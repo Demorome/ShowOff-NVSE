@@ -362,8 +362,10 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	RegisterScriptCommand(SetChallengeProgress);
 	RegisterScriptCommand(ModChallengeProgress);
 	RegisterScriptCommand(CompleteChallenge);
+	
 	RegisterScriptCommand(SetBaseActorValue);
-
+	
+	RegisterScriptCommand(DumpFormList);
 	
 	return true;
 

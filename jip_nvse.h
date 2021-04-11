@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 
-/*
+
 __declspec(naked) bool IsConsoleOpen()
 {
 	__asm
@@ -19,7 +19,7 @@ __declspec(naked) bool IsConsoleOpen()
 		retn
 	}
 }
-
+/*
 __declspec(naked) void __fastcall DoConsolePrint(double* result)
 {
 	__asm
@@ -113,5 +113,31 @@ __declspec(naked) void __fastcall DoConsolePrintID(double* result)
 			pop		ebp
 			retn
 	}
+}
+*/
+/*
+const char kDumpLvlListIndentStr[] = "                                                  ";
+UInt8 s_dumpLvlListIndent = 50;
+
+void BGSLevL::Dump() 
+{
+	ListData* data;
+	TESForm* form;
+	TESLeveledList* lvlList;
+	ListNode<ListData>* iter = list.Head();
+	do
+	{
+		if (!(data = iter->data)) continue;
+		form = data->form;
+		lvlList = form->GetLvlList();
+		Console_Print("%s%s [%08X] Level: %d Count: %d Health: %.2f", kDumpLvlListIndentStr + s_dumpLvlListIndent,
+			lvlList ? "(LeveledList)" : form->GetTheName(), form->refID, data->level, data->count, data->extra ? data->extra->health : 0);
+		if (lvlList)
+		{
+			s_dumpLvlListIndent -= 5;
+			lvlList->Dump();
+			s_dumpLvlListIndent += 5;
+		}
+	} 	while (iter = iter->next);
 }
 */
