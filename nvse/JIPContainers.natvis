@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+	<Type Name="Vector&lt;*&gt;">
+		<DisplayString>{{ Size={numItems} }}</DisplayString>
+		<Expand>
+			<ArrayItems>
+				<Size>numItems</Size>
+				<ValuePointer>data</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+	<Type Name="Set&lt;*&gt;">
+		<DisplayString>{{ Size={numKeys} }}</DisplayString>
+		<Expand>
+			<ArrayItems>
+				<Size>numKeys</Size>
+				<ValuePointer>keys</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+	<Type Name="Map&lt;*&gt;">
+		<DisplayString>{{ Size={numEntries} }}</DisplayString>
+		<Expand>
+			<ArrayItems>
+				<Size>numEntries</Size>
+				<ValuePointer>entries</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+	<Type Name="UnorderedMap&lt;*&gt;">
+		<DisplayString>{{ Buckets={numBuckets} Size={numEntries} }}</DisplayString>
+		<Expand>
+			<ArrayItems>
+				<Size>numBuckets</Size>
+				<ValuePointer>buckets</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+
+	<Type Name="ArrayVarElementContainer::GenericContainer">
+		<DisplayString>{{ Size={numItems} }}</DisplayString>
+		<Expand>
+			<ArrayItems>
+				<Size>numItems</Size>
+				<ValuePointer>(ElementStrMap::Entry*)data</ValuePointer> <!-- Array -->
+			</ArrayItems>
+		</Expand>
+	</Type>
+	<Type Name="ArrayVarElementContainer">
+		<DisplayString Condition="m_type == 0">{{ Size={m_container.numItems} Type=Array }}</DisplayString>
+		<DisplayString Condition="m_type == 1">{{ Size={m_container.numItems} Type=Numeric Map }}</DisplayString>
+		<DisplayString Condition="m_type == 2">{{ Size={m_container.numItems} Type=String Map }}</DisplayString>
+		<Expand>
+			<ArrayItems Condition="m_type == 0">
+				<Size>m_container.numItems</Size>
+				<ValuePointer>(ArrayElement*)m_container.data</ValuePointer>
+			</ArrayItems>
+			<ArrayItems Condition="m_type == 1">
+				<Size>m_container.numItems</Size>
+				<ValuePointer>(ElementNumMap::Entry*)m_container.data</ValuePointer>
+			</ArrayItems>
+			<ArrayItems Condition="m_type == 2">
+				<Size>m_container.numItems</Size>
+				<ValuePointer>(ElementStrMap::Entry*)m_container.data</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+	<Type Name="kEvaluator::Token">
+		<DisplayString Condition="type == 1">Operand={value.operand}</DisplayString>
+		<DisplayString Condition="type == 3">Operator={value.operator_}</DisplayString>
+	</Type>
+</AutoVisualizer>
