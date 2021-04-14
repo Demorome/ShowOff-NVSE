@@ -1,2 +1,2 @@
-# Demo-NVSE
- An NVSE plugin that adds functions.
+# Showoff-NVSE
+This thing isn't vanilla style way. 
