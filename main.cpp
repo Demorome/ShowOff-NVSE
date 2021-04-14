@@ -1,3 +1,4 @@
+#define IFYOULIKEBROKENSHIT 1
 
 
 #include "nvse/PluginAPI.h"
@@ -356,8 +357,6 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	REG_CMD_ARR(GetNearCells, Array);
 	REG_CMD_ARR(DumpTileInfoToArray, Array);
 #endif
-
-#define IFYOULIKEBROKENSHIT  1
 
 #if IFYOULIKEBROKENSHIT
 	RegisterScriptCommand(CompleteChallenge);

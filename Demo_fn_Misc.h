@@ -59,6 +59,8 @@ bool Cmd_ModChallengeProgress_Execute(COMMAND_ARGS)
 	return true;
 }
 
+
+#if IFYOULIKEBROKENSHIT
 DEFINE_COMMAND_PLUGIN(CompleteChallenge, "Completes a challenge.", 0, 1, kParams_Tomm_OneForm)
 bool Cmd_CompleteChallenge_Execute(COMMAND_ARGS)
 {
@@ -74,7 +76,6 @@ bool Cmd_CompleteChallenge_Execute(COMMAND_ARGS)
 }
 
 
-
 DEFINE_COMMAND_ALT_PLUGIN(SetBaseActorValue, SetBaseAV, , 0, 3, kParams_JIP_OneActorValue_OneFloat_OneOptionalActorBase); 
 bool Cmd_SetBaseActorValue_Execute(COMMAND_ARGS) 
 {
@@ -84,7 +85,7 @@ bool Cmd_SetBaseActorValue_Execute(COMMAND_ARGS)
 	if (!ExtractArgs(EXTRACT_ARGS, &actorVal, &valueToSet, &actorBase)) return true;
 	if (!actorBase)
 	{
-		if (!thisObj || !thisObj->IsActor()) return true;
+		/*if (!thisObj || !thisObj->IsActor()) return true;*/ //Idk why IsActor() can't be found, not gonna bother for now.
 		actorBase = (TESActorBase*)thisObj->baseForm;
 	}
 	UInt32 currentValue = *result = actorBase->avOwner.GetActorValue(actorVal);
@@ -92,6 +93,7 @@ bool Cmd_SetBaseActorValue_Execute(COMMAND_ARGS)
 	actorBase->ModActorValue(actorVal, (valueToSet - currentValue));
 	return true;
 }
+#endif
 
 //DEFINE_COMMAND_ALT_PLUGIN(SetBaseActorValueAlt, SetBaseAVAlt, , 0, 3, ? ? ? ? ? );
 
@@ -152,80 +154,6 @@ bool Cmd_IsINISetting_Execute(COMMAND_ARGS)
 			*result = 0;
 			if (IsConsoleMode())
 				Console_Print("IsINISetting >> INVALID INI SETTING");
-		}
-	}
-
-	return true;
-}
-
-#include "ArrayVar.h"
-
-DEFINE_COMMAND_EXP(ar_DumpF, "dumps the contents of an array to a file for debugging purposes.", 0, kParams_JIP_OneString_OneInt);
-bool Cmd_ar_DumpF_Execute(COMMAND_ARGS)
-{
-	*result = 0;
-	UInt32 arrID;
-	if (!ExtractArgs(EXTRACT_ARGS, &s_strArgBuffer, &arrID))
-	{
-		NVSEArrayVar* mainArray = LookupArrayByID(arrID), * column;
-		if (!mainArray) return true;
-		UInt32 numLines = 1, idx, cnt;
-		TempArrayElements topLine(mainArray);
-		if (!topLine.size) return true;
-		Vector<TempArrayElements> columnBuffer(topLine.size);
-		ArrayElementR* elem;
-		TempArrayElements* colElements;
-		for (idx = 0; idx < topLine.size; idx++)
-		{
-			elem = &topLine.elements[idx];
-			if (column = elem->Array())
-			{
-				colElements = columnBuffer.Append(column);
-				if (numLines < colElements->size)
-					numLines = colElements->size;
-			}
-			else columnBuffer.Append(elem);
-		}
-		FileStream outputFile;
-		if (outputFile.OpenWrite(s_strArgBuffer, true))
-		{
-			for (idx = 0; idx < numLines; idx++)
-			{
-				for (cnt = 0; cnt < topLine.size; cnt++)
-				{
-					if (columnBuffer[cnt].size > idx)
-					{
-						elem = &columnBuffer[cnt].elements[idx];
-						switch (elem->GetType())
-						{
-						case 1:
-							FltToStr(s_strValBuffer, elem->Number());
-							outputFile.WriteStr(s_strValBuffer);
-							break;
-						case 2:
-							if (elem->Form())
-							{
-								outputFile.WriteChar('@');
-								outputFile.WriteStr(elem->Form()->RefToString());
-							}
-							else outputFile.WriteChar('0');
-							break;
-						case 3:
-							outputFile.WriteChar('$');
-							outputFile.WriteStr(elem->String());
-							break;
-						default:
-							outputFile.WriteChar('0');
-						}
-					}
-					else outputFile.WriteChar('0');
-					if ((topLine.size - cnt) > 1)
-						outputFile.WriteChar('\t');
-				}
-				if ((numLines - idx) > 1)
-					outputFile.WriteChar('\n');
-			}
-			*result = 1;
 		}
 	}
 
