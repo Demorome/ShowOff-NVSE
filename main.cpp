@@ -72,7 +72,7 @@ typedef NVSEArrayVarInterface::Element NVSEArrayElement;
 
 
 #if 0
-Tile* InterfaceManager::GetActiveTile() //proably from JiP
+Tile* InterfaceManager::GetActiveTile() //probably from JiP
 {
 	return activeTile ? activeTile : activeTileAlt;
 }
@@ -357,15 +357,24 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	REG_CMD_ARR(DumpTileInfoToArray, Array);
 #endif
 
+#define IFYOULIKEBROKENSHIT  1
 
+#if IFYOULIKEBROKENSHIT
+	RegisterScriptCommand(CompleteChallenge);
+#endif
+
+	/* ONLY COMMANDS WITH LISTED OPCODES SHOULD BE USED IN SCRIPTS */
 	RegisterScriptCommand(GetChallengeProgress);
 	RegisterScriptCommand(SetChallengeProgress);
 	RegisterScriptCommand(ModChallengeProgress);
-	RegisterScriptCommand(CompleteChallenge);
 	
 	RegisterScriptCommand(SetBaseActorValue);
 	
 	RegisterScriptCommand(DumpFormList);
+
+	RegisterScriptCommand(IsGamesetting); //For use in scripts to safety check; any other gamesetting function can already be used in console to check if a gamesetting exists.
+	RegisterScriptCommand(IsINISetting); //Uses the GetNumericINISetting "SettingName:CategoryName" format!
+
 	
 	return true;
 

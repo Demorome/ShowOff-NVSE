@@ -1,5 +1,6 @@
-//From JIP's Utility.h, not used
+//From JIP's utility.h, not used
 
+#if 0
 class FileStream
 {
 	FILE* theFile;
@@ -60,3 +61,4 @@ bool FileStream::Open(const char* filePath)
 	theFile = _fsopen(filePath, "rb", 0x20);
 	return theFile ? true : false;
 }
+#endif

@@ -1,6 +1,76 @@
 ﻿#pragma once
+#include <PluginAPI.h>
+
+#include "GameData.h"
+#include "utility.h"
+
+DebugLog s_log, s_debug, s_missingTextures;
 
 
+bool (*WriteRecord)(UInt32 type, UInt32 version, const void* buffer, UInt32 length);
+bool (*WriteRecordData)(const void* buffer, UInt32 length);
+bool (*GetNextRecordInfo)(UInt32* type, UInt32* version, UInt32* length);
+UInt32(*ReadRecordData)(void* buffer, UInt32 length);
+bool (*ResolveRefID)(UInt32 refID, UInt32* outRefID);
+const char* (*GetSavePath)(void);
+CommandInfo* (*GetCmdByOpcode)(UInt32 opcode);
+const char* (*GetStringVar)(UInt32 stringID);
+bool (*AssignString)(COMMAND_ARGS, const char* newValue);
+NVSEArrayVar* (*CreateArray)(const NVSEArrayElement* data, UInt32 size, Script* callingScript);
+NVSEArrayVar* (*CreateStringMap)(const char** keys, const NVSEArrayElement* values, UInt32 size, Script* callingScript);
+bool (*AssignCommandResult)(NVSEArrayVar* arr, double* dest);
+void (*SetElement)(NVSEArrayVar* arr, const NVSEArrayElement& key, const NVSEArrayElement& value);
+void (*AppendElement)(NVSEArrayVar* arr, const NVSEArrayElement& value);
+UInt32(*GetArraySize)(NVSEArrayVar* arr);
+NVSEArrayVar* (*LookupArrayByID)(UInt32 id);
+bool (*GetElement)(NVSEArrayVar* arr, const NVSEArrayElement& key, NVSEArrayElement& outElement);
+bool (*GetElements)(NVSEArrayVar* arr, NVSEArrayElement* elements, NVSEArrayElement* keys);
+bool (*ExtractFormatStringArgs)(UInt32 fmtStringPos, char* buffer, COMMAND_ARGS_EX, UInt32 maxParams, ...);
+bool (*CallFunction)(Script* funcScript, TESObjectREFR* callingObj, TESObjectREFR* container, NVSEArrayElement* result, UInt8 numArgs, ...);
+
+DataHandler* g_dataHandler = NULL;
+
+
+struct TempArrayElements
+{
+	UInt32			size;
+	ArrayElementR* elements;
+	bool			doFree;
+
+	TempArrayElements(NVSEArrayVar* srcArr)
+	{
+		doFree = true;
+		size = GetArraySize(srcArr);
+		if (size)
+		{
+			elements = (ArrayElementR*)calloc(size, sizeof(ArrayElementR));
+			GetElements(srcArr, elements, NULL);
+		}
+		else elements = NULL;
+	}
+	TempArrayElements(ArrayElementR* element) : size(1), elements(element), doFree(false) {}
+	~TempArrayElements()
+	{
+		if (!doFree || !elements) return;
+		ArrayElementR* dataPtr = elements;
+		do
+		{
+			dataPtr->~ElementR();
+			dataPtr++;
+		} 		while (--size);
+		free(elements);
+	}
+};
+
+ArrayElementR* __fastcall GetArrayData(NVSEArrayVar* srcArr, UInt32* size)
+{
+	*size = GetArraySize(srcArr);
+	if (!*size) return NULL;
+	ArrayElementR* data = (ArrayElementR*)GetAuxBuffer(s_auxBuffers[2], *size * sizeof(ArrayElementR));
+	MemZero(data, *size * sizeof(ArrayElementR));
+	GetElements(srcArr, data, NULL);
+	return data;
+}
 
 __declspec(naked) bool IsConsoleOpen()
 {
@@ -141,3 +211,42 @@ void BGSLevL::Dump()
 	} 	while (iter = iter->next);
 }
 */
+
+alignas(16) char
+s_strArgBuffer[0x4000],
+s_strValBuffer[0x10000],
+s_dataPathFull[0x100] = "Data\\",
+s_configPathFull[0x100] = "Data\\Config\\",
+s_scriptsPathFull[0x100] = "Data\\NVSE\\plugins\\scripts\\",
+s_modLogPathFull[0x100] = "Mod Logs\\";
+char* s_dataPath, * s_configPath, * s_scriptsPath, * s_modLogPath;
+
+
+
+UnorderedMap<UInt32, const char*> s_refStrings;
+
+const char* TESForm::RefToString()
+{
+	const char** findID;
+	if (!s_refStrings.Insert(refID, &findID)) return *findID;
+	const char* modName = g_dataHandler->GetNthModName(modIndex);
+	UInt32 length = StrLen(modName);
+	char* refStr = (char*)malloc(length + 8);
+	if (length) memcpy(refStr, modName, length);
+	refStr[length++] = ':';
+	UIntToHex(refStr + length, refID & 0xFFFFFF);
+	*findID = refStr;
+	return refStr;
+}
+
+UnorderedSet<ContChangesEntry*> s_tempContChangesEntries(0x40);
+void DoDeferredFreeEntries()
+{
+	for (auto iter = s_tempContChangesEntries.Begin(); iter; ++iter)
+	{
+		if (iter->extendData)
+			GameHeapFree(iter->extendData);
+		GameHeapFree(*iter);
+	}
+	s_tempContChangesEntries.Clear();
+}
