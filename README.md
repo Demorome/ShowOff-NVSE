@@ -1,2 +1,2 @@
 # Showoff-NVSE
- An NVSE plugin that adds functions. Not yet released.
+This thing isn't vanilla style way. 
