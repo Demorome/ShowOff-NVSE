@@ -111,9 +111,8 @@ public:
 	// in debug builds, force cooperative level so input isn't locked out
 	HRESULT _stdcall SetCooperativeLevel(HWND a,DWORD b)
 	{
-		
 #if defined(_DEBUG) || 0
-		// b = DISCL_BACKGROUND | DISCL_NONEXCLUSIVE;
+		b = DISCL_BACKGROUND | DISCL_NONEXCLUSIVE;
 #endif
 		return m_device->SetCooperativeLevel(a,b);
 	}
@@ -234,33 +233,23 @@ DIHookControl::DIHookControl()
 
 bool DIHookControl::IsKeyPressed(UInt32 keycode, UInt32 flags)
 {
-	if(keycode >= kMaxMacros) return false;
+	if (keycode >= kMaxMacros) return false;
 
-	// default mode
-	if(!flags) flags = kFlag_DefaultBackCompat;
+	if (!flags) flags = kFlag_DefaultBackCompat;
 
-	KeyInfo	* info = &m_keys[keycode];
+	flags &= m_keys[keycode].StateMask();
 
-	bool	result = false;
-	bool	isMouseButton = keycode >= kMacro_MouseButtonOffset;
+	return flags && (flags < kFlag_IgnoreDisabled_User);
+}
 
-	// data sources
-	if(flags & kFlag_GameState)		result |= info->gameState;
-	if(flags & kFlag_RawState)		result |= info->rawState;
-	if(flags & kFlag_InsertedState)	result |= info->insertedState;
+bool DIHookControl::IsKeyPressedRaw(UInt32 keycode)
+{
+	return (keycode < kMaxMacros) && m_keys[keycode].rawState;
+}
 
-	// modifiers
-	bool	disable = false;
-
-	if((flags & kFlag_IgnoreDisabled_User) && info->userDisable)
-		disable = true;
-
-	if((flags & kFlag_IgnoreDisabled_Script) && info->scriptDisable)
-		disable = true;
-
-	if(disable)	result = false;
-
-	return result;
+bool DIHookControl::IsLMBPressed()
+{
+	return m_keys[0x100].rawState;
 }
 
 bool DIHookControl::IsKeyDisabled(UInt32 keycode)
@@ -297,6 +286,11 @@ void DIHookControl::SetKeyDisableState(UInt32 keycode, bool bDisable, UInt32 mas
 		if(mask & kDisable_User)	info->userDisable = bDisable;
 		if(mask & kDisable_Script)	info->scriptDisable = bDisable;
 	}
+}
+
+void DIHookControl::SetLMBDisabled(bool bDisable)
+{
+	m_keys[0x100].userDisable = bDisable;
 }
 
 void DIHookControl::SetKeyHeldState(UInt32 keycode, bool bHold)
@@ -494,6 +488,11 @@ bool DIHookControl::KeyInfo::Process(bool keyDown, UInt32 idx)
 	gameState = keyDown;
 
 	return keyDown;
+}
+
+UInt8 DIHookControl::KeyInfo::StateMask()
+{
+	return gameState + (rawState << 1) + (insertedState << 2) + (userDisable << 3) + (scriptDisable << 4);
 }
 
 // this code doesn't belong here

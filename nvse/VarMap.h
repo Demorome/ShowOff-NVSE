@@ -1,202 +1,287 @@
 #pragma once
 
+#include <map>
+#include <set>
 #include "Serialization.h"
 
 // simple template class used to support NVSE custom data types (strings, arrays, etc)
-
-struct _VarIDs : Set<UInt32>
-{
-	UInt32 PopFirst()
-	{
-		UInt32 *keys = Keys(), first = *keys;
-		if (--numKeys)
-			memmove(keys, keys + 1, numKeys * 4);
-		return first;
-	}
-
-	UInt32 LastKey() {return Keys()[numKeys - 1];}
-};
 
 template <class Var>
 class VarMap
 {
 protected:
-#if _DEBUG
-	typedef Map<UInt32, Var> _VarMap;
-#else
-	typedef UnorderedMap<UInt32, Var> _VarMap;
-#endif
-	class VarCache
-	{
+	typedef std::map<UInt32, Var*>	_VarMap;
+	typedef std::set<UInt32>		_VarIDs;
+
+	class VarCache {
 		// if desired this can be replaced with an impl that caches more than one var without changing client code
 		UInt32		varID;
 		Var			* var;
 
 	public:
-		VarCache() : varID(0), var(NULL) {}
+		VarCache() : varID(0), var(NULL) { }
 
-		~VarCache()
-		{ 
+		~VarCache() { 
 			Reset(); 
 		}
 
-		void Insert(UInt32 id, Var* v)
-		{
+		void Insert(UInt32 id, Var* v) {
 			varID = id;
 			var = v;
 		}
 
 		// clear all cached vars (only one in current impl)
-		void Reset()
-		{
+		void Reset() {
 			varID = 0;
 			var = NULL;
 		}
 
-		void Remove(UInt32 id)
-		{
-			if (id == varID)
-			{
+		void Remove(UInt32 id) {
+			if (id == varID) {
 				Reset();
 			}
 		}
 
-		Var* Get(UInt32 id)
-		{
+		Var* Get(UInt32 id) {
 			return (varID == id) ? var : NULL;
 		}
 	};
 
-	_VarMap				vars;
-	_VarIDs				usedIDs;
-	_VarIDs				tempIDs;		// set of IDs of unreferenced vars, makes for easy cleanup
-	_VarIDs				availableIDs;	// IDs < greatest used ID available as IDs for new vars
-	VarCache			cache;
-	CRITICAL_SECTION	cs;				// trying to avoid what looks like concurrency issues
+	struct	State {
+		_VarMap				vars;
+		_VarIDs				tempVars;		// set of IDs of unreferenced vars, makes for easy cleanup
+		_VarIDs				availableVars;	// IDs < greatest used ID available as IDs for new vars
+		VarCache			cache;
+		CRITICAL_SECTION	cs;				// trying to avoid what looks like concurrency issues
 
+		State() {
+			Init();
+		}
+
+		~State() {
+			Reset();
+		}
+
+		UInt32	GetUnusedID()
+		{
+			UInt32 id = 1;
+
+			::EnterCriticalSection(&cs);
+
+			try
+			{
+				if (availableVars.size())
+				{
+					id = *availableVars.begin();
+					availableVars.erase(id);
+				}
+				else if (vars.size())
+				{
+					_VarMap::iterator iter = vars.end();
+					--iter;
+					id = iter->first + 1;
+				}
+			} catch(...) {}
+
+			::LeaveCriticalSection(&cs);
+
+			return id;
+		}
+
+		Var*	Get(UInt32 varID)
+		{
+			if (varID != 0) {
+				Var* var = cache.Get(varID);
+				if (var) {
+					return var;
+				}
+
+				_VarMap::iterator it = vars.find(varID);
+				if (it != vars.end())  {
+					cache.Insert(varID, it->second);
+					return it->second;
+				}
+			}
+			
+			return NULL;
+		}
+
+		bool	VarExists(UInt32 varID)
+		{
+			return Get(varID) ? true : false;
+		}
+
+		void Insert(UInt32 varID, Var* var)
+		{
+			::EnterCriticalSection(&cs);
+
+			try
+			{
+				vars[varID] = var;
+			} catch(...) {}
+
+			::LeaveCriticalSection(&cs);
+
+		}
+
+		void	Delete(UInt32 varID)
+		{
+			::EnterCriticalSection(&cs);
+
+			try
+			{
+				Var* var = Get(varID);
+				if (var)
+				{
+					cache.Remove(varID);
+
+					delete var;
+					vars.erase(varID);
+				}
+				tempVars.erase(varID);
+				SetIDAvailable(varID);
+			} catch(...) {}
+
+			::LeaveCriticalSection(&cs);
+
+		}
+
+		void Init()
+		{
+			::InitializeCriticalSection(&cs);
+		}
+
+		void Reset()
+		{
+			try
+			{
+				cache.Reset();
+				_VarMap::iterator itEnd = vars.end();
+				_VarMap::iterator iter = vars.begin();
+				_VarMap::iterator toErase = iter;
+				while (iter != itEnd)
+				{
+					delete iter->second;
+					toErase = iter;
+					++iter;
+					vars.erase(toErase);
+				}
+
+				vars.clear();
+				tempVars.clear();
+				availableVars.clear();
+			} catch (...) {}
+
+			::DeleteCriticalSection(&cs);
+		}
+
+		void	MarkTemporary(UInt32 varID, bool bTemporary)
+		{
+			if (bTemporary)
+				tempVars.insert(varID);
+			else
+				tempVars.erase(varID);
+		}
+
+		bool IsTemporary(UInt32 varID)
+		{
+			return (tempVars.find(varID) != tempVars.end()) ? true : false;
+		}
+
+		void SetIDAvailable(UInt32 id) {
+			if (id) {
+				availableVars.insert(id);
+			}
+		}
+	};
+
+	State	* m_state;				// currently loaded vars
+	State	* m_backupState;		// previously loaded vars, used as restore point in the event a saved game fails to load
+
+	UInt32	GetUnusedID()
+	{
+		return m_state->GetUnusedID();
+	}
 
 	void SetIDAvailable(UInt32 id)
 	{
-		if (id) availableIDs.Insert(id);
-	}
-
-	UInt32 GetUnusedID()
-	{
-		UInt32 id = 1;
-		::EnterCriticalSection(&cs);
-
-		if (!availableIDs.Empty())
-			id = availableIDs.PopFirst();
-		else if (!usedIDs.Empty())
-			id = usedIDs.LastKey() + 1;
-		::LeaveCriticalSection(&cs);
-		return id;
+		m_state->SetIDAvailable(id);
 	}
 
 public:
 	VarMap()
 	{
-		::InitializeCriticalSection(&cs);
+		m_state = new State();
+		m_backupState = NULL;
 	}
 
 	~VarMap()
 	{
-		Reset();
-		::DeleteCriticalSection(&cs);
+		delete m_state;
+		delete m_backupState;
 	}
 
-	Var* Get(UInt32 varID)
+	Var*	Get(UInt32 varID)
 	{
-		if (!varID) return NULL;
-		Var* var = cache.Get(varID);
-		if (!var)
-		{
-			var = vars.GetPtr(varID);
-			if (var)
-				cache.Insert(varID, var);
-		}
-		return var;
+		return m_state->Get(varID);
 	}
 
 	bool VarExists(UInt32 varID)
 	{
-		return Get(varID) ? true : false;
+		return m_state->VarExists(varID);
 	}
 
-	template <typename ...Args>
-	Var* Insert(UInt32 varID, Args&& ...args)
+	void Insert(UInt32 varID, Var* var)
 	{
-		::EnterCriticalSection(&cs);
-		usedIDs.Insert(varID);
-		Var* var = vars.Emplace(varID, std::forward<Args>(args)...);
-		::LeaveCriticalSection(&cs);
-		return var;
+		m_state->Insert(varID, var);
 	}
 
 	void Delete(UInt32 varID)
 	{
-		::EnterCriticalSection(&cs);
-		cache.Remove(varID);
-		vars.Erase(varID);
-		usedIDs.Erase(varID);
-		tempIDs.Erase(varID);
-		SetIDAvailable(varID);
-		::LeaveCriticalSection(&cs);
+		m_state->Delete(varID);
 	}
 
-	static void DeleteBySelf(VarMap* self, UInt32 varID)
+	void Reset(NVSESerializationInterface* intfc)
 	{
-		if (self)
-			self->Delete(varID);
+		m_state->Reset();
+		m_state->Init();
 	}
 
-	void Reset()
+	void Preload()
 	{
-		cache.Reset();
-
-		_VarMap::Iterator iter;
-		while (true)
-		{
-			iter.Init(vars);
-			if (iter.End()) break;
-			iter.Remove();
-		}
-
-		usedIDs.Clear();
-		tempIDs.Clear();
-		availableIDs.Clear();
+		m_backupState = m_state;
+		m_state = new State();
 	}
 
-#if _DEBUG
-	std::map<UInt32, std::vector<void*>> debugInfos;
-#endif
-	
-	void MarkTemporary(UInt32 varID, bool bTemporary)
+	void PostLoad(bool bLoadSucceeded) 
 	{
-		if (bTemporary)
-		{
-#if _DEBUG
-			if constexpr (std::is_same_v<Var, ArrayVar>)
-			{
-				//debugInfos[varID] = GetCallStack(12);
+		// there is a possibility loading a saved game will fail. If so, restore vars to previous state.
+		if (bLoadSucceeded) {
+			if (m_backupState) {
+				State* cur = m_state;
+				m_state = m_backupState;
+				m_backupState = NULL;
+				delete m_state;
+				m_state = cur;
 			}
-#endif
-			tempIDs.Insert(varID);
 		}
-		else
-		{
-#if _DEBUG
-			if constexpr (std::is_same_v<Var, ArrayVar>)
-			{
-				//debugInfos.erase(varID);
-			}
-#endif
-			tempIDs.Erase(varID);
+		else {
+			delete m_state;
+			m_state = m_backupState;
+			m_backupState = NULL;
+			// if the loading operation failed right after game init (at the main menu), make sure the map is operable
+			if (m_state == NULL)
+				Preload();
 		}
+	}
+
+	void	MarkTemporary(UInt32 varID, bool bTemporary)
+	{
+		m_state->MarkTemporary(varID, bTemporary);
 	}
 
 	bool IsTemporary(UInt32 varID)
 	{
-		return tempIDs.HasKey(varID);
+		return m_state->IsTemporary(varID);
 	}
 };

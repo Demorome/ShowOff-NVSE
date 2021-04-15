@@ -1,19 +1,15 @@
 #include "Utilities.h"
 #include "SafeWrite.h"
-#include <string>
-#include <algorithm>
-
-
-#include "containers.h"
-#include "GameData.h"
-#include "PluginAPI.h"
-#include "PluginManager.h"
+//#include <string>
+//#include <algorithm>
 
 #if RUNTIME
 #include "GameAPI.h"
 #include "GameForms.h"
 #include "GameScript.h"
 #endif
+
+#include "internal/utility.h"
 
 void DumpClass(void * theClassPtr, UInt32 nIntsToDump)
 {
@@ -104,86 +100,86 @@ const char * GetObjectClassName(void * objBase)
 	return result;
 }
 
-const std::string & GetFalloutDirectory(void)
-{
-	static std::string s_falloutDirectory;
+//const std::string & GetFalloutDirectory(void)
+//{
+//	static std::string s_falloutDirectory;
+//
+//	if(s_falloutDirectory.empty())
+//	{
+//		// can't determine how many bytes we'll need, hope it's not more than MAX_PATH
+//		char	falloutPathBuf[MAX_PATH];
+//		UInt32	falloutPathLength = GetModuleFileName(GetModuleHandle(NULL), falloutPathBuf, sizeof(falloutPathBuf));
+//
+//		if(falloutPathLength && (falloutPathLength < sizeof(falloutPathBuf)))
+//		{
+//			std::string	falloutPath(falloutPathBuf, falloutPathLength);
+//
+//			// truncate at last slash
+//			std::string::size_type	lastSlash = falloutPath.rfind('\\');
+//			if(lastSlash != std::string::npos)	// if we don't find a slash something is VERY WRONG
+//			{
+//				s_falloutDirectory = falloutPath.substr(0, lastSlash + 1);
+//
+//				_DMESSAGE("fallout root = %s", s_falloutDirectory.c_str());
+//			}
+//			else
+//			{
+//				_WARNING("no slash in fallout path? (%s)", falloutPath.c_str());
+//			}
+//		}
+//		else
+//		{
+//			_WARNING("couldn't find fallout path (len = %d, err = %08X)", falloutPathLength, GetLastError());
+//		}
+//	}
+//
+//	return s_falloutDirectory;
+//}
 
-	if(s_falloutDirectory.empty())
-	{
-		// can't determine how many bytes we'll need, hope it's not more than MAX_PATH
-		char	falloutPathBuf[MAX_PATH];
-		UInt32	falloutPathLength = GetModuleFileName(GetModuleHandle(NULL), falloutPathBuf, sizeof(falloutPathBuf));
+//static const std::string & GetNVSEConfigPath(void)
+//{
+//	static std::string s_configPath;
+//
+//	if(s_configPath.empty())
+//	{
+//		std::string	falloutPath = GetFalloutDirectory();
+//		if(!falloutPath.empty())
+//		{
+//			s_configPath = falloutPath + "Data\\NVSE\\nvse_config.ini";
+//
+//			_MESSAGE("config path = %s", s_configPath.c_str());
+//		}
+//	}
+//
+//	return s_configPath;
+//}
 
-		if(falloutPathLength && (falloutPathLength < sizeof(falloutPathBuf)))
-		{
-			std::string	falloutPath(falloutPathBuf, falloutPathLength);
+//std::string GetNVSEConfigOption(const char * section, const char * key)
+//{
+//	std::string	result;
+//
+//	const std::string & configPath = GetNVSEConfigPath();
+//	if(!configPath.empty())
+//	{
+//		char	resultBuf[256];
+//		resultBuf[0] = 0;
+//
+//		UInt32	resultLen = GetPrivateProfileString(section, key, NULL, resultBuf, 255, configPath.c_str());
+//
+//		result = resultBuf;
+//	}
+//
+//	return result;
+//}
 
-			// truncate at last slash
-			std::string::size_type	lastSlash = falloutPath.rfind('\\');
-			if(lastSlash != std::string::npos)	// if we don't find a slash something is VERY WRONG
-			{
-				s_falloutDirectory = falloutPath.substr(0, lastSlash + 1);
-
-				_DMESSAGE("fallout root = %s", s_falloutDirectory.c_str());
-			}
-			else
-			{
-				_WARNING("no slash in fallout path? (%s)", falloutPath.c_str());
-			}
-		}
-		else
-		{
-			_WARNING("couldn't find fallout path (len = %d, err = %08X)", falloutPathLength, GetLastError());
-		}
-	}
-
-	return s_falloutDirectory;
-}
-
-static const std::string & GetNVSEConfigPath(void)
-{
-	static std::string s_configPath;
-
-	if(s_configPath.empty())
-	{
-		std::string	falloutPath = GetFalloutDirectory();
-		if(!falloutPath.empty())
-		{
-			s_configPath = falloutPath + "Data\\NVSE\\nvse_config.ini";
-
-			_MESSAGE("config path = %s", s_configPath.c_str());
-		}
-	}
-
-	return s_configPath;
-}
-
-std::string GetNVSEConfigOption(const char * section, const char * key)
-{
-	std::string	result;
-
-	const std::string & configPath = GetNVSEConfigPath();
-	if(!configPath.empty())
-	{
-		char	resultBuf[256];
-		resultBuf[0] = 0;
-
-		UInt32	resultLen = GetPrivateProfileString(section, key, NULL, resultBuf, 255, configPath.c_str());
-
-		result = resultBuf;
-	}
-
-	return result;
-}
-
-bool GetNVSEConfigOption_UInt32(const char * section, const char * key, UInt32 * dataOut)
-{
-	std::string	data = GetNVSEConfigOption(section, key);
-	if(data.empty())
-		return false;
-
-	return (sscanf(data.c_str(), "%lu", dataOut) == 1);
-}
+//bool GetNVSEConfigOption_UInt32(const char * section, const char * key, UInt32 * dataOut)
+//{
+//	std::string	data = GetNVSEConfigOption(section, key);
+//	if(data.empty())
+//		return false;
+//
+//	return (sscanf_s(data.c_str(), "%lu", dataOut) == 1);
+//}
 
 namespace MersenneTwister
 {
@@ -367,56 +363,49 @@ double genrand_res53(void)
 
 };
 
-Tokenizer::Tokenizer(const char* src, const char* delims)
-: m_offset(0), m_delims(delims), m_data(src)
-{
-	//
-}
+//Tokenizer::Tokenizer(const char* src, const char* delims) : m_offset(0), m_delims(delims), m_data(src) {}
 
-Tokenizer::~Tokenizer()
-{
-	//
-}
+//Tokenizer::~Tokenizer() {}
 
-UInt32 Tokenizer::NextToken(std::string& outStr)
-{
-	if (m_offset == m_data.length())
-		return -1;
+//UInt32 Tokenizer::NextToken(std::string& outStr)
+//{
+//	if (m_offset == m_data.length())
+//		return -1;
+//
+//	size_t start = m_data.find_first_not_of(m_delims, m_offset);
+//	if (start != -1)
+//	{
+//		size_t end = m_data.find_first_of(m_delims, start);
+//		if (end == -1)
+//			end = m_data.length();
+//
+//		m_offset = end;
+//		outStr = m_data.substr(start, end - start);
+//		return start;
+//	}
+//
+//	return -1;
+//}
 
-	size_t start = m_data.find_first_not_of(m_delims, m_offset);
-	if (start != -1)
-	{
-		size_t end = m_data.find_first_of(m_delims, start);
-		if (end == -1)
-			end = m_data.length();
-
-		m_offset = end;
-		outStr = m_data.substr(start, end - start);
-		return start;
-	}
-
-	return -1;
-}
-
-UInt32 Tokenizer::PrevToken(std::string& outStr)
-{
-	if (m_offset == 0)
-		return -1;
-
-	size_t searchStart = m_data.find_last_of(m_delims, m_offset - 1);
-	if (searchStart == -1)
-		return -1;
-
-	size_t end = m_data.find_last_not_of(m_delims, searchStart);
-	if (end == -1)
-		return -1;
-
-	size_t start = m_data.find_last_of(m_delims, end);	// okay if start == -1 here
-
-	m_offset = end + 1;
-	outStr = m_data.substr(start + 1, end - start);
-	return start + 1;
-}
+//UInt32 Tokenizer::PrevToken(std::string& outStr)
+//{
+//	if (m_offset == 0)
+//		return -1;
+//
+//	size_t searchStart = m_data.find_last_of(m_delims, m_offset - 1);
+//	if (searchStart == -1)
+//		return -1;
+//
+//	size_t end = m_data.find_last_not_of(m_delims, searchStart);
+//	if (end == -1)
+//		return -1;
+//
+//	size_t start = m_data.find_last_of(m_delims, end);	// okay if start == -1 here
+//
+//	m_offset = end + 1;
+//	outStr = m_data.substr(start + 1, end - start);
+//	return start + 1;
+//}
 
 #if RUNTIME
 
@@ -446,18 +435,17 @@ const char * GetSeparatorChars(Script * script)
 		return "|";
 }
 
-void Console_Print_Long(const std::string& str)
-{
-	UInt32 numLines = str.length() / 500;
-	for (UInt32 i = 0; i < numLines; i++)
-		Console_Print("%s ...", str.substr(i*500, 500).c_str());
-
-	Console_Print("%s", str.substr(numLines*500, str.length() - numLines*500).c_str());
-}
+//void Console_Print_Long(const std::string& str)
+//{
+//	UInt32 numLines = str.length() / 500;
+//	for (UInt32 i = 0; i < numLines; i++)
+//		Console_Print("%s ...", str.substr(i*500, 500).c_str());
+//
+//	Console_Print("%s", str.substr(numLines*500, str.length() - numLines*500).c_str());
+//}
 
 #endif
 
-/*
 struct ControlName
 {
 	UInt32		unk0;
@@ -465,13 +453,10 @@ struct ControlName
 	UInt32		unkC;
 };
 
-
 ControlName ** g_keyNames = (ControlName **)0x011D52F0;
 ControlName ** g_mouseButtonNames = (ControlName **)0x011D5240;
 ControlName ** g_joystickNames = (ControlName **)0x011D51B0;
-*/
 
-/*
 const char * GetDXDescription(UInt32 keycode)
 {
 	const char * keyName = "<no key>";
@@ -488,85 +473,79 @@ const char * GetDXDescription(UInt32 keycode)
 		if(g_mouseButtonNames[keycode - 256])
 			keyName = g_mouseButtonNames[keycode - 256]->name;
 	}
-	else if (keycode == 264)
+	else if (keycode == 264)		//OB doesn't provide names for wheel up/down
 		keyName = "WheelUp";
 	else if (keycode == 265)
 		keyName = "WheelDown";
 
 	return keyName;
 }
-*/
 
-bool ci_equal(char ch1, char ch2)
-{
-	return tolower((unsigned char)ch1) == tolower((unsigned char)ch2);
-}
+//bool ci_equal(char ch1, char ch2)
+//{
+//	return tolower((unsigned char)ch1) == tolower((unsigned char)ch2);
+//}
 
-bool ci_less(const char* lh, const char* rh)
-{
-	ASSERT(lh && rh);
-	while (*lh && *rh) {
-		char l = toupper(*lh);
-		char r = toupper(*rh);
-		if (l < r) {
-			return true;
-		}
-		else if (l > r) {
-			return false;
-		}
-		lh++;
-		rh++;
-	}
+//bool ci_less(const char* lh, const char* rh)
+//{
+//	ASSERT(lh && rh);
+//	while (*lh && *rh) {
+//		char l = toupper(*lh);
+//		char r = toupper(*rh);
+//		if (l < r) {
+//			return true;
+//		}
+//		else if (l > r) {
+//			return false;
+//		}
+//		lh++;
+//		rh++;
+//	}
+//
+//	return toupper(*lh) < toupper(*rh);
+//}
 
-	return toupper(*lh) < toupper(*rh);
-}
+//void MakeUpper(std::string& str)
+//{
+//	std::transform(str.begin(), str.end(), str.begin(), toupper);
+//}
 
-void MakeUpper(std::string& str)
-{
-	std::transform(str.begin(), str.end(), str.begin(), toupper);
-}
-
-void MakeLower(std::string& str)
-{
-	std::transform(str.begin(), str.end(), str.begin(), tolower);
-}
+//void MakeLower(std::string& str)
+//{
+//	std::transform(str.begin(), str.end(), str.begin(), tolower);
+//}
 
 #if RUNTIME
 
-/*
-char* CopyCString(const char* src)
+char *CopyCString(const char *src)
 {
-	UInt32 size = src ? strlen(src) : 0;
-	char* result = (char*)FormHeap_Allocate(size+1);
-	result[size] = 0;
-	if (size) {
-		strcpy_s(result, size+1, src);
-	}
-
+	UInt32 length = StrLen(src);
+	if (!length) return NULL;
+	char *result = (char*)GameHeapAlloc(length + 1);
+	StrCopy(result, src);
 	return result;
 }
-*/
 
 #endif
 
 #pragma warning(push)
 #pragma warning(disable: 4996)	// warning about std::transform()
 
-void MakeUpper(char* str)
-{
-	if (str) {
-		UInt32 len = strlen(str);
-		std::transform(str, str + len, str, toupper);
-	}
-}
+//void MakeUpper(char* str)
+//{
+//	if (str) {
+//		UInt32 len = strlen(str);
+//		std::transform(str, str + len, str, toupper);
+//	}
+//}
 
-void MakeLower(char* str)
-{
-	if (str) {
-		UInt32 len = strlen(str);
-		std::transform(str, str + len, str, tolower);
-	}
-}
+//void MakeLower(char* str)
+//{
+//	if (str) {
+//		UInt32 len = strlen(str);
+//		std::transform(str, str + len, str, tolower);
+//	}
+//}
 
 #pragma warning(pop)
 
@@ -591,14 +570,6 @@ void ErrOutput::vShow(ErrOutput::Message& msg, va_list args)
 		ShowError(msgText);
 }
 
-void ErrOutput::Show(ErrOutput::Message msg, ...)
-{
-	va_list args;
-	va_start(args, msg);
-
-	vShow(msg, args);
-}
-
 void ErrOutput::Show(const char* msg, ...)
 {
 	va_list args;
@@ -615,129 +586,4 @@ void ErrOutput::vShow(const char* msg, va_list args)
 	tempMsg.bDisabled = false;
 
 	vShow(tempMsg, args);
-}
-
-void ShowErrorMessageBox(const char* message)
-{
-	int msgboxID = MessageBox(
-		NULL,
-		message,
-		"Error",
-		MB_ICONWARNING | MB_OK
-	);
-}
-
-ScopedLock::ScopedLock(ICriticalSection& critSection) : m_critSection(critSection)
-{
-	m_critSection.Enter();
-}
-
-ScopedLock::~ScopedLock()
-{
-	m_critSection.Leave();
-}
-
-#if RUNTIME
-
-UnorderedSet<UInt32> g_warnedScripts;
-
-const char* GetModName(Script* script)
-{
-	if (!script)
-		return "Unknown or deleted script";
-	const char* modName = "In-game console";
-	if (script->GetModIndex() != 0xFF)
-	{
-		modName = DataHandler::Get()->GetNthModName(script->GetModIndex());
-		if (!modName || !modName[0])
-			modName = "Unknown";
-	}
-	return modName;
-}
-#if NVSE_CORE
-void ShowRuntimeError(Script* script, const char* fmt, ...)
-{
-	va_list args;
-	va_start(args, fmt);
-
-	char errorMsg[0x800];
-	vsprintf_s(errorMsg, sizeof(errorMsg), fmt, args);
-	
-	char errorHeader[0x900];
-	const auto* modName = GetModName(script);
-	
-	const auto* scriptName = script ? script->GetName() : nullptr; // JohnnyGuitarNVSE allows this
-	if (scriptName && strlen(scriptName) != 0)
-	{
-		sprintf_s(errorHeader, sizeof(errorHeader), "Error in script %08X (%s) in mod %s\n%s", script ? script->refID : 0, scriptName, modName, errorMsg);
-	}
-	else
-	{
-		sprintf_s(errorHeader, sizeof(errorHeader), "Error in script %08X in mod %s\n%s", script ? script->refID : 0, modName, errorMsg);
-	}
-
-	auto refId = script ? script->refID : 0xDEADBEEF;
-
-	if (g_warnedScripts.Insert(refId))
-	{
-		char message[512];
-		snprintf(message, sizeof(message), "%s: NVSE error (see console print)", GetModName(script));
-		if (!IsConsoleMode())
-			QueueUIMessage(message, 0, reinterpret_cast<const char*>(0x1049638), nullptr, 2.5F, false);
-	}
-
-	Console_Print(errorHeader);
-	_MESSAGE(errorHeader);
-
-	PluginManager::Dispatch_Message(0, NVSEMessagingInterface::kMessage_RuntimeScriptError, errorMsg, 4, NULL);
-
-	va_end(args);
-}
-#endif
-#endif
-
-std::string FormatString(const char* fmt, ...)
-{
-	va_list args;
-	va_start(args, fmt);
-
-	char msg[0x400];
-	vsprintf_s(msg, 0x400, fmt, args);
-	return msg;
-}
-
-std::vector<void*> GetCallStack(int i)
-{
-	std::vector<void*> vecTrace(i, nullptr);
-	CaptureStackBackTrace(0, i, reinterpret_cast<PVOID*>(vecTrace.data()), nullptr);
-	return vecTrace;
-}
-
-void GeckExtenderMessageLog(const char* fmt, ...)
-{
-	va_list args;
-	va_start(args, fmt);
-
-	auto* window = FindWindow("RTEDITLOG", nullptr);
-	if (!window)
-	{
-		_MESSAGE("Failed to find GECK Extender Message Log window");
-		return;
-	}
-	
-	char buffer[0x400];
-	vsprintf_s(buffer, 0x400, fmt, args);
-	strcat_s(buffer, "\n");
-
-	SendMessage(window, 0x8004, 0, reinterpret_cast<LPARAM>(buffer));
-}
-
-bool Cmd_Default_Execute(COMMAND_ARGS)
-{
-	return true;
-}
-
-bool Cmd_Default_Eval(COMMAND_ARGS_EVAL)
-{
-	return true;
 }

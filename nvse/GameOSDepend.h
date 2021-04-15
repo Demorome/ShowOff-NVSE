@@ -7,7 +7,77 @@
 #include <dinput.h>
 //#include <dsound.h>
 
-// 1C00 (1.0) / 1C04 (1.1)
+enum
+{
+	kMaxControlBinds =	0x1C,
+};
+
+enum XboxControlCode
+{
+	kXboxCtrl_DPAD_UP = 1,
+	kXboxCtrl_DPAD_DOWN,
+	kXboxCtrl_DPAD_RIGHT = 4,
+	kXboxCtrl_DPAD_LEFT,
+	kXboxCtrl_START,
+	kXboxCtrl_BACK,
+	kXboxCtrl_LS_BUTTON,
+	kXboxCtrl_RS_BUTTON,
+	kXboxCtrl_BUTTON_A,
+	kXboxCtrl_BUTTON_B,
+	kXboxCtrl_BUTTON_X,
+	kXboxCtrl_BUTTON_Y,
+	kXboxCtrl_RB,
+	kXboxCtrl_LB,
+	kXboxCtrl_LT,
+	kXboxCtrl_RT,
+	kXboxCtrl_LS_UP = 0x13,
+	kXboxCtrl_LS_DOWN,
+	kXboxCtrl_LS_RIGHT = 0x16,
+	kXboxCtrl_LS_LEFT,
+};
+enum KeyState
+{
+	isHeld = 0x0,
+	isPressed = 0x1,
+	isDepressed = 0x2,
+	isChanged = 0x3,
+};
+
+enum ControlCode
+{
+	Forward = 0x0,
+	Backward = 0x1,
+	Left = 0x2,
+	Right = 0x3,
+	Attack = 0x4,
+	Activate = 0x5,
+	Aim = 0x6,
+	ReadyItem = 0x7,
+	Crouch = 0x8,
+	Run = 0x9,
+	AlwaysRun = 0xA,
+	AutoMove = 0xB,
+	Jump = 0xC,
+	TogglePOV = 0xD,
+	MenuMode = 0xE,
+	Rest = 0xF,
+	VATS_ = 0x10,
+	Hotkey1 = 0x11,
+	AmmoSwap = 0x12,
+	Hotkey3 = 0x13,
+	Hotkey4 = 0x14,
+	Hotkey5 = 0x15,
+	Hotkey6 = 0x16,
+	Hotkey7 = 0x17,
+	Hotkey8 = 0x18,
+	QuickSave = 0x19,
+	QuickLoad = 0x1A,
+	Grab = 0x1B,
+	Escape_ = 0x1C,
+	Console = 0x1D,
+	Screenshot = 0x1E,
+};
+// 1C04
 class OSInputGlobals
 {
 public:
@@ -17,11 +87,6 @@ public:
 		kFlag_HasMouse =		1 << 1,
 		kFlag_HasKeyboard =		1 << 2,
 		kFlag_BackgroundMouse =	1 << 3,
-	};
-
-	enum
-	{
-		kMaxControlBinds = 0x1C,
 	};
 
 	// Have not verified nothing has changed here so commenting out (no controllers to test with currently)
@@ -83,50 +148,50 @@ public:
 	};
 #endif
 
-	UInt32		unk0000;							// 0000
-	UInt32		flags;								// 0004
-	void		* unk0008;							// 0008 IDirectInput8* ?
-	UInt32		unk000C;							// 000C
-	UInt32		unk0010;							// 0010
-	UInt32		unk0014;							// 0014
-	UInt32		unk0018;							// 0018
-	UInt32		unk001C;							// 001C
-	UInt32		unk0020;							// 0020
-	UInt32		unk0024;							// 0024
-	UInt32		unk0028;							// 0028
-	void		* unk002C;							// 002C
-	void		* unk0030;							// 0030
-	UInt32		unk0034[(0x1A30 - 0x0034) >> 2];	// 0034
-	UInt32		unk1A30;							// 1A30
-	UInt32		unk1A34[(0x1AF8 - 0x1A34) >> 2];	// 1A34
-	UInt32		unk1AF8;							// 1AF8
-	UInt32		unk1AFC;							// 1AFC
-	UInt32		unk1B00;							// 1B00
-	UInt32		unk1B04;							// 1B04
-	UInt32		unk1B08;							// 1B08
-	UInt32		unk1B0C[(0x1B50 - 0x1B0C) >> 2];	// 1B0C
-	UInt32		unk1B50;							// 4 bytes added between +2C and here for v1.1.0.35
-	UInt32		oldDoubleClickTime;					// 1B50 (1.0) / 1B54 (1.1)
-	UInt32		unk1B54[(0x1B90 - 0x1B54) >> 2];	// 1B54 / 1B58	// Byte at 1B88 referenced
-	UInt8		keyBinds[kMaxControlBinds];			// 1B90 / 1B94
-	UInt8		mouseBinds[kMaxControlBinds];		// 1BAC / 1BB0
-	UInt8		joystickBinds[kMaxControlBinds];	// 1BC8 / 1BCC
-	UInt32		unk1BE4[(0x1C00 - 0x1BE4) >> 2];	// 1BE4 / 1BE8
+	UInt32			unk0000;				// 0000
+	UInt32			flags;					// 0004
+	IDirectInput8	*directInput;			// 0008
+	UInt32			unk000C;				// 000C
+	UInt32			unk0010;				// 0010
+	UInt32			unk0014;				// 0014
+	UInt32			unk0018;				// 0018
+	UInt32			unk001C;				// 001C
+	UInt32			unk0020;				// 0020
+	UInt32			unk0024;				// 0024
+	UInt32			unk0028;				// 0028
+	void			*unk002C;				// 002C
+	void			*unk0030;				// 0030
+	UInt32			unk0034[1584];			// 0034
+	UInt32			unk18F4;				// 18F4
+	UInt8			currKeyStates[256];		// 18F8
+	UInt8			lastKeyStates[256];		// 19F8
+	UInt32			unk1AF8[11];			// 1AF8
+	int				unk1B24;				// 1B24
+	int				unk1B28;				// 1B28
+	int				mouseWheelScroll;		// 1B2C
+	UInt8			currButtonStates[8];	// 1B30
+	UInt32			unk1B38[3];				// 1B38
+	UInt8			lastButtonStates[8];	// 1B44
+	UInt32			ltrtButtonState;		// 1B4C
+	UInt32			unk1B50[2];				// 1B50
+	UInt8			buttonStates1B58[8];	// 1B58
+	UInt32			unk1B60[8];				// 1B60
+	UInt32			*controllerVibration;	// 1B80
+	UInt32			unk1B84[4];				// 1B84
+	UInt8			keyBinds[28];			// 1B94
+	UInt8			mouseBinds[28];			// 1BB0
+	UInt8			joystickBinds[28];		// 1BCC
+	UInt8			controllerBinds[28];	// 1BE8
+	bool GetControlState(ControlCode code, KeyState state) { return ((bool(__thiscall*)(OSInputGlobals*, ControlCode, KeyState))(0xA24660))(this, code, state); }
+	void SetControlHeld(ControlCode code) { ((void(__thiscall*)(OSInputGlobals*, ControlCode))(0xA24280))(this, code); };
+	bool GetMouseState(int buttonID, KeyState state) { return ((bool(__thiscall*)(OSInputGlobals*, int, KeyState))(0xA23A50))(this, buttonID, state); };
+
+	bool GetKeyState(int key, KeyState state) { return 	((bool(__thiscall*)(OSInputGlobals*, int, KeyState))(0xA24180))(this, key, state); };
+	static OSInputGlobals* GetSingleton() { return *(OSInputGlobals * *)(0x11F35CC); }
 };
-
-#if FALLOUT_VERSION < FALLOUT_VERSION_1_1_35
-
-STATIC_ASSERT(sizeof(OSInputGlobals) == 0x1C00);
-STATIC_ASSERT(offsetof(OSInputGlobals, mouseBinds) == 0x1BAC);
-
-#else
-
 STATIC_ASSERT(sizeof(OSInputGlobals) == 0x1C04);
-STATIC_ASSERT(offsetof(OSInputGlobals, mouseBinds) == 0x1BB0);
 
-#endif
-
-extern OSInputGlobals** g_OSInputGlobals;
+extern OSInputGlobals **g_OSInputGlobals;
 
 #if 0
 #include "GameTypes.h"
@@ -224,26 +289,26 @@ public:
 	~OSGlobals();
 
 	UInt8			oneMore;			// 00
-	UInt8			quitGame;			// 01	// The seven are initialized to 0, this one is set by QQQ
+	UInt8			quitGame;			// 01	The seven are initialized to 0, this one is set by QQQ
 	UInt8			exitToMainMenu;		// 02
 	UInt8			unk03;				// 03
 	UInt8			unk04;				// 04
 	UInt8			unk05;				// 05
-	UInt8			unk06;				// 06	// This looks promising as TFC bool byte
-	UInt8			unk07;				// 07
+	UInt8			unk06;				// 06	This looks promising as TFC status byte
+	UInt8			disableAI;			// 07
 	HWND			window;				// 08
 	HINSTANCE		procInstance;		// 0C
 	UInt32			mainThreadID;		// 10
 	HANDLE			mainThreadHandle;	// 14
-	UInt32*			unk18;				// 18 ScrapHeapManager::Buffer*
+	UInt32			*unk18;				// 18	ScrapHeapManager::Buffer*
 	UInt32			unk1C;				// 1C
-	OSInputGlobals	* input;			// 20
-	OSSoundGlobals	* sound;			// 24
-	UInt32			unk28;				// 28 relates to unk18
+	OSInputGlobals	*input;				// 20
+	OSSoundGlobals	*sound;				// 24
+	UInt32			unk28;				// 28	relates to unk18
 	//...
-	UInt32*			unk50;				// 50, same object as unk18
+	UInt32			*unk50;				// 50	same object as unk18
 	//..
-	UInt32			unk60;				// 60 relates to unk50
+	UInt32			unk60;				// 60	relates to unk50
 };
 
 //STATIC_ASSERT(sizeof(OSGlobals) == 0x0A4);	// found in oldWinMain 0x0086AF4B

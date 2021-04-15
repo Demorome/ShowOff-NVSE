@@ -5,7 +5,6 @@
 #include <string>
 #include "StringVar.h"
 #include "ArrayVar.h"
-#include "ScriptTokens.h"
 
 /*************************
 Save file format:
@@ -22,6 +21,7 @@ Save file format:
 
 static ModInfo** s_ModFixupTable = NULL;
 bool LoadModList(NVSESerializationInterface* nvse);	// reads saved mod order, builds table mapping changed mod indexes
+bool BuildFixedModIndexTable();
 
 /*******************************
 *	Callbacks
@@ -98,6 +98,12 @@ void Core_NewGameCallback(void * reserved)
 	g_StringMap.Clean();
 }
 
+void Core_PostLoadCallback(bool bLoadSucceeded)
+{
+	g_ArrayMap.PostLoad(bLoadSucceeded);
+	g_StringMap.PostLoad(bLoadSucceeded);
+}
+
 void Core_PreLoadCallback(void * reserved)
 {
 	// this is invoked only if at least one other plugin registers a preload callback
@@ -107,9 +113,8 @@ void Core_PreLoadCallback(void * reserved)
 
 	NVSESerializationInterface* intfc = &g_NVSESerializationInterface;
 
-	g_nvseVarGarbageCollectionMap.Clear();
-	g_ArrayMap.Reset();
-	g_StringMap.Reset();
+	g_ArrayMap.Preload();
+	g_StringMap.Preload();
 
 	UInt32 type, version, length;
 
@@ -118,6 +123,9 @@ void Core_PreLoadCallback(void * reserved)
 			case 'MODS':
 				if (!LoadModList(intfc))
 					_MESSAGE("PRELOAD: Error occurred while loading mod list");
+				else if (!BuildFixedModIndexTable())
+					_MESSAGE("PRELOAD: Failed to build fixed mod index table");
+
 				break;
 #ifdef _DEBUG
 			case 'CROB':
@@ -148,14 +156,11 @@ void Init_CoreSerialization_Callbacks()
 UInt8	s_preloadModRefIDs[0xFF];
 UInt8	s_numPreloadMods = 0;
 
-#if _DEBUG
-std::vector<std::string> g_modsLoaded;
-#endif
 bool ReadModListFromCoSave(NVSESerializationInterface * intfc)
 {
 	_MESSAGE("Reading mod list from co-save");
 
-	char name[0x104];
+	char name[0x104] = { 0 };
 	UInt16 nameLen = 0;
 
 	intfc->ReadRecordData(&s_numPreloadMods, sizeof(s_numPreloadMods));
@@ -163,9 +168,7 @@ bool ReadModListFromCoSave(NVSESerializationInterface * intfc)
 		intfc->ReadRecordData(&nameLen, sizeof(nameLen));
 		intfc->ReadRecordData(&name, nameLen);
 		name[nameLen] = 0;
-#if _DEBUG
-		g_modsLoaded.emplace_back(name);
-#endif
+
 		s_preloadModRefIDs[i] = DataHandler::Get()->GetModIndex(name);
 	}
 	return true;
@@ -173,10 +176,15 @@ bool ReadModListFromCoSave(NVSESerializationInterface * intfc)
 
 bool LoadModList(NVSESerializationInterface* intfc)
 {
-	// read the mod list
+		// read the mod list
 	return ReadModListFromCoSave(intfc);
 }
 
+bool BuildFixedModIndexTable()
+{
+	//stub
+	return true;
+}
 
 UInt8 ResolveModIndexForPreload(UInt8 modIndexIn)
 {

@@ -1,4 +1,10 @@
-#include "nvse/GameScript.h"
+#include "GameAPI.h"
+#include "GameScript.h"
+#include "GameForms.h"
+#include "GameObjects.h"
+#include "CommandTable.h"
+#include "GameRTTI.h"
+#include "internal/utility.h"
 
 //UInt32 GetDeclaredVariableType(const char* varName, const char* scriptText)
 //{
@@ -67,18 +73,24 @@
 
 #if RUNTIME
 
-void Script::RefVariable::Resolve(ScriptEventList* eventList)
+void Script::RefVariable::Resolve(ScriptEventList *eventList)
 {
 	if (varIdx && eventList)
 	{
-		ScriptVar* var = eventList->GetVariable(varIdx);
-		if (var) form = LookupFormByRefID(*(UInt32*)&var->data);
+		ScriptVar *var = eventList->GetVariable(varIdx);
+		if (var) form = LookupFormByID(*(UInt32*)&var->data);
 	}
 }
 
 ScriptEventList* Script::CreateEventList(void)
 {
-	return ThisCall<ScriptEventList*>(0x005ABF60, this);	// 4th sub above Script::Execute (was 1st above in Oblivion) Execute is the second to last call in Run
+#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
+	return ThisStdCall<ScriptEventList*>(0x005ABF60, this);	// 4th sub above Script::Execute (was 1st above in Oblivion) Execute is the second to last call in Run
+#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
+	return ThisStdCall<ScriptEventList*>(0x005AC110, this);	// 4th sub above Script::Execute (was 1st above in Oblivion) Execute is the second to last call in Run
+#else
+#error
+#endif
 }
 
 Script::RefVariable* ScriptBuffer::ResolveRef(const char* refName)
@@ -87,14 +99,14 @@ Script::RefVariable* ScriptBuffer::ResolveRef(const char* refName)
 	return NULL;
 }
 
-bool Script::RunScriptLine2(const char* text, TESObjectREFR* object, bool bSuppressOutput)
+bool Script::RunScriptLine2(const char * text, TESObjectREFR* object, bool bSuppressOutput)
 {
 	//ToggleConsoleOutput(!bSuppressOutput);
 
-	ConsoleManager* consoleManager = ConsoleManager::GetSingleton();
+	ConsoleManager	* consoleManager = ConsoleManager::GetSingleton();
 
 	UInt8	scriptBuf[sizeof(Script)];
-	Script* script = (Script*)scriptBuf;
+	Script	* script = (Script *)scriptBuf;
 
 	CALL_MEMBER_FN(script, Constructor)();
 	CALL_MEMBER_FN(script, MarkAsTemporary)();
@@ -106,7 +118,7 @@ bool Script::RunScriptLine2(const char* text, TESObjectREFR* object, bool bSuppr
 	return bResult;
 }
 
-bool Script::RunScriptLine(const char* text, TESObjectREFR* object)
+bool Script::RunScriptLine(const char * text, TESObjectREFR * object)
 {
 	return RunScriptLine2(text, object, false);
 }
@@ -173,7 +185,7 @@ Script::RefVariable* ScriptBuffer::ResolveRef(const char* refName)
 
 #endif
 
-UInt32 ScriptBuffer::GetRefIdx(Script::RefVariable* refVar)
+UInt32 ScriptBuffer::GetRefIdx(Script::RefVariable *refVar)
 {
 	return refVars.GetIndex(refVar);
 }
@@ -219,62 +231,65 @@ UInt32 ScriptBuffer::GetRefIdx(Script::RefVariable* refVar)
 
 class ScriptVarFinder
 {
-	const char* m_varName;
+	const char	*m_varName;
 
 public:
-	ScriptVarFinder(const char* varName) : m_varName(varName) {}
+	ScriptVarFinder(const char *varName) : m_varName(varName) {}
 
-	bool Accept(VariableInfo* varInfo)
+	bool Accept(VariableInfo *varInfo)
 	{
-		return !StrCompare(varInfo->name.m_data, m_varName);
+		return StrEqualCI(varInfo->name.m_data, m_varName);
 	}
 };
 
-VariableInfo* Script::GetVariableByName(const char* varName)
+VariableInfo *Script::GetVariableByName(const char *varName)
 {
-	ListNode<VariableInfo>* varIter = varList.Head();
-	VariableInfo* varInfo;
+	ListNode<VariableInfo> *varIter = varList.Head();
+	VariableInfo *varInfo;
 	do
 	{
 		varInfo = varIter->data;
-		if (varInfo && !StrCompare(varName, varInfo->name.m_data))
+		if (varInfo && StrEqualCI(varName, varInfo->name.m_data))
 			return varInfo;
-	} 	while (varIter = varIter->next);
+	}
+	while (varIter = varIter->next);
 	return NULL;
 }
 
-Script::RefVariable* Script::GetVariable(UInt32 reqIdx)
+Script::RefVariable	*Script::GetVariable(UInt32 reqIdx)
 {
 	UInt32 idx = 1;	// yes, really starts at 1
 	if (reqIdx)
 	{
-		ListNode<RefVariable>* varIter = refList.Head();
+		ListNode<RefVariable> *varIter = refList.Head();
 		do
 		{
 			if (idx == reqIdx)
 				return varIter->data;
 			idx++;
-		} 		while (varIter = varIter->next);
+		}
+		while (varIter = varIter->next);
 	}
 	return NULL;
 }
 
-VariableInfo* Script::GetVariableInfo(UInt32 idx)
+VariableInfo *Script::GetVariableInfo(UInt32 idx)
 {
-	ListNode<VariableInfo>* varIter = varList.Head();
-	VariableInfo* varInfo;
+	ListNode<VariableInfo> *varIter = varList.Head();
+	VariableInfo *varInfo;
 	do
 	{
 		varInfo = varIter->data;
 		if (varInfo && (varInfo->idx == idx))
 			return varInfo;
-	} 	while (varIter = varIter->next);
+	}
+	while (varIter = varIter->next);
 	return NULL;
 }
 
-UInt32 Script::AddVariable(TESForm* form)
+UInt32 Script::AddVariable(TESForm *form)
 {
-	RefVariable* refVar = (RefVariable*)GameHeapAlloc(sizeof(RefVariable));
+	RefVariable	*refVar = (RefVariable*)GameHeapAlloc(sizeof(RefVariable));
 	refVar->name.Set("");
 	refVar->form = form;
 	refVar->varIdx = 0;
@@ -289,16 +304,17 @@ void Script::CleanupVariables()
 	refList.RemoveAll();
 }
 
-UInt32 Script::RefVarList::GetIndex(RefVariable* refVar)
+UInt32 Script::RefVarList::GetIndex(RefVariable *refVar)
 {
 	UInt32 idx = 0;
-	ListNode<RefVariable>* varIter = Head();
+	ListNode<RefVariable> *varIter = Head();
 	do
 	{
 		idx++;
 		if (varIter->data == refVar)
 			return idx;
-	} 	while (varIter = varIter->next);
+	}
+	while (varIter = varIter->next);
 	return 0;
 }
 
@@ -309,10 +325,10 @@ UInt32 Script::RefVarList::GetIndex(RefVariable* refVar)
 //const char	* ScriptLineBuffer::kDelims_Whitespace = " \t\n\r";
 //const char  * ScriptLineBuffer::kDelims_WhitespaceAndBrackets = " \t\n\r[]";
 
-bool ScriptLineBuffer::Write(const void* buf, UInt32 bufsize)
+bool ScriptLineBuffer::Write(const void *buf, UInt32 bufsize)
 {
 	if ((dataOffset + bufsize) >= kBufferSize) return false;
-	memmove(dataBuf + dataOffset, buf, bufsize);
+	memcpy(dataBuf + dataOffset, buf, bufsize);
 	dataOffset += bufsize;
 	return true;
 }
@@ -325,13 +341,13 @@ bool ScriptLineBuffer::Write32(UInt32 buf)
 	return true;
 }
 
-bool ScriptLineBuffer::WriteString(const char* buf)
+bool ScriptLineBuffer::WriteString(const char *buf)
 {
 	UInt32 len = StrLen(buf);
 	if ((dataOffset + 2 + len) >= kBufferSize) return false;
-	UInt8* dataPtr = dataBuf + dataOffset;
+	UInt8 *dataPtr = dataBuf + dataOffset;
 	*(UInt16*)dataPtr = len;
-	memmove(dataPtr + 2, buf, len);
+	memcpy(dataPtr + 2, buf, len);
 	dataOffset += 2 + len;
 	return true;
 }
@@ -355,7 +371,7 @@ bool ScriptLineBuffer::WriteByte(UInt8 buf)
 bool ScriptLineBuffer::WriteFloat(double buf)
 {
 	if ((dataOffset + 8) >= kBufferSize) return false;
-	memmove(dataBuf + dataOffset, &buf, 8);
+	memcpy(dataBuf + dataOffset, &buf, 8);
 	dataOffset += 8;
 	return true;
 }

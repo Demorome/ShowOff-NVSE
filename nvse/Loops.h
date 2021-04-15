@@ -10,9 +10,7 @@
 #include <stack>
 #include <vector>
 
-#include "FastStack.h"
-
-class ScriptRunner;
+struct ScriptRunner;
 struct ForEachContext;
 
 // abstract base for Loop classes
@@ -34,9 +32,6 @@ public:
 	virtual ~WhileLoop() { }
 
 	virtual bool Update(COMMAND_ARGS);
-
-	void* operator new(size_t size);
-	void operator delete(void* p);
 };
 
 // iterates over contents of some collection
@@ -53,7 +48,7 @@ class ArrayIterLoop : public ForEachLoop
 	ArrayID					m_srcID;
 	ArrayID					m_iterID;
 	ArrayKey				m_curKey;
-	ScriptEventList::Var	*m_iterVar;
+	ScriptEventList::Var	* m_iterVar;
 
 	void UpdateIterator(const ArrayElement* elem);
 public:
@@ -61,11 +56,7 @@ public:
 	virtual ~ArrayIterLoop();
 
 	virtual bool Update(COMMAND_ARGS);
-	bool IsEmpty()
-	{
-		ArrayVar *arr = g_ArrayMap.Get(m_srcID);
-		return !arr || !arr->Size();
-	}
+	bool IsEmpty() { return (g_ArrayMap.SizeOf(m_srcID) == -1 || g_ArrayMap.SizeOf(m_srcID) == 0);	}
 };
 
 // iterates over characters in a string
@@ -88,10 +79,10 @@ class ContainerIterLoop : public ForEachLoop
 {
 	typedef InventoryReference::Data	IRefData;
 
-	InventoryReference							*m_invRef;
-	ScriptEventList::Var						*m_refVar;
-	UInt32										m_iterIndex;
-	Vector<ExtraContainerChanges::EntryData*>	m_elements;
+	InventoryReference			* m_invRef;
+	ScriptEventList::Var		* m_refVar;
+	UInt32						m_iterIndex;
+	std::vector<IRefData>		m_elements;
 
 	bool SetIterator();
 	bool UnsetIterator();
@@ -100,7 +91,7 @@ public:
 	virtual ~ContainerIterLoop();
 
 	virtual bool Update(COMMAND_ARGS);
-	virtual bool IsEmpty() { return m_elements.Empty(); }
+	virtual bool IsEmpty() { return m_elements.size() == 0; }
 };
 
 class LoopManager
@@ -114,7 +105,7 @@ class LoopManager
 		UInt32		endIP;		// ip of instruction following loop end
 	};
 
-	Stack<LoopInfo>	m_loops;
+	std::stack<LoopInfo>	m_loops;
 	
 	void RestoreStack(ScriptRunner* state, SavedIPInfo* info);
 

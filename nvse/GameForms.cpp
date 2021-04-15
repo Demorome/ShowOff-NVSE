@@ -1,52 +1,62 @@
 #include "GameForms.h"
-
 #include "GameAPI.h"
 #include "GameRTTI.h"
 #include "GameObjects.h"
 #include "GameData.h"
 
-#if RUNTIME
+#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 static const ActorValueInfo** ActorValueInfoPointerArray = (const ActorValueInfo**)0x0011D61C8;		// See GetActorValueInfo
 static const _GetActorValueInfo GetActorValueInfo = (_GetActorValueInfo)0x00066E920;	// See GetActorValueName
 BGSDefaultObjectManager ** g_defaultObjectManager = (BGSDefaultObjectManager**)0x011CA80C;
+#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
+static const ActorValueInfo** ActorValueInfoPointerArray = (const ActorValueInfo**)0x0011D61C8;		// See GetActorValueInfo (same as gore)
+static const _GetActorValueInfo GetActorValueInfo = (_GetActorValueInfo)0x0066E480;	// See GetActorValueName
+BGSDefaultObjectManager ** g_defaultObjectManager = (BGSDefaultObjectManager**)0x011CA80C;
+#else
+static const ActorValueInfo** ActorValueInfoPointerArray = (const ActorValueInfo**)0;
+static const _GetActorValueInfo GetActorValueInfo = (_GetActorValueInfo)0;
+BGSDefaultObjectManager ** g_defaultObjectManager = (BGSDefaultObjectManager**)0x0;
 #endif
 
-TESForm * TESForm::TryGetREFRParent(void)
+TESForm *TESForm::TryGetREFRParent()
 {
-	TESForm			* result = this;
-	if(result) {
-		TESObjectREFR	* refr = DYNAMIC_CAST(this, TESForm, TESObjectREFR);
-		if(refr && refr->baseForm)
-			result = refr->baseForm;
+	if (!this) return NULL;
+	if (GetIsReference())
+	{
+		TESObjectREFR *refr = (TESObjectREFR*)this;
+		if (refr->baseForm) return refr->baseForm;
 	}
-	return result;
+	return this;
 }
 
 UInt8 TESForm::GetModIndex() const
 {
-	return (refID >> 24);
+	return modIndex;
 }
 
-TESFullName* TESForm::GetFullName()  
+TESFullName *TESForm::GetFullName()
 {
-	if (typeID == kFormType_TESObjectCELL)		// some exterior cells inherit name of parent worldspace
+	TESForm *baseForm = this;
+	TESFullName *fullName = NULL;
+
+	if (GetIsReference())
+		baseForm = ((TESObjectREFR*)this)->baseForm;
+	else if IS_TYPE(this, TESObjectCELL)
 	{
 		TESObjectCELL *cell = (TESObjectCELL*)this;
-		TESFullName *fullName = &cell->fullName;
+		fullName = &cell->fullName;
 		if ((!fullName->name.m_data || !fullName->name.m_dataLen) && cell->worldSpace)
-			return &cell->worldSpace->fullName;
-		return fullName;
+			fullName = &cell->worldSpace->fullName;
 	}
-	const TESForm *baseForm = GetIsReference() ? ((TESObjectREFR*)this)->baseForm : this;
-	return DYNAMIC_CAST(baseForm, TESForm, TESFullName);
+	if (!fullName)
+		fullName = DYNAMIC_CAST(baseForm, TESForm, TESFullName);
+	return fullName;
 }
 
-const char* TESForm::GetTheName()
+const char *TESForm::GetTheName()
 {
-	TESFullName* fullName = GetFullName();
-	if (fullName)
-		return fullName->name.CStr();
-	return "";
+	TESFullName *fullName = GetFullName();
+	return fullName ? fullName->name.CStr() : "";
 }
 
 void TESForm::DoAddForm(TESForm* newForm, bool persist, bool record) const
@@ -95,13 +105,6 @@ bool TESForm::IsCloned() const
 	return GetModIndex() == 0xff;
 }
 
-/*
-std::string TESForm::GetStringRepresentation() const
-{
-	return FormatString(R"([id: %X, edid: "%s", name: "%s"])", refID, GetName(), GetFullName() ? GetFullName()->name.CStr() : "<no name>");
-}
-*/
-
 // static
 UInt32 TESBipedModelForm::MaskForSlot(UInt32 slot)
 {
@@ -140,7 +143,7 @@ void TESBipedModelForm::SetSlotsMask(UInt32 mask)
 }
 
 UInt32 TESBipedModelForm::GetBipedMask() const {
-	return bipedFlags & 0xFF;
+	return bipedFlags;
 }
 
 void TESBipedModelForm::SetBipedMask(UInt32 mask)
@@ -192,15 +195,17 @@ const char* TESBipedModelForm::GetPath(UInt32 whichPath, bool bFemalePath)
 		return "";
 }
 
-SInt8 TESActorBaseData::GetFactionRank(TESFaction* faction)
+char TESActorBaseData::GetFactionRank(TESFaction *faction)
 {
-	for(tList<FactionListData>::Iterator iter = factionList.Begin(); !iter.End(); ++iter)
+	ListNode<FactionListData> *facIter = factionList.Head();
+	FactionListData	*data;
+	do
 	{
-		FactionListData	* data = iter.Get();
-		if(data && (data->faction == faction))
+		data = facIter->data;
+		if (data && (data->faction == faction))
 			return data->rank;
 	}
-
+	while (facIter = facIter->next);
 	return -1;
 }
 
@@ -232,7 +237,7 @@ void TESObjectWEAP::SetHandGrip(UInt8 _handGrip)
 
 UInt8 TESObjectWEAP::AttackAnimation() const
 {
-	switch (attackAnim)
+	switch(attackAnim)
 	{
 		case eAttackAnim_Default:		return 0;
 		case eAttackAnim_Attack3:		return 1;
@@ -263,22 +268,24 @@ UInt8 TESObjectWEAP::AttackAnimation() const
 
 const UInt8 kAttackAnims[] = {255, 38, 44, 50, 56, 62, 68, 26, 74, 32, 80, 86, 114, 120, 126, 132, 138, 102, 108, 144, 150, 156, 162};
 
-void TESObjectWEAP::SetAttackAnimation(UInt8 _attackAnim)
+void TESObjectWEAP::SetAttackAnimation(UInt32 _attackAnim)
 {
 	attackAnim = kAttackAnims[_attackAnim];
 }
 
 TESObjectIMOD* TESObjectWEAP::GetItemMod(UInt8 which)
 {
-	TESObjectIMOD* pMod = NULL;
-	switch(which) {
-		case 1: pMod = itemMod1; break;
-		case 2: pMod = itemMod2; break;
-		case 3: pMod = itemMod3; break;
-	}
-	return pMod;
+	if ((which < 1) || (which > 3)) return NULL;
+	return itemMod[which - 1];
 }
 
+TESAmmo *TESObjectWEAP::GetAmmo()
+{
+	if (!ammo.ammo) return NULL;
+	if IS_ID(ammo.ammo, BGSListForm)
+		return (TESAmmo*)((BGSListForm*)ammo.ammo)->list.GetFirstItem();
+	return (TESAmmo*)ammo.ammo;
+}
 
 class FindByForm {
 	TESForm* m_pForm;
@@ -314,11 +321,15 @@ SInt32 BGSListForm::ReplaceForm(TESForm* pForm, TESForm* pReplaceWith)
 
 bool TESForm::IsInventoryObject() const
 {
-	typedef bool (* _IsInventoryObjectType)(UInt32 formType);
-#if RUNTIME
-	static _IsInventoryObjectType IsInventoryObjectType = (_IsInventoryObjectType)0x00481F30;	// first call from first case of main switch in _ExtractArg
+	typedef bool (*_IsInventoryObjectType)(UInt32 formType);
+#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
+	static _IsInventoryObjectType IsInventoryObjectType = (_IsInventoryObjectType)0x481F30;
+#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
+	static _IsInventoryObjectType IsInventoryObjectType = (_IsInventoryObjectType)0x482F50;
 #elif EDITOR
-	static _IsInventoryObjectType IsInventoryObjectType = (_IsInventoryObjectType)0x004F4100;	// first call from first case of main switch in Cmd_DefaultParse
+	static _IsInventoryObjectType IsInventoryObjectType = (_IsInventoryObjectType)0x4F4100;
+#else
+#error
 #endif
 	return IsInventoryObjectType(typeID);
 }
@@ -351,7 +362,7 @@ UInt8 TESPackage::TargetData::TargetCodeForString(const char* targetStr)
 
 TESPackage::TargetData* TESPackage::TargetData::Create()
 {
-	TargetData* data = (TargetData*)FormHeap_Allocate(sizeof(TargetData));
+	TargetData* data = (TargetData*)GameHeapAlloc(sizeof(TargetData));
 
 	// fill out with same defaults as editor uses
 	data->count = 0;
@@ -406,7 +417,7 @@ void TESPackage::SetTarget(UInt8 typeCode, UInt32 count)
 
 TESPackage::LocationData* TESPackage::LocationData::Create()
 {
-	LocationData* data = (LocationData*)FormHeap_Allocate(sizeof(LocationData));
+	LocationData* data = (LocationData*)GameHeapAlloc(sizeof(LocationData));
 
 	data->locationType = kPackLocation_CurrentLocation;
 	data->object.form = NULL;
@@ -530,8 +541,11 @@ UInt8 TESPackage::ObjectCodeForString(const char* objString)
 	return kObjectType_Max;
 }
 
-#if RUNTIME
+#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525 || RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
 	static const char** s_procNames = (const char**)0x011A3CC0;
+#elif EDITOR
+#else
+#error unsupported Fallout version
 #endif
 
 const char* TESPackage::StringForProcedureCode(eProcedure proc)
@@ -696,6 +710,7 @@ void TESFaction::SetNthRankName(const char* newName, UInt32 whichRank, bool bFem
 	}
 }
 
+#if 0
 UInt32 EffectItemList::CountItems() const
 {
 	return list.Count();
@@ -714,32 +729,9 @@ const char* EffectItemList::GetNthEIName(UInt32 whichEffect) const
 	else
 		return "<no name>";
 }
+#endif
 
 BGSDefaultObjectManager* BGSDefaultObjectManager::GetSingleton()
 {
 	return *g_defaultObjectManager;
-}
-
-Script* EffectSetting::	SetScript(Script* newScript)
-{
-	Script* oldScript = NULL;
-	if (1 == archtype )
-	{
-		oldScript = (Script*)associatedItem;
-		associatedItem = (TESForm*)newScript;
-	};
-	return oldScript;
-};
-
-Script* EffectSetting::	RemoveScript()
-{
-	return SetScript(NULL);
-};
-
-SInt32 TESContainer::GetCountForForm(TESForm *form)
-{
-	SInt32 result = 0;
-	for (auto iter = formCountList.Begin(); !iter.End(); ++iter)
-		if (iter->form == form) result += iter->count;
-	return result;
 }

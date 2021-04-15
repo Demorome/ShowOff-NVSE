@@ -281,48 +281,21 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\nvse\nvse\containers.cpp" />
-    <ClCompile Include="..\nvse\nvse\GameAPI.cpp" />
-    <ClCompile Include="..\nvse\nvse\GameBSExtraData.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release GECK|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug GECK|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\nvse\nvse\GameData.cpp" />
-    <ClCompile Include="..\nvse\nvse\GameExtraData.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release GECK|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug GECK|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\nvse\nvse\GameForms.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release GECK|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug GECK|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\nvse\nvse\GameObjects.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release GECK|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug GECK|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\nvse\nvse\GameOSDepend.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release GECK|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug GECK|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\nvse\nvse\GameRTTI.cpp" />
-    <ClCompile Include="..\nvse\nvse\GameScript.cpp" />
-    <ClCompile Include="..\nvse\nvse\GameSettings.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release GECK|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug GECK|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\nvse\nvse\GameTasks.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug GECK|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release GECK|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\nvse\nvse\GameTiles.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release GECK|Win32'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug GECK|Win32'">true</ExcludedFromBuild>
-    </ClCompile>
-    <ClCompile Include="..\nvse\nvse\GameTypes.cpp" />
-    <ClCompile Include="..\nvse\nvse\printf.cpp" />
-    <ClCompile Include="..\nvse\nvse\SafeWrite.cpp" />
-    <ClCompile Include="..\nvse\nvse\Utilities.cpp" />
-    <ClCompile Include="..\nvse\nvse\utility.cpp" />
+    <ClCompile Include="..\nvse\GameAPI.cpp" />
+    <ClCompile Include="..\nvse\GameBSExtraData.cpp" />
+    <ClCompile Include="..\nvse\GameData.cpp" />
+    <ClCompile Include="..\nvse\GameExtraData.cpp" />
+    <ClCompile Include="..\nvse\GameForms.cpp" />
+    <ClCompile Include="..\nvse\GameObjects.cpp" />
+    <ClCompile Include="..\nvse\GameOSDepend.cpp" />
+    <ClCompile Include="..\nvse\GameRTTI.cpp" />
+    <ClCompile Include="..\nvse\GameScript.cpp" />
+    <ClCompile Include="..\nvse\GameSettings.cpp" />
+    <ClCompile Include="..\nvse\GameTasks.cpp" />
+    <ClCompile Include="..\nvse\GameTiles.cpp" />
+    <ClCompile Include="..\nvse\GameTypes.cpp" />
+    <ClCompile Include="..\nvse\SafeWrite.cpp" />
+    <ClCompile Include="..\nvse\Utilities.cpp" />
     <ClCompile Include="dllmain.c">
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug ng|Win32'">
       </ForcedIncludeFiles>
@@ -337,36 +310,39 @@
       <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release GECK|Win32'">
       </ForcedIncludeFiles>
     </ClCompile>
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="internal\utility.cpp" />
+    <ClCompile Include="ShowOffNVSE.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\nvse\nvse\CommandTable.h" />
-    <ClInclude Include="..\nvse\nvse\containers.h" />
-    <ClInclude Include="..\nvse\nvse\GameAPI.h" />
-    <ClInclude Include="..\nvse\nvse\GameBSExtraData.h" />
-    <ClInclude Include="..\nvse\nvse\GameData.h" />
-    <ClInclude Include="..\nvse\nvse\GameEffects.h" />
-    <ClInclude Include="..\nvse\nvse\GameExtraData.h" />
-    <ClInclude Include="..\nvse\nvse\GameForms.h" />
-    <ClInclude Include="..\nvse\nvse\GameObjects.h" />
-    <ClInclude Include="..\nvse\nvse\GameOSDepend.h" />
-    <ClInclude Include="..\nvse\nvse\GameRTTI.h" />
-    <ClInclude Include="..\nvse\nvse\GameScript.h" />
-    <ClInclude Include="..\nvse\nvse\GameSettings.h" />
-    <ClInclude Include="..\nvse\nvse\GameTasks.h" />
-    <ClInclude Include="..\nvse\nvse\GameTiles.h" />
-    <ClInclude Include="..\nvse\nvse\GameTypes.h" />
-    <ClInclude Include="..\nvse\nvse\GameUI.h" />
-    <ClInclude Include="..\nvse\nvse\SafeWrite.h" />
-    <ClInclude Include="..\nvse\nvse\Utilities.h" />
-    <ClInclude Include="..\nvse\nvse\utility.h" />
-    <ClInclude Include="decoding.h" />
-    <ClInclude Include="Demo_fn_Misc.h" />
-    <ClInclude Include="jip_nvse.h" />
-    <ClInclude Include="Tomm_JiP_FileStream.h" />
-    <ClInclude Include="Tomm_fn_Misc.h" />
-    <ClInclude Include="Tomm_fn_UI.h" />
-    <ClInclude Include="params.h" />
+    <ClInclude Include="..\nvse\CommandTable.h" />
+    <ClInclude Include="..\nvse\GameAPI.h" />
+    <ClInclude Include="..\nvse\GameBSExtraData.h" />
+    <ClInclude Include="..\nvse\GameData.h" />
+    <ClInclude Include="..\nvse\GameEffects.h" />
+    <ClInclude Include="..\nvse\GameExtraData.h" />
+    <ClInclude Include="..\nvse\GameForms.h" />
+    <ClInclude Include="..\nvse\GameObjects.h" />
+    <ClInclude Include="..\nvse\GameOSDepend.h" />
+    <ClInclude Include="..\nvse\GameRTTI.h" />
+    <ClInclude Include="..\nvse\GameSettings.h" />
+    <ClInclude Include="..\nvse\GameTasks.h" />
+    <ClInclude Include="..\nvse\GameTiles.h" />
+    <ClInclude Include="..\nvse\GameTypes.h" />
+    <ClInclude Include="..\nvse\GameUI.h" />
+    <ClInclude Include="..\nvse\PluginAPI.h" />
+    <ClInclude Include="..\nvse\SafeWrite.h" />
+    <ClInclude Include="..\nvse\Utilities.h" />
+    <ClInclude Include="functions\Demo_fn_Misc.h" />
+    <ClInclude Include="functions\Tomm_fn_Misc.h" />
+    <ClInclude Include="functions\Tomm_fn_UI.h" />
+    <ClInclude Include="functions\Tomm_JiP_FileStream.h" />
+    <ClInclude Include="internal\containers.h" />
+    <ClInclude Include="internal\decoding.h" />
+    <ClInclude Include="internal\havok.h" />
+    <ClInclude Include="internal\jip_nvse.h" />
+    <ClInclude Include="internal\netimmerse.h" />
+    <ClInclude Include="internal\utility.h" />
+    <ClInclude Include="ShowOffNVSE.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

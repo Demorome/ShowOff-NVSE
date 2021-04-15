@@ -22,7 +22,7 @@ class StringVar
 	std::string data;
 	UInt8		owningModIndex;
 public:
-	StringVar(const char* in_data, UInt8 modIndex);
+	StringVar(const char* in_data, UInt32 in_refID);
 
 	void		Set(const char* newString);
 	SInt32		Compare(char* rhs, bool caseSensitive);
@@ -32,11 +32,11 @@ public:
 	UInt32		Replace(char* toReplace, char* replaceWith, UInt32 startPos, UInt32 numChars, bool bCaseSensitive, UInt32 numToReplace = -1);	//returns num replaced
 	void		Erase(UInt32 startPos, UInt32 numChars);
 	std::string	SubString(UInt32 startPos, UInt32 numChars);
+	double*		ToFloat(UInt32 startPos, UInt32 numChars);
 	char		At(UInt32 charPos);
 	static UInt32	GetCharType(char ch);
 
 	std::string String()					{	return data;	}
-	std::string& StringRef() {return data;}
 	const char*	GetCString();
 	UInt32		GetLength();
 	UInt8		GetOwningModIndex();	
@@ -58,7 +58,6 @@ public:
 	void Clean();
 
 	UInt32 Add(UInt8 varModIndex, const char* data, bool bTemp = false);
-	static StringVarMap * GetSingleton(void);
 };
 
 extern StringVarMap g_StringMap;

@@ -1,17 +1,18 @@
 #pragma once
 
 #include "InventoryInfo.h"
+#include <map>
+#include <vector>
+#include <queue>
 
 class TESObjectREFR;
 
 // InventoryReference represents a temporary reference to a stack of items in an inventory
 // temp refs are valid only for the frame during which they were created
 
-class InventoryReference
-{
+class InventoryReference {
 public:
-	struct Data
-	{
+	struct Data {
 		TESForm								* type;
 		ExtraContainerChanges::EntryData	* entry;
 		ExtraDataList						* xData;
@@ -20,8 +21,10 @@ public:
 		Data(const Data& rhs) : type(rhs.type), entry(rhs.entry), xData(rhs.xData) { }
 		Data() : type(NULL), entry(NULL), xData(NULL) { }
 
-		static void CreateForUnextendedEntry(ExtraContainerChanges::EntryData* entry, SInt32 totalCount, Vector<Data> &dataOut);
+		static void CreateForUnextendedEntry(ExtraContainerChanges::EntryData* entry, SInt32 totalCount, std::vector<Data> &dataOut);
 	};
+
+	static InventoryReference* Create(TESObjectREFR* container, const Data &data, bool bValidate) { return new InventoryReference(container, data, bValidate); }
 
 	~InventoryReference();
 
@@ -29,55 +32,61 @@ public:
 	void SetContainer(TESObjectREFR* cont) { m_containerRef = cont; }
 	bool SetData(const Data &data);
 	TESObjectREFR* GetRef() { return Validate() ? m_tempRef : NULL; }
-	static TESObjectREFR* GetRefBySelf(InventoryReference* self) { return self ? self->GetRef() : NULL; }	// Needed to get convert the address to a void*
 
 	bool WriteRefDataToContainer();
 	bool RemoveFromContainer();			// removes and frees Data pointers
 	bool MoveToContainer(TESObjectREFR* dest);
 	bool CopyToContainer(TESObjectREFR* dest);
+	bool Drop();
 	bool SetEquipped(bool bEquipped);
 	void SetRemoved() { m_bRemoved = true; }
 	void Release();
 
 	static InventoryReference* GetForRefID(UInt32 refID);
+	static void Clean();									// called from main loop to destroy any temp refs
+	static bool HasData() { return s_refmap.size() > 0; }	// provides a quick check from main loop to avoid unnecessary calls to Clean()
 
-	enum ActionType
-	{
-		kAction_Equip,
-		kAction_Remove,
-	};
-
+private:
 	class DeferredAction 
 	{
-		ActionType					m_type;
-		Data						m_itemData;
-		TESObjectREFR				*m_target;
-
 	public:
 		// an operation which could potentially invalidate the extradatalist, deferred until inv ref is released
-		DeferredAction(ActionType type, const Data& data, TESObjectREFR *target = nullptr) : m_type(type), m_itemData(data), m_target(target) {}
-		
-		const Data& Data() {return m_itemData;}
-		bool Execute(InventoryReference* iref);
+		DeferredAction(const Data& data) : m_itemData(data) { }
+		virtual bool Execute(InventoryReference* iref) = 0;
+
+		const Data& Data() { return m_itemData; }
+	private:
+		InventoryReference::Data	m_itemData;
 	};
 
-	Data						m_data;
-	TESObjectREFR				*m_containerRef;
-	TESObjectREFR				*m_tempRef;
-	Stack<DeferredAction>		m_deferredActions;
-	ExtraContainerChanges::EntryData	*m_tempEntry;
-	UInt8						pad1C[0x10];	// This used to be std::queue<DeferredAction*>; Padded to preserve sizeof == 0x30, for backward compatibility with plugins.
-	bool						m_bDoValidation;
-	bool						m_bRemoved;
+	class DeferredEquipAction : public DeferredAction
+	{
+	public:
+		DeferredEquipAction(const InventoryReference::Data& data) : DeferredAction(data) { }
+		virtual bool Execute(InventoryReference* iref);
+	};
+
+	class DeferredRemoveAction : public DeferredAction
+	{
+	public:
+		DeferredRemoveAction(const InventoryReference::Data& data, TESObjectREFR* target = NULL) : DeferredAction(data), m_target(target) { }
+		virtual bool Execute(InventoryReference* iref);
+	private:
+		TESObjectREFR*	m_target;
+	};		
+
+	InventoryReference(TESObjectREFR* container, const Data &data, bool bValidate);
+
+	Data			m_data;
+	TESObjectREFR	* m_containerRef;
+	TESObjectREFR	* m_tempRef;
+	std::queue<DeferredAction*>	m_deferredActions;
+	bool			m_bDoValidation;
+	bool			m_bRemoved;
 
 	bool Validate();
+	void QueueAction(DeferredAction* action);
 	void DoDeferredActions();
-	SInt32 GetCount();
+	SInt16 GetCount();
+	static std::map<UInt32, InventoryReference*>	s_refmap;	// maps refIDs of temp refs to InventoryReferences
 };
-
-typedef UnorderedMap<UInt32, InventoryReference> InventoryReferenceMap;
-extern InventoryReferenceMap s_invRefMap;
-
-InventoryReference* CreateInventoryRef(TESObjectREFR* container, const InventoryReference::Data &data, bool bValidate);
-ExtraContainerChanges::EntryData *CreateTempEntry(TESForm *itemForm, SInt32 countDelta, ExtraDataList *xData);
-TESObjectREFR* CreateInventoryRefEntry(TESObjectREFR *container, TESForm *itemForm, SInt32 countDelta, ExtraDataList *xData);

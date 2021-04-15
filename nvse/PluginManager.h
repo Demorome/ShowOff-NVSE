@@ -35,11 +35,6 @@ public:
 	static bool Dispatch_Message(PluginHandle sender, UInt32 messageType, void * data, UInt32 dataLen, const char* receiver);
 	static bool	RegisterListener(PluginHandle listener, const char* sender, NVSEMessagingInterface::EventCallback handler);
 
-	static void * GetSingleton(UInt32 singletonID);
-	static void * GetFunc(UInt32 funcID);
-	static void * GetData(UInt32 dataID);
-	static void ClearScriptDataCache();
-
 private:
 	struct LoadedPlugin
 	{
@@ -57,8 +52,8 @@ private:
 	bool	InstallPlugin(std::string pluginPath);
 	void	InstallPlugins(void);
 
-	const char *	SafeCallQueryPlugin(LoadedPlugin * plugin, const NVSEInterface * nvse, char* errorBuffer);
-	const char *	SafeCallLoadPlugin(LoadedPlugin * plugin, const NVSEInterface * nvse, char* errorBuffer);
+	const char *	SafeCallQueryPlugin(LoadedPlugin * plugin, const NVSEInterface * nvse);
+	const char *	SafeCallLoadPlugin(LoadedPlugin * plugin, const NVSEInterface * nvse);
 
 	const char *	CheckPluginCompatibility(LoadedPlugin * plugin);
 

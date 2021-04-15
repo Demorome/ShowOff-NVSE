@@ -203,43 +203,39 @@ TESForm * SetFirstItemWithHealthAndOwnershipByRefID(TESObjectREFR* thisObj, UInt
 	pXCount = (ExtraCount*)pExtraDataList->GetByType(kExtraData_Count);
 	pXOwner  = (ExtraOwnership*)pExtraDataList->GetByType(kExtraData_Ownership);
 	pXRank  = (ExtraRank*)pExtraDataList->GetByType(kExtraData_Rank);
-	if (!pXHealth) {
-		if (Health != -1.0) {
-			pXHealth = ExtraHealth::Create();
-			pExtraDataList->Add(pXHealth);
-			pXHealth->health = Health;
-		}
-	}
-	else
-		if (Health != -1.0)
-			if (pHealth && Health==pHealth->health)
+
+	if (Health != -1.0F)
+	{
+		if (pXHealth)
+		{
+			if (pHealth->health == Health)
 				pExtraDataList->Remove(pXHealth, true);
 			else
 				pXHealth->health = Health;
-	if (!pXOwner) {
-		if (pOwner) {
-			pXOwner = ExtraOwnership::Create();
-			pExtraDataList->Add(pXOwner);
-			pXOwner->owner = pOwner;
 		}
+		else
+			pExtraDataList->Add(ExtraHealth::Create(Health));
 	}
-	else
+
+	if (pXOwner)
+	{
 		if (pOwner)
 			pXOwner->owner = pOwner;
 		else
 			pExtraDataList->Remove(pXOwner, true);
-	if (!pXRank) {
-		if (Rank) {
-			pXRank = ExtraRank::Create();
-			pExtraDataList->Add(pXRank);
-			pXRank->rank = Rank;
-		}
 	}
-	else
+	else if (pOwner)
+		pExtraDataList->Add(ExtraOwnership::Create(pOwner));
+
+	if (pXRank)
+	{
 		if (Rank)
 			pXRank->rank = Rank;
 		else
 			pExtraDataList->Remove(pXRank, true);
+	}
+	else if (Rank)
+		pExtraDataList->Add(ExtraRank::Create(Rank));
 
 	if (pXCount)
 		pXCount->count = NumItems;
@@ -298,34 +294,18 @@ TESForm * AddItemHealthPercentOwner(TESObjectREFR* thisObj, UInt32 refID, SInt32
 	TESScriptableForm* pScript = DYNAMIC_CAST(pForm, TESForm, TESScriptableForm);
 	if (pScript && !pScript->script) pScript = NULL;  // Only existing scripts matter
 
-	ExtraHealth* pXHealth = NULL;
-	ExtraOwnership* pXOwner = NULL;
-	ExtraRank* pXRank = NULL;
-	ExtraCount* pXCount = NULL;
-	ExtraDataList* pExtraDataList = NULL;
-	ExtraScript * pXScript = NULL;
-
-	if (!(1.0 == Health) || pOwner || Rank || pScript) {
+	ExtraDataList *pExtraDataList = NULL;
+	if ((Health != 1.0F) || pOwner || Rank || pScript)
+	{
 		pExtraDataList = ExtraDataList::Create();
-		if (!(1.0 == Health)) {
-			pXHealth = ExtraHealth::Create();
-			pExtraDataList->Add(pXHealth);
-			pXHealth->health = pHealth->GetHealth() * Health;
-		}
-		if (pOwner) {
-			pXOwner = ExtraOwnership::Create();
-			pExtraDataList->Add(pXOwner);
-			pXOwner->owner = pOwner;
-		}
-		if (Rank) {
-			pXRank = ExtraRank::Create();
-			pExtraDataList->Add(pXRank);
-			pXRank->rank = Rank;
-		}
-		if (pScript) {
-			pXScript = ExtraScript::Create(pForm, true);
-			pExtraDataList->Add(pXScript);
-		}
+		if (Health != 1.0F)
+			pExtraDataList->Add(ExtraHealth::Create(pHealth->GetHealth() * Health));
+		if (pOwner)
+			pExtraDataList->Add(ExtraOwnership::Create(pOwner));
+		if (Rank)
+			pExtraDataList->Add(ExtraRank::Create(Rank));
+		if (pScript)
+			pExtraDataList->Add(ExtraScript::Create(pForm, true));
 	}
 	thisObj->AddItem(pForm, pExtraDataList, NumItems);
 	return pForm;

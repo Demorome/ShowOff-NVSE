@@ -1,22 +1,27 @@
 #pragma once
 
 #include "GameTypes.h"
-#include "NiNodes.h"
-#include "CommandTable.h"
 #include "GameScript.h"
-#include "common/ITypes.h"
+#include <string>
+
+struct ParamInfo;
+class TESForm;
+class TESObjectREFR;
+struct BaseExtraList;
 
 #define playerID	0x7
 #define playerRefID 0x14
 
-#if RUNTIME
+#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 	static const UInt32 s_Console__Print = 0x0071D0A0;
+#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
+	static const UInt32 s_Console__Print = 0x0071D070;
+#elif EDITOR
+#else
+#error
 #endif
 
 extern bool extraTraces;
-extern bool alternateUpdate3D;
-extern bool s_InsideOnActorEquipHook;
-extern UInt32 s_CheckInsideOnActorEquipHook;
 
 void Console_Print(const char * fmt, ...);
 
@@ -28,11 +33,7 @@ void Console_Print(const char * fmt, ...);
 
 #if RUNTIME
 
-#if USE_EXTRACT_ARGS_EX
-typedef bool (*_ExtractArgs)(ParamInfo *paramInfo, void *scriptDataIn, UInt32 *scriptDataOffset, Script *scriptObj, ScriptEventList *eventList, ...);
-#else
 typedef bool (* _ExtractArgs)(ParamInfo * paramInfo, void * scriptData, UInt32 * arg2, TESObjectREFR * arg3, TESObjectREFR * arg4, Script * script, ScriptEventList * eventList, ...);
-#endif
 extern const _ExtractArgs ExtractArgs;
 
 typedef TESForm * (* _CreateFormInstance)(UInt8 type);
@@ -71,15 +72,11 @@ extern const _ShowMessageBox_pScriptRefID ShowMessageBox_pScriptRefID;
 typedef UInt8 * _ShowMessageBox_button;
 extern const _ShowMessageBox_button ShowMessageBox_button;
 
-// can be passed to QueueUIMessage to determine Vaultboy icon displayed
-enum eEmotion {
-	happy	= 0,
-	sad		= 1,
-	neutral = 2,
-	pain	= 3
-};
-
-typedef bool (* _QueueUIMessage)(const char* msg, UInt32 emotion, const char* ddsPath, const char* soundName, float msgTime, bool maybeNextToDisplay);
+// unk1 = 0
+// unk3 = 0, "UIVATSInsufficientAP" (sound?)
+// duration = 2
+// unk5 = 0
+typedef bool (*_QueueUIMessage)(const char *msgText, UInt32 iconType, const char *iconPath, const char *soundPath, float displayTime, UInt8 unk5);
 extern const _QueueUIMessage QueueUIMessage;
 
 const UInt32 kMaxMessageLength = 0x4000;
@@ -93,16 +90,13 @@ void ShowCompilerError(ScriptLineBuffer* lineBuf, const char* fmt, ...);
 
 #else
 
-
-
+typedef TESForm * (__cdecl * _GetFormByID)(const char* editorID);
+extern const _GetFormByID GetFormByID;
 
 typedef void (__cdecl *_ShowCompilerError)(ScriptBuffer* Buffer, const char* format, ...);
 extern const _ShowCompilerError		ShowCompilerError;
 
 #endif
-
-typedef TESForm* (__cdecl* _GetFormByID)(const char* editorID);
-extern const _GetFormByID GetFormByID;
 
 struct NVSEStringVarInterface;
 	// Problem: plugins may want to use %z specifier in format strings, but don't have access to StringVarMap
@@ -114,9 +108,9 @@ void RegisterStringVarInterface(NVSEStringVarInterface* intfc);
 
 struct ScriptVar
 {
-	UInt32				id;
-	ListNode<ScriptVar>* next;
-	double				data;
+	UInt32		id;
+	void		*next;
+	double		data;
 };
 
 // only records individual objects if there's a block that matches it
@@ -125,46 +119,46 @@ struct ScriptEventList
 {
 	enum
 	{
-		kEvent_OnAdd = 1,
-		kEvent_OnEquip = 2,
-		kEvent_OnActorEquip = 2,
-		kEvent_OnDrop = 4,
-		kEvent_OnUnequip = 8,
-		kEvent_OnActorUnequip = 8,
+		kEvent_OnAdd =						1,
+		kEvent_OnEquip =					2,
+		kEvent_OnActorEquip =				2,
+		kEvent_OnDrop =						4,
+		kEvent_OnUnequip =					8,
+		kEvent_OnActorUnequip =				8,
 
-		kEvent_OnDeath = 0x10,
-		kEvent_OnMurder = 0x20,
-		kEvent_OnCombatEnd = 0x40,			// See 0x008A083C
-		kEvent_OnHit = 0x80,			// See 0x0089AB12
+		kEvent_OnDeath =					0x10,
+		kEvent_OnMurder =					0x20,
+		kEvent_OnCombatEnd =				0x40,			// See 0x008A083C
+		kEvent_OnHit =						0x80,			// See 0x0089AB12
 
-		kEvent_OnHitWith = 0x100,			// TESObjectWEAP*	0x0089AB2F
-		kEvent_OnPackageStart = 0x200,
-		kEvent_OnPackageDone = 0x400,
-		kEvent_OnPackageChange = 0x800,
+		kEvent_OnHitWith =					0x100,			// TESObjectWEAP*	0x0089AB2F
+		kEvent_OnPackageStart =				0x200,
+		kEvent_OnPackageDone =				0x400,
+		kEvent_OnPackageChange =			0x800,
 
-		kEvent_OnLoad = 0x1000,
-		kEvent_OnMagicEffectHit = 0x2000,			// EffectSetting* 0x0082326F
-		kEvent_OnSell = 0x4000,			// 0x0072FE29 and 0x0072FF05, linked to 'Barter Amount Traded' Misc Stat
-		kEvent_OnStartCombat = 0x8000,
+		kEvent_OnLoad =						0x1000,
+		kEvent_OnMagicEffectHit =			0x2000,			// EffectSetting* 0x0082326F
+		kEvent_OnSell =						0x4000,			// 0x0072FE29 and 0x0072FF05, linked to 'Barter Amount Traded' Misc Stat
+		kEvent_OnStartCombat =				0x8000,
 
-		kEvent_OnOpen = 0x10000,		// while opening some container, not all
-		kEvent_OnClose = 0x20000,
-		kEvent_SayToDone = 0x40000,		// in Func0050 0x005791C1 in relation to SayToTopicInfo (OnSayToDone? or OnSayStart/OnSayEnd?)
-		kEvent_OnGrab = 0x80000,		// 0x0095FACD and 0x009604B0 (same func which is called from PlayerCharacter_func001B and 0021)
+		kEvent_OnOpen =						0x10000,		// while opening some container, not all
+		kEvent_OnClose =					0x20000,
+		kEvent_SayToDone =					0x40000,		// in Func0050 0x005791C1 in relation to SayToTopicInfo (OnSayToDone? or OnSayStart/OnSayEnd?)
+		kEvent_OnGrab =						0x80000,		// 0x0095FACD and 0x009604B0 (same func which is called from PlayerCharacter_func001B and 0021)
 
-		kEvent_OnRelease = 0x100000,		// 0x0047ACCA in relation to container
-		kEvent_OnDestructionStageChange = 0x200000,		// 0x004763E7/0x0047ADEE
-		kEvent_OnFire = 0x400000,		// 0x008BAFB9 (references to package use item and use weapon are close)
+		kEvent_OnRelease =					0x100000,		// 0x0047ACCA in relation to container
+		kEvent_OnDestructionStageChange =	0x200000,		// 0x004763E7/0x0047ADEE
+		kEvent_OnFire =						0x400000,		// 0x008BAFB9 (references to package use item and use weapon are close)
 
-		kEvent_OnTrigger = 0x10000000,		// 0x005D8D6A	Cmd_EnterTrigger_Execute
-		kEvent_OnTriggerEnter = 0x20000000,		// 0x005D8D50	Cmd_EnterTrigger_Execute
-		kEvent_OnTriggerLeave = 0x40000000,		// 0x0062C946	OnTriggerLeave ?
-		kEvent_OnReset = 0x80000000		// 0x0054E5FB
+		kEvent_OnTrigger =					0x10000000,		// 0x005D8D6A	Cmd_EnterTrigger_Execute
+		kEvent_OnTriggerEnter =				0x20000000,		// 0x005D8D50	Cmd_EnterTrigger_Execute
+		kEvent_OnTriggerLeave =				0x40000000,		// 0x0062C946	OnTriggerLeave ?
+		kEvent_OnReset =					0x80000000		// 0x0054E5FB
 	};
 
 	struct Event
 	{
-		TESForm* object;
+		TESForm		*object;
 		UInt32		eventMask;
 	};
 
@@ -178,25 +172,21 @@ struct ScriptEventList
 	typedef tList<Event> EventList;
 	typedef tList<ScriptVar> VarList;
 
-	Script* m_script;		// 00
+	Script			*m_script;		// 00
 	UInt32			m_unk1;			// 04
-	EventList* m_eventList;	// 08
-	VarList* m_vars;		// 0C
-	Struct10* unk010;		// 10
+	EventList		*m_eventList;	// 08
+	VarList			*m_vars;		// 0C
+	Struct10		*unk010;		// 10
 
 	void Dump(void);
-	ScriptVar* GetVariable(UInt32 id);
+	ScriptVar *GetVariable(UInt32 id);
 	UInt32 ResetAllVariables();
 };
-
 
 ScriptEventList* EventListFromForm(TESForm* form);
 
 typedef bool (* _MarkBaseExtraListScriptEvent)(TESForm* target, BaseExtraList* extraList, UInt32 eventMask);
 extern const _MarkBaseExtraListScriptEvent MarkBaseExtraListScriptEvent;
-
-typedef void (_cdecl * _DoCheckScriptRunnerAndRun)(TESObjectREFR* refr, BaseExtraList* extraList);
-extern const _DoCheckScriptRunnerAndRun DoCheckScriptRunnerAndRun;
 
 struct ExtractedParam
 {
@@ -222,19 +212,19 @@ struct ExtractedParam
 	{
 		// immediate
 		UInt32			imm;
-		const double* immDouble;
-		TESForm* form;
+		const double	* immDouble;
+		TESForm			* form;
 		struct
 		{
-			const char* buf;
+			const char	* buf;
 			UInt32		len;
 		} str;
 
 		// variable
-		struct
+		struct 
 		{
-			ScriptVar* var;
-			ScriptEventList* parent;
+			ScriptVar			*var;
+			ScriptEventList		*parent;
 		} var;
 	} data;
 };
@@ -337,6 +327,7 @@ enum EActorVals {
 	eActorVal_NoActorValue = 256,
 };
 
+// 914
 class ConsoleManager
 {
 public:
@@ -348,15 +339,31 @@ public:
 	ConsoleManager();
 	~ConsoleManager();
 
-	void	* scriptContext;			// 00
-	UInt32	unk004[(0x0810-0x04) >> 2];	// 004
-	char	COFileName[260];			// 810
+	struct TextNode
+	{
+		TextNode	*next;
+		TextNode	*prev;
+		String		text;
+	};
+
+	struct TextList
+	{
+		TextNode	*first;
+		TextNode	*last;
+		UInt32		count;
+	};
+
+	void		*scriptContext;		// 000
+	TextList	printedLines;		// 004
+	TextList	inputHistory;		// 010
+	UInt32		unk01C;				// 01C
+	UInt32		unk020;				// 020
+	UInt32		unk024;				// 024
+	UInt32		unk028[571];		// 028
 
 	static ConsoleManager * GetSingleton(void);
-	
-	static char * GetConsoleOutputFilename(void);
-	static bool HasConsoleOutputFilename(void);
 };
+STATIC_ASSERT(sizeof(ConsoleManager) == 0x914);
 
 // A plugin author requested the ability to use OBSE format specifiers to format strings with the args
 // coming from a source other than script.
@@ -391,20 +398,91 @@ public:
 
 private:
 	UInt32			numArgs;
-	UInt8* scriptData;
-	Script* scriptObj;
-	ScriptEventList* eventList;
+	UInt8			* scriptData;
+	Script			* scriptObj;
+	ScriptEventList	* eventList;
 	std::string fmtString;
 };
-bool SCRIPT_ASSERT(bool expr, Script* script, const char* errorMsg, ...);
+bool SCRIPT_ASSERT(bool expr, Script* script, const char * errorMsg, ...);
 
-bool ExtractSetStatementVar(Script* script, ScriptEventList* eventList, void* scriptDataIn, double* outVarData, bool* makeTemporary, UInt32* opcodeOffsetPtr, UInt8* outModIndex = NULL);
+bool ExtractSetStatementVar(Script* script, ScriptEventList* eventList, void* scriptDataIn, double* outVarData, UInt8* outModIndex = NULL, bool shortPath = false);
 bool ExtractFormattedString(FormatStringArgs& args, char* buffer);
 
 class ChangesMap;
 class InteriorCellNewReferencesMap;
 class ExteriorCellNewReferencesMap;
 class NumericIDBufferMap;
+
+class NiBinaryStream
+{
+public:
+	NiBinaryStream();
+	~NiBinaryStream();
+
+	virtual void	Destructor(bool freeMemory);		// 00
+	virtual void	Unk_01(void);						// 04
+	virtual void	SeekCur(SInt32 delta);				// 08
+	virtual void	GetBufferSize(void);				// 0C
+	virtual void	InitReadWriteProcs(bool useAlt);	// 10
+
+//	void	** m_vtbl;		// 000
+	UInt32	m_offset;		// 004
+	void	* m_readProc;	// 008 - function pointer
+	void	* m_writeProc;	// 00C - function pointer
+};
+
+class NiFile: public NiBinaryStream
+{
+public:
+	NiFile();
+	~NiFile();
+
+	virtual UInt32	SetOffset(UInt32 newOffset, UInt32 arg2);	// 14
+	virtual UInt32	GetFilename(void);	// 18
+	virtual UInt32	GetSize();			// 1C
+
+	UInt32	m_bufSize;	// 010
+	UInt32	m_unk014;	// 014 - Total read in buffer
+	UInt32	m_unk018;	// 018 - Consumed from buffer
+	UInt32	m_unk01C;	// 01C
+	void*	m_buffer;	// 020
+	FILE*	m_File;		// 024
+};
+
+// 158
+class BSFile : public NiFile
+{
+public:
+	BSFile();
+	~BSFile();
+
+	virtual bool	Reset(bool arg1, bool arg2);	// 20
+	virtual bool	Unk_09(UInt32 arg1);	// 24
+	virtual UInt32	Unk_0A();	// 28
+	virtual UInt32	Unk_0B(String *string, UInt32 arg2);	// 2C
+	virtual UInt32	Unk_0C(void *ptr, UInt32 arg2);	// 30
+	virtual UInt32	ReadBufDelim(void *bufferPtr, UInt32 bufferSize, short delim);		// 34
+	virtual UInt32	Unk_0E(void *ptr, UInt8 arg2);	// 38
+	virtual UInt32	Unk_0F(void *ptr, UInt8 arg2);	// 3C
+	virtual bool	IsReadable();	// 40
+	virtual UInt32	ReadBuf(void *bufferPtr, UInt32 numBytes);	// 44
+	virtual UInt32	WriteBuf(void *bufferPtr, UInt32 numBytes);	// 48
+
+	UInt32		m_modeReadWriteAppend;	// 028
+	UInt8		m_good;					// 02C
+	UInt8		pad02D[3];				// 02D
+	UInt8		m_unk030;				// 030
+	UInt8		pad031[3];				// 031
+	UInt32		m_unk034;				// 034
+	UInt32		m_unk038;				// 038 - init'd to FFFFFFFF
+	UInt32		m_unk03C;				// 038
+	UInt32		m_unk040;				// 038
+	char		m_path[0x104];			// 044
+	UInt32		m_unk148;				// 148
+	UInt32		m_unk14C;				// 14C
+	UInt32		m_fileSize;				// 150
+	UInt32		m_unk154;				// 154
+};
 
 //
 struct ToBeNamed
@@ -532,6 +610,7 @@ union preloadData
 
 class BGSLoadGameBuffer
 {
+public:
 	BGSLoadGameBuffer();
 	~BGSLoadGameBuffer();
 
@@ -560,6 +639,7 @@ struct	BGSSaveLoadChangesMap
 // 030
 class BGSLoadFormBuffer: public BGSLoadGameBuffer
 {
+public:
 	BGSLoadFormBuffer();
 	~BGSLoadFormBuffer();
 
@@ -640,14 +720,25 @@ public:
 	static TESSaveLoadGame* Get();
 
 	MEMBER_FN_PREFIX(TESSaveLoadGame);
-#if RUNTIME
+#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 	DEFINE_MEMBER_FN(AddCreatedForm, UInt32, 0x00861780, TESForm * pForm);
+#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
+	DEFINE_MEMBER_FN(AddCreatedForm, UInt32, 0x00861330, TESForm * pForm);
+#elif EDITOR
+#else
+#error
 #endif
 };
 
-#if RUNTIME
+#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 const UInt32 _SaveGameManager_ConstructSavegameFilename = 0x0084FF90;
 const UInt32 _SaveGameManager_ConstructSavegamePath		= 0x0084FF30;
+#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
+const UInt32 _SaveGameManager_ConstructSavegameFilename = 0x0084F9E0;
+const UInt32 _SaveGameManager_ConstructSavegamePath		= 0x0084F980;
+#elif EDITOR
+#else
+#error
 #endif
 
 template <typename T_Key, typename T_Data>
@@ -767,89 +858,6 @@ std::string GetSavegamePath();
 
 #endif
 
-class ButtonIcon;
-
-const UInt32 FontArraySize = 8;
-
-class FontManager
-{
-public:
-	FontManager();
-	~FontManager();
-
-	// 3C
-	struct FontInfo {
-		FontInfo();
-		~FontInfo();
-
-		struct Data03C {
-			UInt32	unk000;	// 000
-			UInt16	wrd004;	// 004	Init'd to 0
-			UInt16	wrd006;	// 006	Init'd to 0x0FFFF
-		};	// 0008
-
-		struct FontData {
-			float	flt000;				// 000
-			UInt32	fontTextureCount;	// 004
-			UInt32	unk008;
-			char	unk00C[8][0x024];	// array of 8 Font Texture Name (expected in Textures\Fonts\*.tex)
-		};
-
-		struct TextReplaced {
-			String	str000;	// 000	Init'd to ""
-			UInt32	unk008;	// 008	Init'd to arg1
-			UInt32	unk00C;	// 00C	Init'd to arg2
-			UInt32	unk010;	// 010	Init'd to arg3
-			UInt32	unk014;	// 014	Init'd to arg4
-			UInt32	unk018;	// 018	Init'd to 0
-			UInt8	byt01C;	// 01C	Init'd to arg5
-			UInt8	fill[3];	
-		};	// 020
-
-		UInt16						unk000;			// 000	Init'd to 0, loaded successfully in OBSE (word bool ?)
-		UInt16						pad002;			// 002
-		char						* path;			// 004	Init'd to arg2, passed to OpenBSFile
-		UInt32						id;				// 008	1 based, up to 8 apparently
-		NiObject					* unk00C[8];	// 00C	in OBSE: NiTexturingProperty			* textureProperty
-		float						unk02C;			// 02C	Those two values seem to be computed by looping through the characters in the font (max height/weight ?)
-		float						unk030;			// 030
-		UInt32						unk034;			// 038	in OBSE: NiD3DShaderConstantMapEntry	* unk34;
-		FontData					* fontData;		// 038	Init'd to 0, might be the font content, at Unk004 we have the count of font texture
-		Data03C						dat03C;			// 03C
-		BSSimpleArray<ButtonIcon>	unk044;			// 044
-
-		static FontInfo * Load(const char* path, UInt32 ID);
-		bool GetName(char* out);	// filename stripped of path and extension
-	};	// 054
-
-	FontInfo	* fontInfos[FontArraySize];		// 00 indexed by FontInfo::ID - 1; access inlined at each point in code where font requested
-	UInt8		unk20;				// 20
-	UInt8		pad15[3];
-
-	static FontManager * GetSingleton();
-};
-
-void Debug_DumpFontNames(void);
-
-//class NiMemObject
-//{
-//	NiMemObject();
-//	~NiMemObject();
-//
-//};
-
-//class NiRefObject: public NiMemObject
-//{
-//	NiRefObject();
-//	~NiRefObject();
-//
-//	virtual void		Destructor(bool freeThis);	// 00
-//	virtual void		Free(void);					// 01 calls Destructor(true);
-//
-////	void		** _vtbl;		// 000
-//	UInt32		m_uiRefCount;	// 004 - name known (in OBSE)
-//};
-
 enum Coords
 {
 	kCoords_X = 0,	// 00
@@ -914,7 +922,7 @@ struct NavMeshCloseDoorInfo
 };	// Alloc'd to 0x08
 
 struct NavMeshPOVData;
-struct ObstacleData;
+class ObstacleData;
 struct ObstacleUndoData;
 
 struct NavMeshStaticAvoidNode
@@ -930,44 +938,6 @@ struct NavMeshStaticAvoidNode
 	UInt32	unk020;	// 20
 	UInt32	unk024;	// 24
 };	// Alloc'd to 0x28
-
-
-/*
- * See GameScript.h for ScriptRunner struct
-		// represents the currently executing script context
-		class ScriptRunner
-		{
-		public:
-			static const UInt32	kStackDepth = 10;
-
-			enum
-			{
-				kStackFlags_IF = 1 << 0,
-				kStackFlags_ELSEIF = 1 << 1,
-				//ELSE and ENDIF modify the above flags
-			};
-
-			// members
-			//00 TESObjectREFR* containingObj; // set when executing scripts on inventory objects
-			//04 TESForm* callingRefBaseForm;
-			//08 ScriptEventList* eventList;
-			//0C UInt32 unk0C;
-			//10 UInt32 unk10; // pointer? set to NULL before executing an instruction
-			//14 Script* script;
-			//18 UInt32 unk18; // set to 6 after a failed expression evaluation
-			//1C UInt32 unk1C; // set to Expression::errorCode
-			//20 UInt32 ifStackDepth;
-			//24 UInt32 ifStack[kStackDepth];	// stores flags
-			//4C UInt32 unk4C[(0xA0 - 0x4C) >> 2];
-			//A0 UInt8 invalidReferences;	// set when the dot operator fails to resolve a reference (inside the error message handler)
-			//A1 UInt8 unkA1;	// set when the executing CommandInfo's 2nd flag bit (+0x25) is set
-			//A2 UInt16 padA2;
-		};
-		STATIC_ASSERT(sizeof(ScriptRunner) == 0xA4);
-*/
-
-// Gets the real script data ptr, as it can be a pointer to a buffer on the stack in case of vanilla expressions in set and if statements
-UInt8* GetScriptDataPosition(Script* script, void* scriptDataIn, const UInt32* opcodeOffsetPtrIn);
 
 /* I need to port NiTypes 
 

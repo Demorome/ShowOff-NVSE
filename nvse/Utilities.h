@@ -1,17 +1,12 @@
 #pragma once
-#include <string>
-#include <vector>
-
-
-#include "common/ICriticalSection.h"
 
 class Script;
 
 void DumpClass(void * theClassPtr, UInt32 nIntsToDump = 512);
 const char * GetObjectClassName(void * obj);
-const std::string & GetFalloutDirectory(void);
-std::string GetNVSEConfigOption(const char * section, const char * key);
-bool GetNVSEConfigOption_UInt32(const char * section, const char * key, UInt32 * dataOut);
+//const std::string & GetFalloutDirectory(void);
+//std::string GetNVSEConfigOption(const char * section, const char * key);
+//bool GetNVSEConfigOption_UInt32(const char * section, const char * key, UInt32 * dataOut);
 
 // this has been tested to work for non-varargs functions
 // varargs functions end up with 'this' passed as the last parameter (ie. probably broken)
@@ -43,7 +38,7 @@ bool GetNVSEConfigOption_UInt32(const char * section, const char * key, UInt32 *
 
 
 // ConsolePrint() limited to 512 chars; use this to print longer strings to console
-void Console_Print_Long(const std::string& str);
+//void Console_Print_Long(const std::string& str);
 
 // Macro for debug output to console at runtime
 #if RUNTIME
@@ -102,21 +97,21 @@ namespace MersenneTwister
 };
 
 // alternative to strtok; doesn't modify src string, supports forward/backward iteration
-class Tokenizer
-{
-public:
-	Tokenizer(const char* src, const char* delims);
-	~Tokenizer();
-
-	// these return the offset of token in src, or -1 if no token
-	UInt32 NextToken(std::string& outStr);
-	UInt32 PrevToken(std::string& outStr);
-
-private:
-	std::string m_delims;
-	size_t		m_offset;
-	std::string m_data;
-};
+//class Tokenizer
+//{
+//public:
+//	Tokenizer(const char* src, const char* delims);
+//	~Tokenizer();
+//
+//	// these return the offset of token in src, or -1 if no token
+//	UInt32 NextToken(std::string& outStr);
+//	UInt32 PrevToken(std::string& outStr);
+//
+//private:
+//	std::string m_delims;
+//	size_t		m_offset;
+//	std::string m_data;
+//};
 
 #if RUNTIME
 
@@ -125,17 +120,17 @@ const char * GetSeparatorChars(Script * script);
 
 #endif
 
-//const char * GetDXDescription(UInt32 keycode);
+const char * GetDXDescription(UInt32 keycode);
 
-bool ci_equal(char ch1, char ch2);
-bool ci_less(const char* lh, const char* rh);
-void MakeUpper(std::string& str);
-void MakeUpper(char* str);
-void MakeLower(std::string& str);
+//bool ci_equal(char ch1, char ch2);
+//bool ci_less(const char* lh, const char* rh);
+//void MakeUpper(std::string& str);
+//void MakeUpper(char* str);
+//void MakeLower(std::string& str);
 
 // this copies the string onto the FormHeap - used to work around alloc/dealloc mismatch when passing
 // data between nvse and plugins
-//char* CopyCString(const char* src);
+char* CopyCString(const char* src);
 
 // Generic error/warning output
 // provides a common way to output errors and warnings
@@ -156,70 +151,75 @@ public:
 		bool			bDisabled;
 	};
 
-	void Show(Message msg, ...);
+	void Show(Message& msg, ...);
 	void Show(const char* msg, ...);
 	void vShow(Message& msg, va_list args);
 	void vShow(const char* msg, va_list args);
 };
 
-// thread-safe template versions of ThisCall()
+// thread-safe template versions of ThisStdCall()
 
-#define SIZEOF_ARRAY(arrayName, elementType) (sizeof(arrayName) / sizeof(elementType))
-
-
-template <typename T_Ret = UInt32, typename ...Args>
-__forceinline T_Ret ThisCall(UInt32 _addr, const void *_this, Args ...args)
+template <typename T_Ret = void, typename ...Args>
+__forceinline T_Ret ThisStdCall(UInt32 _addr, void* _this, Args ...args)
 {
-	return ((T_Ret (__thiscall *)(const void*, Args...))_addr)(_this, std::forward<Args>(args)...);
+	class T {};
+	union {
+		UInt32  addr;
+		T_Ret(T::* func)(Args...);
+	} u = { _addr };
+	return ((T*)_this->*u.func)(std::forward<Args>(args)...);
 }
-
 template <typename T_Ret = void, typename ...Args>
 __forceinline T_Ret StdCall(UInt32 _addr, Args ...args)
 {
-	return ((T_Ret (__stdcall *)(Args...))_addr)(std::forward<Args>(args)...);
+	return ((T_Ret(__stdcall*)(Args...))_addr)(std::forward<Args>(args)...);
 }
 
 template <typename T_Ret = void, typename ...Args>
 __forceinline T_Ret CdeclCall(UInt32 _addr, Args ...args)
 {
-	return ((T_Ret (__cdecl *)(Args...))_addr)(std::forward<Args>(args)...);
+	return ((T_Ret(__cdecl*)(Args...))_addr)(std::forward<Args>(args)...);
+}
+//	Templates for UInt8 return.
+
+__forceinline UInt8 ThisStdCall_B(UInt32 _f, void* _t)
+{
+	class T {}; union { UInt32 x; UInt8 (T::*m)(); } u = { _f };
+	return ((T*)_t->*u.m)();
 }
 
-void ShowErrorMessageBox(const char* message);
-
-class ScopedLock
+template <typename T1>
+__forceinline UInt8 ThisStdCall_B(UInt32 _f, void* _t, T1 a1)
 {
-public:
-	ScopedLock(ICriticalSection& critSection);
-
-	~ScopedLock();
-
-private:
-	ICriticalSection& m_critSection;
-};
-
-#if RUNTIME
-
-const char* GetModName(Script* script);
-
-void ShowRuntimeError(Script* script, const char* fmt, ...);
-
-inline void* GameHeapAlloc(UInt32 size)
-{
-	return ThisCall<void*>(0xAA3E40, (void*)0x11F6238, size);
+	class T {}; union { UInt32 x; UInt8 (T::*m)(T1); } u = { _f };
+	return ((T*)_t->*u.m)(a1);
 }
 
-inline void GameHeapFree(void* ptr)
+template <typename T1, typename T2>
+__forceinline UInt8 ThisStdCall_B(UInt32 _f, void* _t, T1 a1, T2 a2)
 {
-	ThisCall(0xAA4060, (void*)0x11F6238, ptr);
+	class T {}; union { UInt32 x; UInt8 (T::*m)(T1, T2); } u = { _f };
+	return ((T*)_t->*u.m)(a1, a2);
 }
 
-#endif
+template <typename T1, typename T2, typename T3>
+__forceinline UInt8 ThisStdCall_B(UInt32 _f, void* _t, T1 a1, T2 a2, T3 a3)
+{
+	class T {}; union { UInt32 x; UInt8 (T::*m)(T1, T2, T3); } u = { _f };
+	return ((T*)_t->*u.m)(a1, a2, a3);
+}
 
-std::string FormatString(const char* fmt, ...);
+//	Templates for float return.
 
-#if EDITOR
-void GeckExtenderMessageLog(const char* fmt, ...);
-#endif
+__forceinline float ThisStdCall_F(UInt32 _f, void* _t)
+{
+	class T {}; union { UInt32 x; float (T::*m)(); } u = { _f };
+	return ((T*)_t->*u.m)();
+}
 
-std::vector<void*> GetCallStack(int i);
+template <typename T1>
+__forceinline float ThisStdCall_F(UInt32 _f, void* _t, T1 a1)
+{
+	class T {}; union { UInt32 x; float (T::*m)(T1); } u = { _f };
+	return ((T*)_t->*u.m)(a1);
+}

@@ -7,17 +7,11 @@
 #include "ScriptUtils.h"
 #include "GameData.h"
 #include "GameApi.h"
-#include <set>
 
-StringVar::StringVar(const char* in_data, UInt8 modIndex)
+StringVar::StringVar(const char* in_data, UInt32 in_refID)
 {
-	data = in_data;
-	owningModIndex = modIndex;
-}
-
-StringVarMap* StringVarMap::GetSingleton()
-{
-	return &g_StringMap;
+	data = std::string(in_data);
+	owningModIndex = in_refID >> 24;
 }
 
 const char* StringVar::GetCString()
@@ -27,12 +21,32 @@ const char* StringVar::GetCString()
 
 void StringVar::Set(const char* newString)
 {
-	data = newString;
+	data = std::string(newString);
 }
 
 SInt32 StringVar::Compare(char* rhs, bool caseSensitive)
 {
-	return caseSensitive ? strcmp(rhs, data.c_str()) : StrCompare(rhs, data.c_str());
+	SInt32 cmp = 0;
+	if (!caseSensitive)
+	{
+		cmp = _stricmp(data.c_str(), rhs);
+		if (cmp > 0)
+			return -1;
+		else if (cmp < 0)
+			return 1;
+		else
+			return 0;
+	}
+	else
+	{
+		std::string str2(rhs);
+		if (data == str2)
+			return 0;
+		else if (data > str2)
+			return -1;
+		else
+			return 1;
+	}
 }
 
 void StringVar::Insert(const char* subString, UInt32 insertionPos)
@@ -219,24 +233,27 @@ void StringVarMap::Save(NVSESerializationInterface* intfc)
 {
 	Clean();
 
-	Serialization::OpenRecord('STVS', 0);
+	intfc->OpenRecord('STVS', 0);
 
-	StringVar *var;
-	for (auto iter = vars.Begin(); !iter.End(); ++iter)
-	{
-		if (IsTemporary(iter.Key()))	// don't save temp strings
-			continue;
+	if (m_state) {
+		for (std::map<UInt32, StringVar*>::iterator iter = m_state->vars.begin();
+				iter != m_state->vars.end();
+				iter++)
+		{
+			if (IsTemporary(iter->first))	// don't save temp strings
+				continue;
 
-		var = &iter.Get();
-		Serialization::OpenRecord('STVR', 0);
-		Serialization::WriteRecord8(var->GetOwningModIndex());
-		Serialization::WriteRecord32(iter.Key());
-		UInt16 len = var->GetLength();
-		Serialization::WriteRecord16(len);
-		Serialization::WriteRecordData(var->GetCString(), len);
+			intfc->OpenRecord('STVR', 0);
+			UInt8 modIndex = iter->second->GetOwningModIndex();
+
+			intfc->WriteRecordData(&modIndex, sizeof(UInt8));
+			intfc->WriteRecordData(&iter->first, sizeof(UInt32));
+			UInt16 len = iter->second->GetLength();
+			intfc->WriteRecordData(&len, sizeof(len));
+			intfc->WriteRecordData(iter->second->GetCString(), len);
+		}
 	}
-
-	Serialization::OpenRecord('STVE', 0);
+	intfc->OpenRecord('STVE', 0);
 }
 
 void StringVarMap::Load(NVSESerializationInterface* intfc)
@@ -245,7 +262,7 @@ void StringVarMap::Load(NVSESerializationInterface* intfc)
 	UInt32 type, length, version, stringID, tempRefID;
 	UInt16 strLength;
 	UInt8 modIndex;
-	char buffer[kMaxMessageLength];
+	char buffer[kMaxMessageLength] = { 0 };
 
 	Clean();
 
@@ -254,28 +271,27 @@ void StringVarMap::Load(NVSESerializationInterface* intfc)
 	UInt32 modVarCounts[0x100] = {0};				// for each mod, # of string vars loaded
 	static const UInt32 varCountThreshold = 100;	// what we'll consider a "large number" of vars; 
 													// obviously a few mods may require more than this without it being a problem
-	Set<UInt8> exceededMods;
+	std::set<UInt8> exceededMods;
 
 	bool bContinue = true;
-	while (bContinue && Serialization::GetNextRecordInfo(&type, &version, &length))
+	while (bContinue && intfc->GetNextRecordInfo(&type, &version, &length))
 	{
 		switch (type)
 		{
 		case 'STVE':			//end of block
 			bContinue = false;
 
-			if (!exceededMods.Empty())
-			{
+			if (exceededMods.size()) {
 				_MESSAGE("  WARNING: substantial numbers of string variables exist for the following files (may indicate savegame bloat):");
-				for (auto iter = exceededMods.Begin(); !iter.End(); ++iter) {
+				for (std::set<UInt8>::iterator iter = exceededMods.begin(); iter != exceededMods.end(); ++iter) {
 					_MESSAGE("    %s (%d strings)", DataHandler::Get()->GetNthModName(*iter), modVarCounts[*iter]);
 				}
 			}
 
 			break;
 		case 'STVR':
-			modIndex = Serialization::ReadRecord8();
-			if (!Serialization::ResolveRefID(modIndex << 24, &tempRefID))
+			intfc->ReadRecordData(&modIndex, sizeof(modIndex));
+			if (!intfc->ResolveRefID(modIndex << 24, &tempRefID))
 			{
 				// owning mod is no longer loaded so discard
 				continue;
@@ -283,16 +299,16 @@ void StringVarMap::Load(NVSESerializationInterface* intfc)
 			else
 				modIndex = tempRefID >> 24;
 
-			stringID = Serialization::ReadRecord32();
-			strLength = Serialization::ReadRecord16();
+			intfc->ReadRecordData(&stringID, sizeof(stringID));
+			intfc->ReadRecordData(&strLength, sizeof(strLength));
 			
-			Serialization::ReadRecordData(buffer, strLength);
+			intfc->ReadRecordData(buffer, strLength);
 			buffer[strLength] = 0;
 
-			Insert(stringID, buffer, modIndex);
+			Insert(stringID, new StringVar(buffer, tempRefID));
 			modVarCounts[modIndex] += 1;
 			if (modVarCounts[modIndex] == varCountThreshold) {
-				exceededMods.Insert(modIndex);
+				exceededMods.insert(modIndex);
 			}
 					
 			break;
@@ -306,9 +322,7 @@ void StringVarMap::Load(NVSESerializationInterface* intfc)
 UInt32	StringVarMap::Add(UInt8 varModIndex, const char* data, bool bTemp)
 {
 	UInt32 varID = GetUnusedID();
-	Insert(varID, data, varModIndex);
-
-	// UDFs are instanced once so all strings should be temporary - Kormakur
+	Insert(varID, new StringVar(data, varModIndex << 24));
 	if (bTemp)
 		MarkTemporary(varID, true);
 
@@ -321,22 +335,22 @@ bool AssignToStringVarLong(COMMAND_ARGS, const char* newValue)
 {
 	double strID = 0;
 	UInt8 modIndex = 0;
-	bool bTemp = true;
+	bool bTemp = ExpressionEvaluator::Active();
 	StringVar* strVar = NULL;
 
 	UInt32 len = (newValue) ? strlen(newValue) : 0;
 	if (!newValue || len >= kMaxMessageLength)		//if null pointer or too long, assign an empty string
 		newValue = "";
 
-	if (ExtractSetStatementVar(scriptObj, eventList, scriptData, &strID, &bTemp, opcodeOffsetPtr, &modIndex)) 
-	{
+	if (ExtractSetStatementVar(scriptObj, eventList, scriptData, &strID, &modIndex)) {
 		strVar = g_StringMap.Get(strID);
+		bTemp = false;
 	}
-	else
-	{
-		bTemp = true;
+	else if (!bTemp) {
+		_WARNING("Function must be used within a Set statement or NVSE expression");
+		return false;
 	}
-	
+
 	if (!modIndex)
 		modIndex = scriptObj->GetModIndex();
 
@@ -346,10 +360,8 @@ bool AssignToStringVarLong(COMMAND_ARGS, const char* newValue)
 		g_StringMap.MarkTemporary(strID, false);
 	}
 	else
-	{
 		strID = g_StringMap.Add(modIndex, newValue, bTemp);
-	}
-	
+
 	*result = strID;
 
 #if _DEBUG	// console feedback disabled in release by request (annoying when called from batch scripts)
@@ -371,8 +383,13 @@ bool AssignToStringVar(COMMAND_ARGS, const char* newValue) {	// Adds another cal
 
 void StringVarMap::Clean()		// clean up any temporary vars
 {
-	while (!tempIDs.Empty())
-		Delete(tempIDs.LastKey());
+	if (m_state) {
+		while (m_state->tempVars.size())
+		{
+			UInt32 idToDelete = *(m_state->tempVars.begin());
+			Delete(idToDelete);
+		}
+	}
 }
 
 namespace PluginAPI

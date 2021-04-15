@@ -14,9 +14,6 @@ struct ScriptToken;
 #include "Serialization.h"
 #include "GameAPI.h"
 #include <map>
-#include <memory>
-#include <vector>
-#include <map>
 
 // NVSE array datatype, represented by std::map<ArrayKey, ArrayElement>
 // Data elements can be of mixed types (string, UInt32/formID, float)
@@ -56,7 +53,7 @@ As with string variables, array vars discarded on load if owning mod no longer p
 
 //#if RUNTIME
 
-enum DataType : UInt8
+enum
 {
 	kDataType_Invalid,
 
@@ -66,78 +63,69 @@ enum DataType : UInt8
 	kDataType_Array,
 };
 
-const char* DataTypeToString(DataType dataType);
-
-struct ArrayData
-{
-	DataType	dataType;
-	ArrayID		owningArray;
-	union
-	{
+struct ArrayType {
+	union {
 		double		num;
 		UInt32		formID;
-		char		*str;
-		ArrayID		arrID;
 	};
 
-	~ArrayData();
-	const char *GetStr() const;
-	void SetStr(const char *srcStr);
-
-	ArrayData& operator=(const ArrayData &rhs);
+	std::string		str;
 };
-STATIC_ASSERT(sizeof(ArrayData) == 0x10);
 
 struct ArrayElement
 {
+//	ArrayElement(const ArrayElement& copyFrom);
+//	ArrayElement& operator=(const ArrayElement& rhs);
+
 	friend class ArrayVar;
 	friend class ArrayVarMap;
 
-	ArrayData	m_data;
+	ArrayType	m_data;
+	UInt8		m_dataType;
+	ArrayID		m_owningArray;
 
 	void  Unset();
-
-	DataType DataType() const {return m_data.dataType;}
+	std::string ToString() const;
+public:
+	UInt8 DataType() const { return m_dataType; }
 
 	bool GetAsNumber(double* out) const;
-	bool GetAsString(const char **out) const;
+	bool GetAsString(std::string& out) const;
 	bool GetAsFormID(UInt32* out) const;
 	bool GetAsArray(ArrayID* out) const;
 
 	bool SetForm(const TESForm* form);
 	bool SetFormID(UInt32 refID);
-	bool SetString(const char* str);
-	bool SetArray(ArrayID arr);	
+	bool SetString(const std::string& str);
+	bool SetArray(ArrayID arr, UInt8 modIndex);	
 	bool SetNumber(double num);
-	bool Set(const ArrayElement* elem);
+	bool Set(const ArrayElement& elem);
 
 	ArrayElement();
-	ArrayElement(const ArrayElement& from);
 
-	static bool CompareNames(const ArrayElement& lhs, const ArrayElement& rhs);
-	static bool CompareNamesDescending(const ArrayElement& lhs, const ArrayElement& rhs) {return !CompareNames(lhs, rhs);}
+	static bool CompareAsString(const ArrayElement& lhs, const ArrayElement& rhs);
 
 	bool operator<(const ArrayElement& rhs) const;
-	bool operator==(const ArrayElement& rhs) const;
-	bool operator!=(const ArrayElement& rhs) const;
+	bool Equals(const ArrayElement& compareTo) const;
 
-	bool IsGood() {return m_data.dataType != kDataType_Invalid;}
-
-	std::string GetStringRepresentation() const;
+	bool IsGood() { return m_dataType != kDataType_Invalid;	}
 };
 
 struct ArrayKey
 {
-	ArrayData	key;
-
+private:
+	ArrayType	key;
+	UInt8		keyType;
+public:
 	ArrayKey();
+	ArrayKey(const std::string& _key);
 	ArrayKey(double _key);
 	ArrayKey(const char* _key);
-	ArrayKey(const ArrayKey& from);
-	ArrayKey(DataType type);
 
-	UInt8 KeyType() const {return key.dataType;}
-	bool IsValid() const {return key.dataType != kDataType_Invalid;}
+	ArrayType	Key() const	{	return key;	}
+	UInt8		KeyType() const { return keyType; }
+	void		SetNumericKey(double newVal)	{	keyType = kDataType_Numeric; key.num = newVal;	}
+	bool		IsValid() const { return keyType != kDataType_Invalid;	}
 
 	bool operator<(const ArrayKey& rhs) const;
 	bool operator==(const ArrayKey& rhs) const;
@@ -146,120 +134,49 @@ struct ArrayKey
 	bool operator<=(const ArrayKey& rhs) const { return !(*this > rhs); }
 };
 
-extern thread_local ArrayKey s_arrNumKey, s_arrStrKey;
-
-enum ContainerType
-{
-	kContainer_Array,
-	kContainer_NumericMap,
-	kContainer_StringMap
-};
-
-typedef Vector<ArrayElement> ElementVector;
-typedef Map<double, ArrayElement> ElementNumMap;
-typedef Map<char*, ArrayElement> ElementStrMap;
-
-class ArrayVarElementContainer
-{
-	friend class ArrayVar;
-
-	struct GenericContainer
-	{
-		void *data;
-		UInt32		 numItems;
-		UInt32		 numAlloc;
-	};
-
-	ContainerType		m_type;
-	GenericContainer	m_container;
-
-	ElementVector& AsArray() const {return *(ElementVector*)&m_container;}
-	ElementNumMap& AsNumMap() const {return *(ElementNumMap*)&m_container;}
-	ElementStrMap& AsStrMap() const {return *(ElementStrMap*)&m_container;}
-
-public:
-	ArrayVarElementContainer() : m_type(kContainer_Array)
-	{
-		m_container.data = NULL;
-		m_container.numItems = 0;
-		m_container.numAlloc = 2;
-	}
-
-	~ArrayVarElementContainer();
-
-	UInt32 size() const {return m_container.numItems;}
-
-	bool empty() const {return !m_container.numItems;}
-
-	void clear();
-
-	UInt32 erase(const ArrayKey* key);
-
-	UInt32 erase(UInt32 iLow, UInt32 iHigh);
-
-	class iterator
-	{
-		friend ArrayVarElementContainer;
-
-		struct GenericIterator
-		{
-			GenericContainer	*contObj;
-			void				*pData;
-			UInt32				index;
-		};
-
-		ContainerType	m_type;
-		GenericIterator	m_iter;
-
-		ElementVector::Iterator& AsArray() {return *(ElementVector::Iterator*)&m_iter;}
-		ElementNumMap::Iterator& AsNumMap() {return *(ElementNumMap::Iterator*)&m_iter;}
-		ElementStrMap::Iterator& AsStrMap() {return *(ElementStrMap::Iterator*)&m_iter;}
-
-	public:
-		iterator(ArrayVarElementContainer& container);
-		iterator(ArrayVarElementContainer& container, bool reverse);
-		iterator(ArrayVarElementContainer& container, const ArrayKey* key);
-
-		bool End() {return m_iter.index >= m_iter.contObj->numItems;}
-
-		void operator++();
-		void operator--();
-
-		const ArrayKey* first();
-
-		ArrayElement* second();
-	};
-
-	iterator begin() {return iterator(*this);}
-	iterator rbegin() {return iterator(*this, true);}
-
-	iterator find(const ArrayKey* key) {return iterator(*this, key);}
-
-	ElementVector* getArrayPtr() const {return &AsArray();}
-	ElementNumMap* getNumMapPtr() const {return &AsNumMap();}
-	ElementStrMap* getStrMapPtr() const {return &AsStrMap();}
-};
-
-typedef ArrayVarElementContainer::iterator ArrayIterator;
+typedef std::map<ArrayKey, ArrayElement>::iterator ArrayIterator;
 
 class ArrayVar
 {
-	friend struct ArrayElement;
 	friend class ArrayVarMap;
 	friend class Matrix;
 	friend class PluginAPI::ArrayAPI;
 
-	typedef ArrayVarElementContainer _ElementMap;
-	_ElementMap			m_elements;
+	typedef std::map<ArrayKey, ArrayElement> _ElementMap;
+	_ElementMap m_elements;
 	ArrayID				m_ID;
 	UInt8				m_owningModIndex;
 	UInt8				m_keyType;
 	bool				m_bPacked;
-	Vector<UInt8>		m_refs;		// data is modIndex of referring object; size() is number of references
+	std::vector<UInt8>	m_refs;		// data is modIndex of referring object; size() is number of references
 
-public:
+	UInt32 GetUnusedIndex();
+
+	explicit ArrayVar(UInt8 modIndex);
 	ArrayVar(UInt32 keyType, bool packed, UInt8 modIndex);
 
+	ArrayElement* Get(ArrayKey key, bool bCanCreateNew);
+
+	UInt32 ID()		{ return m_ID;	}
+	void Pack();
+
+	void Dump();
+
+public:
+	~ArrayVar();
+
+	UInt8 KeyType() const	{ return m_keyType; }
+	bool IsPacked() const	{ return m_bPacked; }
+	UInt32 Size() const		{ return m_elements.size(); }
+};
+
+class ArrayVarMap : public VarMap<ArrayVar>
+{
+	// this gets incremented whenever serialization format changes
+	static const UInt32 kVersion = 1;
+
+	void Add(ArrayVar* var, UInt32 varID, UInt32 numRefs, UInt8* refs);
+public:
 	enum SortOrder
 	{
 		kSort_Ascending,
@@ -273,111 +190,73 @@ public:
 		kSortType_UserFunction,
 	};
 
-	UInt32 ID()	const {return m_ID;}
-	UInt8 KeyType() const {return m_keyType;}
-	bool IsPacked() const {return m_bPacked;}
-	UInt8 OwningModIndex() const {return m_owningModIndex;}
-	UInt32 Size() const {return m_elements.size();}
-	bool Empty() const {return m_elements.empty();}
-	ContainerType GetContainerType() const {return m_elements.m_type;}
-
-	ArrayElement* Get(const ArrayKey* key, bool bCanCreateNew);
-	ArrayElement* Get(double key, bool bCanCreateNew);
-	ArrayElement* Get(const char* key, bool bCanCreateNew);
-
-	bool HasKey(double key);
-	bool HasKey(const char* key);
-	bool HasKey(const ArrayKey* key);
-
-	bool SetElementNumber(double key, double num);
-	bool SetElementNumber(const char* key, double num);
-
-	bool SetElementString(double key, const char* str);
-	bool SetElementString(const char* key, const char* str);
-
-	bool SetElementFormID(double key, UInt32 refID);
-	bool SetElementFormID(const char* key, UInt32 refID);
-
-	bool SetElementArray(double key, ArrayID srcID);
-	bool SetElementArray(const char* key, ArrayID srcID);
-
-	bool SetElement(double key, const ArrayElement* val);
-	bool SetElement(const char* key, const ArrayElement* val);
-	bool SetElement(const ArrayKey* key, const ArrayElement* val);
-
-	bool SetElementFromAPI(double key, const NVSEArrayVarInterface::Element* srcElem);
-	bool SetElementFromAPI(const char* key, const NVSEArrayVarInterface::Element* srcElem);
-
-	bool GetElementNumber(const ArrayKey* key, double* out);
-	bool GetElementString(const ArrayKey* key, const char** out);
-	bool GetElementFormID(const ArrayKey* key, UInt32* out);
-	bool GetElementForm(const ArrayKey* key, TESForm** out);
-	bool GetElementArray(const ArrayKey* key, ArrayID* out);
-	DataType GetElementType(const ArrayKey* key);
-
-	const ArrayKey* Find(const ArrayElement* toFind, const Slice* range = NULL);
-
-	bool GetFirstElement(ArrayElement** outElem, const ArrayKey** outKey);
-	bool GetLastElement(ArrayElement** outElem, const ArrayKey** outKey);
-	bool GetNextElement(const ArrayKey* prevKey, ArrayElement** outElem, const ArrayKey** outKey);
-	bool GetPrevElement(const ArrayKey* prevKey, ArrayElement** outElem, const ArrayKey** outKey);
-
-	UInt32 EraseElement(const ArrayKey* key);
-	UInt32 EraseElements(const Slice* slice);	// returns num erased
-	UInt32 EraseAllElements();
-
-	bool SetSize(UInt32 newSize, const ArrayElement* padWith);
-	bool Insert(UInt32 atIndex, const ArrayElement* toInsert);
-	bool Insert(UInt32 atIndex, ArrayID rangeID);
-
-	ArrayVar *GetKeys(UInt8 modIndex);
-	ArrayVar *Copy(UInt8 modIndex, bool bDeepCopy);
-	ArrayVar *MakeSlice(const Slice* slice, UInt8 modIndex);
-
-	void Sort(ArrayVar *result, SortOrder order, SortType type, Script* comparator = NULL);
-
-	void Dump();
-
-	std::string GetStringRepresentation() const;
-};
-
-class ArrayVarMap : public VarMap<ArrayVar>
-{
-	// this gets incremented whenever serialization format changes
-	static const UInt32 kVersion = 2;
-
-	ArrayVar* Add(UInt32 varID, UInt32 keyType, bool packed, UInt8 modIndex, UInt32 numRefs, UInt8* refs);
-public:
 	void Save(NVSESerializationInterface* intfc);
 	void Load(NVSESerializationInterface* intfc);
 	void Clean();
 
-	ArrayVar* Create(UInt32 keyType, bool bPacked, UInt8 modIndex);
-	ArrayVar* CreateArray(UInt8 modIndex) { return Create(kDataType_Numeric, true, modIndex); }
-	ArrayVar* CreateMap(UInt8 modIndex)	{ return Create(kDataType_Numeric, false, modIndex); }
-	ArrayVar* CreateStringMap(UInt8 modIndex)	{ return Create(kDataType_String, false, modIndex); }
+	ArrayID	Create(UInt32 keyType, bool bPacked, UInt8 modIndex);
+	ArrayID CreateArray(UInt8 modIndex) { return Create(kDataType_Numeric, true, modIndex); }
+	ArrayID CreateMap(UInt8 modIndex)	{ return Create(kDataType_Numeric, false, modIndex); }
+	ArrayID CreateStringMap(UInt8 modIndex)	{ return Create(kDataType_String, false, modIndex); }
 	
 	// operations on ArrayVars
 	void    AddReference(ArrayID* ref, ArrayID toRef, UInt8 referringModIndex);
 	void    RemoveReference(ArrayID* ref, UInt8 referringModIndex);
 	void    AddReference(double* ref, ArrayID toRef, UInt8 referringModIndex);
 	void	RemoveReference(double* ref, UInt8 referringModIndex);
+	ArrayID Copy(ArrayID from, UInt8 modIndex, bool bDeepCopy);
+	ArrayID MakeSlice(ArrayID src, const Slice* slice, UInt8 modIndex);
+	UInt32	GetKeyType(ArrayID id);
+	bool	Exists(ArrayID id);
+	void	Erase(ArrayID toErase);
+	void	DumpArray(ArrayID toDump);
+	UInt32	SizeOf(ArrayID id);
+	UInt32  EraseElements(ArrayID id, const ArrayKey& lo, const ArrayKey& hi);	// returns num erased
+	UInt32	EraseAllElements(ArrayID id);
+	ArrayID Sort(ArrayID src, SortOrder order, SortType type, UInt8 modIndex, Script* comparator=NULL);
+	ArrayKey Find(ArrayID toSearch, const ArrayElement& toFind, const Slice* range = NULL);
+	std::string GetTypeString(ArrayID arr);
+	UInt8	GetOwningModIndex(ArrayID id);
+	ArrayID GetKeys(ArrayID id, UInt8 modIndex);
+	bool	HasKey(ArrayID id, const ArrayKey& key);
+	bool	AsVector(ArrayID id, std::vector<const ArrayElement*> &vecOut);
+	bool	SetSize(ArrayID id, UInt32 newSize, const ArrayElement& padWith);
+	bool	Insert(ArrayID id, UInt32 atIndex, const ArrayElement& toInsert);
+	bool	Insert(ArrayID id, UInt32 atIndex, ArrayID rangeID);
+	bool	Merge(ArrayID dest, ArrayID toMerge);
 
-	ArrayElement* GetElement(ArrayID id, const ArrayKey* key);
+	// operations on ArrayElements
+	bool SetElementNumber(ArrayID id, const ArrayKey& key, double num);
+	bool SetElementString(ArrayID id, const ArrayKey& key, const std::string& str);
+	bool SetElementFormID(ArrayID id, const ArrayKey& key, UInt32 refID);
+	bool SetElementArray(ArrayID id, const ArrayKey& key, ArrayID srcID);
+	bool SetElement(ArrayID id, const ArrayKey& key, const ArrayElement& val);
 
-	void DumpAll();
+	bool GetElementNumber(ArrayID id, const ArrayKey& key, double* out);
+	bool GetElementString(ArrayID id, const ArrayKey& key, std::string& out);
+	bool GetElementFormID(ArrayID id, const ArrayKey& key, UInt32* out);
+	bool GetElementForm(ArrayID id, const ArrayKey& key, TESForm** out);
+	bool GetElementArray(ArrayID id, const ArrayKey& key, ArrayID* out);
+	bool GetElementAsBool(ArrayID id, const ArrayKey& key, bool* out);
+	bool GetElementCString(ArrayID id, const ArrayKey& key, const char** out);
 
-	static ArrayVarMap * GetSingleton(void);
+	bool GetFirstElement(ArrayID id, ArrayElement* outElem, ArrayKey* outKey);
+	bool GetLastElement(ArrayID id, ArrayElement* outElem, ArrayKey* outKey);
+	bool GetNextElement(ArrayID id, ArrayKey* prevKey, ArrayElement* outElem, ArrayKey* outKey);
+	bool GetPrevElement(ArrayID id, ArrayKey* prevKey, ArrayElement* outElem, ArrayKey* outKey);
+
+	UInt8 GetElementType(ArrayID id, const ArrayKey& key);
 };
 
 extern ArrayVarMap g_ArrayMap;
-
-UInt8 __fastcall GetArrayOwningModIndex(ArrayID arrID);
 
 namespace PluginAPI
 {
 	class ArrayAPI 
 	{
+	private:
+		static bool SetElementFromAPI(UInt32 id, ArrayKey& key, const NVSEArrayVarInterface::Element& elem);
+
 	public:
 		static NVSEArrayVarInterface::Array* CreateArray(const NVSEArrayVarInterface::Element* data, UInt32 size, Script* callingScript);
 		static NVSEArrayVarInterface::Array* CreateStringMap(const char** keys, const NVSEArrayVarInterface::Element* values, UInt32 size, Script* callingScript);
@@ -388,15 +267,16 @@ namespace PluginAPI
 		static void AppendElement(NVSEArrayVarInterface::Array* arr, const NVSEArrayVarInterface::Element& value);
 
 		static UInt32 GetArraySize(NVSEArrayVarInterface::Array* arr);
-		static UInt32 GetArrayPacked(NVSEArrayVarInterface::Array* arr);
 		static NVSEArrayVarInterface::Array* LookupArrayByID(UInt32 id);
 		static bool GetElement(NVSEArrayVarInterface::Array* arr, const NVSEArrayVarInterface::Element& key,
 			NVSEArrayVarInterface::Element& out);
 		static bool GetElements(NVSEArrayVarInterface::Array* arr, NVSEArrayVarInterface::Element* elements,
 			NVSEArrayVarInterface::Element* keys);
 
+
 		// helper fns
-		static bool InternalElemToPluginElem(const ArrayElement* src, NVSEArrayVarInterface::Element* out);
+		static bool InternalElemToPluginElem(ArrayElement& src, NVSEArrayVarInterface::Element& out);
+		static bool ScriptTokenToPluginElem(ScriptToken* token, NVSEArrayVarInterface::Element& out);
 	};
 }
 

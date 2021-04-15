@@ -1,6 +1,8 @@
 #pragma once
+
+#include "Utilities.h"
 #include "GameBSExtraData.h"
-#include "GameObjects.h"
+#include "GameForms.h"
 
 /*    Class							     vtbl	  Type  Size
  *   ----------------------------		------		--  --
@@ -130,15 +132,15 @@
  *	ExtraXTarget                       ????????		44	10
  */
 
- /* BaseExtraList methods:
-	 AddExtra		0x0040A180
-	 GetByType		0x0040A320, pass typeID
-	 ItemsInList		0x0040A130
-	 RemoveExtra		0x0040A250
+/* BaseExtraList methods:
+	AddExtra		0x0040A180
+	GetByType		0x0040A320, pass typeID
+	ItemsInList		0x0040A130
+	RemoveExtra		0x0040A250
 
-   ExtraDataList methods:
-	 DuplicateExtraListForContainer	0x0041B090
- */
+  ExtraDataList methods:
+	DuplicateExtraListForContainer	0x0041B090
+*/
 
 enum
 {
@@ -292,89 +294,108 @@ enum
 	kExtraData_Max
 };
 
-#define GetExtraType(xDataList, Type) (Extra ## Type*)GetExtraData(xDataList, kExtraData_ ## Type)
-extern const char* GetExtraDataName(UInt8 extraDataType);
+#define GetExtraType(xDataList, Type) (Extra ## Type*)xDataList.GetByType(kExtraData_ ## Type)
+extern char *GetExtraDataValue(BSExtraData *traverse);
+extern const char *GetExtraDataName(UInt8 extraDataType);
 
-// 14
+// 014
 class ExtraAction : public BSExtraData
 {
 public:
-	UInt8			byte0C;		// 0C	some kind of status or flags
-	UInt8			pad0D[3];	// 0D
-	TESObjectREFR* actionRef;	// 10
+	ExtraAction();
+	virtual ~ExtraAction();
 
-	static ExtraAction* __stdcall Create(TESObjectREFR* _actionRef = NULL);
+	UInt8			byte0C;		// 00C	some kind of status or flags
+	UInt8			fill0D[3];	// 00D
+	TESObjectREFR	*actionRef;	// 010
+
+	static ExtraAction* __stdcall Create(TESObjectREFR *_actionRef = NULL);
 };
 
-// 14
+// 014
 class ExtraScript : public BSExtraData
 {
 public:
-	Script* script;	// 0C
-	ScriptEventList* eventList;	// 10
+	ExtraScript();
+	virtual ~ExtraScript();
 
-	static ExtraScript* __stdcall Create(Script* pScript);
+	Script			* script;		// 00C
+	ScriptEventList	* eventList;	// 010
+
+	static ExtraScript* __stdcall Create(TESForm* baseForm = NULL, bool create = true, TESObjectREFR* container = NULL);
 };
 
-// 10
+UInt32 GetCountForExtraDataList(ExtraDataList* list);
+
+// 010
 class ExtraContainerChanges : public BSExtraData
 {
 public:
+	ExtraContainerChanges();
+	virtual ~ExtraContainerChanges();
+
 	class ExtendDataList : public tList<ExtraDataList>
 	{
 	public:
 		void Clear();
-		ExtraDataList* RemoveByType(ExtraDataList* xDataList, UInt32 type);
+		ExtraDataList *RemoveExtra(ExtraDataList *xDataList, BSExtraData *xData);
+		ExtraDataList *RemoveByType(ExtraDataList *xDataList, UInt32 type);
 		void CleanEmpty();
 	};
 
-	// 0C
 	struct EntryData
 	{
-		ExtendDataList* extendData;	// 00
-		SInt32			countDelta;		// 04
-		TESForm* type;			// 08
+		ExtendDataList	*extendData;
+		SInt32			countDelta;
+		TESForm			*type;
 
-		EntryData(ExtendDataList* extend, SInt32 count, TESForm* item) :
-			extendData(extend), countDelta(count), type(item) {}
+		EntryData(ListNode<ExtraDataList> *extend, SInt32 count, TESForm *item) :
+			extendData((ExtendDataList*)extend), countDelta(count), type(item) {}
 
 		void Cleanup();
-		bool HasExtraType(UInt8 xType);
-		bool HasExtraLeveledItem();
 		void RemoveCannotWear();
-		ExtraDataList* GetEquippedExtra();
-		float CalculateWeaponDamage(Actor* owner, float condition, TESForm* ammo);
+		float GetItemHealthPerc(bool arg1 = true);
+		ExtraDataList *GetEquippedExtra();
+		float CalculateWeaponDamage(float condition, TESForm *ammo);
 	};
 
 	struct EntryDataList : tList<EntryData>
 	{
-		EntryData* FindForItem(TESForm* item);
+		EntryData *FindForItem(TESForm *item);
 	};
 
-	// 14
 	struct Data
 	{
-		EntryDataList* objList;		// 00
-		TESObjectREFR* owner;			// 04
-		float			totalWgCurrent;	// 08
-		float			totalWgLast;	// 0C
-		UInt8			byte10;			// 10	referenced in relation to scripts in container
-		UInt8			pad11[3];		// 11
+		EntryDataList	*objList;
+		TESObjectREFR	*owner;
+		float			totalWgCurrent;
+		float			totalWgLast;
+		UInt8			byte10;	// referenced in relation to scripts in container
+		UInt8			pad[3];
 
-		static Data* Create(TESObjectREFR* owner);
+		static Data *Create(TESObjectREFR *owner);
 		float GetInventoryWeight();
 	};
 
-	Data* data;	// 0C
+	Data	*data;	// 00C
 
-	EntryData* GetByType(TESForm* type);
+	EntryData *GetByType(TESForm * type);
 
 	void DebugDump();
 	void Cleanup();	// clean up unneeded extra data from each EntryData
 
 	static ExtraContainerChanges* Create();
 
-	EntryDataList* GetEntryDataList() const { return data ? data->objList : NULL; }
+	// find the equipped item whose form matches the passed matcher
+	struct FoundEquipData{
+		TESForm* pForm;
+		ExtraDataList* pExtraData;
+	};
+	FoundEquipData FindEquipped(FormMatcher& matcher) const;
+
+	EntryDataList* GetEntryDataList() const {
+		return data ? data->objList : NULL;
+	}
 };
 typedef ExtraContainerChanges::EntryData ContChangesEntry;
 
@@ -401,7 +422,7 @@ public:
 	bool Accept(ExtraContainerChanges::EntryData* match)
 	{
 		if (match && match->extendData)
-			return match->extendData->GetIndexOf(ExtraDataListInExtendDataListMatcher(m_toMatch)) >= 0;
+			return match->extendData->GetIndexOf(ExtraDataListInExtendDataListMatcher(m_toMatch))>=0;
 		else
 			return false;
 	}
@@ -488,161 +509,218 @@ public:
 	}
 };
 
-//extern ExtraContainerChanges::ExtendDataList* ExtraContainerChangesExtendDataListCreate(ExtraDataList* pExtraDataList = NULL);
+typedef ExtraContainerChanges::FoundEquipData EquipData;
+
+extern ExtraContainerChanges::ExtendDataList* ExtraContainerChangesExtendDataListCreate(ExtraDataList* pExtraDataList = NULL);
 extern void ExtraContainerChangesExtendDataListFree(ExtraContainerChanges::ExtendDataList* xData, bool bFreeList = false);
 
-// 10
+// 010
 class ExtraHealth : public BSExtraData
 {
 public:
-	float		health;		// 0C
+	ExtraHealth();
+	virtual ~ExtraHealth();
+	float health;
 
 	static ExtraHealth* __stdcall Create(float _health = 0);
 };
 
-// 0C
+// 00C
 class ExtraWorn : public BSExtraData	// Item is equipped
 {
 public:
+	ExtraWorn();
+	virtual ~ExtraWorn();
+
 	static ExtraWorn* Create();
 };
 
-// 0C
+// 00C
 class ExtraWornLeft : public BSExtraData	// haven't seen used yet
 {
 public:
+	ExtraWornLeft();
+	virtual ~ExtraWornLeft();
+
+	//static ExtraWornLeft* Create();
 };
 
-// 0C
+// 00C
 class ExtraCannotWear : public BSExtraData	//	Seen used as ForceEquip ! Unused as forceUnequip (bug?)
 {
 public:
+	ExtraCannotWear();
+	virtual ~ExtraCannotWear();
+
 	static ExtraCannotWear* Create();
 };
 
-// 10
+// 010
 class ExtraHotkey : public BSExtraData
 {
 public:
-	UInt8		index;		// 0C (is 0-7)
-	UInt8		pad0D[3];	// 0D
+	ExtraHotkey();
+	virtual ~ExtraHotkey();
+
+	UInt8	index;		// 00C (is 0-7)
 
 	static ExtraHotkey* __stdcall Create(UInt8 _index = 0);
 };
 
-// 10
+// 010
 class ExtraCount : public BSExtraData
 {
 public:
-	SInt16		count;		// 0C
-	UInt8		pad0E[2];	// 0E
+	ExtraCount();
+	virtual ~ExtraCount();
+
+	SInt16	count;	// 00C
+	UInt8	pad[2];	// 00E
 
 	static ExtraCount* __stdcall Create(UInt32 count = 0);
 };
 
-// 10
+// 010
 class ExtraLock : public BSExtraData
 {
 public:
+	ExtraLock();
+	virtual ~ExtraLock();
+
 	struct Data
 	{
 		UInt32	lockLevel;	// 00
-		TESKey* key;		// 04
+		TESKey	* key;		// 04
 		UInt8	flags;		// 08
-		UInt8	pad09[3];	// 09
+		UInt8	pad[3];
 		UInt32  unk0C;		// 0C introduced since form version 0x10
 		UInt32	unk10;		// 10
 	};
 
-	Data* data;	// 0C
+	Data*	data;		// 00C
 
 	static ExtraLock* Create();
 };
 
-// 10
+// 010
+class ExtraUses : public BSExtraData
+{
+public:
+	ExtraUses();
+	~ExtraUses();
+
+	UInt32 unk0;
+
+	static ExtraUses* Create();
+};
+
+// 010
 class ExtraTeleport : public BSExtraData
 {
 public:
+	ExtraTeleport();
+	~ExtraTeleport();
+
 	struct Data
 	{
-		TESObjectREFR* linkedDoor;	// 00
-		float			x;				// 04 x, y, z, zRot refer to teleport marker's position and rotation
-		float			y;				// 08
-		float			z;				// 0C
-		float			xRot;			// 10 angles in radians. x generally 0
-		float			yRot;			// 14 y generally -0.0, no reason to modify
-		float			zRot;			// 18
-		UInt8			unk1C;			// 1C
-		UInt8			pad1D[3];		// 1D
+		TESObjectREFR*	linkedDoor;	// 00
+		float			x;			// 04 x, y, z, zRot refer to teleport marker's position and rotation
+		float			y; 
+		float			z;
+		float			xRot;		// 10 angles in radians. x generally 0
+		float			yRot;		// 14 y generally -0.0, no reason to modify
+		float			zRot;		// 18
+		UInt8			unk01C;		// 1C
+		UInt8			pad01D[3];	// 1D
 	};
 
-	Data* data;	// 0C
+	Data *	data;
 
 	static ExtraTeleport* Create();
 };
 
-// 10
+// 010
 class ExtraRandomTeleportMarker : public BSExtraData
 {
 public:
-	TESObjectREFR* teleportRef;	// 0C
+	ExtraRandomTeleportMarker();
+	~ExtraRandomTeleportMarker();
+
+	TESObjectREFR *	teleportRef;
 };
 
-// 14
+// 014
 class ExtraAmmo : public BSExtraData
 {
 public:
-	TESAmmo* ammo;	// 0C
-	UInt32		count;	// 10
+	ExtraAmmo();
+	~ExtraAmmo();
+
+	TESAmmo* ammo;
+	UInt32 unk4;
 };
 
-// 10
+// 010
 class ExtraOwnership : public BSExtraData
 {
 public:
-	TESForm* owner;	// maybe this should be a union {TESFaction*; TESNPC*} but it would be more unwieldy to access and modify
+	ExtraOwnership();
+	virtual ~ExtraOwnership();
 
-	static ExtraOwnership* __stdcall Create(TESForm* _owner);
+	TESForm	* owner;	// maybe this should be a union {TESFaction*; TESNPC*} but it would be more unwieldy to access and modify
+
+	static ExtraOwnership* __stdcall Create(TESForm *_owner);
 };
 
-// 10
+// 010
 class ExtraRank : public BSExtraData
 {
 public:
-	SInt32		rank; // 0C
+	ExtraRank();
+	virtual ~ExtraRank();
+
+	SInt32	rank; // 00C
 
 	static ExtraRank* __stdcall Create(UInt32 _rank);
 };
 
-// 10
+// 010
 class ExtraGlobal : public BSExtraData
 {								//ownership data, stored separately from ExtraOwnership
 public:
-	TESGlobal* globalVar;	// 0C
+	ExtraGlobal();
+	virtual ~ExtraGlobal();
+
+	TESGlobal*	globalVar;	// 00C
 };
 
-// 10
+// 010
 class ExtraWeaponModFlags : public BSExtraData
 {
 public:
-	UInt8		flags;		// 0C
-	UInt8		pad0D[3];	// 0D
+	ExtraWeaponModFlags();
+	~ExtraWeaponModFlags();
 
-	static ExtraWeaponModFlags* __stdcall Create(UInt32 _flags);
+	UInt8	flags; // 00C
+
+	static ExtraWeaponModFlags* __stdcall Create(UInt8 _flags = 0);
 };
 
-/*
-// 10
 class ExtraFactionChanges : public BSExtraData
 {
 public:
+	ExtraFactionChanges();
+	virtual ~ExtraFactionChanges();
+
 	typedef tList<FactionListData> FactionListEntry;
-	FactionListEntry* data;		// 0C
+	FactionListEntry	*data;
 
 	void DebugDump();
 
 	static ExtraFactionChanges* Create();
 };
+
+STATIC_ASSERT(sizeof(ExtraFactionChanges) == 0x10);
 
 class ExtraFactionChangesMatcher
 {
@@ -650,93 +728,92 @@ class ExtraFactionChangesMatcher
 	ExtraFactionChanges* xFactionChanges;
 public:
 	ExtraFactionChangesMatcher(TESFaction* faction, ExtraFactionChanges* FactionChanges) : pFaction(faction), xFactionChanges(FactionChanges) {}
-	bool Accept(FactionListData* data) {
+	bool Accept(FactionListData *data) {
 		return (data->faction == pFaction) ? true : false;
 	}
 };
-*/
 
-//ExtraFactionChanges::FactionListEntry* GetExtraFactionList(BaseExtraList& xDataList);
-//void SetExtraFactionRank(BaseExtraList& xDataList, TESFaction* faction, char rank);
+ExtraFactionChanges::FactionListEntry* GetExtraFactionList(BaseExtraList& xDataList);
+void SetExtraFactionRank(BaseExtraList& xDataList, TESFaction * faction, char rank);
 
-// 14
 class ExtraLeveledCreature : public BSExtraData
 {
 public:
-	TESActorBase* baseForm;	// 0C
-	TESActorBase* actorBase;	// 10
+	ExtraLeveledCreature();
+	virtual ~ExtraLeveledCreature();
+
+	TESForm	* baseForm;	// 00C
+	TESForm	* form;		// 010
 };
+
+STATIC_ASSERT(sizeof(ExtraLeveledCreature) == 0x14);
 
 // PackageStartLocation = Worldspace or Cell / PosX / PosY / PosZ / and 4 bytes
 
-// 10
 class ExtraCombatStyle : public BSExtraData
 {
 public:
-	TESCombatStyle* combatStyle;	// 0C
+	ExtraCombatStyle();
+	virtual ~ExtraCombatStyle();
+
+	TESCombatStyle*	combatStyle;		// 00C
 };
 
-// 10
 class ExtraReferencePointer : public BSExtraData
 {
 public:
-	TESObjectREFR* refr;	// 0C
+	ExtraReferencePointer();
+	virtual ~ExtraReferencePointer();
+
+	TESObjectREFR* refr;		// 00C
 };
 
-// 10
-class ExtraMapMarker : public BSExtraData
+// Provided by "Luthien Anarion"
+class ExtraMapMarker : BSExtraData
 {
 public:
-	enum
-	{
-		kFlag_Visible = 1,        // shown on the world map
-		kFlag_CanTravel = 2,        // visited, can fast-travel to it
-		kFlag_Hidden = 4,        // does not appear with Explorer perk
-	};
-	enum
-	{
-		kType_None,                // this determines the icon on the world map
-		kType_City,
-		kType_Settlement,
-		kType_Encampment,
-		kType_NaturalLandmark,
-		kType_Cave,
-		kType_Factory,
-		kType_Memorial,
-		kType_Military,
-		kType_Office,
-		kType_TownRuins,
-		kType_UrbanRuins,
-		kType_SewerRuins,
-		kType_Metro,
-		kType_Vault
-	};
+    ExtraMapMarker();
+    ~ExtraMapMarker();
 
-	struct MarkerData
-	{
-		TESFullName		fullName;		// 00
-		UInt16			flags;			// 0C
-		UInt16			type;			// 0E
-		TESForm* reputation;	// 10
-	};
-	MarkerData* data;	// 0C
+    enum
+    {
+        kFlag_Visible	= 1 << 0,        // shown on the world map
+        kFlag_CanTravel	= 1 << 1,        // visited, can fast-travel to it
+        kFlag_Hidden    = 1 << 2,        // does not appear with Explorer perk
+    };
+    enum
+    {
+        kType_None    = 0,                // this determines the icon on the world map
+        kType_City,
+        kType_Settlement,
+        kType_Encampment,
+        kType_NaturalLandmark,
+        kType_Cave,
+        kType_Factory,
+        kType_Memorial,
+        kType_Military,
+        kType_Office,
+        kType_TownRuins,
+        kType_UrbanRuins,
+        kType_SewerRuins,
+        kType_Metro,
+        kType_Vault,
+    };
 
-	bool IsVisible() { return (data->flags & kFlag_Visible) != 0; }
-	bool CanTravel() { return (data->flags & kFlag_CanTravel) != 0; }
-	bool IsHidden() { return (data->flags & kFlag_Hidden) != 0; }
-	void SetVisible(bool visible)
-	{
-		if (visible) data->flags |= kFlag_Visible;
-		else data->flags &= ~kFlag_Visible;
-	}
-	void SetCanTravel(bool travel)
-	{
-		if (travel) data->flags |= kFlag_CanTravel;
-		else data->flags &= ~kFlag_CanTravel;
-	}
-	void SetHidden(bool hidden)
-	{
-		if (hidden) data->flags |= kFlag_Hidden;
-		else data->flags &= ~kFlag_Hidden;
-	}
+    struct MarkerData
+    {
+        TESFullName fullName;            // not all markers have this
+        UInt16 flags;
+        UInt16 type;
+        TESForm* reputation;            // not all markers have this
+    };
+    MarkerData    *data;
+
+    // flag member functions
+    bool IsVisible() {return (data->flags & kFlag_Visible) == kFlag_Visible;}
+    bool CanTravel() {return (data->flags & kFlag_CanTravel) == kFlag_CanTravel;}
+    bool IsHidden() {return (data->flags & kFlag_Hidden) == kFlag_Hidden;}
+    void SetVisible(bool visible) {data->flags = (visible) ? (data->flags | kFlag_Visible) : (data->flags & ~kFlag_Visible);}
+    void SetCanTravel(bool travel) {data->flags = (travel) ? (data->flags | kFlag_CanTravel) : (data->flags & ~kFlag_CanTravel);}
+    void SetHidden(bool hidden) {data->flags = (hidden) ? (data->flags | kFlag_Hidden) : (data->flags & ~kFlag_Hidden);}
 };

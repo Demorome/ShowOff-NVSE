@@ -1,41 +1,88 @@
 #pragma once
+
 #include "Utilities.h"
 
 #if RUNTIME
 
-const UInt32 _NiTMap_Lookup = 0x00853130;
-
+#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
+const UInt32 kNiTMapLookupAddr = 0x853130;
+#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
+const UInt32 kNiTMapLookupAddr = 0x844740;
+#else
+#error
 #endif
 
-// 8
+#else
+const UInt32 _NiTMap_Lookup = 0;
+#endif
+
+// 08
 struct NiRTTI
 {
-	const char	* name;
-	NiRTTI		* parent;
+	const char		*name;
+	NiRTTI			*parent;
 };
 
-// C
+// 24
+struct NiMatrix33
+{
+	float	cr[3][3];
+
+	void ExtractAngles(float &rotX, float &rotY, float &rotZ);
+	void RotationMatrix(float rotX, float rotY, float rotZ);
+	void Rotate(float rotX, float rotY, float rotZ);
+	void MultiplyMatrices(NiMatrix33 &matA, NiMatrix33 &matB);
+	void Dump(const char *title = NULL);
+};
+
+struct NiQuaternion;
+
+// 0C
 struct NiVector3
 {
 	float	x, y, z;
+
+	NiVector3() {}
+	NiVector3(float _x, float _y, float _z) : x(_x), y(_y), z(_z) {}
+
+	void operator +=(const NiVector3 &rhs)
+	{
+		x += rhs.x;
+		y += rhs.y;
+		z += rhs.z;
+	}
+	void operator -=(const NiVector3 &rhs)
+	{
+		x -= rhs.x;
+		y -= rhs.y;
+		z -= rhs.z;
+	}
+
+	void ToQuaternion(NiQuaternion &quaternion);
+	void MultiplyMatrixVector(NiMatrix33 &mat, NiVector3 &vec);
+	bool RayCastCoords(NiVector3 &maxRange, NiVector3 &posVector, NiMatrix33 &rotMatrix);
 };
 
 // 10 - always aligned?
 struct NiVector4
 {
 	float	x, y, z, w;
+
+	NiVector4() {}
+	NiVector4(float _x, float _y, float _z, float _w) : x(_x), y(_y), z(_z), w(_w) {}
 };
 
 // 10 - always aligned?
 struct NiQuaternion
 {
-	float	x, y, z, w;
-};
+	float	w, x, y, z;
 
-// 24
-struct NiMatrix33
-{
-	float	data[9];
+	NiQuaternion() {}
+	NiQuaternion(float _w, float _x, float _y, float _z) : w(_w), x(_x), y(_y), z(_z) {}
+
+	void EulerYPR(NiVector3 &ypr);
+	void RotationMatrix(NiMatrix33 &rotMatrix);
+	void Dump();
 };
 
 // 34
@@ -104,39 +151,76 @@ struct NiPlane
 // not sure on the above, but some code only works if this is true
 // this can obviously lead to fragmentation, but the accessors don't seem to care
 // weird stuff
-template <typename T>
+template <typename T_Data>
 struct NiTArray
 {
-	void	** _vtbl;		// 00
-	T		* data;			// 04
-	UInt16	capacity;		// 08 - init'd to size of preallocation
-	UInt16	firstFreeEntry;	// 0A - index of the first free entry in the block of free entries at the end of the array (or numObjs if full)
-	UInt16	numObjs;		// 0C - init'd to 0
-	UInt16	growSize;		// 0E - init'd to size of preallocation
+	virtual void* Destroy(UInt32 doFree);
 
-	T operator[](UInt32 idx) {
+	T_Data* data;			// 04
+	UInt16		capacity;		// 08 - init'd to size of preallocation
+	UInt16		firstFreeEntry;	// 0A - index of the first free entry in the block of free entries at the end of the array (or numObjs if full)
+	UInt16		numObjs;		// 0C - init'd to 0
+	UInt16		growSize;		// 0E - init'd to size of preallocation
+
+	T_Data operator[](UInt32 idx)
+	{
 		if (idx < firstFreeEntry)
 			return data[idx];
 		return NULL;
 	}
 
-	T Get(UInt32 idx) { return (*this)[idx]; }
+	T_Data Get(UInt32 idx) { return data[idx]; }
 
-	UInt16 Length(void) { return firstFreeEntry; }
-	void AddAtIndex(UInt32 index, T* item);	// no bounds checking
+	UInt16 Length() { return firstFreeEntry; }
+	void AddAtIndex(UInt32 index, T_Data* item);	// no bounds checking
 	void SetCapacity(UInt16 newCapacity);	// grow and copy data if needed
-};
 
+	class Iterator
+	{
+		friend NiTArray;
+
+		T_Data* pData;
+		UInt16		count;
+
+	public:
+		bool End() const { return !count; }
+		void operator++()
+		{
+			pData++;
+			count--;
+		}
+
+		T_Data& operator*() const { return *pData; }
+		T_Data& operator->() const { return *pData; }
+		T_Data& Get() const { return *pData; }
+
+		Iterator(NiTArray& source) : pData(source.data), count(source.firstFreeEntry) {}
+	};
+
+	Iterator Begin() { return Iterator(*this); }
+};
 #if RUNTIME
 
 template <typename T> void NiTArray<T>::AddAtIndex(UInt32 index, T* item)
 {
+#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 	ThisStdCall(0x00869640, this, index, item);
+#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
+	ThisStdCall(0x00869110, this, index, item);
+#else
+#error unsupported Oblivion version
+#endif
 }
 
 template <typename T> void NiTArray<T>::SetCapacity(UInt16 newCapacity)
 {
+#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 	ThisStdCall(0x008696E0, this, newCapacity);
+#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
+	ThisStdCall(0x00869190, this, newCapacity);
+#else
+#error unsupported Runtime version
+#endif
 }
 
 #endif
@@ -188,36 +272,6 @@ public:
 	NiTPointerMap();
 	virtual ~NiTPointerMap();
 
-	struct Entry
-	{
-		Entry	* next;
-		UInt32	key;
-		T_Data	* data;
-	};
-
-	// note: traverses in non-numerical order
-	class Iterator
-	{
-		friend NiTPointerMap;
-
-	public:
-		Iterator(NiTPointerMap * table, Entry * entry = NULL, UInt32 bucket = 0)
-			:m_table(table), m_entry(entry), m_bucket(bucket) { FindValid(); }
-		~Iterator() { }
-
-		T_Data *	Get(void);
-		UInt32		GetKey(void);
-		bool		Next(void);
-		bool		Done(void);
-
-	private:
-		void		FindValid(void);
-
-		NiTPointerMap	* m_table;
-		Entry		* m_entry;
-		UInt32		m_bucket;
-	};
-
 	virtual UInt32	CalculateBucket(UInt32 key);
 	virtual bool	CompareKey(UInt32 lhs, UInt32 rhs);
 	virtual void	Fn_03(UInt32 arg0, UInt32 arg1, UInt32 arg2);	// assign to entry
@@ -225,109 +279,76 @@ public:
 	virtual void	Fn_05(void);	// locked operations
 	virtual void	Fn_06(void);	// locked operations
 
-	T_Data *	Lookup(UInt32 key);
-	bool		Insert(Entry* nuEntry);
+	struct Entry
+	{
+		Entry		*next;
+		UInt32		key;
+		T_Data		*data;
+	};
 
-//	void	** _vtbl;		// 0
-	UInt32	m_numBuckets;	// 4
-	Entry	** m_buckets;	// 8
-	UInt32	m_numItems;		// C
+	UInt32		m_numBuckets;	// 04
+	Entry		**m_buckets;	// 08
+	UInt32		m_numItems;		// 0C
+
+	T_Data *Lookup(UInt32 key) const
+	{
+		for (Entry *traverse = m_buckets[key % m_numBuckets]; traverse; traverse = traverse->next)
+			if (traverse->key == key) return traverse->data;
+		return NULL;
+	}
+
+	bool Insert(Entry *newEntry)
+	{
+		UInt32 bucket = newEntry->key % m_numBuckets;
+		Entry *entry = m_buckets[bucket], *prev;
+		if (entry)
+		{
+			do
+			{
+				if (entry->key == newEntry->key) return false;
+				prev = entry;
+			}
+			while (entry = entry->next);
+			prev->next = newEntry;
+		}
+		else m_buckets[bucket] = newEntry;
+		m_numItems++;
+		return true;
+	}
+
+	class Iterator
+	{
+		friend NiTPointerMap;
+
+		NiTPointerMap* table;
+		Entry** bucket;
+		Entry* entry;
+
+		void FindNonEmpty()
+		{
+			for (Entry** end = &table->m_buckets[table->m_numBuckets]; bucket != end; bucket++)
+				if (entry = *bucket) return;
+		}
+
+	public:
+		Iterator(NiTPointerMap& _table) : table(&_table), bucket(table->m_buckets), entry(NULL) { FindNonEmpty(); }
+
+		bool End() const { return !entry; }
+		void operator++()
+		{
+			entry = entry->next;
+			if (!entry)
+			{
+				bucket++;
+				FindNonEmpty();
+			}
+		}
+		T_Data* Get() const { return entry->data; }
+		UInt32 Key() const { return entry->key; }
+	};
+
+	Iterator Begin() { return Iterator(*this); }
 };
-
-template <typename T_Data>
-T_Data * NiTPointerMap <T_Data>::Lookup(UInt32 key)
-{
-	for(Entry * traverse = m_buckets[key % m_numBuckets]; traverse; traverse = traverse->next)
-		if(traverse->key == key)
-			return traverse->data;
-	
-	return NULL;
-}
-
-template <typename T_Data>
-bool NiTPointerMap<T_Data>::Insert(Entry* nuEntry)
-{
-	// game code does not appear to care about ordering of entries in buckets
-	UInt32 bucket = nuEntry->key % m_numBuckets;
-	Entry* prev = NULL;
-	for (Entry* cur = m_buckets[bucket]; cur; cur = cur->next) {
-		if (cur->key == nuEntry->key) {
-			return false;
-		}
-		else if (!cur->next) {
-			prev = cur;
-			break;
-		}
-	}
-
-	if (prev) {
-		prev->next = nuEntry;
-	}
-	else {
-		m_buckets[bucket] = nuEntry;
-	}
-
-	m_numBuckets++;
-	return true;
-}
-
-template <typename T_Data>
-T_Data * NiTPointerMap <T_Data>::Iterator::Get(void)
-{
-	if(m_entry)
-		return m_entry->data;
-
-	return NULL;
-}
-
-template <typename T_Data>
-UInt32 NiTPointerMap <T_Data>::Iterator::GetKey(void)
-{
-	if(m_entry)
-		return m_entry->key;
-
-	return 0;
-}
-
-template <typename T_Data>
-bool NiTPointerMap <T_Data>::Iterator::Next(void)
-{
-	if(m_entry)
-		m_entry = m_entry->next;
-
-	while(!m_entry && (m_bucket < (m_table->m_numBuckets - 1)))
-	{
-		m_bucket++;
-
-		m_entry = m_table->m_buckets[m_bucket];
-	}
-
-	return m_entry != NULL;
-}
-
-template <typename T_Data>
-bool NiTPointerMap <T_Data>::Iterator::Done(void)
-{
-	return m_entry == NULL;
-}
-
-template <typename T_Data>
-void NiTPointerMap <T_Data>::Iterator::FindValid(void)
-{
-	// validate bucket
-	if(m_bucket >= m_table->m_numBuckets) return;
-
-	// get bucket
-	m_entry = m_table->m_buckets[m_bucket];
-
-	// find non-empty bucket
-	while(!m_entry && (m_bucket < (m_table->m_numBuckets - 1)))
-	{
-		m_bucket++;
-
-		m_entry = m_table->m_buckets[m_bucket];
-	}
-}
 
 // 10
 // todo: NiTPointerMap should derive from this
@@ -341,30 +362,69 @@ public:
 
 	struct Entry
 	{
-		Entry	* next;	// 000
-		T_Key	key;	// 004
-		T_Data	data;	// 008
+		Entry		*next;
+		T_Key		key;
+		T_Data		data;
 	};
 
-	virtual NiTMapBase<T_Key, T_Data>*	Destructor(bool doFree);						// 000
-	virtual UInt32						Hash(T_Key key);								// 001
-	virtual void						Equal(T_Key key1, T_Key key2);					// 002
-	virtual void						FillEntry(Entry entry, T_Key key, T_Data data);	// 003
-	virtual	void						Unk_004(void * arg0);							// 004
-	virtual	void						Unk_005(void);									// 005
-	virtual	void						Unk_006();										// 006
+	virtual NiTMapBase	*Destructor(bool doFree);
+	virtual UInt32		Hash(T_Key key);
+	virtual void		Equal(T_Key key1, T_Key key2);
+	virtual void		FillEntry(Entry entry, T_Key key, T_Data data);
+	virtual	void		Unk_004(void *arg0);
+	virtual	void		Unk_005();
+	virtual	void		Unk_006();
 
-	//void	** _vtbl;	// 0
-	UInt32	numBuckets;	// 4
-	Entry	** buckets;	// 8
-	UInt32	numItems;	// C
+	UInt32		numBuckets;	// 04
+	Entry		**buckets;	// 08
+	UInt32		numItems;	// 0C
 
-	DEFINE_MEMBER_FN_LONG(NiTMapBase, Lookup, bool, _NiTMap_Lookup, T_Key key, T_Data * dataOut);
+	class Iterator
+	{
+		friend NiTMapBase;
+
+		NiTMapBase		*m_table;
+		Entry			*m_entry;
+		UInt32			m_bucket;
+
+		void FindValid()
+		{
+			for (; m_bucket < m_table->numBuckets; m_bucket++)
+			{
+				m_entry = m_table->buckets[m_bucket];
+				if (m_entry) break;
+			}
+		}
+
+	public:
+		Iterator(NiTMapBase *table) : m_table(table), m_entry(NULL), m_bucket(0) {FindValid();}
+
+		bool Done() const {return m_entry == NULL;}
+		void Next()
+		{
+			m_entry = m_entry->next;
+			if (!m_entry)
+			{
+				m_bucket++;
+				FindValid();
+			}
+		}
+		T_Data Get() const {return m_entry->data;}
+		T_Key Key() const {return m_entry->key;}
+	};
+
+	bool Lookup(T_Key key, T_Data *dataOut);
 };
+
+template <typename T_Key, typename T_Data>
+__declspec(naked) bool NiTMapBase<T_Key, T_Data>::Lookup(T_Key key, T_Data *dataOut)
+{
+	__asm	jmp		kNiTMapLookupAddr
+}
 
 // 14
 template <typename T_Data>
-class NiTStringPointerMap : public NiTPointerMap <T_Data>
+class NiTStringPointerMap : public NiTPointerMap<T_Data>
 {
 public:
 	NiTStringPointerMap();

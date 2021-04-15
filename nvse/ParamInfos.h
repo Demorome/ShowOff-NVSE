@@ -46,6 +46,21 @@ static ParamInfo kParams_TwoFloats[2] =
 	{	"float",	kParamType_Float,	0 },
 };
 
+// static ParamInfo kParams_OneSpellItem[1] =
+// {
+// 	{	"spell", kParamType_SpellItem, 0 }, 
+// };
+// 
+// static ParamInfo kParams_OneMagicItem[1] =
+// {
+// 	{	"spell", kParamType_MagicItem, 0 }, 
+// };
+// 
+// static ParamInfo kParams_OneMagicEffect[1] =
+// {
+// 	{	"magic effect", kParamType_MagicEffect, 0 }, 
+// };
+
 static ParamInfo kParams_OneObjectID[1] =
 {
 	{	"item", kParamType_ObjectID, 0},
@@ -60,12 +75,6 @@ static ParamInfo kParams_OneInt_OneOptionalObjectID[2] =
 {
 	{	"path type",	kParamType_Integer,			0	},
 	{	"item",			kParamType_ObjectID,	1	},
-};
-
-static ParamInfo kParams_OneInt_OneOptionalForm[2] =
-{
-	{	"path type",	kParamType_Integer,			0	},
-	{	"form",			kParamType_AnyForm,	1	},
 };
 
 static ParamInfo kParams_OneObjectID_OneInt[2] =
@@ -88,7 +97,7 @@ static ParamInfo kParams_OneFloat_OneOptionalObjectID[2] =
  
  static ParamInfo kParams_OneInventoryItem_OneOptionalObjectID[2] =
  {
- 	{	"inv item",		kParamType_AnyForm,		0	},
+ 	{	"inv item",		kParamType_MagicItem,		0	},
  	{	"target item",	kParamType_ObjectID,	1	},
  };
  
@@ -180,19 +189,19 @@ static ParamInfo kParams_OneObject[1] =
 static ParamInfo kParams_OneString_OneOptionalObject[2] =
 {
 	{	"string",		kParamType_String,			0	},
-	{	"item",			kParamType_AnyForm,	1	},
+	{	"item",			kParamType_TESObject,	1	},
 };
 
 static ParamInfo kParams_OneObject_OneOptionalObject[2] =
 {
-	{	"target item",	kParamType_AnyForm,		0	},
-	{	"object",		kParamType_AnyForm,		1	},
+	{	"target item",	kParamType_TESObject,		0	},
+	{	"object",		kParamType_TESObject,		1	},
 };
 
 static ParamInfo kParams_OneInt_OneOptionalObject[2] =
 {
 	{	"int",	kParamType_Integer,			0	},
-	{	"item",			kParamType_AnyForm,	1	},
+	{	"item",			kParamType_TESObject,	1	},
 };
 
 static ParamInfo kParams_SetEquippedFloat[2] =
@@ -269,12 +278,6 @@ static ParamInfo kParams_OneOptionalForm[1] =
 	{	"form",	kParamType_AnyForm,	1	},
 };
 
-static ParamInfo kParams_OneForm_OneOptionalForm[2] =
-{
-	{	"form",	kParamType_AnyForm,	0	},
-	{	"form",	kParamType_AnyForm,	1	},
-};
-
 static ParamInfo kParams_EquipItem[3] =
 {
 	{	"item",			kParamType_ObjectID,	0	},
@@ -285,11 +288,6 @@ static ParamInfo kParams_EquipItem[3] =
 static ParamInfo kParams_OneFaction[1] =
 {
 	{	"faction",	kParamType_Faction,	0	},
-};
-
-static ParamInfo kParams_OneActorBase[1] =
-{
-	{	"base actor",	kParamType_ActorBase,	0	},
 };
 
 static ParamInfo kParams_OneOptionalActorBase[1] =
@@ -323,33 +321,9 @@ static ParamInfo kParams_GenericDeleteForm[3] =
 	{	"index",			kParamType_Integer,	0	},
 };
 
-static ParamInfo kParams_GenericCheckForm[3] =
-{
-	{	"which",			kParamType_Integer,	0	},
-	{	"containingForm",	kParamType_AnyForm,	0	},
-	{	"form",				kParamType_AnyForm,	0	},
-};
-
 static ParamInfo kParams_OneIntOneForm[2] =
 {
 	{	"index",	kParamType_Integer, 0	}, 
 	{	"form",		kParamType_AnyForm,	0	},
-};
-
-static ParamInfo kParams_OneIntOneOptionalForm[2] =
-{
-	{	"index",	kParamType_Integer, 0	}, 
-	{	"form",		kParamType_AnyForm,	1	},
-};
-
-static ParamInfo kParams_OneStringOneOptionalForm[2] =
-{
-	{	"index",	kParamType_String,	0	}, 
-	{	"form",		kParamType_AnyForm,	1	},
-};
-
-static ParamInfo kParams_OneSpellItem[1] =
-{
-	{	"spell", kParamType_SpellItem, 0 }, 
 };
 

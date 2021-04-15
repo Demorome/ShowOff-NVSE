@@ -377,6 +377,43 @@ void FixEditorFont(void)
 	//SafeWrite8(basePatchAddr + 6,	0x90);
 }
 
+#if 0
+static void FixErrorReportBug(void)
+{
+	// bethesda passes strings containing user input to printf-like functions
+	// this causes crashes when the user input contains tokens printf is interested in
+	// so we fix it
+
+	// move the entire block of code before the call to printf down, add a new argument pointing to "%s"
+
+	const UInt32	kBlockMoveDelta =	5;
+
+#error	const UInt32	kBlockMoveSrc =		0x00500001;							// inside ShowCompilerError, one past last referebnce
+#error	const UInt32	kBlockMoveDst =		kBlockMoveSrc + kBlockMoveDelta;
+#error	const UInt32	kBlockMoveSize =	0x00500035 - kBlockMoveSrc;
+#error	const UInt32	kFormatStrPos =		0x0092BBE4;	// "%s"
+#error	const UInt32	kStackFixupPos =	0x0B + 2;
+#error	const UInt32	kPCRelFixups[] =	{ 0x00 + 1, 0x06 + 1, 0x28 + 1 };
+
+	UInt8	tempBuf[kBlockMoveSize];
+
+	memcpy(tempBuf, (void *)kBlockMoveSrc, kBlockMoveSize);
+
+	// jumps/calls are pc-relative, we're moving code so fix them up
+	*((UInt32 *)&tempBuf[kPCRelFixups[0]]) -= kBlockMoveDelta;
+	*((UInt32 *)&tempBuf[kPCRelFixups[1]]) -= kBlockMoveDelta;
+	*((UInt32 *)&tempBuf[kPCRelFixups[2]]) -= kBlockMoveDelta;
+
+	// added a new arg, so we need to clean it off the stack
+	tempBuf[kStackFixupPos] += 4;
+
+	SafeWriteBuf(kBlockMoveDst, tempBuf, kBlockMoveSize);
+
+	SafeWrite8(kBlockMoveSrc + 0, 0x68);	// push "%s"
+	SafeWrite32(kBlockMoveSrc + 1, kFormatStrPos);
+}
+#endif
+
 void CreateTokenTypedefs(void)
 {
 char** tokenAlias_Float = (char**)0x00E9BE9C;	//reserved for array variable	// Find "Unknown variable or function '%s'.", previous call, first 59h case is an array containng reserved words
@@ -385,6 +422,17 @@ char** tokenAlias_Long	= (char**)0x00E9BE74;	//string variable
 	*tokenAlias_Long = "string_var";
 	*tokenAlias_Float = "array_var";
 }
+
+#if 0 // Already done in Commands_table
+static void PatchConditionalCommands(void)
+{
+	// editor will not accept commands outside of the vanilla opcode range
+	// for use as conditionals in dialog/packages/quests/etc
+	// nop out a conditional branch to fix
+
+#error	SafeWrite16(0x00457DD0, 0x9090);
+}
+#endif
 
 static UInt32 ScriptIsAlpha_PatchAddr = 0x00C61730; // Same starting proc as tokenAlias_Float. Follow failed test for '"', enter first call. Replace call.
 static UInt32 IsAlphaCallAddr = 0x00C616B3;
@@ -417,54 +465,6 @@ void PatchIsAlpha()
 	SafeWrite8(ScriptCharTableAddr+'['*2, 2);
 	SafeWrite8(ScriptCharTableAddr+']'*2, 2);
 	SafeWrite8(ScriptCharTableAddr+'$'*2, 2);
-}
-
-__declspec(naked) void CommandParserScriptVarHook()
-{
-	__asm
-	{
-		cmp		dword ptr [ebp], 0x2D
-		jnz		onError
-		test	edx, edx
-		jbe		notRef
-		cmp		cl, 'G'
-		jz		onError
-		mov		edx, [esi+0x40C]
-		mov		byte ptr [esi+edx+0x20C], 'r'
-		inc		dword ptr [esi+0x40C]
-		mov		eax, [esi+0x40C]
-		mov		cx, [esp+0x228]
-		mov		[esi+eax+0x20C], cx
-		add		dword ptr [esi+0x40C], 2
-		mov		cl, [esp+0x22C]
-		cmp		cl, 'G'
-		jz		onError
-	notRef:
-		cmp		dword ptr [esp+0x234], 0
-		jbe		onError
-		mov		edx, [esi+0x40C]
-		mov		[esi+edx+0x20C], cl
-		inc		dword ptr [esi+0x40C]
-		mov		eax, [esi+0x40C]
-		mov		cx, [esp+0x234]
-		mov		[esi+eax+0x20C], cx
-		mov		eax, 0x5C7E95
-		jmp		eax
-	onError:
-		mov		eax, 0x5C7F11
-		jmp		eax
-	}
-}
-
-void PatchDefaultCommandParser()
-{
-	//	Handle kParamType_Double
-	SafeWrite8(0x5C830C, 1);
-	*(UInt16*)0xE9C1DC = 1;
-
-	//	Handle kParamType_ScriptVariable
-	SafeWrite32(0x5C82DC, (UInt32)CommandParserScriptVarHook);
-	*(UInt8*)0xE9C1E4 = 1;
 }
 
 #endif

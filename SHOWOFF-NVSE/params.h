@@ -88,7 +88,7 @@ ParamInfo kParams_Tomm_ThreeFloats[3] =
 
 };
 
-
+/*
 ParamInfo kParams_Tomm_TwoFloats_TwoScriptVars[4] =
 {
 	{"Float", kParamType_Float, 0},
@@ -96,7 +96,7 @@ ParamInfo kParams_Tomm_TwoFloats_TwoScriptVars[4] =
 	{"Variable", kParamType_ScriptVariable, 0},
 	{"Variable", kParamType_ScriptVariable, 0},
 };
-
+*/
 
 
 
@@ -141,11 +141,11 @@ ParamInfo kParams_Tomm_OneDouble[1] =
 
 
 
-
+/*
 ParamInfo kParams_Tomm_OneScriptVar[1] =
 {
 
-	{"Variable", kParamType_ScriptVariable, 0},
+	{"Variable", kParamType_ScriptVariable, 0}, 
 };
 
 ParamInfo kParams_Tomm_TwoScriptVars[2] =
@@ -164,7 +164,7 @@ ParamInfo kParams_Tomm_FourScriptVars[4] =
 	{"Variable", kParamType_ScriptVariable, 0},
 	{"Variable", kParamType_ScriptVariable, 0},
 };
-
+*/
 
 ParamInfo kParams_Tomm_OneInt_ThreeOptFloats_OneOptInt[5] = // Copied From JIP
 {

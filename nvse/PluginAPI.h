@@ -177,7 +177,7 @@ struct NVSEMessagingInterface
 	typedef void (* EventCallback)(Message* msg);
 
 	enum {
-		kVersion = 4
+		kVersion = 3
 	};
 
 	// NVSE messages
@@ -230,13 +230,13 @@ struct NVSEMessagingInterface
 		kMessage_DeleteGameName,		// version of the messages sent with a save file name instead of a save file path.
 		kMessage_RenameGameName,
 		kMessage_RenameNewGameName,
-
 // added for kVersion == 4 (xNVSE)
 		kMessage_DeferredInit,
 		kMessage_ClearScriptDataCache,
 		kMessage_MainGameLoop,			// called each game loop
 		kMessage_ScriptCompile   // EDITOR: called after successful script compilation in GECK. data: pointer to Script
 	};
+
 
 	UInt32	version;
 	bool	(* RegisterListener)(PluginHandle listener, const char* sender, EventCallback handler);
@@ -313,133 +313,84 @@ struct NVSEMessagingInterface
 
 #if RUNTIME
 
-struct NVSEArrayVarInterface  //Struct upgraded by copying JIPs.
+struct NVSEArrayVarInterface
 {
-	enum
-	{
+	enum {
 		kVersion = 2
 	};
 
 	struct Array;
 
-	enum
-	{
-		kType_Invalid,
-		kType_Numeric,
-		kType_Form,
-		kType_String,
-		kType_Array
-	};
-
 	struct Element
 	{
+	protected:
 		union
 		{
 			UInt32		raw;
-			char* str;
-			Array* arr;
-			TESForm* form;
+			char		*str;
+			Array		*arr;
+			TESForm		*form;
 			double		num;
 		};
-		UInt8			dataType;
+		UInt8		type;
 
 		friend class PluginAPI::ArrayAPI;
+		void Reset() { if (type == kType_String) { FormHeap_Free(str); type = kType_Invalid; str = NULL; } }
+	public:
+		enum
+		{
+			kType_Invalid,
 
-		bool IsValid() const { return dataType != kType_Invalid; }
-		UInt8 GetType() const { return dataType; }
+			kType_Numeric,
+			kType_Form,
+			kType_String,
+			kType_Array,
+		};
+
+		~Element() { Reset(); }
+
+		Element() : type(kType_Invalid) { }
+		Element(const char* _str) : type(kType_String) { str = CopyCString(_str); }
+		Element(double _num) : num(_num), type(kType_Numeric) { }
+		Element(TESForm* _form) : form(_form), type(kType_Form) { }
+		Element(Array* _array) : arr(_array), type(kType_Array) { }
+		Element(const Element& rhs) { if (rhs.type == kType_String) { str = CopyCString(rhs.str); } else { num = rhs.num; } type = rhs.type; }
+		Element& operator=(const Element& rhs) { if (this != &rhs) { Reset(); if (rhs.type == kType_String) str = CopyCString(rhs.str); else num = rhs.num; type = rhs.type; } return *this; }
+
+		Element& operator=(double _num) { num = _num; type = kType_Numeric; return *this; }
+		Element& operator=(const char *_str) { str = CopyCString(_str); type = kType_String; return *this; }
+		Element& operator=(TESForm *_form) { form = _form; type = kType_Form; return *this; }
+		Element& operator=(Array *_array) { arr = _array; type = kType_Array; return *this; }
+
+		bool IsValid() const { return type != kType_Invalid; }
+		UInt8 GetType() const { return type; }
 
 		UInt32 Raw() { return raw; }
-		double Number() { return dataType == kType_Numeric ? num : 0; }
-		TESForm* Form() { return dataType == kType_Form ? form : NULL; }
-		const char* String() { return dataType == kType_String ? str : NULL; }
-		Array* Array() { return dataType == kType_Array ? arr : NULL; }
+		const char* String() { return type == kType_String ? str : NULL; }
+		Array * Array() { return type == kType_Array ? arr : NULL; }
+		TESForm * Form() { return type == kType_Form ? form : NULL; }
+		double Number() { return type == kType_Numeric ? num : 0.0; }
 	};
 
-	struct ElementL : Element
-	{
-		ElementL() { dataType = kType_Invalid; }
-		ElementL(double _num) { dataType = kType_Numeric; num = _num; }
-		ElementL(TESForm* _form) { dataType = kType_Form; form = _form; }
-		ElementL(const char* _str) { dataType = kType_String; str = const_cast<char*>(_str); }
-		ElementL(NVSEArrayVarInterface::Array* _arr) { dataType = kType_Array; arr = _arr; }
-		ElementL(const Element& rhs)
-		{
-			num = rhs.num;
-			dataType = rhs.dataType;
-		}
+	Array* (* CreateArray)(const Element* data, UInt32 size, Script* callingScript);
+	Array* (* CreateStringMap)(const char** keys, const NVSEArrayVarInterface::Element* values, UInt32 size, Script* callingScript);
+	Array* (* CreateMap)(const double* keys, const NVSEArrayVarInterface::Element* values, UInt32 size, Script* callingScript);
 
-		ElementL& operator=(double _num) { dataType = kType_Numeric; num = _num; return *this; }
-		ElementL& operator=(TESForm* _form) { dataType = kType_Form; form = _form; return *this; }
-		ElementL& operator=(const char* _str) { dataType = kType_String; str = const_cast<char*>(_str); return *this; }
-		ElementL& operator=(NVSEArrayVarInterface::Array* _arr) { dataType = kType_Array; arr = _arr; return *this; }
-		ElementL& operator=(const Element& rhs)
-		{
-			if (this != &rhs)
-			{
-				num = rhs.num;
-				dataType = rhs.dataType;
-			}
-			return *this;
-		}
-	};
+	bool	(* AssignCommandResult)(Array* arr, double* dest);
+	void	(* SetElement)(Array* arr, const Element& key, const Element& value);
+	void	(* AppendElement)(Array* arr, const Element& value);
 
-	struct ElementR : Element
-	{
-		ElementR() { dataType = kType_Invalid; }
-		ElementR(double _num) { dataType = kType_Numeric; num = _num; }
-		ElementR(TESForm* _form) { dataType = kType_Form; form = _form; }
-		ElementR(const char* _str) { dataType = kType_String; str = CopyCString(_str); }
-		ElementR(NVSEArrayVarInterface::Array* _arr) { dataType = kType_Array; arr = _arr; }
-		ElementR(const Element& rhs)
-		{
-			dataType = rhs.dataType;
-			if (dataType == kType_String)
-				str = CopyCString(rhs.str);
-			else num = rhs.num;
-		}
-
-		~ElementR() { if (dataType == kType_String) GameHeapFree(str); }
-
-		ElementR& operator=(double _num) { dataType = kType_Numeric; num = _num; return *this; }
-		ElementR& operator=(TESForm* _form) { dataType = kType_Form; form = _form; return *this; }
-		ElementR& operator=(const char* _str) { dataType = kType_String; str = CopyCString(_str); return *this; }
-		ElementR& operator=(NVSEArrayVarInterface::Array* _arr) { dataType = kType_Array; arr = _arr; return *this; }
-		ElementR& operator=(const Element& rhs)
-		{
-			if (this != &rhs)
-			{
-				if (dataType == kType_String)
-					GameHeapFree(str);
-				dataType = rhs.dataType;
-				if (dataType == kType_String)
-					str = CopyCString(rhs.str);
-				else num = rhs.num;
-			}
-			return *this;
-		}
-	};
-
-	Array* (*CreateArray)(const Element* data, UInt32 size, Script* callingScript);
-	Array* (*CreateStringMap)(const char** keys, const Element* values, UInt32 size, Script* callingScript);
-	Array* (*CreateMap)(const double* keys, const Element* values, UInt32 size, Script* callingScript);
-
-	bool	(*AssignCommandResult)(Array* arr, double* dest);
-	void	(*SetElement)(Array* arr, const Element& key, const Element& value);
-	void	(*AppendElement)(Array* arr, const Element& value);
-
-	UInt32(*GetArraySize)(Array* arr);
-	Array* (*LookupArrayByID)(UInt32 id);
-	bool	(*GetElement)(Array* arr, const Element& key, Element& outElement);
-	bool	(*GetElements)(Array* arr, Element* elements, Element* keys);
+	UInt32	(* GetArraySize)(Array* arr);
+	Array*	(* LookupArrayByID)(UInt32 id);
+	bool	(* GetElement)(Array* arr, const Element& key, Element& outElement);
+	bool	(* GetElements)(Array* arr, Element* elements, Element* keys);
 
 	// version 2
-	UInt32(*GetArrayPacked)(Array* arr);
+	UInt32	(* GetArrayPacked)(Array* arr);
 
 };
 typedef NVSEArrayVarInterface::Array NVSEArrayVar;
 typedef NVSEArrayVarInterface::Element NVSEArrayElement;
-typedef NVSEArrayVarInterface::ElementR ArrayElementR;
-typedef NVSEArrayVarInterface::ElementL ArrayElementL;
 
 #endif
 		
@@ -471,7 +422,6 @@ struct NVSECommandTableInterface
 	UInt32				(* GetReturnType)(const CommandInfo* cmd);		// return type enum defined in CommandTable.h
 	UInt32				(* GetRequiredNVSEVersion)(const CommandInfo* cmd);
 	const PluginInfo*	(* GetParentPlugin)(const CommandInfo* cmd);	// returns a pointer to the PluginInfo of the NVSE plugin that adds the command, if any. returns NULL otherwise
-	const PluginInfo*	(* GetPluginInfoByName)(const char *pluginName);	// Returns a pointer to the PluginInfo of the NVSE plugin of the specified name; returns NULL is the plugin is not loaded.
 };
 
 /**** script API docs **********************************************************
@@ -540,7 +490,7 @@ struct NVSEScriptInterface
 struct NVSEDataInterface
 {
 	enum {
-		kVersion = 2
+		kVersion = 1
 	};
 
 	UInt32		version;
@@ -569,8 +519,6 @@ struct NVSEDataInterface
 		kNVSEData_DataMax,
 	};
 	void * (* GetData)(UInt32 dataID);
-	// v2: xNVSE caches script data for additional performance and short circuit evaluation, if you are manipulating script data then you can clear the cache 
-	void (*ClearScriptDataCache)();
 };
 #endif
 
@@ -680,18 +628,6 @@ struct NVSESerializationInterface
 
 	// Peeks at the data without interfiring with the current position
 	UInt32	(* PeekRecordData)(void * buf, UInt32 length);
-
-	void	(*WriteRecord8)(UInt8 inData);
-	void	(*WriteRecord16)(UInt16 inData);
-	void	(*WriteRecord32)(UInt32 inData);
-	void	(*WriteRecord64)(const void *inData);
-
-	UInt8	(*ReadRecord8)();
-	UInt16	(*ReadRecord16)();
-	UInt32	(*ReadRecord32)();
-	void	(*ReadRecord64)(void *outData);
-
-	void	(*SkipNBytes)(UInt32 byteNum);
 };
 
 struct PluginInfo

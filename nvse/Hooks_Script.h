@@ -15,6 +15,10 @@ bool ParsingExpression();	// returns true if we are parsing an NVSE expression
 void RegisterLoopStart(UInt8* offsetPtr);
 bool HandleLoopEnd(UInt32 offsetToEnd);
 
+void ResetActivationRecurseDepth();
+
+TESObjectREFR* GetExecutingScriptRefr();	// refr associated with currently executing script
+
 #if !RUNTIME
 
 void Hook_Compiler_Init();
