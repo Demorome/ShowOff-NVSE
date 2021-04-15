@@ -138,6 +138,9 @@
     <ClInclude Include="..\nvse\Utilities.h">
       <Filter>nvse</Filter>
     </ClInclude>
+    <ClInclude Include="Demo_ev_Misc.h">
+      <Filter>Events</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
@@ -151,6 +154,9 @@
     </Filter>
     <Filter Include="internal">
       <UniqueIdentifier>{885b4110-ee0c-4cad-801f-10ba49d0ed4f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Events">
+      <UniqueIdentifier>{535a7a2d-76a8-47b7-a518-b8c645d5512e}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -367,7 +367,7 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	/* ONLY COMMANDS WITH LISTED OPCODES SHOULD BE USED IN SCRIPTS */
 	RegisterScriptCommand(GetChallengeProgress);
-	RegisterScriptCommand(SetChallengeProgress);
+	RegisterScriptCommand(SetChallengeProgress); 
 	RegisterScriptCommand(ModChallengeProgress);
 	
 	RegisterScriptCommand(DumpFormList);
@@ -377,6 +377,12 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 
 	RegisterScriptCommand(ModNumericGameSetting);
 	RegisterScriptCommand(ModNumericINISetting);
+
+	//RegisterScriptCommand(SetOnHitAltEventHandler);
+
+	RegisterScriptCommand(GetItemRefValue);
+	RegisterScriptCommand(GetItemRefHealth);  //THESE PROBABLY NEED SAFETY CHECKS (check if loaded in mid-high)
+	//RegisterScriptCommand(GetCalculatedItemWeight);
 	
 	return true;
 

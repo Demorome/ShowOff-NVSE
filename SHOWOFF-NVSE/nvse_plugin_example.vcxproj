@@ -332,6 +332,7 @@
     <ClInclude Include="..\nvse\PluginAPI.h" />
     <ClInclude Include="..\nvse\SafeWrite.h" />
     <ClInclude Include="..\nvse\Utilities.h" />
+    <ClInclude Include="Demo_ev_Misc.h" />
     <ClInclude Include="functions\Demo_fn_Misc.h" />
     <ClInclude Include="functions\Tomm_fn_Misc.h" />
     <ClInclude Include="functions\Tomm_fn_UI.h" />
