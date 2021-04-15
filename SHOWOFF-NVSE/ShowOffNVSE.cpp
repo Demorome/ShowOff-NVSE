@@ -372,9 +372,11 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	
 	RegisterScriptCommand(DumpFormList);
 
-	RegisterScriptCommand(IsGamesetting); //For use in scripts to safety check; any other gamesetting function can already be used in console to check if a gamesetting exists.
+	RegisterScriptCommand(IsGameSetting); //For use in scripts to safety check; any other gamesetting function can already be used in console to check if a gamesetting exists.
 	RegisterScriptCommand(IsINISetting); //Uses the GetNumericINISetting "SettingName:CategoryName" format!
 
+	RegisterScriptCommand(ModNumericGameSetting);
+	RegisterScriptCommand(ModNumericINISetting);
 	
 	return true;
 

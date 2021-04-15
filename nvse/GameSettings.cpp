@@ -1,111 +1,128 @@
 #include "GameTypes.h"
 #include "GameSettings.h"
-#include "internal/utility.h"
 
-GameSettingCollection **g_GameSettingCollection = (GameSettingCollection**)0x11C8048;
-IniSettingCollection **g_INISettingCollection = (IniSettingCollection**)0x11F96A0;
-IniSettingCollection **g_INIPrefCollection = (IniSettingCollection**)0x11F35A0;
-IniSettingCollection **g_INIBlendSettingCollection = (IniSettingCollection**)0x11CC694;
-IniSettingCollection **g_INIRendererSettingCollection = (IniSettingCollection**)0x11F35A4;
+GameSettingCollection** g_GameSettingCollection = (GameSettingCollection**)0x011C8048;
+IniSettingCollection** g_IniSettingCollection = (IniSettingCollection**)0x011F96A0;
+IniSettingCollection** g_IniPrefCollection = (IniSettingCollection**)0x011F35A0;
 
 UInt32 Setting::GetType()
 {
-	if (name)
+	if (!name) return kSetting_Other;
+
+	switch (name[0])
 	{
-		switch (*name | 0x20)
-		{
-		case 'b':
-			return kSetting_Bool;
-		case 'c':
-			return kSetting_c;
-		case 'i':
-			return kSetting_Integer;
-		case 'u':
-			return kSetting_Unsigned;
-		case 'f':
-			return kSetting_Float;
-		case 's':
-			return kSetting_String;
-		case 'r':
-			return kSetting_r;
-		case 'a':
-			return kSetting_a;
-		default:
-			break;
+	case 'b': return kSetting_Bool;
+	case 'c': return kSetting_c;
+	case 'i': return kSetting_Integer;
+	case 'u': return kSetting_Unsigned;
+	case 'f': return kSetting_Float;
+	case 's':
+	case 'S':
+		return kSetting_String;
+	case 'r': return kSetting_r;
+	case 'a': return kSetting_a;
+	default:
+		return kSetting_Other;
+	}
+}
+
+bool Setting::Get(double& out)
+{
+	switch (GetType())
+	{
+	case kSetting_Bool:
+	case kSetting_Integer:
+		out = data.i;
+		return true;
+	case kSetting_Unsigned:
+		out = data.uint;
+		return true;
+	case kSetting_Float:
+		out = data.f;
+		return true;
+	default:
+		return false;
+	}
+}
+
+bool Setting::Get(const char* str)
+{
+	if (GetType() == kSetting_String)
+	{
+		str = data.str;
+		return true;
+	}
+	return false;
+}
+
+const char* Setting::Get(void)
+{
+	if (GetType() == kSetting_String)
+	{
+		return data.str;
+	}
+	return NULL;
+}
+
+bool Setting::Set(double newVal)
+{
+	switch (GetType())
+	{
+	case kSetting_Bool:
+		data.i = newVal ? 1 : 0;
+		return true;
+	case kSetting_Integer:
+		data.i = newVal;
+		return true;
+	case kSetting_Unsigned:
+		data.uint = newVal;
+		return true;
+	case kSetting_Float:
+		data.f = newVal;
+		return true;
+	default:
+		return false;
+	}
+}
+
+
+bool Setting::Set(const char* str)
+{
+	if (GetType() == kSetting_String)
+	{
+		char* newVal = (char*)FormHeap_Allocate(strlen(str) + 1);
+		if (!strcpy_s(newVal, strlen(str) + 1, str)) {
+			data.str = newVal;
+			return true;
 		}
 	}
-	return kSetting_Other;
+	return false;
 }
 
-bool Setting::ValidType()
-{
-	switch (*name | 0x20)
-	{
-		case 'b':
-		case 'f':
-		case 'i':
-		case 's':
-		case 'u':
-			return true;
-		default:
-			return false;
-	}
-}
 
-void Setting::Get(double *out)
-{
-	switch (*name | 0x20)
-	{
-		case 'b':
-		case 'u':
-			*out = data.uint;
-			break;
-		case 'f':
-			*out = data.f;
-			break;
-		case 'i':
-			*out = data.i;
-			break;
-		default:
-			break;
-	}
-}
-
-void Setting::Set(float newVal)
-{
-	switch (*name | 0x20)
-	{
-		case 'b':
-			data.uint = newVal ? 1 : 0;
-			break;
-		case 'f':
-			data.f = newVal;
-			break;
-		case 'i':
-			data.i = (int)newVal;
-			break;
-		case 'u':
-			data.uint = (UInt32)newVal;
-			break;
-		default:
-			break;
-	}
-}
-
-void Setting::Set(const char *strVal, bool doFree)
-{
-	if (doFree) GameHeapFree(data.str);
-	data.str = (char*)GameHeapAlloc(StrLen(strVal) + 1);
-	StrCopy(data.str, strVal);
-}
-
-__declspec(naked) bool GameSettingCollection::GetGameSetting(char *settingName, Setting **out)
+__declspec(naked) bool GameSettingCollection::GetGameSetting(char* settingName, Setting** out)
 {
 	__asm
 	{
 		add		ecx, 0x10C
 		jmp		kNiTMapLookupAddr
 	}
+}
+
+
+GameSettingCollection* GameSettingCollection::GetSingleton()
+{
+	return *g_GameSettingCollection;
+}
+
+IniSettingCollection* IniSettingCollection::GetIniSettings()
+{
+	return *g_IniSettingCollection;
+}
+
+IniSettingCollection* IniSettingCollection::GetIniPrefs()
+{
+	return *g_IniPrefCollection;
 }
 
 class IniSettingFinder
@@ -148,17 +165,47 @@ bool GetINISetting(const char* settingName, Setting** out)
 	return false;
 }
 
-GameSettingCollection *GameSettingCollection::GetSingleton()
+bool GetNumericGameSetting(char* settingName, double* result)
 {
-	return *g_GameSettingCollection;
+	bool bResult = false;
+	*result = -1;
+
+	if (strlen(settingName))
+	{
+		Setting* setting;
+		GameSettingCollection* gmsts = GameSettingCollection::GetSingleton();
+		if (gmsts && gmsts->GetGameSetting(settingName, &setting))
+		{
+			double val;
+			if (setting->Get(val))
+			{
+				*result = val;
+				bResult = true;
+			}
+		};
+	}
+
+	return bResult;
 }
 
-IniSettingCollection *IniSettingCollection::GetIniSettings()
+bool GetNumericINISetting(char* settingName, double* result)
 {
-	return *g_INISettingCollection;
-}
+	bool bResult = false;
+	*result = -1;
 
-IniSettingCollection *IniSettingCollection::GetIniPrefs()
-{
-	return *g_INIPrefCollection;
+	if (strlen(settingName))
+	{
+		Setting* setting;
+		if (GetINISetting(settingName, &setting))
+		{
+			double val;
+			if (setting->Get(val))
+			{
+				*result = val;
+				bResult = true;
+			}
+		};
+	}
+
+	return bResult;
 }
