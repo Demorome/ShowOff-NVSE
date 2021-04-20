@@ -7,7 +7,7 @@
 #include "nvse/ParamInfos.h"
 #include "nvse/GameObjects.h"
 #include "nvse/GameUI.h"
-#include "decoding.h"
+#include "internal/decoding.h"
 #include "params.h"
 #include "internal\utility.h"
 #include "nvse\ArrayVar.h"
@@ -15,6 +15,8 @@
 //#include "nvse\nvse\iomanip"
 
 #include <string>
+
+#include "internal/decoding.h"
 
 //#include "jip_nvse.h"
 
@@ -227,7 +229,8 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 */
 
 #include "functions/Demo_fn_Misc.h"
-
+#include "functions/Demo_fn_Settings.h"
+#include "functions/Demo_fn_GameMechanics.h"
 
 
 #if RUNTIME
@@ -363,6 +366,21 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 #if IFYOULIKEBROKENSHIT //aka functions being tested (or just abandoned).
 	RegisterScriptCommand(CompleteChallenge);
 	RegisterScriptCommand(SetBaseActorValue);
+
+	/*
+RegisterScriptCommand(SetNumericGameSettingAlt);
+RegisterScriptCommand(SetNumericINISettingAlt);
+*/
+	RegisterScriptCommand(DumpGameSettings);
+
+	//RegisterScriptCommand(SetOnHitAltEventHandler);
+
+	RegisterScriptCommand(GetItemRefValue);
+	RegisterScriptCommand(GetItemRefHealth);  //THESE PROBABLY NEED SAFETY CHECKS (check if loaded in mid-high)
+	//RegisterScriptCommand(GetCalculatedItemWeight);
+
+	RegisterScriptCommand(SetPlayerCanPickpocketEquippedItems);
+	RegisterScriptCommand(MultiJump);
 #endif
 
 	/* ONLY COMMANDS WITH LISTED OPCODES SHOULD BE USED IN SCRIPTS */
@@ -373,18 +391,13 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	RegisterScriptCommand(DumpFormList);
 
 	RegisterScriptCommand(IsGameSetting); //For use in scripts to safety check; any other gamesetting function can already be used in console to check if a gamesetting exists.
-	RegisterScriptCommand(IsINISetting); //Uses the GetNumericINISetting "SettingName:CategoryName" format!
-
+	RegisterScriptCommand(IsINISetting); //Uses the GetNumericINISetting "SettingName:CategoryName" format
 	RegisterScriptCommand(ModNumericGameSetting);
 	RegisterScriptCommand(ModNumericINISetting);
 
-	//RegisterScriptCommand(SetOnHitAltEventHandler);
-
-	RegisterScriptCommand(GetItemRefValue);
-	RegisterScriptCommand(GetItemRefHealth);  //THESE PROBABLY NEED SAFETY CHECKS (check if loaded in mid-high)
-	//RegisterScriptCommand(GetCalculatedItemWeight);
 	
 	return true;
 
 }
+
 

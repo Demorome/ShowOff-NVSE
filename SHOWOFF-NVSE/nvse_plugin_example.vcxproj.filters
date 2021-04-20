@@ -141,6 +141,18 @@
     <ClInclude Include="Demo_ev_Misc.h">
       <Filter>Events</Filter>
     </ClInclude>
+    <ClInclude Include="functions\Demo_fn_Settings.h">
+      <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\Demo_fn_GameMechanics.h">
+      <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\NiPoint.h">
+      <Filter>internal</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\StewieMagic.h">
+      <Filter>internal</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

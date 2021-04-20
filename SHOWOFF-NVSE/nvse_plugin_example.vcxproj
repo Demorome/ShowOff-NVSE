@@ -333,7 +333,9 @@
     <ClInclude Include="..\nvse\SafeWrite.h" />
     <ClInclude Include="..\nvse\Utilities.h" />
     <ClInclude Include="Demo_ev_Misc.h" />
+    <ClInclude Include="functions\Demo_fn_GameMechanics.h" />
     <ClInclude Include="functions\Demo_fn_Misc.h" />
+    <ClInclude Include="functions\Demo_fn_Settings.h" />
     <ClInclude Include="functions\Tomm_fn_Misc.h" />
     <ClInclude Include="functions\Tomm_fn_UI.h" />
     <ClInclude Include="functions\Tomm_JiP_FileStream.h" />
@@ -342,6 +344,8 @@
     <ClInclude Include="internal\havok.h" />
     <ClInclude Include="internal\jip_nvse.h" />
     <ClInclude Include="internal\netimmerse.h" />
+    <ClInclude Include="internal\NiPoint.h" />
+    <ClInclude Include="internal\StewieMagic.h" />
     <ClInclude Include="internal\utility.h" />
     <ClInclude Include="ShowOffNVSE.h" />
   </ItemGroup>

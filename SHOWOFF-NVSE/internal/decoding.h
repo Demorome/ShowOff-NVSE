@@ -1,5 +1,13 @@
 #pragma once
+#include "GameBSExtraData.h"
+#include "GameForms.h"
+#include "GameObjects.h"
+#include "GameTasks.h"
+#include "GameTiles.h"
+#include "netimmerse.h"
+#include "internal/NiPoint.h" 
 
+class BSGameSound;
 class NiBSBoneLODController;
 class NiBSplineCompTransformInterpolator;
 struct CombatTarget;
@@ -72,6 +80,94 @@ class BGSPrimitiveSphere : public BGSPrimitive
 public:
 	BGSPrimitiveSphere();
 	~BGSPrimitiveSphere();
+};
+
+class BSAudioListener
+{
+public:
+	BSAudioListener();
+	~BSAudioListener();
+
+	virtual BSAudioListener* Destroy(bool doFree);
+	virtual void	Unk_01(void);
+	virtual void	Unk_02(void);
+	virtual void	Unk_03(void);
+	virtual void	Unk_04(void);
+	virtual void	Unk_05(void);
+	virtual void	Unk_06(void);
+	virtual void	Unk_07(void);
+	virtual void	Unk_08(void);
+	virtual void	Unk_09(void);
+	virtual void	Unk_0A(void);
+	virtual void	Unk_0B(void);
+	virtual void	Unk_0C(void);
+};
+
+// 64
+class BSWin32AudioListener : public BSAudioListener
+{
+public:
+	BSWin32AudioListener();
+	~BSWin32AudioListener();
+
+	UInt32			unk04[14];		// 04
+	float			flt3C;			// 3C
+	UInt32			unk40[9];		// 40
+};
+
+class BSWin32Audio
+{
+public:
+	BSWin32Audio();
+	~BSWin32Audio();
+
+	virtual void	Destroy(bool doFree);
+	virtual void	Unk_01(void);
+	virtual void	Unk_02(void);
+	virtual void	Unk_03(void);
+	virtual void	Unk_04(void);
+	virtual BSGameSound* CreateGameSound(const char* filePath);
+	virtual void	Unk_06(void);
+	virtual void	Unk_07(void);
+
+	UInt32					unk004[3];		// 004
+	BSWin32AudioListener* listener;		// 010
+	UInt32					unk014[3];		// 014
+	bool(*sub_82D150)(UInt32*, UInt32*, UInt32*, UInt32*);	// 020
+	bool(*sub_82D280)(UInt32*, UInt32*, UInt32*, UInt32*);	// 024
+	bool(*sub_5E3630)(UInt32*);	// 028
+	UInt32(*sub_82D400)(UInt32*, TESSound*, UInt32*);	// 02C
+	void(*sub_832C40)(void);	// 030
+	void(*sub_832C80)(void);	// 034
+
+	static BSWin32Audio* GetSingleton() { return *(BSWin32Audio**)0x11F6D98; };
+};
+
+struct Sound
+{
+	UInt32 unk00;
+	UInt8 byte04;
+	UInt8 pad05;
+	UInt8 pad06;
+	UInt8 pad07;
+	UInt32 unk08;
+
+	Sound() : unk00(0xFFFFFFFF), byte04(0), unk08(0) {}
+
+
+	Sound(const char* soundPath, UInt32 flags)
+	{
+		ThisStdCall(0xAD7550, BSWin32Audio::GetSingleton(), this, soundPath, flags);
+	}
+	Sound(UInt32 refId, UInt32 flags)
+	{
+		ThisStdCall(0xAD73B0, BSWin32Audio::GetSingleton(), this, refId, flags);
+	}
+
+	void Play()
+	{
+		ThisStdCall(0xAD8830, this, 0);
+	}
 };
 
 // 18
@@ -180,6 +276,7 @@ struct DetectionData
 	UInt8		byte1F;			// 1F
 };
 
+/*
 // 46C
 class HighProcess : public MiddleHighProcess
 {
@@ -300,6 +397,7 @@ public:
 	UInt32								unk454[6];			// 454
 };
 STATIC_ASSERT(sizeof(HighProcess) == 0x46C);
+*/
 
 // 150
 class Projectile : public MobileObject
@@ -1014,37 +1112,53 @@ public:
 	ContainerMenu();
 	~ContainerMenu();
 
-	TileImage			*tile028;		// 028
-	TileText			*tile02C;		// 02C
-	TileImage			*tile030;		// 030
-	TileText			*tile034;		// 034
-	TileImage			*tile038;		// 038
-	TileImage			*tile03C;		// 03C
-	TileText			*tile040;		// 040
-	TileImage			*tile044;		// 044
-	TileImage			*tile048;		// 048
-	TileImage			*tile04C;		// 04C
-	TileImage			*tile050;		// 050
-	TileImage			*tile054;		// 054
-	TileImage			*tile058;		// 058
-	TileRect			*tile05C;		// 05C
-	TileRect			*tile060;		// 060
-	TileRect			*tile064;		// 064
-	TileRect			*tile068;		// 068
-	TileRect			*tile06C;		// 06C
-	TileRect			*tile070;		// 070
-	TESObjectREFR		*containerRef;	// 074
+	enum Mode
+	{
+		kNormal = 0x1,
+		kPickpocket,
+		kTeammate,
+		kRockItLauncher
+	};
+
+	TileImage* tile028;		// 028
+	TileText* tile02C;		// 02C
+	TileImage* tile030;		// 030
+	TileText* tileInventoryWeight;		// 034
+	TileImage* tile038;		// 038
+	TileImage* tile03C;		// 03C
+	TileText* tile040;		// 040
+	TileImage* tile044;		// 044
+	TileImage* tile048;		// 048
+	TileImage* tile04C;		// 04C
+	TileImage* takeAllTile;	// 050
+	TileImage* tile054;		// 054
+	TileImage* tile058;		// 058
+	TileRect* tile05C;		// 05C
+	TileRect* tile060;		// 060
+	TileRect* tile064;		// 064
+	TileRect* tile068;		// 068
+	TileRect* tile06C;		// 06C
+	TileRect* tile070;		// 070
+	TESObjectREFR* containerRef;	// 074
 	tList<void>			list078;		// 078
-	UInt32				unk080;			// 080
-	UInt32				unk084;			// 084
-	UInt32				unk088;			// 088
+	UInt32				mode;			// 080
+	UInt32				valueTransfered;// 084
+	UInt8				hasPickedPocket;// 088
+	UInt8				hasFailedPickpocket;	// 089
+	UInt8				pad08A;			// 08A
+	UInt8				pad08B;			// 08B
 	UInt32				leftFilter;		// 08C
 	UInt32				rightFilter;	// 090
-	UInt32				unk094;			// 094
+	UInt32				menuSoundID;	// 094
 	MenuItemEntryList	leftItems;		// 098
 	MenuItemEntryList	rightItems;		// 0C8
-	MenuItemEntryList	*currentItems;	// 0F8
-	UInt32				unk0FC[4];		// 0FC
+	MenuItemEntryList* currentItems;	// 0F8
+	UInt32				unk0FC;			// 0FC
+	Sound				menuSound;		// 100
+
+	static ContainerMenu* GetSingleton() { return *(ContainerMenu**)(0x11D93F8); }
+	static ContChangesEntry* GetSelection() { return *(ContChangesEntry**)(0x11D93FC); }
+	static void SetSelection(ContChangesEntry* entry) { *(ContChangesEntry**)(0x11D93FC) = entry; }
 };
 STATIC_ASSERT(sizeof(ContainerMenu) == 0x10C);
 
@@ -1436,7 +1550,7 @@ public:
 	UInt32				unk19C[16];		// 19C
 };
 STATIC_ASSERT(sizeof(HackingMenu) == 0x1DC);
-
+/*
 struct VATSTargetInfo
 {
 	UInt32 actionType;
@@ -1457,6 +1571,7 @@ struct VATSTargetInfo
 	UInt8 gap25[3];
 };
 STATIC_ASSERT(sizeof(VATSTargetInfo) == 0x28);
+*/
 // 144
 class VATSMenu : public Menu			// 1056
 {
@@ -2557,92 +2672,7 @@ public:
 };
 STATIC_ASSERT(sizeof(BSAudioManager) == 0x188);
 
-class BSAudioListener
-{
-public:
-	BSAudioListener();
-	~BSAudioListener();
 
-	virtual BSAudioListener	*Destroy(bool doFree);
-	virtual void	Unk_01(void);
-	virtual void	Unk_02(void);
-	virtual void	Unk_03(void);
-	virtual void	Unk_04(void);
-	virtual void	Unk_05(void);
-	virtual void	Unk_06(void);
-	virtual void	Unk_07(void);
-	virtual void	Unk_08(void);
-	virtual void	Unk_09(void);
-	virtual void	Unk_0A(void);
-	virtual void	Unk_0B(void);
-	virtual void	Unk_0C(void);
-};
-
-// 64
-class BSWin32AudioListener : public BSAudioListener
-{
-public:
-	BSWin32AudioListener();
-	~BSWin32AudioListener();
-
-	UInt32			unk04[14];		// 04
-	float			flt3C;			// 3C
-	UInt32			unk40[9];		// 40
-};
-
-class BSWin32Audio
-{
-public:
-	BSWin32Audio();
-	~BSWin32Audio();
-
-	virtual void	Destroy(bool doFree);
-	virtual void	Unk_01(void);
-	virtual void	Unk_02(void);
-	virtual void	Unk_03(void);
-	virtual void	Unk_04(void);
-	virtual BSGameSound* CreateGameSound(const char* filePath);
-	virtual void	Unk_06(void);
-	virtual void	Unk_07(void);
-
-	UInt32					unk004[3];		// 004
-	BSWin32AudioListener* listener;		// 010
-	UInt32					unk014[3];		// 014
-	bool(*sub_82D150)(UInt32*, UInt32*, UInt32*, UInt32*);	// 020
-	bool(*sub_82D280)(UInt32*, UInt32*, UInt32*, UInt32*);	// 024
-	bool(*sub_5E3630)(UInt32*);	// 028
-	UInt32(*sub_82D400)(UInt32*, TESSound*, UInt32*);	// 02C
-	void(*sub_832C40)(void);	// 030
-	void(*sub_832C80)(void);	// 034
-
-	static BSWin32Audio* GetSingleton() { return *(BSWin32Audio * *)0x11F6D98; };
-};
-struct Sound
-{
-	UInt32 unk00;
-	UInt8 byte04;
-	UInt8 pad05;
-	UInt8 pad06;
-	UInt8 pad07;
-	UInt32 unk08;
-
-	Sound() : unk00(0xFFFFFFFF), byte04(0), unk08(0) {}
-
-
-	Sound(const char* soundPath, UInt32 flags)
-	{
-		ThisStdCall(0xAD7550, BSWin32Audio::GetSingleton(), this, soundPath, flags);
-	}
-	Sound(UInt32 refId, UInt32 flags)
-	{
-		ThisStdCall(0xAD73B0, BSWin32Audio::GetSingleton(), this, refId, flags);
-	}
-
-	void Play()
-	{
-		ThisStdCall(0xAD8830, this, 0);
-	}
-};
 // D8
 class FORenderedMenu
 {
@@ -3368,6 +3398,7 @@ public:
 	static ExtraSpecialRenderFlags* __stdcall Create(UInt32 _flags = 0);
 };
 
+/*
 // 48
 struct VATSCameraData
 {
@@ -3391,6 +3422,7 @@ struct VATSCameraData
 	UInt32							unk44;			// 44
 };
 STATIC_ASSERT(sizeof(VATSCameraData) == 0x48);
+*/
 
 // 10
 struct SystemColorManager
