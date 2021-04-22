@@ -6,14 +6,11 @@
 #include "internal/StewieMagic.h"
 #include "internal/jip_nvse.h"
 
-#if IFYOULIKEBROKENSHIT
-
 DEFINE_COMMAND_PLUGIN(SetPlayerCanPickpocketEquippedItems, , 0, 1, kParams_OneOptionalInt);
 bool Cmd_SetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
 {
 	UInt32 bOn;
-
-	if (ExtractArgs(EXTRACT_ARGS, &bOn))
+	if (NUM_ARGS && ExtractArgs(EXTRACT_ARGS, &bOn))
 	{
 		bool bCheck = canPlayerPickpocketEqItems();
 		if (bOn && !bCheck)
@@ -27,10 +24,13 @@ bool Cmd_SetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
 			// revert the change to the check in ContainerMenu::ShouldHideItem.
 			WriteRelCall(0x75E87A, 0x4BDDD0);
 		}
-		*result = canPlayerPickpocketEqItems();
 	}
+	*result = canPlayerPickpocketEqItems();
 	return true;
 }
+
+
+#if IFYOULIKEBROKENSHIT
 
 //not so ez...
 bool __fastcall ez(TESAnimGroup* entry, void* edx)

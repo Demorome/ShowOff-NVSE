@@ -379,8 +379,7 @@ RegisterScriptCommand(SetNumericINISettingAlt);
 	RegisterScriptCommand(GetItemRefHealth);  //THESE PROBABLY NEED SAFETY CHECKS (check if loaded in mid-high)
 	//RegisterScriptCommand(GetCalculatedItemWeight);
 
-	RegisterScriptCommand(SetPlayerCanPickpocketEquippedItems);
-	RegisterScriptCommand(MultiJump);
+	RegisterScriptCommand(MultiJump);  //super broke
 #endif
 
 	/* ONLY COMMANDS WITH LISTED OPCODES SHOULD BE USED IN SCRIPTS */
@@ -394,6 +393,9 @@ RegisterScriptCommand(SetNumericINISettingAlt);
 	RegisterScriptCommand(IsINISetting); //Uses the GetNumericINISetting "SettingName:CategoryName" format
 	RegisterScriptCommand(ModNumericGameSetting);
 	RegisterScriptCommand(ModNumericINISetting);
+
+	RegisterScriptCommand(SetPlayerCanPickpocketEquippedItems);
+
 
 	
 	return true;
