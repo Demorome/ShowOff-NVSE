@@ -854,8 +854,8 @@ public:
 	UInt8								byte65B;				// 65B
 	UInt32								unk65C[4];				// 65C
 	UInt8								byte66C;				// 66C
-	UInt8								byte66D;				// 66D
-	UInt8								byte66E;				// 66E
+	UInt8								byte66D;				// 66D  Something to do with Fast Travel flags
+	UInt8								canSleepWait;			// 66E
 	UInt8								byte66F;				// 66F
 	//UInt32								unk670[4];				// 670
 	float                               worldFOV;				//670

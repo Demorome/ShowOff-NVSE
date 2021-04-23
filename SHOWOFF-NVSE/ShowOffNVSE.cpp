@@ -12,6 +12,8 @@
 #include "internal\utility.h"
 #include "nvse\ArrayVar.h"
 #include "ShowOffNVSE.h"
+#include "GameData.h"
+
 //#include "nvse\nvse\iomanip"
 
 #include <string>
@@ -47,7 +49,6 @@ bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
 
 NVSEStringVarInterface* StrIfc = NULL;
 HUDMainMenu* g_HUDMainMenu = NULL;
-InterfaceManager* g_interfaceManager = NULL;
 TileMenu** g_tileMenuArray = NULL;
 UInt32 g_screenWidth = 0;
 UInt32 g_screenHeight = 0;
@@ -201,7 +202,14 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		//_MESSAGE("Received DELETE message with file path %s", msg->data);
 		break;
 
-	case NVSEMessagingInterface::kMessage_DeferredInit: 
+	case NVSEMessagingInterface::kMessage_DeferredInit:
+		g_thePlayer = PlayerCharacter::GetSingleton();
+		g_processManager = (ProcessManager*)0x11E0E80;
+		g_bsWin32Audio = BSWin32Audio::GetSingleton();
+		g_dataHandler = DataHandler::Get();
+		g_audioManager = (BSAudioManager*)0x11F6EF0;
+		g_currentSky = (Sky**)0x11DEA20;
+		
 		g_HUDMainMenu = *(HUDMainMenu**)0x11D96C0;  // From JiP's patches game
 		g_interfaceManager = *(InterfaceManager**)0x11D8A80; // From JiP's patches game
 		g_tileMenuArray = *(TileMenu***)0x11F350C; // From JiP's patches game
@@ -303,9 +311,6 @@ bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* info)
 
 bool NVSEPlugin_Load(const NVSEInterface* nvse)
 {
-
-
-
 	g_pluginHandle = nvse->GetPluginHandle();
 
 	// save the NVSEinterface in cas we need it later
@@ -315,50 +320,32 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	g_messagingInterface = (NVSEMessagingInterface*)nvse->QueryInterface(kInterface_Messaging);
 	g_messagingInterface->RegisterListener(g_pluginHandle, "NVSE", MessageHandler);
 
-
-
-
-
 	_MESSAGE("DemoNVSE Version: %d", DemoNVSEVersion);
-
-
 
 
 #if RUNTIME
 	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 #endif
 
+	// Do hooks
+	//WriteRelCall(0x75E121, UINT32(CalculatePickpocketChance));
 
+
+	
+
+	// Register script commands
+	// 
 	//https://geckwiki.com/index.php?title=NVSE_Opcode_Base
-
-	 // register commands
 #define REG_TYPED_CMD(name, type) nvse->RegisterTypedCommand(&kCommandInfo_##name,kRetnType_##type);
 #define REG_CMD_STR(name) nvse->RegisterTypedCommand(&kCommandInfo_##name, kRetnType_String) // From JIP_NVSE.H
 #define REG_CMD_ARR(name) nvse->RegisterTypedCommand(&kCommandInfo_##name, kRetnType_Array) // From JIP_NVSE.H
 
 	nvse->SetOpcodeBase(0x2000);
 
-#if 0
-	//  v.1.00
-	/*3961*/RegisterScriptCommand(SetHUDVisibilityFlags);
-	/*3962*/RegisterScriptCommand(GetHUDVisibilityFlags);
-	/*3963*/RegisterScriptCommand(DumpTileInfo);
-	/*3964*/RegisterScriptCommand(DumpTileInfoAll);
-	/*3965*/RegisterScriptCommand(GetScreenTrait);
-	/*3966*/RegisterScriptCommand(GetCalculatedPos);
-	/*3967*/RegisterScriptCommand(GetCursorTrait);
-	/*3967*/RegisterScriptCommand(SetCursorTrait);
-	/*3968*/RegisterScriptCommand(GetSUPVersion);
-	//  v.1.1
-	RegisterScriptCommand(SetCursorTraitGradual);
-	RegisterScriptCommand(GetFileSize);
-	RegisterScriptCommand(GetLoadedSaveSize);
+#if 0 //examples
 	RegisterScriptCommand(GetSavedSaveSize);
 	REG_CMD_STR(GetSaveName);
-	RegisterScriptCommand(RoundAlt);
-	RegisterScriptCommand(Round);
-	RegisterScriptCommand(MarkScriptOnLoad);
-	RegisterScriptCommand(IsScriptMarkedOnLoad);
+
 	REG_CMD_ARR(GetNearCells, Array);
 	REG_CMD_ARR(DumpTileInfoToArray, Array);
 #endif
@@ -368,9 +355,9 @@ bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	RegisterScriptCommand(SetBaseActorValue);
 
 	/*
-RegisterScriptCommand(SetNumericGameSettingAlt);
-RegisterScriptCommand(SetNumericINISettingAlt);
-*/
+	RegisterScriptCommand(SetNumericGameSettingAlt);
+	RegisterScriptCommand(SetNumericINISettingAlt);
+	*/
 	RegisterScriptCommand(DumpGameSettings);
 
 	//RegisterScriptCommand(SetOnHitAltEventHandler);
@@ -380,6 +367,8 @@ RegisterScriptCommand(SetNumericINISettingAlt);
 	//RegisterScriptCommand(GetCalculatedItemWeight);
 
 	RegisterScriptCommand(MultiJump);  //super broke
+	//RegisterScriptCommand(SetPlayerPickpocketBaseChance);
+	RegisterScriptCommand(GetFastTravelFlags);
 #endif
 
 	/* ONLY COMMANDS WITH LISTED OPCODES SHOULD BE USED IN SCRIPTS */
@@ -395,8 +384,10 @@ RegisterScriptCommand(SetNumericINISettingAlt);
 	RegisterScriptCommand(ModNumericINISetting);
 
 	RegisterScriptCommand(SetPlayerCanPickpocketEquippedItems);
-
-
+	RegisterScriptCommand(GetPlayerCanPickpocketEquippedItems);
+	RegisterScriptCommand(GetPCCanFastTravel);
+	RegisterScriptCommand(GetPCCanSleepWait);
+	RegisterScriptCommand(SetPCCanSleepWait);
 	
 	return true;
 
