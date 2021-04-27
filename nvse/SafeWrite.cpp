@@ -34,19 +34,27 @@ void __stdcall SafeWriteBuf(UInt32 addr, void * data, UInt32 len)
 
 void __stdcall WriteRelJump(UInt32 jumpSrc, UInt32 jumpTgt)
 {
+	// ask to be able to modify the desired region of code (normally programs prevent code being modified by other code to prevent exploits)
 	UInt32 oldProtect;
 	VirtualProtect((void*)jumpSrc, 5, PAGE_EXECUTE_READWRITE, &oldProtect);
-	*(UInt8*)jumpSrc = 0xE9;
-	*(UInt32*)(jumpSrc + 1) = jumpTgt - jumpSrc - 5;
+	
+	*(UInt8*)jumpSrc = 0xE9;  // write the 'long jump' instruction
+	*(UInt32*)(jumpSrc + 1) = jumpTgt - jumpSrc - 5;  // write the relative offset 
+
+	// restore old protection of code
 	VirtualProtect((void*)jumpSrc, 5, oldProtect, &oldProtect);
 }
 
 void __stdcall WriteRelCall(UInt32 jumpSrc, UInt32 jumpTgt)
 {
+	// ask to be able to modify the desired region of code (normally programs prevent code being modified by other code to prevent exploits)
 	UInt32 oldProtect;
 	VirtualProtect((void*)jumpSrc, 5, PAGE_EXECUTE_READWRITE, &oldProtect);
-	*(UInt8*)jumpSrc = 0xE8;
-	*(UInt32*)(jumpSrc + 1) = jumpTgt - jumpSrc - 5;
+	
+	*(UInt8*)jumpSrc = 0xE8;  // write the 'call' instruction
+	*(UInt32*)(jumpSrc + 1) = jumpTgt - jumpSrc - 5;  // write the relative offset 
+
+	// restore old protection of code
 	VirtualProtect((void*)jumpSrc, 5, oldProtect, &oldProtect);
 }
 

@@ -296,20 +296,6 @@
     <ClCompile Include="..\nvse\GameTypes.cpp" />
     <ClCompile Include="..\nvse\SafeWrite.cpp" />
     <ClCompile Include="..\nvse\Utilities.cpp" />
-    <ClCompile Include="dllmain.c">
-      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug ng|Win32'">
-      </ForcedIncludeFiles>
-      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </ForcedIncludeFiles>
-      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Debug GECK|Win32'">
-      </ForcedIncludeFiles>
-      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release ng|Win32'">
-      </ForcedIncludeFiles>
-      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </ForcedIncludeFiles>
-      <ForcedIncludeFiles Condition="'$(Configuration)|$(Platform)'=='Release GECK|Win32'">
-      </ForcedIncludeFiles>
-    </ClCompile>
     <ClCompile Include="internal\utility.cpp" />
     <ClCompile Include="ShowOffNVSE.cpp" />
   </ItemGroup>
@@ -323,6 +309,7 @@
     <ClInclude Include="..\nvse\GameForms.h" />
     <ClInclude Include="..\nvse\GameObjects.h" />
     <ClInclude Include="..\nvse\GameOSDepend.h" />
+    <ClInclude Include="..\nvse\GameProcess.h" />
     <ClInclude Include="..\nvse\GameRTTI.h" />
     <ClInclude Include="..\nvse\GameSettings.h" />
     <ClInclude Include="..\nvse\GameTasks.h" />
@@ -347,7 +334,9 @@
     <ClInclude Include="internal\NiPoint.h" />
     <ClInclude Include="internal\StewieMagic.h" />
     <ClInclude Include="internal\utility.h" />
+    <ClInclude Include="settings.h" />
     <ClInclude Include="ShowOffNVSE.h" />
+    <ClInclude Include="SimpleINILibrary\SimpleIni.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

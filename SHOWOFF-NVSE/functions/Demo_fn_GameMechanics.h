@@ -77,6 +77,44 @@ bool Cmd_SetPCCanSleepWait_Execute(COMMAND_ARGS)
 #if IFYOULIKEBROKENSHIT
 
 
+
+DEFINE_COMMAND_PLUGIN(SetPCCanPickpocketInCombat, , 0, 1, kParams_OneInt);
+bool Cmd_SetPCCanPickpocketInCombat_Execute(COMMAND_ARGS)
+{
+	UInt32 bOn;
+	if (ExtractArgs(EXTRACT_ARGS, &bOn))
+		g_canPlayerPickpocketInCombat = bOn;
+	
+	return true;
+}
+
+/*
+bool Cmd_GetNoUnequip_Execute(COMMAND_ARGS)
+{
+	InventoryRef* invRef = InventoryRefGetForID(thisObj->refID);
+	*result = (invRef && invRef->xData && invRef->xData->HasType(kExtraData_CannotWear)) ? 1 : 0;
+	return true;
+}
+
+bool Cmd_SetNoUnequip_Execute(COMMAND_ARGS)
+{
+	UInt32 noUnequip;
+	if (ExtractArgs(EXTRACT_ARGS, &noUnequip))
+	{
+		InventoryRef* invRef = InventoryRefGetForID(thisObj->refID);
+		ExtraDataList* xData = invRef ? invRef->xData : NULL;
+		if (xData)
+		{
+			if (!noUnequip)
+				RemoveExtraType(xData, kExtraData_CannotWear);
+			else if (xData->HasType(kExtraData_Worn) && !xData->HasType(kExtraData_CannotWear))
+				AddExtraData(xData, ExtraCannotWear::Create());
+		}
+	}
+	return true;
+}
+*/
+
 DEFINE_COMMAND_PLUGIN(GetFastTravelFlags, , 0, 0, NULL);
 bool Cmd_GetFastTravelFlags_Execute(COMMAND_ARGS)
 {

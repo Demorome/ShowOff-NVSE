@@ -295,6 +295,8 @@ enum
 };
 
 #define GetExtraType(xDataList, Type) (Extra ## Type*)xDataList.GetByType(kExtraData_ ## Type)
+#define GetExtraTypeJIP(xDataList, Type) (Extra ## Type*)GetExtraData(xDataList, kExtraData_ ## Type)
+
 extern char *GetExtraDataValue(BSExtraData *traverse);
 extern const char *GetExtraDataName(UInt8 extraDataType);
 

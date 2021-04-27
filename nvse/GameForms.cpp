@@ -29,6 +29,23 @@ TESForm *TESForm::TryGetREFRParent()
 	return this;
 }
 
+float TESForm::GetWeight()
+{
+	TESWeightForm* weightForm = DYNAMIC_CAST(this, TESForm, TESWeightForm);
+	if (weightForm)
+	{
+		return weightForm->weight;
+	}
+	else {
+		TESAmmo* pAmmo = DYNAMIC_CAST(this, TESForm, TESAmmo);
+		if (pAmmo)
+		{
+			return pAmmo->weight;
+		}
+	}
+	return 0.0F;
+}
+
 UInt8 TESForm::GetModIndex() const
 {
 	return modIndex;

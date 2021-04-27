@@ -43,6 +43,7 @@ struct BaseExtraList
 	void DebugDump() const;
 	bool IsWorn();
 	char GetExtraFactionRank(TESFaction *faction);
+	SInt32 GetCount() const;
 };
 
 struct ExtraDataList : public BaseExtraList
@@ -52,3 +53,22 @@ struct ExtraDataList : public BaseExtraList
 };
 
 STATIC_ASSERT(sizeof(ExtraDataList) == 0x020);
+
+
+typedef BSExtraData* (__thiscall* _GetExtraData)(const BaseExtraList*, UInt8);
+extern const _GetExtraData GetExtraData;
+
+typedef BSExtraData* (__thiscall* _AddExtraData)(BaseExtraList*, BSExtraData*);
+extern const _AddExtraData AddExtraData;
+
+typedef void(__thiscall* _RemoveExtraData)(BaseExtraList*, BSExtraData*, bool);
+extern const _RemoveExtraData RemoveExtraData;
+
+typedef void(__thiscall* _RemoveExtraType)(BaseExtraList*, UInt8);
+extern const _RemoveExtraType RemoveExtraType;
+
+typedef void(__thiscall* _ClearExtraDataList)(BaseExtraList*, bool);
+extern const _ClearExtraDataList ClearExtraDataList;
+
+typedef void(__thiscall* _CopyExtraDataList)(BaseExtraList*, const BaseExtraList*);
+extern const _CopyExtraDataList CopyExtraDataList;

@@ -7,6 +7,7 @@
 #include "internal/netimmerse.h"
 #include "internal/havok.h"
 #include "stdint.h"
+
 enum FormType
 {
 	kFormType_None = 0,
@@ -544,12 +545,13 @@ public:
 
 	enum
 	{
-		kFormFlags_Initialized =	0x00000008,	// set by TESForm::InitItem()
-		kFormFlags_CastShadows =	0x00000200,
-		kFormFlags_QuestItem =		0x00000400,
-		kFormFlags_IsPermanent =	0x00000800,
-		kFormFlags_DontSaveForm =	0x00004000,	// TODO: investigate
-		kFormFlags_Compressed =		0x00040000,
+		kFormFlags_Initialized = 0x00000008,	// set by TESForm::InitItem()
+		kFormFlags_Deleted = 0x00000020,
+		kFormFlags_CastShadows = 0x00000200,
+		kFormFlags_QuestItem = 0x00000400,
+		kFormFlags_IsPermanent = 0x00000800,
+		kFormFlags_DontSaveForm = 0x00004000,	// TODO: investigate
+		kFormFlags_Compressed = 0x00040000,
 	};
 
 	enum
@@ -593,15 +595,20 @@ public:
 	bool IsReference();
 
 	bool HasScript();
-	bool GetScriptAndEventList(Script *&script, ScriptEventList *&eventList);
+	bool GetScriptAndEventList(Script*& script, ScriptEventList*& eventList);
 	bool IsItemPlayable();
 	UInt32 GetItemValue();
+	float GetWeight();
+	float GetModifiedWeight();
 	UInt8 GetOverridingModIdx();
-	const char *GetDescriptionText();
-	const char *RefToString();
-	TESLeveledList *GetLvlList();
+	const char* GetDescriptionText();
+	const char* RefToString();
+	TESLeveledList* GetLvlList();
 	void SetJIPFlag(UInt8 jipFlag, bool bSet);
-
+	bool IsQuestItem2() { return flags & kFormFlags_QuestItem; };
+	bool IsDisabled() { return flags & kFormFlags_IsPermanent; };
+	bool IsDeleted() { return flags & kFormFlags_Deleted; };
+	
 	MEMBER_FN_PREFIX(TESForm);
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 	DEFINE_MEMBER_FN(MarkAsTemporary, void, 0x00484490);	// probably a member of TESForm
@@ -1578,18 +1585,21 @@ public:
 
 	virtual UInt32	GetBaseActorValue(UInt32 avCode);		// GetBaseActorValue (used from Eval) result in EAX
 	virtual float	GetBaseAVFloat(UInt32 avCode);			// GetBaseActorValue internal, result in st
-	virtual float	Fn_02(UInt32 avCode);					// GetActorValue internal, result in EAX
+	virtual int		Fn_02(UInt32 avCode);					// GetActorValue internal, result in EAX
 	virtual float	GetActorValue(UInt32 avCode);			// GetActorValue (used from Eval) result in EAX
-	virtual float	Fn_04(UInt32 avCode);					// GetBaseActorValue04 (internal) result in st
+	virtual float	GetTempActorValue(UInt32 avCode);					// GetBaseActorValue04 (internal) result in st
 	virtual float	GetActorValueDamage(UInt32 avCode);
-	virtual float	Fn_06(UInt32 avCode);					// GetDamageActorValue or GetModifiedActorValue		called from Fn_08, result in st, added to Fn_01
-	virtual UInt32	Fn_07(UInt32 avCode);					// Manipulate GetPermanentActorValue, maybe convert to integer.
+	virtual float	GetPermActorValue(UInt32 avCode);					// GetDamageActorValue or GetModifiedActorValue		called from Fn_08, result in st, added to Fn_01
+	virtual UInt32	GetNormalizedPermanentAV(UInt32 avCode);					// Manipulate GetPermanentActorValue, maybe convert to integer.
 	virtual float	GetPermanentActorValue(UInt32 avCode);	// GetPermanentActorValue (used from Eval) result in EAX
-	virtual Actor*	Fn_09(void);							// GetActorBase (= this - 0x100) or GetActorBase (= this - 0x0A4)
+	virtual Actor* Fn_09(void);							// GetActorBase (= this - 0x100) or GetActorBase (= this - 0x0A4)
 	virtual UInt16	GetLevel();								// GetLevel (from ActorBase)
 
+	float GetThresholdedActorValue(UInt32 avCode) { return ThisStdCall<float>(0x66EF50, this, avCode); }
 	// SkillsCurrentValue[14] at index 20
 };
+
+STATIC_ASSERT(sizeof(ActorValueOwner) == 0x004);
 
 STATIC_ASSERT(sizeof(ActorValueOwner) == 0x004);
 

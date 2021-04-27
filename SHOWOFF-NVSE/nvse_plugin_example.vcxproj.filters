@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="dllmain.c" />
     <ClCompile Include="ShowOffNVSE.cpp" />
     <ClCompile Include="internal\utility.cpp">
       <Filter>internal</Filter>
@@ -153,6 +152,13 @@
     <ClInclude Include="internal\StewieMagic.h">
       <Filter>internal</Filter>
     </ClInclude>
+    <ClInclude Include="..\nvse\GameProcess.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="settings.h" />
+    <ClInclude Include="SimpleINILibrary\SimpleIni.h">
+      <Filter>SimpleINI Library</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
@@ -169,6 +175,9 @@
     </Filter>
     <Filter Include="Events">
       <UniqueIdentifier>{535a7a2d-76a8-47b7-a518-b8c645d5512e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SimpleINI Library">
+      <UniqueIdentifier>{a5cf6dd2-1a87-4d23-a159-50e502279200}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -15,6 +15,12 @@ PlayerCharacter *PlayerCharacter::GetSingleton()
 	return *(PlayerCharacter**)0x11DEA3C;
 }
 
+bool Actor::IsSneaking()
+{
+	Actor* actor = this;
+	return (ThisStdCall<bool>(0x4997B0, actor));
+}
+
 __declspec(naked) TESContainer *TESObjectREFR::GetContainer()
 {
 	__asm

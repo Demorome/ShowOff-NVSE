@@ -98,7 +98,7 @@ public:
 	virtual bool		IsProjectile();
 	virtual void		Unk_8A(void);			// SetParentCell (Interior only ?)
 	virtual bool		HasHealth(bool arg0);	// HasHealth (baseForm health > 0 or Flags bit23 set)
-	virtual bool		Unk_8C(void);
+	virtual bool		GetHasKnockedState(void);
 	virtual bool		Unk_8D(void);
 	virtual void		Unk_8E(void);
 	virtual void		Unk_8F(void);
@@ -206,6 +206,8 @@ public:
 STATIC_ASSERT(sizeof(TESObjectREFR) == 0x068);
 
 class BaseProcess;
+struct NiPoint3;
+
 
 // 88
 class MobileObject : public TESObjectREFR
@@ -462,14 +464,14 @@ public:
 	virtual void		Unk_CC(void);
 	virtual void		Unk_CD(void);
 	virtual void		Unk_CE(void);
-	virtual void		Unk_CF(void);
+	virtual void		DamageActionPoints(float amount); // checks GetIsGodMode before decreasing
 	virtual void		Unk_D0(void);
 	virtual void		Unk_D1(void);
 	virtual void		Unk_D2(void);
 	virtual void		Unk_D3(void);
 	virtual void		Unk_D4(void);
 	virtual void		Unk_D5(void);
-	virtual void		Unk_D6(void);
+	virtual void		IsOverencumbered(void);
 	virtual void		Unk_D7(void);
 	virtual bool		IsPlayerRef(void);
 	virtual void		Unk_D9(void);

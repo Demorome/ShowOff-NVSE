@@ -13,18 +13,17 @@
 #include "nvse\ArrayVar.h"
 #include "ShowOffNVSE.h"
 #include "GameData.h"
+#include "SafeWrite.h"
+#include "ShowOffNVSE.h"
+#include "internal/StewieMagic.h"
+#include "internal/jip_nvse.h"
 
 //#include "nvse\nvse\iomanip"
 
 #include <string>
 
+#include "settings.h"
 #include "internal/decoding.h"
-
-//#include "jip_nvse.h"
-
-
-//NoGore is unsupported in this fork
-
 
 
 
@@ -204,6 +203,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 
 	case NVSEMessagingInterface::kMessage_DeferredInit:
 		g_thePlayer = PlayerCharacter::GetSingleton();
+		g_playerAVOwner = &g_thePlayer->avOwner;
 		g_processManager = (ProcessManager*)0x11E0E80;
 		g_bsWin32Audio = BSWin32Audio::GetSingleton();
 		g_dataHandler = DataHandler::Get();
@@ -252,145 +252,163 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 
 
 
-bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* info)
+
+
+
+//No idea why the extern "C" is there.
+extern "C"
 {
-	//_MESSAGE("query");
 
-	// fill out the info structure
-	info->infoVersion = PluginInfo::kInfoVersion;
-	info->name = "Demo NVSE Plugin";
-	info->version = DemoNVSEVersion;
-
-	
-	//s_debug.CreateLog("Demo_NVSE_Debug.log");
-
-	// version checks
-	if (nvse->nvseVersion < NVSE_VERSION_INTEGER)
+	BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID lpReserved)
 	{
-		_ERROR("NVSE version too old (got %08X expected at least %08X)", nvse->nvseVersion, NVSE_VERSION_INTEGER);
-		return false;
+		if (fdwReason == DLL_PROCESS_ATTACH)
+		{
+			ShowOffHandle = hModule;
+			DisableThreadLibraryCalls(hModule);
+		}
+		return TRUE;
 	}
 
-	if (!nvse->isEditor)
+	bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* info)
 	{
-		g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
-		ExtractArgsEx = g_script->ExtractArgsEx;
-		StrIfc = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar); // From JG
+		//_MESSAGE("query");
 
-		ArrIfc = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar); // From JG
+		// fill out the info structure
+		info->infoVersion = PluginInfo::kInfoVersion;
+		info->name = "Demo NVSE Plugin";
+		info->version = DemoNVSEVersion;
 
 
-		if (nvse->runtimeVersion < RUNTIME_VERSION_1_4_0_525)
+		//s_debug.CreateLog("Demo_NVSE_Debug.log");
+
+		// version checks
+		if (nvse->nvseVersion < NVSE_VERSION_INTEGER)
 		{
-			_ERROR("incorrect runtime version (got %08X need at least %08X)", nvse->runtimeVersion, RUNTIME_VERSION_1_4_0_525);
+			_ERROR("NVSE version too old (got %08X expected at least %08X)", nvse->nvseVersion, NVSE_VERSION_INTEGER);
 			return false;
 		}
 
-		if (nvse->isNogore)
+		if (!nvse->isEditor)
 		{
-			_ERROR("NoGore is not supported");
-			return false;
+			g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
+			ExtractArgsEx = g_script->ExtractArgsEx;
+			StrIfc = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar); // From JG
+
+			ArrIfc = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar); // From JG
+
+
+			if (nvse->runtimeVersion < RUNTIME_VERSION_1_4_0_525)
+			{
+				_ERROR("incorrect runtime version (got %08X need at least %08X)", nvse->runtimeVersion, RUNTIME_VERSION_1_4_0_525);
+				return false;
+			}
+
+			if (nvse->isNogore)
+			{
+				_ERROR("NoGore is not supported");
+				return false;
+			}
 		}
+
+		else
+		{
+			if (nvse->editorVersion < CS_VERSION_1_4_0_518)
+			{
+				_ERROR("incorrect editor version (got %08X need at least %08X)", nvse->editorVersion, CS_VERSION_1_4_0_518);
+				return false;
+			}
+		}
+
+		// version checks pass
+		// any version compatibility checks should be done here
+		return true;
 	}
 
-	else
+
+
+	bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	{
-		if (nvse->editorVersion < CS_VERSION_1_4_0_518)
-		{
-			_ERROR("incorrect editor version (got %08X need at least %08X)", nvse->editorVersion, CS_VERSION_1_4_0_518);
-			return false;
-		}
-	}
+		g_pluginHandle = nvse->GetPluginHandle();
 
-	// version checks pass
-	// any version compatibility checks should be done here
-	return true;
-}
+		// save the NVSEinterface in cas we need it later
+		g_nvseInterface = (NVSEInterface*)nvse;
 
+		// register to receive messages from NVSE
+		g_messagingInterface = (NVSEMessagingInterface*)nvse->QueryInterface(kInterface_Messaging);
+		g_messagingInterface->RegisterListener(g_pluginHandle, "NVSE", MessageHandler);
 
+		_MESSAGE("DemoNVSE Version: %d", DemoNVSEVersion);
 
-bool NVSEPlugin_Load(const NVSEInterface* nvse)
-{
-	g_pluginHandle = nvse->GetPluginHandle();
-
-	// save the NVSEinterface in cas we need it later
-	g_nvseInterface = (NVSEInterface*)nvse;
-
-	// register to receive messages from NVSE
-	g_messagingInterface = (NVSEMessagingInterface*)nvse->QueryInterface(kInterface_Messaging);
-	g_messagingInterface->RegisterListener(g_pluginHandle, "NVSE", MessageHandler);
-
-	_MESSAGE("DemoNVSE Version: %d", DemoNVSEVersion);
-
+		handleIniOptions();
 
 #if RUNTIME
-	g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
+		g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 #endif
 
-	// Do hooks
-	//WriteRelCall(0x75E121, UINT32(CalculatePickpocketChance));
+		// Do hooks
+		//WriteRelCall(0x75E121, UINT32(CalculatePickpocketChance));
 
+		DoHooks();
 
-	
-
-	// Register script commands
-	// 
-	//https://geckwiki.com/index.php?title=NVSE_Opcode_Base
+		// Register script commands
+		// 
+		//https://geckwiki.com/index.php?title=NVSE_Opcode_Base
 #define REG_TYPED_CMD(name, type) nvse->RegisterTypedCommand(&kCommandInfo_##name,kRetnType_##type);
 #define REG_CMD_STR(name) nvse->RegisterTypedCommand(&kCommandInfo_##name, kRetnType_String) // From JIP_NVSE.H
 #define REG_CMD_ARR(name) nvse->RegisterTypedCommand(&kCommandInfo_##name, kRetnType_Array) // From JIP_NVSE.H
 
-	nvse->SetOpcodeBase(0x2000);
+		nvse->SetOpcodeBase(0x3A9F);
 
 #if 0 //examples
-	RegisterScriptCommand(GetSavedSaveSize);
-	REG_CMD_STR(GetSaveName);
+		RegisterScriptCommand(GetSavedSaveSize);
+		REG_CMD_STR(GetSaveName);
 
-	REG_CMD_ARR(GetNearCells, Array);
-	REG_CMD_ARR(DumpTileInfoToArray, Array);
+		REG_CMD_ARR(GetNearCells, Array);
+		REG_CMD_ARR(DumpTileInfoToArray, Array);
 #endif
 
 #if IFYOULIKEBROKENSHIT //aka functions being tested (or just abandoned).
-	RegisterScriptCommand(CompleteChallenge);
-	RegisterScriptCommand(SetBaseActorValue);
+		RegisterScriptCommand(CompleteChallenge);
+		RegisterScriptCommand(SetBaseActorValue);
 
-	/*
-	RegisterScriptCommand(SetNumericGameSettingAlt);
-	RegisterScriptCommand(SetNumericINISettingAlt);
-	*/
-	RegisterScriptCommand(DumpGameSettings);
+		/*
+		RegisterScriptCommand(SetNumericGameSettingAlt);
+		RegisterScriptCommand(SetNumericINISettingAlt);
+		*/
+		RegisterScriptCommand(DumpGameSettings);
 
-	//RegisterScriptCommand(SetOnHitAltEventHandler);
+		//RegisterScriptCommand(SetOnHitAltEventHandler);
 
-	RegisterScriptCommand(GetItemRefValue);
-	RegisterScriptCommand(GetItemRefHealth);  //THESE PROBABLY NEED SAFETY CHECKS (check if loaded in mid-high)
-	//RegisterScriptCommand(GetCalculatedItemWeight);
+		RegisterScriptCommand(GetItemRefValue);
+		RegisterScriptCommand(GetItemRefHealth);  //THESE PROBABLY NEED SAFETY CHECKS (check if loaded in mid-high)
+		//RegisterScriptCommand(GetCalculatedItemWeight);
 
-	RegisterScriptCommand(MultiJump);  //super broke
-	//RegisterScriptCommand(SetPlayerPickpocketBaseChance);
-	RegisterScriptCommand(GetFastTravelFlags);
+		RegisterScriptCommand(MultiJump);  //super broke
+		//RegisterScriptCommand(SetPlayerPickpocketBaseChance);
+		RegisterScriptCommand(GetFastTravelFlags);
+		RegisterScriptCommand(SetPCCanPickpocketInCombat);
 #endif
 
-	/* ONLY COMMANDS WITH LISTED OPCODES SHOULD BE USED IN SCRIPTS */
-	RegisterScriptCommand(GetChallengeProgress);
-	RegisterScriptCommand(SetChallengeProgress); 
-	RegisterScriptCommand(ModChallengeProgress);
-	
-	RegisterScriptCommand(DumpFormList);
+		/* ONLY COMMANDS WITH LISTED OPCODES SHOULD BE USED IN SCRIPTS */
+		RegisterScriptCommand(GetChallengeProgress);
+		RegisterScriptCommand(SetChallengeProgress);
+		RegisterScriptCommand(ModChallengeProgress);
 
-	RegisterScriptCommand(IsGameSetting); //For use in scripts to safety check; any other gamesetting function can already be used in console to check if a gamesetting exists.
-	RegisterScriptCommand(IsINISetting); //Uses the GetNumericINISetting "SettingName:CategoryName" format
-	RegisterScriptCommand(ModNumericGameSetting);
-	RegisterScriptCommand(ModNumericINISetting);
+		RegisterScriptCommand(DumpFormList);
 
-	RegisterScriptCommand(SetPlayerCanPickpocketEquippedItems);
-	RegisterScriptCommand(GetPlayerCanPickpocketEquippedItems);
-	RegisterScriptCommand(GetPCCanFastTravel);
-	RegisterScriptCommand(GetPCCanSleepWait);
-	RegisterScriptCommand(SetPCCanSleepWait);
-	
-	return true;
+		RegisterScriptCommand(IsGameSetting); //For use in scripts to safety check; any other gamesetting function can already be used in console to check if a gamesetting exists.
+		RegisterScriptCommand(IsINISetting); //Uses the GetNumericINISetting "SettingName:CategoryName" format
+		RegisterScriptCommand(ModNumericGameSetting);
+		RegisterScriptCommand(ModNumericINISetting);
 
-}
+		RegisterScriptCommand(SetPlayerCanPickpocketEquippedItems);
+		RegisterScriptCommand(GetPlayerCanPickpocketEquippedItems);
+		RegisterScriptCommand(GetPCCanFastTravel);
+		RegisterScriptCommand(GetPCCanSleepWait);
+		RegisterScriptCommand(SetPCCanSleepWait);
 
+		return true;
 
+	}
+
+};

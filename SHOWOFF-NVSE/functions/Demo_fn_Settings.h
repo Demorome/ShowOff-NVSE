@@ -1,7 +1,5 @@
 #pragma once
 
-//#include <ParamInfos.h>  //whyyyy did I have to add this? WTF
-
 #include "GameSettings.h"
 #include "GameRTTI.h"
 #include "internal/jip_nvse.h"

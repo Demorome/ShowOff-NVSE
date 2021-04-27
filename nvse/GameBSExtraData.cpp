@@ -2,6 +2,14 @@
 #include "GameAPI.h"
 #include "GameExtraData.h"
 
+
+const _GetExtraData GetExtraData = (_GetExtraData)0x410220;
+const _AddExtraData AddExtraData = (_AddExtraData)0x40FF60;
+const _RemoveExtraData RemoveExtraData = (_RemoveExtraData)0x410020;
+const _RemoveExtraType RemoveExtraType = (_RemoveExtraType)0x410140;
+const _ClearExtraDataList ClearExtraDataList = (_ClearExtraDataList)0x40FAE0;
+const _CopyExtraDataList CopyExtraDataList = (_CopyExtraDataList)0x411EC0;
+
 bool BaseExtraList::HasType(UInt32 type) const
 {
 	UInt32 index = (type >> 3);
@@ -136,4 +144,11 @@ void BaseExtraList::DebugDump() const
 bool BaseExtraList::MarkScriptEvent(UInt32 eventMask, TESForm* eventTarget)
 {
 	return MarkBaseExtraListScriptEvent(eventTarget, this, eventMask);
+}
+
+
+SInt32 BaseExtraList::GetCount() const
+{
+	ExtraCount* xCount = GetExtraTypeJIP(this, Count);
+	return xCount ? xCount->count : 1;
 }
