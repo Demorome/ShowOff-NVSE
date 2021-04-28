@@ -345,10 +345,13 @@ extern "C"
 		g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 #endif
 
-		// Do hooks
-		//WriteRelCall(0x75E121, UINT32(CalculatePickpocketChance));
-
-		DoHooks();
+		if (!nvse->isEditor) 
+		{
+			DoHooks();
+			
+			NVSEDataInterface* nvseData = (NVSEDataInterface*)nvse->QueryInterface(kInterface_Data);
+			InventoryRefGetForID = (InventoryRef * (*)(UInt32))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID);
+		}
 
 		// Register script commands
 		// 
@@ -387,6 +390,7 @@ extern "C"
 		//RegisterScriptCommand(SetPlayerPickpocketBaseChance);
 		RegisterScriptCommand(GetFastTravelFlags);
 		RegisterScriptCommand(SetPCCanPickpocketInCombat);
+		RegisterScriptCommand(SetNoEquip);
 #endif
 
 		/* ONLY COMMANDS WITH LISTED OPCODES SHOULD BE USED IN SCRIPTS */
@@ -406,6 +410,7 @@ extern "C"
 		RegisterScriptCommand(GetPCCanFastTravel);
 		RegisterScriptCommand(GetPCCanSleepWait);
 		RegisterScriptCommand(SetPCCanSleepWait);
+	
 
 		return true;
 

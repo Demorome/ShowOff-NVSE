@@ -88,32 +88,35 @@ bool Cmd_SetPCCanPickpocketInCombat_Execute(COMMAND_ARGS)
 	return true;
 }
 
-/*
-bool Cmd_GetNoUnequip_Execute(COMMAND_ARGS)
-{
-	InventoryRef* invRef = InventoryRefGetForID(thisObj->refID);
-	*result = (invRef && invRef->xData && invRef->xData->HasType(kExtraData_CannotWear)) ? 1 : 0;
-	return true;
-}
 
-bool Cmd_SetNoUnequip_Execute(COMMAND_ARGS)
+DEFINE_COMMAND_PLUGIN(SetNoEquip, "Returns 1 if the inventory ref was sucessfully set to NoEquip (or the flag was properly cleared). Returns 2 if it was already set.", 1, 1, kParams_OneInt);
+bool Cmd_SetNoEquip_Execute(COMMAND_ARGS)
 {
-	UInt32 noUnequip;
-	if (ExtractArgs(EXTRACT_ARGS, &noUnequip))
+	*result = 0;
+	UInt32 noEquip;
+	if (ExtractArgs(EXTRACT_ARGS, &noEquip))
 	{
 		InventoryRef* invRef = InventoryRefGetForID(thisObj->refID);
+		if (!invRef) return true;
 		ExtraDataList* xData = invRef ? invRef->xData : NULL;
 		if (xData)
 		{
-			if (!noUnequip)
+			if (!noEquip)
+			{
 				RemoveExtraType(xData, kExtraData_CannotWear);
-			else if (xData->HasType(kExtraData_Worn) && !xData->HasType(kExtraData_CannotWear))
+				*result = 1;
+			}
+			else if (!xData->HasType(kExtraData_CannotWear) && !xData->HasType(kExtraData_Worn))  //I just replaced the "IsEquipped" extra data check from JIP's SetNoUnequip.
+			{
 				AddExtraData(xData, ExtraCannotWear::Create());
+				*result = 1;
+			}
+			else if (xData->HasType(kExtraData_CannotWear))
+				*result = 2;
 		}
-	}
+	} 
 	return true;
 }
-*/
 
 DEFINE_COMMAND_PLUGIN(GetFastTravelFlags, , 0, 0, NULL);
 bool Cmd_GetFastTravelFlags_Execute(COMMAND_ARGS)
