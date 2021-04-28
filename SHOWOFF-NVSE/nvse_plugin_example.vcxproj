@@ -326,6 +326,7 @@
     <ClInclude Include="functions\Tomm_fn_Misc.h" />
     <ClInclude Include="functions\Tomm_fn_UI.h" />
     <ClInclude Include="functions\Tomm_JiP_FileStream.h" />
+    <ClInclude Include="functions\Trooper_fn_misc.h" />
     <ClInclude Include="internal\containers.h" />
     <ClInclude Include="internal\decoding.h" />
     <ClInclude Include="internal\havok.h" />

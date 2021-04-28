@@ -159,6 +159,9 @@
     <ClInclude Include="SimpleINILibrary\SimpleIni.h">
       <Filter>SimpleINI Library</Filter>
     </ClInclude>
+    <ClInclude Include="functions\Trooper_fn_misc.h">
+      <Filter>functions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

@@ -237,7 +237,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 */
 
 #include "functions/Demo_fn_Misc.h"
-#include "Trooper_fn_misc.h"
+#include "functions/Trooper_fn_misc.h"
 #include "functions/Demo_fn_Settings.h"
 #include "functions/Demo_fn_GameMechanics.h"
 
