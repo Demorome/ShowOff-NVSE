@@ -277,11 +277,11 @@ void DoHooks()
 	//Same thing but for Creatures (like Super Mutants).
 	WriteRelCall(0x5FA81F, UINT32(PCCanPickpocketInCombatHOOK));
 
-	//NOTE: When failing the AP cost check, it counts as if you were caught by the actor.
-	//This could cause really weird behavior with the NPC just taking back everything that was previously stolen,
-	//not to mention you would no longer be able to pickpocket them normally after combat.
+	// NOTE: When failing the AP cost check, it counts as if you were caught by the actor.
+	// This could cause really weird behavior with the NPC just taking back everything that was previously stolen,
+	// not to mention you would no longer be able to pickpocket them normally after combat.
 	//
-	//Possible solution: open and hook the companion loot exchange menu instead?
+	// Possible solution: open and hook the companion loot exchange menu instead?
 
 	//Below isn't working currently...
 	WriteRelCall(0x77738A, UINT32(ShowPickpocketStringInCombat));

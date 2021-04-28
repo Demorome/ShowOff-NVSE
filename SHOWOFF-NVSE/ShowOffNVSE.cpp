@@ -237,6 +237,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 */
 
 #include "functions/Demo_fn_Misc.h"
+#include "functions/Trooper_fn_misc.h"
 #include "functions/Demo_fn_Settings.h"
 #include "functions/Demo_fn_GameMechanics.h"
 
@@ -411,6 +412,10 @@ extern "C"
 		RegisterScriptCommand(GetPCCanSleepWait);
 		RegisterScriptCommand(SetPCCanSleepWait);
 	
+		//Showing off by copying vanilla style way functions!
+
+		RegisterScriptCommand(ShowingOffDisable);
+		RegisterScriptCommand(ShowingOffEnable);
 
 		return true;
 
