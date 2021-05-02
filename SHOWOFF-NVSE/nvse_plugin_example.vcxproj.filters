@@ -162,6 +162,15 @@
     <ClInclude Include="functions\Trooper_fn_misc.h">
       <Filter>functions</Filter>
     </ClInclude>
+    <ClInclude Include="functions\Demo_fn_Array.h">
+      <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\Johnnnny Guitarrrrr.h">
+      <Filter>internal</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\Demo_fn_Actors.h">
+      <Filter>functions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

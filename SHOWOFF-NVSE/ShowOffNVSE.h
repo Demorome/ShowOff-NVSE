@@ -3,6 +3,7 @@
 #include "SafeWrite.h"
 #include "internal/StewieMagic.h"
 #include "GameProcess.h"
+#include "settings.h"
 
 //idk
 HMODULE ShowOffHandle;
@@ -48,44 +49,44 @@ void __fastcall ContainerMenuHandleMouseoverAlt(ContainerMenu* menu, void* edx, 
 int CalculateCombatPickpocketAPCost(ContChangesEntry* item, Actor* target, signed int itemValue, signed int count, bool isItemOwnedByTarget)
 {
 	// Average player (5 AGL) will have ~80 action points
-	// 7 AGL = ~86 action points. So the base is still around 80.
 	// Meaning, to balance this out, AP costs should refrain from going over 80 (save for some exceptions).
 
 	// Detection value won't be taken into account - this is a brute-force kind of approach, anyone will see it coming, unless they're unconscious.
 	// Still, it's a Sleight of Hand trick, so the target's Perception will be important, as will the player's Sneak + Agility (used as an intermediary for Sleight of Hand).
-	// If the enemy is agile, it'll be trickier for the player to grab things from them, so also take targetAgility into account.
-	
+	// If the enemy is perceptive, it'll be trickier for the player to do their trick, so also take targetPerception into account.
 
 	int playerAgility = g_playerAVOwner->GetThresholdedActorValue(kAVCode_Agility);
 	int playerSneak = g_playerAVOwner->GetThresholdedActorValue(kAVCode_Sneak);
 	int targetPerception = target->avOwner.GetThresholdedActorValue(kAVCode_Perception);
-	int targetAgility = target->avOwner.GetThresholdedActorValue(kAVCode_Agility);
-
 	float itemWeight = item->type->GetWeight() * count;
 
-
-	float cost = //g_fPickpocketBaseChance()
-		+ playerAgility //* g_fPickpocketPlayerAgilityMult
-		+ playerSneak //* g_fPickpocketPlayerSneakMult
-		- itemValue //* g_fPickpocketItemValueMult
-		- itemWeight //* g_fPickpocketItemWeightMult
+	float cost = g_fForcePickpocketBaseAPCost
+		- playerAgility * g_fForcePickpocketPlayerAgilityMult
+		- playerSneak * g_fForcePickpocketPlayerSneakMult
+		+ targetPerception * g_fForcePickpocketTargetPerceptionMult
+		+ itemWeight * g_fForcePickpocketItemWeightMult
 		;
 
-	
-	// If the item is equipped ON THE TARGET, the target's Strength will be taken into account to apply a penalty.
-	// This penalty can be minimized with the player's own Strength, which will also only be taken into account if the item being stolen is equipped ON THE TARGET.
-	// NOTE: Equipped items cannot be stolen in vanilla, for this to do anything, that feature must be enabled in an NVSE plugin.
-	if (item->GetEquippedExtra() && isItemOwnedByTarget)
+	if (isItemOwnedByTarget)
 	{
-		int targetStrength = target->avOwner.GetThresholdedActorValue(kAVCode_Strength);
-		int playerStrength = g_playerAVOwner->GetThresholdedActorValue(kAVCode_Strength);
+		cost += itemValue * g_fForcePickpocketItemValueMult;  //Value only matters to the opponent; it determines how much they want to hold onto something.
+		if (item->GetEquippedExtra())
+		{
+			// If the item is equipped ON THE TARGET, the target's Strength will be taken into account to apply a penalty.
+			// This penalty can be minimized with the player's own Strength, which will also only be taken into account if the item being stolen is equipped ON THE TARGET.
+			
+			int targetStrength = target->avOwner.GetThresholdedActorValue(kAVCode_Strength);
+			int playerStrength = g_playerAVOwner->GetThresholdedActorValue(kAVCode_Strength);
 
-		//cost *= g_fPickpocketWornItemChanceMult;
+			cost += max(0, (g_fForcePickpocketTargetStrengthMult * targetStrength
+					- g_fForcePickpocketPlayerStrengthMult * playerStrength));
+					//0 or greater.
+		}
 	}
 
-	//cost = min(cost, fCombatPickpocketMaxAPCost); //Cap it to 100 AP (by default).
-	//cost = max(cost, fCombatPickPocketMinAPCost); //Costs at least 15 AP (by default).
-
+	cost = min(cost, g_fForcePickpocketMaxAPCost); //yes, the choice of global setting is intentional.
+	cost = max(cost, g_fForcePickpocketMinAPCost);
+	
 	return cost;
 }
 
@@ -104,7 +105,7 @@ bool __fastcall TryCombatPickpocket(ContChangesEntry* selection, SInt32 count, A
 		{
 			ThisStdCall(0x8C00E0, g_thePlayer, actor, 0, 0);
 			char buf[260];
-			sprintf(buf, "You don't have enough Action Points to steal this item.");
+			sprintf(buf, "%s", g_fForcePickpocketFailureMessage);
 			QueueUIMessage(buf, eEmotion::sad, NULL, NULL, 2.0, 0);
 
 			//menu->hasFailedPickpocket= true; //not sure what the point of this is.

@@ -17,6 +17,7 @@
 #include "ShowOffNVSE.h"
 #include "internal/StewieMagic.h"
 #include "internal/jip_nvse.h"
+#include "internal/Johnnnny Guitarrrrr.h"
 
 //#include "nvse\nvse\iomanip"
 
@@ -55,7 +56,7 @@ UInt32 g_screenHeight = 0;
 
 UInt32 DemoNVSEVersion = 100;
 #define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)
-
+#define REFR_RES *(UInt32*)result  //From JIP
 
 /*
 UnorderedMap<const char*, UInt32> s_menuNameToID({ {"MessageMenu", kMenuType_Message}, {"InventoryMenu", kMenuType_Inventory}, {"StatsMenu", kMenuType_Stats},
@@ -240,7 +241,8 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 #include "functions/Trooper_fn_misc.h"
 #include "functions/Demo_fn_Settings.h"
 #include "functions/Demo_fn_GameMechanics.h"
-
+#include "functions/Demo_fn_Array.h"
+#include "functions/Demo_fn_Actors.h"
 
 #if RUNTIME
 //In here we define a script function
@@ -294,8 +296,9 @@ extern "C"
 			g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 			ExtractArgsEx = g_script->ExtractArgsEx;
 			StrIfc = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar); // From JG
-
 			ArrIfc = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar); // From JG
+
+			GetElement = ArrIfc->GetElement;
 
 
 			if (nvse->runtimeVersion < RUNTIME_VERSION_1_4_0_525)
@@ -371,28 +374,6 @@ extern "C"
 		REG_CMD_ARR(DumpTileInfoToArray, Array);
 #endif
 
-#if IFYOULIKEBROKENSHIT //aka functions being tested (or just abandoned).
-		RegisterScriptCommand(CompleteChallenge);
-		RegisterScriptCommand(SetBaseActorValue);
-
-		/*
-		RegisterScriptCommand(SetNumericGameSettingAlt);
-		RegisterScriptCommand(SetNumericINISettingAlt);
-		*/
-		RegisterScriptCommand(DumpGameSettings);
-
-		//RegisterScriptCommand(SetOnHitAltEventHandler);
-
-		RegisterScriptCommand(GetItemRefValue);
-		RegisterScriptCommand(GetItemRefHealth);  //THESE PROBABLY NEED SAFETY CHECKS (check if loaded in mid-high)
-		//RegisterScriptCommand(GetCalculatedItemWeight);
-
-		RegisterScriptCommand(MultiJump);  //super broke
-		//RegisterScriptCommand(SetPlayerPickpocketBaseChance);
-		RegisterScriptCommand(GetFastTravelFlags);
-		RegisterScriptCommand(SetPCCanPickpocketInCombat);
-		RegisterScriptCommand(SetNoEquip);
-#endif
 
 		/* ONLY COMMANDS WITH LISTED OPCODES SHOULD BE USED IN SCRIPTS */
 		RegisterScriptCommand(GetChallengeProgress);
@@ -417,7 +398,37 @@ extern "C"
 		RegisterScriptCommand(ShowingOffDisable);
 		RegisterScriptCommand(ShowingOffEnable);
 
+
+#if IFYOULIKEBROKENSHIT //aka functions being tested (or just abandoned).
+		RegisterScriptCommand(CompleteChallenge);
+		RegisterScriptCommand(SetBaseActorValue);
+
+		/*
+		RegisterScriptCommand(SetNumericGameSettingAlt);
+		RegisterScriptCommand(SetNumericINISettingAlt);
+		*/
+		RegisterScriptCommand(DumpGameSettings);
+
+		//RegisterScriptCommand(SetOnHitAltEventHandler);
+
+		RegisterScriptCommand(GetItemRefValue);
+		RegisterScriptCommand(GetItemRefHealth);  //THESE PROBABLY NEED SAFETY CHECKS (check if loaded in mid-high)
+		//RegisterScriptCommand(GetCalculatedItemWeight);
+
+		RegisterScriptCommand(MultiJump);  //super broke
+		//RegisterScriptCommand(SetPlayerPickpocketBaseChance);
+		RegisterScriptCommand(GetFastTravelFlags);
+		RegisterScriptCommand(SetPCCanPickpocketInCombat);
+		RegisterScriptCommand(SetNoEquip);
+
+		REG_CMD_ARR(Ar_GetInvalidRefs);
+		RegisterScriptCommand(GetNumActorsInRange);
+#endif
+
+		
+
 		return true;
+		
 
 	}
 

@@ -40,6 +40,126 @@ struct InventoryRef
 
 InventoryRef* (*InventoryRefGetForID)(UInt32 refID);
 
+typedef NVSEArrayVarInterface::Array NVSEArrayVar;
+typedef NVSEArrayVarInterface::Element NVSEArrayElement;
+typedef NVSEArrayVarInterface::ElementR ArrayElementR;
+typedef NVSEArrayVarInterface::ElementL ArrayElementL;
+
+bool (*GetElement)(NVSEArrayVar* arr, const NVSEArrayElement& key, NVSEArrayElement& outElement);
+
+
+__declspec(naked) float __fastcall GetAxisDistance(TESObjectREFR* ref1, TESObjectREFR* ref2, UInt8 axis)  
+{
+	__asm
+	{
+		xorps	xmm0, xmm0
+		mov		al, [esp + 4]
+		test	al, 1
+		jz		doneX
+		movss	xmm0, [ecx + 0x30]
+		subss	xmm0, [edx + 0x30]
+		mulss	xmm0, xmm0
+	doneX :
+		test	al, 2
+		jz		doneY
+		movss	xmm1, [ecx + 0x34]
+		subss	xmm1, [edx + 0x34]
+		mulss	xmm1, xmm1
+		addss	xmm0, xmm1
+	doneY :
+		test	al, 4
+		jz		doneZ
+		movss	xmm1, [ecx + 0x38]
+		subss	xmm1, [edx + 0x38]
+		mulss	xmm1, xmm1
+		addss	xmm0, xmm1
+	doneZ :
+		sqrtss	xmm0, xmm0
+		movss[esp + 4], xmm0
+		fld		dword ptr[esp + 4]
+		retn	4
+	}
+}
+
+//If ref1 and ref2 are the same, distance = 0.
+float GetDistance3D(TESObjectREFR* ref1, TESObjectREFR* ref2)
+{
+	return GetAxisDistance(ref1, ref2, 7);
+}
+
+
+
+__declspec(naked) bool Actor::IsInCombatWith(Actor* target)
+{
+	__asm
+	{
+		mov		eax, [ecx + 0x12C]
+		test	eax, eax
+		jz		done
+		mov		ecx, [eax + 4]
+		mov		eax, [eax + 8]
+		mov		edx, [esp + 4]
+		test	eax, eax
+		jnz		iterHead
+		done :
+		retn	4
+			lea		esp, [esp]
+			fnop
+			iterHead :
+		cmp[ecx], edx
+			jz		rtnTrue
+			add		ecx, 4
+			dec		eax
+			jnz		iterHead
+			retn	4
+			rtnTrue:
+		mov		al, 1
+			retn	4
+	}
+}
+
+//Not sure if this is needed.
+__declspec(naked) float TESObjectREFR::GetDistance(TESObjectREFR* target)
+{
+	__asm
+	{
+		push	ebx
+		push	esi
+		push	edi
+		mov		ebx, ecx
+		mov		esi, [esp + 0x10]
+		call	TESObjectREFR::GetParentCell
+		test	eax, eax
+		jz		fltMax
+		mov		edi, eax
+		mov		ecx, esi
+		call	TESObjectREFR::GetParentCell
+		test	eax, eax
+		jz		fltMax
+		cmp		edi, eax
+		jz		calcDist
+		mov		edi, [edi + 0xC0]
+		test	edi, edi
+		jz		fltMax
+		cmp		edi, [eax + 0xC0]
+		jnz		fltMax
+		calcDist :
+		push	7
+			mov		edx, esi
+			mov		ecx, ebx
+			call	GetAxisDistance
+			jmp		done
+			fltMax :
+		fld		kFltMax
+			done :
+		pop		edi
+			pop		esi
+			pop		ebx
+			retn	4
+	}
+}
+
+
 
 #if 0 //not gonna bother with this for now
 DebugLog s_log, s_debug, s_missingTextures;

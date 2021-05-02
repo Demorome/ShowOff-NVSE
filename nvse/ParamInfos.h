@@ -29,6 +29,18 @@ static ParamInfo kParams_OneFloat[1] =
 	{	"float", kParamType_Float,	0 },
 };
 
+static ParamInfo  kParams_OneFloat_OneOptionalInt[2] =
+{
+	{	"float", kParamType_Float, 0 },
+	{	"int", kParamType_Integer, 1 },
+};
+
+static ParamInfo  kParams_OneFloat_OneInt[2] =
+{
+	{	"float", kParamType_Float, 0 },
+	{	"int", kParamType_Integer, 0 },
+};
+
 static ParamInfo kParams_OneString[1] =
 {
 	{	"string",	kParamType_String,	0 },
@@ -325,5 +337,11 @@ static ParamInfo kParams_OneIntOneForm[2] =
 {
 	{	"index",	kParamType_Integer, 0	}, 
 	{	"form",		kParamType_AnyForm,	0	},
+};
+
+// Array is passed as an int.
+static ParamInfo kParams_OneArray[1] =  	
+{
+	{	"array",	kParamType_Integer, 0	},
 };
 

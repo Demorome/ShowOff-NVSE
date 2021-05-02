@@ -320,6 +320,8 @@
     <ClInclude Include="..\nvse\SafeWrite.h" />
     <ClInclude Include="..\nvse\Utilities.h" />
     <ClInclude Include="Demo_ev_Misc.h" />
+    <ClInclude Include="functions\Demo_fn_Actors.h" />
+    <ClInclude Include="functions\Demo_fn_Array.h" />
     <ClInclude Include="functions\Demo_fn_GameMechanics.h" />
     <ClInclude Include="functions\Demo_fn_Misc.h" />
     <ClInclude Include="functions\Demo_fn_Settings.h" />
@@ -331,6 +333,7 @@
     <ClInclude Include="internal\decoding.h" />
     <ClInclude Include="internal\havok.h" />
     <ClInclude Include="internal\jip_nvse.h" />
+    <ClInclude Include="internal\Johnnnny Guitarrrrr.h" />
     <ClInclude Include="internal\netimmerse.h" />
     <ClInclude Include="internal\NiPoint.h" />
     <ClInclude Include="internal\StewieMagic.h" />
