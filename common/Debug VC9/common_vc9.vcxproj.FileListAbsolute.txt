@@ -1,2 +1,3 @@
 C:\Users\Borome\Documents\New Vegas Notes\NVSE-6.0.8\common\Debug VC9\common_vc9.lib
 C:\Users\Borome\Documents\New Vegas Notes\ShowOff NVSE\common\Debug VC9\common_vc9.lib
+D:\New Vegas Notes\ShowOff NVSE\common\Debug VC9\common_vc9.lib

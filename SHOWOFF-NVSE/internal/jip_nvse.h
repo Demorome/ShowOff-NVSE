@@ -87,8 +87,6 @@ float GetDistance3D(TESObjectREFR* ref1, TESObjectREFR* ref2)
 	return GetAxisDistance(ref1, ref2, 7);
 }
 
-
-
 __declspec(naked) bool Actor::IsInCombatWith(Actor* target)
 {
 	__asm
@@ -101,24 +99,25 @@ __declspec(naked) bool Actor::IsInCombatWith(Actor* target)
 		mov		edx, [esp + 4]
 		test	eax, eax
 		jnz		iterHead
-		done :
+	done:
 		retn	4
-			lea		esp, [esp]
-			fnop
-			iterHead :
-		cmp[ecx], edx
-			jz		rtnTrue
-			add		ecx, 4
-			dec		eax
-			jnz		iterHead
-			retn	4
-			rtnTrue:
+		lea		esp, [esp]
+		fnop
+	iterHead:
+		cmp		[ecx], edx
+		jz		rtnTrue
+		add		ecx, 4
+		dec		eax
+		jnz		iterHead
+		retn	4
+	rtnTrue:
 		mov		al, 1
-			retn	4
+		retn	4
 	}
 }
 
 //Not sure if this is needed.
+/*
 __declspec(naked) float TESObjectREFR::GetDistance(TESObjectREFR* target)
 {
 	__asm
@@ -158,7 +157,7 @@ __declspec(naked) float TESObjectREFR::GetDistance(TESObjectREFR* target)
 			retn	4
 	}
 }
-
+*/
 
 
 #if 0 //not gonna bother with this for now

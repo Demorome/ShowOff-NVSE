@@ -156,7 +156,7 @@ struct NiTArray
 {
 	virtual void* Destroy(UInt32 doFree);
 
-	T_Data* data;			// 04
+	T_Data*		data;			// 04
 	UInt16		capacity;		// 08 - init'd to size of preallocation
 	UInt16		firstFreeEntry;	// 0A - index of the first free entry in the block of free entries at the end of the array (or numObjs if full)
 	UInt16		numObjs;		// 0C - init'd to 0

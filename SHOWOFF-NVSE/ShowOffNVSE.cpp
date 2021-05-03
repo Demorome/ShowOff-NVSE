@@ -394,10 +394,12 @@ extern "C"
 		RegisterScriptCommand(SetPCCanSleepWait);
 	
 		//Showing off by copying vanilla style way functions!
-
 		RegisterScriptCommand(ShowingOffDisable);
 		RegisterScriptCommand(ShowingOffEnable);
 
+		RegisterScriptCommand(GetNumActorsInRangeFromRef);
+		RegisterScriptCommand(GetNumCombatActorsFromActor);
+		
 
 #if IFYOULIKEBROKENSHIT //aka functions being tested (or just abandoned).
 		RegisterScriptCommand(CompleteChallenge);
@@ -422,7 +424,6 @@ extern "C"
 		RegisterScriptCommand(SetNoEquip);
 
 		REG_CMD_ARR(Ar_GetInvalidRefs);
-		RegisterScriptCommand(GetNumActorsInRange);
 #endif
 
 		

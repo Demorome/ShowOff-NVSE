@@ -153,6 +153,31 @@ bool Cmd_MultiJump_Execute(COMMAND_ARGS)
 	return true;
 }
 
+/*
+DEFINE_COMMAND_PLUGIN(SetParentRef, , 1, 1, kParams_OneOptionalForm);
+bool Cmd_SetParentRef_Execute(COMMAND_ARGS)
+{
+	ExtraDataList* xData = thisObj ? thisObj->xData : NULL;
+	if (xData)
+	{
+		if (!noEquip)
+		{
+			RemoveExtraType(xData, kExtraData_CannotWear);
+			*result = 1;
+		}
+		else if (!xData->HasType(kExtraData_CannotWear) && !xData->HasType(kExtraData_Worn))  //I just replaced the "IsEquipped" extra data check from JIP's SetNoUnequip.
+		{
+			AddExtraData(xData, ExtraCannotWear::Create());
+			*result = 1;
+		}
+		else if (xData->HasType(kExtraData_CannotWear))
+			*result = 2;
+	}
+	
+	return true;
+}
+*/
+
 
 
 #endif
