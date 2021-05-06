@@ -1,8 +1,7 @@
 #pragma once
 
 #include "GameSettings.h"
-#include "GameRTTI.h"
-#include "internal/jip_nvse.h"
+
 
 DEFINE_COMMAND_PLUGIN(IsGameSetting, "Checks if a string refers to a valid Gamesetting", 0, 1, kParams_OneString);
 bool Cmd_IsGameSetting_Execute(COMMAND_ARGS)
@@ -159,7 +158,7 @@ bool Cmd_SetNumericGameSettingAlt_Execute(COMMAND_ARGS)
 
 }
 */
-#if IFYOULIKEBROKENSHIT
+#ifdef _DEBUG
 DEFINE_COMMAND_PLUGIN(DumpGameSettings, , 0, 0, NULL);
 bool Cmd_DumpGameSettings_Execute(COMMAND_ARGS)
 {

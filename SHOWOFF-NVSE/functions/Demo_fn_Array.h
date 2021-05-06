@@ -1,7 +1,8 @@
 ﻿#pragma once
-#include "internal/jip_nvse.h"
 
-#if IFYOULIKEBROKENSHIT
+
+
+#ifdef _DEBUG
 
 DEFINE_COMMAND_PLUGIN(Ar_GetInvalidRefs, "", 0, 2, kParams_OneArray);  //failed experiment
 bool Cmd_Ar_GetInvalidRefs_Execute(COMMAND_ARGS)

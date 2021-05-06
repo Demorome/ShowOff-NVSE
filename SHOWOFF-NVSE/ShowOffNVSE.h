@@ -5,13 +5,49 @@
 #include "GameProcess.h"
 #include "settings.h"
 
-//idk
-HMODULE ShowOffHandle;
+
+// Globals - for INI globals, see settings.h
+
+UInt32 g_ShowOffVersion = 100;
+
+bool g_canPlayerPickpocketInCombat = false;
 
 
 
+// Misc.
+bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
+#define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)  //Probably breaks Compiler Override!!
+#define REFR_RES *(UInt32*)result  //From JIP
 
-//Singletons
+#define ExtractFormatStringArgs(...) g_script->ExtractFormatStringArgs(__VA_ARGS__)
+#define IS_TYPE(form, type) (*(UInt32*)form == kVtbl_##type)  //already defined in GameForms.h
+#define NOT_ID(form, type) (form->typeID != kFormType_##type) //already defined in GameForms.h
+#define IS_ID(form, type) (form->typeID == kFormType_##type) //already defined in GameForms.h
+
+#define RegisterScriptCommand(name) 	nvse->RegisterCommand(&kCommandInfo_ ##name);
+#define REG_CMD(name) nvse->RegisterCommand(&kCommandInfo_##name);  //Short version of RegisterScriptCommand.
+#define REG_TYPED_CMD(name, type) nvse->RegisterTypedCommand(&kCommandInfo_##name,kRetnType_##type);
+#define REG_CMD_STR(name) nvse->RegisterTypedCommand(&kCommandInfo_##name, kRetnType_String) // From JIP_NVSE.H
+#define REG_CMD_ARR(name) nvse->RegisterTypedCommand(&kCommandInfo_##name, kRetnType_Array) // From JIP_NVSE.H
+
+#define VarNameSize 64
+
+typedef NVSEArrayVarInterface::Array NVSEArrayVar;
+typedef NVSEArrayVarInterface::Element NVSEArrayElement;
+
+
+// Singletons
+NVSEArrayVarInterface* ArrIfc = NULL;
+NVSEStringVarInterface* StrIfc = NULL;
+NVSEMessagingInterface* g_msg = NULL;
+NVSEScriptInterface* g_script = NULL;
+NVSECommandTableInterface* CmdIfc = NULL;
+
+HUDMainMenu* g_HUDMainMenu = NULL;
+TileMenu** g_tileMenuArray = NULL;
+UInt32 g_screenWidth = 0;
+UInt32 g_screenHeight = 0;
+
 PlayerCharacter* g_thePlayer = nullptr;
 ActorValueOwner* g_playerAVOwner = NULL;
 ProcessManager* g_processManager = nullptr;
@@ -19,20 +55,14 @@ InterfaceManager* g_interfaceManager = nullptr;
 BSWin32Audio* g_bsWin32Audio = nullptr;
 DataHandler* g_dataHandler = nullptr;
 BSAudioManager* g_audioManager = nullptr;
-Sky** g_currentSky = nullptr; 
+Sky** g_currentSky = nullptr;
 
 
-//Globals - for INI globals, see settings.h
-bool g_canPlayerPickpocketEqItems() { return *(UInt32*)0x75E87B != 0xFFD5F551; }
+//---Hooks and Hook Stuff
+
+bool canPlayerPickpocketEqItems() { return *(UInt32*)0x75E87B != 0xFFD5F551; }
 //Checks if the address has been changed, to take into account Stewie's Tweaks' implementation.
 //If the address was changed by something else, uh... Well I don't take that into account.
-
-bool g_canPlayerPickpocketInCombat = false;
-
-
-
-
-//---HOOKS
 
 
 void __fastcall ContainerMenuHandleMouseoverAlt(ContainerMenu* menu, void* edx, int a2, int a3)

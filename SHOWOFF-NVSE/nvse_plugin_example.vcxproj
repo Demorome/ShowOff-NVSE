@@ -142,6 +142,7 @@
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
       <DataExecutionPrevention />
       <TargetMachine>MachineX86</TargetMachine>
+      <GenerateMapFile>true</GenerateMapFile>
     </Link>
     <PostBuildEvent>
       <Message>Installing DLL...</Message>
@@ -198,7 +199,7 @@
     </Link>
     <PostBuildEvent>
       <Message>Installing DLL...</Message>
-      <Command>copy "$(TargetPath)" "E:\Games\Fallout New Vegas\Data\NVSE\Plugins\$(TargetFileName)"</Command>
+      <Command>copy "$(TargetPath)" "C:\Games\Steam\steamapps\common\Fallout New Vegas\Data\nvse\plugins\$(TargetFileName)"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release GECK|Win32'">
@@ -320,15 +321,13 @@
     <ClInclude Include="..\nvse\PluginAPI.h" />
     <ClInclude Include="..\nvse\SafeWrite.h" />
     <ClInclude Include="..\nvse\Utilities.h" />
-    <ClInclude Include="Demo_ev_Misc.h" />
+    <ClInclude Include="Events\Demo_ev_Misc.h" />
     <ClInclude Include="functions\Demo_fn_Actors.h" />
     <ClInclude Include="functions\Demo_fn_Array.h" />
-    <ClInclude Include="functions\Demo_fn_GameMechanics.h" />
+    <ClInclude Include="functions\Demo_fn_Debug.h" />
+    <ClInclude Include="functions\Demo_fn_Gameplay.h" />
     <ClInclude Include="functions\Demo_fn_Misc.h" />
     <ClInclude Include="functions\Demo_fn_Settings.h" />
-    <ClInclude Include="functions\Tomm_fn_Misc.h" />
-    <ClInclude Include="functions\Tomm_fn_UI.h" />
-    <ClInclude Include="functions\Tomm_JiP_FileStream.h" />
     <ClInclude Include="functions\Trooper_fn_misc.h" />
     <ClInclude Include="internal\containers.h" />
     <ClInclude Include="internal\decoding.h" />

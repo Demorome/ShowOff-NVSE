@@ -1,8 +1,4 @@
 ﻿#pragma once
-#include "internal/jip_nvse.h"
-
-
-
 
 
 DEFINE_CMD_ALT_COND_PLUGIN(GetNumActorsInRangeFromRef,, "Returns the amount of actors that are a certain distance nearby to the calling reference.", 1, kParams_OneFloat_OneInt);
@@ -254,7 +250,7 @@ bool Cmd_GetNumCombatActorsFromActor_Execute(COMMAND_ARGS)
 
 
 
-#if IFYOULIKEBROKENSHIT
+#ifdef _DEBUG
 
 
 

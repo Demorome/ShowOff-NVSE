@@ -55,15 +55,6 @@
     <ClInclude Include="functions\Demo_fn_Misc.h">
       <Filter>functions</Filter>
     </ClInclude>
-    <ClInclude Include="functions\Tomm_fn_Misc.h">
-      <Filter>functions</Filter>
-    </ClInclude>
-    <ClInclude Include="functions\Tomm_fn_UI.h">
-      <Filter>functions</Filter>
-    </ClInclude>
-    <ClInclude Include="functions\Tomm_JiP_FileStream.h">
-      <Filter>functions</Filter>
-    </ClInclude>
     <ClInclude Include="internal\containers.h">
       <Filter>internal</Filter>
     </ClInclude>
@@ -137,13 +128,10 @@
     <ClInclude Include="..\nvse\Utilities.h">
       <Filter>nvse</Filter>
     </ClInclude>
-    <ClInclude Include="Demo_ev_Misc.h">
-      <Filter>Events</Filter>
-    </ClInclude>
     <ClInclude Include="functions\Demo_fn_Settings.h">
       <Filter>functions</Filter>
     </ClInclude>
-    <ClInclude Include="functions\Demo_fn_GameMechanics.h">
+    <ClInclude Include="functions\Demo_fn_Gameplay.h">
       <Filter>functions</Filter>
     </ClInclude>
     <ClInclude Include="internal\NiPoint.h">
@@ -170,6 +158,12 @@
     </ClInclude>
     <ClInclude Include="functions\Demo_fn_Actors.h">
       <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\Demo_fn_Debug.h">
+      <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="Events\Demo_ev_Misc.h">
+      <Filter>Events</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

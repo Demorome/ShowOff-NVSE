@@ -1,6 +1,5 @@
 ﻿#pragma once
-#include "GameRTTI.h"
-#include "internal/jip_nvse.h"
+
 
 /*
 DEFINE_COMMAND_PLUGIN(SetOnHitAltEventHandler, , 0, 3, kParams_JIP_OneForm_OneInt_OneOptionalForm);
