@@ -19,7 +19,6 @@ bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
 #define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)  //Probably breaks Compiler Override!!
 #define REFR_RES *(UInt32*)result  //From JIP
 
-#define ExtractFormatStringArgs(...) g_script->ExtractFormatStringArgs(__VA_ARGS__)
 #define IS_TYPE(form, type) (*(UInt32*)form == kVtbl_##type)  //already defined in GameForms.h
 #define NOT_ID(form, type) (form->typeID != kFormType_##type) //already defined in GameForms.h
 #define IS_ID(form, type) (form->typeID == kFormType_##type) //already defined in GameForms.h
@@ -34,6 +33,13 @@ bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
 
 typedef NVSEArrayVarInterface::Array NVSEArrayVar;
 typedef NVSEArrayVarInterface::Element NVSEArrayElement;
+bool (*ExtractFormatStringArgs)(UInt32 fmtStringPos, char* buffer, COMMAND_ARGS_EX, UInt32 maxParams, ...);  // From JIP_NVSE.H
+
+
+
+//Imports from JG
+//#define DllImport   __declspec( dllimport )
+
 
 
 // Singletons
@@ -299,7 +305,15 @@ tList<PlayerCharacter::CompassTarget>* __fastcall ShowPickpocketStringInCombat2(
 	return g_thePlayer->compassTargets;
 }
 
+bool __fastcall QueueUIMessageHook(HUDMainMenu* menu, void* edx, char* msgText, eEmotion IconType, char* iconPath, char* soundPath, float displayTime, bool instantEndCurrentMessage)
+{
+	//dispatch event by looping thru all registered handlers
 
+	//Console_Print("==Testing hook==\n -msgText: %s\n -IconType: %d\n -iconPath: %s\n -soundPath: %s\n -displayTime: %f\n -instantEndCurrentMessage: %d", msgText, IconType, iconPath, soundPath, displayTime, instantEndCurrentMessage);
+	
+	//Call original function.
+	return ThisStdCall_B(0x775380, menu, msgText, IconType, iconPath, soundPath, displayTime, instantEndCurrentMessage);
+}
 
 void DoHooks()
 {
@@ -317,5 +331,12 @@ void DoHooks()
 	//Below isn't working currently...
 	WriteRelCall(0x77738A, UINT32(ShowPickpocketStringInCombat));
 	WriteRelCall(0x7772C9, UINT32(ShowPickpocketStringInCombat2));
-	//WriteRelCall(0x770C0D, UINT32(ShowPickpocketStringInCombat2)); //breaks health target UI 
+	//WriteRelCall(0x770C0D, UINT32(ShowPickpocketStringInCombat2)); //breaks health target UI
+
+	WriteRelCall(0x705379, UINT32(QueueUIMessageHook));
+	WriteRelCall(0x7EE74D, UINT32(QueueUIMessageHook));
+	WriteRelCall(0x7EE87D, UINT32(QueueUIMessageHook));
+	WriteRelCall(0x7EEA6C, UINT32(QueueUIMessageHook));
+	WriteRelCall(0x833303, UINT32(QueueUIMessageHook));
+	WriteRelCall(0x8B959B, UINT32(QueueUIMessageHook));
 }

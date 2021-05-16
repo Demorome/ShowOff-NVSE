@@ -29,6 +29,7 @@
 #include "functions/Demo_fn_Debug.h"
 
 // Events
+#include "Events/Demo_ev_Misc.h"
 
 
 // Plugin Stuff
@@ -191,6 +192,7 @@ extern "C"
 			ArrIfc = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar); // From JG
 			GetElement = ArrIfc->GetElement;
 			ExtractArgsEx = g_script->ExtractArgsEx;
+			ExtractFormatStringArgs = g_script->ExtractFormatStringArgs;
 			
 			handleIniOptions();
 			DoHooks();
@@ -201,9 +203,6 @@ extern "C"
 		nvse->SetOpcodeBase(0x3A9F);
 
 		/* ONLY COMMANDS WITH LISTED OPCODES SHOULD BE USED IN SCRIPTS */
-		REG_CMD(GetChallengeProgress);
-		REG_CMD(SetChallengeProgress);
-		REG_CMD(ModChallengeProgress);
 
 		REG_CMD(DumpFormList);
 
@@ -223,8 +222,18 @@ extern "C"
 		REG_CMD(GetNumActorsInRangeFromRef);
 		REG_CMD(GetNumCombatActorsFromActor);
 		
+		REG_CMD(IsWeaponMelee);
+		REG_CMD(IsEquippedWeaponMelee);
+		REG_CMD(IsWeaponRanged);
+		REG_CMD(IsEquippedWeaponRanged);
+		
+		REG_CMD(GetChallengeProgress);
+		
+		REG_CMD(TestCondition);
 
-#ifdef _DEBUG  //for functions being tested (or just abandoned).
+
+
+#if _DEBUG  //for functions being tested (or just abandoned).
 
 		//These two functions are useless, the setting functions already safety check and even report if the setting could not be found via func result.
 		REG_CMD(IsGameSetting); //For use in scripts to safety check; any other gamesetting function can already be used in console to check if a gamesetting exists.
@@ -232,11 +241,14 @@ extern "C"
 		
 		REG_CMD(SetProjectileRefFlag);
 		REG_CMD(GetProjectileRefFlag);
-		
+
+		REG_CMD(SetChallengeProgress);
+		REG_CMD(ModChallengeProgress);
 		REG_CMD(CompleteChallenge);
+		
 		REG_CMD(SetBaseActorValue);
 
-		REG_CMD(DumpGameSettings);
+		REG_CMD(DumpGameSettings); //no idea how to do this...
 
 		//REG_CMD(SetOnHitAltEventHandler);
 
@@ -246,14 +258,20 @@ extern "C"
 
 		//REG_CMD(SetPlayerPickpocketBaseChance);
 		REG_CMD(GetFastTravelFlags);
+
 		REG_CMD(SetPCCanPickpocketInCombat);
+		
 		REG_CMD(SetNoEquip);
 
-		REG_CMD_ARR(Ar_GetInvalidRefs); //gave up
+		//REG_CMD_ARR(Ar_GetInvalidRefs); //gave up
 		
-		//REG_CMD(GetEquippedWeaponType);
-		///REG_CMD(IsWeaponMeleeRange);
-		//REG_CMD(IsEquippedWeaponMeleeRange);
+		//REG_CMD(GetEquippedWeaponType);  //JIP already made it for TTW.
+
+		REG_CMD(SetEnableParent);
+
+		REG_CMD(ApplyPoison);
+		REG_CMD(MessageExAltShowoff);
+
 #endif
 
 		

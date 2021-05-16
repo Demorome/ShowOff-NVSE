@@ -4,6 +4,16 @@
 #include "GameData.h"
 #include "utility.h"
 
+alignas(16) char
+s_strArgBuffer[0x4000],
+s_strValBuffer[0x10000],
+s_dataPathFull[0x100] = "Data\\",
+s_configPathFull[0x100] = "Data\\Config\\",
+s_scriptsPathFull[0x100] = "Data\\NVSE\\plugins\\scripts\\",
+s_modLogPathFull[0x100] = "Mod Logs\\";
+char* s_dataPath, * s_configPath, * s_scriptsPath, * s_modLogPath;
+
+
 __declspec(naked) bool IsConsoleOpen()
 {
 	__asm
@@ -158,6 +168,16 @@ __declspec(naked) float TESObjectREFR::GetDistance(TESObjectREFR* target)
 	}
 }
 */
+
+TESObjectWEAP* Actor::GetEquippedWeapon()
+{
+	if (baseProcess)
+	{
+		ContChangesEntry* weaponInfo = baseProcess->GetWeaponInfo();
+		if (weaponInfo) return (TESObjectWEAP*)weaponInfo->type;
+	}
+	return NULL;
+}
 
 
 #if 0 //not gonna bother with this for now
@@ -352,14 +372,6 @@ void BGSLevL::Dump()
 }
 */
 
-alignas(16) char
-s_strArgBuffer[0x4000],
-s_strValBuffer[0x10000],
-s_dataPathFull[0x100] = "Data\\",
-s_configPathFull[0x100] = "Data\\Config\\",
-s_scriptsPathFull[0x100] = "Data\\NVSE\\plugins\\scripts\\",
-s_modLogPathFull[0x100] = "Mod Logs\\";
-char* s_dataPath, * s_configPath, * s_scriptsPath, * s_modLogPath;
 
 
 

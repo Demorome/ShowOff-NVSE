@@ -68,13 +68,153 @@ bool Cmd_SetPCCanSleepWait_Execute(COMMAND_ARGS)
 }
 
 
+DEFINE_CMD_ALT_COND_PLUGIN(IsWeaponMelee, , "Returns 1 if the weapon's base form is of one of the three weapon types belonging to melee-range weapons.", 1, kParams_OneOptionalObjectID);
+bool Cmd_IsWeaponMelee_Eval(COMMAND_ARGS_EVAL)
+{
+	//Console_Print("thisObj: [%0.8X]", thisObj->baseForm->GetId());
+	*result = 0;
+	TESForm* form;
+	if (arg1)
+	{
+		form = (TESForm*)arg1;
+	}
+	else if (thisObj)
+	{
+		form = thisObj->baseForm;
+	}
+	else return true;
+
+	auto const weapon = DYNAMIC_CAST(form, TESForm, TESObjectWEAP);
+	if (!weapon) return true;
+
+	UINT8 weapType = weapon->eWeaponType;
+	*result = weapType <= 2;
+	return true;
+}
+bool Cmd_IsWeaponMelee_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	TESObjectWEAP* weapon = NULL;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &weapon)) return true;
+
+	return Cmd_IsWeaponMelee_Eval(thisObj, weapon, 0, result);
+}
+
+DEFINE_CMD_ALT_COND_PLUGIN(IsEquippedWeaponMelee, , "Returns 1 if the calling actor's equipped weapon's base form is of one of the three weapon types belonging to melee-range weapons.", 1, NULL);
+bool Cmd_IsEquippedWeaponMelee_Eval(COMMAND_ARGS_EVAL)
+{
+	// Not recommended to use this function for certain perk effects, like Calculate Weap. Damage;
+	// since it will affect the DAM that appears in the UI for other weapons, as long as the currently equipped weapon is a melee weap.
+
+	*result = 0;
+	if (thisObj)
+	{
+		if (!thisObj->IsActor()) return true;
+		TESObjectWEAP* weapon = ((Actor*)thisObj)->GetEquippedWeapon();
+		if (weapon)
+		{
+			*result = weapon->eWeaponType <= 2;
+		}
+		else
+		{
+			*result = 1;
+#if _DEBUG
+			Console_Print("IsEquippedWeaponMelee >> 1 >> No equipped weapon found, assuming that the default unarmed is equipped.");
+#endif
+		}
+	}
+	return true;
+}
+bool Cmd_IsEquippedWeaponMelee_Execute(COMMAND_ARGS)
+{
+	return Cmd_IsEquippedWeaponMelee_Eval(thisObj, nullptr, nullptr, result);
+}
+
+DEFINE_CMD_ALT_COND_PLUGIN(IsWeaponRanged, , "Returns 1 if the weapon's base form is one of the weapon types belonging to NON melee-range weapons.", 1, kParams_OneOptionalObjectID);
+bool Cmd_IsWeaponRanged_Eval(COMMAND_ARGS_EVAL)
+{
+	//Console_Print("thisObj: [%0.8X]", thisObj->baseForm->GetId());
+	*result = 0;
+	TESForm* form;
+	if (arg1)
+	{
+		form = (TESForm*)arg1;
+	}
+	else if (thisObj)
+	{
+		form = thisObj->baseForm;
+	}
+	else return true;
+
+	auto const weapon = DYNAMIC_CAST(form, TESForm, TESObjectWEAP);
+	if (!weapon) return true;
+
+	UINT8 weapType = weapon->eWeaponType;
+	*result = weapType >= 3 && weapType <= 13;
+
+	return true;
+}
+bool Cmd_IsWeaponRanged_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	TESObjectWEAP* weapon = NULL;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &weapon)) return true;
+
+	return Cmd_IsWeaponRanged_Eval(thisObj, weapon, 0, result);
+}
+
+DEFINE_CMD_ALT_COND_PLUGIN(IsEquippedWeaponRanged, , "Returns 1 if the calling actor's equipped weapon's base form is one of the weapon types belonging to NON melee-range weapons.", 1, NULL);
+bool Cmd_IsEquippedWeaponRanged_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = 0;
+	if (thisObj)
+	{
+		if (!thisObj->IsActor()) return true;
+		TESObjectWEAP* weapon = ((Actor*)thisObj)->GetEquippedWeapon();
+		if (weapon)
+		{
+			UINT8 weapType = weapon->eWeaponType;
+			*result = weapType >= 3 && weapType <= 13;
+		}
+	}
+	return true;
+}
+bool Cmd_IsEquippedWeaponRanged_Execute(COMMAND_ARGS)
+{
+	return Cmd_IsEquippedWeaponRanged_Eval(thisObj, nullptr, nullptr, result);
+}
+
+DEFINE_CMD_ALT_COND_PLUGIN(GetChallengeProgress, , "Returns the progress made on a challenge.", 0, kParams_OneChallenge)
+bool Cmd_GetChallengeProgress_Execute(COMMAND_ARGS)
+{
+	TESChallenge* challenge;
+	if (ExtractArgs(EXTRACT_ARGS, &challenge) && IS_TYPE(challenge, TESChallenge))
+		*result = (int)challenge->progress;  //This can show up as negative.
+	else *result = 0;
+	return true;
+}
+bool Cmd_GetChallengeProgress_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = 0;
+	if (arg1)
+	{
+		TESChallenge* challenge = (TESChallenge*)arg1;
+		if (IS_TYPE(challenge, TESChallenge))
+			*result = (int)challenge->progress;
+	}
+#if _DEBUG
+	Console_Print("GetChallengeProgress >> %f", *result);
+#endif
+	return true;
+}
 
 
 
 #ifdef _DEBUG
 
 
-DEFINE_COMMAND_PLUGIN(GetChallengeProgress, "Returns the progress made on a challenge.", 0, 1, kParams_Tomm_OneForm)
+
+/*Notes on GetChallengeProgress w/ other funcs:*/
 //If the challenge is beaten...
 //...and is NOT set to "Recurring", will return the max Threshold value.
 //......If the value was changed using SetChallengeProgress / ModChallengeProgress, its "progress" will change, but it still won't budge naturally.
@@ -92,14 +232,7 @@ DEFINE_COMMAND_PLUGIN(ModChallengeProgress, "Modifies the progress made on a cha
 
 //FLAW TO FIX: Find a way to forcefully activate the Challenge completion.
 
-bool Cmd_GetChallengeProgress_Execute(COMMAND_ARGS)
-{
-	TESChallenge* challenge;
-	if (ExtractArgs(EXTRACT_ARGS, &challenge) && IS_TYPE(challenge, TESChallenge))
-		*result = (int)challenge->progress;  //This can show up as negative.
-	else *result = 0;
-	return true;
-}
+
 
 bool Cmd_SetChallengeProgress_Execute(COMMAND_ARGS)
 {
@@ -261,31 +394,37 @@ bool Cmd_GetEquippedWeaponType_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_CMD_ALT_COND_PLUGIN(IsWeaponMeleeRange, , "Returns 1 if the weapon's base form is of one of the three weapon types belonging to melee-range weapons.", 0, kParams_OneOptionalForm);
-bool Cmd_IsWeaponMeleeRange_Eval(COMMAND_ARGS_EVAL)
-{
-	*result = arg1 ? ((TESObjectWEAP*)thisObj)->eWeaponType <= 2 : ((TESObjectWEAP*)arg1)->eWeaponType <= 2;
-	//no idea if arg1 can actually be null!
-	return true;
-}
-bool Cmd_IsWeaponMeleeRange_Execute(COMMAND_ARGS)
+
+DEFINE_COMMAND_PLUGIN(ApplyPoison, , 0, 1, kParams_OneForm);  //apply on player's equipped weapon. All credit goes to c6
+bool Cmd_ApplyPoison_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	TESObjectWEAP* weapon = NULL;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &weapon)) return true;
-	
-	if (!weapon)
+	AlchemyItem* poison;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &poison) || !IS_TYPE(poison, AlchemyItem) || !poison->IsPoison()) return true; 
+
+	ContChangesEntry* wpnInfo = g_thePlayer->baseProcess->GetWeaponInfo();
+	if (wpnInfo && wpnInfo->extendData)
 	{
-		if (!thisObj) return true;
-		TESForm* form = thisObj->baseForm;
-		weapon = DYNAMIC_CAST(form, TESForm, TESObjectWEAP);
-		if (weapon)
-			*result = weapon->eWeaponType <= 2;
+		UInt32 weaponSkill = ((TESObjectWEAP*)wpnInfo->type)->weaponSkill;
+		if (weaponSkill != kAVCode_Unarmed && weaponSkill != kAVCode_MeleeWeapons) return true;
+		
+		ExtraDataList* xDataList = wpnInfo->extendData->GetFirstItem();
+		if (xDataList)
+		{
+			ExtraPoison* xPoison = GetExtraTypeJIP(xDataList, Poison);
+			if (!xPoison)
+			{
+				*result = -1; //poison already applied
+			}
+			else
+			{
+				if (!xPoison)
+					ThisStdCall(0x4BDD20, wpnInfo, poison); 
+				*result = 1;
+			}
+		}
 	}
-	else if IS_ID(weapon, TESObjectWEAP)
-	{
-		*result = weapon->eWeaponType <= 2;
-	}
+
 	return true;
 }
 

@@ -17,3 +17,27 @@ bool Cmd_DumpFormList_Execute(COMMAND_ARGS)
 	}
 	return true;
 }
+
+//Would be cool if this could return whatever is calling this condition, or at what address etc..
+DEFINE_CMD_ALT_COND_PLUGIN(TestCondition, , "Returns 1, and prints a message to console. Meant for testing if previous conditions passed.", 0, NULL);
+bool Cmd_TestCondition_Execute(COMMAND_ARGS)
+{
+	*result = 1;
+	if (IsConsoleOpen())
+		Console_Print("TestCondition >> 1. Not meant for use as a script function.");
+	return true;
+}
+bool Cmd_TestCondition_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = 1;
+	UINT32 refID = 0;
+	const char* edID = NULL;
+	if (thisObj)
+	{
+		refID = thisObj->refID;
+		TESForm* form = thisObj;
+		edID = form->GetName();  //Only works with JG's bLoadEditorIDs = 1, otherwise returns an empty string.
+	}
+	Console_Print("TestCondition >> 1. thisObj: [%08X] (%s)", refID, edID);
+	return true;
+}

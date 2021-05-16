@@ -14,7 +14,7 @@ bool Cmd_SetBaseActorValue_Execute(COMMAND_ARGS)
 	if (!ExtractArgs(EXTRACT_ARGS, &actorVal, &valueToSet, &actorBase)) return true;
 	if (!actorBase)
 	{
-		/*if (!thisObj || !thisObj->IsActor()) return true;*/ //Idk why IsActor() can't be found, not gonna bother for now.
+		if (!thisObj || !thisObj->IsActor()) return true;
 		actorBase = (TESActorBase*)thisObj->baseForm;
 	}
 	UInt32 currentValue = *result = actorBase->avOwner.GetActorValue(actorVal);
@@ -75,6 +75,109 @@ bool Cmd_GetCalculatedItemWeight_Execute(COMMAND_ARGS)
 }
 */
 
+struct ActivateRefEntry  //LinkedRefEntry, no way this will work..
+{
+	UInt32		linkID;
+	UInt8		modIdx;
+
+	void Set(UInt32 _linkID, UInt8 _modIdx)
+	{
+		linkID = _linkID;
+		modIdx = _modIdx;
+	}
+};
+UnorderedMap<UInt32, ActivateRefEntry> s_activateRefModified;
+UnorderedMap<UInt32, UInt32> s_activateRefDefault, s_activateRefsTemp;
+
+
+DEFINE_COMMAND_PLUGIN(SetEnableParent, , 1, 1, kParams_OneOptionalForm);
+
+//Stole some code from JIP (TESObjectREFR::SetLinkedRef)
+bool Cmd_SetEnableParent_Execute(COMMAND_ARGS)
+{
+	//TESObjectREFR* newParent = NULL;
+	//if (!ExtractArgsEx(EXTRACT_ARGS_EX, &newParent)) return true;
+
+#if 0
+	ExtraDataList xData = thisObj->extraDataList;
+	ExtraActivateRef* xActivateRef = GetExtraType(xData, ActivateRef);
+
+	RemoveExtraData(&xData, xActivateRef, true);
+	if (!newParent)
+	{
+		//xActivateRef->parentRefs.RemoveAll();  //DANGER! MUST TEST
+		auto findDefID = s_activateRefDefault.Find(thisObj->refID);
+		if (findDefID)
+		{
+			if (xActivateRef)
+			{
+				if (*findDefID)
+				{
+					TESForm* form = LookupFormByRefID(*findDefID);
+					if (form && form->GetIsReference()) xLinkedRef->linkedRef = (TESObjectREFR*)form;
+				}
+				else RemoveExtraData(xData, xLinkedRef, true);
+			}
+			findDefID.Remove();
+		}
+		s_activateRefModified.Erase(thisObj->refID);
+		return true;
+	}
+	else
+	{
+		
+	}
+	
+	if (!linkObj)
+	{
+		auto findDefID = s_activateRefDefault.Find(refID);
+		if (findDefID)
+		{
+			if (xLinkedRef)
+			{
+				if (*findDefID)
+				{
+					TESForm* form = LookupFormByRefID(*findDefID);
+					if (form && form->GetIsReference()) xLinkedRef->linkedRef = (TESObjectREFR*)form;
+				}
+				else RemoveExtraData(&extraDataList, xLinkedRef, true);
+			}
+			findDefID.Remove();
+		}
+		s_activateRefModified.Erase(refID);
+		return true;
+	}
+#endif
+
+
+	return true;
+
+}
+
+
+const UInt32 kMsgIconsPathAddr[] = { 0x10208A0, 0x10208E0, 0x1025CDC, 0x1030E78, 0x103A830, 0x1049638, 0x104BFE8 };
+
+//99% ripped from JIP's MessageExAlt.
+DEFINE_COMMAND_PLUGIN(MessageExAltShowoff, , 0, 22, kParams_JIP_OneFloat_OneInt_OneFormatString);
+bool Cmd_MessageExAltShowoff_Execute(COMMAND_ARGS)
+{ 
+	float displayTime;
+	UINT32 appendToQueue;
+	if (!ExtractFormatStringArgs(2, s_strArgBuffer, EXTRACT_ARGS_EX, kCommandInfo_MessageExAltShowoff.numParams, &displayTime, &appendToQueue))
+		return true;
+	
+	char* msgPtr = GetNextTokenJIP(s_strArgBuffer, '|');  
+	msgPtr[0x203] = 0;
+	if (*msgPtr)
+	{
+		if ((s_strArgBuffer[0] == '#') && (s_strArgBuffer[1] >= '0') && (s_strArgBuffer[1] <= '6') && !s_strArgBuffer[2])
+			QueueUIMessage(msgPtr, 0, (const char*)kMsgIconsPathAddr[s_strArgBuffer[1] - '0'], NULL, displayTime, appendToQueue != 0);
+		else QueueUIMessage(msgPtr, 0, s_strArgBuffer, NULL, displayTime, appendToQueue != 0);
+	}
+	else QueueUIMessage(s_strArgBuffer, 0, NULL, NULL, displayTime, appendToQueue != 0);
+	
+	return true;
+}
 
 
 #endif

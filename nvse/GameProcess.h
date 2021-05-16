@@ -393,7 +393,7 @@ public:
 	virtual void	Unk_112();
 	virtual void	Unk_113();
 	virtual void	Unk_114();
-	virtual bool	IsWeaponOut();
+	virtual bool	IsWeaponOut();  //Always returns 0 for Creatures without a weapon.
 	virtual void	SetWeaponOut(Actor* actor, bool weaponOut);
 	virtual void	Unk_117();
 	virtual void	Unk_118();

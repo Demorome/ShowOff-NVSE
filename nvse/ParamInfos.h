@@ -345,3 +345,8 @@ static ParamInfo kParams_OneArray[1] =
 	{	"array",	kParamType_Integer, 0	},
 };
 
+static ParamInfo kParams_OneChallenge[1] =
+{
+	{	"challenge",	kParamType_Challenge, 0	},
+};
+

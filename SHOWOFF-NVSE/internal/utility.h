@@ -152,6 +152,8 @@ char* __fastcall GetNextToken(char *str, char delim);
 
 char* __fastcall GetNextToken(char *str, const char *delims);
 
+char* __fastcall GetNextTokenJIP(char* str, char delim);
+
 char* __fastcall CopyString(const char *key);
 
 char* __fastcall IntToStr(int num, char *str);

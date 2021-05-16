@@ -25,7 +25,7 @@ public:
 // 020
 struct BaseExtraList
 {
-	virtual void	Unk_00(void);
+	virtual void	Destroy(bool doFree);
 
 	BSExtraData		*m_data;					// 004
 	UInt8			m_presenceBitfield[0x15];	// 008 - if a bit is set, then the extralist should contain that extradata

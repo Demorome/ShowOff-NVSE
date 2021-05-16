@@ -763,6 +763,13 @@ ParamInfo kParams_JIP_OneFloat_OneFormatString[] =
 	FORMAT_STRING_PARAMS
 };
 
+ParamInfo kParams_JIP_OneFloat_OneInt_OneFormatString[] =
+{
+	{"Float", kParamType_Float, 0},
+	{"Int", kParamType_Integer, 0},
+	FORMAT_STRING_PARAMS
+};
+
 ParamInfo kParams_JIP_OneForm_OneFormatString[] =
 {
 	{"Form", kParamType_AnyForm, 0},

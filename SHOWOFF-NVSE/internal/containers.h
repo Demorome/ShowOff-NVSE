@@ -492,6 +492,7 @@ template <typename T_Key, typename T_Data> class UnorderedMap
 {
 protected:
 	typedef HashedKey<T_Key> H_Key;
+	using Key_Arg = std::conditional_t<std::is_scalar_v<T_Key>, T_Key, const T_Key&>;  //JIP
 
 	struct Entry
 	{
@@ -807,6 +808,9 @@ public:
 		Iterator(UnorderedMap &_table) {Init(_table);}
 		Iterator(UnorderedMap &_table, T_Key key) {Find(_table, key);}
 	};
+
+	Iterator Begin() { return Iterator(*this); }  //From JIP
+	Iterator Find(Key_Arg key) { return Iterator(*this, key); }
 };
 
 template <typename T_Key> class UnorderedSet

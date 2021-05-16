@@ -935,6 +935,39 @@ __declspec(naked) char* __fastcall GetNextToken(char *str, char delim)
 	}
 }
 
+__declspec(naked) char* __fastcall GetNextTokenJIP(char* str, char delim)
+{
+	__asm
+	{
+		push	ebx
+		mov		eax, ecx
+		xor bl, bl
+		jmp		iterHead
+		done :
+		pop		ebx
+			retn
+			and esp, 0xEFFFFFFF
+			nop
+			iterHead :
+		mov		cl, [eax]
+			test	cl, cl
+			jz		done
+			cmp		cl, dl
+			jz		chrEQ
+			test	bl, bl
+			jnz		done
+			jmp		iterNext
+			chrEQ :
+		test	bl, bl
+			jnz		iterNext
+			mov		bl, 1
+			mov[eax], 0
+			iterNext :
+			inc		eax
+			jmp		iterHead
+	}
+}
+
 __declspec(naked) char* __fastcall GetNextToken(char *str, const char *delims)
 {
 	__asm
