@@ -134,9 +134,9 @@ extern "C"
 		//gLog.open??
 
 		// version checks
-		if (nvse->nvseVersion < NVSE_VERSION_INTEGER)
+		if (nvse->nvseVersion < PACKED_NVSE_VERSION)
 		{
-			_ERROR("NVSE version too old (got %08X expected at least %08X)", nvse->nvseVersion, NVSE_VERSION_INTEGER);
+			_ERROR("NVSE version too old (got %08X expected at least %08X)", nvse->nvseVersion, PACKED_NVSE_VERSION);
 			return false;
 		}
 		

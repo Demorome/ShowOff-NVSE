@@ -260,7 +260,7 @@ bool Cmd_GetCreatureTurningSpeed_Execute(COMMAND_ARGS)
 		creature = (TESCreature*)((Actor*)thisObj)->GetActorBase();
 	}
 	if IS_TYPE(creature, TESCreature)
-		* result = creature->turningSpeed;
+		*result = creature->turningSpeed;
 	return true;
 }
 
@@ -296,7 +296,7 @@ bool Cmd_GetCreatureFootWeight_Execute(COMMAND_ARGS)
 		creature = (TESCreature*)((Actor*)thisObj)->GetActorBase();
 	}
 	if IS_TYPE(creature, TESCreature)
-		* result = creature->footWeight;
+		*result = creature->footWeight;
 	return true;
 }
 
@@ -332,7 +332,7 @@ bool Cmd_GetCreatureAttackReach_Execute(COMMAND_ARGS)
 		creature = (TESCreature*)((Actor*)thisObj)->GetActorBase();
 	}
 	if IS_TYPE(creature, TESCreature)
-		* result = creature->attackReach;
+		*result = creature->attackReach;
 	return true;
 }
 
