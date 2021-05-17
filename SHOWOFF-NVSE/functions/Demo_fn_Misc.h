@@ -1,9 +1,74 @@
 ﻿#pragma once
 
+const UInt32 kMsgIconsPathAddr[] = { 0x10208A0, 0x10208E0, 0x1025CDC, 0x1030E78, 0x103A830, 0x1049638, 0x104BFE8 };
+
+//99% ripped from JIP's MessageExAlt.
+DEFINE_COMMAND_PLUGIN(MessageExAltShowoff, , 0, 22, kParams_JIP_OneFloat_OneInt_OneFormatString);
+bool Cmd_MessageExAltShowoff_Execute(COMMAND_ARGS)
+{
+	float displayTime;
+	UINT32 appendToQueue;
+	if (!ExtractFormatStringArgs(2, s_strArgBuffer, EXTRACT_ARGS_EX, kCommandInfo_MessageExAltShowoff.numParams, &displayTime, &appendToQueue))
+		return true;
+
+	char* msgPtr = GetNextTokenJIP(s_strArgBuffer, '|');
+	msgPtr[0x203] = 0;
+	if (*msgPtr)
+	{
+		if ((s_strArgBuffer[0] == '#') && (s_strArgBuffer[1] >= '0') && (s_strArgBuffer[1] <= '6') && !s_strArgBuffer[2])
+			QueueUIMessage(msgPtr, 0, (const char*)kMsgIconsPathAddr[s_strArgBuffer[1] - '0'], NULL, displayTime, appendToQueue != 0);
+		else QueueUIMessage(msgPtr, 0, s_strArgBuffer, NULL, displayTime, appendToQueue != 0);
+	}
+	else QueueUIMessage(s_strArgBuffer, 0, NULL, NULL, displayTime, appendToQueue != 0);
+
+	return true;
+}
 
 
+DEFINE_CMD_ALT_COND_PLUGIN(IsCornerMessageDisplayed, , "Returns 1/0 depending on if a corner message is displayed.", 0, NULL);
+bool Cmd_IsCornerMessageDisplayed_Execute(COMMAND_ARGS)
+{
+	*result = !g_HUDMainMenu->queuedMessages.Empty();  
+	//*result = (bool)g_HUDMainMenu->currMsgKey;
+	//another way to check. Seems to be a bit slower to update when initially adding a message to the queue.
+	return true;
+}
+bool Cmd_IsCornerMessageDisplayed_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = !g_HUDMainMenu->queuedMessages.Empty();
+	return true;
+}
+
+DEFINE_CMD_ALT_COND_PLUGIN(GetNumQueuedCornerMessages, , , 0, NULL);
+bool Cmd_GetNumQueuedCornerMessages_Execute(COMMAND_ARGS)
+{
+	*result = g_HUDMainMenu->queuedMessages.Count();
+	return true;
+}
+bool Cmd_GetNumQueuedCornerMessages_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = g_HUDMainMenu->queuedMessages.Count();
+	return true;
+}
 
 #ifdef _DEBUG
+
+DEFINE_COMMAND_PLUGIN(GetQueuedCornerMessages, "Returns the queued corner messages as a multidimensional array.", 0, 0, NULL);
+bool Cmd_GetQueuedCornerMessages_Execute(COMMAND_ARGS)
+{
+	NVSEArrayVar* msgArr = ArrIfc->CreateArray(NULL, 0, scriptObj);
+
+	for (UINT32 iIndex = g_HUDMainMenu->queuedMessages.Count() + 1; ; --iIndex)
+	{
+		if (iIndex == 0) break;
+		g_HUDMainMenu->queuedMessages.GetNthItem(iIndex);
+		//no idea what to do with this :snig:
+	}
+
+	ArrIfc->AssignCommandResult(msgArr, result);
+	return true;
+}
+
 
 DEFINE_COMMAND_ALT_PLUGIN(SetBaseActorValue, SetBaseAV, , 0, 3, kParams_JIP_OneActorValue_OneFloat_OneOptionalActorBase); 
 bool Cmd_SetBaseActorValue_Execute(COMMAND_ARGS) 
@@ -125,9 +190,9 @@ bool Cmd_SetEnableParent_Execute(COMMAND_ARGS)
 	}
 	else
 	{
-		
+
 	}
-	
+
 	if (!linkObj)
 	{
 		auto findDefID = s_activateRefDefault.Find(refID);
@@ -148,36 +213,9 @@ bool Cmd_SetEnableParent_Execute(COMMAND_ARGS)
 		return true;
 	}
 #endif
-
-
-	return true;
-
-}
-
-
-const UInt32 kMsgIconsPathAddr[] = { 0x10208A0, 0x10208E0, 0x1025CDC, 0x1030E78, 0x103A830, 0x1049638, 0x104BFE8 };
-
-//99% ripped from JIP's MessageExAlt.
-DEFINE_COMMAND_PLUGIN(MessageExAltShowoff, , 0, 22, kParams_JIP_OneFloat_OneInt_OneFormatString);
-bool Cmd_MessageExAltShowoff_Execute(COMMAND_ARGS)
-{ 
-	float displayTime;
-	UINT32 appendToQueue;
-	if (!ExtractFormatStringArgs(2, s_strArgBuffer, EXTRACT_ARGS_EX, kCommandInfo_MessageExAltShowoff.numParams, &displayTime, &appendToQueue))
-		return true;
-	
-	char* msgPtr = GetNextTokenJIP(s_strArgBuffer, '|');  
-	msgPtr[0x203] = 0;
-	if (*msgPtr)
-	{
-		if ((s_strArgBuffer[0] == '#') && (s_strArgBuffer[1] >= '0') && (s_strArgBuffer[1] <= '6') && !s_strArgBuffer[2])
-			QueueUIMessage(msgPtr, 0, (const char*)kMsgIconsPathAddr[s_strArgBuffer[1] - '0'], NULL, displayTime, appendToQueue != 0);
-		else QueueUIMessage(msgPtr, 0, s_strArgBuffer, NULL, displayTime, appendToQueue != 0);
-	}
-	else QueueUIMessage(s_strArgBuffer, 0, NULL, NULL, displayTime, appendToQueue != 0);
-	
 	return true;
 }
+
 
 
 #endif

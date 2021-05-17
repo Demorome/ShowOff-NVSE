@@ -38,7 +38,9 @@ bool (*ExtractFormatStringArgs)(UInt32 fmtStringPos, char* buffer, COMMAND_ARGS_
 
 
 //Imports from JG
-//#define DllImport   __declspec( dllimport )
+class EventInformation;
+typedef EventInformation* EventInfo;
+typedef EventInfo (*JGCreateEvent)(const char* EventName, UInt8 maxArgs, UInt8 maxFilters, void* (__fastcall* CreatorFunction)(void**, UInt32));
 
 
 

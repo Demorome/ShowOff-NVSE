@@ -165,6 +165,9 @@
     <ClInclude Include="Events\Demo_ev_Misc.h">
       <Filter>Events</Filter>
     </ClInclude>
+    <ClInclude Include="Events\EventFilteringInterface.h">
+      <Filter>Events</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

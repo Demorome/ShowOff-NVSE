@@ -18,6 +18,7 @@
 #include "ShowOffNVSE.h"
 #include "GameData.h"
 #include "settings.h"
+#include "GameScript.h"
 
 // Functions
 #include "functions/Trooper_fn_misc.h"
@@ -29,6 +30,7 @@
 #include "functions/Demo_fn_Debug.h"
 
 // Events
+#include "Events/EventFilteringInterface.h"
 #include "Events/Demo_ev_Misc.h"
 
 
@@ -193,6 +195,8 @@ extern "C"
 			GetElement = ArrIfc->GetElement;
 			ExtractArgsEx = g_script->ExtractArgsEx;
 			ExtractFormatStringArgs = g_script->ExtractFormatStringArgs;
+			auto johnnyGuitar = GetModuleHandle("johnnyguitar.dll");
+			
 			
 			handleIniOptions();
 			DoHooks();
@@ -230,8 +234,17 @@ extern "C"
 		REG_CMD(GetChallengeProgress);
 		
 		REG_CMD(TestCondition);
-
-
+		
+		REG_CMD(MessageExAltShowoff);
+		REG_CMD(IsCornerMessageDisplayed);
+		REG_CMD(GetNumQueuedCornerMessages);
+		
+		REG_CMD(GetCreatureTurningSpeed);
+		REG_CMD(SetCreatureTurningSpeed);
+		REG_CMD(GetCreatureFootWeight);
+		REG_CMD(SetCreatureFootWeight);
+		REG_CMD(GetCreatureAttackReach);
+		REG_CMD(SetCreatureAttackReach);
 
 #if _DEBUG  //for functions being tested (or just abandoned).
 
@@ -270,7 +283,8 @@ extern "C"
 		REG_CMD(SetEnableParent);
 
 		REG_CMD(ApplyPoison);
-		REG_CMD(MessageExAltShowoff);
+
+		REG_CMD_ARR(GetQueuedCornerMessages);
 
 #endif
 

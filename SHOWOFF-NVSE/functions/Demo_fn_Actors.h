@@ -248,7 +248,113 @@ bool Cmd_GetNumCombatActorsFromActor_Execute(COMMAND_ARGS)
 	return true;
 }
 
+DEFINE_COMMAND_PLUGIN(GetCreatureTurningSpeed, , 0, 1, kParams_OneOptionalActorBase);  //copied after GetCreatureCombatSkill from JG
+bool Cmd_GetCreatureTurningSpeed_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	TESCreature* creature = NULL;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &creature)) return true;
+	if (!creature)
+	{
+		if (!thisObj || !thisObj->IsActor()) return true;
+		creature = (TESCreature*)((Actor*)thisObj)->GetActorBase();
+	}
+	if IS_TYPE(creature, TESCreature)
+		* result = creature->turningSpeed;
+	return true;
+}
 
+DEFINE_COMMAND_PLUGIN(SetCreatureTurningSpeed, , 0, 2, kParams_OneFloat_OneOptionalActorBase);
+bool Cmd_SetCreatureTurningSpeed_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	TESCreature* creature = NULL;
+	float turningSpeed = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &turningSpeed, &creature)) return true;
+	if (!creature)
+	{
+		if (!thisObj || !thisObj->IsActor()) return true;
+		creature = (TESCreature*)((Actor*)thisObj)->GetActorBase();
+	}
+	if IS_TYPE(creature, TESCreature)
+	{
+		creature->turningSpeed = turningSpeed;
+		*result = 1;
+	}
+	return true;
+}
+
+DEFINE_COMMAND_PLUGIN(GetCreatureFootWeight, , 0, 1, kParams_OneOptionalActorBase);
+bool Cmd_GetCreatureFootWeight_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	TESCreature* creature = NULL;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &creature)) return true;
+	if (!creature)
+	{
+		if (!thisObj || !thisObj->IsActor()) return true;
+		creature = (TESCreature*)((Actor*)thisObj)->GetActorBase();
+	}
+	if IS_TYPE(creature, TESCreature)
+		* result = creature->footWeight;
+	return true;
+}
+
+DEFINE_COMMAND_PLUGIN(SetCreatureFootWeight, , 0, 2, kParams_OneFloat_OneOptionalActorBase);
+bool Cmd_SetCreatureFootWeight_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	TESCreature* creature = NULL;
+	float footWeight = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &footWeight, &creature)) return true;
+	if (!creature)
+	{
+		if (!thisObj || !thisObj->IsActor()) return true;
+		creature = (TESCreature*)((Actor*)thisObj)->GetActorBase();
+	}
+	if IS_TYPE(creature, TESCreature)
+	{
+		creature->footWeight = footWeight;
+		*result = 1;
+	}
+	return true;
+}
+
+DEFINE_COMMAND_PLUGIN(GetCreatureAttackReach, , 0, 1, kParams_OneOptionalActorBase);
+bool Cmd_GetCreatureAttackReach_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	TESCreature* creature = NULL;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &creature)) return true;
+	if (!creature)
+	{
+		if (!thisObj || !thisObj->IsActor()) return true;
+		creature = (TESCreature*)((Actor*)thisObj)->GetActorBase();
+	}
+	if IS_TYPE(creature, TESCreature)
+		* result = creature->attackReach;
+	return true;
+}
+
+DEFINE_COMMAND_PLUGIN(SetCreatureAttackReach, , 0, 2, kParams_OneFloat_OneOptionalActorBase);
+bool Cmd_SetCreatureAttackReach_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	TESCreature* creature = NULL;
+	float attackReach = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &attackReach, &creature)) return true;
+	if (!creature)
+	{
+		if (!thisObj || !thisObj->IsActor()) return true;
+		creature = (TESCreature*)((Actor*)thisObj)->GetActorBase();
+	}
+	if IS_TYPE(creature, TESCreature)
+	{
+		creature->attackReach = attackReach;
+		*result = 1;
+	}
+	return true;
+}
 
 #ifdef _DEBUG
 

@@ -322,6 +322,7 @@
     <ClInclude Include="..\nvse\SafeWrite.h" />
     <ClInclude Include="..\nvse\Utilities.h" />
     <ClInclude Include="Events\Demo_ev_Misc.h" />
+    <ClInclude Include="Events\EventFilteringInterface.h" />
     <ClInclude Include="functions\Demo_fn_Actors.h" />
     <ClInclude Include="functions\Demo_fn_Array.h" />
     <ClInclude Include="functions\Demo_fn_Debug.h" />

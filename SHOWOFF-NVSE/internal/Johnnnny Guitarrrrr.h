@@ -23,3 +23,9 @@ bool AlchemyItem::IsPoison()
 	} while (iter = iter->next);
 	return effSetting != NULL;
 }
+
+TESActorBase* Actor::GetActorBase()
+{
+	ExtraLeveledCreature* xLvlCre = GetExtraType(extraDataList, LeveledCreature);
+	return (xLvlCre && xLvlCre->form) ? (TESActorBase*)xLvlCre->form : (TESActorBase*)baseForm;
+}
