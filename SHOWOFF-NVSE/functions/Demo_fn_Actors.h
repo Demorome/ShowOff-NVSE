@@ -358,6 +358,31 @@ bool Cmd_SetCreatureAttackReach_Execute(COMMAND_ARGS)
 
 #ifdef _DEBUG
 
+DEFINE_CMD_ALT_COND_PLUGIN(HasAnyScriptPackage, , , 1, NULL);
+bool Cmd_HasAnyScriptPackage_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = 0;
+	if (thisObj->IsActor())
+	{
+		ExtraDataList* xList = &thisObj->extraDataList;
+		//*result = ThisStdCall<UINT32>(0x41CB10, xList);
+		ExtraPackage* xPackage = GetExtraTypeJIP(&thisObj->extraDataList, Package);
+		if (xPackage)
+		{
+			*result = xPackage->unk10[2];  //kill meh, doesn't work. 0x41CB10 is the best lead I have.
+		}
+		//bool const bTest = ThisStdCall<bool>(0x674D40, package);
+		//Console_Print("ActorHasAnyScriptPackage TEST >> %d", bTest);
+		//*result = ?
+	} 
+	return true;
+}
+bool Cmd_HasAnyScriptPackage_Execute(COMMAND_ARGS)
+{
+	return Cmd_HasAnyScriptPackage_Eval(thisObj, 0, 0, result);
+}
+
+
 
 
 #endif

@@ -216,6 +216,20 @@ bool Cmd_SetEnableParent_Execute(COMMAND_ARGS)
 	return true;
 }
 
+double g_TestDemoVar = 0;
 
+void __fastcall TestDemoFunc(double *stuff)
+{
+	*stuff -= 1;
+}
+
+DEFINE_COMMAND_PLUGIN(TestDemo, , 0, 0, NULL);
+bool Cmd_TestDemo_Execute(COMMAND_ARGS)
+{
+	g_TestDemoVar += 2;
+	TestDemoFunc(&g_TestDemoVar);
+	*result = g_TestDemoVar;
+	return true;
+}
 
 #endif

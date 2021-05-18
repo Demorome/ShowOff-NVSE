@@ -248,6 +248,8 @@ extern "C"
 
 #if _DEBUG  //for functions being tested (or just abandoned).
 
+		REG_CMD(HasAnyScriptPackage);
+
 		//These two functions are useless, the setting functions already safety check and even report if the setting could not be found via func result.
 		REG_CMD(IsGameSetting); //For use in scripts to safety check; any other gamesetting function can already be used in console to check if a gamesetting exists.
 		REG_CMD(IsINISetting); //Uses the GetNumericINISetting "SettingName:CategoryName" format
@@ -285,6 +287,8 @@ extern "C"
 		REG_CMD(ApplyPoison);
 
 		REG_CMD_ARR(GetQueuedCornerMessages);
+
+		REG_CMD(TestDemo);
 
 #endif
 

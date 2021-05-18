@@ -18,6 +18,9 @@ float g_fForcePickpocketPlayerStrengthMult;
 float g_fForcePickpocketTargetStrengthMult;
 char* g_fForcePickpocketFailureMessage = nullptr;
 
+//For PreventBackwardsRangedAttacks (PBRA)
+float g_PBRA_On;
+float g_PBRA_MaxAbsHeadingAngle;
 
 
 //-- Read INI values.
@@ -61,6 +64,10 @@ void handleIniOptions()
 	g_fForcePickpocketPlayerStrengthMult = ini.GetOrCreate("Force Pickpocket", "fForcePickpocketPlayerStrengthMult", 2, NULL);
 	g_fForcePickpocketTargetStrengthMult = ini.GetOrCreate("Force Pickpocket", "fForcePickpocketTargetStrengthMult", 2.5, NULL);
 	g_fForcePickpocketFailureMessage = _strdup(ini.GetOrCreate("Force Pickpocket", "fForcePickpocketFailureMessage", "You don't have enough Action Points to steal this item.", "; Sets the text that will be displayed when the player does not have enough AP to pickpocket."));
+
+	//For PreventBackwardsRangedAttacks (PBRA)
+	g_PBRA_On = ini.GetOrCreate("Prevent Backwards Ranged Attacks", "bOn", 0, ";EXPERIMENTAL. Prevents actors from firing if they aren't facing their target within a certain angle.");
+	g_PBRA_MaxAbsHeadingAngle = ini.GetOrCreate("Prevent Backwards Ranged Attacks", "fMaxAbsHeadingAngle", 75, ";Controls the maximum heading angle that an actor must face their target in order to fire their weapon.");
 	
 	ini.SaveFile(iniPath, false);
 }

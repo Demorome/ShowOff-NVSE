@@ -180,6 +180,16 @@ TESObjectWEAP* Actor::GetEquippedWeapon()
 }
 
 
+TESPackage* Actor::GetStablePackage()
+{
+	if (!baseProcess) return NULL;
+	TESPackage* package = baseProcess->currentPackage.package;
+	if (!package) return NULL;
+	if ((package->type < 18) || (package->type == 26) || (package->type == 30)) return package;
+	ExtraPackage* xPackage = GetExtraTypeJIP(&extraDataList, Package);
+	return xPackage ? xPackage->package : NULL;
+}
+
 #if 0 //not gonna bother with this for now
 DebugLog s_log, s_debug, s_missingTextures;
 

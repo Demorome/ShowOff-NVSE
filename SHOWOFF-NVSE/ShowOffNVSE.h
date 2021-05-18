@@ -317,6 +317,52 @@ bool __fastcall QueueUIMessageHook(HUDMainMenu* menu, void* edx, char* msgText, 
 	return ThisStdCall_B(0x775380, menu, msgText, IconType, iconPath, soundPath, displayTime, instantEndCurrentMessage);
 }
 
+
+Actor* g_backwardsRangedAttackActor = nullptr;
+
+double __fastcall GetHeadingAngle(TESObjectREFR* actor, TESObjectREFR* target)
+{
+	double headingAngle = 0;
+	CdeclCall(0x5A0410, actor, target, 0, &headingAngle);
+#if _DEBUG
+	Console_Print("GetHeadingAngle -> %f", headingAngle);
+#endif
+	return headingAngle;
+}
+
+Actor* __fastcall GetBackwardsRangedAttackActor(void* combatProcedure, void* edx)
+{
+	g_backwardsRangedAttackActor = ThisStdCall<Actor*>(0x996DE0, combatProcedure);
+	return g_backwardsRangedAttackActor;
+}
+
+bool __fastcall PreventBackwardsRangedAttacks(void* combatState, void* edx)
+{
+#if _DEBUG
+	Console_Print("You've been hooked by, you've been struck by, a daft idiot.");
+#endif
+	if (g_backwardsRangedAttackActor)
+	{
+		Actor* target = ThisStdCall<Actor*>(0x8A0360, g_backwardsRangedAttackActor);
+		double const headingAngle = GetHeadingAngle(g_backwardsRangedAttackActor, target);
+
+		if ( (headingAngle <= g_PBRA_MaxAbsHeadingAngle) && (headingAngle >= -g_PBRA_MaxAbsHeadingAngle) )
+		{
+#if _DEBUG
+			Console_Print("PreventBackwardsRangedAttacks -> Actor is facing target.");
+#endif
+			return ThisStdCall<UInt8>(0x97FB20, combatState);
+		}
+#if _DEBUG
+		Console_Print("PreventBackwardsRangedAttacks -> Actor is NOT facing target.");
+#endif
+	}
+
+	return false;
+
+}
+
+
 void DoHooks()
 {
 	//Modify a "IsInCombat" check to allow NPC activation even if they are in combat.
@@ -330,15 +376,23 @@ void DoHooks()
 	//
 	// Possible solution: open and hook the companion loot exchange menu instead?
 
+	if (g_PBRA_On)
+	{
+		WriteRelCall(0x9D0A46, UINT32(GetBackwardsRangedAttackActor));
+		WriteRelCall(0x9D0D6D, UINT32(PreventBackwardsRangedAttacks));
+	}
+
+#if _DEBUG
 	//Below isn't working currently...
 	WriteRelCall(0x77738A, UINT32(ShowPickpocketStringInCombat));
 	WriteRelCall(0x7772C9, UINT32(ShowPickpocketStringInCombat2));
 	//WriteRelCall(0x770C0D, UINT32(ShowPickpocketStringInCombat2)); //breaks health target UI
-
+	
 	WriteRelCall(0x705379, UINT32(QueueUIMessageHook));
 	WriteRelCall(0x7EE74D, UINT32(QueueUIMessageHook));
 	WriteRelCall(0x7EE87D, UINT32(QueueUIMessageHook));
 	WriteRelCall(0x7EEA6C, UINT32(QueueUIMessageHook));
 	WriteRelCall(0x833303, UINT32(QueueUIMessageHook));
 	WriteRelCall(0x8B959B, UINT32(QueueUIMessageHook));
+#endif 
 }
