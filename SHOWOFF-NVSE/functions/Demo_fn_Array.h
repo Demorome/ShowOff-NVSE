@@ -22,9 +22,10 @@ bool Cmd_AddArrayToFormList_Execute(COMMAND_ARGS)
 	g_arrInterface->GetElements(inArr, elements, NULL);
 
 	for (int i = 0; i < size; i++) {
-		if (elements[i].Form() == NULL) return true;
+		if (elements[i].Form() == NULL) continue;
 		UInt32 const addedAtIndex = pListForm->AddAt(elements[i].Form(), index);
-		if (addedAtIndex == eListInvalid) {
+		if (addedAtIndex == eListInvalid) 
+		{
 			*result = -1;
 			break;
 		}
