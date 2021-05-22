@@ -10,6 +10,17 @@ UInt32 GetRelJumpAddr(UInt32 jumpSrc)
 
 
 
+enum
+{
+	kAddr_EquipItem = 0x88C650,
+	kAddr_UnequipItem = 0x88C790,
+	kAddr_GetItemHealthPerc = 0x4BCDB0,
+	kAddr_GetItemValue = 0x4BD400,
+	kAddr_ReadXML = 0xA01B00,
+	kAddr_TileFromTemplate = 0xA1DDB0,
+	kAddr_EvaluateConditions = 0x680C60,
+	kAddr_EvaluateCondition = 0x681600,
+};
 
 bool __fastcall ContainerMenuCheckIsTargetChild(ContChangesEntry* entry, void* edx, int a1)
 {
@@ -17,6 +28,25 @@ bool __fastcall ContainerMenuCheckIsTargetChild(ContChangesEntry* entry, void* e
 	return ref->GetIsChildSize(true);
 }
 
+__declspec(naked) void Actor::UnequipItem(TESForm* objType, UInt32 unk1, ExtraDataList* itemExtraList, UInt32 unk3, bool lockUnequip, UInt32 unk5)
+{
+	static const UInt32 procAddr = kAddr_UnequipItem;
+	__asm	jmp		procAddr
+}
+
+__declspec(naked) float ExtraContainerChanges::EntryData::GetItemHealthPerc(bool arg1)
+{
+	static const UInt32 procAddr = kAddr_GetItemHealthPerc;
+	__asm	jmp		procAddr
+}
+
+/*
+__declspec(naked) float ExtraContainerChanges::EntryData::GetValue()
+{
+	static const UInt32 procAddr = kAddr_GetItemValue;
+	__asm jmp procAddr
+}
+*/
 
 void (*ToggleMenus)(bool toggleON) = ((void(__cdecl*)(bool))(0x703810));
 void (*CreateScreenshot)(char* name) = ((void(__cdecl*)(char*))(0x878860));

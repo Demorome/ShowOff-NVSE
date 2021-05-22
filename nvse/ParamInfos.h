@@ -345,10 +345,17 @@ static ParamInfo kParams_OneIntOneForm[2] =
 	{	"form",		kParamType_AnyForm,	0	},
 };
 
-// Array is passed as an int.
+// Array is passed as an int; array type otherwise requires Compiler Override.
 static ParamInfo kParams_OneArray[1] =  	
 {
 	{	"array",	kParamType_Integer, 0	},
+};
+
+static ParamInfo kParams_OneFormlist_OneArray_OneOptionalIndex[3] =
+{
+	{	"form list", kParamType_FormList,	0		},
+	{	"array",	 kParamType_Integer,	0		},
+	{	"index",	 kParamType_Integer,	1		},
 };
 
 static ParamInfo kParams_OneChallenge[1] =

@@ -56,7 +56,7 @@ bool Cmd_GetNumQueuedCornerMessages_Eval(COMMAND_ARGS_EVAL)
 DEFINE_COMMAND_PLUGIN(GetQueuedCornerMessages, "Returns the queued corner messages as a multidimensional array.", 0, 0, NULL);
 bool Cmd_GetQueuedCornerMessages_Execute(COMMAND_ARGS)
 {
-	NVSEArrayVar* msgArr = ArrIfc->CreateArray(NULL, 0, scriptObj);
+	NVSEArrayVar* msgArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
 
 	for (UINT32 iIndex = g_HUDMainMenu->queuedMessages.Count() + 1; ; --iIndex)
 	{
@@ -65,7 +65,7 @@ bool Cmd_GetQueuedCornerMessages_Execute(COMMAND_ARGS)
 		//no idea what to do with this :snig:
 	}
 
-	ArrIfc->AssignCommandResult(msgArr, result);
+	g_arrInterface->AssignCommandResult(msgArr, result);
 	return true;
 }
 

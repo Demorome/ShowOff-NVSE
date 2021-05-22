@@ -18,9 +18,16 @@ float g_fForcePickpocketPlayerStrengthMult;
 float g_fForcePickpocketTargetStrengthMult;
 char* g_fForcePickpocketFailureMessage = nullptr;
 
+#if 0
 //For PreventBackwardsRangedAttacks (PBRA)
-float g_PBRA_On;
+bool g_PBRA_On;
 float g_PBRA_MaxAbsHeadingAngle;
+#endif
+
+//For PreventBrokenItemRepairing (PBIR)
+bool g_PBIR_On;
+char* g_PBIR_FailMessage = nullptr;
+
 
 
 //-- Read INI values.
@@ -65,9 +72,17 @@ void handleIniOptions()
 	g_fForcePickpocketTargetStrengthMult = ini.GetOrCreate("Force Pickpocket", "fForcePickpocketTargetStrengthMult", 2.5, NULL);
 	g_fForcePickpocketFailureMessage = _strdup(ini.GetOrCreate("Force Pickpocket", "fForcePickpocketFailureMessage", "You don't have enough Action Points to steal this item.", "; Sets the text that will be displayed when the player does not have enough AP to pickpocket."));
 
+#if 0
 	//For PreventBackwardsRangedAttacks (PBRA)
 	g_PBRA_On = ini.GetOrCreate("Prevent Backwards Ranged Attacks", "bOn", 0, ";EXPERIMENTAL. Prevents actors from firing if they aren't facing their target within a certain angle.");
 	g_PBRA_MaxAbsHeadingAngle = ini.GetOrCreate("Prevent Backwards Ranged Attacks", "fMaxAbsHeadingAngle", 75, ";Controls the maximum heading angle that an actor must face their target in order to fire their weapon.");
-	
+#endif
+
+	//For PreventBrokenItemRepairing (PBIR)
+	g_PBIR_On = ini.GetOrCreate("Prevent Repairing Broken Items", "bOn", 0, NULL);
+#if 0
+	g_PBIR_FailMessage = _strdup(ini.GetOrCreate("Prevent Repairing Broken Items", "sFailMessage", "You cannot repair broken items.", NULL));;
+#endif
+
 	ini.SaveFile(iniPath, false);
 }

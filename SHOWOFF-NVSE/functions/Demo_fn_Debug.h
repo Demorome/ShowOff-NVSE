@@ -8,10 +8,21 @@ bool Cmd_DumpFormList_Execute(COMMAND_ARGS)
 	if (ExtractArgs(EXTRACT_ARGS, &FList) && IsConsoleOpen() && FList)
 	{
 		Console_Print("Dumping %s FormList [%08X], size %d:", FList->GetName(), FList->refID, FList->Count());
-		for (tList<TESForm>::Iterator iter = FList->list.Begin(); !iter.End(); ++iter) {
-			if (iter.Get()) {
+		int iIndex = 0;
+		for (tList<TESForm>::Iterator iter = FList->list.Begin(); !iter.End(); ++iter)
+		{
+			if (iter.Get()) 
+			{
 				TESFullName* formName = DYNAMIC_CAST(iter.Get(), TESForm, TESFullName);
-				Console_Print("%s [%08X]", formName->name.m_data, iter.Get()->refID);
+				if (formName)
+				{
+					Console_Print("%d: %s [%08X]", iIndex, formName->name.m_data, iter.Get()->refID);
+				}
+				else
+				{
+					Console_Print("%d: (name unavailable) [%08X]", iIndex, iter.Get()->refID);
+				}
+				iIndex++;
 			}
 		}
 	}

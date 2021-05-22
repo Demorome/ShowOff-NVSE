@@ -45,8 +45,8 @@ typedef EventInfo (*JGCreateEvent)(const char* EventName, UInt8 maxArgs, UInt8 m
 
 
 // Singletons
-NVSEArrayVarInterface* ArrIfc = NULL;
-NVSEStringVarInterface* StrIfc = NULL;
+NVSEArrayVarInterface* g_arrInterface = NULL;
+NVSEStringVarInterface* g_strInterface = NULL;
 NVSEMessagingInterface* g_msg = NULL;
 NVSEScriptInterface* g_script = NULL;
 NVSECommandTableInterface* CmdIfc = NULL;
@@ -318,15 +318,13 @@ bool __fastcall QueueUIMessageHook(HUDMainMenu* menu, void* edx, char* msgText, 
 }
 
 
+#if 0
 Actor* g_backwardsRangedAttackActor = nullptr;
 
 double __fastcall GetHeadingAngle(TESObjectREFR* actor, TESObjectREFR* target)
 {
 	double headingAngle = 0;
 	CdeclCall(0x5A0410, actor, target, 0, &headingAngle);
-#if _DEBUG
-	Console_Print("GetHeadingAngle -> %f", headingAngle);
-#endif
 	return headingAngle;
 }
 
@@ -338,9 +336,6 @@ Actor* __fastcall GetBackwardsRangedAttackActor(void* combatProcedure, void* edx
 
 bool __fastcall PreventBackwardsRangedAttacks(void* combatState, void* edx)
 {
-#if _DEBUG
-	Console_Print("You've been hooked by, you've been struck by, a daft idiot.");
-#endif
 	if (g_backwardsRangedAttackActor)
 	{
 		Actor* target = ThisStdCall<Actor*>(0x8A0360, g_backwardsRangedAttackActor);
@@ -357,9 +352,22 @@ bool __fastcall PreventBackwardsRangedAttacks(void* combatState, void* edx)
 		Console_Print("PreventBackwardsRangedAttacks -> Actor is NOT facing target.");
 #endif
 	}
-
 	return false;
+}
+#endif
 
+//bool g_bRepairButtonPrevented_PBIR;
+
+double __fastcall PreventRepairButton(ContChangesEntry* entry, int bPercent)
+{
+	auto const result = ThisStdCall<double>(0x4BCDB0, entry, bPercent);
+	if (result == 0.0F)
+	{
+		//g_bRepairButtonPrevented_PBIR = true;
+		return 100.0F;  //since you can't repair items at 100% health, I use that bit of code to prevent repairing items at 0% health.
+	}
+	//g_bRepairButtonPrevented_PBIR = false;
+	return result;
 }
 
 
@@ -376,12 +384,6 @@ void DoHooks()
 	//
 	// Possible solution: open and hook the companion loot exchange menu instead?
 
-	if (g_PBRA_On)
-	{
-		WriteRelCall(0x9D0A46, UINT32(GetBackwardsRangedAttackActor));
-		WriteRelCall(0x9D0D6D, UINT32(PreventBackwardsRangedAttacks));
-	}
-
 #if _DEBUG
 	//Below isn't working currently...
 	WriteRelCall(0x77738A, UINT32(ShowPickpocketStringInCombat));
@@ -394,5 +396,26 @@ void DoHooks()
 	WriteRelCall(0x7EEA6C, UINT32(QueueUIMessageHook));
 	WriteRelCall(0x833303, UINT32(QueueUIMessageHook));
 	WriteRelCall(0x8B959B, UINT32(QueueUIMessageHook));
-#endif 
+
+	//SafeWrite8(0x9D0D40, 0x0);  //test the fix that prevents actors from shooting behind themselves.
+	if (g_PBIR_On)
+	{
+		WriteRelCall(0x7818B7, UINT32(PreventRepairButton));
+		/*
+		char buf[260];
+		sprintf(buf, "%s", g_PBIR_FailMessage);
+		QueueUIMessage(buf, eEmotion::sad, NULL, NULL, 2.0, 0);
+		 */
+	}
+	
+#endif
+
+#if 0  //remnants of the past, beaten by Stewie/c6
+	if (g_PBRA_On)
+	{
+		WriteRelCall(0x9D0A46, UINT32(GetBackwardsRangedAttackActor));
+		//WriteRelCall(0x9D0D6D, UINT32(PreventBackwardsRangedAttacks));
+		PatchMemoryNop(0x9D13B2, 8);
+	}
+#endif
 }

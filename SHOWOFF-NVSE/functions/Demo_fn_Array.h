@@ -1,8 +1,38 @@
 ﻿#pragma once
 
 
-
 #ifdef _DEBUG
+
+
+DEFINE_COMMAND_PLUGIN(AddArrayToFormList, "", 0, 3, kParams_OneFormlist_OneArray_OneOptionalIndex);
+
+//ripped code from FOSE's ListAddForm
+bool Cmd_AddArrayToFormList_Execute(COMMAND_ARGS)
+{
+	*result = 1;
+	BGSListForm* pListForm = NULL;
+	UInt32 arrID;
+	UInt32 index = eListEnd;
+	
+	ExtractArgsEx(EXTRACT_ARGS_EX, &pListForm, &arrID, &index);
+	NVSEArrayVar* inArr = g_arrInterface->LookupArrayByID(arrID);
+	if (!pListForm || !inArr) return true;
+	UInt32 size = g_arrInterface->GetArraySize(inArr);
+	NVSEArrayElement* elements = new NVSEArrayElement[size];
+	g_arrInterface->GetElements(inArr, elements, NULL);
+
+	for (int i = 0; i < size; i++) {
+		if (elements[i].Form() == NULL) return true;
+		UInt32 const addedAtIndex = pListForm->AddAt(elements[i].Form(), index);
+		if (addedAtIndex == eListInvalid) {
+			*result = -1;
+			break;
+		}
+	}
+	
+	delete[] elements;
+	return true;
+}
 
 DEFINE_COMMAND_PLUGIN(Ar_GetInvalidRefs, "", 0, 2, kParams_OneArray);  //failed experiment
 bool Cmd_Ar_GetInvalidRefs_Execute(COMMAND_ARGS)
@@ -13,13 +43,13 @@ bool Cmd_Ar_GetInvalidRefs_Execute(COMMAND_ARGS)
 	int iMDArrayNumber;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID, &iMDArrayNumber)) return true;
 
-	NVSEArrayVar* inArr = ArrIfc->LookupArrayByID(arrID);
+	NVSEArrayVar* inArr = g_arrInterface->LookupArrayByID(arrID);
 	if (!inArr) return true;
 	NVSEArrayElement ElementArray;
 	NVSEArrayElement* elements;
 
 	UInt32 size;
-	size = ArrIfc->GetArraySize(inArr);  //Multidimensional arrays are not accounted for.
+	size = g_arrInterface->GetArraySize(inArr);  //Multidimensional arrays are not accounted for.
 
 	//****Will this work with arrays of different types?
 
@@ -30,10 +60,10 @@ bool Cmd_Ar_GetInvalidRefs_Execute(COMMAND_ARGS)
 		return true;
 	}
 	
-	NVSEArrayVar* InvalidRefArr = ArrIfc->CreateArray(NULL, 0, scriptObj);
+	NVSEArrayVar* InvalidRefArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
 	
 	elements = new NVSEArrayElement[size];
-	ArrIfc->GetElements(inArr, elements, NULL);
+	g_arrInterface->GetElements(inArr, elements, NULL);
 
 	for (int i = 0; i < size; i++)
 	{
@@ -51,7 +81,7 @@ bool Cmd_Ar_GetInvalidRefs_Execute(COMMAND_ARGS)
 				{
 					if (resElement.form)
 						Console_Print("Maybe?");
-					//ArrIfc->AppendElement(InvalidRefArr, ArrayElementL(resElement.raw));
+					//g_arrInterface->AppendElement(InvalidRefArr, ArrayElementL(resElement.raw));
 					Console_Print("plzzzzz");
 				}
 			}
@@ -60,7 +90,7 @@ bool Cmd_Ar_GetInvalidRefs_Execute(COMMAND_ARGS)
 	}
 	delete[] elements;
 
-	ArrIfc->AssignCommandResult(InvalidRefArr, result);
+	g_arrInterface->AssignCommandResult(InvalidRefArr, result);
 	return true;
 }
 

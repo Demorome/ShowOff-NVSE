@@ -190,9 +190,9 @@ extern "C"
 			InventoryRefGetForID = (InventoryRef * (*)(UInt32))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID);
 			g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 			CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
-			StrIfc = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar); // From JG
-			ArrIfc = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar); // From JG
-			GetElement = ArrIfc->GetElement;
+			g_strInterface = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar); // From JG
+			g_arrInterface = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar); // From JG
+			GetElement = g_arrInterface->GetElement;
 			ExtractArgsEx = g_script->ExtractArgsEx;
 			ExtractFormatStringArgs = g_script->ExtractFormatStringArgs;
 			auto johnnyGuitar = GetModuleHandle("johnnyguitar.dll");
@@ -247,6 +247,8 @@ extern "C"
 		REG_CMD(SetCreatureAttackReach);
 
 #if _DEBUG  //for functions being tested (or just abandoned).
+		
+		REG_CMD(AddArrayToFormList);
 
 		REG_CMD(HasAnyScriptPackage);
 
