@@ -36,7 +36,7 @@ bool Cmd_DumpFormList_Execute(COMMAND_ARGS)
 			}
 		}
 	}
-	if (filepathStr != "nope")
+	if (strcmp(filepathStr, "nope") != 0)  //https://stackoverflow.com/a/1330559, strcmp returns non-zero if the string contents are not equal.
 	{
 		FileStreamJIP outputFile;
 		if (outputFile.OpenWrite(filepathStr, true))
