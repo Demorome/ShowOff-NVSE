@@ -1,5 +1,37 @@
 ﻿#pragma once
 
+DEFINE_COMMAND_ALT_PLUGIN(ListAddList, AddFormListToFormList, "", 0, 3, kParams_TwoFormLists_OneOptionalIndex);
+
+//ripped code from FOSE's ListAddForm
+bool Cmd_ListAddList_Execute(COMMAND_ARGS)
+{
+	*result = 1;
+	BGSListForm* pListForm = NULL;
+	BGSListForm* pToAppendList = NULL;
+	UInt32 index = eListEnd;
+
+	ExtractArgsEx(EXTRACT_ARGS_EX, &pListForm, &pToAppendList, &index);
+	if (!pListForm || !pToAppendList) return true;
+
+	for (tList<TESForm>::Iterator iter = pToAppendList->list.Begin(); !iter.End(); ++iter)
+	{
+		TESForm* form = iter.Get();
+		if (form)
+		{
+			UInt32 const addedAtIndex = pListForm->AddAt(form, index);
+			if (addedAtIndex == eListInvalid)
+			{
+				*result = -1;
+				break;
+			}
+		}
+	}
+
+	return true;
+}
+
+
+
 const UInt32 kMsgIconsPathAddr[] = { 0x10208A0, 0x10208E0, 0x1025CDC, 0x1030E78, 0x103A830, 0x1049638, 0x104BFE8 };
 
 //99% ripped from JIP's MessageExAlt.

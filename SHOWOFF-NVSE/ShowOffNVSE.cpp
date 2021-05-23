@@ -5,11 +5,11 @@
 #include "nvse/GameObjects.h"
 #include "nvse/GameUI.h"
 #include "nvse/GameRTTI.h"
-#include "nvse\ArrayVar.h"
+#include "nvse/ArrayVar.h"
 #include "nvse/SafeWrite.h"
 
 #include "internal/decoding.h"
-#include "internal\utility.h"
+#include "internal/utility.h"
 #include "internal/StewieMagic.h"
 #include "internal/jip_nvse.h"
 #include "internal/Johnnnny Guitarrrrr.h"
@@ -248,7 +248,8 @@ extern "C"
 
 #if _DEBUG  //for functions being tested (or just abandoned).
 		
-		REG_CMD(AddArrayToFormList);
+		REG_CMD(ListAddArray);
+		REG_CMD(ListAddList);
 
 		REG_CMD(HasAnyScriptPackage);
 

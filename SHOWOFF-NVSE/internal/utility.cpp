@@ -1268,6 +1268,116 @@ void FileStream::MakeAllDirs(char *fullPath)
 	}
 }
 
+//Begin JIP stuff
+
+bool FileStreamJIP::Open(const char* filePath)
+{
+	if (theFile) fclose(theFile);
+	theFile = _fsopen(filePath, "rb", 0x20);
+	return theFile ? true : false;
+}
+
+bool FileStreamJIP::OpenAt(const char* filePath, UInt32 inOffset)
+{
+	if (theFile) fclose(theFile);
+	theFile = _fsopen(filePath, "rb", 0x20);
+	if (!theFile) return false;
+	fseek(theFile, 0, SEEK_END);
+	if (ftell(theFile) < inOffset)
+	{
+		Close();
+		return false;
+	}
+	fseek(theFile, inOffset, SEEK_SET);
+	return true;
+}
+
+bool FileStreamJIP::OpenWrite(char* filePath, bool append)
+{
+	if (theFile) fclose(theFile);
+	if (FileExists(filePath))
+	{
+		if (append)
+		{
+			theFile = _fsopen(filePath, "ab", 0x20);
+			if (!theFile) return false;
+			fputc('\n', theFile);
+			fflush(theFile);
+			return true;
+		}
+	}
+	else MakeAllDirs(filePath);
+	theFile = _fsopen(filePath, "wb", 0x20);
+	return theFile ? true : false;
+}
+
+bool FileStreamJIP::Create(const char* filePath)
+{
+	if (theFile) fclose(theFile);
+	theFile = _fsopen(filePath, "wb", 0x20);
+	return theFile ? true : false;
+}
+
+UInt32 FileStreamJIP::GetLength()
+{
+	fseek(theFile, 0, SEEK_END);
+	UInt32 result = ftell(theFile);
+	rewind(theFile);
+	return result;
+}
+
+void FileStreamJIP::SetOffset(UInt32 inOffset)
+{
+	fseek(theFile, 0, SEEK_END);
+	if (ftell(theFile) > inOffset)
+		fseek(theFile, inOffset, SEEK_SET);
+}
+
+char FileStreamJIP::ReadChar()
+{
+	return (char)fgetc(theFile);
+}
+
+void FileStreamJIP::ReadBuf(void* outData, UInt32 inLength)
+{
+	fread(outData, inLength, 1, theFile);
+}
+
+void FileStreamJIP::WriteChar(char chr)
+{
+	fputc(chr, theFile);
+	fflush(theFile);
+}
+
+void FileStreamJIP::WriteStr(const char* inStr)
+{
+	fputs(inStr, theFile);
+	fflush(theFile);
+}
+
+void FileStreamJIP::WriteBuf(const void* inData, UInt32 inLength)
+{
+	fwrite(inData, inLength, 1, theFile);
+	fflush(theFile);
+}
+
+void FileStreamJIP::MakeAllDirs(char* fullPath)
+{
+	char* traverse = fullPath, curr;
+	while (curr = *traverse)
+	{
+		if ((curr == '\\') || (curr == '/'))
+		{
+			*traverse = 0;
+			CreateDirectory(fullPath, NULL);
+			*traverse = '\\';
+		}
+		traverse++;
+	}
+}
+
+//End JIP stuff
+
 LineIterator::LineIterator(const char *filePath, char *buffer)
 {
 	dataPtr = buffer;
@@ -1348,6 +1458,16 @@ void DumpMemImg(void *data, UInt32 size, UInt8 extra)
 			else _MESSAGE("%03X\t\t%08X\t", iter, *ptr);
 		}*/
 	}
+}
+
+//From NVSE
+void Console_Print_Long(const std::string& str)
+{
+	UInt32 numLines = str.length() / 500;
+	for (UInt32 i = 0; i < numLines; i++)
+		Console_Print("%s ...", str.substr(i * 500, 500).c_str());
+
+	Console_Print("%s", str.substr(numLines * 500, str.length() - numLines * 500).c_str());
 }
 
 /*

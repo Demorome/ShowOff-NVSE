@@ -1,31 +1,59 @@
 ﻿#pragma once
 
 
-DEFINE_COMMAND_ALT_PLUGIN(DumpFormList, LListDump, , 0, 1, kParams_FormList);
+
+
+DEFINE_COMMAND_ALT_PLUGIN(DumpFormList, FListDump, , 0, 2, kParams_OneFormList_OneOptionalString);
 bool Cmd_DumpFormList_Execute(COMMAND_ARGS)
 {
 	BGSListForm* FList;
-	if (ExtractArgs(EXTRACT_ARGS, &FList) && IsConsoleOpen() && FList)
+	char filepathStr[260] = "nope";
+	*result = 0;
+	
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &FList, &filepathStr)) return true;
+	if (!FList) return true;
+
+	char* buf = s_strValBuffer;  //I have no idea what I'm doing with these char*, lol
+	int bufLength = 0;
+
+	//https://stackoverflow.com/questions/2674312/how-to-append-strings-using-sprintf
+	bufLength += sprintf(buf+bufLength, "Dumping %s FormList [%08X], size %d:", FList->GetName(), FList->refID, FList->Count());
+	
+	int iIndex = 0;
+	for (tList<TESForm>::Iterator iter = FList->list.Begin(); !iter.End(); ++iter, iIndex++)
 	{
-		Console_Print("Dumping %s FormList [%08X], size %d:", FList->GetName(), FList->refID, FList->Count());
-		int iIndex = 0;
-		for (tList<TESForm>::Iterator iter = FList->list.Begin(); !iter.End(); ++iter)
+		TESForm* form = iter.Get();
+		if (form)
 		{
-			if (iter.Get()) 
+			TESFullName* formName = DYNAMIC_CAST(form, TESForm, TESFullName);
+			if (formName)
 			{
-				TESFullName* formName = DYNAMIC_CAST(iter.Get(), TESForm, TESFullName);
-				if (formName)
-				{
-					Console_Print("%d: %s [%08X]", iIndex, formName->name.m_data, iter.Get()->refID);
-				}
-				else
-				{
-					Console_Print("%d: (name unavailable) [%08X]", iIndex, iter.Get()->refID);
-				}
-				iIndex++;
+				bufLength += sprintf(buf+bufLength,"\n%d: %s [%08X]", iIndex, formName->name.m_data, form->refID);
+			}
+			else
+			{
+				bufLength += sprintf(buf+bufLength, "\n%d: (name unavailable) [%08X]", iIndex, form->refID);
 			}
 		}
 	}
+	if (filepathStr != "nope")
+	{
+		FileStreamJIP outputFile;
+		if (outputFile.OpenWrite(filepathStr, true))
+		{
+			outputFile.WriteStr(buf);
+			*result = 1;
+		}
+	}
+	else
+	{
+		if (strlen(buf) < 512)
+			Console_Print(buf);  //won't check for IsConsoleOpen, to mimic ar_Dump.
+		else
+			Console_Print_Long(buf);
+		*result = 1;
+	}
+
 	return true;
 }
 

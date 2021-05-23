@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 const double
 kDblZero = 0,
@@ -206,6 +207,42 @@ public:
 	static void MakeAllDirs(char *fullPath);
 };
 
+//Begin JIP stuff
+
+class FileStreamJIP
+{
+	FILE* theFile;
+
+public:
+	FileStreamJIP() : theFile(NULL) {}
+	~FileStreamJIP() { if (theFile) fclose(theFile); }
+
+	bool Open(const char* filePath);
+	bool OpenAt(const char* filePath, UInt32 inOffset);
+	bool OpenWrite(char* filePath, bool append);
+	bool Create(const char* filePath);
+	void SetOffset(UInt32 inOffset);
+
+	void Close()
+	{
+		fclose(theFile);
+		theFile = NULL;
+	}
+
+	UInt32 GetLength();
+	char ReadChar();
+	void ReadBuf(void* outData, UInt32 inLength);
+	void WriteChar(char chr);
+	void WriteStr(const char* inStr);
+	void WriteBuf(const void* inData, UInt32 inLength);
+
+	static void MakeAllDirs(char* fullPath);
+};
+
+static const char kIndentLevelStr[] = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
+
+//End of JIP stuff
+
 class LineIterator
 {
 protected:
@@ -252,6 +289,9 @@ public:
 bool FileToBuffer(const char *filePath, char *buffer);
 
 void __fastcall GetTimeStamp(char *buffer);
+
+// ConsolePrint() limited to 512 chars; use this to print longer strings to console
+void Console_Print_Long(const std::string& str);
 
 UInt32 __fastcall ByteSwap(UInt32 dword);
 

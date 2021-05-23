@@ -4,10 +4,10 @@
 #ifdef _DEBUG
 
 
-DEFINE_COMMAND_PLUGIN(AddArrayToFormList, "", 0, 3, kParams_OneFormlist_OneArray_OneOptionalIndex);
+DEFINE_COMMAND_ALT_PLUGIN(ListAddArray, AddArrayToFormList, "", 0, 3, kParams_OneFormlist_OneArray_OneOptionalIndex);
 
 //ripped code from FOSE's ListAddForm
-bool Cmd_AddArrayToFormList_Execute(COMMAND_ARGS)
+bool Cmd_ListAddArray_Execute(COMMAND_ARGS)
 {
 	*result = 1;
 	BGSListForm* pListForm = NULL;

@@ -158,8 +158,6 @@ ConsoleManager * ConsoleManager::GetSingleton(void)
 
 void Console_Print(const char * fmt, ...)
 {
-	//if (IsConsoleMode() != 1) return; //(added by Demo)
-
 	ConsoleManager	* mgr = ConsoleManager::GetSingleton();
 	if(mgr)
 	{
