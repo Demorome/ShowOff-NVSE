@@ -246,10 +246,10 @@ extern "C"
 		REG_CMD(GetCreatureAttackReach);
 		REG_CMD(SetCreatureAttackReach);
 
-#if _DEBUG  //for functions being tested (or just abandoned).
-		
 		REG_CMD(ListAddArray);
 		REG_CMD(ListAddList);
+
+#if _DEBUG  //for functions being tested (or just abandoned).
 
 		REG_CMD(HasAnyScriptPackage);
 

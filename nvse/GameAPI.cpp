@@ -156,7 +156,7 @@ ConsoleManager * ConsoleManager::GetSingleton(void)
 	return (ConsoleManager *)ConsoleManager_GetSingleton(true);
 }
 
-void Console_Print(const char * fmt, ...)
+void Console_Print(const char * fmt, ...)  //use Console_Print_Long if strlen(char*) >= 512
 {
 	ConsoleManager	* mgr = ConsoleManager::GetSingleton();
 	if(mgr)

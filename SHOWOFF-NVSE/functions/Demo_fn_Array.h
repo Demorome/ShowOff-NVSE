@@ -1,7 +1,6 @@
 ﻿#pragma once
 
 
-#ifdef _DEBUG
 
 
 DEFINE_COMMAND_ALT_PLUGIN(ListAddArray, AddArrayToFormList, "", 0, 3, kParams_OneFormlist_OneArray_OneOptionalIndex);
@@ -34,6 +33,11 @@ bool Cmd_ListAddArray_Execute(COMMAND_ARGS)
 	delete[] elements;
 	return true;
 }
+
+
+
+#ifdef _DEBUG
+
 
 DEFINE_COMMAND_PLUGIN(Ar_GetInvalidRefs, "", 0, 2, kParams_OneArray);  //failed experiment
 bool Cmd_Ar_GetInvalidRefs_Execute(COMMAND_ARGS)

@@ -28,11 +28,11 @@ bool Cmd_DumpFormList_Execute(COMMAND_ARGS)
 			TESFullName* formName = DYNAMIC_CAST(form, TESForm, TESFullName);
 			if (formName)
 			{
-				bufLength += sprintf(buf+bufLength,"\n%d: %s [%08X]", iIndex, formName->name.m_data, form->refID);
+				bufLength += sprintf(buf+bufLength,"\n%d: %s (%s) [%08X]", iIndex, formName->name.m_data, form->GetName(), form->refID);
 			}
 			else
 			{
-				bufLength += sprintf(buf+bufLength, "\n%d: (name unavailable) [%08X]", iIndex, form->refID);
+				bufLength += sprintf(buf+bufLength, "\n%d: (name unavailable) (%s) [%08X]", iIndex, form->GetName(), form->refID);
 			}
 		}
 	}

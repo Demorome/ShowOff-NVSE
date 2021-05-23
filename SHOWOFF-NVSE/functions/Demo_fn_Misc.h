@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+
 DEFINE_COMMAND_ALT_PLUGIN(ListAddList, AddFormListToFormList, "", 0, 3, kParams_TwoFormLists_OneOptionalIndex);
 
 //ripped code from FOSE's ListAddForm
@@ -21,7 +22,7 @@ bool Cmd_ListAddList_Execute(COMMAND_ARGS)
 			UInt32 const addedAtIndex = pListForm->AddAt(form, index);
 			if (addedAtIndex == eListInvalid)
 			{
-				*result = -1;
+				*result = 0; //error
 				break;
 			}
 		}
@@ -30,12 +31,10 @@ bool Cmd_ListAddList_Execute(COMMAND_ARGS)
 	return true;
 }
 
-
-
+DEFINE_COMMAND_PLUGIN(MessageExAltShowoff, , 0, 22, kParams_JIP_OneFloat_OneInt_OneFormatString);
 const UInt32 kMsgIconsPathAddr[] = { 0x10208A0, 0x10208E0, 0x1025CDC, 0x1030E78, 0x103A830, 0x1049638, 0x104BFE8 };
 
 //99% ripped from JIP's MessageExAlt.
-DEFINE_COMMAND_PLUGIN(MessageExAltShowoff, , 0, 22, kParams_JIP_OneFloat_OneInt_OneFormatString);
 bool Cmd_MessageExAltShowoff_Execute(COMMAND_ARGS)
 {
 	float displayTime;

@@ -171,7 +171,7 @@ UInt32 __fastcall HexToUInt(const char *str);
 
 bool __fastcall FileExists(const char *path);
 
-class FileStream
+class FileStream //Also check FileStreamJIP!
 {
 protected:
 	HANDLE		theFile;
