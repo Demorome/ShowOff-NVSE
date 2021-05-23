@@ -208,46 +208,47 @@ extern "C"
 
 		/* ONLY COMMANDS WITH LISTED OPCODES SHOULD BE USED IN SCRIPTS */
 
-		REG_CMD(DumpFormList);
+		REG_CMD(DumpFormList)
 
-		REG_CMD(ModNumericGameSetting);
-		REG_CMD(ModNumericINISetting);
+		REG_CMD(ModNumericGameSetting)
+		REG_CMD(ModNumericINISetting)
 
-		REG_CMD(SetPlayerCanPickpocketEquippedItems);
-		REG_CMD(GetPlayerCanPickpocketEquippedItems);
-		REG_CMD(GetPCCanFastTravel);
-		REG_CMD(GetPCCanSleepWait);
-		REG_CMD(SetPCCanSleepWait);
+		REG_CMD(SetPlayerCanPickpocketEquippedItems)
+		REG_CMD(GetPlayerCanPickpocketEquippedItems)
+		REG_CMD(GetPCCanFastTravel)
+		REG_CMD(GetPCCanSleepWait)
+		REG_CMD(SetPCCanSleepWait)
 	
 		//Showing off by copying vanilla style way functions!
-		REG_CMD(ShowingOffDisable);
-		REG_CMD(ShowingOffEnable);
+		REG_CMD(ShowingOffDisable)
+		REG_CMD(ShowingOffEnable)
 
-		REG_CMD(GetNumActorsInRangeFromRef);
-		REG_CMD(GetNumCombatActorsFromActor);
+		REG_CMD(GetNumActorsInRangeFromRef)
+		REG_CMD(GetNumCombatActorsFromActor)
 		
-		REG_CMD(IsWeaponMelee);
-		REG_CMD(IsEquippedWeaponMelee);
-		REG_CMD(IsWeaponRanged);
-		REG_CMD(IsEquippedWeaponRanged);
+		REG_CMD(IsWeaponMelee)
+		REG_CMD(IsEquippedWeaponMelee)
+		REG_CMD(IsWeaponRanged)
+		REG_CMD(IsEquippedWeaponRanged)
 		
-		REG_CMD(GetChallengeProgress);
+		REG_CMD(GetChallengeProgress)
 		
-		REG_CMD(TestCondition);
+		REG_CMD(TestCondition)
 		
-		REG_CMD(MessageExAltShowoff);
-		REG_CMD(IsCornerMessageDisplayed);
-		REG_CMD(GetNumQueuedCornerMessages);
+		REG_CMD(MessageExAltShowoff)
+		REG_CMD(IsCornerMessageDisplayed)
+		REG_CMD(GetNumQueuedCornerMessages)
 		
-		REG_CMD(GetCreatureTurningSpeed);
-		REG_CMD(SetCreatureTurningSpeed);
-		REG_CMD(GetCreatureFootWeight);
-		REG_CMD(SetCreatureFootWeight);
-		REG_CMD(GetCreatureAttackReach);
-		REG_CMD(SetCreatureAttackReach);
+		REG_CMD(GetCreatureTurningSpeed)
+		REG_CMD(SetCreatureTurningSpeed)
+		REG_CMD(GetCreatureFootWeight)
+		REG_CMD(SetCreatureFootWeight)
+		REG_CMD(GetCreatureAttackReach)
+		REG_CMD(SetCreatureAttackReach)
+		REG_CMD(SetCreatureBaseScale)
 
-		REG_CMD(ListAddArray);
-		REG_CMD(ListAddList);
+		REG_CMD(ListAddArray)
+		REG_CMD(ListAddList)
 
 #if _DEBUG  //for functions being tested (or just abandoned).
 

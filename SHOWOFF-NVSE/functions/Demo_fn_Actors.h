@@ -356,6 +356,27 @@ bool Cmd_SetCreatureAttackReach_Execute(COMMAND_ARGS)
 	return true;
 }
 
+DEFINE_COMMAND_PLUGIN(SetCreatureBaseScale, , 0, 2, kParams_OneFloat_OneOptionalActorBase);
+bool Cmd_SetCreatureBaseScale_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	TESCreature* creature = NULL;
+	float newVal = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &newVal, &creature)) return true;
+	if (!creature)
+	{
+		if (!thisObj || !thisObj->IsActor()) return true;
+		creature = (TESCreature*)((Actor*)thisObj)->GetActorBase();
+	}
+	if IS_TYPE(creature, TESCreature)
+	{
+		creature->baseScale = newVal;
+		*result = 1;
+	}
+	return true;
+}
+
+
 #ifdef _DEBUG
 
 DEFINE_CMD_ALT_COND_PLUGIN(HasAnyScriptPackage, , , 1, NULL);
