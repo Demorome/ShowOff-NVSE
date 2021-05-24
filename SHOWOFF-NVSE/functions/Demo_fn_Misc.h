@@ -82,7 +82,83 @@ bool Cmd_GetNumQueuedCornerMessages_Eval(COMMAND_ARGS_EVAL)
 	return true;
 }
 
+
+//Code ripped from JIP's IsAnimPlayingEx
+DEFINE_CMD_ALT_COND_PLUGIN(IsAnimPlayingExCond, , "Same as IsAnimPlayingEx, but available as a condition. Had to cut the variationFlags filter.", 1, kParams_JIP_OneInt_OneOptionalInt);
+bool Cmd_IsAnimPlayingExCond_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = 0;
+	UInt32 category = (UInt32)arg1;
+	UInt32 subType = (UInt32)arg2;  //optional
+
+	if (!thisObj) return true;
+	if (category > 5 || category < 1) return true;
+	if (subType > 23) return true;
+
+	AnimData* animData = thisObj->GetAnimData();
+	if (!animData) return true;
+	UInt32 animID;
+	const AnimGroupClassify* classify;
+	for (UInt16 groupID : animData->animGroupIDs)
+	{
+		animID = groupID & 0xFF;
+		if (animID >= 245) continue;
+		classify = &s_animGroupClassify[animID];
+		if (classify->category == category && (category >= 4 || (!subType || classify->subType == subType)))
+		{
+			*result = 1;
+			break;
+		}
+	}
+
+	return true;
+}
+bool Cmd_IsAnimPlayingExCond_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	UInt32 category, subType = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &category, &subType)) return true;
+
+	return Cmd_IsAnimPlayingExCond_Eval(thisObj, (void*)category, (void*)subType, result);
+}
+
+
+
 #ifdef _DEBUG
+
+
+
+DEFINE_COMMAND_PLUGIN(SetCellFullNameAlt, "Like SetCellFullName but accepts a string.", 0, 2, kParams_JIP_OneCell_OneString);
+bool Cmd_SetCellFullNameAlt_Execute(COMMAND_ARGS)
+{
+	TESObjectCELL* cell;
+	char newName[256]; 
+	
+	ExtractArgsEx(EXTRACT_ARGS_EX, &cell, &newName);
+	if (!cell) return true;
+
+	TESFullName* fullName = &cell->fullName;  //wtf. Seems to work, idk why
+	ThisStdCall(0x489100, fullName, newName);  //rip, needs something more to save-bake
+	//fullName->name.Set(newName); //crashes
+	
+	return true;
+}
+
+DEFINE_COMMAND_PLUGIN(GetCellFullName, , 0, 1, kParams_JIP_OneCell);
+bool Cmd_GetCellFullName_Execute(COMMAND_ARGS)
+{
+	TESObjectCELL* cell;
+
+	ExtractArgsEx(EXTRACT_ARGS_EX, &cell);
+	if (!cell) return true;
+
+	TESFullName* fullName = &cell->fullName;  //wtf. Seems to work, idk why
+	const char* oldName = fullName->name.CStr();
+	g_strInterface->Assign(PASS_COMMAND_ARGS, oldName);
+	
+	return true;
+}
+
 
 DEFINE_COMMAND_PLUGIN(GetQueuedCornerMessages, "Returns the queued corner messages as a multidimensional array.", 0, 0, NULL);
 bool Cmd_GetQueuedCornerMessages_Execute(COMMAND_ARGS)

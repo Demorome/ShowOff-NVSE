@@ -769,7 +769,7 @@ struct AnimData
 	NiNode* UNUSED040;			// 040
 	NiNode* nNeck1;			// 044
 	float							unk048;				// 048
-	UInt16							groupIDs[8];		// 04C
+	UInt16							animGroupIDs[8];		// 04C
 	SInt32							sequenceState1[8];	// 05C
 	SInt32							sequenceState2[8];	// 07C
 	UInt16							unk09C[8];			// 09C

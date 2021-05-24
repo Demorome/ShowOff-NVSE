@@ -220,7 +220,7 @@ extern "C"
 		REG_CMD(SetPCCanSleepWait)
 	
 		//Showing off by copying vanilla style way functions!
-		REG_CMD(ShowingOffDisable)
+		REG_CMD(ShowingOffDisable)  //best to keep undocumented to not waste people's time.
 		REG_CMD(ShowingOffEnable)
 
 		REG_CMD(GetNumActorsInRangeFromRef)
@@ -235,8 +235,8 @@ extern "C"
 		
 		REG_CMD(TestCondition)
 		
-		REG_CMD(MessageExAltShowoff)
-		REG_CMD(IsCornerMessageDisplayed)
+		REG_CMD(MessageExAltShowoff) //Keep undocumented; don't recommend for general use
+		REG_CMD(IsCornerMessageDisplayed)  //(any corner message)
 		REG_CMD(GetNumQueuedCornerMessages)
 		
 		REG_CMD(GetCreatureTurningSpeed)
@@ -245,12 +245,24 @@ extern "C"
 		REG_CMD(SetCreatureFootWeight)
 		REG_CMD(GetCreatureAttackReach)
 		REG_CMD(SetCreatureAttackReach)
-		REG_CMD(SetCreatureBaseScale)
+		REG_CMD(SetCreatureBaseScale) //JG's GetBaseScale should return the creature's base scale, so no need for a GetCreatureBaseScale.
 
 		REG_CMD(ListAddArray)
 		REG_CMD(ListAddList)
+		
+		REG_CMD(IsAnimPlayingExCond)
+
 
 #if _DEBUG  //for functions being tested (or just abandoned).
+
+
+		
+#if 0
+		REG_CMD_ARR(Ar_Init);
+#endif
+
+		REG_CMD(SetCellFullNameAlt)
+		REG_CMD_STR(GetCellFullName);
 
 		REG_CMD(HasAnyScriptPackage);
 

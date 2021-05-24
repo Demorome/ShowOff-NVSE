@@ -376,3 +376,9 @@ static ParamInfo kParams_OneChallenge[1] =
 	{	"challenge",	kParamType_Challenge, 0	},
 };
 
+#if 0
+static ParamInfo kParams_OneBasicType[] =
+{
+	//{	"expression",	kNVSEParamType_BasicType,	0	},
+};
+#endif
