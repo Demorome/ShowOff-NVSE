@@ -42,3 +42,21 @@ static void PatchMemoryNop(ULONG_PTR Address, SIZE_T Size)
 
 	FlushInstructionCache(GetCurrentProcess(), (LPVOID)Address, Size);
 }
+
+__declspec(naked) TESObjectCELL* TESObjectREFR::GetParentCell()
+{
+	__asm
+	{
+		mov		eax, [ecx + 0x40]
+		test	eax, eax
+		jnz		done
+		push	kExtraData_PersistentCell
+		add		ecx, 0x44
+		call	BaseExtraList::GetByType
+		test	eax, eax
+		jz		done
+		mov		eax, [eax + 0xC]
+		done:
+		retn
+	}
+}

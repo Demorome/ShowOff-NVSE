@@ -251,6 +251,7 @@ extern "C"
 		REG_CMD(ListAddList)
 		
 		REG_CMD(IsAnimPlayingExCond)
+		REG_CMD(GetNumCompassHostilesInRange)
 
 
 #if _DEBUG  //for functions being tested (or just abandoned).

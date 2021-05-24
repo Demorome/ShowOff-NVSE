@@ -377,7 +377,77 @@ bool Cmd_SetCreatureBaseScale_Execute(COMMAND_ARGS)
 }
 
 
+DEFINE_CMD_ALT_COND_PLUGIN(GetNumCompassHostilesInRange, , "Returns the amount of hostile actors that are a certain distance nearby to the player that appear on the compass.", 0, kParams_OneOptionalFloat_OneOptionalInt);
+
+float g_compassHostiles_Range = 0;  //necessary since can't pass float as void*
+
+//Copied JG's GetNearestCompassHostile code.
+bool Cmd_GetNumCompassHostilesInRange_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = 0;
+	float range = *(float*)&arg1;  //check if this works!
+	UInt32 skipInvisible = (UInt32)arg2;
+	UInt32 numHostiles = 0;
+
+	if (!range && g_compassHostiles_Range)
+	{
+		range = g_compassHostiles_Range;  //g_compassHostiles_Range is always 0, except when it is fed a value in _Execute.
+	}
+	g_compassHostiles_Range = 0;
+
+	//To avoid counting "compass targets" that are super far away and can't even be seen on compass (I assume).
+	float fSneakMaxDistance = *(float*)(0x11CD7D8 + 4);
+	float fSneakExteriorDistanceMult = *(float*)(0x11CDCBC + 4);
+	bool isInterior = g_thePlayer->GetParentCell()->IsInterior();
+	float interiorDistanceSquared = fSneakMaxDistance * fSneakMaxDistance;
+	float exteriorDistanceSquared = (fSneakMaxDistance * fSneakExteriorDistanceMult) * (fSneakMaxDistance * fSneakExteriorDistanceMult);
+	float maxDist = isInterior ? interiorDistanceSquared : exteriorDistanceSquared;
+
+	NiPoint3* playerPos = g_thePlayer->GetPos();
+	auto iter = g_thePlayer->compassTargets->Begin();
+	for (; !iter.End(); ++iter)
+	{
+		PlayerCharacter::CompassTarget* target = iter.Get();
+		if (target->isHostile)
+		{
+			if (skipInvisible > 0 && (target->target->avOwner.Fn_02(kAVCode_Invisibility) > 0 || target->target->avOwner.Fn_02(kAVCode_Chameleon) > 0)) {
+				continue;
+			}
+			auto distToPlayer = target->target->GetPos()->CalculateDistSquared(playerPos);
+			if (distToPlayer < maxDist)
+			{
+				if (range)
+				{
+					if (distToPlayer < range)
+						numHostiles++;
+				}
+				else
+				{
+					numHostiles++;
+				}
+			}
+		}
+	}
+	*result = numHostiles;
+	return true;
+}
+bool Cmd_GetNumCompassHostilesInRange_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	g_compassHostiles_Range = 0;
+	UInt32 skipInvisible = 0;
+
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &g_compassHostiles_Range, &skipInvisible)) return true;
+
+	return Cmd_GetNumCompassHostilesInRange_Eval(thisObj, 0, (void*)skipInvisible, result);
+}
+
+
+
+
 #ifdef _DEBUG
+
+
 
 DEFINE_CMD_ALT_COND_PLUGIN(HasAnyScriptPackage, , , 1, NULL);
 bool Cmd_HasAnyScriptPackage_Eval(COMMAND_ARGS_EVAL)
