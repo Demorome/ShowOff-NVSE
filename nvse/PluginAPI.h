@@ -675,6 +675,19 @@ struct NVSESerializationInterface
 
 	// Peeks at the data without interfiring with the current position
 	UInt32	(* PeekRecordData)(void * buf, UInt32 length);
+
+	//Added in JIP (?)
+	void	(*WriteRecord8)(UInt8 inData);
+	void	(*WriteRecord16)(UInt16 inData);
+	void	(*WriteRecord32)(UInt32 inData);
+	void	(*WriteRecord64)(const void* inData);
+
+	UInt8	(*ReadRecord8)();
+	UInt16	(*ReadRecord16)();
+	UInt32	(*ReadRecord32)();
+	void	(*ReadRecord64)(void* outData);
+
+	void	(*SkipNBytes)(UInt32 byteNum);
 };
 
 struct PluginInfo

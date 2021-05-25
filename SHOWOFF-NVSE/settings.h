@@ -34,7 +34,7 @@ char* g_PBIR_FailMessage = nullptr;
 
 extern HMODULE ShowOffHandle;
 
-void handleIniOptions()
+void HandleIniOptions()
 {
 	char iniPath[MAX_PATH];
 	GetModuleFileNameA(ShowOffHandle, iniPath, MAX_PATH);

@@ -298,6 +298,8 @@
     <ClCompile Include="..\nvse\GameTypes.cpp" />
     <ClCompile Include="..\nvse\SafeWrite.cpp" />
     <ClCompile Include="..\nvse\Utilities.cpp" />
+    <ClCompile Include="internal\containers.cpp" />
+    <ClCompile Include="internal\memory_pool.cpp" />
     <ClCompile Include="internal\utility.cpp" />
     <ClCompile Include="ShowOffNVSE.cpp" />
   </ItemGroup>
@@ -325,6 +327,7 @@
     <ClInclude Include="Events\EventFilteringInterface.h" />
     <ClInclude Include="functions\Demo_fn_Actors.h" />
     <ClInclude Include="functions\Demo_fn_Array.h" />
+    <ClInclude Include="functions\Demo_fn_AuxVars.h" />
     <ClInclude Include="functions\Demo_fn_Debug.h" />
     <ClInclude Include="functions\Demo_fn_Gameplay.h" />
     <ClInclude Include="functions\Demo_fn_Misc.h" />
@@ -335,6 +338,7 @@
     <ClInclude Include="internal\havok.h" />
     <ClInclude Include="internal\jip_nvse.h" />
     <ClInclude Include="internal\Johnnnny Guitarrrrr.h" />
+    <ClInclude Include="internal\memory_pool.h" />
     <ClInclude Include="internal\netimmerse.h" />
     <ClInclude Include="internal\NiPoint.h" />
     <ClInclude Include="internal\StewieMagic.h" />

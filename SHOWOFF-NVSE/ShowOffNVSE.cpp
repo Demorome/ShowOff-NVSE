@@ -8,17 +8,19 @@
 #include "nvse/ArrayVar.h"
 #include "nvse/SafeWrite.h"
 
+#include "GameData.h"
+#include "GameScript.h"
 #include "internal/decoding.h"
 #include "internal/utility.h"
-#include "internal/StewieMagic.h"
+#include "internal/memory_pool.h"
+#include "internal/containers.h"
+#include "internal/StewieMagic.h" 
 #include "internal/jip_nvse.h"
 #include "internal/Johnnnny Guitarrrrr.h"
 
 #include "params.h"
 #include "ShowOffNVSE.h"
-#include "GameData.h"
 #include "settings.h"
-#include "GameScript.h"
 
 // Functions
 #include "functions/Trooper_fn_misc.h"
@@ -26,6 +28,7 @@
 #include "functions/Demo_fn_Settings.h"
 #include "functions/Demo_fn_Gameplay.h"
 #include "functions/Demo_fn_Array.h"
+#include "functions/Demo_fn_AuxVars.h" 
 #include "functions/Demo_fn_Actors.h"
 #include "functions/Demo_fn_Debug.h"
 
@@ -188,6 +191,24 @@ extern "C"
 		{
 			NVSEDataInterface* nvseData = (NVSEDataInterface*)nvse->QueryInterface(kInterface_Data);
 			InventoryRefGetForID = (InventoryRef * (*)(UInt32))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID);
+
+			NVSESerializationInterface* serialization = (NVSESerializationInterface*)nvse->QueryInterface(kInterface_Serialization);
+			WriteRecord = serialization->WriteRecord;
+			WriteRecordData = serialization->WriteRecordData;
+			GetNextRecordInfo = serialization->GetNextRecordInfo;
+			ReadRecordData = serialization->ReadRecordData;
+			ResolveRefID = serialization->ResolveRefID;
+			GetSavePath = serialization->GetSavePath;
+			WriteRecord8 = serialization->WriteRecord8;
+			WriteRecord16 = serialization->WriteRecord16;
+			WriteRecord32 = serialization->WriteRecord32;
+			WriteRecord64 = serialization->WriteRecord64;
+			ReadRecord8 = serialization->ReadRecord8;
+			ReadRecord16 = serialization->ReadRecord16;
+			ReadRecord32 = serialization->ReadRecord32;
+			ReadRecord64 = serialization->ReadRecord64;
+			SkipNBytes = serialization->SkipNBytes;
+			
 			g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 			CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 			g_strInterface = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar); // From JG
@@ -195,11 +216,12 @@ extern "C"
 			GetElement = g_arrInterface->GetElement;
 			ExtractArgsEx = g_script->ExtractArgsEx;
 			ExtractFormatStringArgs = g_script->ExtractFormatStringArgs;
+			
 			auto johnnyGuitar = GetModuleHandle("johnnyguitar.dll");
 			
 			
-			handleIniOptions();
-			DoHooks();
+			HandleIniOptions();
+			HandleGameHooks();
 		}
 
 		// Register script commands

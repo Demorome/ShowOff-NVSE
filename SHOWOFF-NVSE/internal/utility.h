@@ -32,8 +32,56 @@ kFlt12288 = 12288.0F,
 kFlt40000 = 40000.0F,
 kFltMax = FLT_MAX;
 
+// JIP assembly definitions.
+#define CALL_EAX(addr) __asm mov eax, addr __asm call eax
+#define JMP_EAX(addr)  __asm mov eax, addr __asm jmp eax
+#define JMP_EDX(addr)  __asm mov edx, addr __asm jmp edx
+
+// These are used for 10h aligning segments in ASM code (massive performance gain, particularly with loops).
+#define EMIT(bt) __asm _emit bt
+#define NOP_0x1 EMIT(0x90)
+//	"\x90"
+#define NOP_0x2 EMIT(0x66) NOP_0x1
+//	"\x66\x90"
+#define NOP_0x3 EMIT(0x0F) EMIT(0x1F) EMIT(0x00)
+//	"\x0F\x1F\x00"
+#define NOP_0x4 EMIT(0x0F) EMIT(0x1F) EMIT(0x40) EMIT(0x00)
+//	"\x0F\x1F\x40\x00"
+#define NOP_0x5 EMIT(0x0F) EMIT(0x1F) EMIT(0x44) EMIT(0x00) EMIT(0x00)
+//	"\x0F\x1F\x44\x00\x00"
+#define NOP_0x6 EMIT(0x66) NOP_0x5
+//	"\x66\x0F\x1F\x44\x00\x00"
+#define NOP_0x7 EMIT(0x0F) EMIT(0x1F) EMIT(0x80) EMIT(0x00) EMIT(0x00) EMIT(0x00) EMIT(0x00)
+//	"\x0F\x1F\x80\x00\x00\x00\x00"
+#define NOP_0x8 EMIT(0x0F) EMIT(0x1F) EMIT(0x84) EMIT(0x00) EMIT(0x00) EMIT(0x00) EMIT(0x00) EMIT(0x00)
+//	"\x0F\x1F\x84\x00\x00\x00\x00\x00"
+#define NOP_0x9 EMIT(0x66) NOP_0x8
+//	"\x66\x0F\x1F\x84\x00\x00\x00\x00\x00"
+#define NOP_0xA EMIT(0x66) NOP_0x9
+//	"\x66\x66\x0F\x1F\x84\x00\x00\x00\x00\x00"
+#define NOP_0xB EMIT(0x66) NOP_0xA
+//	"\x66\x66\x66\x0F\x1F\x84\x00\x00\x00\x00\x00"
+#define NOP_0xC NOP_0x8 NOP_0x4
+#define NOP_0xD NOP_0x8 NOP_0x5
+#define NOP_0xE NOP_0x7 NOP_0x7
+#define NOP_0xF NOP_0x8 NOP_0x7
+
+#define GAME_HEAP_ALLOC __asm mov ecx, 0x11F6238 CALL_EAX(0xAA3E40)
+#define GAME_HEAP_FREE  __asm mov ecx, 0x11F6238 CALL_EAX(0xAA4060)
+
 #define GameHeapAlloc(size) ThisStdCall<void*>(0xAA3E40, (void*)0x11F6238, size)
-#define GameHeapFree(ptr) ThisStdCall<void*>(0xAA4060, (void*)0x11F6238, ptr)   
+#define GameHeapFree(ptr) ThisStdCall<void*>(0xAA4060, (void*)0x11F6238, ptr)
+
+/* from JIP, consider swapping these in.
+#define GameHeapAlloc(size) ThisCall<void*, UInt32>(0xAA3E40, (void*)0x11F6238, size)
+#define GameHeapFree(ptr) ThisCall<void, void*>(0xAA4060, (void*)0x11F6238, ptr)
+*/
+
+#define GetRandomInt(n) ThisCall<SInt32, SInt32>(0xAA5230, (void*)0x11C4180, n)
+#define GetRandomIntInRange(iMin, iMax) (GetRandomInt(iMax - iMin) + iMin)
+
+typedef void* (__cdecl* memcpy_t)(void*, const void*, size_t);
+extern memcpy_t MemCopy, MemMove;
 
 union Coordinate
 {
@@ -168,6 +216,12 @@ double __fastcall StrToDbl(const char *str);
 char* __fastcall UIntToHex(UInt32 num, char *str);
 
 UInt32 __fastcall HexToUInt(const char *str);
+
+//Begin JIP string / char stuff
+
+extern const UInt8 kLwrCaseConverter[], kUprCaseConverter[];
+
+//End JIP string / char stuff
 
 bool __fastcall FileExists(const char *path);
 

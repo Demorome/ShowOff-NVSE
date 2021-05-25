@@ -36,7 +36,6 @@ typedef NVSEArrayVarInterface::Element NVSEArrayElement;
 bool (*ExtractFormatStringArgs)(UInt32 fmtStringPos, char* buffer, COMMAND_ARGS_EX, UInt32 maxParams, ...);  // From JIP_NVSE.H
 
 
-
 //Imports from JG
 class EventInformation;
 typedef EventInformation* EventInfo;
@@ -371,7 +370,7 @@ double __fastcall PreventRepairButton(ContChangesEntry* entry, int bPercent)
 }
 
 
-void DoHooks()
+void HandleGameHooks()
 {
 	//Modify a "IsInCombat" check to allow NPC activation even if they are in combat.
 	WriteRelCall(0x607E70, UINT32(PCCanPickpocketInCombatHOOK));

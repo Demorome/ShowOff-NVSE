@@ -1,5 +1,6 @@
 #pragma once
 #include "GameProcess.h"
+#include "internal/jip_nvse.h"
 #include "internal/decoding.h"
 
 
@@ -12,8 +13,6 @@ UInt32 GetRelJumpAddr(UInt32 jumpSrc)
 
 enum
 {
-	kAddr_EquipItem = 0x88C650,
-	kAddr_UnequipItem = 0x88C790,
 	kAddr_GetItemHealthPerc = 0x4BCDB0,
 	kAddr_GetItemValue = 0x4BD400,
 	kAddr_ReadXML = 0xA01B00,
@@ -89,11 +88,6 @@ int Actor::GetDetectionValue(Actor* detected)
 }
 
 
-enum
-{
-	kAddr_TileSetFloat = 0xA012D0,
-	kAddr_TileSetString = 0xA01350,
-};
 __declspec(naked) void Tile::SetFloat(UInt32 id, float fltVal, bool bPropagate)
 {
 	static const UInt32 procAddr = kAddr_TileSetFloat;

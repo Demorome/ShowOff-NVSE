@@ -1,8 +1,30 @@
 ﻿#pragma once
-#include <PluginAPI.h>
 
-#include "GameData.h"
-#include "utility.h"
+enum
+{
+	kAddr_AddExtraData = 0x40FF60,
+	kAddr_RemoveExtraType = 0x410140,
+	kAddr_LoadModel = 0x447080,
+	kAddr_ApplyAmmoEffects = 0x59A030,
+	kAddr_MoveToMarker = 0x5CCB20,
+	kAddr_ApplyPerkModifiers = 0x5E58F0,
+	kAddr_ReturnThis = 0x6815C0,
+	kAddr_PurgeTerminalModel = 0x7FFE00,
+	kAddr_EquipItem = 0x88C650,
+	kAddr_UnequipItem = 0x88C790,
+	kAddr_ReturnTrue = 0x8D0360,
+	kAddr_TileGetFloat = 0xA011B0,
+	kAddr_TileSetFloat = 0xA012D0,
+	kAddr_TileSetString = 0xA01350,
+	kAddr_InitFontInfo = 0xA12020,
+};
+
+#define IS_REFERENCE(form) ((*(UInt32**)form)[0x3C] == kAddr_ReturnTrue)
+#define NOT_REFERENCE(form) ((*(UInt32**)form)[0x3C] != kAddr_ReturnTrue)
+#define IS_ACTOR(form) ((*(UInt32**)form)[0x40] == kAddr_ReturnTrue)
+#define NOT_ACTOR(form) ((*(UInt32**)form)[0x40] != kAddr_ReturnTrue)
+#define IS_NODE(object) ((*(UInt32**)object)[3] == kAddr_ReturnThis)
+
 
 alignas(16) char
 s_strArgBuffer[0x4000],
@@ -13,8 +35,24 @@ s_scriptsPathFull[0x100] = "Data\\NVSE\\plugins\\scripts\\",
 s_modLogPathFull[0x100] = "Mod Logs\\";
 char* s_dataPath, * s_configPath, * s_scriptsPath, * s_modLogPath;
 
+bool (*WriteRecord)(UInt32 type, UInt32 version, const void* buffer, UInt32 length);
+bool (*WriteRecordData)(const void* buffer, UInt32 length);
+bool (*GetNextRecordInfo)(UInt32* type, UInt32* version, UInt32* length);
+UInt32(*ReadRecordData)(void* buffer, UInt32 length);
+bool (*ResolveRefID)(UInt32 refID, UInt32* outRefID);
+const char* (*GetSavePath)(void);
+void (*WriteRecord8)(UInt8 inData);
+void (*WriteRecord16)(UInt16 inData);
+void (*WriteRecord32)(UInt32 inData);
+void (*WriteRecord64)(const void* inData);
+UInt8(*ReadRecord8)();
+UInt16(*ReadRecord16)();
+UInt32(*ReadRecord32)();
+void (*ReadRecord64)(void* outData);
+void (*SkipNBytes)(UInt32 byteNum);
 
-__declspec(naked) bool IsConsoleOpen()
+
+__declspec(naked) bool IsConsoleOpen()  //how does this differ from IsConsoleMode()?
 {
 	__asm
 	{
@@ -30,6 +68,12 @@ __declspec(naked) bool IsConsoleOpen()
 		done :
 		retn
 	}
+}
+
+UInt8 TESForm::GetOverridingModIdx()
+{
+	ModInfo* info = mods.GetLastItem();
+	return info ? info->modIndex : 0xFF;
 }
 
 struct InventoryRef
@@ -169,6 +213,34 @@ __declspec(naked) float TESObjectREFR::GetDistance(TESObjectREFR* target)
 }
 */
 
+__declspec(naked) TESForm* __stdcall LookupFormByRefID(UInt32 refID)
+{
+	__asm
+	{
+		mov		ecx, ds: [0x11C54C0]
+		mov		eax, [esp+4]
+		xor		edx, edx
+		div		dword ptr[ecx+4]
+		mov		eax, [ecx+8]
+		mov		eax, [eax+edx*4]
+		test	eax, eax
+		jz		done
+		mov		edx, [esp+4]
+		ALIGN 16
+	iterHead:
+		cmp		[eax+4], edx
+		jz		found
+		mov		eax, [eax]
+		test	eax, eax
+		jnz		iterHead
+		retn	4
+	found:
+		mov		eax, [eax+8]
+	done :
+		retn	4
+	}
+}
+
 TESObjectWEAP* Actor::GetEquippedWeapon()
 {
 	if (baseProcess)
@@ -189,6 +261,220 @@ TESPackage* Actor::GetStablePackage()
 	ExtraPackage* xPackage = GetExtraTypeJIP(&extraDataList, Package);
 	return xPackage ? xPackage->package : NULL;
 }
+
+
+
+UInt32 s_serializedVersion = 9;
+
+class AuxVariableValue
+{
+	UInt8		type;
+	UInt8		pad01[3];
+	UInt16		alloc;
+	UInt16		length;
+	union
+	{
+		double	num;
+		UInt32	refID;
+		char* str;
+	};
+
+	void Clear()
+	{
+		if (alloc)
+		{
+			Pool_Free(str, alloc);
+			alloc = 0;
+		}
+	}
+
+	void ReadValData()
+	{
+		if (type == 1)
+		{
+			if (s_serializedVersion < 10)
+			{
+				refID = ReadRecord32();
+				num = *(float*)&refID;
+			}
+			else ReadRecord64(&num);
+		}
+		else if (type == 2)
+		{
+			refID = ReadRecord32();
+			ResolveRefID(refID, &refID);
+		}
+		else
+		{
+			length = ReadRecord16();
+			if (length)
+			{
+				alloc = AlignNumAlloc<char>(length + 1);
+				str = (char*)Pool_Alloc(alloc);
+				ReadRecordData(str, length);
+				str[length] = 0;
+			}
+		}
+	}
+
+public:
+	AuxVariableValue() : alloc(0) {}
+	AuxVariableValue(UInt8 _type) : type(_type), alloc(0) { ReadValData(); }
+	AuxVariableValue(NVSEArrayElement& elem) : alloc(0) { SetElem(elem); }
+
+	~AuxVariableValue() { Clear(); }
+
+	UInt8 GetType() const { return type; }
+	double GetFlt() const { return (type == 1) ? num : 0; }
+	UInt32 GetRef() const { return (type == 2) ? refID : 0; }
+	const char* GetStr() const { return alloc ? str : NULL; }
+
+	void SetFlt(double value)
+	{
+		Clear();
+		type = 1;
+		num = value;
+	}
+
+	void SetRef(TESForm* value)
+	{
+		Clear();
+		type = 2;
+		refID = value ? value->refID : 0;
+	}
+
+	void SetStr(const char* value)
+	{
+		type = 4;
+		length = StrLen(value);
+		if (length)
+		{
+			UInt16 size = length + 1;
+			if (alloc < size)
+			{
+				if (alloc) Pool_Free(str, alloc);
+				alloc = AlignNumAlloc<char>(size);
+				str = (char*)Pool_Alloc(alloc);
+			}
+			memcpy(str, value, size);
+		}
+		else if (alloc)
+			*str = 0;
+	}
+
+	void SetElem(NVSEArrayElement& elem)
+	{
+		if (elem.GetType() == 2) SetRef(elem.form);
+		else if (elem.GetType() == 3) SetStr(elem.str);
+		else SetFlt(elem.num);
+	}
+
+	ArrayElementL GetAsElement() const
+	{
+		if (type == 2) return ArrayElementL(LookupFormByRefID(refID));
+		if (type == 4) return ArrayElementL(GetStr());
+		return ArrayElementL(num);
+	}
+
+	void WriteValData() const
+	{
+		WriteRecord8(type);
+		if (type == 1)
+			WriteRecord64(&num);
+		else if (type == 2)
+			WriteRecord32(refID);
+		else
+		{
+			WriteRecord16(length);
+			if (length) WriteRecordData(str, length);
+		}
+	}
+};
+STATIC_ASSERT(sizeof(AuxVariableValue) == 0x10);
+
+#if 0
+struct AuxVarValsArr : Vector<AuxVariableValue>
+{
+	AuxVarValsArr(UInt32 _alloc = 2) : Vector<AuxVariableValue>(_alloc) {}
+};
+typedef UnorderedMap<char*, AuxVarValsArr> AuxVarVarsMap;
+typedef UnorderedMap<UInt32, AuxVarVarsMap> AuxVarOwnersMap;
+typedef UnorderedMap<UInt32, AuxVarOwnersMap> AuxVarModsMap;
+AuxVarModsMap s_auxVariablesPerm, s_auxVariablesTemp;
+#endif
+
+typedef UnorderedMap<UInt32, AuxVariableValue> RefMapIDsMap;
+typedef UnorderedMap<char*, RefMapIDsMap> RefMapVarsMap;
+typedef UnorderedMap<UInt32, RefMapVarsMap> RefMapModsMap;
+RefMapModsMap s_refMapArraysPerm, s_refMapArraysTemp;
+
+UInt32 __fastcall GetSubjectID(TESForm* form, TESObjectREFR* thisObj)
+{
+	if (form) return IS_REFERENCE(form) ? ((TESObjectREFR*)form)->baseForm->refID : form->refID;
+	if (thisObj) return thisObj->refID;
+	return 0;
+}
+
+#if 0
+struct AuxVarInfo
+{
+	UInt32		ownerID;
+	UInt32		modIndex;
+	char*		varName;
+	bool		isPerm;
+
+	AuxVarInfo(TESForm* form, TESObjectREFR* thisObj, Script* scriptObj, char* pVarName)
+	{
+		if (!pVarName[0])
+		{
+			ownerID = 0;
+			return;
+		}
+		ownerID = GetSubjectID(form, thisObj);
+		if (ownerID)
+		{
+			varName = pVarName;
+			isPerm = (varName[0] != '*');
+			modIndex = (varName[!isPerm] == '_') ? 0xFF : scriptObj->GetOverridingModIdx();
+		}
+	}
+
+	AuxVarInfo(TESForm* form, TESObjectREFR* thisObj, Script* scriptObj, UInt8 type)
+	{
+		ownerID = GetSubjectID(form, thisObj);
+		if (ownerID)
+		{
+			isPerm = !(type & 1);
+			modIndex = (type > 1) ? 0xFF : scriptObj->GetOverridingModIdx();
+		}
+	}
+
+	AuxVarModsMap& ModsMap() { return isPerm ? s_auxVariablesPerm : s_auxVariablesTemp; }
+};
+#endif
+
+struct RefMapInfo
+{
+	UInt32		modIndex;
+	bool		isPerm;
+
+	RefMapInfo(Script* scriptObj, char* varName)
+	{
+		isPerm = (varName[0] != '*');
+		modIndex = (varName[!isPerm] == '_') ? 0xFF : scriptObj->GetOverridingModIdx();
+	}
+
+	RefMapInfo(Script* scriptObj, UInt8 type)
+	{
+		isPerm = !(type & 1);
+		modIndex = (type > 1) ? 0xFF : scriptObj->GetOverridingModIdx();
+	}
+
+	RefMapModsMap& ModsMap() { return isPerm ? s_refMapArraysPerm : s_refMapArraysTemp; }
+};
+
+UInt8 s_dataChangedFlags = 0; //For AuxVar serialization.
+
 
 #if 0 //not gonna bother with this for now
 DebugLog s_log, s_debug, s_missingTextures;

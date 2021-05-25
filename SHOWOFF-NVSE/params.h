@@ -553,6 +553,13 @@ ParamInfo kParams_JIP_OneString_OneInt_OneOptionalForm[] =
 	{"Form", kParamType_AnyForm, 1}
 };
 
+ParamInfo kParams_JIP_OneString_OneDouble_OneOptionalForm[] =
+{
+	{"String", kParamType_String, 0},
+	{"Double", kParamType_Double, 0},
+	{"Form", kParamType_AnyForm, 1}
+};
+
 ParamInfo kParams_JIP_OneString_OneFloat_OneOptionalForm[] =
 {
 	{"String", kParamType_String, 0},

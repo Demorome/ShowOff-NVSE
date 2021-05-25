@@ -50,6 +50,12 @@
     <ClCompile Include="..\nvse\Utilities.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
+    <ClCompile Include="internal\memory_pool.cpp">
+      <Filter>internal</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\containers.cpp">
+      <Filter>internal</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="functions\Demo_fn_Misc.h">
@@ -167,6 +173,12 @@
     </ClInclude>
     <ClInclude Include="Events\EventFilteringInterface.h">
       <Filter>Events</Filter>
+    </ClInclude>
+    <ClInclude Include="internal\memory_pool.h">
+      <Filter>internal</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\Demo_fn_AuxVars.h">
+      <Filter>functions</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
