@@ -38,9 +38,16 @@
 
 
 // Plugin Stuff
-
 IDebugLog	gLog("ShowOffNVSE.log");
 HMODULE	ShowOffHandle;
+
+
+//Globals. It's better to include them here instead of a header file.
+//Otherwise, compilation will fail if another .cpp file tries to include the global.
+//Use for example "extern NVSEMessagingInterface* g_messagingInterface;" in ShowOffNVSE.h if you want to use the global elsewhere.
+UnorderedSet<TESForm*> s_tempFormList(0x40);
+Vector<ArrayElementL> s_tempElements(0x100);
+
 
 
 // This is a message handler for nvse events
@@ -210,15 +217,29 @@ extern "C"
 			SkipNBytes = serialization->SkipNBytes;
 			
 			g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
-			CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
-			g_strInterface = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar); // From JG
-			g_arrInterface = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar); // From JG
-			GetElement = g_arrInterface->GetElement;
 			ExtractArgsEx = g_script->ExtractArgsEx;
 			ExtractFormatStringArgs = g_script->ExtractFormatStringArgs;
 			
-			auto johnnyGuitar = GetModuleHandle("johnnyguitar.dll");
+			CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 			
+			g_strInterface = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);
+			GetStringVar = g_strInterface->GetString;
+			AssignString = g_strInterface->Assign;
+			
+			g_arrInterface = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
+			CreateArray = g_arrInterface->CreateArray;
+			CreateStringMap = g_arrInterface->CreateStringMap;
+			AssignArrayResult = g_arrInterface->AssignCommandResult;
+			SetElement = g_arrInterface->SetElement;
+			AppendElement = g_arrInterface->AppendElement;
+			GetArraySize = g_arrInterface->GetArraySize;
+			LookupArrayByID = g_arrInterface->LookupArrayByID;
+			GetElement = g_arrInterface->GetElement;
+			GetElements = g_arrInterface->GetElements;
+
+			
+			auto johnnyGuitar = GetModuleHandle("johnnyguitar.dll");
+			//do stuff with johnny handle?
 			
 			HandleIniOptions();
 			HandleGameHooks();
@@ -278,7 +299,19 @@ extern "C"
 
 #if _DEBUG  //for functions being tested (or just abandoned).
 
-
+		REG_CMD(AuxStringMapArrayGetSize)
+		REG_CMD(AuxStringMapArrayGetType)
+		REG_CMD(AuxStringMapArrayGetFloat)
+		REG_CMD(AuxStringMapArrayGetRef)
+		REG_CMD_STR(AuxStringMapArrayGetString);
+		REG_CMD_ARR(AuxStringMapArrayGetFirst);
+		REG_CMD_ARR(AuxStringMapArrayGetNext);
+		REG_CMD_ARR(AuxStringMapArrayGetKeys);
+		REG_CMD_ARR(AuxStringMapArrayGetAll);
+		REG_CMD(AuxStringMapArraySetFloat)
+		REG_CMD(AuxStringMapArraySetRef)
+		REG_CMD(AuxStringMapArraySetString)
+		REG_CMD(AuxStringMapArrayErase)
 		
 #if 0
 		REG_CMD_ARR(Ar_Init);

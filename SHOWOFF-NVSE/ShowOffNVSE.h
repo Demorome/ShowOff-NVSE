@@ -12,7 +12,7 @@ UInt32 g_ShowOffVersion = 100;
 
 bool g_canPlayerPickpocketInCombat = false;
 
-
+extern Vector<ArrayElementL> s_tempElements;
 
 // Misc.
 bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
@@ -43,12 +43,28 @@ typedef EventInfo (*JGCreateEvent)(const char* EventName, UInt8 maxArgs, UInt8 m
 
 
 
-// Singletons
+// Singletons and shortcuts for those singletons.
 NVSEArrayVarInterface* g_arrInterface = NULL;
+NVSEArrayVar* (*CreateArray)(const NVSEArrayElement* data, UInt32 size, Script* callingScript);
+NVSEArrayVar* (*CreateStringMap)(const char** keys, const NVSEArrayElement* values, UInt32 size, Script* callingScript);
+bool (*AssignArrayResult)(NVSEArrayVar* arr, double* dest);
+void (*SetElement)(NVSEArrayVar* arr, const NVSEArrayElement& key, const NVSEArrayElement& value);
+void (*AppendElement)(NVSEArrayVar* arr, const NVSEArrayElement& value);
+UInt32(*GetArraySize)(NVSEArrayVar* arr);
+NVSEArrayVar* (*LookupArrayByID)(UInt32 id);
+bool (*GetElement)(NVSEArrayVar* arr, const NVSEArrayElement& key, NVSEArrayElement& outElement);
+bool (*GetElements)(NVSEArrayVar* arr, NVSEArrayElement* elements, NVSEArrayElement* keys);
+
 NVSEStringVarInterface* g_strInterface = NULL;
+bool (*AssignString)(COMMAND_ARGS, const char* newValue);
+const char* (*GetStringVar)(UInt32 stringID);
+
 NVSEMessagingInterface* g_msg = NULL;
 NVSEScriptInterface* g_script = NULL;
 NVSECommandTableInterface* CmdIfc = NULL;
+
+
+
 
 HUDMainMenu* g_HUDMainMenu = NULL;
 TileMenu** g_tileMenuArray = NULL;

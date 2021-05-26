@@ -51,6 +51,11 @@ UInt32(*ReadRecord32)();
 void (*ReadRecord64)(void* outData);
 void (*SkipNBytes)(UInt32 byteNum);
 
+typedef NVSEArrayVarInterface::Array NVSEArrayVar;
+typedef NVSEArrayVarInterface::Element NVSEArrayElement;
+typedef NVSEArrayVarInterface::ElementR ArrayElementR;
+typedef NVSEArrayVarInterface::ElementL ArrayElementL;
+
 
 __declspec(naked) bool IsConsoleOpen()  //how does this differ from IsConsoleMode()?
 {
@@ -93,13 +98,6 @@ struct InventoryRef
 };
 
 InventoryRef* (*InventoryRefGetForID)(UInt32 refID);
-
-typedef NVSEArrayVarInterface::Array NVSEArrayVar;
-typedef NVSEArrayVarInterface::Element NVSEArrayElement;
-typedef NVSEArrayVarInterface::ElementR ArrayElementR;
-typedef NVSEArrayVarInterface::ElementL ArrayElementL;
-
-bool (*GetElement)(NVSEArrayVar* arr, const NVSEArrayElement& key, NVSEArrayElement& outElement);
 
 
 __declspec(naked) float __fastcall GetAxisDistance(TESObjectREFR* ref1, TESObjectREFR* ref2, UInt8 axis)  
@@ -403,10 +401,10 @@ typedef UnorderedMap<UInt32, AuxVarOwnersMap> AuxVarModsMap;
 AuxVarModsMap s_auxVariablesPerm, s_auxVariablesTemp;
 #endif
 
-typedef UnorderedMap<UInt32, AuxVariableValue> RefMapIDsMap;
-typedef UnorderedMap<char*, RefMapIDsMap> RefMapVarsMap;
-typedef UnorderedMap<UInt32, RefMapVarsMap> RefMapModsMap;
-RefMapModsMap s_refMapArraysPerm, s_refMapArraysTemp;
+typedef UnorderedMap<UInt32, AuxVariableValue> AuxStringMapIDsMap;
+typedef UnorderedMap<char*, AuxStringMapIDsMap> AuxStringMapVarsMap;
+typedef UnorderedMap<UInt32, AuxStringMapVarsMap> AuxStringMapModsMap;
+AuxStringMapModsMap s_auxStringMapArraysPerm, s_auxStringMapArraysTemp;
 
 UInt32 __fastcall GetSubjectID(TESForm* form, TESObjectREFR* thisObj)
 {
@@ -453,24 +451,24 @@ struct AuxVarInfo
 };
 #endif
 
-struct RefMapInfo
+struct AuxStringMapInfo
 {
 	UInt32		modIndex;
 	bool		isPerm;
 
-	RefMapInfo(Script* scriptObj, char* varName)
+	AuxStringMapInfo(Script* scriptObj, char* varName)
 	{
 		isPerm = (varName[0] != '*');
 		modIndex = (varName[!isPerm] == '_') ? 0xFF : scriptObj->GetOverridingModIdx();
 	}
 
-	RefMapInfo(Script* scriptObj, UInt8 type)
+	AuxStringMapInfo(Script* scriptObj, UInt8 type)
 	{
 		isPerm = !(type & 1);
 		modIndex = (type > 1) ? 0xFF : scriptObj->GetOverridingModIdx();
 	}
 
-	RefMapModsMap& ModsMap() { return isPerm ? s_refMapArraysPerm : s_refMapArraysTemp; }
+	AuxStringMapModsMap& ModsMap() { return isPerm ? s_auxStringMapArraysPerm : s_auxStringMapArraysTemp; }
 };
 
 UInt8 s_dataChangedFlags = 0; //For AuxVar serialization.
@@ -480,25 +478,6 @@ UInt8 s_dataChangedFlags = 0; //For AuxVar serialization.
 DebugLog s_log, s_debug, s_missingTextures;
 
 
-bool (*WriteRecord)(UInt32 type, UInt32 version, const void* buffer, UInt32 length);
-bool (*WriteRecordData)(const void* buffer, UInt32 length);
-bool (*GetNextRecordInfo)(UInt32* type, UInt32* version, UInt32* length);
-UInt32(*ReadRecordData)(void* buffer, UInt32 length);
-bool (*ResolveRefID)(UInt32 refID, UInt32* outRefID);
-const char* (*GetSavePath)(void);
-CommandInfo* (*GetCmdByOpcode)(UInt32 opcode);
-const char* (*GetStringVar)(UInt32 stringID);
-bool (*AssignString)(COMMAND_ARGS, const char* newValue);
-NVSEArrayVar* (*CreateArray)(const NVSEArrayElement* data, UInt32 size, Script* callingScript);
-NVSEArrayVar* (*CreateStringMap)(const char** keys, const NVSEArrayElement* values, UInt32 size, Script* callingScript);
-bool (*AssignCommandResult)(NVSEArrayVar* arr, double* dest);
-void (*SetElement)(NVSEArrayVar* arr, const NVSEArrayElement& key, const NVSEArrayElement& value);
-void (*AppendElement)(NVSEArrayVar* arr, const NVSEArrayElement& value);
-UInt32(*GetArraySize)(NVSEArrayVar* arr);
-NVSEArrayVar* (*LookupArrayByID)(UInt32 id);
-bool (*GetElement)(NVSEArrayVar* arr, const NVSEArrayElement& key, NVSEArrayElement& outElement);
-bool (*GetElements)(NVSEArrayVar* arr, NVSEArrayElement* elements, NVSEArrayElement* keys);
-bool (*ExtractFormatStringArgs)(UInt32 fmtStringPos, char* buffer, COMMAND_ARGS_EX, UInt32 maxParams, ...);
 bool (*CallFunction)(Script* funcScript, TESObjectREFR* callingObj, TESObjectREFR* container, NVSEArrayElement* result, UInt8 numArgs, ...);
 
 DataHandler* g_dataHandler = NULL;

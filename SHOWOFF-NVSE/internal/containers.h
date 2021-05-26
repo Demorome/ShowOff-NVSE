@@ -23,6 +23,44 @@ enum
 	kVectorDefaultAlloc =	2,
 };
 
+template <typename T_Data> __forceinline UInt32 AlignNumAlloc(UInt32 numAlloc)
+{
+	switch (sizeof(T_Data) & 0xF)
+	{
+	case 0:
+		return numAlloc;
+	case 2:
+	case 6:
+	case 0xA:
+	case 0xE:
+		if (numAlloc & 7)
+		{
+			numAlloc &= 0xFFFFFFF8;
+			numAlloc += 8;
+		}
+		return numAlloc;
+	case 4:
+	case 0xC:
+		if (numAlloc & 3)
+		{
+			numAlloc &= 0xFFFFFFFC;
+			numAlloc += 4;
+		}
+		return numAlloc;
+	case 8:
+		if (numAlloc & 1)
+			numAlloc++;
+		return numAlloc;
+	default:
+		if (numAlloc & 0xF)
+		{
+			numAlloc &= 0xFFFFFFF0;
+			numAlloc += 0x10;
+		}
+		return numAlloc;
+	}
+}
+
 template <typename T_Key, typename T_Data> struct MappedPair
 {
 	T_Key		key;
@@ -66,6 +104,7 @@ public:
 	void Clear() {free(key);}
 };
 
+#if 0
 template <typename T_Key, typename T_Data> class Map
 {
 protected:
@@ -293,7 +332,9 @@ public:
 		}
 	};
 };
+#endif
 
+#if 0
 template <typename T_Key> class Set
 {
 protected:
@@ -463,6 +504,7 @@ public:
 		}
 	};
 };
+#endif
 
 template <typename T_Key> __forceinline UInt32 HashKey(T_Key inKey)
 {
@@ -794,6 +836,7 @@ public:
 
 	void DumpLoads()
 	{
+#if 0
 		UInt32 loadsArray[0x40];
 		MemZero(loadsArray, sizeof(loadsArray));
 		Bucket* pBucket = buckets;
@@ -808,6 +851,7 @@ public:
 		PrintDebug("Size = %d\nBuckets = %d\n----------------\n", numEntries, numBuckets);
 		for (UInt32 iter = 0; iter <= maxLoad; iter++)
 			PrintDebug("%d:\t%05d (%.4f%%)", iter, loadsArray[iter], 100.0 * (double)loadsArray[iter] / numEntries);
+#endif
 	}
 
 	class Iterator
@@ -1091,21 +1135,26 @@ public:
 	};
 };
 
-template <typename T_Data> class Vector
+template <typename T_Data> class Vector  //replaced with JIP definition.
 {
 	using Data_Arg = std::conditional_t<std::is_scalar_v<T_Data>, T_Data, T_Data&>;
-	
-	T_Data		*data;		// 00
-	UInt32		numItems;	// 04
-	UInt32		alloc;		// 08
 
-	__declspec(noinline) T_Data *AllocateData()
+	T_Data* data;		// 00
+	UInt32		numItems;	// 04
+	UInt32		numAlloc;	// 08
+
+	__declspec(noinline) T_Data* AllocateData()
 	{
-		if (!data) data = (T_Data*)malloc(sizeof(T_Data) * alloc);
-		else if (numItems == alloc)
+		if (!data)
 		{
-			alloc *= 2;
-			data = (T_Data*)realloc(data, sizeof(T_Data) * alloc);
+			numAlloc = AlignNumAlloc<T_Data>(numAlloc);
+			data = POOL_ALLOC(numAlloc, T_Data); 
+		}
+		else if (numAlloc <= numItems)
+		{
+			UInt32 newAlloc = numAlloc << 1;
+			POOL_REALLOC(data, numAlloc, newAlloc, T_Data);
+			numAlloc = newAlloc;
 		}
 		return data + numItems++;
 	}
@@ -1113,23 +1162,24 @@ template <typename T_Data> class Vector
 	T_Data* End() const { return data + numItems; }
 
 public:
-	Vector(UInt32 _alloc = kVectorDefaultAlloc) : alloc(_alloc), numItems(0), data(NULL) {}
+	Vector(UInt32 _alloc = VECTOR_DEFAULT_ALLOC) : data(nullptr), numItems(0), numAlloc(_alloc) {}
+	Vector(std::initializer_list<T_Data> inList) : data(nullptr), numItems(0), numAlloc(inList.size()) { AppendList(inList); }
 	~Vector()
 	{
 		if (!data) return;
-		while (numItems) data[--numItems].~T_Data();
-		free(data);
-		data = NULL;
+		Clear();
+		POOL_FREE(data, numAlloc, T_Data);
+		data = nullptr;
 	}
 
-	UInt32 Size() const {return numItems;}
-	bool Empty() const {return !numItems;}
+	UInt32 Size() const { return numItems; }
+	bool Empty() const { return !numItems; }
 
-	T_Data* Data() const {return data;}
+	T_Data* Data() const { return data; }
 
-	T_Data& operator[](UInt32 index) const {return data[index];}
+	T_Data& operator[](UInt32 index) const { return data[index]; }
 
-	T_Data* GetPtr(UInt32 index) const {return (index < numItems) ? (data + index) : nullptr;}
+	T_Data* GetPtr(UInt32 index) const { return (index < numItems) ? (data + index) : nullptr; }
 
 	Data_Arg Top() const { return data[numItems - 1]; }
 
@@ -1184,254 +1234,439 @@ public:
 		new (pData) T_Data(std::forward<Args>(args)...);
 		return pData;
 	}
-	
-	void Append(const T_Data item)
-	{
-		T_Data *pData = AllocateData();
-		*pData = item;
-	}
 
-	__declspec(noinline) void Concatenate(const Vector &source)
+	void Concatenate(const Vector& source)
 	{
 		if (!source.numItems) return;
 		UInt32 newCount = numItems + source.numItems;
 		if (!data)
 		{
-			if (alloc < newCount) alloc = newCount;
-			data = (T_Data*)malloc(sizeof(T_Data) * alloc);
+			if (numAlloc < newCount) numAlloc = newCount;
+			numAlloc = AlignNumAlloc<T_Data>(numAlloc);
+			data = POOL_ALLOC(numAlloc, T_Data);
 		}
-		else if (alloc < newCount)
+		else if (numAlloc < newCount)
 		{
-			alloc = newCount;
-			data = (T_Data*)realloc(data, sizeof(T_Data) * alloc);
+			newCount = AlignNumAlloc<T_Data>(newCount);
+			POOL_REALLOC(data, numAlloc, newCount, T_Data);
+			numAlloc = newCount;
 		}
 		memcpy(data + numItems, source.data, sizeof(T_Data) * source.numItems);
 		numItems = newCount;
 	}
 
-	void Insert(const T_Data &item, UInt32 index)
-	{
-		if (index <= numItems)
-		{
-			UInt32 size = numItems - index;
-			T_Data *pData = AllocateData();
-			if (size)
-			{
-				pData = data + index;
-				memmove(pData + 1, pData, sizeof(T_Data) * size);
-			}
-			*pData = item;
-		}
-	}
-
-	UInt32 InsertSorted(const T_Data &item)
+	UInt32 InsertSorted(Data_Arg item, bool descending = false)
 	{
 		UInt32 lBound = 0, uBound = numItems, index;
+		bool isLT;
 		while (lBound != uBound)
 		{
-			index = (lBound + uBound) / 2;
-			if (item < data[index]) uBound = index;
+			index = (lBound + uBound) >> 1;
+			isLT = item < data[index];
+			if (descending) isLT = !isLT;
+			if (isLT) uBound = index;
 			else lBound = index + 1;
 		}
 		uBound = numItems - lBound;
-		T_Data *pData = AllocateData();
+		T_Data* pData = AllocateData();
 		if (uBound)
 		{
 			pData = data + lBound;
 			memmove(pData + 1, pData, sizeof(T_Data) * uBound);
 		}
-		*pData = item;
+		RawAssign<T_Data>(*pData, item);
 		return lBound;
 	}
 
-	template <typename ...Args>
-	T_Data* Emplace(Args&& ...args)
+	typedef bool (*SortComperator)(const T_Data& lhs, const T_Data& rhs);
+	UInt32 InsertSorted(Data_Arg item, SortComperator comperator)
 	{
-		return new (AllocateData()) T_Data(std::forward<Args>(args)...);
+		UInt32 lBound = 0, uBound = numItems, index;
+		while (lBound != uBound)
+		{
+			index = (lBound + uBound) >> 1;
+			if (comperator(item, data[index]))
+				uBound = index;
+			else lBound = index + 1;
+		}
+		uBound = numItems - lBound;
+		T_Data* pData = AllocateData();
+		if (uBound)
+		{
+			pData = data + lBound;
+			memmove(pData + 1, pData, sizeof(T_Data) * uBound);
+		}
+		RawAssign<T_Data>(*pData, item);
+		return lBound;
+	}
+
+	void MoveToEnd(Data_Arg item)
+	{
+		if (numItems > 1)
+		{
+			T_Data* pData = data, * pEnd = End() - 1;
+			do
+			{
+				if (*pData == item)
+				{
+					memcpy(pData, pData + 1, (UInt32)pEnd - (UInt32)pData);
+					RawAssign<T_Data>(*pEnd, item);
+					return;
+				}
+				pData++;
+			} 			while (pData != pEnd);
+		}
+	}
+
+	SInt32 GetIndexOf(Data_Arg item) const
+	{
+		if (numItems)
+		{
+			T_Data* pData = data, * pEnd = End();
+			do
+			{
+				if (*pData == item)
+					return pData - data;
+				pData++;
+			} 			while (pData != pEnd);
+		}
+		return -1;
+	}
+
+	template <class Matcher>
+	SInt32 GetIndexOf(Matcher& matcher) const
+	{
+		if (numItems)
+		{
+			T_Data* pData = data, * pEnd = End();
+			do
+			{
+				if (matcher(*pData))
+					return pData - data;
+				pData++;
+			} 			while (pData != pEnd);
+		}
+		return -1;
+	}
+
+	template <class Matcher>
+	T_Data* Find(Matcher& matcher) const
+	{
+		if (numItems)
+		{
+			T_Data* pData = data, * pEnd = End();
+			do
+			{
+				if (matcher(*pData))
+					return pData;
+				pData++;
+			} 			while (pData != pEnd);
+		}
+		return nullptr;
 	}
 
 	bool RemoveNth(UInt32 index)
 	{
-		if ((index < 0) || (index >= numItems)) return false;
-		T_Data *pData = data + index;
+		if (index >= numItems) return false;
+		T_Data* pData = data + index;
 		pData->~T_Data();
 		numItems--;
 		index = numItems - index;
-		if (index) memmove(pData, pData + 1, sizeof(T_Data) * index);
+		if (index) memcpy(pData, pData + 1, sizeof(T_Data) * index);
 		return true;
 	}
 
-	SInt32 GetIndexOf(T_Data item) const
+	bool Remove(Data_Arg item)
 	{
-		T_Data *pData = data;
-		for (UInt32 count = numItems; count; count--, pData++)
-			if (*pData == item) return numItems - count;
-		return -1;
-	}
-
-	template <class Finder>
-	SInt32 GetIndexOf(Finder &finder) const
-	{
-		T_Data *pData = data;
-		for (UInt32 count = numItems; count; count--, pData++)
-			if (finder.Accept(*pData)) return numItems - count;
-		return -1;
-	}
-
-	template <class Finder>
-	T_Data* Find(Finder &finder) const
-	{
-		T_Data *pData = data;
-		for (UInt32 count = numItems; count; count--, pData++)
-			if (finder.Accept(*pData)) return pData;
-		return NULL;
-	}
-
-	bool Remove(T_Data item)
-	{
-		if (!numItems) return false;
-		T_Data *pData = data + numItems;
-		UInt32 count = numItems;
-		for (; count; count--)
+		if (numItems)
 		{
-			pData--;
-			if (*pData != item) continue;
-			pData->~T_Data();
-			count = numItems - count;
-			if (count) memmove(pData, pData + 1, sizeof(T_Data) * count);
-			numItems--;
-			return true;
+			T_Data* pData = End(), * pEnd = data;
+			do
+			{
+				pData--;
+				if (*pData != item) continue;
+				numItems--;
+				pData->~T_Data();
+				UInt32 size = (UInt32)End() - (UInt32)pData;
+				if (size) memcpy(pData, pData + 1, size);
+				return true;
+			} 			while (pData != pEnd);
 		}
 		return false;
 	}
 
-	template <class Finder>
-	UInt32 Remove(Finder &finder)
+	template <class Matcher>
+	UInt32 Remove(Matcher& matcher)
 	{
-		if (!numItems) return 0;
-		UInt32 removed = 0, size;
-		T_Data *pData = data + numItems;
-		for (UInt32 count = numItems; count; count--)
+		if (numItems)
 		{
-			pData--;
-			if (!finder.Accept(*pData)) continue;
-			pData->~T_Data();
-			size = numItems - count;
-			if (size) memmove(pData, pData + 1, sizeof(T_Data) * size);
-			numItems--;
-			removed++;
+			T_Data* pData = End(), * pEnd = data;
+			UInt32 removed = 0, size;
+			do
+			{
+				pData--;
+				if (!matcher(*pData)) continue;
+				numItems--;
+				pData->~T_Data();
+				size = (UInt32)End() - (UInt32)pData;
+				if (size) memcpy(pData, pData + 1, size);
+				removed++;
+			} 			while (pData != pEnd);
+			return removed;
 		}
-		return removed;
+		return 0;
 	}
 
 	void RemoveRange(UInt32 beginIdx, UInt32 count)
 	{
-		if (beginIdx >= numItems) return;
+		if (!count || (beginIdx >= numItems)) return;
 		if (count > (numItems - beginIdx))
 			count = numItems - beginIdx;
-		T_Data *pData = data + beginIdx + count;
-		for (UInt32 index = count; index; index--)
+		T_Data* pBgn = data + beginIdx, * pEnd = pBgn + count, * pData = pBgn;
+		do
 		{
-			pData--;
 			pData->~T_Data();
-		}
-		if ((beginIdx + count) < numItems)
-			memmove(pData, pData + count, sizeof(T_Data) * (numItems - beginIdx - count));
+			pData++;
+		} 		while (pData != pEnd);
+		UInt32 size = (UInt32)End() - (UInt32)pData;
+		if (size) memcpy(pBgn, pData, size);
 		numItems -= count;
 	}
 
-	bool Clear(bool delData = false)
+	void Resize(UInt32 newSize)
 	{
-		if (!numItems) return false;
-		if (delData)
-			while (numItems)
-				data[--numItems].~T_Data();
-		else numItems = 0;
-		return true;
+		if (numItems == newSize)
+			return;
+		T_Data* pData, * pEnd;
+		if (numItems < newSize)
+		{
+			if (!data)
+			{
+				numAlloc = AlignNumAlloc<T_Data>(newSize);
+				data = POOL_ALLOC(numAlloc, T_Data);
+			}
+			else if (numAlloc < newSize)
+			{
+				newSize = AlignNumAlloc<T_Data>(newSize);
+				POOL_REALLOC(data, numAlloc, newSize, T_Data);
+				numAlloc = newSize;
+			}
+			pData = data + numItems;
+			pEnd = data + newSize;
+			do
+			{
+				new (pData) T_Data();
+				pData++;
+			} 			while (pData != pEnd);
+		}
+		else
+		{
+			pData = data + newSize;
+			pEnd = End();
+			do
+			{
+				pData->~T_Data();
+				pData++;
+			} 			while (pData != pEnd);
+		}
+		numItems = newSize;
 	}
 
-	typedef bool (*CompareFunc)(T_Data&, T_Data&);
+	T_Data Pop()
+	{
+		if (!numItems) return NULL;
+		numItems--;
+		T_Data* pEnd = End();
+		pEnd->~T_Data();
+		return *pEnd;
+	}
 
-	void QuickSort(UInt32 p, UInt32 q, CompareFunc compareFunc)
+	void Clear()
+	{
+		if (numItems)
+		{
+			T_Data* pData = data, * pEnd = End();
+			do
+			{
+				pData->~T_Data();
+				pData++;
+			} 			while (pData != pEnd);
+		}
+		numItems = 0;
+	}
+
+private:
+	void QuickSortAscending(UInt32 p, UInt32 q)
 	{
 		if (p >= q) return;
 		UInt32 i = p;
-		T_Data temp;
 		for (UInt32 j = p + 1; j < q; j++)
 		{
-			if (compareFunc(data[p], data[j])) continue;
+			if (data[p] < data[j])
+				continue;
 			i++;
-			temp = data[i];
-			data[i] = data[j];
-			data[j] = temp;
+			RawSwap<T_Data>(data[j], data[i]);
 		}
-		temp = data[i];
-		data[i] = data[p];
-		data[p] = temp;
-		QuickSort(p, i, compareFunc);
-		QuickSort(i + 1, q, compareFunc);
+		RawSwap<T_Data>(data[p], data[i]);
+		QuickSortAscending(p, i);
+		QuickSortAscending(i + 1, q);
+	}
+
+	void QuickSortDescending(UInt32 p, UInt32 q)
+	{
+		if (p >= q) return;
+		UInt32 i = p;
+		for (UInt32 j = p + 1; j < q; j++)
+		{
+			if (!(data[p] < data[j]))
+				continue;
+			i++;
+			RawSwap<T_Data>(data[j], data[i]);
+		}
+		RawSwap<T_Data>(data[p], data[i]);
+		QuickSortDescending(p, i);
+		QuickSortDescending(i + 1, q);
+	}
+
+	void QuickSortCustom(UInt32 p, UInt32 q, SortComperator comperator)
+	{
+		if (p >= q) return;
+		UInt32 i = p;
+		for (UInt32 j = p + 1; j < q; j++)
+		{
+			if (comperator(data[p], data[j]))
+				continue;
+			i++;
+			RawSwap<T_Data>(data[j], data[i]);
+		}
+		RawSwap<T_Data>(data[p], data[i]);
+		QuickSortCustom(p, i, comperator);
+		QuickSortCustom(i + 1, q, comperator);
+	}
+public:
+
+	void Sort(bool descending = false)
+	{
+		if (descending)
+			QuickSortDescending(0, numItems);
+		else QuickSortAscending(0, numItems);
+	}
+
+	void Sort(SortComperator comperator)
+	{
+		QuickSortCustom(0, numItems, comperator);
+	}
+
+	void Shuffle()
+	{
+		UInt32 idx = numItems, rand;
+		while (idx > 1)
+		{
+			rand = GetRandomInt(idx);
+			idx--;
+			if (rand != idx)
+				RawSwap<T_Data>(data[rand], data[idx]);
+		}
 	}
 
 	class Iterator
 	{
-	protected:
 		friend Vector;
 
-		UInt32		count;
 		T_Data		*pData;
-
-	public:
-		bool End() const {return !count;}
-		void operator++()
-		{
-			count--;
-			pData++;
-		}
-
-		T_Data& operator*() const {return *pData;}
-		T_Data& operator->() const {return *pData;}
-		T_Data& Get() const {return *pData;}
+		UInt32		count;
 
 		Iterator() {}
-		Iterator(Vector &source) : count(source.numItems), pData(source.data) {}
-		Iterator(Vector &source, UInt32 index)
+
+	public:
+		explicit operator bool() const { return count != 0; }
+		void operator++()
 		{
-			if (source.numItems > index)
+			pData++;
+			count--;
+		}
+		void operator+=(UInt32 _count)
+		{
+			if (_count >= count)
+				count = 0;
+			else
 			{
-				count = source.numItems - index;
-				pData = source.data + index;
+				pData += _count;
+				count -= _count;
 			}
-			else count = 0;
+		}
+
+		Data_Arg operator*() const { return *pData; }
+		Data_Arg operator->() const { return *pData; }
+		Data_Arg operator()() const { return *pData; }
+		T_Data& Ref() { return *pData; }
+
+		Iterator(Vector& source) : pData(source.data), count(source.numItems) {}
+		Iterator(Vector& source, UInt32 index) : count(source.numItems)
+		{
+			if (count <= index)
+				count = 0;
+			else
+			{
+				pData = source.data + index;
+				count -= index;
+			}
 		}
 	};
 
 	class RvIterator : public Iterator
 	{
-		Vector		*contObj;
-
 	public:
-		Vector* Container() const {return contObj;}
-
 		void operator--()
 		{
-			count--;
 			pData--;
+			count--;
+		}
+		void operator-=(UInt32 _count)
+		{
+			if (_count >= count)
+				count = 0;
+			else
+			{
+				pData -= _count;
+				count -= _count;
+			}
 		}
 
-		void Remove()
+		void Remove(Vector& source)
 		{
 			pData->~T_Data();
-			UInt32 size = contObj->numItems - count;
-			if (size) memmove(pData, pData + 1, sizeof(T_Data) * size);
-			contObj->numItems--;
+			UInt32 size = source.numItems - count;
+			source.numItems--;
+			if (size) memcpy(pData, pData + 1, size * sizeof(T_Data));
 		}
 
-		RvIterator(Vector &source) : contObj(&source)
+		RvIterator(Vector& source)
 		{
-			count = source.numItems;
-			if (count) pData = source.data + (count - 1);
+			if (count = source.numItems)
+				pData = source.data + (count - 1);
 		}
 	};
+
+	class CpIterator : public Iterator
+	{
+	public:
+		CpIterator(Vector& source)
+		{
+			if (count = source.numItems)
+			{
+				UInt32 size = count * sizeof(T_Data);
+				pData = (T_Data*)memcpy(GetAuxBuffer(s_auxBuffers[2], size), source.data, size);
+			}
+		}
+	};
+
+	Iterator Begin() { return Iterator(*this); }
+	Iterator BeginAt(UInt32 index) { return Iterator(*this, index); }
+
+	RvIterator BeginRv() { return RvIterator(*this); }
+
+	CpIterator BeginCp() { return CpIterator(*this); }
 };
 
 template <typename T_Data, size_t N> class FixedTypeArray
@@ -1478,40 +1713,3 @@ public:
 	};
 };
 
-template <typename T_Data> __forceinline UInt32 AlignNumAlloc(UInt32 numAlloc)
-{
-	switch (sizeof(T_Data) & 0xF)
-	{
-	case 0:
-		return numAlloc;
-	case 2:
-	case 6:
-	case 0xA:
-	case 0xE:
-		if (numAlloc & 7)
-		{
-			numAlloc &= 0xFFFFFFF8;
-			numAlloc += 8;
-		}
-		return numAlloc;
-	case 4:
-	case 0xC:
-		if (numAlloc & 3)
-		{
-			numAlloc &= 0xFFFFFFFC;
-			numAlloc += 4;
-		}
-		return numAlloc;
-	case 8:
-		if (numAlloc & 1)
-			numAlloc++;
-		return numAlloc;
-	default:
-		if (numAlloc & 0xF)
-		{
-			numAlloc &= 0xFFFFFFF0;
-			numAlloc += 0x10;
-		}
-		return numAlloc;
-	}
-}

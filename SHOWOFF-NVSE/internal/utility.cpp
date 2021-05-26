@@ -1,6 +1,6 @@
 #include "internal/utility.h"
+#include <ctime>
 #include "nvse/GameAPI.h"
-#include <time.h>
 
 memcpy_t MemCopy = memcpy, MemMove = memmove;
 
@@ -1513,4 +1513,41 @@ void Console_Print_Long(const std::string& str)
 		Console_Print("%s ...", str.substr(i * 500, 500).c_str());
 
 	Console_Print("%s", str.substr(numLines * 500, str.length() - numLines * 500).c_str());
+}
+
+
+AuxBuffer s_auxBuffers[3];
+
+__declspec(naked) UInt8* __fastcall GetAuxBuffer(AuxBuffer& buffer, UInt32 reqSize)
+{
+	__asm
+	{
+		mov		eax, [ecx]
+		cmp[ecx + 4], edx
+		jb		doRealloc
+		test	eax, eax
+		jz		doInit
+		retn
+		doInit :
+		push	ecx
+			push	0x10
+			push	dword ptr[ecx + 4]
+			jmp		doAlloc
+			doRealloc :
+		mov[ecx + 4], edx
+			push	ecx
+			push	0x10
+			push	edx
+			test	eax, eax
+			jz		doAlloc
+			push	eax
+			call	_aligned_free
+			pop		ecx
+			doAlloc :
+		call	_aligned_malloc
+			add		esp, 8
+			pop		ecx
+			mov[ecx], eax
+			retn
+	}
 }

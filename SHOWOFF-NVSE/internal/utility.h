@@ -72,13 +72,8 @@ kFltMax = FLT_MAX;
 #define GameHeapAlloc(size) ThisStdCall<void*>(0xAA3E40, (void*)0x11F6238, size)
 #define GameHeapFree(ptr) ThisStdCall<void*>(0xAA4060, (void*)0x11F6238, ptr)
 
-/* from JIP, consider swapping these in.
-#define GameHeapAlloc(size) ThisCall<void*, UInt32>(0xAA3E40, (void*)0x11F6238, size)
-#define GameHeapFree(ptr) ThisCall<void, void*>(0xAA4060, (void*)0x11F6238, ptr)
-*/
-
-#define GetRandomInt(n) ThisCall<SInt32, SInt32>(0xAA5230, (void*)0x11C4180, n)
-#define GetRandomIntInRange(iMin, iMax) (GetRandomInt(iMax - iMin) + iMin)
+#define GetRandomInt(n) ThisStdCall<SInt32, SInt32>(0xAA5230, (void*)0x11C4180, n)
+#define GetRandomIntInRange(iMin, iMax) (GetRandomInt(iMax - iMin) + iMin) 
 
 typedef void* (__cdecl* memcpy_t)(void*, const void*, size_t);
 extern memcpy_t MemCopy, MemMove;
@@ -351,6 +346,18 @@ UInt32 __fastcall ByteSwap(UInt32 dword);
 
 void DumpMemImg(void *data, UInt32 size, UInt8 extra = 0);
 
-void GetMD5File(const char *filePath, char *outHash);
 
-void GetSHA1File(const char *filePath, char *outHash);
+#define AUX_BUFFER_INIT_SIZE 0x8000
+
+class AuxBuffer
+{
+	UInt8	*ptr;
+	UInt32	size;
+
+public:
+	AuxBuffer() : ptr(NULL), size(AUX_BUFFER_INIT_SIZE) {}
+};
+
+extern AuxBuffer s_auxBuffers[3];
+
+UInt8* __fastcall GetAuxBuffer(AuxBuffer& buffer, UInt32 reqSize);
