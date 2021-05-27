@@ -1,14 +1,14 @@
 ﻿#pragma once
 
-//For Auxiliary StringMap Arrays (AuxStringMap, ASM)
+//For Auxiliary StringMap Arrays (AuxStringMap, ASM, not to confuse with ASM = assembly)
 
 #define DoLater 0
 
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetSize, AuxStringMapSize, , 0, 1, kParams_OneString);
-DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetType, AuxStringMapGetType, , 0, 2, kParams_JIP_OneString_OneOptionalForm);
-DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetFloat, AuxStringMapGetFlt, , 0, 2, kParams_JIP_OneString_OneOptionalForm);
-DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetRef, AuxStringMapGetRef, , 0, 2, kParams_JIP_OneString_OneOptionalForm);
-DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetString, AuxStringMapGetStr, , 0, 2, kParams_JIP_OneString_OneOptionalForm);
+DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetType, AuxStringMapGetType, , 0, 2, kParams_TwoStrings);
+DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetFloat, AuxStringMapGetFlt, , 0, 2, kParams_TwoStrings);
+DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetRef, AuxStringMapGetRef, , 0, 2, kParams_TwoStrings);
+DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetString, AuxStringMapGetStr, , 0, 2, kParams_TwoStrings);
 
 #if DoLater
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetValue, AuxStringMapGetVal, , 0, 2, kParams_JIP_OneString_OneOptionalForm);
@@ -18,15 +18,21 @@ DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetFirst, AuxStringMapFirst, , 0, 1, 
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetNext, AuxStringMapNext, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetKeys, AuxStringMapKeys, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetAll, AuxStringMapGetAll, , 0, 1, kParams_OneInt);
-DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArraySetFloat, AuxStringMapSetFlt, , 0, 3, kParams_JIP_OneString_OneDouble_OneOptionalForm);
-DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArraySetRef, AuxStringMapSetRef, , 0, 3, kParams_JIP_OneString_OneForm_OneOptionalForm);
-DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArraySetString, AuxStringMapSetStr, , 0, 3, kParams_JIP_TwoStrings_OneOptionalForm);
+
+DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetAsArray, AuxStringMapGetAsArr, , 0, 1, kParams_OneString);
+DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArraySetFromArray, AuxStringMapSetFromArr, , 0, 2, kParams_OneString_OneArray);
+//add append array option
+
+DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArraySetFloat, AuxStringMapSetFlt, , 0, 3, kParams_TwoStrings_OneDouble);
+DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArraySetRef, AuxStringMapSetRef, , 0, 3, kParams_TwoStrings_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArraySetString, AuxStringMapSetStr, , 0, 3, kParams_ThreeStrings);
+
 
 #if DoLater
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArraySetValue, AuxStringMapSetVal, , 0, 3, kParams_JIP_OneString_OneInt_OneOptionalForm);
 #endif
 
-DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayErase, AuxStringMapErase, , 0, 2, kParams_JIP_OneString_OneOptionalForm);
+DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayErase, AuxStringMapErase, , 0, 2, kParams_TwoStrings);
 
 #if DoLater
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayValidate, AuxStringMapValidate, , 0, 1, kParams_OneString);
@@ -58,13 +64,13 @@ bool Cmd_AuxStringMapArrayGetType_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	char varName[0x50];
-	TESForm* form = NULL;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &form))
+	char keyName[0x50];
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &keyName))
 	{
 		AuxStringMapIDsMap* idsMap = ASMFind(scriptObj, varName);
 		if (idsMap)
 		{
-			AuxVariableValue* value = idsMap->GetPtr(GetSubjectID(form, thisObj));
+			AuxVariableValue* value = idsMap->GetPtr(keyName);
 			if (value)
 				*result = value->GetType();
 		}
@@ -76,13 +82,13 @@ bool Cmd_AuxStringMapArrayGetFloat_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	char varName[0x50];
-	TESForm* form = NULL;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &form))
+	char keyName[0x50];
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &keyName))
 	{
 		AuxStringMapIDsMap* idsMap = ASMFind(scriptObj, varName);
 		if (idsMap)
 		{
-			AuxVariableValue* value = idsMap->GetPtr(GetSubjectID(form, thisObj));
+			AuxVariableValue* value = idsMap->GetPtr(keyName);
 			if (value)
 				*result = value->GetFlt();
 		}
@@ -94,13 +100,13 @@ bool Cmd_AuxStringMapArrayGetRef_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	char varName[0x50];
-	TESForm* form = NULL;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &form))
+	char keyName[0x50];
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &keyName))
 	{
 		AuxStringMapIDsMap* idsMap = ASMFind(scriptObj, varName);
 		if (idsMap)
 		{
-			AuxVariableValue* value = idsMap->GetPtr(GetSubjectID(form, thisObj));
+			AuxVariableValue* value = idsMap->GetPtr(keyName);
 			if (value)
 				REFR_RES = value->GetRef();
 		}
@@ -112,13 +118,13 @@ bool Cmd_AuxStringMapArrayGetString_Execute(COMMAND_ARGS)
 {
 	const char* resStr = NULL;
 	char varName[0x50];
-	TESForm* form = NULL;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &form))
+	char keyName[0x50];
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &keyName))
 	{
 		AuxStringMapIDsMap* idsMap = ASMFind(scriptObj, varName);
 		if (idsMap)
 		{
-			AuxVariableValue* value = idsMap->GetPtr(GetSubjectID(form, thisObj));
+			AuxVariableValue* value = idsMap->GetPtr(keyName);
 			if (value)
 				resStr = value->GetStr();
 		}
@@ -164,7 +170,7 @@ NVSEArrayVar* __fastcall AuxStringMapArrayIterator(Script* scriptObj, char* varN
 	}
 	else if (!s_auxStringMapIterator.IsValid())
 		return NULL;
-	ArrayElementL elements[2] = { LookupFormByRefID(s_auxStringMapIterator.Key()), s_auxStringMapIterator().GetAsElement() };
+	ArrayElementL elements[2] = { s_auxStringMapIterator.Key(), s_auxStringMapIterator().GetAsElement() };
 	++s_auxStringMapIterator;
 	return CreateArray(elements, 2, scriptObj);
 }
@@ -202,7 +208,7 @@ bool Cmd_AuxStringMapArrayGetKeys_Execute(COMMAND_ARGS)
 	if (!idsMap) return true;
 	s_tempElements.Clear();
 	for (auto idIter = idsMap->Begin(); idIter; ++idIter)
-		s_tempElements.Append(LookupFormByRefID(idIter.Key()));
+		s_tempElements.Append(idIter.Key());   //check how JIP appends string elements
 	if (!s_tempElements.Empty())
 		AssignArrayResult(CreateArray(s_tempElements.Data(), s_tempElements.Size(), scriptObj), result);
 	return true;
@@ -221,27 +227,49 @@ bool Cmd_AuxStringMapArrayGetAll_Execute(COMMAND_ARGS)
 	{
 		s_tempElements.Clear();
 		for (auto idIter = varIter().Begin(); idIter; ++idIter)
-			s_tempElements.Append(LookupFormByRefID(idIter.Key()));
+			s_tempElements.Append(idIter.Key());  //check how JIP appends string elements
 		SetElement(varsMap, ArrayElementL(varIter.Key()), ArrayElementL(CreateArray(s_tempElements.Data(), s_tempElements.Size(), scriptObj)));
 	}
 	AssignArrayResult(varsMap, result);
 	return true;
 }
 
-AuxVariableValue* __fastcall AuxStringMapAddValue(TESForm* form, TESObjectREFR* thisObj, Script* scriptObj, char* varName)
+bool Cmd_AuxStringMapArrayGetAsArray_Execute(COMMAND_ARGS)
 {
-	if (varName[0])
+	*result = 0;
+	char varName[0x50];
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &varName)) return true;
+	AuxStringMapIDsMap* idsMap = ASMFind(scriptObj, varName);
+	if (!idsMap) return true;
+	NVSEArrayVar* varsMap = CreateStringMap(NULL, NULL, 0, scriptObj);
+	for (auto idIter = idsMap->Begin(); idIter; ++idIter)
 	{
-		UInt32 keyID = GetSubjectID(form, thisObj);
-		if (keyID)
-		{
-			AuxStringMapInfo varInfo(scriptObj, varName);
+		SetElement(varsMap, ArrayElementL(idIter.Key()), ArrayElementL(idIter().GetAsElement()));
+	}
+	AssignArrayResult(varsMap, result);
+	return true;
+}
+
+bool Cmd_AuxStringMapArraySetFromArray_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	char varName[0x50];
+	UInt32 arrayID = NULL;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &arrayID)) return true;
+	//lookup array elements, loop, hmm
+	return true;
+}
+
+AuxVariableValue* __fastcall AuxStringMapAddValue(Script* scriptObj, char* varName, char* keyName)
+{
+	if (varName[0] && keyName[0])
+	{
+		AuxStringMapInfo varInfo(scriptObj, varName);
 #if DoLater
-			if (varInfo.isPerm)
-				s_dataChangedFlags |= kChangedFlag_RefMaps;
+		if (varInfo.isPerm)
+			s_dataChangedFlags |= kChangedFlag_RefMaps;
 #endif
-			return &varInfo.ModsMap()[varInfo.modIndex][varName][keyID];
-		}
+		return &varInfo.ModsMap()[varInfo.modIndex][varName][keyName];
 	}
 	return NULL;
 }
@@ -249,11 +277,11 @@ AuxVariableValue* __fastcall AuxStringMapAddValue(TESForm* form, TESObjectREFR* 
 bool Cmd_AuxStringMapArraySetFloat_Execute(COMMAND_ARGS)
 {
 	char varName[0x50];
-	TESForm* form = NULL;
+	char keyName[0x50];
 	double fltVal;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &fltVal, &form))
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &keyName, &fltVal))
 	{
-		AuxVariableValue* value = AuxStringMapAddValue(form, thisObj, scriptObj, varName);
+		AuxVariableValue* value = AuxStringMapAddValue(scriptObj, varName, keyName);
 		if (value)
 			value->SetFlt(fltVal);
 	}
@@ -263,10 +291,11 @@ bool Cmd_AuxStringMapArraySetFloat_Execute(COMMAND_ARGS)
 bool Cmd_AuxStringMapArraySetRef_Execute(COMMAND_ARGS)
 {
 	char varName[0x50];
-	TESForm* form = NULL, * refVal;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &refVal, &form))
+	char keyName[0x50];
+	TESForm* refVal;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &keyName, &refVal))
 	{
-		AuxVariableValue* value = AuxStringMapAddValue(form, thisObj, scriptObj, varName);
+		AuxVariableValue* value = AuxStringMapAddValue(scriptObj, varName, keyName);
 		if (value)
 			value->SetRef(refVal);
 	}
@@ -276,10 +305,10 @@ bool Cmd_AuxStringMapArraySetRef_Execute(COMMAND_ARGS)
 bool Cmd_AuxStringMapArraySetString_Execute(COMMAND_ARGS)
 {
 	char varName[0x50];
-	TESForm* form = NULL;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &s_strValBuffer, &form))
+	char keyName[0x50];
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &keyName, &s_strValBuffer))
 	{
-		AuxVariableValue* value = AuxStringMapAddValue(form, thisObj, scriptObj, varName);
+		AuxVariableValue* value = AuxStringMapAddValue(scriptObj, varName, keyName);
 		if (value)
 			value->SetStr(s_strValBuffer);
 	}
@@ -314,14 +343,14 @@ bool Cmd_AuxStringMapArrayErase_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	char varName[0x50];
-	TESForm* form = NULL;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &form) || !varName[0]) return true;
+	char keyName[0x50];
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &keyName) || !varName[0]) return true;
 	AuxStringMapInfo varInfo(scriptObj, varName);
 	auto findMod = varInfo.ModsMap().Find(varInfo.modIndex);
 	if (!findMod) return true;
 	auto findVar = findMod().Find(varName);
 	if (!findVar) return true;
-	auto findID = findVar().Find(GetSubjectID(form, thisObj));
+	auto findID = findVar().Find(keyName);
 	if (!findID) return true;
 	findID.Remove();
 	if (findVar().Empty())

@@ -390,7 +390,7 @@ public:
 };
 STATIC_ASSERT(sizeof(AuxVariableValue) == 0x10);
 
-typedef UnorderedMap<UInt32, AuxVariableValue> AuxStringMapIDsMap;
+typedef UnorderedMap<char*, AuxVariableValue> AuxStringMapIDsMap;
 typedef UnorderedMap<char*, AuxStringMapIDsMap> AuxStringMapVarsMap;
 typedef UnorderedMap<UInt32, AuxStringMapVarsMap> AuxStringMapModsMap;
 AuxStringMapModsMap s_auxStringMapArraysPerm, s_auxStringMapArraysTemp;
