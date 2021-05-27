@@ -126,13 +126,28 @@ bool Cmd_IsAnimPlayingExCond_Execute(COMMAND_ARGS)
 
 #ifdef _DEBUG
 
-DEFINE_COMMAND_PLUGIN(GetRadiationExtraData, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(GetRadiationExtraData, , 1, 0, NULL);
 bool Cmd_GetRadiationExtraData_Execute(COMMAND_ARGS)
 {
+	*result = 0;
 	if (thisObj)
 	{
 		ExtraRadiation* xRadius = GetExtraTypeJIP(&thisObj->extraDataList, Radiation);
 		if (xRadius) *result = xRadius->radiation;
+	}
+	return true;
+}
+
+DEFINE_COMMAND_PLUGIN(SetRadiationExtraData, , 1, 1, kParams_OneFloat);
+bool Cmd_SetRadiationExtraData_Execute(COMMAND_ARGS)
+{
+	float fNewVal = 0;
+	*result = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &fNewVal)) return true;
+	if (thisObj)
+	{
+		ThisStdCall(0x422350, &thisObj->extraDataList, fNewVal);
+		*result = 1;
 	}
 	return true;
 }

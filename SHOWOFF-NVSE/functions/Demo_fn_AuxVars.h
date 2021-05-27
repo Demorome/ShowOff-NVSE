@@ -2,7 +2,7 @@
 
 //For Auxiliary StringMap Arrays (AuxStringMap, ASM, not to confuse with ASM = assembly)
 
-#define DoLater 0
+#define DoLaterMaybe 0
 
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetSize, AuxStringMapSize, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetValueType, AuxStringMapGetValueType, , 0, 2, kParams_TwoStrings);
@@ -10,8 +10,8 @@ DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetFloat, AuxStringMapGetFlt, , 0, 2,
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetRef, AuxStringMapGetRef, , 0, 2, kParams_TwoStrings);
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetString, AuxStringMapGetStr, , 0, 2, kParams_TwoStrings);
 
-#if DoLater
-DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetValue, AuxStringMapGetVal, , 0, 2, kParams_JIP_OneString_OneOptionalForm);
+#if DoLaterMaybe
+DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetValue, AuxStringMapGetVal, , 0, 2, kParams_TwoStrings);
 #endif
 
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetFirst, AuxStringMapFirst, , 0, 1, kParams_OneString);
@@ -25,7 +25,7 @@ DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArraySetFloat, AuxStringMapSetFlt, , 0, 3,
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArraySetRef, AuxStringMapSetRef, , 0, 3, kParams_TwoStrings_OneForm);
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArraySetString, AuxStringMapSetStr, , 0, 3, kParams_ThreeStrings);
 
-#if DoLater
+#if DoLaterMaybe
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArraySetValue, AuxStringMapSetVal, , 0, 3, kParams_JIP_OneString_OneInt_OneOptionalForm);
 #endif
 
@@ -128,7 +128,7 @@ bool Cmd_AuxStringMapArrayGetString_Execute(COMMAND_ARGS)
 	return true;
 }
 
-#if DoLater
+#if DoLaterMaybe
 bool Cmd_AuxStringMapArrayGetValue_Execute(COMMAND_ARGS)
 {
 	*result = 0;
@@ -336,12 +336,14 @@ bool Cmd_AuxStringMapArraySetFromArray_Execute(COMMAND_ARGS)
 			value->SetElem(elements[i]);
 		}
 	}
+	if (varInfo.isPerm)
+		s_dataChangedFlags |= kChangedFlag_AuxStringMaps;
 	delete[] elements;
 	delete[] keys;
 	return true;
 }
 
-#if DoLater
+#if DoLaterMaybe
 bool Cmd_AuxStringMapArraySetValue_Execute(COMMAND_ARGS)  //a bit unwieldy having to use the array middleman
 {
 	char varName[0x50];
@@ -439,4 +441,4 @@ bool Cmd_AuxStringMapArrayDestroy_Execute(COMMAND_ARGS)
 	return true;
 }
 
-#undef DoLater
+#undef DoLaterMaybe

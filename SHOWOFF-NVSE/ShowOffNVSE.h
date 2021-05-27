@@ -5,6 +5,8 @@
 #include "GameProcess.h"
 #include "settings.h"
 
+//todo: Remove static buffers, move global declarations to main.cpp
+
 
 // Globals - for INI globals, see settings.h
 
