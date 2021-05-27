@@ -126,7 +126,16 @@ bool Cmd_IsAnimPlayingExCond_Execute(COMMAND_ARGS)
 
 #ifdef _DEBUG
 
-
+DEFINE_COMMAND_PLUGIN(GetRadiationExtraData, , 0, 0, NULL);
+bool Cmd_GetRadiationExtraData_Execute(COMMAND_ARGS)
+{
+	if (thisObj)
+	{
+		ExtraRadiation* xRadius = GetExtraTypeJIP(&thisObj->extraDataList, Radiation);
+		if (xRadius) *result = xRadius->radiation;
+	}
+	return true;
+}
 
 DEFINE_COMMAND_PLUGIN(SetCellFullNameAlt, "Like SetCellFullName but accepts a string.", 0, 2, kParams_JIP_OneCell_OneString);
 bool Cmd_SetCellFullNameAlt_Execute(COMMAND_ARGS)

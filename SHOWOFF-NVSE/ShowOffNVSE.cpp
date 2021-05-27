@@ -322,6 +322,8 @@ extern "C"
 		REG_CMD(AuxStringMapArrayEraseKey)
 		REG_CMD(AuxStringMapArrayValidateValues)
 		REG_CMD(AuxStringMapArrayDestroy)
+
+		REG_CMD(GetRadiationExtraData)
 #if 0
 		REG_CMD_ARR(Ar_Init);
 #endif
