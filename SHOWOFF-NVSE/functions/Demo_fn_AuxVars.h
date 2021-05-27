@@ -5,7 +5,7 @@
 #define DoLater 0
 
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetSize, AuxStringMapSize, , 0, 1, kParams_OneString);
-DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetType, AuxStringMapGetType, , 0, 2, kParams_TwoStrings);
+DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetValueType, AuxStringMapGetValueType, , 0, 2, kParams_TwoStrings);
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetFloat, AuxStringMapGetFlt, , 0, 2, kParams_TwoStrings);
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetRef, AuxStringMapGetRef, , 0, 2, kParams_TwoStrings);
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetString, AuxStringMapGetStr, , 0, 2, kParams_TwoStrings);
@@ -18,26 +18,21 @@ DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetFirst, AuxStringMapFirst, , 0, 1, 
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetNext, AuxStringMapNext, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetKeys, AuxStringMapKeys, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetAll, AuxStringMapGetAll, , 0, 1, kParams_OneInt);
-
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetAsArray, AuxStringMapGetAsArr, , 0, 1, kParams_OneString);
-DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArraySetFromArray, AuxStringMapSetFromArr, , 0, 2, kParams_OneString_OneArray);
-//add append array option
+DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArraySetFromArray, AuxStringMapSetFromArr, , 0, 3, kParams_OneString_OneArray_OneOptionalInt);
 
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArraySetFloat, AuxStringMapSetFlt, , 0, 3, kParams_TwoStrings_OneDouble);
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArraySetRef, AuxStringMapSetRef, , 0, 3, kParams_TwoStrings_OneForm);
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArraySetString, AuxStringMapSetStr, , 0, 3, kParams_ThreeStrings);
 
-
 #if DoLater
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArraySetValue, AuxStringMapSetVal, , 0, 3, kParams_JIP_OneString_OneInt_OneOptionalForm);
 #endif
 
-DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayErase, AuxStringMapErase, , 0, 2, kParams_TwoStrings);
-
-#if DoLater
-DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayValidate, AuxStringMapValidate, , 0, 1, kParams_OneString);
+DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayEraseKey, AuxStringMapEraseKey, , 0, 2, kParams_TwoStrings);
+DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayValidateValues, AuxStringMapValidateVals, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayDestroy, AuxStringMapDestroy, , 0, 1, kParams_OneString);
-#endif
+
 
 AuxStringMapIDsMap* ASMFind(Script* scriptObj, char* varName)
 {
@@ -60,7 +55,7 @@ bool Cmd_AuxStringMapArrayGetSize_Execute(COMMAND_ARGS)
 	return true;
 }
 
-bool Cmd_AuxStringMapArrayGetType_Execute(COMMAND_ARGS)
+bool Cmd_AuxStringMapArrayGetValueType_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	char varName[0x50];
@@ -227,7 +222,7 @@ bool Cmd_AuxStringMapArrayGetAll_Execute(COMMAND_ARGS)
 	{
 		s_tempElements.Clear();
 		for (auto idIter = varIter().Begin(); idIter; ++idIter)
-			s_tempElements.Append(idIter.Key());  //check how JIP appends string elements
+			s_tempElements.Append(idIter.Key());
 		SetElement(varsMap, ArrayElementL(varIter.Key()), ArrayElementL(CreateArray(s_tempElements.Data(), s_tempElements.Size(), scriptObj)));
 	}
 	AssignArrayResult(varsMap, result);
@@ -250,15 +245,6 @@ bool Cmd_AuxStringMapArrayGetAsArray_Execute(COMMAND_ARGS)
 	return true;
 }
 
-bool Cmd_AuxStringMapArraySetFromArray_Execute(COMMAND_ARGS)
-{
-	*result = 0;
-	char varName[0x50];
-	UInt32 arrayID = NULL;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &arrayID)) return true;
-	//lookup array elements, loop, hmm
-	return true;
-}
 
 AuxVariableValue* __fastcall AuxStringMapAddValue(Script* scriptObj, char* varName, char* keyName)
 {
@@ -315,6 +301,48 @@ bool Cmd_AuxStringMapArraySetString_Execute(COMMAND_ARGS)
 	return true;
 }
 
+bool Cmd_AuxStringMapArraySetFromArray_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	char varName[0x50];
+	UInt32 arrID = NULL;
+	UINT32 bAppend = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &arrID, &bAppend)) return true;
+	AuxStringMapInfo varInfo(scriptObj, varName);
+	auto findMod = varInfo.ModsMap().Find(varInfo.modIndex);
+	if (findMod)
+	{
+		auto findVar = findMod().Find(varName);
+		if (findVar)
+		{
+			if (findVar().Empty() || !bAppend)
+			{
+				findVar.Remove();
+				if (findMod().Empty()) findMod.Remove();
+			}
+		}
+	}
+	NVSEArrayVar* inArr = LookupArrayByID(arrID);
+	if (!inArr) return true;
+	UInt32 size = GetArraySize(inArr);
+	NVSEArrayElement* elements = new NVSEArrayElement[size];
+	NVSEArrayElement* keys = new NVSEArrayElement[size];
+	g_arrInterface->GetElements(inArr, elements, keys);
+	if (keys[0].GetType() == NVSEArrayVarInterface::kType_String)  //only works by passing StringMap arrays
+	{
+		for (int i = 0; i < size; i++)
+		{
+			char* keyName = CopyCString(keys[i].String());
+			AuxVariableValue* value = AuxStringMapAddValue(scriptObj, varName, keyName);
+			if (!value) continue;
+			value->SetElem(elements[i]);
+		}
+	}
+	delete[] elements;
+	delete[] keys;
+	return true;
+}
+
 #if DoLater
 bool Cmd_AuxStringMapArraySetValue_Execute(COMMAND_ARGS)  //undocumented, prolly since it's a bit unwieldy having to use the array middleman
 {
@@ -339,7 +367,7 @@ bool Cmd_AuxStringMapArraySetValue_Execute(COMMAND_ARGS)  //undocumented, prolly
 }
 #endif
 
-bool Cmd_AuxStringMapArrayErase_Execute(COMMAND_ARGS)
+bool Cmd_AuxStringMapArrayEraseKey_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	char varName[0x50];
@@ -366,9 +394,9 @@ bool Cmd_AuxStringMapArrayErase_Execute(COMMAND_ARGS)
 	return true;
 }
 
-#if DoLater
-//  Make this clear out entries with VALUES that are invalid, instead of checking the keys.
-bool Cmd_AuxStringMapArrayValidate_Execute(COMMAND_ARGS)
+
+//  Clears out entries with VALUES that are invalid, instead of checking the keys (which is what RefMapValidate does).
+bool Cmd_AuxStringMapArrayValidateValues_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	char varName[0x50];
@@ -381,7 +409,9 @@ bool Cmd_AuxStringMapArrayValidate_Execute(COMMAND_ARGS)
 	bool cleaned = false;
 	for (auto idIter = findVar().Begin(); idIter; ++idIter)
 	{
-		if (LookupFormByRefID(idIter.Key())) continue;
+		auto refVal = idIter().GetRef();
+		if (!refVal) continue;
+		if (LookupFormByID(refVal)) continue;
 		idIter.Remove();
 		cleaned = true;
 	}
@@ -391,8 +421,10 @@ bool Cmd_AuxStringMapArrayValidate_Execute(COMMAND_ARGS)
 		if (findMod().Empty()) findMod.Remove();
 	}
 	else *result = (int)findVar().Size();
+#if DoLater
 	if (cleaned && varInfo.isPerm)
 		s_dataChangedFlags |= kChangedFlag_RefMaps;
+#endif
 	return true;
 }
 
@@ -408,9 +440,9 @@ bool Cmd_AuxStringMapArrayDestroy_Execute(COMMAND_ARGS)
 	if (!findVar) return true;
 	findVar.Remove();
 	if (findMod().Empty()) findMod.Remove();
+#if DoLater
 	if (varInfo.isPerm)
 		s_dataChangedFlags |= kChangedFlag_RefMaps;
+#endif
 	return true;
 }
-
-#endif

@@ -301,7 +301,7 @@ extern "C"
 #if _DEBUG  //for functions being tested (or just abandoned).
 
 		REG_CMD(AuxStringMapArrayGetSize)
-		REG_CMD(AuxStringMapArrayGetType)
+		REG_CMD(AuxStringMapArrayGetValueType)
 		REG_CMD(AuxStringMapArrayGetFloat)
 		REG_CMD_FORM(AuxStringMapArrayGetRef)
 		REG_CMD_STR(AuxStringMapArrayGetString)
@@ -314,8 +314,9 @@ extern "C"
 		REG_CMD(AuxStringMapArraySetFloat)
 		REG_CMD(AuxStringMapArraySetRef)
 		REG_CMD(AuxStringMapArraySetString)
-		REG_CMD(AuxStringMapArrayErase)
-		
+		REG_CMD(AuxStringMapArrayEraseKey)
+		REG_CMD(AuxStringMapArrayValidateValues)
+		REG_CMD(AuxStringMapArrayDestroy)
 #if 0
 		REG_CMD_ARR(Ar_Init);
 #endif

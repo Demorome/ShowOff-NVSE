@@ -64,6 +64,13 @@ static ParamInfo kParams_OneString_OneArray[2] =
 	{	"array",	kParamType_Integer,	0 },
 };
 
+static ParamInfo kParams_OneString_OneArray_OneOptionalInt[3] =
+{
+	{	"string",	kParamType_String,	0 },
+	{	"array",	kParamType_Integer,	0 },
+	{	"int",		kParamType_Integer,	1 },
+};
+
 static ParamInfo kParams_TwoFloats[2] =
 {
 	{	"float",	kParamType_Float,	0 },
@@ -217,14 +224,14 @@ static ParamInfo kParams_TwoStrings_OneForm[3] =
 {
 	{	"string",	kParamType_String,	0	},
 	{	"string",	kParamType_String,	0	},
-	{	"double",	kParamType_AnyForm,	0	},
+	{	"form",		kParamType_AnyForm,	0	},
 };
 
 static ParamInfo kParams_ThreeStrings[3] =
 {
 	{	"string",	kParamType_String,	0	},
 	{	"string",	kParamType_String,	0	},
-	{	"double",	kParamType_String,	0	},
+	{	"string",	kParamType_String,	0	},
 };
 
 static ParamInfo kParams_OneObject[1] =
