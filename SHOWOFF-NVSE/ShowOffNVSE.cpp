@@ -16,6 +16,7 @@
 #include "internal/containers.h"
 #include "internal/StewieMagic.h" 
 #include "internal/jip_nvse.h"
+#include "internal/serialization.h"
 #include "internal/Johnnnny Guitarrrrr.h"
 
 #include "params.h"
@@ -197,6 +198,8 @@ extern "C"
 
 		if (!nvse->isEditor) 
 		{
+			PluginHandle nvsePluginHandle = nvse->GetPluginHandle();
+			
 			NVSEDataInterface* nvseData = (NVSEDataInterface*)nvse->QueryInterface(kInterface_Data);
 			InventoryRefGetForID = (InventoryRef * (*)(UInt32))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID);
 
@@ -216,6 +219,9 @@ extern "C"
 			ReadRecord32 = serialization->ReadRecord32;
 			ReadRecord64 = serialization->ReadRecord64;
 			SkipNBytes = serialization->SkipNBytes;
+			serialization->SetLoadCallback(nvsePluginHandle, LoadGameCallback);
+			serialization->SetSaveCallback(nvsePluginHandle, SaveGameCallback);
+			serialization->SetNewGameCallback(nvsePluginHandle, NewGameCallback);
 			
 			g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 			ExtractArgsEx = g_script->ExtractArgsEx;
@@ -237,7 +243,6 @@ extern "C"
 			LookupArrayByID = g_arrInterface->LookupArrayByID;
 			GetElement = g_arrInterface->GetElement;
 			GetElements = g_arrInterface->GetElements;
-
 			
 			auto johnnyGuitar = GetModuleHandle("johnnyguitar.dll");
 			//do stuff with johnny handle?

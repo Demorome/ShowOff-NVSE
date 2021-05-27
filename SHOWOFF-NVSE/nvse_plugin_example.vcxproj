@@ -341,6 +341,7 @@
     <ClInclude Include="internal\memory_pool.h" />
     <ClInclude Include="internal\netimmerse.h" />
     <ClInclude Include="internal\NiPoint.h" />
+    <ClInclude Include="internal\serialization.h" />
     <ClInclude Include="internal\StewieMagic.h" />
     <ClInclude Include="internal\utility.h" />
     <ClInclude Include="settings.h" />

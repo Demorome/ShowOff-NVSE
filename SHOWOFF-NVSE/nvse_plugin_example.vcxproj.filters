@@ -180,6 +180,9 @@
     <ClInclude Include="functions\Demo_fn_AuxVars.h">
       <Filter>functions</Filter>
     </ClInclude>
+    <ClInclude Include="internal\serialization.h">
+      <Filter>internal</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
