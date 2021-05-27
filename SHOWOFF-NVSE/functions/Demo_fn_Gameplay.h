@@ -395,39 +395,6 @@ bool Cmd_GetEquippedWeaponType_Execute(COMMAND_ARGS)
 }
 
 
-DEFINE_COMMAND_PLUGIN(ApplyPoison, , 0, 1, kParams_OneForm);  //apply on player's equipped weapon. All credit goes to c6
-bool Cmd_ApplyPoison_Execute(COMMAND_ARGS)
-{
-	*result = 0;
-	AlchemyItem* poison;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &poison) || !IS_TYPE(poison, AlchemyItem) || !poison->IsPoison()) return true; 
-
-	ContChangesEntry* wpnInfo = g_thePlayer->baseProcess->GetWeaponInfo();
-	if (wpnInfo && wpnInfo->extendData)
-	{
-		UInt32 weaponSkill = ((TESObjectWEAP*)wpnInfo->type)->weaponSkill;
-		if (weaponSkill != kAVCode_Unarmed && weaponSkill != kAVCode_MeleeWeapons) return true;
-		
-		ExtraDataList* xDataList = wpnInfo->extendData->GetFirstItem();
-		if (xDataList)
-		{
-			ExtraPoison* xPoison = GetExtraTypeJIP(xDataList, Poison);
-			if (!xPoison)
-			{
-				*result = -1; //poison already applied
-			}
-			else
-			{
-				if (!xPoison)
-					ThisStdCall(0x4BDD20, wpnInfo, poison); 
-				*result = 1;
-			}
-		}
-	}
-
-	return true;
-}
-
 
 
 #endif

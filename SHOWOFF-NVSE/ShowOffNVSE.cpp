@@ -38,11 +38,12 @@
 
 
 // Plugin Stuff
-IDebugLog	gLog("ShowOffNVSE.log");
+IDebugLog gLog("ShowOffNVSE.log");
 HMODULE	ShowOffHandle;
 
 
-//Globals. It's better to include them here instead of a header file.
+//--Globals.
+//It's better to include them here instead of a header file.
 //Otherwise, compilation will fail if another .cpp file tries to include the global.
 //Use for example "extern NVSEMessagingInterface* g_messagingInterface;" in ShowOffNVSE.h if you want to use the global elsewhere.
 UnorderedSet<TESForm*> s_tempFormList(0x40);
@@ -286,7 +287,7 @@ extern "C"
 		REG_CMD(SetCreatureTurningSpeed)
 		REG_CMD(GetCreatureFootWeight)
 		REG_CMD(SetCreatureFootWeight)
-		REG_CMD(GetCreatureAttackReach)
+		//REG_CMD(GetCreatureAttackReach)  //Already in JIP!
 		REG_CMD(SetCreatureAttackReach)
 		REG_CMD(SetCreatureBaseScale) //JG's GetBaseScale should return the creature's base scale, so no need for a GetCreatureBaseScale.
 
@@ -302,12 +303,12 @@ extern "C"
 		REG_CMD(AuxStringMapArrayGetSize)
 		REG_CMD(AuxStringMapArrayGetType)
 		REG_CMD(AuxStringMapArrayGetFloat)
-		REG_CMD(AuxStringMapArrayGetRef)
-		REG_CMD_STR(AuxStringMapArrayGetString);
-		REG_CMD_ARR(AuxStringMapArrayGetFirst);
-		REG_CMD_ARR(AuxStringMapArrayGetNext);
-		REG_CMD_ARR(AuxStringMapArrayGetKeys);
-		REG_CMD_ARR(AuxStringMapArrayGetAll);
+		REG_CMD_FORM(AuxStringMapArrayGetRef)
+		REG_CMD_STR(AuxStringMapArrayGetString)
+		REG_CMD_ARR(AuxStringMapArrayGetFirst)
+		REG_CMD_ARR(AuxStringMapArrayGetNext)
+		REG_CMD_ARR(AuxStringMapArrayGetKeys)
+		REG_CMD_ARR(AuxStringMapArrayGetAll)
 		REG_CMD(AuxStringMapArraySetFloat)
 		REG_CMD(AuxStringMapArraySetRef)
 		REG_CMD(AuxStringMapArraySetString)
@@ -318,24 +319,24 @@ extern "C"
 #endif
 
 		REG_CMD(SetCellFullNameAlt)
-		REG_CMD_STR(GetCellFullName);
+		REG_CMD_STR(GetCellFullName)
 
-		REG_CMD(HasAnyScriptPackage);
+		REG_CMD(HasAnyScriptPackage)
 
 		//These two functions are useless, the setting functions already safety check and even report if the setting could not be found via func result.
-		REG_CMD(IsGameSetting); //For use in scripts to safety check; any other gamesetting function can already be used in console to check if a gamesetting exists.
-		REG_CMD(IsINISetting); //Uses the GetNumericINISetting "SettingName:CategoryName" format
+		REG_CMD(IsGameSetting) //For use in scripts to safety check; any other gamesetting function can already be used in console to check if a gamesetting exists.
+		REG_CMD(IsINISetting) //Uses the GetNumericINISetting "SettingName:CategoryName" format
 		
-		REG_CMD(SetProjectileRefFlag);
-		REG_CMD(GetProjectileRefFlag);
+		REG_CMD(SetProjectileRefFlag)
+		REG_CMD(GetProjectileRefFlag)
 
-		REG_CMD(SetChallengeProgress);
-		REG_CMD(ModChallengeProgress);
-		REG_CMD(CompleteChallenge);
-		
-		REG_CMD(SetBaseActorValue);
+		REG_CMD(SetChallengeProgress)
+		REG_CMD(ModChallengeProgress)
+		REG_CMD(CompleteChallenge)
+	
+		REG_CMD(SetBaseActorValue)
 
-		REG_CMD(DumpGameSettings); //no idea how to do this...
+		REG_CMD(DumpGameSettings) //no idea how to do this...
 
 		//REG_CMD(SetOnHitAltEventHandler);
 
@@ -355,8 +356,6 @@ extern "C"
 		//REG_CMD(GetEquippedWeaponType);  //JIP already made it for TTW.
 
 		REG_CMD(SetEnableParent);
-
-		REG_CMD(ApplyPoison);
 
 		REG_CMD_ARR(GetQueuedCornerMessages);
 

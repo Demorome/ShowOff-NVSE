@@ -390,17 +390,6 @@ public:
 };
 STATIC_ASSERT(sizeof(AuxVariableValue) == 0x10);
 
-#if 0
-struct AuxVarValsArr : Vector<AuxVariableValue>
-{
-	AuxVarValsArr(UInt32 _alloc = 2) : Vector<AuxVariableValue>(_alloc) {}
-};
-typedef UnorderedMap<char*, AuxVarValsArr> AuxVarVarsMap;
-typedef UnorderedMap<UInt32, AuxVarVarsMap> AuxVarOwnersMap;
-typedef UnorderedMap<UInt32, AuxVarOwnersMap> AuxVarModsMap;
-AuxVarModsMap s_auxVariablesPerm, s_auxVariablesTemp;
-#endif
-
 typedef UnorderedMap<UInt32, AuxVariableValue> AuxStringMapIDsMap;
 typedef UnorderedMap<char*, AuxStringMapIDsMap> AuxStringMapVarsMap;
 typedef UnorderedMap<UInt32, AuxStringMapVarsMap> AuxStringMapModsMap;
@@ -412,44 +401,6 @@ UInt32 __fastcall GetSubjectID(TESForm* form, TESObjectREFR* thisObj)
 	if (thisObj) return thisObj->refID;
 	return 0;
 }
-
-#if 0
-struct AuxVarInfo
-{
-	UInt32		ownerID;
-	UInt32		modIndex;
-	char*		varName;
-	bool		isPerm;
-
-	AuxVarInfo(TESForm* form, TESObjectREFR* thisObj, Script* scriptObj, char* pVarName)
-	{
-		if (!pVarName[0])
-		{
-			ownerID = 0;
-			return;
-		}
-		ownerID = GetSubjectID(form, thisObj);
-		if (ownerID)
-		{
-			varName = pVarName;
-			isPerm = (varName[0] != '*');
-			modIndex = (varName[!isPerm] == '_') ? 0xFF : scriptObj->GetOverridingModIdx();
-		}
-	}
-
-	AuxVarInfo(TESForm* form, TESObjectREFR* thisObj, Script* scriptObj, UInt8 type)
-	{
-		ownerID = GetSubjectID(form, thisObj);
-		if (ownerID)
-		{
-			isPerm = !(type & 1);
-			modIndex = (type > 1) ? 0xFF : scriptObj->GetOverridingModIdx();
-		}
-	}
-
-	AuxVarModsMap& ModsMap() { return isPerm ? s_auxVariablesPerm : s_auxVariablesTemp; }
-};
-#endif
 
 struct AuxStringMapInfo
 {

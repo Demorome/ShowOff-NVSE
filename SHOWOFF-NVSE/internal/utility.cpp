@@ -1,6 +1,6 @@
 #include "internal/utility.h"
-#include <ctime>
 #include "nvse/GameAPI.h"
+#include <ctime>
 
 memcpy_t MemCopy = memcpy, MemMove = memmove;
 

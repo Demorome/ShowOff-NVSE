@@ -10,7 +10,7 @@ DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetFloat, AuxStringMapGetFlt, , 0, 2,
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetRef, AuxStringMapGetRef, , 0, 2, kParams_JIP_OneString_OneOptionalForm);
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetString, AuxStringMapGetStr, , 0, 2, kParams_JIP_OneString_OneOptionalForm);
 
-#if DoLat
+#if DoLater
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetValue, AuxStringMapGetVal, , 0, 2, kParams_JIP_OneString_OneOptionalForm);
 #endif
 

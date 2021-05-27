@@ -1,6 +1,7 @@
 #pragma once
 
 #include "internal/utility.h"
+#include "internal/memory_pool.h"
 
 //Below definitions are used by JIP
 #define MAP_DEFAULT_ALLOC			8
