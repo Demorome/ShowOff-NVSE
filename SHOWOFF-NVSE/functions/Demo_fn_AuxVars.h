@@ -251,10 +251,8 @@ AuxVariableValue* __fastcall AuxStringMapAddValue(Script* scriptObj, char* varNa
 	if (varName[0] && keyName[0])
 	{
 		AuxStringMapInfo varInfo(scriptObj, varName);
-#if DoLater
 		if (varInfo.isPerm)
-			s_dataChangedFlags |= kChangedFlag_RefMaps;
-#endif
+			s_dataChangedFlags |= kChangedFlag_AuxStringMaps;
 		return &varInfo.ModsMap()[varInfo.modIndex][varName][keyName];
 	}
 	return NULL;
@@ -344,7 +342,7 @@ bool Cmd_AuxStringMapArraySetFromArray_Execute(COMMAND_ARGS)
 }
 
 #if DoLater
-bool Cmd_AuxStringMapArraySetValue_Execute(COMMAND_ARGS)  //undocumented, prolly since it's a bit unwieldy having to use the array middleman
+bool Cmd_AuxStringMapArraySetValue_Execute(COMMAND_ARGS)  //a bit unwieldy having to use the array middleman
 {
 	char varName[0x50];
 	UInt32 arrID;
@@ -387,10 +385,8 @@ bool Cmd_AuxStringMapArrayEraseKey_Execute(COMMAND_ARGS)
 		if (findMod().Empty()) findMod.Remove();
 	}
 	else *result = (int)findVar().Size();
-#if DoLater
 	if (varInfo.isPerm)
-		s_dataChangedFlags |= kChangedFlag_RefMaps;
-#endif
+		s_dataChangedFlags |= kChangedFlag_AuxStringMaps;
 	return true;
 }
 
@@ -421,10 +417,8 @@ bool Cmd_AuxStringMapArrayValidateValues_Execute(COMMAND_ARGS)
 		if (findMod().Empty()) findMod.Remove();
 	}
 	else *result = (int)findVar().Size();
-#if DoLater
 	if (cleaned && varInfo.isPerm)
-		s_dataChangedFlags |= kChangedFlag_RefMaps;
-#endif
+		s_dataChangedFlags |= kChangedFlag_AuxStringMaps;
 	return true;
 }
 
@@ -440,9 +434,9 @@ bool Cmd_AuxStringMapArrayDestroy_Execute(COMMAND_ARGS)
 	if (!findVar) return true;
 	findVar.Remove();
 	if (findMod().Empty()) findMod.Remove();
-#if DoLater
 	if (varInfo.isPerm)
-		s_dataChangedFlags |= kChangedFlag_RefMaps;
-#endif
+		s_dataChangedFlags |= kChangedFlag_AuxStringMaps;
 	return true;
 }
+
+#undef DoLater
