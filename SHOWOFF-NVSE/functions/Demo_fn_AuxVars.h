@@ -151,10 +151,11 @@ bool Cmd_AuxStringMapArrayGetValue_Execute(COMMAND_ARGS)
 }
 #endif
 
-AuxStringMapIDsMap::Iterator s_auxStringMapIterator;
+AuxStringMapIDsMap::Iterator s_auxStringMapIterator; //need to ensure thread safety!
 
 NVSEArrayVar* __fastcall AuxStringMapArrayIterator(Script* scriptObj, char* varName, bool getFirst)
 {
+	ScopedLock lock(&g_Lock);
 	AuxStringMapIDsMap* idsMap = ASMFind(scriptObj, varName);
 	if (!idsMap) return NULL;
 	if (getFirst || (s_auxStringMapIterator.Table() != idsMap))
@@ -253,6 +254,7 @@ AuxVariableValue* __fastcall AuxStringMapAddValue(Script* scriptObj, char* varNa
 		AuxStringMapInfo varInfo(scriptObj, varName);
 		if (varInfo.isPerm)
 			s_dataChangedFlags |= kChangedFlag_AuxStringMaps;
+		ScopedLock lock(&g_Lock);  //since ModsMap() returns the global.
 		return &varInfo.ModsMap()[varInfo.modIndex][varName][keyName];
 	}
 	return NULL;
@@ -307,6 +309,7 @@ bool Cmd_AuxStringMapArraySetFromArray_Execute(COMMAND_ARGS)
 	UInt32 arrID = NULL;
 	UINT32 bAppend = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &arrID, &bAppend)) return true;
+	g_Lock.Enter();  //since ModsMap() returns a global.
 	AuxStringMapInfo varInfo(scriptObj, varName);
 	auto findMod = varInfo.ModsMap().Find(varInfo.modIndex);
 	if (findMod)
@@ -321,12 +324,13 @@ bool Cmd_AuxStringMapArraySetFromArray_Execute(COMMAND_ARGS)
 			}
 		}
 	}
+	g_Lock.Leave();
 	NVSEArrayVar* inArr = LookupArrayByID(arrID);
 	if (!inArr) return true;
 	UInt32 size = GetArraySize(inArr);
 	NVSEArrayElement* elements = new NVSEArrayElement[size];
 	NVSEArrayElement* keys = new NVSEArrayElement[size];
-	g_arrInterface->GetElements(inArr, elements, keys);
+	GetArrayElements(inArr, elements, keys);
 	if (keys[0].GetType() == NVSEArrayVarInterface::kType_String)  //only works by passing StringMap arrays
 	{
 		for (int i = 0; i < size; i++)
@@ -359,7 +363,7 @@ bool Cmd_AuxStringMapArraySetValue_Execute(COMMAND_ARGS)  //a bit unwieldy havin
 			if (value)
 			{
 				ArrayElementR element;
-				GetElements(srcArr, &element, NULL);
+				GetArrayElements(srcArr, &element, NULL);
 				value->SetElem(element);
 			}
 		}
@@ -381,6 +385,7 @@ bool Cmd_AuxStringMapArrayEraseKey_Execute(COMMAND_ARGS)
 	if (!findVar) return true;
 	auto findID = findVar().Find(keyName);
 	if (!findID) return true;
+	ScopedLock lock(&g_Lock);
 	findID.Remove();
 	if (findVar().Empty())
 	{
@@ -405,6 +410,7 @@ bool Cmd_AuxStringMapArrayValidateValues_Execute(COMMAND_ARGS)
 	if (!findMod) return true;
 	auto findVar = findMod().Find(varName);
 	if (!findVar) return true;
+	ScopedLock lock(&g_Lock);
 	bool cleaned = false;
 	for (auto idIter = findVar().Begin(); idIter; ++idIter)
 	{
@@ -435,6 +441,7 @@ bool Cmd_AuxStringMapArrayDestroy_Execute(COMMAND_ARGS)
 	if (!findMod) return true;
 	auto findVar = findMod().Find(varName);
 	if (!findVar) return true;
+	ScopedLock lock(&g_Lock);
 	findVar.Remove();
 	if (findMod().Empty()) findMod.Remove();
 	if (varInfo.isPerm)

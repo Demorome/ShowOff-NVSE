@@ -9,20 +9,23 @@
 #include "nvse/SafeWrite.h"
 
 #include "common/ICriticalSection.h"
+#include <atomic>
+#include "ShowOffNVSE.h"
+#include "settings.h"
+
+
 #include "GameData.h"
 #include "GameScript.h"
 #include "internal/decoding.h"
 #include "internal/utility.h"
 #include "internal/memory_pool.h"
 #include "internal/containers.h"
-#include "internal/StewieMagic.h" 
 #include "internal/jip_nvse.h"
-#include "internal/serialization.h"
+#include "internal/StewieMagic.h"
 #include "internal/Johnnnny Guitarrrrr.h"
 
 #include "params.h"
-#include "ShowOffNVSE.h"
-#include "settings.h"
+#include "internal/serialization.h"
 
 // Functions
 #include "functions/Trooper_fn_misc.h"
@@ -51,7 +54,9 @@ UInt32 g_ShowOffVersion = 100;
 *
 *===Danger of using Globals===
 * Modifying globals is not thread-safe, which is unfortunate since scripts are multithreaded.
-* Therefore, to modify globals after game first opns, one MUST lock threads to ensure thread safety.
+* Therefore, to modify globals after game first opens, one MUST either:
+* a) lock threads to ensure thread safety,
+* b) first declare the global as std::atomic<type>
 * It will make the other threads sleep, so globals can be safely modified.
 * Other than that, it's completely safe to check the value at any point.
 *
@@ -59,34 +64,35 @@ UInt32 g_ShowOffVersion = 100;
 ICriticalSection g_someLock;
 void Func()
 {
-	g_someLock.Enter();
+	ScopedLock lock(&g_Lock);
 	// do un-thread safe stuff like modify globals, only a single thread can be here at a time
-	g_someLock.Leave();
+
+	//will automatically leave critical section when leaving scope.
 }
+
+std::atomic<char*> doesn't really work.
 */
 ICriticalSection g_Lock;
 
 //-Hook Globals
-bool g_canPlayerPickpocketInCombat = false;
+std::atomic<bool> g_canPlayerPickpocketInCombat = false;
 
 //-Force Pickpocketting INI globals (enabled via function)
-float g_fForcePickpocketBaseAPCost;
-float g_fForcePickpocketMinAPCost;
-float g_fForcePickpocketMaxAPCost;
-float g_fForcePickpocketPlayerAgilityMult;
-float g_fForcePickpocketPlayerSneakMult;
-float g_fForcePickpocketTargetPerceptionMult;
-float g_fForcePickpocketItemWeightMult;
-float g_fForcePickpocketItemValueMult;
-float g_fForcePickpocketPlayerStrengthMult;
-float g_fForcePickpocketTargetStrengthMult;
+std::atomic<float> g_fForcePickpocketBaseAPCost;
+std::atomic<float> g_fForcePickpocketMinAPCost;
+std::atomic<float> g_fForcePickpocketMaxAPCost;
+std::atomic<float> g_fForcePickpocketPlayerAgilityMult;
+std::atomic<float> g_fForcePickpocketPlayerSneakMult;
+std::atomic<float> g_fForcePickpocketTargetPerceptionMult;
+std::atomic<float> g_fForcePickpocketItemWeightMult;
+std::atomic<float> g_fForcePickpocketItemValueMult;
+std::atomic<float> g_fForcePickpocketPlayerStrengthMult;
+std::atomic<float> g_fForcePickpocketTargetStrengthMult;
 char* g_fForcePickpocketFailureMessage = nullptr;
 
 //-PreventBrokenItemRepairing (PBIR) INI globals 
-bool g_PBIR_On;
-#if 0
+std::atomic<bool> g_PBIR_On;
 char* g_PBIR_FailMessage = nullptr;
-#endif
 
 
 // This is a message handler for nvse events
@@ -278,7 +284,7 @@ extern "C"
 			GetArraySize = g_arrInterface->GetArraySize;
 			LookupArrayByID = g_arrInterface->LookupArrayByID;
 			GetElement = g_arrInterface->GetElement;
-			GetElements = g_arrInterface->GetElements;
+			GetArrayElements = g_arrInterface->GetElements;
 			
 			auto johnnyGuitar = GetModuleHandle("johnnyguitar.dll");
 			//do stuff with johnny handle?

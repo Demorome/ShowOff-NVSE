@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+extern ICriticalSection g_Lock;
+
 enum
 {
 	kAddr_AddExtraData = 0x40FF60,
@@ -242,7 +244,7 @@ TESObjectWEAP* Actor::GetEquippedWeapon()
 
 
 
-UInt32 s_serializedVersion = 9;
+std::atomic<UInt32> s_serializedVersion = 9;
 
 class AuxVariableValue
 {
@@ -309,6 +311,7 @@ public:
 
 	void SetFlt(double value)
 	{
+		ScopedLock lock(&g_Lock);   
 		Clear();
 		type = 1;
 		num = value;
@@ -316,6 +319,7 @@ public:
 
 	void SetRef(TESForm* value)
 	{
+		ScopedLock lock(&g_Lock);
 		Clear();
 		type = 2;
 		refID = value ? value->refID : 0;
@@ -323,6 +327,7 @@ public:
 
 	void SetStr(const char* value)
 	{
+		ScopedLock lock(&g_Lock);
 		type = 4;
 		length = StrLen(value);
 		if (length)
@@ -342,6 +347,7 @@ public:
 
 	void SetElem(NVSEArrayElement& elem)
 	{
+		ScopedLock lock(&g_Lock);
 		if (elem.GetType() == 2) SetRef(elem.form);
 		else if (elem.GetType() == 3) SetStr(elem.str);
 		else SetFlt(elem.num);
@@ -373,7 +379,7 @@ STATIC_ASSERT(sizeof(AuxVariableValue) == 0x10);
 typedef UnorderedMap<char*, AuxVariableValue> AuxStringMapIDsMap;
 typedef UnorderedMap<char*, AuxStringMapIDsMap> AuxStringMapVarsMap;
 typedef UnorderedMap<UInt32, AuxStringMapVarsMap> AuxStringMapModsMap;
-AuxStringMapModsMap s_auxStringMapArraysPerm, s_auxStringMapArraysTemp;
+AuxStringMapModsMap s_auxStringMapArraysPerm, s_auxStringMapArraysTemp;  //Ensure thread safety when modifying these globals!!
 
 UInt32 __fastcall GetSubjectID(TESForm* form, TESObjectREFR* thisObj)
 {
@@ -402,7 +408,7 @@ struct AuxStringMapInfo
 	AuxStringMapModsMap& ModsMap() { return isPerm ? s_auxStringMapArraysPerm : s_auxStringMapArraysTemp; }
 };
 
-UInt8 s_dataChangedFlags = 0; //For AuxVar serialization.
+std::atomic<UInt8> s_dataChangedFlags = 0; //For AuxVar serialization.
 
 
 #if 0 //not gonna bother with this for now
@@ -427,7 +433,7 @@ struct TempArrayElements
 		if (size)
 		{
 			elements = (ArrayElementR*)calloc(size, sizeof(ArrayElementR));
-			GetElements(srcArr, elements, NULL);
+			GetArrayElements(srcArr, elements, NULL);
 		}
 		else elements = NULL;
 	}
@@ -451,107 +457,10 @@ ArrayElementR* __fastcall GetArrayData(NVSEArrayVar* srcArr, UInt32* size)
 	if (!*size) return NULL;
 	ArrayElementR* data = (ArrayElementR*)GetAuxBuffer(s_auxBuffers[2], *size * sizeof(ArrayElementR));
 	MemZero(data, *size * sizeof(ArrayElementR));
-	GetElements(srcArr, data, NULL);
+	GetArrayElements(srcArr, data, NULL);
 	return data;
 }
 
-/*
-__declspec(naked) void __fastcall DoConsolePrint(double* result)
-{
-	__asm
-	{
-		call	IsConsoleOpen
-		test	al, al
-		jnz		proceed
-		retn
-		proceed :
-		mov		edx, [ebp]
-			mov		edx, [edx - 0x30]
-			mov		edx, [edx]
-			movsd	xmm0, qword ptr[ecx]
-			push	ebp
-			mov		ebp, esp
-			sub		esp, 0x50
-			lea		ecx, [ebp - 0x50]
-			call	StrCopy
-			mov		ecx, eax
-			mov		dword ptr[ecx], ' >> '
-			add		ecx, 4
-			call	FltToStr
-			lea		eax, [ebp - 0x50]
-			push	eax
-			push	eax
-			mov		ecx, g_consoleManager
-			mov		eax, 0x71D0A0
-			call	eax
-			mov		esp, ebp
-			pop		ebp
-			retn
-	}
-}
-
-__declspec(naked) void __fastcall DoConsolePrintID(double* result)
-{
-	__asm
-	{
-		call	IsConsoleOpen
-		test	al, al
-		jnz		proceed
-		retn
-		proceed :
-		mov		edx, [ebp]
-			mov		edx, [edx - 0x30]
-			mov		edx, [edx]
-			push	ebp
-			mov		ebp, esp
-			sub		esp, 0x60
-			push	esi
-			mov		esi, [ecx]
-			lea		ecx, [ebp - 0x60]
-			call	StrCopy
-			mov		ecx, eax
-			mov		dword ptr[ecx], ' >> '
-			add		ecx, 4
-			test	esi, esi
-			jnz		haveID
-			mov		word ptr[ecx], '0'
-			jmp		noEDID
-			haveID :
-		mov		edx, esi
-			call	UIntToHex
-			push	esi
-			mov		esi, eax
-			call	LookupFormByRefID
-			test	eax, eax
-			jz		noEDID
-			mov		ecx, eax
-			mov		eax, [ecx]
-			call	dword ptr[eax + 0x130]
-			test	eax, eax
-			jz		noEDID
-			cmp[eax], 0
-			jz		noEDID
-			mov		ecx, esi
-			mov		word ptr[ecx], '\" '
-			add		ecx, 2
-			mov		edx, eax
-			call	StrCopy
-			mov		word ptr[eax], '\"'
-			noEDID:
-		pop		esi
-			lea		eax, [ebp - 0x60]
-			push	eax
-			push	eax
-			mov		ecx, g_consoleManager
-			mov		eax, 0x71D0A0
-			call	eax
-			mov		esp, ebp
-			pop		ebp
-			retn
-	}
-}
-*/
-/*
 const char kDumpLvlListIndentStr[] = "                                                  ";
 UInt8 s_dumpLvlListIndent = 50;
 
@@ -576,9 +485,6 @@ void BGSLevL::Dump()
 		}
 	} 	while (iter = iter->next);
 }
-*/
-
-
 
 
 UnorderedMap<UInt32, const char*> s_refStrings;

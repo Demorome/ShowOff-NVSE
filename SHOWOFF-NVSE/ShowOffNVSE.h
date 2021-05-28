@@ -8,23 +8,23 @@
 extern ICriticalSection g_Lock;
 
 //-Hook Globals
-extern bool g_canPlayerPickpocketInCombat;
+extern std::atomic<bool> g_canPlayerPickpocketInCombat;
 
 //-Force Pickpocketting INI globals (enabled via function)
-extern float g_fForcePickpocketBaseAPCost;
-extern float g_fForcePickpocketMinAPCost;
-extern float g_fForcePickpocketMaxAPCost;
-extern float g_fForcePickpocketPlayerAgilityMult;
-extern float g_fForcePickpocketPlayerSneakMult;
-extern float g_fForcePickpocketTargetPerceptionMult;
-extern float g_fForcePickpocketItemWeightMult;
-extern float g_fForcePickpocketItemValueMult;
-extern float g_fForcePickpocketPlayerStrengthMult;
-extern float g_fForcePickpocketTargetStrengthMult;
+extern std::atomic<float> g_fForcePickpocketBaseAPCost;
+extern std::atomic<float> g_fForcePickpocketMinAPCost;
+extern std::atomic<float> g_fForcePickpocketMaxAPCost;
+extern std::atomic<float> g_fForcePickpocketPlayerAgilityMult;
+extern std::atomic<float> g_fForcePickpocketPlayerSneakMult;
+extern std::atomic<float> g_fForcePickpocketTargetPerceptionMult;
+extern std::atomic<float> g_fForcePickpocketItemWeightMult;
+extern std::atomic<float> g_fForcePickpocketItemValueMult;
+extern std::atomic<float> g_fForcePickpocketPlayerStrengthMult;
+extern std::atomic<float> g_fForcePickpocketTargetStrengthMult;
 extern char* g_fForcePickpocketFailureMessage;
 
 //-PreventBrokenItemRepairing (PBIR) INI globals 
-extern bool g_PBIR_On;
+extern std::atomic<bool> g_PBIR_On;
 extern char* g_PBIR_FailMessage;
 
 
@@ -56,7 +56,7 @@ typedef EventInfo (*JGCreateEvent)(const char* EventName, UInt8 maxArgs, UInt8 m
 
 
 // Singletons and shortcuts for those singletons.
-NVSEArrayVarInterface* g_arrInterface = NULL;
+NVSEArrayVarInterface* g_arrInterface = nullptr;
 NVSEArrayVar* (*CreateArray)(const NVSEArrayElement* data, UInt32 size, Script* callingScript);
 NVSEArrayVar* (*CreateStringMap)(const char** keys, const NVSEArrayElement* values, UInt32 size, Script* callingScript);
 bool (*AssignArrayResult)(NVSEArrayVar* arr, double* dest);
@@ -65,23 +65,23 @@ void (*AppendElement)(NVSEArrayVar* arr, const NVSEArrayElement& value);
 UInt32(*GetArraySize)(NVSEArrayVar* arr);
 NVSEArrayVar* (*LookupArrayByID)(UInt32 id);
 bool (*GetElement)(NVSEArrayVar* arr, const NVSEArrayElement& key, NVSEArrayElement& outElement);
-bool (*GetElements)(NVSEArrayVar* arr, NVSEArrayElement* elements, NVSEArrayElement* keys);
+bool (*GetArrayElements)(NVSEArrayVar* arr, NVSEArrayElement* elements, NVSEArrayElement* keys);
 
-NVSEStringVarInterface* g_strInterface = NULL;
+NVSEStringVarInterface* g_strInterface = nullptr;
 bool (*AssignString)(COMMAND_ARGS, const char* newValue);
 const char* (*GetStringVar)(UInt32 stringID);
 
-NVSEMessagingInterface* g_msg = NULL;
-NVSEScriptInterface* g_script = NULL;
-NVSECommandTableInterface* CmdIfc = NULL;
+NVSEMessagingInterface* g_msg = nullptr;
+NVSEScriptInterface* g_script = nullptr;
+NVSECommandTableInterface* CmdIfc = nullptr;
 
-HUDMainMenu* g_HUDMainMenu = NULL;
-TileMenu** g_tileMenuArray = NULL;
+HUDMainMenu* g_HUDMainMenu = nullptr;
+TileMenu** g_tileMenuArray = nullptr;
 UInt32 g_screenWidth = 0;
 UInt32 g_screenHeight = 0;
 
 PlayerCharacter* g_thePlayer = nullptr;
-ActorValueOwner* g_playerAVOwner = NULL;
+ActorValueOwner* g_playerAVOwner = nullptr;
 ProcessManager* g_processManager = nullptr;
 InterfaceManager* g_interfaceManager = nullptr;
 BSWin32Audio* g_bsWin32Audio = nullptr;
@@ -167,6 +167,7 @@ bool __fastcall TryCombatPickpocket(ContChangesEntry* selection, SInt32 count, A
 		{
 			ThisStdCall(0x8C00E0, g_thePlayer, actor, 0, 0);
 			char buf[260];
+			ScopedLock lock(&g_Lock);
 			sprintf(buf, "%s", g_fForcePickpocketFailureMessage);
 			QueueUIMessage(buf, eEmotion::sad, NULL, NULL, 2.0, 0);
 

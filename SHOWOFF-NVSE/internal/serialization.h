@@ -10,22 +10,24 @@ enum
 
 void DoLoadGameCleanup() 
 {
+	ScopedLock lock(&g_Lock);
 	if (s_dataChangedFlags & kChangedFlag_AuxStringMaps) s_auxStringMapArraysPerm.Clear();
-
 	s_dataChangedFlags = 0;
 }
 
-char s_lastLoadedPath[MAX_PATH];
+char s_lastLoadedPath[MAX_PATH];  //static buffer, use locks before modifying
 
 void LoadGameCallback(void*)
 {
 	const char* currentPath = GetSavePath();
+	g_Lock.Enter();
 	if (strcmp(s_lastLoadedPath, currentPath))
 	{
 		StrCopy(s_lastLoadedPath, currentPath);
 		s_dataChangedFlags = kChangedFlag_All;
 	}
-	UInt8 changedFlags = s_dataChangedFlags;
+	g_Lock.Leave();
+	UInt8 const changedFlags = s_dataChangedFlags;
 	DoLoadGameCleanup();
 
 	UInt32 type, length, buffer4, skipSize;
@@ -34,7 +36,7 @@ void LoadGameCallback(void*)
 	char varName[0x50];
 	char keyName[0x50];
 
-	while (GetNextRecordInfo(&type, &s_serializedVersion, &length))
+	while (GetNextRecordInfo(&type, (UInt32*)&s_serializedVersion, &length))
 	{
 		switch (type)
 		{
@@ -70,6 +72,7 @@ void LoadGameCallback(void*)
 						{
 							if (!idsMap)
 							{
+								ScopedLock lock(&g_Lock);
 								if (!rVarsMap) rVarsMap = s_auxStringMapArraysPerm.Emplace(modIdx, nVars);
 								idsMap = rVarsMap->Emplace(varName, nVals);
 							}
@@ -100,10 +103,11 @@ void LoadGameCallback(void*)
 
 void SaveGameCallback(void*)
 {
-	UInt8 buffer1;
+	UInt8 buffer1, loopBuffer;
 	UInt16 buffer2;
-	UInt8 loopBuffer;
 
+	ScopedLock lock(&g_Lock);
+	 
 	StrCopy(s_lastLoadedPath, GetSavePath());
 	s_dataChangedFlags = 0;
 
@@ -136,5 +140,7 @@ void NewGameCallback(void*)
 {
 	s_dataChangedFlags = kChangedFlag_All;
 	DoLoadGameCleanup();
+	
+	ScopedLock lock(&g_Lock);
 	s_lastLoadedPath[0] = 0;
 }

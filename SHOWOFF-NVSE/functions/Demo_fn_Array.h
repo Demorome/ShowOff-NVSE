@@ -40,7 +40,7 @@ bool Cmd_ListAddArray_Execute(COMMAND_ARGS)
 		UInt32 const addedAtIndex = pListForm->AddAt(elements[i].Form(), index);
 		if (addedAtIndex == eListInvalid) 
 		{
-			*result = -1;
+			*result = 0;
 			break;
 		}
 	}
@@ -75,10 +75,7 @@ bool Cmd_Ar_GetInvalidRefs_Execute(COMMAND_ARGS)
 
 	//Console_Print("Array size is  is >>> %d", size);
 
-	if (size < 1)
-	{
-		return true;
-	}
+	if (size < 1) return true;
 	
 	NVSEArrayVar* InvalidRefArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
 	
