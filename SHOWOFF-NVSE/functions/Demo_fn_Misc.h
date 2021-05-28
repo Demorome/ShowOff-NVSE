@@ -193,6 +193,38 @@ bool Cmd_SetPlayerIsAMurderer_Execute(COMMAND_ARGS)
 	return true;
 }
 
+DEFINE_CMD_ALT_COND_PLUGIN(IsNight, , "Returns true if it's night according to the current (or specified) climate.", 0, kParams_OneOptionalForm);
+bool Cmd_IsNight_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = 0;
+	TESClimate* climate = (TESClimate*)arg1;
+	Sky* sky = *g_currentSky;
+	float const gameHour = ThisStdCall<double>(0x966A20, sky);
+	float sunrise, sunset;
+	if (climate && IS_TYPE(climate, TESClimate))
+	{
+		sunrise = ThisStdCall<UInt8>(0x595F10, climate, 1) / 6.0F;  //sunrise begin sprinkled with adjustments. 
+		sunset = ThisStdCall<UInt8>(0x595F10, climate, 2) / 6.0F;  //Second arg determines which type of time to check.
+	}
+	else
+	{
+		sunrise = ThisStdCall<double>(0x595F50, sky);
+		sunset = ThisStdCall<double>(0x595FC0, sky);
+	}
+	if (sunset <= gameHour || (sunrise >= gameHour))
+		*result = 1;
+	return true;
+}
+bool Cmd_IsNight_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	TESClimate* climate = NULL;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &climate)) return true;
+	return Cmd_IsNight_Eval(0, climate, 0, result);
+}
+
+
+
 
 #ifdef _DEBUG
 

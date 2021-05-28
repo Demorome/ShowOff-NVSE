@@ -373,6 +373,7 @@ extern "C"
 		REG_CMD(PlayerHasImprovedSpotting)
 		REG_CMD(PlayerIsDrinkingPlacedWater)
 		REG_CMD(SetPlayerIsAMurderer)
+		REG_CMD(IsNight)
 
 #if 0
 		REG_CMD_ARR(Ar_Init);
