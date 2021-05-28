@@ -924,7 +924,7 @@ public:
 	NiObject							*unkD3C;				// D3C
 	UInt32								unkD40;					// D40
 	Actor								*reticleActor;			// D44
-	tList<CompassTarget>				*compassTargets;				// D48
+	tList<CompassTarget>				*compassTargets;		// D48
 	UInt32								unkD4C[6];				// D4C
 	CombatActors						*combatActors;			// D64
 	UInt32								teammateCount;			// D68
@@ -941,17 +941,29 @@ public:
 	UInt8								byteDF2;				// DF2
 	UInt8								byteDF3;				// DF3
 	BSSimpleArray<ItemChange>			itemChanges;			// DF4
-	UInt32								unkE04[5];				// E04
+	UInt32								rockItLauncherWeight;   // E04
+	bool								hasNightVisionApplied;	// E08
+	UInt8								byteE09; 				// E09
+	UInt8								byteE0A;				// E0A
+	UInt8								byteE0B;				// E0B
+	UInt32								modifiedReputation;		// E0C
+	UInt32								unkE10;        			// E10
+	UInt32								unkE14;       			// E14
 	float								killCamTimer;			// E18
 	float								killCamCooldown;		// E1C
 	UInt8								byteE20;				// E20
-	UInt8								byteE21;				// E21
+	bool								isUsingTurbo;			// E21
 	UInt8								byteE22;				// E22
 	UInt8								byteE23;				// E23
-	float								fltE24;					// E24
+	float								lastHelloTime;			// E24
 	float								counterAttackTimer;		// E28
-	UInt32								unkE2C;					// E2C
-	UInt32								unkE30;					// E30
+
+	UInt8								byteE2C;				// E2C
+	bool								isCateyeEnabled;		// E2D
+	bool								isSpottingImprovedActive;//E2E
+	UInt8								byteE2F;				// E2F
+	float								itemDetectionTimer;		// E30
+	
 	NiNode								*ironSightNode;			// E34
 	bool								noHardcoreTracking;		// E38	Appears to be unused
 	bool								skipHCNeedsUpdate;		// E39

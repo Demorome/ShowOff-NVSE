@@ -367,6 +367,12 @@ extern "C"
 
 		REG_CMD(GetRadiationExtraData)
 		REG_CMD(SetRadiationExtraData)
+		
+		REG_CMD(PlayerHasNightVision)
+		REG_CMD(PlayerIsUsingTurbo) //needs testing
+		REG_CMD(PlayerHasCateyeEnabled)
+		REG_CMD(PlayerHasImprovedSpotting)
+
 #if 0
 		REG_CMD_ARR(Ar_Init);
 #endif

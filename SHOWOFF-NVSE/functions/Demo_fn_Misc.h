@@ -123,10 +123,6 @@ bool Cmd_IsAnimPlayingExCond_Execute(COMMAND_ARGS)
 	return Cmd_IsAnimPlayingExCond_Eval(thisObj, (void*)category, (void*)subType, result);
 }
 
-
-
-#ifdef _DEBUG
-
 DEFINE_COMMAND_PLUGIN(GetRadiationExtraData, , 1, 0, NULL);
 bool Cmd_GetRadiationExtraData_Execute(COMMAND_ARGS)
 {
@@ -152,6 +148,39 @@ bool Cmd_SetRadiationExtraData_Execute(COMMAND_ARGS)
 	}
 	return true;
 }
+
+DEFINE_COMMAND_PLUGIN(PlayerHasNightVision, , 0, 0, NULL);
+bool Cmd_PlayerHasNightVision_Execute(COMMAND_ARGS)
+{
+	*result = g_thePlayer->hasNightVisionApplied;
+	return true;
+}
+
+DEFINE_COMMAND_PLUGIN(PlayerIsUsingTurbo, , 0, 0, NULL);
+bool Cmd_PlayerIsUsingTurbo_Execute(COMMAND_ARGS)
+{
+	*result = g_thePlayer->isUsingTurbo;  
+	return true;
+}
+
+DEFINE_COMMAND_PLUGIN(PlayerHasCateyeEnabled, , 0, 0, NULL);
+bool Cmd_PlayerHasCateyeEnabled_Execute(COMMAND_ARGS)
+{
+	*result = g_thePlayer->isCateyeEnabled;
+	return true;
+}
+
+DEFINE_COMMAND_PLUGIN(PlayerHasImprovedSpotting, , 0, 0, NULL);
+bool Cmd_PlayerHasImprovedSpotting_Execute(COMMAND_ARGS)
+{
+	*result = g_thePlayer->isSpottingImprovedActive;
+	return true;
+}
+
+
+#ifdef _DEBUG
+
+
 
 DEFINE_COMMAND_PLUGIN(SetCellFullNameAlt, "Like SetCellFullName but accepts a string.", 0, 2, kParams_JIP_OneCell_OneString);
 bool Cmd_SetCellFullNameAlt_Execute(COMMAND_ARGS)
@@ -358,9 +387,9 @@ void __fastcall TestDemoFunc(double *stuff)
 DEFINE_COMMAND_PLUGIN(TestDemo, , 0, 0, NULL);
 bool Cmd_TestDemo_Execute(COMMAND_ARGS)
 {
-	g_TestDemoVar += 2;
-	TestDemoFunc(&g_TestDemoVar);
-	*result = g_TestDemoVar;
+	UInt32 bInt = 0;
+	//if (!ExtractArgsEx(EXTRACT_ARGS_EX)) return true;
+	*result = g_thePlayer->hasNightVisionApplied;
 	return true;
 }
 

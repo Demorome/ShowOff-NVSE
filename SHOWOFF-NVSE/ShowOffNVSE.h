@@ -421,7 +421,6 @@ void HandleGameHooks()
 	WriteRelCall(0x833303, UINT32(QueueUIMessageHook));
 	WriteRelCall(0x8B959B, UINT32(QueueUIMessageHook));
 
-	//SafeWrite8(0x9D0D40, 0x0);  //test the fix that prevents actors from shooting behind themselves.
 	if (g_PBIR_On)
 	{
 		WriteRelCall(0x7818B7, UINT32(PreventRepairButton));
