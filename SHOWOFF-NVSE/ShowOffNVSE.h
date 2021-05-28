@@ -2,19 +2,31 @@
 #include "GameData.h"
 #include "SafeWrite.h"
 #include "internal/StewieMagic.h"
-#include "GameProcess.h"
-#include "settings.h"
 
-//todo: Remove static buffers, move global declarations to main.cpp
+//todo: Move global declarations to main.cpp
 
+extern ICriticalSection g_Lock;
 
-// Globals - for INI globals, see settings.h
+//-Hook Globals
+extern bool g_canPlayerPickpocketInCombat;
 
-UInt32 g_ShowOffVersion = 100;
+//-Force Pickpocketting INI globals (enabled via function)
+extern float g_fForcePickpocketBaseAPCost;
+extern float g_fForcePickpocketMinAPCost;
+extern float g_fForcePickpocketMaxAPCost;
+extern float g_fForcePickpocketPlayerAgilityMult;
+extern float g_fForcePickpocketPlayerSneakMult;
+extern float g_fForcePickpocketTargetPerceptionMult;
+extern float g_fForcePickpocketItemWeightMult;
+extern float g_fForcePickpocketItemValueMult;
+extern float g_fForcePickpocketPlayerStrengthMult;
+extern float g_fForcePickpocketTargetStrengthMult;
+extern char* g_fForcePickpocketFailureMessage;
 
-bool g_canPlayerPickpocketInCombat = false;
+//-PreventBrokenItemRepairing (PBIR) INI globals 
+extern bool g_PBIR_On;
+extern char* g_PBIR_FailMessage;
 
-extern Vector<ArrayElementL> s_tempElements;
 
 // Misc.
 bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
@@ -33,18 +45,14 @@ bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
 #define REG_CMD_FORM(name) nvse->RegisterTypedCommand(&kCommandInfo_##name, kRetnType_Form);
 #define REG_CMD_AMB(name) nvse->RegisterTypedCommand(&kCommandInfo_##name, kRetnType_Ambiguous);
 
-#define VarNameSize 64
-
 typedef NVSEArrayVarInterface::Array NVSEArrayVar;
 typedef NVSEArrayVarInterface::Element NVSEArrayElement;
 bool (*ExtractFormatStringArgs)(UInt32 fmtStringPos, char* buffer, COMMAND_ARGS_EX, UInt32 maxParams, ...);  // From JIP_NVSE.H
-
 
 //Imports from JG
 class EventInformation;
 typedef EventInformation* EventInfo;
 typedef EventInfo (*JGCreateEvent)(const char* EventName, UInt8 maxArgs, UInt8 maxFilters, void* (__fastcall* CreatorFunction)(void**, UInt32));
-
 
 
 // Singletons and shortcuts for those singletons.
@@ -66,9 +74,6 @@ const char* (*GetStringVar)(UInt32 stringID);
 NVSEMessagingInterface* g_msg = NULL;
 NVSEScriptInterface* g_script = NULL;
 NVSECommandTableInterface* CmdIfc = NULL;
-
-
-
 
 HUDMainMenu* g_HUDMainMenu = NULL;
 TileMenu** g_tileMenuArray = NULL;
@@ -287,9 +292,6 @@ bool __fastcall PCCanPickpocketInCombatHOOK(Actor* actor, void* edx)
 				// Jump over the "was player caught by this NPC" check
 				SafeWrite8(0x608200, 0xEB);
 				SafeWrite8(0x5FA8E4, 0xEB); //for creatures
-
-				Console_Print("Changes online.");
-
 			}
 			return false;  // so the pickpocket menu is allowed to open despite the actor being in combat.
 		}
@@ -308,7 +310,9 @@ bool __fastcall ShowPickpocketStringInCombat(Actor* actor, void* edx, char a2)
 	bool isInCombat = ThisStdCall<bool>(0x8BC700, actor, g_thePlayer);
 	if (isInCombat && g_canPlayerPickpocketInCombat && g_thePlayer->IsSneaking())
 	{
+#if _DEBUG
 		Console_Print("I made a difference!"); //seems like we're failing before this even happens...
+#endif
 		return false;
 	}
 	return isInCombat;
@@ -384,6 +388,7 @@ double __fastcall PreventRepairButton(ContChangesEntry* entry, int bPercent)
 	{
 		//g_bRepairButtonPrevented_PBIR = true;
 		return 100.0F;  //since you can't repair items at 100% health, I use that bit of code to prevent repairing items at 0% health.
+		//super hacky
 	}
 	//g_bRepairButtonPrevented_PBIR = false;
 	return result;
@@ -394,8 +399,7 @@ void HandleGameHooks()
 {
 	//Modify a "IsInCombat" check to allow NPC activation even if they are in combat.
 	WriteRelCall(0x607E70, UINT32(PCCanPickpocketInCombatHOOK));
-	//Same thing but for Creatures (like Super Mutants).
-	WriteRelCall(0x5FA81F, UINT32(PCCanPickpocketInCombatHOOK));
+	WriteRelCall(0x5FA81F, UINT32(PCCanPickpocketInCombatHOOK));  //Same thing but for Creatures (like Super Mutants).
 
 	// NOTE: When failing the AP cost check, it counts as if you were caught by the actor.
 	// This could cause really weird behavior with the NPC just taking back everything that was previously stolen,
@@ -427,14 +431,5 @@ void HandleGameHooks()
 		 */
 	}
 	
-#endif
-
-#if 0  //remnants of the past, beaten by Stewie/c6
-	if (g_PBRA_On)
-	{
-		WriteRelCall(0x9D0A46, UINT32(GetBackwardsRangedAttackActor));
-		//WriteRelCall(0x9D0D6D, UINT32(PreventBackwardsRangedAttacks));
-		PatchMemoryNop(0x9D13B2, 8);
-	}
 #endif
 }

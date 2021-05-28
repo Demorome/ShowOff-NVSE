@@ -23,7 +23,7 @@ bool IMutex::Wait(UInt32 timeout)
 
 		default:
 		case WAIT_TIMEOUT:
-			gLog.FormattedMessage("IMutex::Wait: timeout");
+			g_Log.FormattedMessage("IMutex::Wait: timeout");
 			return false;
 	}
 }

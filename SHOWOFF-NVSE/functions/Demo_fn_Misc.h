@@ -39,18 +39,19 @@ bool Cmd_MessageExAltShowoff_Execute(COMMAND_ARGS)
 {
 	float displayTime;
 	UINT32 appendToQueue;
-	if (!ExtractFormatStringArgs(2, s_strArgBuffer, EXTRACT_ARGS_EX, kCommandInfo_MessageExAltShowoff.numParams, &displayTime, &appendToQueue))
+	char* buffer = GetStrArgBuffer();
+	if (!ExtractFormatStringArgs(2, buffer, EXTRACT_ARGS_EX, kCommandInfo_MessageExAltShowoff.numParams, &displayTime, &appendToQueue))
 		return true;
 
-	char* msgPtr = GetNextTokenJIP(s_strArgBuffer, '|');
+	char* msgPtr = GetNextTokenJIP(buffer, '|');
 	msgPtr[0x203] = 0;
 	if (*msgPtr)
 	{
-		if ((s_strArgBuffer[0] == '#') && (s_strArgBuffer[1] >= '0') && (s_strArgBuffer[1] <= '6') && !s_strArgBuffer[2])
-			QueueUIMessage(msgPtr, 0, (const char*)kMsgIconsPathAddr[s_strArgBuffer[1] - '0'], NULL, displayTime, appendToQueue != 0);
-		else QueueUIMessage(msgPtr, 0, s_strArgBuffer, NULL, displayTime, appendToQueue != 0);
+		if ((buffer[0] == '#') && (buffer[1] >= '0') && (buffer[1] <= '6') && !buffer[2])
+			QueueUIMessage(msgPtr, 0, (const char*)kMsgIconsPathAddr[buffer[1] - '0'], NULL, displayTime, appendToQueue != 0);
+		else QueueUIMessage(msgPtr, 0, buffer, NULL, displayTime, appendToQueue != 0);
 	}
-	else QueueUIMessage(s_strArgBuffer, 0, NULL, NULL, displayTime, appendToQueue != 0);
+	else QueueUIMessage(buffer, 0, NULL, NULL, displayTime, appendToQueue != 0);
 
 	return true;
 }

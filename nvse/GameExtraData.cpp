@@ -224,14 +224,14 @@ void ExtraContainerChanges::Cleanup()
 void ExtraContainerChanges::DebugDump()
 {
 	_MESSAGE("Dumping ExtraContainerChanges");
-	gLog.Indent();
+	g_Log.Indent();
 
 	if (data && data->objList)
 	{
 		for (ExtraContainerChanges::EntryDataList::Iterator entry = data->objList->Begin(); !entry.End(); ++entry)
 		{
 			_MESSAGE("Type: %s CountDelta: %d [%08X]", GetFullName(entry.Get()->type), entry.Get()->countDelta, entry.Get());
-			gLog.Indent();
+			g_Log.Indent();
 			if (!entry.Get() || !entry.Get()->extendData)
 				_MESSAGE("* No extend data *");
 			else
@@ -239,7 +239,7 @@ void ExtraContainerChanges::DebugDump()
 				for (ExtraContainerChanges::ExtendDataList::Iterator extendData = entry.Get()->extendData->Begin(); !extendData.End(); ++extendData)
 				{
 					_MESSAGE("Extend Data: [%08X]", extendData.Get());
-					gLog.Indent();
+					g_Log.Indent();
 					if (extendData.Get()) {
 						extendData.Get()->DebugDump();
 						ExtraCount* xCount = (ExtraCount*)extendData.Get()->GetByType(kExtraData_Count);
@@ -250,13 +250,13 @@ void ExtraContainerChanges::DebugDump()
 					else
 						_MESSAGE("NULL");
 
-					gLog.Outdent();
+					g_Log.Outdent();
 				}
 			}
-			gLog.Outdent();
+			g_Log.Outdent();
 		}
 	}
-	gLog.Outdent();
+	g_Log.Outdent();
 }
 #endif
 

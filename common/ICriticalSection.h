@@ -13,3 +13,14 @@ class ICriticalSection
 	private:
 		CRITICAL_SECTION	critSection;
 };
+
+// Added thanks to JIP:
+
+class ScopedLock  //use this to be safe when doing non-thread-safe things.
+{
+	ICriticalSection* cs;
+
+public:
+	ScopedLock(ICriticalSection* _cs) : cs(_cs) { cs->Enter(); }
+	~ScopedLock() { cs->Leave(); }
+};

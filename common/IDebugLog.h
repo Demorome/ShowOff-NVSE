@@ -75,14 +75,14 @@ class IDebugLog
 		static LogLevel		printLevel;			//!< least important log level to print
 };
 
-extern IDebugLog gLog;
+extern IDebugLog g_Log;
 
 inline void _FATALERROR(const char * fmt, ...)
 {
 	va_list args;
 
 	va_start(args, fmt);
-	gLog.Log(IDebugLog::kLevel_FatalError, fmt, args);
+	g_Log.Log(IDebugLog::kLevel_FatalError, fmt, args);
 	va_end(args);
 }
 
@@ -91,7 +91,7 @@ inline void _ERROR(const char * fmt, ...)
 	va_list args;
 
 	va_start(args, fmt);
-	gLog.Log(IDebugLog::kLevel_Error, fmt, args);
+	g_Log.Log(IDebugLog::kLevel_Error, fmt, args);
 	va_end(args);
 }
 
@@ -100,7 +100,7 @@ inline void _WARNING(const char * fmt, ...)
 	va_list args;
 
 	va_start(args, fmt);
-	gLog.Log(IDebugLog::kLevel_Warning, fmt, args);
+	g_Log.Log(IDebugLog::kLevel_Warning, fmt, args);
 	va_end(args);
 }
 
@@ -109,7 +109,7 @@ inline void _MESSAGE(const char * fmt, ...)
 	va_list args;
 
 	va_start(args, fmt);
-	gLog.Log(IDebugLog::kLevel_Message, fmt, args);
+	g_Log.Log(IDebugLog::kLevel_Message, fmt, args);
 	va_end(args);
 }
 
@@ -118,7 +118,7 @@ inline void _VMESSAGE(const char * fmt, ...)
 	va_list args;
 
 	va_start(args, fmt);
-	gLog.Log(IDebugLog::kLevel_VerboseMessage, fmt, args);
+	g_Log.Log(IDebugLog::kLevel_VerboseMessage, fmt, args);
 	va_end(args);
 }
 
@@ -127,6 +127,6 @@ inline void _DMESSAGE(const char * fmt, ...)
 	va_list args;
 
 	va_start(args, fmt);
-	gLog.Log(IDebugLog::kLevel_DebugMessage, fmt, args);
+	g_Log.Log(IDebugLog::kLevel_DebugMessage, fmt, args);
 	va_end(args);
 }

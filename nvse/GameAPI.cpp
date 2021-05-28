@@ -1602,9 +1602,9 @@ bool SCRIPT_ASSERT(bool expr, Script* script, const char * errorMsg, ...)
 	//		vsprintf_s(errorBuf, sizeof(errorBuf) - 1, errorMsg, args);
 	//		va_end(args);
 	//
-	//		gLog.Indent();
+	//		g_Log.Indent();
 	//		_MESSAGE("%s", errorBuf);
-	//		gLog.Outdent();
+	//		g_Log.Outdent();
 	//
 	//		if (!bAlerted)
 	//		{

@@ -123,7 +123,7 @@ void BaseExtraList::DebugDump() const
 {
 	_MESSAGE("\nBaseExtraList Dump:");
 	Console_Print("BaseExtraList Dump:");
-	gLog.Indent();
+	g_Log.Indent();
 	if (m_data)
 	{
 		for (BSExtraData *traverse = m_data; traverse; traverse = traverse->next)
@@ -138,7 +138,7 @@ void BaseExtraList::DebugDump() const
 		_MESSAGE("No data in list");
 		Console_Print("No data in list");
 	}
-	gLog.Outdent();
+	g_Log.Outdent();
 }
 
 bool BaseExtraList::MarkScriptEvent(UInt32 eventMask, TESForm* eventTarget)

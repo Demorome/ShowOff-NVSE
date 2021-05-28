@@ -42,7 +42,7 @@ bool IEvent::Wait(UInt32 timeout)
 
 		default:
 		case WAIT_TIMEOUT:
-			gLog.FormattedMessage("IEvent::Wait: timeout");
+			g_Log.FormattedMessage("IEvent::Wait: timeout");
 			return false;
 	}
 }
@@ -60,7 +60,7 @@ bool IAutoEvent::Wait(UInt32 timeout)
 
 		default:
 		case WAIT_TIMEOUT:
-			gLog.FormattedMessage("IAutoEvent::Wait: timeout");
+			g_Log.FormattedMessage("IAutoEvent::Wait: timeout");
 			return false;
 	}
 }

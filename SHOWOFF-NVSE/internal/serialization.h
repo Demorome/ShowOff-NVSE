@@ -10,11 +10,9 @@ enum
 
 void DoLoadGameCleanup() 
 {
-
 	if (s_dataChangedFlags & kChangedFlag_AuxStringMaps) s_auxStringMapArraysPerm.Clear();
 
 	s_dataChangedFlags = 0;
-
 }
 
 char s_lastLoadedPath[MAX_PATH];

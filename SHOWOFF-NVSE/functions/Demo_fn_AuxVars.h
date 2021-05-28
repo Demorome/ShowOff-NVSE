@@ -201,11 +201,11 @@ bool Cmd_AuxStringMapArrayGetKeys_Execute(COMMAND_ARGS)
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &varName)) return true;
 	AuxStringMapIDsMap* idsMap = ASMFind(scriptObj, varName);
 	if (!idsMap) return true;
-	s_tempElements.Clear();
+	Vector<ArrayElementL> elems;
 	for (auto idIter = idsMap->Begin(); idIter; ++idIter)
-		s_tempElements.Append(idIter.Key());   //check how JIP appends string elements
-	if (!s_tempElements.Empty())
-		AssignArrayResult(CreateArray(s_tempElements.Data(), s_tempElements.Size(), scriptObj), result);
+		elems.Append(idIter.Key());
+	if (!elems.Empty())
+		AssignArrayResult(CreateArray(elems.Data(), elems.Size(), scriptObj), result);
 	return true;
 }
 
@@ -220,10 +220,10 @@ bool Cmd_AuxStringMapArrayGetAll_Execute(COMMAND_ARGS)
 	NVSEArrayVar* varsMap = CreateStringMap(NULL, NULL, 0, scriptObj);
 	for (auto varIter = findMod->Begin(); varIter; ++varIter)
 	{
-		s_tempElements.Clear();
+		Vector<ArrayElementL> elems;
 		for (auto idIter = varIter().Begin(); idIter; ++idIter)
-			s_tempElements.Append(idIter.Key());
-		SetElement(varsMap, ArrayElementL(varIter.Key()), ArrayElementL(CreateArray(s_tempElements.Data(), s_tempElements.Size(), scriptObj)));
+			elems.Append(idIter.Key());
+		SetElement(varsMap, ArrayElementL(varIter.Key()), ArrayElementL(CreateArray(elems.Data(), elems.Size(), scriptObj)));
 	}
 	AssignArrayResult(varsMap, result);
 	return true;
@@ -290,11 +290,12 @@ bool Cmd_AuxStringMapArraySetString_Execute(COMMAND_ARGS)
 {
 	char varName[0x50];
 	char keyName[0x50];
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &keyName, &s_strValBuffer))
+	char* buffer = GetStrArgBuffer();
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &keyName, &buffer))
 	{
 		AuxVariableValue* value = AuxStringMapAddValue(scriptObj, varName, keyName);
 		if (value)
-			value->SetStr(s_strValBuffer);
+			value->SetStr(buffer);
 	}
 	return true;
 }

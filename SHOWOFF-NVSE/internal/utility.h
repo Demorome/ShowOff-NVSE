@@ -215,6 +215,7 @@ UInt32 __fastcall HexToUInt(const char *str);
 //Begin JIP string / char stuff
 
 extern const UInt8 kLwrCaseConverter[], kUprCaseConverter[];
+extern char* GetStrArgBuffer();
 
 //End JIP string / char stuff
 

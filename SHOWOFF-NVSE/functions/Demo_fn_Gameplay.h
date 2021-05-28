@@ -308,8 +308,10 @@ DEFINE_COMMAND_PLUGIN(SetPCCanPickpocketInCombat, , 0, 1, kParams_OneInt);
 bool Cmd_SetPCCanPickpocketInCombat_Execute(COMMAND_ARGS)
 {
 	UInt32 bOn;
-	if (ExtractArgs(EXTRACT_ARGS, &bOn))
-		g_canPlayerPickpocketInCombat = bOn;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bOn)) return true;
+
+	ScopedLock lock(&g_Lock);  //might not actually work, not sure if "&" is correct here.
+	g_canPlayerPickpocketInCombat = bOn;
 	
 	return true;
 }

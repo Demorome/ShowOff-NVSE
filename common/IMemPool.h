@@ -93,21 +93,21 @@ public:
 
 	void	Dump(void)
 	{
-		gLog.Indent();
+		g_Log.Indent();
 
 		_DMESSAGE("free:");
-		gLog.Indent();
+		g_Log.Indent();
 		for(PoolItem * traverse = m_free; traverse; traverse = traverse->next)
 			_DMESSAGE("%08X", traverse);
-		gLog.Outdent();
+		g_Log.Outdent();
 
 		_DMESSAGE("alloc:");
-		gLog.Indent();
+		g_Log.Indent();
 		for(PoolItem * traverse = m_alloc; traverse; traverse = traverse->next)
 			_DMESSAGE("%08X", traverse);
-		gLog.Outdent();
+		g_Log.Outdent();
 
-		gLog.Outdent();
+		g_Log.Outdent();
 	}
 
 	bool	Full(void)

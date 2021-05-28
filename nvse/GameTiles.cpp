@@ -193,11 +193,11 @@ Tile *Tile::GetComponentTile(const char *componentPath)
 void Tile::Dump()
 {
 	_MESSAGE("%08X\t%s", this, name.m_data);
-	gLog.Indent();
+	g_Log.Indent();
 
 	_MESSAGE("Values:");
 
-	gLog.Indent();
+	g_Log.Indent();
 	
 	Value *value;
 	const char *traitName;
@@ -220,12 +220,12 @@ void Tile::Dump()
 			_MESSAGE("%d  %s: %.4f", value->id, traitName, value->num);
 	}
 
-	gLog.Outdent();
+	g_Log.Outdent();
 
 	for (DListNode<Tile> *traverse = children.Tail(); traverse; traverse = traverse->prev)
 		if (traverse->data) traverse->data->Dump();
 
-	gLog.Outdent();
+	g_Log.Outdent();
 }
 
 void Debug_DumpTraits(void)

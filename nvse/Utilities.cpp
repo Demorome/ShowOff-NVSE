@@ -16,7 +16,7 @@ void DumpClass(void * theClassPtr, UInt32 nIntsToDump)
 	_MESSAGE("DumpClass:");
 	UInt32* basePtr = (UInt32*)theClassPtr;
 
-	gLog.Indent();
+	g_Log.Indent();
 
 	if (!theClassPtr) return;
 	for (UInt32 ix = 0; ix < nIntsToDump; ix++ ) {
@@ -46,7 +46,7 @@ void DumpClass(void * theClassPtr, UInt32 nIntsToDump)
 		_MESSAGE("%3d +%03X ptr: 0x%08X: %32s *ptr: 0x%08x | %f: %32s", ix, ix*4, curPtr, curPtrName, otherPtr, otherFloat, otherPtrName);
 	}
 
-	gLog.Outdent();
+	g_Log.Outdent();
 }
 
 #pragma warning (push)

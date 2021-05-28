@@ -5,7 +5,7 @@ void Test_IMemPool(void)
 	IMemPool <UInt32, 3>	pool;
 
 	_DMESSAGE("main: pool test");
-	gLog.Indent();
+	g_Log.Indent();
 
 	_DMESSAGE("start");
 	pool.Dump();
@@ -39,5 +39,5 @@ void Test_IMemPool(void)
 	_DMESSAGE("done");
 	pool.Dump();
 
-	gLog.Outdent();
+	g_Log.Outdent();
 }

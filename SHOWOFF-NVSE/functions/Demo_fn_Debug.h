@@ -13,7 +13,7 @@ bool Cmd_DumpFormList_Execute(COMMAND_ARGS)
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &FList, &filepathStr)) return true;
 	if (!FList) return true;
 
-	char* buf = s_strValBuffer;  //I have no idea what I'm doing with these char*, lol
+	char* buf = GetStrArgBuffer();;  //I have no idea what I'm doing with these char*, lol
 	int bufLength = 0;
 
 	//https://stackoverflow.com/questions/2674312/how-to-append-strings-using-sprintf

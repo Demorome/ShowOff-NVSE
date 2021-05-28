@@ -8,6 +8,7 @@
 #include "nvse/ArrayVar.h"
 #include "nvse/SafeWrite.h"
 
+#include "common/ICriticalSection.h"
 #include "GameData.h"
 #include "GameScript.h"
 #include "internal/decoding.h"
@@ -39,17 +40,53 @@
 
 
 // Plugin Stuff
-IDebugLog gLog("ShowOffNVSE.log");
-HMODULE	ShowOffHandle;
+IDebugLog g_Log("ShowOffNVSE.log");
+HMODULE	g_ShowOffHandle;
+UInt32 g_ShowOffVersion = 100;
 
+/*----------Globals------------------------------------------------------------------------
+* It's better to include them in a .cpp file instead of a header file.
+* Otherwise, compilation will fail if another .cpp file tries to include the global.
+* Use for example "extern NVSEMessagingInterface* g_messagingInterface;" in main.h if you want to use the global elsewhere.
+*
+*===Danger of using Globals===
+* Modifying globals is not thread-safe, which is unfortunate since scripts are multithreaded.
+* Therefore, to modify globals after game first opns, one MUST lock threads to ensure thread safety.
+* It will make the other threads sleep, so globals can be safely modified.
+* Other than that, it's completely safe to check the value at any point.
+*
+*--Example of this:
+ICriticalSection g_someLock;
+void Func()
+{
+	g_someLock.Enter();
+	// do un-thread safe stuff like modify globals, only a single thread can be here at a time
+	g_someLock.Leave();
+}
+*/
+ICriticalSection g_Lock;
 
-//--Globals.
-//It's better to include them here instead of a header file.
-//Otherwise, compilation will fail if another .cpp file tries to include the global.
-//Use for example "extern NVSEMessagingInterface* g_messagingInterface;" in ShowOffNVSE.h if you want to use the global elsewhere.
-UnorderedSet<TESForm*> s_tempFormList(0x40);
-Vector<ArrayElementL> s_tempElements(0x100);
+//-Hook Globals
+bool g_canPlayerPickpocketInCombat = false;
 
+//-Force Pickpocketting INI globals (enabled via function)
+float g_fForcePickpocketBaseAPCost;
+float g_fForcePickpocketMinAPCost;
+float g_fForcePickpocketMaxAPCost;
+float g_fForcePickpocketPlayerAgilityMult;
+float g_fForcePickpocketPlayerSneakMult;
+float g_fForcePickpocketTargetPerceptionMult;
+float g_fForcePickpocketItemWeightMult;
+float g_fForcePickpocketItemValueMult;
+float g_fForcePickpocketPlayerStrengthMult;
+float g_fForcePickpocketTargetStrengthMult;
+char* g_fForcePickpocketFailureMessage = nullptr;
+
+//-PreventBrokenItemRepairing (PBIR) INI globals 
+bool g_PBIR_On;
+#if 0
+char* g_PBIR_FailMessage = nullptr;
+#endif
 
 
 // This is a message handler for nvse events
@@ -130,7 +167,7 @@ extern "C"
 	{
 		if (fdwReason == DLL_PROCESS_ATTACH)
 		{
-			ShowOffHandle = hModule;
+			g_ShowOffHandle = hModule;
 			DisableThreadLibraryCalls(hModule);
 		}
 		return TRUE;
@@ -143,7 +180,7 @@ extern "C"
 		info->name = "ShowOffNVSE Plugin";
 		info->version = g_ShowOffVersion;
 		//s_debug.CreateLog("Demo_NVSE_Debug.log");
-		//gLog.open??
+		//g_Log.open??
 
 		// version checks
 		if (nvse->nvseVersion < PACKED_NVSE_VERSION)
@@ -194,7 +231,6 @@ extern "C"
 		
 		// register to receive messages from NVSE
 		((NVSEMessagingInterface*)nvse->QueryInterface(kInterface_Messaging))->RegisterListener(nvse->GetPluginHandle(), "NVSE", MessageHandler);
-		
 
 		if (!nvse->isEditor) 
 		{
