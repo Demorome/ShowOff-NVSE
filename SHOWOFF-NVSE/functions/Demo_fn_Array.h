@@ -27,14 +27,12 @@ bool Cmd_ListAddArray_Execute(COMMAND_ARGS)
 	BGSListForm* pListForm = NULL;
 	UInt32 arrID;
 	UInt32 index = eListEnd;
-	
 	ExtractArgsEx(EXTRACT_ARGS_EX, &pListForm, &arrID, &index);
 	NVSEArrayVar* inArr = g_arrInterface->LookupArrayByID(arrID);
 	if (!pListForm || !inArr) return true;
 	UInt32 size = g_arrInterface->GetArraySize(inArr);
 	NVSEArrayElement* elements = new NVSEArrayElement[size];
 	g_arrInterface->GetElements(inArr, elements, NULL);
-
 	for (int i = 0; i < size; i++) {
 		if (elements[i].Form() == NULL) continue;
 		UInt32 const addedAtIndex = pListForm->AddAt(elements[i].Form(), index);
@@ -44,7 +42,6 @@ bool Cmd_ListAddArray_Execute(COMMAND_ARGS)
 			break;
 		}
 	}
-	
 	delete[] elements;
 	return true;
 }

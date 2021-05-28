@@ -320,29 +320,13 @@ bool Cmd_SetCreatureFootWeight_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(GetCreatureAttackReach, , 0, 1, kParams_OneOptionalActorBase);
-bool Cmd_GetCreatureAttackReach_Execute(COMMAND_ARGS)
+DEFINE_COMMAND_PLUGIN(SetCreatureReach, , 0, 2, kParams_OneInt_OneOptionalActorBase);
+bool Cmd_SetCreatureReach_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	TESCreature* creature = NULL;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &creature)) return true;
-	if (!creature)
-	{
-		if (!thisObj || !thisObj->IsActor()) return true;
-		creature = (TESCreature*)((Actor*)thisObj)->GetActorBase();
-	}
-	if IS_TYPE(creature, TESCreature)
-		*result = creature->attackReach;
-	return true;
-}
-
-DEFINE_COMMAND_PLUGIN(SetCreatureAttackReach, , 0, 2, kParams_OneFloat_OneOptionalActorBase);
-bool Cmd_SetCreatureAttackReach_Execute(COMMAND_ARGS)
-{
-	*result = 0;
-	TESCreature* creature = NULL;
-	float attackReach = 0;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &attackReach, &creature)) return true;
+	UInt32 reach = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &reach, &creature)) return true;
 	if (!creature)
 	{
 		if (!thisObj || !thisObj->IsActor()) return true;
@@ -350,7 +334,7 @@ bool Cmd_SetCreatureAttackReach_Execute(COMMAND_ARGS)
 	}
 	if IS_TYPE(creature, TESCreature)
 	{
-		creature->attackReach = attackReach;
+		creature->attackReach = reach;
 		*result = 1;
 	}
 	return true;

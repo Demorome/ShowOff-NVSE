@@ -359,9 +359,9 @@ static ParamInfo kParams_OneFloat_OneOptionalActorBase[2] =
 	{	"base actor",	kParamType_ActorBase,	1	},
 };
 
-static ParamInfo kParams_OneIntOneOptionalActorBase[2] =
+static ParamInfo kParams_OneInt_OneOptionalActorBase[2] =
 {
-	{	"bool",			kParamType_Integer,		0	},
+	{	"int",			kParamType_Integer,		0	},
 	{	"base actor",	kParamType_ActorBase,	1	},
 };
 

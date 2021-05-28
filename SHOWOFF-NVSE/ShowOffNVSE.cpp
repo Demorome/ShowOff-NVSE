@@ -334,8 +334,7 @@ extern "C"
 		REG_CMD(SetCreatureTurningSpeed)
 		REG_CMD(GetCreatureFootWeight)
 		REG_CMD(SetCreatureFootWeight)
-		//REG_CMD(GetCreatureAttackReach)  //Already in JIP!
-		REG_CMD(SetCreatureAttackReach)
+		REG_CMD(SetCreatureReach)
 		REG_CMD(SetCreatureBaseScale) //JG's GetBaseScale should return the creature's base scale, so no need for a GetCreatureBaseScale.
 
 		REG_CMD(ListAddArray)
