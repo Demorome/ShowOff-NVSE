@@ -177,6 +177,22 @@ bool Cmd_PlayerHasImprovedSpotting_Execute(COMMAND_ARGS)
 	return true;
 }
 
+DEFINE_COMMAND_PLUGIN(PlayerIsDrinkingPlacedWater, , 0, 0, NULL);
+bool Cmd_PlayerIsDrinkingPlacedWater_Execute(COMMAND_ARGS)
+{
+	*result = g_thePlayer->isDrinkingPlacedWater;
+	return true;
+}
+
+DEFINE_COMMAND_PLUGIN(SetPlayerIsAMurderer, , 0, 1, kParams_OneInt);
+bool Cmd_SetPlayerIsAMurderer_Execute(COMMAND_ARGS)
+{
+	UInt32 bIsMurderer = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bIsMurderer)) return true;
+	g_thePlayer->bIsAMurderer = (bIsMurderer != 0);
+	return true;
+}
+
 
 #ifdef _DEBUG
 

@@ -878,7 +878,21 @@ public:
 	TESQuest							*activeQuest;			// 6B8
 	tList<BGSQuestObjective>			questObjectiveList;		// 6BC
 	tList<BGSQuestObjective::Target>	questTargetList;		// 6C4
-	UInt32								unk6CC[8];				// 6CC
+	UInt8								byte6CC;				// 6CC
+	UInt8								pad6CD[3];				// 6CD
+	UInt32								time6D0;				// 6D0
+	UInt32								unk6D4;					// 6D4
+	bool								bIsAMurderer;			// 6D8
+	UInt8								pad6D9;					// 6D9
+	UInt8								pad6DA;					// 6DA
+	UInt8								pad6DB;					// 6DB
+	UInt32								amountSoldStolen;		// 6DC
+	UInt32								sortActorDistanceListTimer; // 6E0
+	UInt32								seatedRotation;			// 6E4
+	UInt8								byte6E8;				// 6E8
+	UInt8								byte6E9;				// 6E9
+	UInt8								byte6EA;				// 6EA
+	UInt8								byte6EB;				// 6EB
 	TESForm								*form6EC;				// 6EC TESTING
 	TESForm								*form6F0;				// 6F0 TESTING
 	UInt32								unk6F4;					// 6F4;
@@ -894,7 +908,17 @@ public:
 	UInt8								byte75F;				// 75F
 	TESRegion							*currentRegion;			// 760
 	TESRegionList						regionsList;			// 764
-	UInt32								unk774[14];				// 774
+	UInt32								unk774;					// 774
+	UInt32								unk778;					// 778
+	UInt32								heartBeatSound[7];		// 77C
+	bool								isInSleepPackage;		// 798
+	bool								isTransitioningSeatedState; // 799
+	bool								isDrinkingPlacedWater;	// 79A
+	bool								isPackagePlaying;		// 79B
+	UInt8								byte79C;				// 79C
+	UInt8								byte79D;				// 79D
+	UInt8								gap79E[2];				// 79E
+	UInt32								unk7A0[3];				// 7A0
 	TESForm								*pcWorldOrCell;			// 7AC
 	UInt32								unk7B0;					// 7B0
 	BGSMusicType						*musicType;				// 7B4
@@ -925,7 +949,13 @@ public:
 	UInt32								unkD40;					// D40
 	Actor								*reticleActor;			// D44
 	tList<CompassTarget>				*compassTargets;		// D48
-	UInt32								unkD4C[6];				// D4C
+	UInt32								pipboyLightHeldTime;	// D4C
+	UInt32								ammoSwapTimer;			// D50
+	bool								shouldOpenPipboy;		// D54
+	UInt8								byteD55;				// D55
+	UInt8								byteD56;				// D56
+	UInt8								byteD57;				// D57
+	UInt32*								ptD58[3];				// D58
 	CombatActors						*combatActors;			// D64
 	UInt32								teammateCount;			// D68
 	UInt32								unkD6C[5];				// D6C
@@ -957,13 +987,11 @@ public:
 	UInt8								byteE23;				// E23
 	float								lastHelloTime;			// E24
 	float								counterAttackTimer;		// E28
-
 	UInt8								byteE2C;				// E2C
 	bool								isCateyeEnabled;		// E2D
 	bool								isSpottingImprovedActive;//E2E
 	UInt8								byteE2F;				// E2F
 	float								itemDetectionTimer;		// E30
-	
 	NiNode								*ironSightNode;			// E34
 	bool								noHardcoreTracking;		// E38	Appears to be unused
 	bool								skipHCNeedsUpdate;		// E39

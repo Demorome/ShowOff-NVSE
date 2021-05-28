@@ -372,6 +372,8 @@ extern "C"
 		REG_CMD(PlayerIsUsingTurbo) //needs testing
 		REG_CMD(PlayerHasCateyeEnabled)
 		REG_CMD(PlayerHasImprovedSpotting)
+		REG_CMD(PlayerIsDrinkingPlacedWater)
+		REG_CMD(SetPlayerIsAMurderer)
 
 #if 0
 		REG_CMD_ARR(Ar_Init);
