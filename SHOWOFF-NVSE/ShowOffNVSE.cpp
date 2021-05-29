@@ -77,6 +77,9 @@ ICriticalSection g_Lock;
 //-Hook Globals
 std::atomic<bool> g_canPlayerPickpocketInCombat = false;
 
+
+//todo: remove INI globals and make a class for them (unordered map, access value via string key)
+
 //-Force Pickpocketting INI globals (enabled via function)
 std::atomic<float> g_fForcePickpocketBaseAPCost;
 std::atomic<float> g_fForcePickpocketMinAPCost;
@@ -377,7 +380,7 @@ extern "C"
 		REG_CMD(IsLimbCrippled)
 		REG_CMD(GetNumCrippledLimbs)
 		REG_CMD(GetCrippledLimbsAsBitMask)
-
+		REG_CMD(GetNumBrokenEquippedItems)  //test plz
 		//todo: make a "ClearJIPData" equivalent.
 
 #if 0

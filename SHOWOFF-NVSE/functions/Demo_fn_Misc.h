@@ -326,7 +326,137 @@ bool Cmd_GetCrippledLimbsAsBitMask_Execute(COMMAND_ARGS)
 }
 
 
-#ifdef _DEBUG
+// Get Equipped Object utility functions, from FOSE
+class MatchBySlot : public FormMatcher
+{
+	UInt32 m_slotMask;
+public:
+	MatchBySlot(UInt32 slot) : m_slotMask(TESBipedModelForm::MaskForSlot(slot)) {}
+	bool Matches(TESForm* pForm) const {
+		UInt32 formMask = 0;
+		if (pForm) {
+			if (IS_TYPE(pForm, TESObjectWEAP)) {
+				formMask = TESBipedModelForm::eSlot_Weapon;
+			}
+			else {
+				TESBipedModelForm* pBip = DYNAMIC_CAST(pForm, TESForm, TESBipedModelForm);
+				if (pBip) {
+					formMask = pBip->partMask;
+				}
+			}
+		}
+		return (formMask & m_slotMask) != 0;
+	}
+};
+
+class MatchBySlotMask : public FormMatcher
+{
+	UInt32 m_targetMask;
+	UInt32 m_targetData;
+public:
+	MatchBySlotMask(UInt32 targetMask, UInt32 targetData) : m_targetMask(targetMask) {}
+	bool Matches(TESForm* pForm) const {
+		UInt32 slotMask = 0;
+		if (pForm) {
+			if (IS_TYPE(pForm, TESObjectWEAP)) {
+				slotMask = TESBipedModelForm::ePart_Weapon;
+			}
+			else {
+				TESBipedModelForm* pBip = DYNAMIC_CAST(pForm, TESForm, TESBipedModelForm);
+				if (pBip) {
+					slotMask = pBip->partMask;
+				}
+			}
+		}
+		return ((slotMask & m_targetMask) == m_targetData);
+	}
+};
+
+static EquipData FindEquipped(TESObjectREFR* thisObj, FormMatcher& matcher) {
+	ExtraContainerChanges* pContainerChanges = static_cast<ExtraContainerChanges*>(thisObj->extraDataList.GetByType(kExtraData_ContainerChanges));
+	return (pContainerChanges) ? pContainerChanges->FindEquipped(matcher) : EquipData();
+}
+
+
+DEFINE_CMD_ALT_COND_PLUGIN(GetNumBrokenEquippedItems, , , 1, kParams_TwoOptionalInts);
+bool Cmd_GetNumBrokenEquippedItems_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = 0;
+	if (!IS_ACTOR(thisObj)) return true;
+	Actor* const actor = (Actor*)thisObj;
+	UInt32 const threshold = (UInt32)arg1;
+	UInt32 const flags = (UInt32)arg2;
+
+	enum EquippedItems_Flags
+	{
+		kFlag_Head = 1,
+		kFlag_Hair = 2,
+		kFlag_UpperBody = 4,
+		kFlag_leftHand = 8,
+		kFlag_rightHand = 1 << 4 ,
+		kFlag_weapon = 1 << 5,
+		kFlag_pipboy = 1 << 6 ,
+		kFlag_backpack = 1 << 7,
+		kFlag_necklace = 1 << 8,
+		kFlag_headband = 1 << 9,
+		kFlag_hat = 1 << 10 ,
+		kFlag_eyeglasses = 1 << 11,
+		kFlag_nosering = 1 << 12,
+		kFlag_earrings = 1 << 13,
+		kFlag_mask = 1 << 14,
+		kFlag_choker = 1 << 15,
+		kFlag_mouthObject = 1 << 16,
+		kFlag_bodyAddon1 = 1 << 17,
+		kFlag_bodyAddon2 = 1 << 18,
+		kFlag_bodyAddon3 = 1 << 19,
+		kFlag_AllArmors = 1 << 20,  //handled uniquely
+
+	};
+	int const numFlags = 21;
+	UInt32 flagArr[numFlags] = { 1, 2, 4, 8, 1 << 4, 1 << 5, 1 << 6, 1 << 7, 1 << 8, 1 << 9, 1 << 10, 1 << 11, 1 << 12, 1 << 13, 1 << 14, 1 << 15, 1 << 16, 1 << 17, 1 << 18, 1 << 19, 1 << 20 };
+
+	UInt32 numBrokenItems = 0;
+	for (UInt32 slotIdx = 0; slotIdx <= 19; slotIdx++)
+	{
+		if (slotIdx != kFlag_weapon && !(flags & kFlag_AllArmors))  //grant passage if eq. item is armor and kFlag_AllArmors is true.
+		{
+			if (flags && !(flagArr[slotIdx] & flags)) continue;  //if flags = 0 (default), everything is checked.
+																//Otherwise, return if flag is not toggled on for item.
+		}
+
+		MatchBySlot matcher(slotIdx);
+		EquipData equipD = FindEquipped(thisObj, matcher);
+		if (equipD.pForm)
+		{
+			ExtraHealth* pXHealth = equipD.pExtraData ? (ExtraHealth*)equipD.pExtraData->GetByType(kExtraData_Health) : NULL;
+			if (pXHealth)
+			{
+				if (pXHealth->health <= threshold) numBrokenItems++;
+			}
+			else
+			{
+				TESHealthForm* pHealth = DYNAMIC_CAST(equipD.pForm, TESForm, TESHealthForm);
+				if (pHealth)
+					if (pHealth->health <= threshold) numBrokenItems++;
+			}
+		}
+	}
+	*result = numBrokenItems;
+	return true;
+}
+bool Cmd_GetNumBrokenEquippedItems_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	UInt32 threshold = 0;
+	UInt32 flags = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &threshold, &flags)) return true;
+	return Cmd_GetNumBrokenEquippedItems_Eval(thisObj, (void*)threshold, (void*)flags, result);
+}
+
+
+
+
+#if _DEBUG
 
 
 
