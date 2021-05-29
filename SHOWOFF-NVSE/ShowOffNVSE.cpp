@@ -368,12 +368,17 @@ extern "C"
 		REG_CMD(SetRadiationExtraData)
 		
 		REG_CMD(PlayerHasNightVision)
-		REG_CMD(PlayerIsUsingTurbo) //needs testing
+		REG_CMD(PlayerIsUsingTurbo) //todo: needs testing
 		REG_CMD(PlayerHasCateyeEnabled)
 		REG_CMD(PlayerHasImprovedSpotting)
 		REG_CMD(PlayerIsDrinkingPlacedWater)
 		REG_CMD(SetPlayerIsAMurderer)
 		REG_CMD(IsNight)
+		REG_CMD(IsLimbCrippled)
+		REG_CMD(GetNumCrippledLimbs)
+		REG_CMD(GetCrippledLimbsAsBitMask)
+
+		//todo: make a "ClearJIPData" equivalent.
 
 #if 0
 		REG_CMD_ARR(Ar_Init);

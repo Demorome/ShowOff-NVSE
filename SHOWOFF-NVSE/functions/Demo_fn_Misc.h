@@ -224,9 +224,110 @@ bool Cmd_IsNight_Execute(COMMAND_ARGS)
 }
 
 
+DEFINE_CMD_ALT_COND_PLUGIN(IsLimbCrippled, , "If no args are passed / arg is -1, returns true if actor has any crippled limbs. Otherwise, checks if the specified limb is crippled.", 1, kParams_TwoOptionalInts);
+bool Cmd_IsLimbCrippled_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = 0;
+	if (!IS_ACTOR(thisObj)) return true;
+	Actor* const actor = (Actor*)thisObj;
+	UInt32 limbID = (UInt32)arg1;
+	UInt32 const threshold = (UInt32)arg2;
+	if (limbID == -1)
+	{
+		//loop through all limb health AVs and break if a single one is at 0 health (or below threshold).
+		for (limbID = kAVCode_PerceptionCondition; limbID <= kAVCode_BrainCondition; limbID++)
+		{
+			if (actor->avOwner.GetActorValue(limbID) <= threshold)
+			{
+				*result = 1;
+				break;
+			}
+		}
+	}
+	else if (limbID <= 6)
+	{
+		limbID += kAVCode_PerceptionCondition;
+		if (actor->avOwner.GetActorValue(limbID) <= threshold) *result = 1;
+	}
+	return true;
+}
+bool Cmd_IsLimbCrippled_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	UInt32 limbID = -1;
+	UInt32 threshold = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &limbID, &threshold)) return true;
+	return Cmd_IsLimbCrippled_Eval(thisObj, (void*)limbID, (void*)threshold, result);
+}
+
+DEFINE_CMD_ALT_COND_PLUGIN(GetNumCrippledLimbs, , , 1, kParams_OneOptionalInt);
+bool Cmd_GetNumCrippledLimbs_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = 0;
+	if (!IS_ACTOR(thisObj)) return true;
+	Actor* const actor = (Actor*)thisObj;
+	UInt32 const threshold = (UInt32)arg1;
+	UInt32 numCrippledLimbs = 0;
+	for (UInt32 limbID = kAVCode_PerceptionCondition; limbID <= kAVCode_BrainCondition; limbID++)
+	{
+		if (actor->avOwner.GetActorValue(limbID) <= threshold)
+		{
+			numCrippledLimbs++;
+		}
+	}
+	*result = numCrippledLimbs;
+	return true;
+}
+bool Cmd_GetNumCrippledLimbs_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	UInt32 threshold = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &threshold)) return true;
+	return Cmd_GetNumCrippledLimbs_Eval(thisObj, (void*)threshold, 0, result);
+}
+
+DEFINE_CMD_ALT_COND_PLUGIN(GetCrippledLimbsAsBitMask, , , 1, kParams_OneOptionalInt);
+bool Cmd_GetCrippledLimbsAsBitMask_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = 0;
+	if (!IS_ACTOR(thisObj)) return true;
+	Actor* const actor = (Actor*)thisObj;
+	UInt32 const threshold = (UInt32)arg1;
+
+	enum LimbGoneFlags
+	{
+		kFlag_Head = 1,
+		kFlag_Torso = 2,
+		kFlag_LeftArm = 4,
+		kFlag_RightArm = 8,
+		kFlag_LeftLeg = 0x10,
+		kFlag_RightLeg = 0x20,
+		kFlag_Brain = 0x40,
+	};
+	UInt32 flagsArr[7] = { kFlag_Head, kFlag_Torso, kFlag_LeftArm, kFlag_RightArm, kFlag_LeftLeg, kFlag_RightLeg, kFlag_Brain };
+
+	UInt32 CrippledLimbsMask = 0;
+	for (UInt32 limbID = kAVCode_PerceptionCondition; limbID <= kAVCode_BrainCondition; limbID++)
+	{
+		if (actor->avOwner.GetActorValue(limbID) <= threshold)
+		{
+			CrippledLimbsMask |= flagsArr[limbID - kAVCode_PerceptionCondition];
+		}
+	}
+	*result = CrippledLimbsMask;
+	return true;
+}
+bool Cmd_GetCrippledLimbsAsBitMask_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	UInt32 threshold = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &threshold)) return true;
+	return Cmd_GetCrippledLimbsAsBitMask_Eval(thisObj, (void*)threshold, 0, result);
+}
 
 
 #ifdef _DEBUG
+
 
 
 
