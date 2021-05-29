@@ -377,54 +377,26 @@ static EquipData FindEquipped(TESObjectREFR* thisObj, FormMatcher& matcher) {
 	return (pContainerChanges) ? pContainerChanges->FindEquipped(matcher) : EquipData();
 }
 
+typedef TESBipedModelForm::EPartBit EquippedItemIndex;
+typedef TESBipedModelForm::ESlot EquippedItemSlot;
 
 DEFINE_CMD_ALT_COND_PLUGIN(GetNumBrokenEquippedItems, , , 1, kParams_TwoOptionalInts);
 bool Cmd_GetNumBrokenEquippedItems_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
 	if (!IS_ACTOR(thisObj)) return true;
-	Actor* const actor = (Actor*)thisObj;
 	UInt32 const threshold = (UInt32)arg1;
 	UInt32 const flags = (UInt32)arg2;
 
-	enum EquippedItems_Flags
-	{
-		kFlag_Head = 1,
-		kFlag_Hair = 2,
-		kFlag_UpperBody = 4,
-		kFlag_leftHand = 8,
-		kFlag_rightHand = 1 << 4 ,
-		kFlag_weapon = 1 << 5,
-		kFlag_pipboy = 1 << 6 ,
-		kFlag_backpack = 1 << 7,
-		kFlag_necklace = 1 << 8,
-		kFlag_headband = 1 << 9,
-		kFlag_hat = 1 << 10 ,
-		kFlag_eyeglasses = 1 << 11,
-		kFlag_nosering = 1 << 12,
-		kFlag_earrings = 1 << 13,
-		kFlag_mask = 1 << 14,
-		kFlag_choker = 1 << 15,
-		kFlag_mouthObject = 1 << 16,
-		kFlag_bodyAddon1 = 1 << 17,
-		kFlag_bodyAddon2 = 1 << 18,
-		kFlag_bodyAddon3 = 1 << 19,
-		kFlag_AllArmors = 1 << 20,  //handled uniquely
-
-	};
-	int const numFlags = 21;
-	UInt32 flagArr[numFlags] = { 1, 2, 4, 8, 1 << 4, 1 << 5, 1 << 6, 1 << 7, 1 << 8, 1 << 9, 1 << 10, 1 << 11, 1 << 12, 1 << 13, 1 << 14, 1 << 15, 1 << 16, 1 << 17, 1 << 18, 1 << 19, 1 << 20 };
-
 	UInt32 numBrokenItems = 0;
-	for (UInt32 slotIdx = 0; slotIdx <= 19; slotIdx++)
+	for (UInt32 slotIdx = EquippedItemIndex::ePart_Head; slotIdx <= EquippedItemIndex::ePart_BodyAddon3; slotIdx++)
 	{
-		if (slotIdx != kFlag_weapon && !(flags & kFlag_AllArmors))  //grant passage if eq. item is armor and kFlag_AllArmors is true.
-		{
-			if (flags && !(flagArr[slotIdx] & flags)) continue;  //if flags = 0 (default), everything is checked.
-																//Otherwise, return if flag is not toggled on for item.
-		}
-
 		MatchBySlot matcher(slotIdx);
+		if (flags)  //if flags = 0 (default), everything is checked.
+		{
+			//Otherwise, return if flag is not toggled on for item.
+			if (flags && !(TESBipedModelForm::MaskForSlot(slotIdx) & flags)) continue;
+		}
 		EquipData equipD = FindEquipped(thisObj, matcher);
 		if (equipD.pForm)
 		{
