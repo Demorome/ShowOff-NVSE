@@ -150,6 +150,34 @@ UInt32 TESBipedModelForm::MaskForSlot(UInt32 slot)
 	}
 }
 
+// static
+UInt32 TESBipedModelForm::SlotForMask(UInt32 slot)
+{
+	switch (slot) {
+	case eSlot_Head:		return ePart_Head;
+	case eSlot_Hair:		return ePart_Hair;
+	case eSlot_UpperBody:	return ePart_UpperBody;
+	case eSlot_LeftHand:	return ePart_LeftHand;
+	case eSlot_RightHand:	return ePart_RightHand;
+	case eSlot_Weapon:		return ePart_Weapon;
+	case eSlot_PipBoy:		return ePart_PipBoy;
+	case eSlot_Backpack:	return ePart_Backpack;
+	case eSlot_Necklace:	return ePart_Necklace;
+	case eSlot_Headband:	return ePart_Headband;
+	case eSlot_Hat:			return ePart_Hat;
+	case eSlot_Eyeglasses:	return ePart_Eyeglasses;
+	case eSlot_Nosering:	return ePart_Nosering;
+	case eSlot_Earrings:	return ePart_Earrings;
+	case eSlot_Mask:		return ePart_Mask;
+	case eSlot_Choker:		return ePart_Choker;
+	case eSlot_MouthObject:	return ePart_MouthObject;
+	case eSlot_BodyAddon1:	return ePart_BodyAddon1;
+	case eSlot_BodyAddon2:	return ePart_BodyAddon2;
+	case eSlot_BodyAddon3:	return ePart_BodyAddon3;
+	default:				return -1;
+	}
+}
+
 UInt32 TESBipedModelForm::GetSlotsMask() const {
 	return partMask;
 }

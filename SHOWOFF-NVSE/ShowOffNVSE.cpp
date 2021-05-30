@@ -380,8 +380,11 @@ extern "C"
 		REG_CMD(IsLimbCrippled)
 		REG_CMD(GetNumCrippledLimbs)
 		REG_CMD(GetCrippledLimbsAsBitMask)
-		REG_CMD(GetNumBrokenEquippedItems)  //test plz
-		//todo: make a "ClearJIPData" equivalent.
+		REG_CMD(GetNumBrokenEquippedItems)
+		REG_CMD(GetEquippedItemsAsBitMask)
+		//REG_CMD(UnequipItemsFromBitMask)  //tricky to get xData, idk if anyone will ever use this anyways.
+		//GetEquippedTotalValue
+		REG_CMD(ClearShowoffSavedData)
 
 #if 0
 		REG_CMD_ARR(Ar_Init);

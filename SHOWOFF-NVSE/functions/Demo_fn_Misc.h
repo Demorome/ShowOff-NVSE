@@ -425,6 +425,64 @@ bool Cmd_GetNumBrokenEquippedItems_Execute(COMMAND_ARGS)
 	return Cmd_GetNumBrokenEquippedItems_Eval(thisObj, (void*)threshold, (void*)flags, result);
 }
 
+DEFINE_CMD_ALT_COND_PLUGIN(GetEquippedItemsAsBitMask, , , 1, NULL);
+bool Cmd_GetEquippedItemsAsBitMask_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = 0;
+	if (!IS_ACTOR(thisObj)) return true;
+	UInt32 flags = 0;
+	for (UInt32 slotIdx = EquippedItemIndex::ePart_Head; slotIdx <= EquippedItemIndex::ePart_BodyAddon3; slotIdx++)
+	{
+		MatchBySlot matcher(slotIdx);
+		EquipData equipD = FindEquipped(thisObj, matcher);
+		if (equipD.pForm)
+		{
+			flags |= TESBipedModelForm::MaskForSlot(slotIdx);
+		}
+	}
+	*result = flags;
+	return true;
+}
+bool Cmd_GetEquippedItemsAsBitMask_Execute(COMMAND_ARGS)
+{
+	return Cmd_GetEquippedItemsAsBitMask_Eval(thisObj, 0, 0, result);
+}
+
+#if 0
+DEFINE_COMMAND_PLUGIN(UnequipItemsFromBitMask, , 1, 1, kParams_OneInt);
+bool Cmd_UnequipItemsFromBitMask_Execute(COMMAND_ARGS)
+{
+	UInt32 flags = 0, noEquip = 0, noMessage = 1;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &flags, &noEquip, &noMessage)) return true;
+	if (!IS_ACTOR(thisObj)) return true;
+	Actor* actor = (Actor*)thisObj;
+	for (UInt32 slotIdx = EquippedItemIndex::ePart_Head; slotIdx <= EquippedItemIndex::ePart_BodyAddon3; slotIdx++)
+	{
+		MatchBySlot matcher(slotIdx);
+		EquipData equipD = FindEquipped(thisObj, matcher);
+		if (equipD.pForm)
+		{
+			if (flags & TESBipedModelForm::MaskForSlot(slotIdx))
+			{
+				//Unequip item if its matching flag is set.
+				actor->UnequipItem(equipD.pForm, 1, xData, 1, noEquip != 0, noMessage != 0);
+			}
+		}
+	}
+	return true;
+}
+#endif
+
+DEFINE_COMMAND_PLUGIN(ClearShowoffSavedData, "", 0, 1, kParams_OneInt);
+bool Cmd_ClearShowoffSavedData_Execute(COMMAND_ARGS)
+{
+	UInt32 auxStringMaps;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &auxStringMaps)) return true;
+	UInt8 modIdx = scriptObj->GetOverridingModIdx();
+	if (auxStringMaps && s_auxStringMapArraysPerm.Erase((auxStringMaps == 2) ? 0xFF : modIdx))
+		s_dataChangedFlags |= kChangedFlag_AuxStringMaps;
+	return true;
+}
 
 
 

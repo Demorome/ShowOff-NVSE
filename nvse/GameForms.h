@@ -1256,7 +1256,8 @@ public:
 	TESModelRDT				modelRDT;			// 0C4
 	// 0DC
 
-	static UInt32 MaskForSlot(UInt32 mask);
+	static UInt32 MaskForSlot(UInt32 slot);
+	static UInt32 SlotForMask(UInt32 mask);
 
 	bool IsPowerArmor() const { return (bipedFlags & eBipedFlag_PowerArmor) == eBipedFlag_PowerArmor; }
 	bool IsNonPlayable() const { return (bipedFlags & eBipedFlag_NonPlayable) == eBipedFlag_NonPlayable; }
