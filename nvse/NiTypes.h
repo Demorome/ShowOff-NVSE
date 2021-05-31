@@ -419,12 +419,6 @@ public:
 	Iterator Begin() { return Iterator(*this); }
 };
 
-template <typename T_Key, typename T_Data>
-__declspec(naked) bool NiTMapBase<T_Key, T_Data>::Lookup(T_Key key, T_Data *dataOut)
-{
-	__asm	jmp		kNiTMapLookupAddr
-}
-
 // 14
 template <typename T_Data>
 class NiTStringPointerMap : public NiTPointerMap<T_Data>

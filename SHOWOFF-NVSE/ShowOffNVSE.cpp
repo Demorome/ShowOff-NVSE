@@ -386,7 +386,10 @@ extern "C"
 		//REG_CMD(UnequipItemsFromBitMask)  //tricky to get xData, idk if anyone will ever use this anyways.
 		//todo: GetEquippedTotalValue
 		REG_CMD(ClearShowoffSavedData)  //todo: test serialization
-
+		
+		REG_CMD(GetBaseEquippedWeight)
+		REG_CMD(GetCalculatedEquippedWeight)  //NOTE: bWeightlessWorn(Power)Armor from Stewie's is not accounted for.
+		REG_CMD(GetCalculatedMaxCarryWeight)
 #if 0
 		REG_CMD_ARR(Ar_Init);
 #endif

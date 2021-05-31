@@ -392,7 +392,7 @@ bool Cmd_GetNumBrokenEquippedItems_Eval(COMMAND_ARGS_EVAL)
 	for (UInt32 slotIdx = EquippedItemIndex::ePart_Head; slotIdx <= EquippedItemIndex::ePart_BodyAddon3; slotIdx++)
 	{
 		MatchBySlot matcher(slotIdx);
-		if (flags)  //if flags = 0 (default), everything is checked.
+		if (flags)  //if flags = 0 (default), every equip slot is checked.
 		{
 			//Otherwise, return if flag is not toggled on for item.
 			if (flags && !(TESBipedModelForm::MaskForSlot(slotIdx) & flags)) continue;
@@ -484,6 +484,150 @@ bool Cmd_ClearShowoffSavedData_Execute(COMMAND_ARGS)
 	return true;
 }
 
+
+DEFINE_CMD_ALT_COND_PLUGIN(GetBaseEquippedWeight, , , 1, kParams_TwoOptionalInts);
+bool Cmd_GetBaseEquippedWeight_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = 0;
+	if (!IS_ACTOR(thisObj)) return true;
+	UInt32 const minWeight = (UInt32)arg1;
+	UInt32 const flags = (UInt32)arg2;
+
+	float totalWeight = 0;
+	for (UInt32 slotIdx = EquippedItemIndex::ePart_Head; slotIdx <= EquippedItemIndex::ePart_BodyAddon3; slotIdx++)
+	{
+		MatchBySlot matcher(slotIdx);
+		if (flags)  //if flags = 0 (default), every equip slot is checked.
+		{
+			//Otherwise, return if flag is not toggled on for item.
+			if (flags && !(TESBipedModelForm::MaskForSlot(slotIdx) & flags)) continue;
+		}
+		EquipData equipD = FindEquipped(thisObj, matcher);
+		if (equipD.pForm)
+		{
+			TESWeightForm* pWeight = DYNAMIC_CAST(equipD.pForm, TESForm, TESWeightForm);
+			if (pWeight)
+			{
+				if (pWeight->weight >= minWeight)
+				{
+					totalWeight += pWeight->weight;
+				}
+			}
+		}
+	}
+	*result = totalWeight;
+	return true;
+}
+bool Cmd_GetBaseEquippedWeight_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	UInt32 minWeight = 0;
+	UInt32 flags = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &minWeight, &flags)) return true;
+	return Cmd_GetBaseEquippedWeight_Eval(thisObj, (void*)minWeight, (void*)flags, result);
+}
+
+DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedEquippedWeight, , "Accounts for perk effects + weapon mods.", 1, kParams_TwoOptionalInts);
+bool Cmd_GetCalculatedEquippedWeight_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = 0;
+	if (!IS_ACTOR(thisObj)) return true;
+	UInt32 const minWeight = (UInt32)arg1;
+	UInt32 const flags = (UInt32)arg2;
+	Actor* actor = (Actor*)thisObj;
+
+	float totalWeight = 0;
+	bool isHardcore = g_thePlayer->isHardcore;
+	
+	for (UInt32 slotIdx = EquippedItemIndex::ePart_Head; slotIdx <= EquippedItemIndex::ePart_BodyAddon3; slotIdx++)
+	{
+		if (flags)  //if flags = 0 (default), every equip slot is checked.
+		{
+			//Otherwise, return if flag is not toggled on for item.
+			if (flags && !(TESBipedModelForm::MaskForSlot(slotIdx) & flags)) continue;
+		}
+		
+		float itemWeight = 0;
+		TESForm* item = nullptr;
+		bool isWeapon = false;
+		ContChangesEntry* weapInfo = nullptr;
+
+		if (slotIdx == EquippedItemIndex::ePart_Weapon) {
+			isWeapon = true;
+			weapInfo = actor->baseProcess->GetWeaponInfo();
+			item = weapInfo->type;
+			if (item) {
+				bool hasDecreaseWeightMod = ThisStdCall<bool>(0x4BDA70, weapInfo, TESObjectWEAP::kWeaponModEffect_DecreaseWeight);
+				itemWeight = ThisStdCall<double>(0x4BE380, (TESObjectWEAP*)item, hasDecreaseWeightMod);
+				if (itemWeight >= 10.0)
+				{
+					float heavyWeaponWeightMult = 1.0;
+					ApplyPerkModifiers(kPerkEntry_AdjustHeavyWeaponWeight, (Actor*)g_thePlayer, &heavyWeaponWeightMult);
+					itemWeight = itemWeight * heavyWeaponWeightMult;
+				}
+			}
+		}
+		else {
+			MatchBySlot matcher(slotIdx);
+			EquipData equipD = FindEquipped(thisObj, matcher);
+			item = equipD.pForm;
+			if (item) {
+				itemWeight = CdeclCall<double>(0x48EBC0, item, isHardcore);  // GetItemWeight. isHardcore check only affects ammo, but whatever.
+			}
+		}
+
+		if (itemWeight > 0.0)
+		{
+			float hasPackRatFlt = 0.0;
+			ApplyPerkModifiers(kPerkEntry_ModifyLightItems, (Actor*)g_thePlayer, &hasPackRatFlt);
+			if (hasPackRatFlt > 0.0)
+			{
+				float const fPackRatThreshold = *(float*)(0x11C6478 + 4);
+				float const fPackRatModifier = *(float*)(0x11C64A8 + 4);
+				if (fPackRatThreshold >= (double)itemWeight)
+					itemWeight = itemWeight * fPackRatModifier;
+			}
+
+#if 0		// todo: figure out wtf 0x4D0D83 does.
+			if (isWeapon && weapInfo)
+			{
+				//NOTE: Game does some weird jank to account for multiple DecreaseWeight effects.
+				//I just really have no idea what's going on at 0x4D0D83 .
+				bool const hasDecreaseWeightEffect = ThisStdCall<bool>(0x4BDA70, weapInfo, TESObjectWEAP::kWeaponModEffect_DecreaseWeight);
+				if (hasDecreaseWeightEffect) {
+					itemWeight *= ThisStdCall<float>(0x4BCF60, weapInfo->type, TESObjectWEAP::kWeaponModEffect_DecreaseWeight, 1);
+				}
+			}
+#endif
+			
+			if (itemWeight >= minWeight) totalWeight += itemWeight;
+		}
+	}
+	*result = totalWeight;
+	return true;
+}
+bool Cmd_GetCalculatedEquippedWeight_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	UInt32 minWeight = 0;
+	UInt32 flags = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &minWeight, &flags)) return true;
+	return Cmd_GetCalculatedEquippedWeight_Eval(thisObj, (void*)minWeight, (void*)flags, result);
+}
+
+
+DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedMaxCarryWeight, GetMaxCarryWeightPerkModified, "Accounts for GetMaxCarryWeight perk entry.", 1, NULL);
+bool Cmd_GetCalculatedMaxCarryWeight_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = 0;
+	if (!IS_ACTOR(thisObj)) return true;
+	*result = ThisStdCall<double>(0x8A0C20, (Actor*)thisObj);
+	return true;
+}
+bool Cmd_GetCalculatedMaxCarryWeight_Execute(COMMAND_ARGS)
+{
+	return Cmd_GetCalculatedMaxCarryWeight_Eval(thisObj, 0, 0, result);
+}
 
 
 #if _DEBUG
