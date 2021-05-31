@@ -85,7 +85,7 @@ bool Cmd_Ar_GetInvalidRefs_Execute(COMMAND_ARGS)
 		//Check out JIP's GetArrayValue.
 		ArrayElementR resElement;
 
-		if (GetElement((NVSEArrayVar*)arrID, ArrayElementL(i), resElement))
+		if (GetElement((NVSEArrayVar*)arrID, ArrayElementL(i), resElement))  //key is given an int; is this compatible with map arrays? Probably redundant anyways.
 		{
 			if (elements[i].GetType() == 2)  //if ref-type
 			{

@@ -507,21 +507,6 @@ bool Cmd_SetCellFullNameAlt_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(GetCellFullName, , 0, 1, kParams_JIP_OneCell);
-bool Cmd_GetCellFullName_Execute(COMMAND_ARGS)
-{
-	TESObjectCELL* cell;
-
-	ExtractArgsEx(EXTRACT_ARGS_EX, &cell);
-	if (!cell) return true;
-
-	TESFullName* fullName = &cell->fullName;  //wtf. Seems to work, idk why
-	const char* oldName = fullName->name.CStr();
-	g_strInterface->Assign(PASS_COMMAND_ARGS, oldName);
-	
-	return true;
-}
-
 
 DEFINE_COMMAND_PLUGIN(GetQueuedCornerMessages, "Returns the queued corner messages as a multidimensional array.", 0, 0, NULL);
 bool Cmd_GetQueuedCornerMessages_Execute(COMMAND_ARGS)
@@ -553,7 +538,6 @@ bool Cmd_SetBaseActorValue_Execute(COMMAND_ARGS)
 		actorBase = (TESActorBase*)thisObj->baseForm;
 	}
 	UInt32 currentValue = *result = actorBase->avOwner.GetActorValue(actorVal);
-	//Console_Print("Current Value %d", currentValue);
 	actorBase->ModActorValue(actorVal, (valueToSet - currentValue));
 	return true;
 }

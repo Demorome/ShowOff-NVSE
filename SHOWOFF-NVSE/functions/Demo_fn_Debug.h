@@ -9,16 +9,12 @@ bool Cmd_DumpFormList_Execute(COMMAND_ARGS)
 	BGSListForm* FList;
 	char filepathStr[260] = "nope";
 	*result = 0;
-	
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &FList, &filepathStr)) return true;
 	if (!FList) return true;
-
-	char* buf = GetStrArgBuffer();;  //I have no idea what I'm doing with these char*, lol
+	char* buf = GetStrArgBuffer();  //I have no idea what I'm doing with these char*, lol
 	int bufLength = 0;
-
 	//https://stackoverflow.com/questions/2674312/how-to-append-strings-using-sprintf
 	bufLength += sprintf(buf+bufLength, "Dumping %s FormList [%08X], size %d:", FList->GetName(), FList->refID, FList->Count());
-	
 	int iIndex = 0;
 	for (tList<TESForm>::Iterator iter = FList->list.Begin(); !iter.End(); ++iter, iIndex++)
 	{
@@ -53,7 +49,6 @@ bool Cmd_DumpFormList_Execute(COMMAND_ARGS)
 			Console_Print_Long(buf);
 		*result = 1;
 	}
-
 	return true;
 }
 

@@ -302,7 +302,7 @@ extern "C"
 
 		/* ONLY COMMANDS WITH LISTED OPCODES SHOULD BE USED IN SCRIPTS */
 
-		REG_CMD(DumpFormList)
+		REG_CMD(DumpFormList)  //todo: verify if char* usage is safe
 
 		REG_CMD(ModNumericGameSetting)
 		REG_CMD(ModNumericINISetting)
@@ -349,6 +349,7 @@ extern "C"
 
 #if _DEBUG  //for functions being tested (or just abandoned).
 
+		//todo: test AuxStringMap serialization / clearing.
 		REG_CMD(AuxStringMapArrayGetSize)
 		REG_CMD(AuxStringMapArrayGetValueType)
 		REG_CMD(AuxStringMapArrayGetFloat)
@@ -383,15 +384,14 @@ extern "C"
 		REG_CMD(GetNumBrokenEquippedItems)
 		REG_CMD(GetEquippedItemsAsBitMask)
 		//REG_CMD(UnequipItemsFromBitMask)  //tricky to get xData, idk if anyone will ever use this anyways.
-		//GetEquippedTotalValue
-		REG_CMD(ClearShowoffSavedData)
+		//todo: GetEquippedTotalValue
+		REG_CMD(ClearShowoffSavedData)  //todo: test serialization
 
 #if 0
 		REG_CMD_ARR(Ar_Init);
 #endif
 
 		REG_CMD(SetCellFullNameAlt)
-		REG_CMD_STR(GetCellFullName)
 
 		REG_CMD(HasAnyScriptPackage)
 
@@ -408,7 +408,7 @@ extern "C"
 	
 		REG_CMD(SetBaseActorValue)
 
-		REG_CMD(DumpGameSettings) //no idea how to do this...
+		//REG_CMD(DumpGameSettings) //pointless, see GetGameSettings in JIP
 
 		//REG_CMD(SetOnHitAltEventHandler);
 
@@ -432,6 +432,14 @@ extern "C"
 		REG_CMD_ARR(GetQueuedCornerMessages);
 
 		REG_CMD(TestDemo);
+
+		/*=======Function ideas======
+		 *
+		 * GetActorValueShowoff - uses numeric keys like JG, but also has args to get the base/current/etc. Basically all-in-one.
+		 * IsActorInRadius - returns true if the actor is within the Radius extradata of the reference.
+		 *
+		 * 
+		 */
 
 #endif
 

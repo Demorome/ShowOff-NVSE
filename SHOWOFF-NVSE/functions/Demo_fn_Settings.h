@@ -158,29 +158,11 @@ bool Cmd_SetNumericGameSettingAlt_Execute(COMMAND_ARGS)
 
 }
 */
-#ifdef _DEBUG
-DEFINE_COMMAND_PLUGIN(DumpGameSettings, , 0, 0, NULL);
-bool Cmd_DumpGameSettings_Execute(COMMAND_ARGS)
-{
-	char settingName[512];
-	GameSettingCollection* gmsts = GameSettingCollection::GetSingleton();
-	//if (gmsts && gmsts->GetGameSetting(settingName, &setting))
-		//;
-	UINT32 const numGmsts = gmsts->settingMap.numItems;
-	UINT32 const numBuckets = gmsts->settingMap.numBuckets;
-	
-	
-	if (IsConsoleMode())
-	{
-		Console_Print("--- Dumping GameSettings Map, Size: %d, NumBuckets: %d ---", numGmsts, numBuckets);
-		//NiTMapBase<char*, Setting*> map = gmsts->settingMap;
-		//NiTMapBase<const char*, Setting*>::Entry **entry = gmsts->settingMap.buckets;
-		//NiTMapBase<const char*, Setting*>::Entry.next = auto entry; // ::next;
-		//&entry.next; 
-		
-	}
 
-	return true;
-}
+#ifdef _DEBUG
+
+
+
+
 
 #endif

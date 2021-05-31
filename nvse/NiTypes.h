@@ -266,7 +266,7 @@ struct NiTSet
 // this is a NiTPointerMap <UInt32, T_Data>
 // todo: generalize key
 template <typename T_Data>
-class NiTPointerMap
+class NiTPointerMap  //copied JIP definition for iterator access.
 {
 public:
 	NiTPointerMap();
@@ -357,63 +357,66 @@ template <typename T_Key, typename T_Data>
 class NiTMapBase
 {
 public:
-	NiTMapBase();
-	~NiTMapBase();
-
 	struct Entry
 	{
-		Entry		*next;
+		Entry* next;
 		T_Key		key;
 		T_Data		data;
 	};
 
-	virtual NiTMapBase	*Destructor(bool doFree);
-	virtual UInt32		Hash(T_Key key);
-	virtual void		Equal(T_Key key1, T_Key key2);
-	virtual void		FillEntry(Entry entry, T_Key key, T_Data data);
-	virtual	void		Unk_004(void *arg0);
-	virtual	void		Unk_005();
-	virtual	void		Unk_006();
+	virtual void	Destroy(bool doFree);
+	virtual UInt32	CalculateBucket(T_Key key);
+	virtual bool	Equal(T_Key key1, T_Key key2);
+	virtual void	FillEntry(Entry* entry, T_Key key, T_Data data);
+	virtual	void	FreeKey(Entry* entry);
+	virtual	Entry* AllocNewEntry();
+	virtual	void	FreeEntry(Entry* entry);
 
 	UInt32		numBuckets;	// 04
-	Entry		**buckets;	// 08
+	Entry** buckets;	// 08
 	UInt32		numItems;	// 0C
+
+	T_Data Lookup(T_Key key)
+	{
+		for (Entry* entry = buckets[CalculateBucket(key)]; entry; entry = entry->next)
+			if (Equal(key, entry->key)) return entry->data;
+		return NULL;
+	}
+
+	void FreeBuckets();
 
 	class Iterator
 	{
 		friend NiTMapBase;
 
-		NiTMapBase		*m_table;
-		Entry			*m_entry;
-		UInt32			m_bucket;
+		NiTMapBase* table;
+		Entry** bucket;
+		Entry* entry;
 
-		void FindValid()
+		void FindNonEmpty()
 		{
-			for (; m_bucket < m_table->numBuckets; m_bucket++)
-			{
-				m_entry = m_table->buckets[m_bucket];
-				if (m_entry) break;
-			}
+			for (Entry** end = &table->buckets[table->numBuckets]; bucket != end; bucket++)
+				if (entry = *bucket) return;
 		}
 
 	public:
-		Iterator(NiTMapBase *table) : m_table(table), m_entry(NULL), m_bucket(0) {FindValid();}
+		Iterator(NiTMapBase& _table) : table(&_table), bucket(table->buckets), entry(NULL) { FindNonEmpty(); }
 
-		bool Done() const {return m_entry == NULL;}
-		void Next()
+		explicit operator bool() const { return entry != NULL; }
+		void operator++()
 		{
-			m_entry = m_entry->next;
-			if (!m_entry)
+			entry = entry->next;
+			if (!entry)
 			{
-				m_bucket++;
-				FindValid();
+				bucket++;
+				FindNonEmpty();
 			}
 		}
-		T_Data Get() const {return m_entry->data;}
-		T_Key Key() const {return m_entry->key;}
+		T_Data Get() const { return entry->data; }
+		T_Key Key() const { return entry->key; }
 	};
 
-	bool Lookup(T_Key key, T_Data *dataOut);
+	Iterator Begin() { return Iterator(*this); }
 };
 
 template <typename T_Key, typename T_Data>
