@@ -9,7 +9,7 @@ EventInformation* OnCornerMessage;
 bool __fastcall handleCornerMessageEvent(HUDMainMenu* menu, void* edx, char* msgText, eEmotion IconType, char* iconPath, char* soundPath, float displayTime, bool instantEndCurrentMessage)
 {
 	for (auto const& callback : OnCornerMessage->EventCallbacks) {
-		FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnCornerMessage->numMaxArgs, displayTime);
+		FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnCornerMessage->numMaxArgs);
 	}
 #if _DEBUG
 	//Console_Print("==Testing hook==\n -msgText: %s\n -IconType: %d\n -iconPath: %s\n -soundPath: %s\n -displayTime: %f\n -instantEndCurrentMessage: %d", msgText, IconType, iconPath, soundPath, displayTime, instantEndCurrentMessage);
@@ -45,7 +45,7 @@ bool Cmd_SetOnHitAltEventHandler_Execute(COMMAND_ARGS)
 
 void HandleEventHooks()
 {
-	OnCornerMessage = JGCreateEvent("OnCornerMessage", 1, 0, NULL); 
+	OnCornerMessage = JGCreateEvent("OnCornerMessage", 0, 0, NULL); 
 	FunctionCallScript = g_scriptInterface->CallFunction;
 	WriteRelCall(0x705379, UINT32(handleCornerMessageEvent));
 	WriteRelCall(0x7EE74D, UINT32(handleCornerMessageEvent));

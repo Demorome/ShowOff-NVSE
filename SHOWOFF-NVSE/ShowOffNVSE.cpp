@@ -80,6 +80,40 @@ std::atomic<char*> doesn't really work.
 */
 ICriticalSection g_Lock;
 
+//NVSE Globals
+bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
+bool (*ExtractFormatStringArgs)(UInt32 fmtStringPos, char* buffer, COMMAND_ARGS_EX, UInt32 maxParams, ...);  // From JIP_NVSE.H
+NVSEArrayVarInterface* g_arrInterface = nullptr;
+NVSEArrayVar* (*CreateArray)(const NVSEArrayElement* data, UInt32 size, Script* callingScript);
+NVSEArrayVar* (*CreateStringMap)(const char** keys, const NVSEArrayElement* values, UInt32 size, Script* callingScript);
+bool (*AssignArrayResult)(NVSEArrayVar* arr, double* dest);
+void (*SetElement)(NVSEArrayVar* arr, const NVSEArrayElement& key, const NVSEArrayElement& value);
+void (*AppendElement)(NVSEArrayVar* arr, const NVSEArrayElement& value);
+UInt32(*GetArraySize)(NVSEArrayVar* arr);
+NVSEArrayVar* (*LookupArrayByID)(UInt32 id);
+bool (*GetElement)(NVSEArrayVar* arr, const NVSEArrayElement& key, NVSEArrayElement& outElement);
+bool (*GetArrayElements)(NVSEArrayVar* arr, NVSEArrayElement* elements, NVSEArrayElement* keys);
+NVSEStringVarInterface* g_strInterface = nullptr;
+bool (*AssignString)(COMMAND_ARGS, const char* newValue);
+const char* (*GetStringVar)(UInt32 stringID);
+NVSEMessagingInterface* g_msg = nullptr;
+NVSEScriptInterface* g_scriptInterface = nullptr;
+NVSECommandTableInterface* g_commandInterface = nullptr;
+
+//Singletons
+HUDMainMenu* g_HUDMainMenu = nullptr;
+TileMenu** g_tileMenuArray = nullptr;
+UInt32 g_screenWidth = 0;
+UInt32 g_screenHeight = 0;
+PlayerCharacter* g_thePlayer = nullptr;
+ActorValueOwner* g_playerAVOwner = nullptr;
+ProcessManager* g_processManager = nullptr;
+InterfaceManager* g_interfaceManager = nullptr;
+BSWin32Audio* g_bsWin32Audio = nullptr;
+DataHandler* g_dataHandler = nullptr;
+BSAudioManager* g_audioManager = nullptr;
+Sky** g_currentSky = nullptr;
+
 //-Hook Globals
 std::atomic<bool> g_canPlayerPickpocketInCombat = false;
 
@@ -279,7 +313,7 @@ extern "C"
 			ExtractArgsEx = g_scriptInterface->ExtractArgsEx;
 			ExtractFormatStringArgs = g_scriptInterface->ExtractFormatStringArgs;
 			
-			CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
+			g_commandInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 			
 			g_strInterface = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);
 			GetStringVar = g_strInterface->GetString;

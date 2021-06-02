@@ -7,6 +7,40 @@
 
 extern ICriticalSection g_Lock;
 
+//NVSE Globals
+extern bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
+extern bool (*ExtractFormatStringArgs)(UInt32 fmtStringPos, char* buffer, COMMAND_ARGS_EX, UInt32 maxParams, ...);  // From JIP_NVSE.H
+extern NVSEArrayVarInterface* g_arrInterface;
+extern NVSEArrayVar* (*CreateArray)(const NVSEArrayElement* data, UInt32 size, Script* callingScript);
+extern NVSEArrayVar* (*CreateStringMap)(const char** keys, const NVSEArrayElement* values, UInt32 size, Script* callingScript);
+extern bool (*AssignArrayResult)(NVSEArrayVar* arr, double* dest);
+extern void (*SetElement)(NVSEArrayVar* arr, const NVSEArrayElement& key, const NVSEArrayElement& value);
+extern void (*AppendElement)(NVSEArrayVar* arr, const NVSEArrayElement& value);
+extern UInt32(*GetArraySize)(NVSEArrayVar* arr);
+extern NVSEArrayVar* (*LookupArrayByID)(UInt32 id);
+extern bool (*GetElement)(NVSEArrayVar* arr, const NVSEArrayElement& key, NVSEArrayElement& outElement);
+extern bool (*GetArrayElements)(NVSEArrayVar* arr, NVSEArrayElement* elements, NVSEArrayElement* keys);
+extern NVSEStringVarInterface* g_strInterface;
+extern bool (*AssignString)(COMMAND_ARGS, const char* newValue);
+extern const char* (*GetStringVar)(UInt32 stringID);
+extern NVSEMessagingInterface* g_msg;
+extern NVSEScriptInterface* g_scriptInterface;
+extern NVSECommandTableInterface* g_commandInterface;
+
+//Singletons
+extern HUDMainMenu* g_HUDMainMenu;
+extern TileMenu** g_tileMenuArray;
+extern UInt32 g_screenWidth;
+extern UInt32 g_screenHeight;
+extern PlayerCharacter* g_thePlayer;
+extern ActorValueOwner* g_playerAVOwner;
+extern ProcessManager* g_processManager;
+extern InterfaceManager* g_interfaceManager;
+extern BSWin32Audio* g_bsWin32Audio;
+extern DataHandler* g_dataHandler;
+extern BSAudioManager* g_audioManager;
+extern Sky** g_currentSky;
+
 //-Hook Globals
 extern std::atomic<bool> g_canPlayerPickpocketInCombat;
 
@@ -29,7 +63,6 @@ extern char* g_PBIR_FailMessage;
 
 
 // Misc.
-bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
 #define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)  //Probably breaks Compiler Override!!
 #define REFR_RES *(UInt32*)result  //From JIP
 
@@ -47,42 +80,6 @@ bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
 
 typedef NVSEArrayVarInterface::Array NVSEArrayVar;
 typedef NVSEArrayVarInterface::Element NVSEArrayElement;
-bool (*ExtractFormatStringArgs)(UInt32 fmtStringPos, char* buffer, COMMAND_ARGS_EX, UInt32 maxParams, ...);  // From JIP_NVSE.H
-
-// Singletons and shortcuts for those singletons.
-NVSEArrayVarInterface* g_arrInterface = nullptr;
-NVSEArrayVar* (*CreateArray)(const NVSEArrayElement* data, UInt32 size, Script* callingScript);
-NVSEArrayVar* (*CreateStringMap)(const char** keys, const NVSEArrayElement* values, UInt32 size, Script* callingScript);
-bool (*AssignArrayResult)(NVSEArrayVar* arr, double* dest);
-void (*SetElement)(NVSEArrayVar* arr, const NVSEArrayElement& key, const NVSEArrayElement& value);
-void (*AppendElement)(NVSEArrayVar* arr, const NVSEArrayElement& value);
-UInt32(*GetArraySize)(NVSEArrayVar* arr);
-NVSEArrayVar* (*LookupArrayByID)(UInt32 id);
-bool (*GetElement)(NVSEArrayVar* arr, const NVSEArrayElement& key, NVSEArrayElement& outElement);
-bool (*GetArrayElements)(NVSEArrayVar* arr, NVSEArrayElement* elements, NVSEArrayElement* keys);
-
-NVSEStringVarInterface* g_strInterface = nullptr;
-bool (*AssignString)(COMMAND_ARGS, const char* newValue);
-const char* (*GetStringVar)(UInt32 stringID);
-
-NVSEMessagingInterface* g_msg = nullptr;
-NVSEScriptInterface* g_scriptInterface = nullptr;
-NVSECommandTableInterface* CmdIfc = nullptr;
-
-HUDMainMenu* g_HUDMainMenu = nullptr;
-TileMenu** g_tileMenuArray = nullptr;
-UInt32 g_screenWidth = 0;
-UInt32 g_screenHeight = 0;
-
-PlayerCharacter* g_thePlayer = nullptr;
-ActorValueOwner* g_playerAVOwner = nullptr;
-ProcessManager* g_processManager = nullptr;
-InterfaceManager* g_interfaceManager = nullptr;
-BSWin32Audio* g_bsWin32Audio = nullptr;
-DataHandler* g_dataHandler = nullptr;
-BSAudioManager* g_audioManager = nullptr;
-Sky** g_currentSky = nullptr;
-
 
 //---Hooks and Hook Stuff
 
