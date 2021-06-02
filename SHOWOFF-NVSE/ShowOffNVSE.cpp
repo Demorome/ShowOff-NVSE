@@ -354,9 +354,7 @@ extern "C"
 		nvse->SetOpcodeBase(0x3A9F);
 
 		/* ONLY COMMANDS WITH LISTED OPCODES SHOULD BE USED IN SCRIPTS */
-
-		REG_CMD(DumpFormList)  //todo: verify if char* usage is safe
-
+		
 		REG_CMD(ModNumericGameSetting)
 		REG_CMD(ModNumericINISetting)
 
@@ -447,6 +445,9 @@ extern "C"
 
 		REG_CMD(SetShowOffOnCornerMessageEventHandler)
 		
+
+		REG_CMD(DumpFormList)  //todo: verify if char* usage is safe. Breaks for large arrays!
+
 		
 		//REG_CMD_ARR(Ar_Init);
 		REG_CMD(SetCellFullNameAlt)

@@ -207,6 +207,13 @@ static ParamInfo kParams_OneFormList_OneOptionalString[2] =
 	{	"string",	 kParamType_String,		1		},
 };
 
+static ParamInfo kParams_OneFormList_OneOptionalString_OneOptionalInt[3] =
+{
+	{	"form list", kParamType_FormList,	0		},
+	{	"string",	 kParamType_String,		1		},
+	{	"int",		 kParamType_Integer,	1		},
+}; 
+
 static ParamInfo kParams_OneString_OneOptionalObjectID[2] =
 {
 	{	"string",		kParamType_String,		0	},

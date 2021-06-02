@@ -3,15 +3,15 @@
 
 
 
-DEFINE_COMMAND_ALT_PLUGIN(DumpFormList, FListDump, , 0, 2, kParams_OneFormList_OneOptionalString);
+DEFINE_COMMAND_ALT_PLUGIN(DumpFormList, FListDump, , 0, 3, kParams_OneFormList_OneOptionalString_OneOptionalInt);
 bool Cmd_DumpFormList_Execute(COMMAND_ARGS)
 {
 	BGSListForm* FList;
 	char filepathStr[260] = "nope";
-	*result = 0;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &FList, &filepathStr)) return true;
+	UInt32 bAppend = 1;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &FList, &filepathStr, &bAppend)) return true;
 	if (!FList) return true;
-	char* buf = GetStrArgBuffer();  //I have no idea what I'm doing with these char*, lol
+	char* buf = GetStrArgBuffer();  //I have no idea what I'm doing with these char*
 	int bufLength = 0;
 	//https://stackoverflow.com/questions/2674312/how-to-append-strings-using-sprintf
 	bufLength += sprintf(buf+bufLength, "Dumping %s FormList [%08X], size %d:", FList->GetName(), FList->refID, FList->Count());
@@ -35,19 +35,10 @@ bool Cmd_DumpFormList_Execute(COMMAND_ARGS)
 	if (strcmp(filepathStr, "nope") != 0)  //https://stackoverflow.com/a/1330559, strcmp returns non-zero if the string contents are not equal.
 	{
 		FileStreamJIP outputFile;
-		if (outputFile.OpenWrite(filepathStr, true))
+		if (outputFile.OpenWrite(filepathStr, bAppend != 0))
 		{
 			outputFile.WriteStr(buf);
-			*result = 1;
 		}
-	}
-	else
-	{
-		if (strlen(buf) < 512)
-			Console_Print(buf);  //won't check for IsConsoleOpen, to mimic ar_Dump.
-		else
-			Console_Print_Long(buf);
-		*result = 1;
 	}
 	return true;
 }
