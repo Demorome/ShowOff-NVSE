@@ -168,7 +168,7 @@
     <ClInclude Include="functions\Demo_fn_Debug.h">
       <Filter>functions</Filter>
     </ClInclude>
-    <ClInclude Include="Events\Demo_ev_Misc.h">
+    <ClInclude Include="Events\ShowOffEvents.h">
       <Filter>Events</Filter>
     </ClInclude>
     <ClInclude Include="Events\EventFilteringInterface.h">
@@ -182,6 +182,12 @@
     </ClInclude>
     <ClInclude Include="internal\serialization.h">
       <Filter>internal</Filter>
+    </ClInclude>
+    <ClInclude Include="Events\JohnnyEventPredefinitions.h">
+      <Filter>Events</Filter>
+    </ClInclude>
+    <ClInclude Include="Events\CustomEventFilters.h">
+      <Filter>Events</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

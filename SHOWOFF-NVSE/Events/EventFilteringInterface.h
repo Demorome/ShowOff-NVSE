@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include <unordered_set>
 
-//From JohnnyGuitar
+//From JohnnyGuitar NVSE
 
 union GenericFilters
 {
@@ -71,18 +71,6 @@ public:
 
 };
 
-
-class EventContainerInterface
-{
-public:
-	void virtual RegisterEvent(Script* script, void** filters);
-	void virtual RemoveEvent(Script* script, void** filters);
-};
-
-
-EventContainerInterface* (_cdecl* CreateScriptEvent)(const char* EventName, UInt8 maxArgs, UInt8 maxFilters, void* (__fastcall* CustomConstructor)(void**, UInt32));
-void(__cdecl* FreeScriptEvent)(EventContainerInterface*& toRemove);
-
 class BaseEventClass
 {
 public:
@@ -100,7 +88,6 @@ public:
 	}
 	void SetDeleted(bool doSet)
 	{
-
 		doSet ? Flags |= kEventFlag_Deleted : Flags &= ~kEventFlag_Deleted;
 	}
 };

@@ -8,7 +8,7 @@
 
 extern HMODULE g_ShowOffHandle;
 
-void HandleIniOptions()
+void HandleINIOptions()
 {
 	char iniPath[MAX_PATH];
 	GetModuleFileNameA(g_ShowOffHandle, iniPath, MAX_PATH);

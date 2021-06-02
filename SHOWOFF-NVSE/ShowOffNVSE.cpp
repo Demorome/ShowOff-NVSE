@@ -1,3 +1,8 @@
+#include <memory>
+#include <mutex>
+#include <shared_mutex>
+#include <atomic>
+
 #include "nvse/PluginAPI.h"
 #include "nvse/CommandTable.h"
 #include "nvse/GameAPI.h"
@@ -9,7 +14,6 @@
 #include "nvse/SafeWrite.h"
 
 #include "common/ICriticalSection.h"
-#include <atomic>
 #include "ShowOffNVSE.h"
 #include "settings.h"
 
@@ -38,8 +42,10 @@
 #include "functions/Demo_fn_Debug.h"
 
 // Events
+#include "Events/JohnnyEventPredefinitions.h"
 #include "Events/EventFilteringInterface.h"
-#include "Events/Demo_ev_Misc.h"
+#include "Events/CustomEventFilters.h"
+#include "Events/ShowOffEvents.h"
 
 
 // Plugin Stuff
@@ -192,6 +198,7 @@ extern "C"
 		//g_Log.open??
 
 		// version checks
+		//todo: revise debug log functionality, add Windows MessageBox warnings.
 		if (nvse->nvseVersion < PACKED_NVSE_VERSION)
 		{
 			_ERROR("NVSE version too old (got %08X expected at least %08X)", nvse->nvseVersion, PACKED_NVSE_VERSION);
@@ -268,9 +275,9 @@ extern "C"
 			serialization->SetSaveCallback(nvsePluginHandle, SaveGameCallback);
 			serialization->SetNewGameCallback(nvsePluginHandle, NewGameCallback);
 			
-			g_script = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
-			ExtractArgsEx = g_script->ExtractArgsEx;
-			ExtractFormatStringArgs = g_script->ExtractFormatStringArgs;
+			g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
+			ExtractArgsEx = g_scriptInterface->ExtractArgsEx;
+			ExtractFormatStringArgs = g_scriptInterface->ExtractFormatStringArgs;
 			
 			CmdIfc = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 			
@@ -288,12 +295,15 @@ extern "C"
 			LookupArrayByID = g_arrInterface->LookupArrayByID;
 			GetElement = g_arrInterface->GetElement;
 			GetArrayElements = g_arrInterface->GetElements;
-			
+#if 0
 			auto johnnyGuitar = GetModuleHandle("johnnyguitar.dll");
-			//do stuff with johnny handle?
+			JGCreateEvent = (CreateScriptEvent)GetProcAddress(johnnyGuitar, "JGCreateEvent");
+			JGFreeEvent = (FreeScriptEvent)GetProcAddress(johnnyGuitar, "JGFreeEvent");
+#endif
 			
-			HandleIniOptions();
+			HandleINIOptions();
 			HandleGameHooks();
+			HandleEventHooks();
 		}
 
 		// Register script commands
@@ -358,7 +368,7 @@ extern "C"
 		REG_CMD_ARR(AuxStringMapArrayGetFirst)
 		REG_CMD_ARR(AuxStringMapArrayGetNext)
 		REG_CMD_ARR(AuxStringMapArrayGetKeys)
-		REG_CMD_ARR(AuxStringMapArrayGetAll)
+		REG_CMD_ARR(AuxStringMapArrayGetAll) 
 		REG_CMD_ARR(AuxStringMapArrayGetAsArray)
 		REG_CMD(AuxStringMapArraySetFromArray)
 		REG_CMD(AuxStringMapArraySetFloat)
@@ -386,16 +396,17 @@ extern "C"
 		//REG_CMD(UnequipItemsFromBitMask)  //tricky to get xData, idk if anyone will ever use this anyways.
 		//todo: GetEquippedTotalValue
 		REG_CMD(ClearShowoffSavedData)  //todo: test serialization
-		
+
+		//todo: make GetCalculatedEquippedWeight / GetBaseEquippedWeight allow for float min, instead of int min.
 		REG_CMD(GetBaseEquippedWeight)
 		REG_CMD(GetCalculatedEquippedWeight)  //NOTE: bWeightlessWorn(Power)Armor from Stewie's is not accounted for.
 		REG_CMD(GetCalculatedMaxCarryWeight)
-#if 0
-		REG_CMD_ARR(Ar_Init);
-#endif
 
+		REG_CMD(SetShowOffOnCornerMessageEventHandler)
+		
+		
+		//REG_CMD_ARR(Ar_Init);
 		REG_CMD(SetCellFullNameAlt)
-
 		REG_CMD(HasAnyScriptPackage)
 
 		//These two functions are useless, the setting functions already safety check and even report if the setting could not be found via func result.
@@ -436,11 +447,11 @@ extern "C"
 
 		REG_CMD(TestDemo);
 
-		/*=======Function ideas======
+		/*todo =======Function ideas ======
 		 *
 		 * GetActorValueShowoff - uses numeric keys like JG, but also has args to get the base/current/etc. Basically all-in-one.
 		 * IsActorInRadius - returns true if the actor is within the Radius extradata of the reference.
-		 *
+		 * GetCalculatedItemWeight, using parts from GetCalc.equ.weight
 		 * 
 		 */
 

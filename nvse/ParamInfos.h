@@ -428,3 +428,31 @@ static ParamInfo kParams_OneBasicType[] =
 	//{	"expression",	kNVSEParamType_BasicType,	0	},
 };
 #endif
+
+
+static ParamInfo kParams_Event_OneForm[4] =
+{
+	{ "setOrRemove", kParamType_Integer, 0 },
+	{ "Script", kParamType_AnyForm, 0 },
+	{ "flags", kParamType_Integer, 1 },
+	{ "Form", kParamType_AnyForm, 1 }
+
+};
+
+static ParamInfo kParams_Event[3] =
+{
+	{ "setOrRemove", kParamType_Integer, 0 },
+	{ "Script", kParamType_AnyForm, 0 },
+	{ "flags", kParamType_Integer, 1 },
+
+};
+
+static ParamInfo kParams_Event_OneForm_OneInt[5] =
+{
+	{ "setOrRemove", kParamType_Integer, 0 },
+	{ "Script", kParamType_AnyForm, 0 },
+	{ "flags", kParamType_Integer, 1 },
+	{ "Form", kParamType_AnyForm, 1 },
+	{ "Integer", kParamType_Integer, 1 },
+
+};
