@@ -250,7 +250,7 @@ void resetPickpocketHooks()
 	SafeWrite8(0x608200, 0x74);
 
 	IsPickpocketHookSet = false;
-	Console_Print("Changes offline.");
+	//Console_Print("Changes offline.");
 } 
 
 

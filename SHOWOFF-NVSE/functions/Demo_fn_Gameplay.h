@@ -1,10 +1,21 @@
 ﻿#pragma once
 
 DEFINE_COMMAND_ALT_PLUGIN(SetPlayerCanPickpocketEquippedItems, SetPCCanStealEqItems, "Toggles the ability to pickpocket equipped items.", 0, 1, kParams_OneInt);
+DEFINE_CMD_ALT_COND_PLUGIN(GetPlayerCanPickpocketEquippedItems, GetPCCanStealEqItems, "Checks if the player can pickpocket equipped items.", 0, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(GetPCHasFastTravelOverride, , "Returns whether or not the player is restricted by EnableFastTravel", 0, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(GetPCHasSleepWaitOverride, , "Returns whether or not the player has a Sleep/Wait prevention override", 0, NULL);
+DEFINE_COMMAND_PLUGIN(SetPCHasSleepWaitOverride, "Sets whether or not the player has a Sleep/Wait prevention override", 0, 1, kParams_OneInt);
+DEFINE_CMD_ALT_COND_PLUGIN(IsWeaponMelee, , "Returns 1 if the weapon's base form is of one of the three weapon types belonging to melee-range weapons.", 1, kParams_OneOptionalObjectID);
+DEFINE_CMD_ALT_COND_PLUGIN(IsEquippedWeaponMelee, , "Returns 1 if the calling actor's equipped weapon's base form is of one of the three weapon types belonging to melee-range weapons.", 1, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(IsWeaponRanged, , "Returns 1 if the weapon's base form is one of the weapon types belonging to NON melee-range weapons.", 1, kParams_OneOptionalObjectID);
+DEFINE_CMD_ALT_COND_PLUGIN(IsEquippedWeaponRanged, , "Returns 1 if the calling actor's equipped weapon's base form is one of the weapon types belonging to NON melee-range weapons.", 1, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(GetChallengeProgress, , "Returns the progress made on a challenge.", 0, kParams_OneChallenge)
+
+
 bool Cmd_SetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
 {
 	UInt32 bOn;
-	if (NUM_ARGS && ExtractArgs(EXTRACT_ARGS, &bOn))
+	if (NUM_ARGS && ExtractArgsEx(EXTRACT_ARGS_EX, &bOn))
 	{
 		bool bCheck = canPlayerPickpocketEqItems();
 		if (bOn && !bCheck)
@@ -22,7 +33,6 @@ bool Cmd_SetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_CMD_ALT_COND_PLUGIN(GetPlayerCanPickpocketEquippedItems, GetPCCanStealEqItems, "Checks if the player can pickpocket equipped items.", 0, NULL);
 bool Cmd_GetPlayerCanPickpocketEquippedItems_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = canPlayerPickpocketEqItems();
@@ -34,41 +44,40 @@ bool Cmd_GetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_CMD_ALT_COND_PLUGIN(GetPCCanFastTravel, GetCanFastTravel, "Returns whether or not the player can Fast Travel", 0, NULL);
-bool Cmd_GetPCCanFastTravel_Eval(COMMAND_ARGS_EVAL)
+bool Cmd_GetPCHasFastTravelOverride_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = (g_thePlayer->byte66D & 1) != 0;
 	return true;
 }
-bool Cmd_GetPCCanFastTravel_Execute(COMMAND_ARGS)
+bool Cmd_GetPCHasFastTravelOverride_Execute(COMMAND_ARGS)
 {
+#if _DEBUG
+	Console_Print("%x", g_thePlayer->byte66D);
+#endif
 	*result = (g_thePlayer->byte66D & 1) != 0;
 	return true;
 }
 
-DEFINE_CMD_ALT_COND_PLUGIN(GetPCCanSleepWait, GetCanSleepWait, "Returns whether or not the player can Sleep/Wait", 0, NULL);
-bool Cmd_GetPCCanSleepWait_Eval(COMMAND_ARGS_EVAL)
+bool Cmd_GetPCHasSleepWaitOverride_Eval(COMMAND_ARGS_EVAL)
 {
-	*result = g_thePlayer->canSleepWait;
+	*result = !g_thePlayer->canSleepWait;
 	return true;
 }
-bool Cmd_GetPCCanSleepWait_Execute(COMMAND_ARGS)
+bool Cmd_GetPCHasSleepWaitOverride_Execute(COMMAND_ARGS)
 {
-	Cmd_GetPCCanSleepWait_Eval(thisObj, NULL, NULL, result);
+	Cmd_GetPCHasSleepWaitOverride_Eval(thisObj, NULL, NULL, result);
 	return true;
 }
 
-DEFINE_COMMAND_ALT_PLUGIN(SetPCCanSleepWait, SetCanSleepWait, "Sets whether or not the player can Sleep/Wait", 0, 1, kParams_OneInt);
-bool Cmd_SetPCCanSleepWait_Execute(COMMAND_ARGS)
+bool Cmd_SetPCHasSleepWaitOverride_Execute(COMMAND_ARGS)
 {
 	UInt32 bOn;
 	if (ExtractArgs(EXTRACT_ARGS, &bOn))
-		g_thePlayer->canSleepWait = (bOn != 0);
+		g_thePlayer->canSleepWait = !bOn;
 	return true;
 }
 
 
-DEFINE_CMD_ALT_COND_PLUGIN(IsWeaponMelee, , "Returns 1 if the weapon's base form is of one of the three weapon types belonging to melee-range weapons.", 1, kParams_OneOptionalObjectID);
 bool Cmd_IsWeaponMelee_Eval(COMMAND_ARGS_EVAL)
 {
 	//Console_Print("thisObj: [%0.8X]", thisObj->baseForm->GetId());
@@ -100,7 +109,6 @@ bool Cmd_IsWeaponMelee_Execute(COMMAND_ARGS)
 	return Cmd_IsWeaponMelee_Eval(thisObj, weapon, 0, result);
 }
 
-DEFINE_CMD_ALT_COND_PLUGIN(IsEquippedWeaponMelee, , "Returns 1 if the calling actor's equipped weapon's base form is of one of the three weapon types belonging to melee-range weapons.", 1, NULL);
 bool Cmd_IsEquippedWeaponMelee_Eval(COMMAND_ARGS_EVAL)
 {
 	// Not recommended to use this function for certain perk effects, like Calculate Weap. Damage;
@@ -130,7 +138,6 @@ bool Cmd_IsEquippedWeaponMelee_Execute(COMMAND_ARGS)
 	return Cmd_IsEquippedWeaponMelee_Eval(thisObj, nullptr, nullptr, result);
 }
 
-DEFINE_CMD_ALT_COND_PLUGIN(IsWeaponRanged, , "Returns 1 if the weapon's base form is one of the weapon types belonging to NON melee-range weapons.", 1, kParams_OneOptionalObjectID);
 bool Cmd_IsWeaponRanged_Eval(COMMAND_ARGS_EVAL)
 {
 	//Console_Print("thisObj: [%0.8X]", thisObj->baseForm->GetId());
@@ -163,7 +170,6 @@ bool Cmd_IsWeaponRanged_Execute(COMMAND_ARGS)
 	return Cmd_IsWeaponRanged_Eval(thisObj, weapon, 0, result);
 }
 
-DEFINE_CMD_ALT_COND_PLUGIN(IsEquippedWeaponRanged, , "Returns 1 if the calling actor's equipped weapon's base form is one of the weapon types belonging to NON melee-range weapons.", 1, NULL);
 bool Cmd_IsEquippedWeaponRanged_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
@@ -184,7 +190,7 @@ bool Cmd_IsEquippedWeaponRanged_Execute(COMMAND_ARGS)
 	return Cmd_IsEquippedWeaponRanged_Eval(thisObj, nullptr, nullptr, result);
 }
 
-DEFINE_CMD_ALT_COND_PLUGIN(GetChallengeProgress, , "Returns the progress made on a challenge.", 0, kParams_OneChallenge)
+
 bool Cmd_GetChallengeProgress_Execute(COMMAND_ARGS)
 {
 	TESChallenge* challenge;
@@ -343,12 +349,14 @@ bool Cmd_SetNoEquip_Execute(COMMAND_ARGS)
 	return true;
 }
 
+/*
 DEFINE_COMMAND_PLUGIN(GetFastTravelFlags, , 0, 0, NULL);
 bool Cmd_GetFastTravelFlags_Execute(COMMAND_ARGS)
 {
 	*result = (g_thePlayer->byte66D & 1) != 0;
 	return true;
 }
+*/
 
 /*
 DEFINE_COMMAND_PLUGIN(SetParentRef, , 1, 1, kParams_OneOptionalForm);

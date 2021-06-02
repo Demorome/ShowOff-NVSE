@@ -357,12 +357,10 @@ extern "C"
 		
 		REG_CMD(ModNumericGameSetting)
 		REG_CMD(ModNumericINISetting)
-
 		REG_CMD(SetPlayerCanPickpocketEquippedItems)
 		REG_CMD(GetPlayerCanPickpocketEquippedItems)
-		REG_CMD(GetPCCanFastTravel)
-		REG_CMD(GetPCCanSleepWait)
-		REG_CMD(SetPCCanSleepWait)
+		REG_CMD(GetPCHasSleepWaitOverride)
+		REG_CMD(SetPCHasSleepWaitOverride)
 	
 		//Showing off by copying vanilla style way functions!
 		REG_CMD(ShowingOffDisable)  //best to keep undocumented to not waste people's time.
@@ -475,7 +473,7 @@ extern "C"
 		//REG_CMD(GetCalculatedItemWeight);
 
 		//REG_CMD(SetPlayerPickpocketBaseChance);
-		REG_CMD(GetFastTravelFlags);
+		//REG_CMD(GetFastTravelFlags);
 
 		REG_CMD(SetPCCanPickpocketInCombat);
 		
@@ -486,8 +484,9 @@ extern "C"
 		//REG_CMD(GetEquippedWeaponType);  //JIP already made it for TTW.
 
 		REG_CMD(SetEnableParent);
-
 		REG_CMD_ARR(GetQueuedCornerMessages);
+		REG_CMD(GetPCHasFastTravelOverride)
+
 
 		REG_CMD(TestDemo);
 
