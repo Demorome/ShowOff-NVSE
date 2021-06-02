@@ -186,7 +186,6 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		g_dataHandler = DataHandler::Get();
 		g_audioManager = (BSAudioManager*)0x11F6EF0;
 		g_currentSky = (Sky**)0x11DEA20;
-		
 		g_HUDMainMenu = *(HUDMainMenu**)0x11D96C0;  // From JiP's patches game
 		g_interfaceManager = *(InterfaceManager**)0x11D8A80; // From JiP's patches game
 		g_tileMenuArray = *(TileMenu***)0x11F350C; // From JiP's patches game
@@ -232,10 +231,12 @@ extern "C"
 		//g_Log.open??
 
 		// version checks
-		//todo: revise debug log functionality, add Windows MessageBox warnings.
 		if (nvse->nvseVersion < PACKED_NVSE_VERSION)
 		{
-			_ERROR("NVSE version too old (got %08X expected at least %08X)", nvse->nvseVersion, PACKED_NVSE_VERSION);
+			char buffer[100];
+			sprintf_s(buffer, 100,"NVSE version too old (got %08X expected at least %08X)", nvse->nvseVersion, PACKED_NVSE_VERSION);
+			MessageBoxA(nullptr, buffer, "ShowOff", MB_ICONEXCLAMATION);
+			_ERROR(buffer);
 			return false;
 		}
 		
@@ -243,13 +244,18 @@ extern "C"
 		{
 			if (nvse->runtimeVersion < RUNTIME_VERSION_1_4_0_525)
 			{
-				_ERROR("incorrect runtime version (got %08X need at least %08X)", nvse->runtimeVersion, RUNTIME_VERSION_1_4_0_525);
+				char buffer[100];
+				sprintf_s(buffer, 100, "Incorrect runtime version (got %08X need at least %08X)", nvse->runtimeVersion, RUNTIME_VERSION_1_4_0_525);
+				MessageBoxA(nullptr, buffer, "ShowOff", MB_ICONEXCLAMATION);
+				_ERROR(buffer);
 				return false;
 			}
 
 			if (nvse->isNogore)
 			{
-				_ERROR("NoGore is not supported");
+				char buffer[30] = "NoGore is not supported";
+				MessageBoxA(nullptr, buffer, "ShowOff", MB_ICONEXCLAMATION);
+				_ERROR(buffer);
 				return false;
 			}
 		}
@@ -257,7 +263,10 @@ extern "C"
 		{
 			if (nvse->editorVersion < CS_VERSION_1_4_0_518)
 			{
-				_ERROR("incorrect editor version (got %08X need at least %08X)", nvse->editorVersion, CS_VERSION_1_4_0_518);
+				char buffer[100];
+				sprintf_s(buffer, 100, "Incorrect editor version (got %08X, need at least %08X)", nvse->editorVersion, CS_VERSION_1_4_0_518);
+				MessageBoxA(nullptr, buffer, "ShowOff", MB_ICONEXCLAMATION);
+				_ERROR(buffer);
 				return false;
 			}
 		}
