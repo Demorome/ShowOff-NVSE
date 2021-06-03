@@ -219,7 +219,7 @@ bool Cmd_GetNumCombatActorsFromActor_Execute(COMMAND_ARGS)
 
 bool Cmd_GetCreatureTurningSpeed_Execute(COMMAND_ARGS)
 {
-	*result = 0;
+	*result = -1;
 	TESCreature* creature = NULL;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &creature)) return true;
 	if (!creature)
@@ -238,7 +238,7 @@ bool Cmd_SetCreatureTurningSpeed_Execute(COMMAND_ARGS)
 	*result = 0;
 	TESCreature* creature = NULL;
 	float turningSpeed = 0;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &turningSpeed, &creature)) return true;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &turningSpeed, &creature) || turningSpeed < 0) return true;
 	if (!creature)
 	{
 		if (!thisObj || !thisObj->IsActor()) return true;
@@ -255,7 +255,7 @@ bool Cmd_SetCreatureTurningSpeed_Execute(COMMAND_ARGS)
 
 bool Cmd_GetCreatureFootWeight_Execute(COMMAND_ARGS)
 {
-	*result = 0;
+	*result = -1;
 	TESCreature* creature = NULL;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &creature)) return true;
 	if (!creature)
@@ -274,7 +274,7 @@ bool Cmd_SetCreatureFootWeight_Execute(COMMAND_ARGS)
 	*result = 0;
 	TESCreature* creature = NULL;
 	float footWeight = 0;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &footWeight, &creature)) return true;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &footWeight, &creature) || footWeight < 0) return true;
 	if (!creature)
 	{
 		if (!thisObj || !thisObj->IsActor()) return true;
@@ -294,7 +294,7 @@ bool Cmd_SetCreatureReach_Execute(COMMAND_ARGS)
 	*result = 0;
 	TESCreature* creature = NULL;
 	UInt32 reach = 0;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &reach, &creature)) return true;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &reach, &creature) || reach < 0) return true;
 	if (!creature)
 	{
 		if (!thisObj || !thisObj->IsActor()) return true;
@@ -314,7 +314,7 @@ bool Cmd_SetCreatureBaseScale_Execute(COMMAND_ARGS)
 	*result = 0;
 	TESCreature* creature = NULL;
 	float newVal = 0;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &newVal, &creature)) return true;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &newVal, &creature) || newVal < 0) return true;
 	if (!creature)
 	{
 		if (!thisObj || !thisObj->IsActor()) return true;
