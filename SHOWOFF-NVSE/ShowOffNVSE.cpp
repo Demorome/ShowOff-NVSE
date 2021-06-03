@@ -364,7 +364,6 @@ extern "C"
 		REG_CMD(ShowingOffEnable) //best to keep undocumented to not waste people's time.
 		REG_CMD(GetNumActorsInRangeFromRef)
 		REG_CMD(GetNumCombatActorsFromActor)
-		
 		REG_CMD(IsWeaponMelee)
 		REG_CMD(IsEquippedWeaponMelee)
 		REG_CMD(IsWeaponRanged)

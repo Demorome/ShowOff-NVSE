@@ -113,7 +113,6 @@ bool Cmd_IsEquippedWeaponMelee_Eval(COMMAND_ARGS_EVAL)
 {
 	// Not recommended to use this function for certain perk effects, like Calculate Weap. Damage;
 	// since it will affect the DAM that appears in the UI for other weapons, as long as the currently equipped weapon is a melee weap.
-
 	*result = 0;
 	if (thisObj)
 	{
@@ -195,7 +194,7 @@ bool Cmd_GetChallengeProgress_Execute(COMMAND_ARGS)
 {
 	TESChallenge* challenge;
 	if (ExtractArgs(EXTRACT_ARGS, &challenge) && IS_TYPE(challenge, TESChallenge))
-		*result = (int)challenge->progress;  //This can show up as negative.
+		*result = challenge->progress;
 	else *result = 0;
 	return true;
 }
@@ -206,7 +205,7 @@ bool Cmd_GetChallengeProgress_Eval(COMMAND_ARGS_EVAL)
 	{
 		TESChallenge* challenge = (TESChallenge*)arg1;
 		if (IS_TYPE(challenge, TESChallenge))
-			*result = (int)challenge->progress;
+			*result = challenge->progress;
 	}
 #if _DEBUG
 	Console_Print("GetChallengeProgress >> %f", *result);
