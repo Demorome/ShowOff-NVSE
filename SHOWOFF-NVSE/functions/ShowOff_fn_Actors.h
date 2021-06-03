@@ -80,131 +80,91 @@ bool Cmd_GetNumActorsInRangeFromRef_Execute(COMMAND_ARGS)
 }
 
 
-//Code ripped off of JIP's GetCombatActors.
-UINT32 __fastcall GetNumCombatActorsFromActorCALL(TESObjectREFR* thisObj, float range, UInt32 flags)
+// Code ripped off of JIP's GetCombatActors.
+// todo: enforce Avoid Repeating Code principle.
+// Figure out how to merge all these for loops.
+
+UInt32 __fastcall GetNumCombatActorsFromActorCALL(TESObjectREFR* thisObj, float range, UInt32 flags)
 {
 	if (!thisObj) return 0;
 	if (!thisObj->IsActor()) return 0;
-	if (!flags) return 0;
 	//Even if the calling actor is dead, they could still have combat targets, so we don't filter that out.
-	
-	UINT32 numActors = 0;
-	bool const getAllies = flags & 0x1;
-	bool const getTargets = flags & 0x2;
-	
-	Actor* actor;
-	if (range <= 0)  //ignore distance.
+
+	enum functionFlags
 	{
-		if (thisObj == g_thePlayer)
+		kFlag_GetAllies = 1,
+		kFlag_GetTargets = 2,
+		maxFlags = kFlag_GetAllies | kFlag_GetTargets,
+	};
+	if (!flags) flags = maxFlags;
+	bool const getAllies = flags & kFlag_GetAllies;
+	bool const getTargets = flags & kFlag_GetTargets;
+
+	UINT32 numActors = 0;
+	auto IncrementNumActorsIfChecksPass = [&](Actor* actor)
+	{
+		if (range != 0.0F && actor && (actor != thisObj))  //todo: verify if !range (float) check works
 		{
-			CombatActors* cmbActors = g_thePlayer->combatActors;
-			if (!cmbActors) return numActors;
-			if (getAllies)
+			if (GetDistance3D(thisObj, actor) <= range)
 			{
-				numActors += cmbActors->allies.size;   //thisObj is its own combat ally, for whatever reason...
-				numActors--;                           //So we decrement it by one to get rid of that.
-			}
-			if (getTargets)
-			{
-				numActors += cmbActors->targets.size;
+				numActors++;
 			}
 		}
-		else
+	};
+	
+	Actor* actor;
+	if (thisObj == g_thePlayer)
+	{
+		CombatActors* cmbActors = g_thePlayer->combatActors;
+		if (!cmbActors) return 0;
+		if (getAllies)
 		{
-			actor = (Actor*)thisObj;
-			if (getAllies && actor->combatAllies)
+			CombatAlly* allies = cmbActors->allies.data;
+			for (UInt32 count = cmbActors->allies.size; count; count--, allies++)
 			{
-				numActors += actor->combatAllies->size;
+				actor = allies->ally;
+				IncrementNumActorsIfChecksPass(actor);
 			}
-			if (getTargets && actor->combatTargets)
+		}
+		if (getTargets)
+		{
+			CombatTarget* targets = cmbActors->targets.data;
+			for (UInt32 count = cmbActors->targets.size; count; count--, targets++)
 			{
-				numActors += actor->combatTargets->size;
+				actor = targets->target;
+				IncrementNumActorsIfChecksPass(actor);
 			}
 		}
 	}
-	else  //---Account for distance.
+	else
 	{
-		UINT32 count;
-		
-		if (thisObj == g_thePlayer)
+		actor = (Actor*)thisObj;
+		Actor** actorsArr = NULL;
+		if (getAllies && actor->combatAllies)
 		{
-			CombatActors* cmbActors = g_thePlayer->combatActors;
-			if (!cmbActors) return numActors;
-			if (getAllies)
+			actorsArr = actor->combatAllies->data; 
+			if (actorsArr)
 			{
-				CombatAlly* allies = cmbActors->allies.data;
-				for (count = cmbActors->allies.size; count; count--, allies++)
+				for (UInt32 count = actor->combatAllies->size; count; count--, actorsArr++)
 				{
-					actor = allies->ally;
-					if (actor && (actor != thisObj))
-					{
-						if (GetDistance3D(thisObj, actor) <= range)
-						{
-							numActors++;
-						}
-					}
-				}
-			}
-			if (getTargets)
-			{
-				CombatTarget* targets = cmbActors->targets.data;
-				for (count = cmbActors->targets.size; count; count--, targets++)
-				{
-					actor = targets->target;
-					if (actor)
-					{
-						if (GetDistance3D(thisObj, actor) <= range)
-						{
-							numActors++;
-						}
-					}
+					actor = *actorsArr;
+					IncrementNumActorsIfChecksPass(actor);
 				}
 			}
 		}
-		else
+		if (getTargets && actor->combatTargets)  
 		{
-			actor = (Actor*)thisObj;
-			Actor** actorsArr = NULL;
-			if (getAllies && actor->combatAllies)
+			actorsArr = actor->combatTargets->data;
+			if (actorsArr)
 			{
-				actorsArr = actor->combatAllies->data;
-				if (actorsArr)
+				for (UInt32 count = actor->combatTargets->size; count; count--, actorsArr++)
 				{
-					count = actor->combatAllies->size;
-					for (; count; count--, actorsArr++)   //can I merge these two loops, to be easier to debug?
-					{
-						actor = *actorsArr;
-						if (actor && (actor != thisObj))  //thisObj is its own combat ally, for whatever reason...
-						{
-							if (GetDistance3D(thisObj, actor) <= range)
-							{
-								numActors++;
-							}
-						}
-					}
+					actor = *actorsArr;
+					IncrementNumActorsIfChecksPass(actor);
 				}
 			}
-			if (getTargets && actor->combatTargets)  
-			{
-				actorsArr = actor->combatTargets->data;
-				if (actorsArr)
-				{
-					count = actor->combatTargets->size;
-					for (; count; count--, actorsArr++)   //can I merge these two loops, to be easier to debug?
-					{
-						actor = *actorsArr;
-						if (actor)  //thisObj cannot be its own target, no need to check against that.
-						{
-							if (GetDistance3D(thisObj, actor) <= range)
-							{
-								numActors++;
-							}
-						}
-					}
-				}
-			}
+		}
 
-		}
 	}
 	return numActors;
 }
@@ -216,8 +176,8 @@ bool Cmd_GetNumCombatActorsFromActor_Eval(COMMAND_ARGS_EVAL)
 }
 bool Cmd_GetNumCombatActorsFromActor_Execute(COMMAND_ARGS)
 {
-	float range;
-	UINT32 flags;
+	float range = 0.0F;
+	UINT32 flags = 0;
 	if (ExtractArgs(EXTRACT_ARGS, &range, &flags))
 		*result = GetNumCombatActorsFromActorCALL(thisObj, range, flags);
 	else
@@ -339,7 +299,7 @@ bool Cmd_SetCreatureBaseScale_Execute(COMMAND_ARGS)
 
 
 
-
+//todo: refactor away use of global
 float g_compassHostiles_Range = 0;  //necessary since can't pass float as void*
 
 //Copied JG's GetNearestCompassHostile code.
@@ -397,9 +357,7 @@ bool Cmd_GetNumCompassHostilesInRange_Execute(COMMAND_ARGS)
 	*result = 0;
 	g_compassHostiles_Range = 0;
 	UInt32 skipInvisible = 0;
-
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &g_compassHostiles_Range, &skipInvisible)) return true;
-
 	return Cmd_GetNumCompassHostilesInRange_Eval(thisObj, 0, (void*)skipInvisible, result);
 }
 
