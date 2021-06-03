@@ -373,7 +373,6 @@ extern "C"
 		REG_CMD(MessageExAltShowoff) //Keep undocumented; don't recommend for general use, extra feature is jank.
 		//REG_CMD(IsCornerMessageDisplayed)  //(any corner message). Redundant in the face of GetNumQueuedCornerMessages.
 		REG_CMD(GetNumQueuedCornerMessages)
-		
 		REG_CMD(GetCreatureTurningSpeed)
 		REG_CMD(SetCreatureTurningSpeed)
 		REG_CMD(GetCreatureFootWeight)
@@ -381,8 +380,10 @@ extern "C"
 		REG_CMD(SetCreatureReach)
 		REG_CMD(SetCreatureBaseScale) //JG's GetBaseScale should return the creature's base scale, so no need for a GetCreatureBaseScale.
 
+		REG_CMD(DumpFormList)  //todo: verify if char* usage is safe. Breaks for large arrays!
 		REG_CMD(ListAddArray)
 		REG_CMD(ListAddList)
+
 		
 		REG_CMD(IsAnimPlayingExCond)
 		REG_CMD(GetNumCompassHostilesInRange)
@@ -434,9 +435,6 @@ extern "C"
 		REG_CMD(GetCalculatedMaxCarryWeight)
 
 		REG_CMD(SetShowOffOnCornerMessageEventHandler)
-		
-
-		REG_CMD(DumpFormList)  //todo: verify if char* usage is safe. Breaks for large arrays!
 
 		
 		//REG_CMD_ARR(Ar_Init);

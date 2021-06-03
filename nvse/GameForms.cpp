@@ -364,6 +364,59 @@ SInt32 BGSListForm::ReplaceForm(TESForm* pForm, TESForm* pReplaceWith)
 	return index;
 }
 
+void BGSListForm::Dump(const std::function<void(const std::string&)>& output)
+{
+	output(FormatString("** Dumping %s FormList [%08X], size %d: **", GetName(), refID, Count()));
+	_MESSAGE("** Dumping %s FormList [%08X], size %d: **", GetName(), refID, Count());
+
+	int iIndex = 0;
+	for (tList<TESForm>::Iterator iter = list.Begin(); !iter.End(); ++iter, iIndex++)
+	{
+		TESForm* form = iter.Get();
+		if (form)
+		{
+			std::string elementInfo = FormatString("%d: %s (%s) [%08X]", iIndex, ::GetFullName(form), form->GetName(), form->refID);
+			output(elementInfo);
+			_MESSAGE("%s", elementInfo.c_str());
+		}
+		else
+		{
+			output(FormatString("%d: < Error >", iIndex));
+			_MESSAGE("%d: < Error >", iIndex);
+		}
+	}
+}
+
+void BGSListForm::DumpToFile(const char* filePath, bool append)
+{
+	try
+	{
+		FILE* f;
+		errno_t e;
+		if (append)
+		{
+			e = fopen_s(&f, filePath, "a+");
+		}
+		else
+		{
+			e = fopen_s(&f, filePath, "w+");
+		}
+
+		if (!e)
+		{
+			Dump([&](const std::string& input) { fprintf(f, "%s\n", input.c_str()); });
+			fclose(f);
+		}
+		else
+			_MESSAGE("Cannot open file %s [%d]", filePath, e);
+
+	}
+	catch (...)
+	{
+		_MESSAGE("Cannot write to file %s", filePath);
+	}
+}
+
 bool TESForm::IsInventoryObject() const
 {
 	typedef bool (*_IsInventoryObjectType)(UInt32 formType);

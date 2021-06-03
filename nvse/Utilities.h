@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 class Script;
 
@@ -156,6 +157,8 @@ public:
 	void vShow(Message& msg, va_list args);
 	void vShow(const char* msg, va_list args);
 };
+
+std::string FormatString(const char* fmt, ...);
 
 // thread-safe template versions of ThisStdCall()
 

@@ -3,6 +3,7 @@
 #include "Utilities.h"
 #include "NiTypes.h"
 #include "internal/utility.h"
+#include <functional>
 
 // 8
 class String

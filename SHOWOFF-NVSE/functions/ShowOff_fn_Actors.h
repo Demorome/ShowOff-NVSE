@@ -99,7 +99,7 @@ UInt32 __fastcall GetNumCombatActorsFromActorCALL(TESObjectREFR* thisObj, float 
 	if (!thisObj->IsActor()) return 0;
 	//Even if the calling actor is dead, they could still have combat targets, so we don't filter that out.
 
-#define DebugGetNumCombatActorsFromActor _DEBUG;
+#define DebugGetNumCombatActorsFromActor _DEBUG
 
 #if DebugGetNumCombatActorsFromActor 
 	_MESSAGE("DebugGetNumActorsInRangeFromRef - begin dump for thisObj %s (%08x)", thisObj->GetName(), thisObj->refID);

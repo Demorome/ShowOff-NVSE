@@ -8,6 +8,9 @@
 #include "internal/havok.h"
 #include "stdint.h"
 
+extern void Console_Print(const char* fmt, ...);
+
+
 enum FormType
 {
 	kFormType_None = 0,
@@ -5362,6 +5365,9 @@ public:
 		list.RemoveAll();
 		numAddedObjects = 0;
 	}
+
+	void Dump(const std::function<void(const std::string&)>& output = [&](const std::string& input) { Console_Print("%s", input.c_str()); });
+	void DumpToFile(const char* filePath, bool append);
 };
 
 STATIC_ASSERT(sizeof(BGSListForm) == 0x024);
