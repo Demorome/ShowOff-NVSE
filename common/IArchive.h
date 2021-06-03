@@ -70,7 +70,7 @@ class IArchive
 				UInt32		GetTypeID(void)			{ return GetData()->typeID; }
 				UInt32		GetSubID(void)			{ return GetData()->subID; }
 				UInt32		GetDataLength(void)		{ return GetData()->dataLength; }
-				char *		GetName(void)			{ return &owner->nameTable[GetData()->nameOffset]; }
+				char *		GetName(void)			{ return &owner->nameTable[GetData()->nameOffset]; }  //gets EditorID with JG
 				void *		GetBuffer(UInt32 * outLength);
 
 				iterator &	operator++() { Next(); return *this; }

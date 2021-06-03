@@ -1,87 +1,65 @@
 ﻿#pragma once
 
+DEFINE_CMD_ALT_COND_PLUGIN(GetNumActorsInRangeFromRef, , "Returns the amount of actors that are a certain distance nearby to the calling reference.", 1, kParams_OneFloat_OneInt);
+DEFINE_CMD_ALT_COND_PLUGIN(GetNumCombatActorsFromActor, , "Returns the amount of actors that are allies/targets to the calling actor, with optional filters.", 1, kParams_OneFloat_OneInt);
+DEFINE_COMMAND_PLUGIN(GetCreatureTurningSpeed, , 0, 1, kParams_OneOptionalActorBase);  //copied after GetCreatureCombatSkill from JG
+DEFINE_COMMAND_PLUGIN(SetCreatureTurningSpeed, , 0, 2, kParams_OneFloat_OneOptionalActorBase);
+DEFINE_COMMAND_PLUGIN(GetCreatureFootWeight, , 0, 1, kParams_OneOptionalActorBase);
+DEFINE_COMMAND_PLUGIN(SetCreatureFootWeight, , 0, 2, kParams_OneFloat_OneOptionalActorBase);
+DEFINE_COMMAND_PLUGIN(SetCreatureReach, , 0, 2, kParams_OneInt_OneOptionalActorBase);
+DEFINE_COMMAND_PLUGIN(SetCreatureBaseScale, , 0, 2, kParams_OneFloat_OneOptionalActorBase);
+DEFINE_CMD_ALT_COND_PLUGIN(GetNumCompassHostilesInRange, , "Returns the amount of hostile actors that are a certain distance nearby to the player that appear on the compass.", 0, kParams_OneOptionalFloat_OneOptionalInt);
 
-DEFINE_CMD_ALT_COND_PLUGIN(GetNumActorsInRangeFromRef,, "Returns the amount of actors that are a certain distance nearby to the calling reference.", 1, kParams_OneFloat_OneInt);
+
+
 //Code ripped from both JIP (GetActorsByProcessingLevel) and SUP.
-UINT32 __fastcall GetNumActorsInRangeFromRefCALL(TESObjectREFR* thisObj, float range, UInt32 flags)
+UINT32 __fastcall GetNumActorsInRangeFromRefCALL(TESObjectREFR* const thisObj, float const range, UInt32 const flags)
 {
 	if (range <= 0) return 0;
 	if (!thisObj) return 0;
+
+#define DebugGetNumActorsInRangeFromRef 1;
 	
 	UInt32 numActors = 0;
-	bool const noDeadActors = flags & 0x1;
-	//bool const something = flags & 0x2;
+	bool const noDeadActors = flags & 1;
+	//bool const something = flags & 2;
 	
 	MobileObject** objArray = g_processManager->objects.data, ** arrEnd = objArray;
 	objArray += g_processManager->beginOffsets[0];  //Only objects in High process.
 	arrEnd += g_processManager->endOffsets[0];
-	Actor* actor;
 
-	if (thisObj->IsActor())  //To avoid redundant (actor != thisObj) checks.
+	for (; objArray != arrEnd; objArray++)
 	{
-		for (; objArray != arrEnd; objArray++)
+		auto actor = (Actor*)*objArray;
+		if (actor && actor->IsActor() && actor != thisObj)
 		{
-			actor = (Actor*)*objArray;
-			//Console_Print("Current actor >>>%08x", actor->refID);
+#if DebugGetNumActorsInRangeFromRef 
+			Console_Print("Current actor >>> %08x (%s)", actor->refID, actor->GetName());
+#endif
+			
+			if (noDeadActors && actor->GetDead())
+				continue;
 
-			if (actor && actor->IsActor() && actor != thisObj)
-			{
-				if (noDeadActors && actor->GetDead())
-					continue;
-
-				if (GetDistance3D(thisObj, actor) <= range)
-					numActors++;
-			}
-		}
-	}
-	else if (flags)  //To avoid redundant flag checks.
-	{
-		for (; objArray != arrEnd; objArray++)
-		{
-			actor = (Actor*)*objArray;
-			//Console_Print("Current actor >>>%08x", actor->refID);
-
-			if (actor && actor->IsActor() && actor != thisObj)
-			{
-				if (noDeadActors && actor->GetDead())
-					continue;
-
-				if (GetDistance3D(thisObj, actor) <= range)
-					numActors++;
-			}
-		}
-	}
-	else
-	{
-		for (; objArray != arrEnd; objArray++)
-		{
-			actor = (Actor*)*objArray;
-			if (actor && actor->IsActor())
-			{
-				if (GetDistance3D(thisObj, actor) <= range)
-				{
-					numActors++;
-				}
-			}
+			if (GetDistance3D(thisObj, actor) <= range)
+				numActors++;
 		}
 	}
 
 	// Player is not included in the looped array, so we need to check for it outside the loop.
 	if (thisObj != g_thePlayer)
 	{
-		actor = (Actor*)g_thePlayer;
 		if (noDeadActors)
 		{
-			if (actor->GetDead())
+			if (g_thePlayer->GetDead())
 				return numActors;
 		}
-		if (GetDistance3D(thisObj, actor) <= range)
+		if (GetDistance3D(thisObj, g_thePlayer) <= range)
 		{
 			numActors++;
 		}
 	}
 
-	//Console_Print("Result: %d", numActors);
+#undef DebugGetNumActorsInRangeFromRef
 	return numActors; 
 }
 
@@ -92,8 +70,8 @@ bool Cmd_GetNumActorsInRangeFromRef_Eval(COMMAND_ARGS_EVAL)
 }
 bool Cmd_GetNumActorsInRangeFromRef_Execute(COMMAND_ARGS)
 {
-	float range;
-	UINT32 flags;
+	float range = 0;
+	UINT32 flags = 0;
 	if (ExtractArgs(EXTRACT_ARGS, &range, &flags))
 		*result = GetNumActorsInRangeFromRefCALL(thisObj, range, flags);
 	else
@@ -102,7 +80,6 @@ bool Cmd_GetNumActorsInRangeFromRef_Execute(COMMAND_ARGS)
 }
 
 
-DEFINE_CMD_ALT_COND_PLUGIN(GetNumCombatActorsFromActor, , "Returns the amount of actors that are allies/targets to the calling actor, with optional filters.", 1, kParams_OneFloat_OneInt);
 //Code ripped off of JIP's GetCombatActors.
 UINT32 __fastcall GetNumCombatActorsFromActorCALL(TESObjectREFR* thisObj, float range, UInt32 flags)
 {
@@ -248,7 +225,7 @@ bool Cmd_GetNumCombatActorsFromActor_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(GetCreatureTurningSpeed, , 0, 1, kParams_OneOptionalActorBase);  //copied after GetCreatureCombatSkill from JG
+
 bool Cmd_GetCreatureTurningSpeed_Execute(COMMAND_ARGS)
 {
 	*result = 0;
@@ -264,7 +241,7 @@ bool Cmd_GetCreatureTurningSpeed_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(SetCreatureTurningSpeed, , 0, 2, kParams_OneFloat_OneOptionalActorBase);
+
 bool Cmd_SetCreatureTurningSpeed_Execute(COMMAND_ARGS)
 {
 	*result = 0;
@@ -284,7 +261,7 @@ bool Cmd_SetCreatureTurningSpeed_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(GetCreatureFootWeight, , 0, 1, kParams_OneOptionalActorBase);
+
 bool Cmd_GetCreatureFootWeight_Execute(COMMAND_ARGS)
 {
 	*result = 0;
@@ -300,7 +277,7 @@ bool Cmd_GetCreatureFootWeight_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(SetCreatureFootWeight, , 0, 2, kParams_OneFloat_OneOptionalActorBase);
+
 bool Cmd_SetCreatureFootWeight_Execute(COMMAND_ARGS)
 {
 	*result = 0;
@@ -320,7 +297,7 @@ bool Cmd_SetCreatureFootWeight_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(SetCreatureReach, , 0, 2, kParams_OneInt_OneOptionalActorBase);
+
 bool Cmd_SetCreatureReach_Execute(COMMAND_ARGS)
 {
 	*result = 0;
@@ -340,7 +317,7 @@ bool Cmd_SetCreatureReach_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(SetCreatureBaseScale, , 0, 2, kParams_OneFloat_OneOptionalActorBase);
+
 bool Cmd_SetCreatureBaseScale_Execute(COMMAND_ARGS)
 {
 	*result = 0;
@@ -361,7 +338,7 @@ bool Cmd_SetCreatureBaseScale_Execute(COMMAND_ARGS)
 }
 
 
-DEFINE_CMD_ALT_COND_PLUGIN(GetNumCompassHostilesInRange, , "Returns the amount of hostile actors that are a certain distance nearby to the player that appear on the compass.", 0, kParams_OneOptionalFloat_OneOptionalInt);
+
 
 float g_compassHostiles_Range = 0;  //necessary since can't pass float as void*
 

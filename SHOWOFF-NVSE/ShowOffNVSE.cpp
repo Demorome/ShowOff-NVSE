@@ -326,7 +326,7 @@ extern "C"
 			g_strInterface = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);
 			GetStringVar = g_strInterface->GetString;
 			AssignString = g_strInterface->Assign;
-			
+
 			g_arrInterface = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
 			CreateArray = g_arrInterface->CreateArray;
 			CreateStringMap = g_arrInterface->CreateStringMap;
