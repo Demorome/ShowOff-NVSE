@@ -356,17 +356,17 @@ UInt32 __fastcall GetNumCompassHostilesInRangeCALL(TESObjectREFR* const thisObj,
 //Copied JG's GetNearestCompassHostile code.
 bool Cmd_GetNumCompassHostilesInRange_Eval(COMMAND_ARGS_EVAL)
 {
-	float range = *(float*)&arg1;
-	auto flags = (UInt32)arg2;
-	*result = GetNumCompassHostilesInRangeCALL(thisObj,  range, flags);
+	float const range = *(float*)&arg1;
+	auto const flags = (UInt32)arg2;
+	*result = GetNumCompassHostilesInRangeCALL(thisObj, range, flags);
 	return true;
 }
 bool Cmd_GetNumCompassHostilesInRange_Execute(COMMAND_ARGS)
 {
 	float range = 0;
 	UInt32 flags = 0;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &range, &flags))
-		*result = *result = GetNumCompassHostilesInRangeCALL(thisObj, range, flags);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &range, &flags))
+		*result = GetNumCompassHostilesInRangeCALL(thisObj, range, flags);
 	else
 		*result = 0;
 	return true;
