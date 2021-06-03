@@ -103,9 +103,16 @@ UInt32 __fastcall GetNumCombatActorsFromActorCALL(TESObjectREFR* thisObj, float 
 	UINT32 numActors = 0;
 	auto IncrementNumActorsIfChecksPass = [&](Actor* actor)
 	{
-		if (range != 0.0F && actor && (actor != thisObj))  //todo: verify if !range (float) check works
+		if (actor && (actor != thisObj))  //todo: verify if !range (float) check works
 		{
-			if (GetDistance3D(thisObj, actor) <= range)
+			if (range != 0.0F)
+			{
+				if (GetDistance3D(thisObj, actor) <= range)
+				{
+					numActors++;
+				}
+			}
+			else
 			{
 				numActors++;
 			}
