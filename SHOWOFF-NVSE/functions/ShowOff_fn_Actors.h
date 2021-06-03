@@ -305,23 +305,17 @@ bool Cmd_SetCreatureBaseScale_Execute(COMMAND_ARGS)
 }
 
 
-
-//todo: refactor away use of global
-float g_compassHostiles_Range = 0;  //necessary since can't pass float as void*
-
-//Copied JG's GetNearestCompassHostile code.
-bool Cmd_GetNumCompassHostilesInRange_Eval(COMMAND_ARGS_EVAL)
+UInt32 __fastcall GetNumCompassHostilesInRangeCALL(TESObjectREFR* const thisObj, float const range, UInt32 flags)
 {
-	*result = 0;
-	float range = *(float*)&arg1;  //check if this works!
-	UInt32 skipInvisible = (UInt32)arg2;
-	UInt32 numHostiles = 0;
-
-	if (!range && g_compassHostiles_Range)
+	enum FunctionFlags
 	{
-		range = g_compassHostiles_Range;  //g_compassHostiles_Range is always 0, except when it is fed a value in _Execute.
-	}
-	g_compassHostiles_Range = 0;
+		kFlag_SkipInvisible = 1,
+		kFlag_Max = kFlag_SkipInvisible,  // | someOtherFlag
+	};
+	if (!flags) flags = kFlag_Max;
+
+	bool const skipInvisible = flags & kFlag_SkipInvisible;
+	UInt32 numHostiles = 0;  //result
 
 	//To avoid counting "compass targets" that are super far away and can't even be seen on compass (I assume).
 	float fSneakMaxDistance = *(float*)(0x11CD7D8 + 4);
@@ -338,13 +332,13 @@ bool Cmd_GetNumCompassHostilesInRange_Eval(COMMAND_ARGS_EVAL)
 		PlayerCharacter::CompassTarget* target = iter.Get();
 		if (target->isHostile)
 		{
-			if (skipInvisible > 0 && (target->target->avOwner.Fn_02(kAVCode_Invisibility) > 0 || target->target->avOwner.Fn_02(kAVCode_Chameleon) > 0)) {
+			if (skipInvisible && (target->target->avOwner.Fn_02(kAVCode_Invisibility) > 0 || target->target->avOwner.Fn_02(kAVCode_Chameleon) > 0)) {
 				continue;
 			}
 			auto distToPlayer = target->target->GetPos()->CalculateDistSquared(playerPos);
 			if (distToPlayer < maxDist)
 			{
-				if (range)
+				if (range) //todo: verify bugprone float check!!
 				{
 					if (distToPlayer < range)
 						numHostiles++;
@@ -356,16 +350,26 @@ bool Cmd_GetNumCompassHostilesInRange_Eval(COMMAND_ARGS_EVAL)
 			}
 		}
 	}
-	*result = numHostiles;
+	return numHostiles;
+}
+
+//Copied JG's GetNearestCompassHostile code.
+bool Cmd_GetNumCompassHostilesInRange_Eval(COMMAND_ARGS_EVAL)
+{
+	float range = *(float*)&arg1;
+	auto flags = (UInt32)arg2;
+	*result = GetNumCompassHostilesInRangeCALL(thisObj,  range, flags);
 	return true;
 }
 bool Cmd_GetNumCompassHostilesInRange_Execute(COMMAND_ARGS)
 {
-	*result = 0;
-	g_compassHostiles_Range = 0;
-	UInt32 skipInvisible = 0;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &g_compassHostiles_Range, &skipInvisible)) return true;
-	return Cmd_GetNumCompassHostilesInRange_Eval(thisObj, 0, (void*)skipInvisible, result);
+	float range = 0;
+	UInt32 flags = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &range, &flags))
+		*result = *result = GetNumCompassHostilesInRangeCALL(thisObj, range, flags);
+	else
+		*result = 0;
+	return true;
 }
 
 
