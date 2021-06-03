@@ -1,7 +1,43 @@
 ﻿#pragma once
 
 
+DEFINE_COMMAND_PLUGIN(ShowingOffDisable, "Does the same thing as vanilla Disable. For showing off!", 1, 1, kParams_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(ShowingOffEnable, "Does the same thing as vanilla Enable. For showing off!", 1, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_ALT_PLUGIN(ListAddList, AddFormListToFormList, "", 0, 3, kParams_TwoFormLists_OneOptionalIndex);
+DEFINE_COMMAND_PLUGIN(MessageExAltShowoff, , 0, 22, kParams_JIP_OneFloat_OneInt_OneFormatString);
+DEFINE_CMD_ALT_COND_PLUGIN(IsCornerMessageDisplayed, , "Returns 1/0 depending on if a corner message is displayed.", 0, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(GetNumQueuedCornerMessages, , , 0, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(IsAnimPlayingExCond, , "Same as IsAnimPlayingEx, but available as a condition. Had to cut the variationFlags filter.", 1, kParams_JIP_OneInt_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(GetRadiationExtraData, , 1, 0, NULL);
+DEFINE_COMMAND_PLUGIN(SetRadiationExtraData, , 1, 1, kParams_OneFloat);
+DEFINE_COMMAND_PLUGIN(PlayerHasNightVision, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(PlayerIsUsingTurbo, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(PlayerHasCateyeEnabled, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(PlayerHasImprovedSpotting, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(PlayerIsDrinkingPlacedWater, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(SetPlayerIsAMurderer, , 0, 1, kParams_OneInt);
+DEFINE_CMD_ALT_COND_PLUGIN(IsNight, , "Returns true if it's night according to the current (or specified) climate.", 0, kParams_OneOptionalForm);
+DEFINE_CMD_ALT_COND_PLUGIN(IsLimbCrippled, , "If no args are passed / arg is -1, returns true if actor has any crippled limbs. Otherwise, checks if the specified limb is crippled.", 1, kParams_TwoOptionalInts);
+DEFINE_CMD_ALT_COND_PLUGIN(GetNumCrippledLimbs, , , 1, kParams_OneOptionalInt);
+DEFINE_CMD_ALT_COND_PLUGIN(GetCrippledLimbsAsBitMask, , , 1, kParams_OneOptionalInt);
+DEFINE_CMD_ALT_COND_PLUGIN(GetNumBrokenEquippedItems, , , 1, kParams_TwoOptionalInts);
+DEFINE_CMD_ALT_COND_PLUGIN(GetEquippedItemsAsBitMask, , , 1, NULL);
+DEFINE_COMMAND_PLUGIN(ClearShowoffSavedData, "", 0, 1, kParams_OneInt);
+DEFINE_CMD_ALT_COND_PLUGIN(GetBaseEquippedWeight, , , 1, kParams_TwoOptionalInts);
+DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedEquippedWeight, , "Accounts for perk effects + weapon mods.", 1, kParams_TwoOptionalInts);
+DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedMaxCarryWeight, GetMaxCarryWeightPerkModified, "Accounts for GetMaxCarryWeight perk entry.", 1, NULL);
+
+
+bool(__cdecl* Cmd_Disable)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5C45E0;
+bool(__cdecl* Cmd_Enable)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5C43D0;
+
+bool Cmd_ShowingOffDisable_Execute(COMMAND_ARGS) {
+	return Cmd_Disable(PASS_COMMAND_ARGS);
+}
+
+bool Cmd_ShowingOffEnable_Execute(COMMAND_ARGS) {
+	return Cmd_Enable(PASS_COMMAND_ARGS);
+}
 
 //ripped code from FOSE's ListAddForm
 bool Cmd_ListAddList_Execute(COMMAND_ARGS)
@@ -31,7 +67,6 @@ bool Cmd_ListAddList_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(MessageExAltShowoff, , 0, 22, kParams_JIP_OneFloat_OneInt_OneFormatString);
 const UInt32 kMsgIconsPathAddr[] = { 0x10208A0, 0x10208E0, 0x1025CDC, 0x1030E78, 0x103A830, 0x1049638, 0x104BFE8 };
 
 //99% ripped from JIP's MessageExAlt.
@@ -57,7 +92,6 @@ bool Cmd_MessageExAltShowoff_Execute(COMMAND_ARGS)
 }
 
 
-DEFINE_CMD_ALT_COND_PLUGIN(IsCornerMessageDisplayed, , "Returns 1/0 depending on if a corner message is displayed.", 0, NULL);
 bool Cmd_IsCornerMessageDisplayed_Execute(COMMAND_ARGS)
 {
 	*result = !g_HUDMainMenu->queuedMessages.Empty();  
@@ -71,7 +105,6 @@ bool Cmd_IsCornerMessageDisplayed_Eval(COMMAND_ARGS_EVAL)
 	return true;
 }
 
-DEFINE_CMD_ALT_COND_PLUGIN(GetNumQueuedCornerMessages, , , 0, NULL);
 bool Cmd_GetNumQueuedCornerMessages_Execute(COMMAND_ARGS)
 {
 	*result = g_HUDMainMenu->queuedMessages.Count();
@@ -85,7 +118,6 @@ bool Cmd_GetNumQueuedCornerMessages_Eval(COMMAND_ARGS_EVAL)
 
 
 //Code ripped from JIP's IsAnimPlayingEx
-DEFINE_CMD_ALT_COND_PLUGIN(IsAnimPlayingExCond, , "Same as IsAnimPlayingEx, but available as a condition. Had to cut the variationFlags filter.", 1, kParams_JIP_OneInt_OneOptionalInt);
 bool Cmd_IsAnimPlayingExCond_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
@@ -123,7 +155,6 @@ bool Cmd_IsAnimPlayingExCond_Execute(COMMAND_ARGS)
 	return Cmd_IsAnimPlayingExCond_Eval(thisObj, (void*)category, (void*)subType, result);
 }
 
-DEFINE_COMMAND_PLUGIN(GetRadiationExtraData, , 1, 0, NULL);
 bool Cmd_GetRadiationExtraData_Execute(COMMAND_ARGS)
 {
 	*result = 0;
@@ -135,7 +166,7 @@ bool Cmd_GetRadiationExtraData_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(SetRadiationExtraData, , 1, 1, kParams_OneFloat);
+
 bool Cmd_SetRadiationExtraData_Execute(COMMAND_ARGS)
 {
 	float fNewVal = 0;
@@ -149,42 +180,42 @@ bool Cmd_SetRadiationExtraData_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(PlayerHasNightVision, , 0, 0, NULL);
+
 bool Cmd_PlayerHasNightVision_Execute(COMMAND_ARGS)
 {
 	*result = g_thePlayer->hasNightVisionApplied;
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(PlayerIsUsingTurbo, , 0, 0, NULL);
+
 bool Cmd_PlayerIsUsingTurbo_Execute(COMMAND_ARGS)
 {
 	*result = g_thePlayer->isUsingTurbo;  
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(PlayerHasCateyeEnabled, , 0, 0, NULL);
+
 bool Cmd_PlayerHasCateyeEnabled_Execute(COMMAND_ARGS)
 {
 	*result = g_thePlayer->isCateyeEnabled;
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(PlayerHasImprovedSpotting, , 0, 0, NULL);
+
 bool Cmd_PlayerHasImprovedSpotting_Execute(COMMAND_ARGS)
 {
 	*result = g_thePlayer->isSpottingImprovedActive;
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(PlayerIsDrinkingPlacedWater, , 0, 0, NULL);
+
 bool Cmd_PlayerIsDrinkingPlacedWater_Execute(COMMAND_ARGS)
 {
 	*result = g_thePlayer->isDrinkingPlacedWater;
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(SetPlayerIsAMurderer, , 0, 1, kParams_OneInt);
+
 bool Cmd_SetPlayerIsAMurderer_Execute(COMMAND_ARGS)
 {
 	UInt32 bIsMurderer = 0;
@@ -193,7 +224,7 @@ bool Cmd_SetPlayerIsAMurderer_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_CMD_ALT_COND_PLUGIN(IsNight, , "Returns true if it's night according to the current (or specified) climate.", 0, kParams_OneOptionalForm);
+
 bool Cmd_IsNight_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
@@ -224,7 +255,6 @@ bool Cmd_IsNight_Execute(COMMAND_ARGS)
 }
 
 
-DEFINE_CMD_ALT_COND_PLUGIN(IsLimbCrippled, , "If no args are passed / arg is -1, returns true if actor has any crippled limbs. Otherwise, checks if the specified limb is crippled.", 1, kParams_TwoOptionalInts);
 bool Cmd_IsLimbCrippled_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
@@ -260,7 +290,6 @@ bool Cmd_IsLimbCrippled_Execute(COMMAND_ARGS)
 	return Cmd_IsLimbCrippled_Eval(thisObj, (void*)limbID, (void*)threshold, result);
 }
 
-DEFINE_CMD_ALT_COND_PLUGIN(GetNumCrippledLimbs, , , 1, kParams_OneOptionalInt);
 bool Cmd_GetNumCrippledLimbs_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
@@ -286,7 +315,7 @@ bool Cmd_GetNumCrippledLimbs_Execute(COMMAND_ARGS)
 	return Cmd_GetNumCrippledLimbs_Eval(thisObj, (void*)threshold, 0, result);
 }
 
-DEFINE_CMD_ALT_COND_PLUGIN(GetCrippledLimbsAsBitMask, , , 1, kParams_OneOptionalInt);
+
 bool Cmd_GetCrippledLimbsAsBitMask_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
@@ -380,7 +409,7 @@ static EquipData FindEquipped(TESObjectREFR* thisObj, FormMatcher& matcher) {
 typedef TESBipedModelForm::EPartBit EquippedItemIndex;
 typedef TESBipedModelForm::ESlot EquippedItemSlot;
 
-DEFINE_CMD_ALT_COND_PLUGIN(GetNumBrokenEquippedItems, , , 1, kParams_TwoOptionalInts);
+
 bool Cmd_GetNumBrokenEquippedItems_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
@@ -425,7 +454,7 @@ bool Cmd_GetNumBrokenEquippedItems_Execute(COMMAND_ARGS)
 	return Cmd_GetNumBrokenEquippedItems_Eval(thisObj, (void*)threshold, (void*)flags, result);
 }
 
-DEFINE_CMD_ALT_COND_PLUGIN(GetEquippedItemsAsBitMask, , , 1, NULL);
+
 bool Cmd_GetEquippedItemsAsBitMask_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
@@ -473,7 +502,7 @@ bool Cmd_UnequipItemsFromBitMask_Execute(COMMAND_ARGS)
 }
 #endif
 
-DEFINE_COMMAND_PLUGIN(ClearShowoffSavedData, "", 0, 1, kParams_OneInt);
+
 bool Cmd_ClearShowoffSavedData_Execute(COMMAND_ARGS)
 {
 	UInt32 auxStringMaps;
@@ -485,7 +514,6 @@ bool Cmd_ClearShowoffSavedData_Execute(COMMAND_ARGS)
 }
 
 
-DEFINE_CMD_ALT_COND_PLUGIN(GetBaseEquippedWeight, , , 1, kParams_TwoOptionalInts);
 bool Cmd_GetBaseEquippedWeight_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
@@ -527,7 +555,7 @@ bool Cmd_GetBaseEquippedWeight_Execute(COMMAND_ARGS)
 	return Cmd_GetBaseEquippedWeight_Eval(thisObj, (void*)minWeight, (void*)flags, result);
 }
 
-DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedEquippedWeight, , "Accounts for perk effects + weapon mods.", 1, kParams_TwoOptionalInts);
+
 bool Cmd_GetCalculatedEquippedWeight_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
@@ -616,7 +644,7 @@ bool Cmd_GetCalculatedEquippedWeight_Execute(COMMAND_ARGS)
 }
 
 
-DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedMaxCarryWeight, GetMaxCarryWeightPerkModified, "Accounts for GetMaxCarryWeight perk entry.", 1, NULL);
+
 bool Cmd_GetCalculatedMaxCarryWeight_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;

@@ -58,7 +58,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="functions\Demo_fn_Misc.h">
+    <ClInclude Include="functions\ShowOff_fn_Misc.h">
       <Filter>functions</Filter>
     </ClInclude>
     <ClInclude Include="internal\containers.h">
@@ -134,10 +134,10 @@
     <ClInclude Include="..\nvse\Utilities.h">
       <Filter>nvse</Filter>
     </ClInclude>
-    <ClInclude Include="functions\Demo_fn_Settings.h">
+    <ClInclude Include="functions\ShowOff_fn_Settings.h">
       <Filter>functions</Filter>
     </ClInclude>
-    <ClInclude Include="functions\Demo_fn_Gameplay.h">
+    <ClInclude Include="functions\ShowOff_fn_Gameplay.h">
       <Filter>functions</Filter>
     </ClInclude>
     <ClInclude Include="internal\NiPoint.h">
@@ -153,19 +153,16 @@
     <ClInclude Include="SimpleINILibrary\SimpleIni.h">
       <Filter>SimpleINI Library</Filter>
     </ClInclude>
-    <ClInclude Include="functions\Trooper_fn_misc.h">
-      <Filter>functions</Filter>
-    </ClInclude>
-    <ClInclude Include="functions\Demo_fn_Array.h">
+    <ClInclude Include="functions\ShowOff_fn_Array.h">
       <Filter>functions</Filter>
     </ClInclude>
     <ClInclude Include="internal\Johnnnny Guitarrrrr.h">
       <Filter>internal</Filter>
     </ClInclude>
-    <ClInclude Include="functions\Demo_fn_Actors.h">
+    <ClInclude Include="functions\ShowOff_fn_Actors.h">
       <Filter>functions</Filter>
     </ClInclude>
-    <ClInclude Include="functions\Demo_fn_Debug.h">
+    <ClInclude Include="functions\ShowOff_fn_Debug.h">
       <Filter>functions</Filter>
     </ClInclude>
     <ClInclude Include="Events\ShowOffEvents.h">
@@ -177,7 +174,7 @@
     <ClInclude Include="internal\memory_pool.h">
       <Filter>internal</Filter>
     </ClInclude>
-    <ClInclude Include="functions\Demo_fn_AuxVars.h">
+    <ClInclude Include="functions\ShowOff_fn_AuxVars.h">
       <Filter>functions</Filter>
     </ClInclude>
     <ClInclude Include="internal\serialization.h">

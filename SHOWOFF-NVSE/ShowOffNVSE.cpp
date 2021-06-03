@@ -32,14 +32,13 @@
 #include "internal/serialization.h"
 
 // Functions
-#include "functions/Trooper_fn_misc.h"
-#include "functions/Demo_fn_Misc.h"
-#include "functions/Demo_fn_Settings.h"
-#include "functions/Demo_fn_Gameplay.h"
-#include "functions/Demo_fn_Array.h"
-#include "functions/Demo_fn_AuxVars.h" 
-#include "functions/Demo_fn_Actors.h"
-#include "functions/Demo_fn_Debug.h"
+#include "functions/ShowOff_fn_Misc.h"
+#include "functions/ShowOff_fn_Settings.h"
+#include "functions/ShowOff_fn_Gameplay.h"
+#include "functions/ShowOff_fn_Array.h"
+#include "functions/ShowOff_fn_AuxVars.h" 
+#include "functions/ShowOff_fn_Actors.h"
+#include "functions/ShowOff_fn_Debug.h"
 
 // Events
 #include "Events/JohnnyEventPredefinitions.h"
@@ -236,7 +235,7 @@ extern "C"
 			char buffer[100];
 			sprintf_s(buffer, 100,"NVSE version too old (got %08X expected at least %08X)", nvse->nvseVersion, PACKED_NVSE_VERSION);
 			MessageBoxA(nullptr, buffer, "ShowOff", MB_ICONEXCLAMATION);
-			_ERROR(buffer);
+			_ERROR("%s", buffer);
 			return false;
 		}
 		
@@ -247,7 +246,7 @@ extern "C"
 				char buffer[100];
 				sprintf_s(buffer, 100, "Incorrect runtime version (got %08X need at least %08X)", nvse->runtimeVersion, RUNTIME_VERSION_1_4_0_525);
 				MessageBoxA(nullptr, buffer, "ShowOff", MB_ICONEXCLAMATION);
-				_ERROR(buffer);
+				_ERROR("%s", buffer);
 				return false;
 			}
 
@@ -255,7 +254,7 @@ extern "C"
 			{
 				char buffer[30] = "NoGore is not supported";
 				MessageBoxA(nullptr, buffer, "ShowOff", MB_ICONEXCLAMATION);
-				_ERROR(buffer);
+				_ERROR("%s", buffer);
 				return false;
 			}
 		}
@@ -266,7 +265,7 @@ extern "C"
 				char buffer[100];
 				sprintf_s(buffer, 100, "Incorrect editor version (got %08X, need at least %08X)", nvse->editorVersion, CS_VERSION_1_4_0_518);
 				MessageBoxA(nullptr, buffer, "ShowOff", MB_ICONEXCLAMATION);
-				_ERROR(buffer);
+				_ERROR("%s", buffer);
 				return false;
 			}
 		}
@@ -361,10 +360,8 @@ extern "C"
 		REG_CMD(GetPlayerCanPickpocketEquippedItems)
 		REG_CMD(GetPCHasSleepWaitOverride)
 		REG_CMD(SetPCHasSleepWaitOverride)
-	
-		//Showing off by copying vanilla style way functions!
-		REG_CMD(ShowingOffDisable)  //best to keep undocumented to not waste people's time.
-		REG_CMD(ShowingOffEnable)
+		REG_CMD(ShowingOffDisable)  //Showing off by copying vanilla style way functions! 
+		REG_CMD(ShowingOffEnable) //best to keep undocumented to not waste people's time.
 
 		REG_CMD(GetNumActorsInRangeFromRef)
 		REG_CMD(GetNumCombatActorsFromActor)
@@ -378,8 +375,8 @@ extern "C"
 		
 		REG_CMD(TestCondition)
 		
-		REG_CMD(MessageExAltShowoff) //Keep undocumented; don't recommend for general use
-		REG_CMD(IsCornerMessageDisplayed)  //(any corner message)
+		REG_CMD(MessageExAltShowoff) //Keep undocumented; don't recommend for general use, extra feature is jank.
+		//REG_CMD(IsCornerMessageDisplayed)  //(any corner message). Redundant in the face of GetNumQueuedCornerMessages.
 		REG_CMD(GetNumQueuedCornerMessages)
 		
 		REG_CMD(GetCreatureTurningSpeed)
@@ -495,6 +492,7 @@ extern "C"
 		 * GetActorValueShowoff - uses numeric keys like JG, but also has args to get the base/current/etc. Basically all-in-one.
 		 * IsActorInRadius - returns true if the actor is within the Radius extradata of the reference.
 		 * GetCalculatedItemWeight, using parts from GetCalc.equ.weight
+		 * Cmd_ShowSleepWaitMenu::CheckPreconditions -> GetPCCanSleepWait (0x969FA0)
 		 * 
 		 */
 

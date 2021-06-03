@@ -1,9 +1,10 @@
 ﻿#pragma once
 
-
-
-
 DEFINE_COMMAND_ALT_PLUGIN(DumpFormList, FListDump, , 0, 3, kParams_OneFormList_OneOptionalString_OneOptionalInt);
+DEFINE_CMD_ALT_COND_PLUGIN(TestCondition, , "Returns 1, and prints a message to console. Meant for testing if previous conditions passed.", 0, NULL);
+
+
+
 bool Cmd_DumpFormList_Execute(COMMAND_ARGS)
 {
 	BGSListForm* FList;
@@ -44,7 +45,6 @@ bool Cmd_DumpFormList_Execute(COMMAND_ARGS)
 }
 
 //Would be cool if this could return whatever is calling this condition, or at what address etc..
-DEFINE_CMD_ALT_COND_PLUGIN(TestCondition, , "Returns 1, and prints a message to console. Meant for testing if previous conditions passed.", 0, NULL);
 bool Cmd_TestCondition_Execute(COMMAND_ARGS)
 {
 	*result = 1;
