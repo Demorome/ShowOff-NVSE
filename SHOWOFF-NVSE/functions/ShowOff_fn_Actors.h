@@ -18,7 +18,7 @@ UInt32 __fastcall GetNumActorsInRangeFromRefCALL(TESObjectREFR* const thisObj, f
 	if (range <= 0) return 0;
 	if (!thisObj) return 0;
 
-#define DebugGetNumActorsInRangeFromRef _DEBUG;
+#define DebugGetNumActorsInRangeFromRef _DEBUG
 
 	enum functionFlags
 	{

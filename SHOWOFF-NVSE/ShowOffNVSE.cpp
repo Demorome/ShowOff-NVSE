@@ -379,12 +379,11 @@ extern "C"
 		REG_CMD(SetCreatureFootWeight)
 		REG_CMD(SetCreatureReach)
 		REG_CMD(SetCreatureBaseScale) //JG's GetBaseScale should return the creature's base scale, so no need for a GetCreatureBaseScale.
-
-		REG_CMD(DumpFormList)  //todo: verify if char* usage is safe. Breaks for large arrays!
+		REG_CMD(DumpFormList)
+		
 		REG_CMD(ListAddArray)
 		REG_CMD(ListAddList)
 
-		
 		REG_CMD(IsAnimPlayingExCond)
 		REG_CMD(GetNumCompassHostilesInRange)
 
@@ -426,7 +425,6 @@ extern "C"
 		REG_CMD(GetNumBrokenEquippedItems)
 		REG_CMD(GetEquippedItemsAsBitMask)
 		//REG_CMD(UnequipItemsFromBitMask)  //tricky to get xData, idk if anyone will ever use this anyways.
-		//todo: GetEquippedTotalValue
 		REG_CMD(ClearShowoffSavedData)  //todo: test serialization
 
 		//todo: make GetCalculatedEquippedWeight / GetBaseEquippedWeight allow for float min, instead of int min.
@@ -486,7 +484,8 @@ extern "C"
 		 * IsActorInRadius - returns true if the actor is within the Radius extradata of the reference.
 		 * GetCalculatedItemWeight, using parts from GetCalc.equ.weight
 		 * Cmd_ShowSleepWaitMenu::CheckPreconditions -> GetPCCanSleepWait (0x969FA0)
-		 * 
+		 * GetEquippedTotalValue
+
 		 */
 
 #endif

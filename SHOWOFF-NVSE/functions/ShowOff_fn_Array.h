@@ -1,24 +1,8 @@
 ﻿#pragma once
 
-#if 0  //difficulties figuring out ambiguous-type extraction
-DEFINE_COMMAND_PLUGIN(Ar_Init, , "Initializes a numeric array with the specified value, repeated over X keys.", 0, 3, kParams_OneBasicType);
-
-bool Cmd_ListAddArray_Execute(COMMAND_ARGS)
-{
-	void* anyValue;
-	UINT32 numElements;
-	
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &anyValue, &numElements)) return true;
-		
-	NVSEArrayVar* outArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
-	for (int i = 0; i < numElements; i++)
-		g_arrInterface->AppendElement(outArr, NVSEArrayElement(anyValue));
-	
-	return true;
-}
-#endif
-
 DEFINE_COMMAND_ALT_PLUGIN(ListAddArray, AddArrayToFormList, "", 0, 3, kParams_OneFormlist_OneArray_OneOptionalIndex);
+
+
 
 //ripped code from FOSE's ListAddForm
 bool Cmd_ListAddArray_Execute(COMMAND_ARGS)
@@ -33,7 +17,7 @@ bool Cmd_ListAddArray_Execute(COMMAND_ARGS)
 	UInt32 size = g_arrInterface->GetArraySize(inArr);
 	NVSEArrayElement* elements = new NVSEArrayElement[size];
 	g_arrInterface->GetElements(inArr, elements, NULL);
-	for (int i = 0; i < size; i++) {
+	for (UInt32 i = 0; i < size; i++) {
 		if (elements[i].Form() == NULL) continue;
 		UInt32 const addedAtIndex = pListForm->AddAt(elements[i].Form(), index);
 		if (addedAtIndex == eListInvalid) 
@@ -49,6 +33,24 @@ bool Cmd_ListAddArray_Execute(COMMAND_ARGS)
 
 
 #ifdef _DEBUG
+
+#if 0  //difficulties figuring out ambiguous-type extraction
+DEFINE_COMMAND_PLUGIN(Ar_Init, , "Initializes a numeric array with the specified value, repeated over X keys.", 0, 3, kParams_OneBasicType);
+
+bool Cmd_ListAddArray_Execute(COMMAND_ARGS)
+{
+	void* anyValue;
+	UINT32 numElements;
+
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &anyValue, &numElements)) return true;
+
+	NVSEArrayVar* outArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
+	for (int i = 0; i < numElements; i++)
+		g_arrInterface->AppendElement(outArr, NVSEArrayElement(anyValue));
+
+	return true;
+}
+#endif
 
 
 DEFINE_COMMAND_PLUGIN(Ar_GetInvalidRefs, "", 0, 2, kParams_OneArray);  //failed experiment
