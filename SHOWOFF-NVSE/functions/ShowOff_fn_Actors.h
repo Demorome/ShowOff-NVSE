@@ -1,7 +1,7 @@
 ﻿#pragma once
 
-DEFINE_CMD_ALT_COND_PLUGIN(GetNumActorsInRangeFromRef, , "Returns the amount of actors that are a certain distance nearby to the calling reference.", 1, kParams_OneFloat_OneInt);
-DEFINE_CMD_ALT_COND_PLUGIN(GetNumCombatActorsFromActor, , "Returns the amount of actors that are allies/targets to the calling actor, with optional filters.", 1, kParams_OneFloat_OneInt);
+DEFINE_CMD_ALT_COND_PLUGIN(GetNumActorsInRangeFromRef, , "Returns the amount of actors that are a certain distance nearby to the calling reference.", 1, kParams_OneFloat_OneOptionalInt);
+DEFINE_CMD_ALT_COND_PLUGIN(GetNumCombatActorsFromActor, , "Returns the amount of actors that are allies/targets to the calling actor, with optional filters.", 1, kParams_OneFloat_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetCreatureTurningSpeed, , 0, 1, kParams_OneOptionalActorBase);  //copied after GetCreatureCombatSkill from JG
 DEFINE_COMMAND_PLUGIN(SetCreatureTurningSpeed, , 0, 2, kParams_OneFloat_OneOptionalActorBase);
 DEFINE_COMMAND_PLUGIN(GetCreatureFootWeight, , 0, 1, kParams_OneOptionalActorBase);
@@ -13,33 +13,46 @@ DEFINE_CMD_ALT_COND_PLUGIN(GetNumCompassHostilesInRange, , "Returns the amount o
 
 
 //Code ripped from both JIP (GetActorsByProcessingLevel) and SUP.
-UINT32 __fastcall GetNumActorsInRangeFromRefCALL(TESObjectREFR* const thisObj, float const range, UInt32 const flags)
+UInt32 __fastcall GetNumActorsInRangeFromRefCALL(TESObjectREFR* const thisObj, float const range, UInt32 const flags)
 {
 	if (range <= 0) return 0;
 	if (!thisObj) return 0;
 
-#define DebugGetNumActorsInRangeFromRef 1;
+#define DebugGetNumActorsInRangeFromRef _DEBUG;
+
+	enum functionFlags
+	{
+		kFlag_noDeadActors = 1,
+		kFlag_noInvisibleActors = 2,
+		maxFlags = kFlag_noDeadActors | kFlag_noInvisibleActors,
+	};
 	
-	UInt32 numActors = 0;
-	bool const noDeadActors = flags & 1;
-	//bool const something = flags & 2;
+	bool const noDeadActors = flags & kFlag_noDeadActors;
+	bool const noInvisibleActors = flags & kFlag_noInvisibleActors;
+
+#if DebugGetNumActorsInRangeFromRef 
+	_MESSAGE("DebugGetNumActorsInRangeFromRef - begin dump for thisObj %s (%08x)", thisObj->GetName(), thisObj->refID);
+#endif
 	
 	MobileObject** objArray = g_processManager->objects.data, ** arrEnd = objArray;
 	objArray += g_processManager->beginOffsets[0];  //Only objects in High process.
 	arrEnd += g_processManager->endOffsets[0];
-
+	UInt32 numActors = 0;  //return value
 	for (; objArray != arrEnd; objArray++)
 	{
 		auto actor = (Actor*)*objArray;
 		if (actor && actor->IsActor() && actor != thisObj)
 		{
 #if DebugGetNumActorsInRangeFromRef 
-			Console_Print("Current actor >>> %08x (%s)", actor->refID, actor->GetName());
+			_MESSAGE("Current actor >>> %08x (%s). isDead: %d, distance: %f", actor->refID, actor->GetName(), actor->GetDead(), GetDistance3D(thisObj, actor));
 #endif
 			
 			if (noDeadActors && actor->GetDead())
 				continue;
 
+			if (noInvisibleActors && actor->avOwner.Fn_02(kAVCode_Invisibility) > 0 || actor->avOwner.Fn_02(kAVCode_Chameleon) > 0)
+				continue;
+			
 			if (GetDistance3D(thisObj, actor) <= range)
 				numActors++;
 		}
@@ -48,15 +61,11 @@ UINT32 __fastcall GetNumActorsInRangeFromRefCALL(TESObjectREFR* const thisObj, f
 	// Player is not included in the looped array, so we need to check for it outside the loop.
 	if (thisObj != g_thePlayer)
 	{
-		if (noDeadActors)
-		{
-			if (g_thePlayer->GetDead())
-				return numActors;
-		}
+		if (noDeadActors && g_thePlayer->GetDead())
+			return numActors;
+		
 		if (GetDistance3D(thisObj, g_thePlayer) <= range)
-		{
 			numActors++;
-		}
 	}
 
 #undef DebugGetNumActorsInRangeFromRef
@@ -94,18 +103,18 @@ UInt32 __fastcall GetNumCombatActorsFromActorCALL(TESObjectREFR* thisObj, float 
 	{
 		kFlag_GetAllies = 1,
 		kFlag_GetTargets = 2,
-		maxFlags = kFlag_GetAllies | kFlag_GetTargets,
+		kFlag_AlliesAndTargets = kFlag_GetAllies | kFlag_GetTargets,
 	};
-	if (!flags) flags = maxFlags;
+	if (!flags) flags = kFlag_AlliesAndTargets;
 	bool const getAllies = flags & kFlag_GetAllies;
 	bool const getTargets = flags & kFlag_GetTargets;
 
 	UINT32 numActors = 0;
 	auto IncrementNumActorsIfChecksPass = [&](Actor* actor)
 	{
-		if (actor && (actor != thisObj))  //todo: verify if !range (float) check works
+		if (actor && (actor != thisObj))  
 		{
-			if (range != 0.0F)
+			if (range > 0.0F)  //todo: verify if !range (float) check works
 			{
 				if (GetDistance3D(thisObj, actor) <= range)
 				{
@@ -318,6 +327,7 @@ UInt32 __fastcall GetNumCompassHostilesInRangeCALL(TESObjectREFR* const thisObj,
 	UInt32 numHostiles = 0;  //result
 
 	//To avoid counting "compass targets" that are super far away and can't even be seen on compass (I assume).
+	//todo: learn why this stuff is checked!
 	float fSneakMaxDistance = *(float*)(0x11CD7D8 + 4);
 	float fSneakExteriorDistanceMult = *(float*)(0x11CDCBC + 4);
 	bool isInterior = g_thePlayer->GetParentCell()->IsInterior();
@@ -338,7 +348,7 @@ UInt32 __fastcall GetNumCompassHostilesInRangeCALL(TESObjectREFR* const thisObj,
 			auto distToPlayer = target->target->GetPos()->CalculateDistSquared(playerPos);
 			if (distToPlayer < maxDist)
 			{
-				if (range) //todo: verify bugprone float check!!
+				if (range >= 0.0F) //todo: verify bugprone float check!!
 				{
 					if (distToPlayer < range)
 						numHostiles++;
