@@ -353,6 +353,7 @@ extern "C"
 		nvse->SetOpcodeBase(0x3A9F);
 
 		/* ONLY COMMANDS WITH LISTED OPCODES SHOULD BE USED IN SCRIPTS */
+		/* DO NO COMMENT OUT AN ALREADY-RELEASED FUNCTION; REGISTER AN EMPTY COMMAND INSTEAD */
 		
 		REG_CMD(ModNumericGameSetting)
 		REG_CMD(ModNumericINISetting)
@@ -432,6 +433,7 @@ extern "C"
 		REG_CMD(GetCalculatedEquippedWeight)  //NOTE: bWeightlessWorn(Power)Armor from Stewie's is not accounted for.
 		REG_CMD(GetCalculatedMaxCarryWeight)
 
+		//todo: fix whatever is causing the UDFs to not fire despite the hook working.
 		REG_CMD(SetShowOffOnCornerMessageEventHandler)
 
 		

@@ -7,18 +7,18 @@ DEFINE_CMD_ALT_COND_PLUGIN(ConditionPrint, , "Returns 1, and prints a message to
 bool Cmd_DumpFormList_Execute(COMMAND_ARGS)
 {
 	BGSListForm* FList = nullptr;
-	char filepathStr[260] = "default";
+	char fileName[MAX_PATH] = "default";
 	UInt32 bAppend = 1;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &FList, &filepathStr, &bAppend) || !IS_TYPE(FList, BGSListForm
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &FList, &fileName, &bAppend) || !IS_TYPE(FList, BGSListForm
 	)) return true;
 
-	if (strcmp(filepathStr, "default") == 0)  //if they are the same, i.e. filepathStr was not passed.
+	if (strcmp(fileName, "default") == 0)  //if they are the same, i.e. filepathStr was not passed.
 	{
 		FList->Dump();
 	}
 	else
 	{
-		FList->DumpToFile(filepathStr, bAppend);
+		FList->DumpToFile(fileName, bAppend);
 	}
 	return true;
 }

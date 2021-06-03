@@ -387,7 +387,7 @@ void BGSListForm::Dump(const std::function<void(const std::string&)>& output)
 	}
 }
 
-void BGSListForm::DumpToFile(const char* filePath, bool append)
+void BGSListForm::DumpToFile(const char* fileName, bool append)
 {
 	try
 	{
@@ -395,11 +395,11 @@ void BGSListForm::DumpToFile(const char* filePath, bool append)
 		errno_t e;
 		if (append)
 		{
-			e = fopen_s(&f, filePath, "a+");
+			e = fopen_s(&f, fileName, "a+");
 		}
 		else
 		{
-			e = fopen_s(&f, filePath, "w+");
+			e = fopen_s(&f, fileName, "w+");
 		}
 
 		if (!e)
@@ -408,12 +408,12 @@ void BGSListForm::DumpToFile(const char* filePath, bool append)
 			fclose(f);
 		}
 		else
-			_MESSAGE("Cannot open file %s [%d]", filePath, e);
+			_MESSAGE("Cannot open file %s [%d]", fileName, e);
 
 	}
 	catch (...)
 	{
-		_MESSAGE("Cannot write to file %s", filePath);
+		_MESSAGE("Cannot write to file %s", fileName);
 	}
 }
 
