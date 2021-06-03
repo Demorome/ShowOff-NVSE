@@ -368,10 +368,8 @@ extern "C"
 		REG_CMD(IsEquippedWeaponMelee)
 		REG_CMD(IsWeaponRanged)
 		REG_CMD(IsEquippedWeaponRanged)
-		
 		REG_CMD(GetChallengeProgress)
-		
-		REG_CMD(TestCondition)
+		REG_CMD(ConditionPrint)
 		
 		REG_CMD(MessageExAltShowoff) //Keep undocumented; don't recommend for general use, extra feature is jank.
 		//REG_CMD(IsCornerMessageDisplayed)  //(any corner message). Redundant in the face of GetNumQueuedCornerMessages.

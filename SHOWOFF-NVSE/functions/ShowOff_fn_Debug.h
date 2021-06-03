@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 DEFINE_COMMAND_ALT_PLUGIN(DumpFormList, FListDump, , 0, 3, kParams_OneFormList_OneOptionalString_OneOptionalInt);
-DEFINE_CMD_ALT_COND_PLUGIN(TestCondition, , "Returns 1, and prints a message to console. Meant for testing if previous conditions passed.", 0, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(ConditionPrint, , "Returns 1, and prints a message to console. Meant for testing if previous conditions passed.", 0, NULL);
 
 
 
@@ -45,14 +45,14 @@ bool Cmd_DumpFormList_Execute(COMMAND_ARGS)
 }
 
 //Would be cool if this could return whatever is calling this condition, or at what address etc..
-bool Cmd_TestCondition_Execute(COMMAND_ARGS)
+bool Cmd_ConditionPrint_Execute(COMMAND_ARGS)
 {
 	*result = 1;
 	if (IsConsoleOpen())
 		Console_Print("TestCondition >> 1. Not meant for use as a script function.");
 	return true;
 }
-bool Cmd_TestCondition_Eval(COMMAND_ARGS_EVAL)
+bool Cmd_ConditionPrint_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 1;
 	UINT32 refID = 0;
@@ -60,8 +60,7 @@ bool Cmd_TestCondition_Eval(COMMAND_ARGS_EVAL)
 	if (thisObj)
 	{
 		refID = thisObj->refID;
-		TESForm* form = thisObj;
-		edID = form->GetName();  //Only works with JG's bLoadEditorIDs = 1, otherwise returns an empty string.
+		edID = thisObj->GetName();  //Only works with JG's bLoadEditorIDs = 1, otherwise returns an empty string.
 	}
 	Console_Print("TestCondition >> 1. thisObj: [%08X] (%s)", refID, edID);
 	return true;
