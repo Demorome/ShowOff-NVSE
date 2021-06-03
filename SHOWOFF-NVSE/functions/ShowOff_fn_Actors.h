@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 DEFINE_CMD_ALT_COND_PLUGIN(GetNumActorsInRangeFromRef, , "Returns the amount of actors that are a certain distance nearby to the calling reference.", 1, kParams_OneFloat_OneOptionalInt);
-DEFINE_CMD_ALT_COND_PLUGIN(GetNumCombatActorsFromActor, , "Returns the amount of actors that are allies/targets to the calling actor, with optional filters.", 1, kParams_OneFloat_OneOptionalInt);
+DEFINE_CMD_ALT_COND_PLUGIN(GetNumCombatActorsFromActor, , "Returns the amount of actors that are allies/targets to the calling actor, with optional filters.", 1, kParams_OneOptionalFloat_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetCreatureTurningSpeed, , 0, 1, kParams_OneOptionalActorBase);  //copied after GetCreatureCombatSkill from JG
 DEFINE_COMMAND_PLUGIN(SetCreatureTurningSpeed, , 0, 2, kParams_OneFloat_OneOptionalActorBase);
 DEFINE_COMMAND_PLUGIN(GetCreatureFootWeight, , 0, 1, kParams_OneOptionalActorBase);
@@ -99,22 +99,36 @@ UInt32 __fastcall GetNumCombatActorsFromActorCALL(TESObjectREFR* thisObj, float 
 	if (!thisObj->IsActor()) return 0;
 	//Even if the calling actor is dead, they could still have combat targets, so we don't filter that out.
 
+#define DebugGetNumCombatActorsFromActor _DEBUG;
+
+#if DebugGetNumCombatActorsFromActor 
+	_MESSAGE("DebugGetNumActorsInRangeFromRef - begin dump for thisObj %s (%08x)", thisObj->GetName(), thisObj->refID);
+#endif
+
 	enum functionFlags
 	{
 		kFlag_GetAllies = 1,
 		kFlag_GetTargets = 2,
 		kFlag_AlliesAndTargets = kFlag_GetAllies | kFlag_GetTargets,
+		kFlag_NoInvisibleActors = 4,
 	};
 	if (!flags) flags = kFlag_AlliesAndTargets;
 	bool const getAllies = flags & kFlag_GetAllies;
 	bool const getTargets = flags & kFlag_GetTargets;
+	bool const noInvisibleActors = flags & kFlag_NoInvisibleActors;
 
 	UINT32 numActors = 0;
 	auto IncrementNumActorsIfChecksPass = [&](Actor* actor)
 	{
 		if (actor && (actor != thisObj))  
 		{
-			if (range > 0.0F)  //todo: verify if !range (float) check works
+#if DebugGetNumCombatActorsFromActor 
+			_MESSAGE("Current actor >>> %08x (%s). isDead: %d, distance: %f", actor->refID, actor->GetName(), actor->GetDead(), GetDistance3D(thisObj, actor));
+#endif
+			if (noInvisibleActors && actor->avOwner.Fn_02(kAVCode_Invisibility) > 0 || actor->avOwner.Fn_02(kAVCode_Chameleon) > 0)
+				return;
+			
+			if (range > 0.0F)
 			{
 				if (GetDistance3D(thisObj, actor) <= range)
 				{
@@ -182,6 +196,7 @@ UInt32 __fastcall GetNumCombatActorsFromActorCALL(TESObjectREFR* thisObj, float 
 		}
 
 	}
+#undef DebugGetNumCombatActorsFromActor
 	return numActors;
 }
 

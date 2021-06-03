@@ -362,7 +362,6 @@ extern "C"
 		REG_CMD(SetPCHasSleepWaitOverride)
 		REG_CMD(ShowingOffDisable)  //Showing off by copying vanilla style way functions! 
 		REG_CMD(ShowingOffEnable) //best to keep undocumented to not waste people's time.
-
 		REG_CMD(GetNumActorsInRangeFromRef)
 		REG_CMD(GetNumCombatActorsFromActor)
 		
