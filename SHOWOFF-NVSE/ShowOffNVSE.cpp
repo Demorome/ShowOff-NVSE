@@ -380,11 +380,9 @@ extern "C"
 		REG_CMD(SetCreatureBaseScale) //JG's GetBaseScale should return the creature's base scale, so no need for a GetCreatureBaseScale.
 		REG_CMD(DumpFormList)
 		REG_CMD(ListAddArray)
-		
 		REG_CMD(ListAddList)
-
 		REG_CMD(IsAnimPlayingExCond)
-		REG_CMD(GetNumCompassHostilesInRange)
+		REG_CMD(GetNumCompassHostiles)
 
 
 #if _DEBUG  //for functions being tested (or just abandoned).

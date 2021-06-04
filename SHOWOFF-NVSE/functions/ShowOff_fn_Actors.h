@@ -8,7 +8,7 @@ DEFINE_COMMAND_PLUGIN(GetCreatureFootWeight, , 0, 1, kParams_OneOptionalActorBas
 DEFINE_COMMAND_PLUGIN(SetCreatureFootWeight, , 0, 2, kParams_OneFloat_OneOptionalActorBase);
 DEFINE_COMMAND_PLUGIN(SetCreatureReach, , 0, 2, kParams_OneInt_OneOptionalActorBase);
 DEFINE_COMMAND_PLUGIN(SetCreatureBaseScale, , 0, 2, kParams_OneFloat_OneOptionalActorBase);
-DEFINE_CMD_ALT_COND_PLUGIN(GetNumCompassHostilesInRange, , "Returns the amount of hostile actors that are a certain distance nearby to the player that appear on the compass.", 0, kParams_OneOptionalFloat_OneOptionalInt);
+DEFINE_CMD_ALT_COND_PLUGIN(GetNumCompassHostiles, , "Returns the amount of hostile actors on compass, w/ optional filters.", 0, kParams_OneOptionalFloat_OneOptionalInt);
 
 
 
@@ -329,7 +329,7 @@ bool Cmd_SetCreatureBaseScale_Execute(COMMAND_ARGS)
 }
 
 
-UInt32 __fastcall GetNumCompassHostilesInRangeCALL(TESObjectREFR* const thisObj, float const range, UInt32 flags)
+UInt32 __fastcall GetNumCompassHostiles_Call(TESObjectREFR* const thisObj, float const maxRange, UInt32 flags)
 {
 	enum FunctionFlags
 	{
@@ -363,9 +363,9 @@ UInt32 __fastcall GetNumCompassHostilesInRangeCALL(TESObjectREFR* const thisObj,
 			auto distToPlayer = target->target->GetPos()->CalculateDistSquared(playerPos);
 			if (distToPlayer < maxDist)
 			{
-				if (range >= 0.0F) //todo: verify bugprone float check!!
+				if (maxRange > 0.0F)
 				{
-					if (distToPlayer < range)
+					if (distToPlayer <= maxRange)
 						numHostiles++;
 				}
 				else
@@ -379,19 +379,19 @@ UInt32 __fastcall GetNumCompassHostilesInRangeCALL(TESObjectREFR* const thisObj,
 }
 
 //Copied JG's GetNearestCompassHostile code.
-bool Cmd_GetNumCompassHostilesInRange_Eval(COMMAND_ARGS_EVAL)
+bool Cmd_GetNumCompassHostiles_Eval(COMMAND_ARGS_EVAL)
 {
-	float const range = *(float*)&arg1;
+	float const max_range = *(float*)&arg1;
 	auto const flags = (UInt32)arg2;
-	*result = GetNumCompassHostilesInRangeCALL(thisObj, range, flags);
+	*result = GetNumCompassHostiles_Call(thisObj, max_range, flags);
 	return true;
 }
-bool Cmd_GetNumCompassHostilesInRange_Execute(COMMAND_ARGS)
+bool Cmd_GetNumCompassHostiles_Execute(COMMAND_ARGS)
 {
-	float range = 0;
+	float max_range = 0;
 	UInt32 flags = 0;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &range, &flags))
-		*result = GetNumCompassHostilesInRangeCALL(thisObj, range, flags);
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &max_range, &flags))
+		*result = GetNumCompassHostiles_Call(thisObj, max_range, flags);
 	else
 		*result = 0;
 	return true;

@@ -154,8 +154,8 @@ bool Cmd_GetNumQueuedCornerMessages_Eval(COMMAND_ARGS_EVAL)
 bool Cmd_IsAnimPlayingExCond_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
-	UInt32 category = (UInt32)arg1;
-	UInt32 subType = (UInt32)arg2;  //optional
+	auto category = (UInt32)arg1;
+	auto subType = (UInt32)arg2;  //optional
 
 	if (!thisObj) return true;
 	if (category > 5 || category < 1) return true;
@@ -163,11 +163,10 @@ bool Cmd_IsAnimPlayingExCond_Eval(COMMAND_ARGS_EVAL)
 
 	AnimData* animData = thisObj->GetAnimData();
 	if (!animData) return true;
-	UInt32 animID;
 	const AnimGroupClassify* classify;
 	for (UInt16 groupID : animData->animGroupIDs)
 	{
-		animID = groupID & 0xFF;
+		UInt32 const animID = groupID & 0xFF;
 		if (animID >= 245) continue;
 		classify = &s_animGroupClassify[animID];
 		if (classify->category == category && (category >= 4 || (!subType || classify->subType == subType)))
