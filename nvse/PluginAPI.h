@@ -430,7 +430,7 @@ struct NVSEArrayVarInterface
 	UInt32	(* GetArraySize)(Array* arr);
 	Array*	(* LookupArrayByID)(UInt32 id);
 	bool	(* GetElement)(Array* arr, const Element& key, Element& outElement);
-	bool	(* GetElements)(Array* arr, Element* elements, Element* keys);
+	bool	(* GetElements)(Array* arr, Element* elements, Element* keys);  //sorted by Keys
 
 	// version 2
 	UInt32	(* GetArrayPacked)(Array* arr);

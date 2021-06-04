@@ -226,8 +226,6 @@ extern "C"
 		info->infoVersion = PluginInfo::kInfoVersion;
 		info->name = "ShowOffNVSE Plugin";
 		info->version = g_ShowOffVersion;
-		//s_debug.CreateLog("Demo_NVSE_Debug.log");
-		//g_Log.open??
 
 		// version checks
 		if (nvse->nvseVersion < PACKED_NVSE_VERSION)

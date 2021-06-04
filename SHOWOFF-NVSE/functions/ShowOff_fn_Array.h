@@ -17,15 +17,32 @@ bool Cmd_ListAddArray_Execute(COMMAND_ARGS)
 	UInt32 size = g_arrInterface->GetArraySize(inArr);
 	NVSEArrayElement* elements = new NVSEArrayElement[size];
 	g_arrInterface->GetElements(inArr, elements, NULL);
-	for (UInt32 i = 0; i < size; i++) {
-		if (elements[i].Form() == NULL) continue;
-		UInt32 const addedAtIndex = pListForm->AddAt(elements[i].Form(), index);
-		if (addedAtIndex == eListInvalid) 
+
+	auto AddElement = [&](int elemIndex)
+	{
+		if (elements[elemIndex].Form() == NULL) return true;  //acts as a continue.
+		UInt32 const addedAtIndex = pListForm->AddAt(elements[elemIndex].Form(), index);
+		if (addedAtIndex == eListInvalid)
 		{
 			*result = 0;
-			break;
+			return false;
+		}
+		return true;
+	};
+	
+	if (index == eListEnd)
+	{
+		for (int i = 0; i < size; i++) {
+			if (!AddElement(i)) break;
 		}
 	}
+	else
+	{
+		for (int i = size; i >= 0; --i) {
+			if (!AddElement(i)) break;
+		}
+	}
+
 	delete[] elements;
 	return true;
 }
@@ -37,7 +54,7 @@ bool Cmd_ListAddArray_Execute(COMMAND_ARGS)
 #if 0  //difficulties figuring out ambiguous-type extraction
 DEFINE_COMMAND_PLUGIN(Ar_Init, , "Initializes a numeric array with the specified value, repeated over X keys.", 0, 3, kParams_OneBasicType);
 
-bool Cmd_ListAddArray_Execute(COMMAND_ARGS)
+bool Cmd_Ar_Init_Execute(COMMAND_ARGS)
 {
 	void* anyValue;
 	UINT32 numElements;
