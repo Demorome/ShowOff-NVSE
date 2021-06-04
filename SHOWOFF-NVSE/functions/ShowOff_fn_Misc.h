@@ -1,8 +1,8 @@
 ﻿#pragma once
 
 
-DEFINE_COMMAND_PLUGIN(ShowingOffDisable, "Does the same thing as vanilla Disable. For showing off!", 1, 1, kParams_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN(ShowingOffEnable, "Does the same thing as vanilla Enable. For showing off!", 1, 1, kParams_OneOptionalInt);
+DEFINE_COMMAND_ALT_PLUGIN(ShowingOffDisable, ShowingOffDisableAltExCond2, "Does the same thing as vanilla Disable. For showing off!", 1, 1, kParams_OneOptionalInt);
+DEFINE_COMMAND_ALT_PLUGIN(ShowingOffEnable, ShowingOffEnableAltExCond2, "Does the same thing as vanilla Enable. For showing off!", 1, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_ALT_PLUGIN(ListAddList, AddFormListToFormList, "", 0, 3, kParams_TwoFormLists_OneOptionalIndex);
 DEFINE_COMMAND_PLUGIN(MessageExAltShowoff, , 0, 22, kParams_JIP_OneFloat_OneInt_OneFormatString);
 DEFINE_CMD_ALT_COND_PLUGIN(IsCornerMessageDisplayed, , "Returns 1/0 depending on if a corner message is displayed.", 0, NULL);

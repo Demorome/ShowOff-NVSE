@@ -12,7 +12,7 @@ void HandleINIOptions()
 {
 	char iniPath[MAX_PATH];
 	GetModuleFileNameA(g_ShowOffHandle, iniPath, MAX_PATH);
-	strcpy((char*)(strrchr(iniPath, '\\') + 1), INI_NAME);
+	strcpy((strrchr(iniPath, '\\') + 1), INI_NAME);
 
 	CSimpleIniA ini;
 	ini.SetUnicode(); 

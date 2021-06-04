@@ -339,9 +339,10 @@ extern "C"
 			auto johnnyGuitar = GetModuleHandle("johnnyguitar.dll");
 			JGCreateEvent = (CreateScriptEvent)GetProcAddress(johnnyGuitar, "JGCreateEvent");
 			JGFreeEvent = (FreeScriptEvent)GetProcAddress(johnnyGuitar, "JGFreeEvent");
+			//todo: if using these imports, add JG requirement check
 #endif
 			
-			HandleINIOptions();
+			//HandleINIOptions();  //todo: overhaul INI options + add more before introducing to public
 			HandleGameHooks();
 			HandleEventHooks();
 		}
@@ -370,7 +371,6 @@ extern "C"
 		REG_CMD(GetChallengeProgress)
 		REG_CMD(ConditionPrint)
 		REG_CMD(MessageExAltShowoff) //Keep undocumented; don't recommend for general use, extra feature is jank.
-		//REG_CMD(IsCornerMessageDisplayed)  //(any corner message). Redundant in the face of GetNumQueuedCornerMessages.
 		REG_CMD(GetNumQueuedCornerMessages)
 		REG_CMD(GetCreatureTurningSpeed)
 		REG_CMD(SetCreatureTurningSpeed)
@@ -466,8 +466,8 @@ extern "C"
 		REG_CMD(SetNoEquip);
 
 		//REG_CMD_ARR(Ar_GetInvalidRefs); //gave up
-		
 		//REG_CMD(GetEquippedWeaponType);  //JIP already made it for TTW.
+		//REG_CMD(IsCornerMessageDisplayed)  //(any corner message). Redundant in the face of GetNumQueuedCornerMessages.
 
 		REG_CMD(SetEnableParent);
 		REG_CMD_ARR(GetQueuedCornerMessages);
