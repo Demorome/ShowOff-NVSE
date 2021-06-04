@@ -39,28 +39,61 @@ bool Cmd_ShowingOffEnable_Execute(COMMAND_ARGS) {
 	return Cmd_Enable(PASS_COMMAND_ARGS);
 }
 
+
+
+
 //ripped code from FOSE's ListAddForm
 bool Cmd_ListAddList_Execute(COMMAND_ARGS)
 {
 	*result = 1;
-	BGSListForm* pListForm = NULL;
-	BGSListForm* pToAppendList = NULL;
-	UInt32 index = eListEnd;
+	BGSListForm* pListForm = nullptr;
+	BGSListForm* pToAppendList = nullptr;
+	UInt32 addAtIndex = eListEnd;
 
-	ExtractArgsEx(EXTRACT_ARGS_EX, &pListForm, &pToAppendList, &index);
+	ExtractArgsEx(EXTRACT_ARGS_EX, &pListForm, &pToAppendList, &addAtIndex);
 	if (!pListForm || !pToAppendList) return true;
 
+	auto Try_Adding_Form_From_FormList = [&](TESForm* form)
+	{
+		UInt32 const addedAtIndex = pListForm->AddAt(form, addAtIndex);
+		if (addedAtIndex == eListInvalid)
+		{
+			*result = 0; //error
+			return false;
+		}
+		return true;
+	};
+
+	// Need to append elements to our own array in order to iterate backwards, to append in descending key order.
+	std::vector<TESForm*> formArr;
+	
 	for (tList<TESForm>::Iterator iter = pToAppendList->list.Begin(); !iter.End(); ++iter)
 	{
 		TESForm* form = iter.Get();
 		if (form)
 		{
-			UInt32 const addedAtIndex = pListForm->AddAt(form, index);
-			if (addedAtIndex == eListInvalid)
+			if (addAtIndex != eListEnd)
 			{
-				*result = 0; //error
-				break;
+				formArr.push_back(form);
 			}
+			else
+			{
+				if (!Try_Adding_Form_From_FormList(form)) break;
+			}
+		}
+		else
+		{
+			_ERROR("ListAddList - found invalid form in formlist.");
+			*result = 0;
+			break;
+		}
+	}
+
+	if (!formArr.empty())
+	{
+		for (int i = formArr.size() - 1; i >= 0; i--)
+		{
+			if (!Try_Adding_Form_From_FormList(formArr[i])) break;
 		}
 	}
 

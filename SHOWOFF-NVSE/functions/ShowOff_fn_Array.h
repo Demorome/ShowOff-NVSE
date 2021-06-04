@@ -18,7 +18,7 @@ bool Cmd_ListAddArray_Execute(COMMAND_ARGS)
 	NVSEArrayElement* elements = new NVSEArrayElement[size];
 	g_arrInterface->GetElements(inArr, elements, NULL);
 
-	auto AddElement = [&](int elemIndex)
+	auto Add_Array_Element_To_FormList = [&](int elemIndex)
 	{
 		if (elements[elemIndex].Form() == NULL) return true;  //acts as a continue.
 		UInt32 const addedAtIndex = pListForm->AddAt(elements[elemIndex].Form(), index);
@@ -33,13 +33,13 @@ bool Cmd_ListAddArray_Execute(COMMAND_ARGS)
 	if (index == eListEnd)
 	{
 		for (int i = 0; i < size; i++) {
-			if (!AddElement(i)) break;
+			if (!Add_Array_Element_To_FormList(i)) break;
 		}
 	}
 	else
 	{
-		for (int i = size; i >= 0; --i) {
-			if (!AddElement(i)) break;
+		for (int i = size - 1; i >= 0; i--) {
+			if (!Add_Array_Element_To_FormList(i)) break;
 		}
 	}
 
