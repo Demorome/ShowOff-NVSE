@@ -1,6 +1,8 @@
 ﻿#include "internal/memory_pool.h"
 #include "internal/utility.h"
 
+// Ripped from JIP LN
+
 alignas(16) void* s_availableCachedBlocks[(MAX_CACHED_BLOCK_SIZE >> 4) + 1] = { NULL };
 
 __declspec(naked) void* __fastcall Pool_Alloc(UInt32 size)

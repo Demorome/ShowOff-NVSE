@@ -364,6 +364,7 @@ SInt32 BGSListForm::ReplaceForm(TESForm* pForm, TESForm* pReplaceWith)
 	return index;
 }
 
+// Credits: Kormakur for the new ar_Dump code, which does the same lambda function magic
 void BGSListForm::Dump(const std::function<void(const std::string&)>& output)
 {
 	output(FormatString("** Dumping %s FormList [%08X], size %d: **", GetName(), refID, Count()));

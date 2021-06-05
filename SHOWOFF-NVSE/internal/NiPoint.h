@@ -1,5 +1,9 @@
 #pragma once
 
+
+// Ripped from JIP LN.
+// Maybe has a little from JG (?).
+
 #define DECL_FLOAT_OP(op) \
 	NiPoint3 operator op(const float n) const \
 	{ \

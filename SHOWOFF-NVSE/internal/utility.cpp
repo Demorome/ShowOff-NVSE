@@ -5,6 +5,9 @@
 memcpy_t MemCopy = memcpy, MemMove = memmove;
 
 
+// Some stuff belongs to NVSE, some to JIP LN, some to JG...
+
+
 bool fCompare(float lval, float rval)
 {
 	return fabs(lval - rval) < FLT_EPSILON;

@@ -1,5 +1,7 @@
 #pragma once
 
+// Partly from JG, and JIP.
+
 struct hkVector4
 {
 	float	x, y, z, w;

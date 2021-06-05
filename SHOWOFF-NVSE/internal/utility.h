@@ -1,6 +1,8 @@
 #pragma once
 #include <string>
 
+// Copied many things over from JIP LN.
+
 const double
 kDblZero = 0,
 kDblPI = 3.141592653589793,

@@ -11,9 +11,11 @@ DEFINE_COMMAND_PLUGIN(SetCreatureBaseScale, , 0, 2, kParams_OneFloat_OneOptional
 DEFINE_CMD_ALT_COND_PLUGIN(GetNumCompassHostiles, , "Returns the amount of hostile actors on compass, w/ optional filters.", 0, kParams_OneOptionalFloat_OneOptionalInt);
 
 
+//No Invisible Actor filter - credits to JG for that bit of code.
 
-//Code ripped from both JIP (GetActorsByProcessingLevel) and SUP.
-UInt32 __fastcall GetNumActorsInRangeFromRefCALL(TESObjectREFR* const thisObj, float const range, UInt32 const flags)
+
+//Code ripped from both JIP (GetActorsByProcessingLevel) and SUP (FindClosestActorFromRef).
+UInt32 __fastcall GetNumActorsInRangeFromRef_Call(TESObjectREFR* const thisObj, float const range, UInt32 const flags)
 {
 	if (range <= 0) return 0;
 	if (!thisObj) return 0;
@@ -74,7 +76,7 @@ UInt32 __fastcall GetNumActorsInRangeFromRefCALL(TESObjectREFR* const thisObj, f
 
 bool Cmd_GetNumActorsInRangeFromRef_Eval(COMMAND_ARGS_EVAL)
 {
-	*result = GetNumActorsInRangeFromRefCALL(thisObj, *(float*)&arg1, (UInt32)arg2);
+	*result = GetNumActorsInRangeFromRef_Call(thisObj, *(float*)&arg1, (UInt32)arg2);
 	return true;
 }
 bool Cmd_GetNumActorsInRangeFromRef_Execute(COMMAND_ARGS)
@@ -82,7 +84,7 @@ bool Cmd_GetNumActorsInRangeFromRef_Execute(COMMAND_ARGS)
 	float range = 0;
 	UINT32 flags = 0;
 	if (ExtractArgs(EXTRACT_ARGS, &range, &flags))
-		*result = GetNumActorsInRangeFromRefCALL(thisObj, range, flags);
+		*result = GetNumActorsInRangeFromRef_Call(thisObj, range, flags);
 	else
 		*result = 0;
 	return true;
@@ -216,7 +218,7 @@ bool Cmd_GetNumCombatActorsFromActor_Execute(COMMAND_ARGS)
 	return true;
 }
 
-
+// Credits to JIP LN for the GetCreature__ code format.
 bool Cmd_GetCreatureTurningSpeed_Execute(COMMAND_ARGS)
 {
 	*result = -1;
@@ -328,7 +330,7 @@ bool Cmd_SetCreatureBaseScale_Execute(COMMAND_ARGS)
 	return true;
 }
 
-
+//Copied JG's GetNearestCompassHostile code.
 UInt32 __fastcall GetNumCompassHostiles_Call(TESObjectREFR* const thisObj, float const maxRange, UInt32 flags)
 {
 	enum FunctionFlags
@@ -378,7 +380,6 @@ UInt32 __fastcall GetNumCompassHostiles_Call(TESObjectREFR* const thisObj, float
 	return numHostiles;
 }
 
-//Copied JG's GetNearestCompassHostile code.
 bool Cmd_GetNumCompassHostiles_Eval(COMMAND_ARGS_EVAL)
 {
 	float const max_range = *(float*)&arg1;

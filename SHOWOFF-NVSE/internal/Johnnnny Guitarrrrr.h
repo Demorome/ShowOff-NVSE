@@ -1,5 +1,8 @@
 ﻿#pragma once
 
+
+// Everything here was ripped from JohnnyGuitar NVSE.
+
 //not really useful for now...
 bool(__cdecl* Cmd_GetAV)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5BD8A0;
 bool(__cdecl* Cmd_SetAV)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5BDCD0;

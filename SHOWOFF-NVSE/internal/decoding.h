@@ -5,7 +5,10 @@
 #include "GameTasks.h"
 #include "GameTiles.h"
 #include "netimmerse.h"
-#include "internal/NiPoint.h" 
+#include "internal/NiPoint.h"
+
+
+// Credits: JIPLN, lStewieAl, JG, and surely others.
 
 class BSGameSound;
 class NiBSBoneLODController;

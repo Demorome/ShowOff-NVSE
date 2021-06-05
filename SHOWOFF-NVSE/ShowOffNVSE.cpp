@@ -178,6 +178,8 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		break;
 
 	case NVSEMessagingInterface::kMessage_DeferredInit:
+
+		// From JiP's patches_game.h
 		g_thePlayer = PlayerCharacter::GetSingleton();
 		g_playerAVOwner = &g_thePlayer->avOwner;
 		g_processManager = (ProcessManager*)0x11E0E80;
@@ -185,11 +187,11 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		g_dataHandler = DataHandler::Get();
 		g_audioManager = (BSAudioManager*)0x11F6EF0;
 		g_currentSky = (Sky**)0x11DEA20;
-		g_HUDMainMenu = *(HUDMainMenu**)0x11D96C0;  // From JiP's patches game
-		g_interfaceManager = *(InterfaceManager**)0x11D8A80; // From JiP's patches game
-		g_tileMenuArray = *(TileMenu***)0x11F350C; // From JiP's patches game
-		g_screenWidth = *(UInt32*)0x11C73E0; // From JiP's patches game
-		g_screenHeight = *(UInt32*)0x11C7190; // From JiP's patches game
+		g_HUDMainMenu = *(HUDMainMenu**)0x11D96C0;  
+		g_interfaceManager = *(InterfaceManager**)0x11D8A80; 
+		g_tileMenuArray = *(TileMenu***)0x11F350C; 
+		g_screenWidth = *(UInt32*)0x11C73E0;
+		g_screenHeight = *(UInt32*)0x11C7190;
 
 		break;
 
@@ -228,11 +230,11 @@ extern "C"
 		info->version = g_ShowOffVersion;
 
 		// version checks
-		if (nvse->nvseVersion < PACKED_NVSE_VERSION)
+		if (nvse->nvseVersion < PACKED_NVSE_VERSION)  //fixed version check thanks to c6
 		{
 			char buffer[100];
 			sprintf_s(buffer, 100,"NVSE version too old (got %08X expected at least %08X)", nvse->nvseVersion, PACKED_NVSE_VERSION);
-			MessageBoxA(nullptr, buffer, "ShowOff", MB_ICONEXCLAMATION);
+			MessageBoxA(nullptr, buffer, "ShowOff", MB_ICONEXCLAMATION);  //MessageBoxA usage style copied from lStewieAl.
 			_ERROR("%s", buffer);
 			return false;
 		}
@@ -290,11 +292,12 @@ extern "C"
 
 		if (!nvse->isEditor) 
 		{
-			PluginHandle nvsePluginHandle = nvse->GetPluginHandle();
+			PluginHandle nvsePluginHandle = nvse->GetPluginHandle();  //from JiPLN
 			
 			NVSEDataInterface* nvseData = (NVSEDataInterface*)nvse->QueryInterface(kInterface_Data);
 			InventoryRefGetForID = (InventoryRef * (*)(UInt32))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID);
 
+			// From JiPLN (jip_nvse.cpp) 
 			NVSESerializationInterface* serialization = (NVSESerializationInterface*)nvse->QueryInterface(kInterface_Serialization);
 			WriteRecord = serialization->WriteRecord;
 			WriteRecordData = serialization->WriteRecordData;
@@ -320,9 +323,10 @@ extern "C"
 			ExtractFormatStringArgs = g_scriptInterface->ExtractFormatStringArgs;
 			
 			g_commandInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
-			
+
+			//g_??Interface->??; shortcuts are from JiP
 			g_strInterface = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);
-			GetStringVar = g_strInterface->GetString;
+			GetStringVar = g_strInterface->GetString;  
 			AssignString = g_strInterface->Assign;
 
 			g_arrInterface = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
@@ -393,18 +397,16 @@ extern "C"
 		REG_CMD(AuxStringMapArrayGetFloat)
 		REG_CMD_FORM(AuxStringMapArrayGetRef)
 		REG_CMD_STR(AuxStringMapArrayGetString)
-		
 		REG_CMD_ARR(AuxStringMapArrayGetFirst)
 		REG_CMD_ARR(AuxStringMapArrayGetNext)
-		
 		REG_CMD_ARR(AuxStringMapArrayGetKeys)
-		REG_CMD_ARR(AuxStringMapArrayGetAll) 
+		REG_CMD_ARR(AuxStringMapArrayGetAll)  //todo: test this
 		REG_CMD_ARR(AuxStringMapArrayGetAsArray)
-		
-		REG_CMD(AuxStringMapArraySetFromArray)
+		REG_CMD(AuxStringMapArraySetFromArray)  //todo: test huge array (GetGameSetting) + if it gets serialized properly.
 		REG_CMD(AuxStringMapArraySetFloat)
 		REG_CMD(AuxStringMapArraySetRef)
 		REG_CMD(AuxStringMapArraySetString)
+		
 		REG_CMD(AuxStringMapArrayEraseKey)
 		REG_CMD(AuxStringMapArrayValidateValues)
 		REG_CMD(AuxStringMapArrayDestroy)

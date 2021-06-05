@@ -318,7 +318,7 @@ bool Cmd_SetPCCanPickpocketInCombat_Execute(COMMAND_ARGS)
 	return true;
 }
 
-
+// Ripped code from JIPLN's "SetNoUnequip"
 DEFINE_COMMAND_PLUGIN(SetNoEquip, "Returns 1 if the inventory ref was sucessfully set to NoEquip (or the flag was properly cleared). Returns 2 if it was already set.", 1, 1, kParams_OneInt);
 bool Cmd_SetNoEquip_Execute(COMMAND_ARGS)
 {

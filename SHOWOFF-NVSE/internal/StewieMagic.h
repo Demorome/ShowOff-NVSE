@@ -3,6 +3,8 @@
 #include "internal/jip_nvse.h"
 #include "internal/decoding.h"
 
+// Everything here was ripped from lStewieAl.
+
 
 UInt32 GetRelJumpAddr(UInt32 jumpSrc)
 {

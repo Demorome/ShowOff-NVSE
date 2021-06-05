@@ -124,7 +124,7 @@ bool Cmd_MessageExAltShowoff_Execute(COMMAND_ARGS)
 	return true;
 }
 
-
+// Inspired by JIP's "ClearMessageQueue"
 bool Cmd_IsCornerMessageDisplayed_Execute(COMMAND_ARGS)
 {
 	*result = !g_HUDMainMenu->queuedMessages.Empty();  
@@ -206,7 +206,7 @@ bool Cmd_SetRadiationExtraData_Execute(COMMAND_ARGS)
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &fNewVal)) return true;
 	if (thisObj)
 	{
-		ThisStdCall(0x422350, &thisObj->extraDataList, fNewVal);
+		ThisStdCall(0x422350, &thisObj->extraDataList, fNewVal);  //credits to c6 for pointing this address out.
 		*result = 1;
 	}
 	return true;
@@ -286,7 +286,7 @@ bool Cmd_IsNight_Execute(COMMAND_ARGS)
 	return Cmd_IsNight_Eval(0, climate, 0, result);
 }
 
-
+//credits to JIP LN's "CrippleLimb" for much of the structure.
 bool Cmd_IsLimbCrippled_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
@@ -387,7 +387,7 @@ bool Cmd_GetCrippledLimbsAsBitMask_Execute(COMMAND_ARGS)
 }
 
 
-// Get Equipped Object utility functions, from FOSE
+// Get Equipped Object utility functions, from FOSE.
 class MatchBySlot : public FormMatcher
 {
 	UInt32 m_slotMask;
@@ -534,7 +534,7 @@ bool Cmd_UnequipItemsFromBitMask_Execute(COMMAND_ARGS)
 }
 #endif
 
-
+// Copied ClearJIPSavedData
 bool Cmd_ClearShowoffSavedData_Execute(COMMAND_ARGS)
 {
 	UInt32 auxStringMaps;
@@ -711,7 +711,7 @@ bool Cmd_SetCellFullNameAlt_Execute(COMMAND_ARGS)
 	return true;
 }
 
-
+// Takes from JIP's ClearMessageQueue.
 DEFINE_COMMAND_PLUGIN(GetQueuedCornerMessages, "Returns the queued corner messages as a multidimensional array.", 0, 0, NULL);
 bool Cmd_GetQueuedCornerMessages_Execute(COMMAND_ARGS)
 {
@@ -728,7 +728,7 @@ bool Cmd_GetQueuedCornerMessages_Execute(COMMAND_ARGS)
 	return true;
 }
 
-
+// Takes from JIP's "ModBaseAV"
 DEFINE_COMMAND_ALT_PLUGIN(SetBaseActorValue, SetBaseAV, , 0, 3, kParams_JIP_OneActorValue_OneFloat_OneOptionalActorBase); 
 bool Cmd_SetBaseActorValue_Execute(COMMAND_ARGS) 
 {
@@ -752,7 +752,7 @@ bool Cmd_GetItemRefValue_Execute(COMMAND_ARGS)
 	*result = -1;
 	if (thisObj)
 	{
-		ContChangesEntry tempEntry(NULL, 1, thisObj->baseForm);  //copying after GetCalculatedWeaponDamage from JIP, and c6.
+		ContChangesEntry tempEntry(NULL, 1, thisObj->baseForm);  //copying after GetCalculatedWeaponDamage from JIP, thx c6.
 		ExtraContainerChanges::ExtendDataList extendData;
 		extendData.Init(&thisObj->extraDataList);
 		tempEntry.extendData = &extendData;
@@ -797,21 +797,6 @@ bool Cmd_GetCalculatedItemWeight_Execute(COMMAND_ARGS)
 	return true;
 }
 */
-
-struct ActivateRefEntry  //LinkedRefEntry, no way this will work..
-{
-	UInt32		linkID;
-	UInt8		modIdx;
-
-	void Set(UInt32 _linkID, UInt8 _modIdx)
-	{
-		linkID = _linkID;
-		modIdx = _modIdx;
-	}
-};
-UnorderedMap<UInt32, ActivateRefEntry> s_activateRefModified;
-UnorderedMap<UInt32, UInt32> s_activateRefDefault, s_activateRefsTemp;
-
 
 DEFINE_COMMAND_PLUGIN(SetEnableParent, , 1, 1, kParams_OneOptionalForm);
 
@@ -881,6 +866,7 @@ void __fastcall TestDemoFunc(double *stuff)
 	*stuff -= 1;
 }
 
+// Does whatever I want it to at the time.
 DEFINE_COMMAND_PLUGIN(TestDemo, , 0, 0, NULL);
 bool Cmd_TestDemo_Execute(COMMAND_ARGS)
 {

@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+// ripped from JIP LN
+
 enum
 {
 	kChangedFlag_AuxStringMaps = 1 << 1,

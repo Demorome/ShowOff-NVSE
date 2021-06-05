@@ -1,5 +1,8 @@
 #pragma once
 
+
+// Ripped from JIP LN.
+
 class BSFadeNode;
 class NiMultiTargetTransformController;
 class NiTextKeyExtraData;

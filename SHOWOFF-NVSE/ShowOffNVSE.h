@@ -63,20 +63,21 @@ extern char* g_PBIR_FailMessage;
 
 
 // Misc.
-#define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)  //Probably breaks Compiler Override!!
-#define REFR_RES *(UInt32*)result  //From JIP
+#define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)  //Probably breaks Compiler Override!! - Credits to Stewie.
+#define REFR_RES *(UInt32*)result  //From JIPLN
 
-#define IS_TYPE(form, type) (*(UInt32*)form == kVtbl_##type)  //already defined in GameForms.h
-#define NOT_ID(form, type) (form->typeID != kFormType_##type) //already defined in GameForms.h
-#define IS_ID(form, type) (form->typeID == kFormType_##type) //already defined in GameForms.h
+//Below are already defined in GameForms.h - All from JIPLN
+#define IS_TYPE(form, type) (*(UInt32*)form == kVtbl_##type)  
+#define NOT_ID(form, type) (form->typeID != kFormType_##type) 
+#define IS_ID(form, type) (form->typeID == kFormType_##type)
 
 #define RegisterScriptCommand(name) nvse->RegisterCommand(&kCommandInfo_ ##name); //Default return type (return a number)
-#define REG_CMD(name) nvse->RegisterCommand(&kCommandInfo_##name);  //Short version of RegisterScriptCommand.
-#define REG_TYPED_CMD(name, type) nvse->RegisterTypedCommand(&kCommandInfo_##name,kRetnType_##type);
-#define REG_CMD_STR(name) nvse->RegisterTypedCommand(&kCommandInfo_##name, kRetnType_String);
-#define REG_CMD_ARR(name) nvse->RegisterTypedCommand(&kCommandInfo_##name, kRetnType_Array);
-#define REG_CMD_FORM(name) nvse->RegisterTypedCommand(&kCommandInfo_##name, kRetnType_Form);
-#define REG_CMD_AMB(name) nvse->RegisterTypedCommand(&kCommandInfo_##name, kRetnType_Ambiguous);
+#define REG_CMD(name) nvse->RegisterCommand(&kCommandInfo_##name);  //Short version of RegisterScriptCommand, from JIP.
+#define REG_TYPED_CMD(name, type) nvse->RegisterTypedCommand(&kCommandInfo_##name,kRetnType_##type);  //from JG
+#define REG_CMD_STR(name) nvse->RegisterTypedCommand(&kCommandInfo_##name, kRetnType_String); //From JIPLN
+#define REG_CMD_ARR(name) nvse->RegisterTypedCommand(&kCommandInfo_##name, kRetnType_Array); //From JIPLN
+#define REG_CMD_FORM(name) nvse->RegisterTypedCommand(&kCommandInfo_##name, kRetnType_Form); //From JIPLN
+#define REG_CMD_AMB(name) nvse->RegisterTypedCommand(&kCommandInfo_##name, kRetnType_Ambiguous); //From JIPLN
 
 typedef NVSEArrayVarInterface::Array NVSEArrayVar;
 typedef NVSEArrayVarInterface::Element NVSEArrayElement;
@@ -84,10 +85,11 @@ typedef NVSEArrayVarInterface::Element NVSEArrayElement;
 //---Hooks and Hook Stuff
 
 bool canPlayerPickpocketEqItems() { return *(UInt32*)0x75E87B != 0xFFD5F551; }
-//Checks if the address has been changed, to take into account Stewie's Tweaks' implementation.
+//Checks if the address has been changed, to take into account Stewie's Tweaks' implementation (bPickpocketWornItems).
 //If the address was changed by something else, uh... Well I don't take that into account.
 
 
+// From lStewieAl's Tweaks (bImprovedPickpocketing).
 void __fastcall ContainerMenuHandleMouseoverAlt(ContainerMenu* menu, void* edx, int a2, int a3)
 {
 	// if not in pickpocket mode return
@@ -99,6 +101,7 @@ void __fastcall ContainerMenuHandleMouseoverAlt(ContainerMenu* menu, void* edx, 
 	ThisStdCall(0x75CF70, menu, a2, a3);
 }
 
+// From lStewieAl's Tweaks.
 int CalculateCombatPickpocketAPCost(ContChangesEntry* item, Actor* target, signed int itemValue, signed int count, bool isItemOwnedByTarget)
 {
 	// Average player (5 AGL) will have ~80 action points
@@ -144,6 +147,7 @@ int CalculateCombatPickpocketAPCost(ContChangesEntry* item, Actor* target, signe
 }
 
 // custom pickpocket code, for ripping items straight out of an opponent's hands/pockets.
+// Code ripped from lStewieAl's Tweaks (TryPickpocket)
 bool __fastcall TryCombatPickpocket(ContChangesEntry* selection, SInt32 count, Actor* actor, signed int itemValue)
 {
 	bool wasSuccessful = true;
@@ -226,7 +230,8 @@ __declspec(naked) void ContainerHoverItemHook()
 	static const UInt32 retnAddr = 0x75CEDA;
 	_asm
 	{
-		call	SetContainerSubtitleStringToPickpocketAPCost
+		call	SetContainerSubtitleStringTo
+		APCost
 
 		originalCode :
 			mov		ecx, [ebp - 4]
@@ -311,6 +316,7 @@ bool __fastcall ShowPickpocketStringInCombat(Actor* actor, void* edx, char a2)
 }
 
 //Still doesn't work even with this...
+//Ripped code from somewhere, don't exactly remember - maybe JIP, Stewie or JG.
 tList<PlayerCharacter::CompassTarget>* __fastcall ShowPickpocketStringInCombat2(PlayerCharacter* player, void* edx)
 {
 	if (g_canPlayerPickpocketInCombat)

@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+// Everything here was ripped from JIP LN.
+
 extern ICriticalSection g_Lock;
 
 enum

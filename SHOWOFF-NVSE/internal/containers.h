@@ -3,7 +3,8 @@
 #include "internal/utility.h"
 #include "internal/memory_pool.h"
 
-//Below definitions are used by JIP
+// Some container code was taken directly from JIP.
+// Below definitions are used by JIP
 #define MAP_DEFAULT_ALLOC			8
 #define MAP_DEFAULT_BUCKET_COUNT	8
 #define MAP_MAX_BUCKET_COUNT		0x40000

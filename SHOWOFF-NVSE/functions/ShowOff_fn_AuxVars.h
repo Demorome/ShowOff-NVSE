@@ -1,6 +1,10 @@
 ﻿#pragma once
 
-//For Auxiliary StringMap Arrays (AuxStringMap, ASM, not to confuse with ASM = assembly)
+/* For Auxiliary StringMap Arrays (AuxStringMap, ASM, not to confuse with ASM = assembly)
+ * 
+ * Credits: JIPLN for AuxVars and RefMap code, which composes 99% of the code below.
+ * 
+ */
 
 #define DoLaterMaybe 0
 

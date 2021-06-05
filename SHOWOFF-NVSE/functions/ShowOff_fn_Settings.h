@@ -3,6 +3,8 @@
 #include "GameSettings.h"
 
 
+// Code mostly ripped from FOSE's gamesetting functions (GetNumericGameSetting etc).
+
 DEFINE_COMMAND_PLUGIN(IsGameSetting, "Checks if a string refers to a valid Gamesetting", 0, 1, kParams_OneString);
 bool Cmd_IsGameSetting_Execute(COMMAND_ARGS)
 {

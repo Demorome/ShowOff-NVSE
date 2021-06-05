@@ -8,6 +8,7 @@
 
 extern HMODULE g_ShowOffHandle;
 
+// INI usage copied from lStewieAl's Tweaks (settings.h)
 void HandleINIOptions()
 {
 	char iniPath[MAX_PATH];

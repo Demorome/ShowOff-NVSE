@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+// Credits to Karut (from JohnnyGuitar) for making the Event Framework.
+
 DEFINE_COMMAND_PLUGIN(SetShowOffOnCornerMessageEventHandler, , 0, 3, kParams_Event);
 
 
