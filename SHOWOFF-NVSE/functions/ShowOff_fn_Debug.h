@@ -27,7 +27,7 @@ bool Cmd_DumpFormList_Execute(COMMAND_ARGS)
 bool Cmd_ConditionPrint_Execute(COMMAND_ARGS)
 {
 	*result = 1;
-	if (IsConsoleOpen())
+	if (IsConsoleMode())
 		Console_Print("TestCondition >> 1. Not meant for use as a script function.");
 	return true;
 }

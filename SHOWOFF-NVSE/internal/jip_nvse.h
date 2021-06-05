@@ -49,25 +49,6 @@ typedef NVSEArrayVarInterface::Element NVSEArrayElement;
 typedef NVSEArrayVarInterface::ElementR ArrayElementR;
 typedef NVSEArrayVarInterface::ElementL ArrayElementL;
 
-
-__declspec(naked) bool IsConsoleOpen()  //how does this differ from IsConsoleMode()?
-{
-	__asm
-	{
-		mov		al, byte ptr ds : [0x11DEA2E]
-		test	al, al
-		jz		done
-		mov		eax, ds : [0x126FD98]
-		mov		edx, fs : [0x2C]
-		mov		eax, [edx + eax * 4]
-		test	eax, eax
-		jz		done
-		mov		al, [eax + 0x268]
-		done :
-		retn
-	}
-}
-
 UInt8 TESForm::GetOverridingModIdx()
 {
 	ModInfo* info = mods.GetLastItem();
@@ -160,49 +141,6 @@ __declspec(naked) bool Actor::IsInCombatWith(Actor* target)
 		retn	4
 	}
 }
-
-//Not sure if this is needed.
-/*
-__declspec(naked) float TESObjectREFR::GetDistance(TESObjectREFR* target)
-{
-	__asm
-	{
-		push	ebx
-		push	esi
-		push	edi
-		mov		ebx, ecx
-		mov		esi, [esp + 0x10]
-		call	TESObjectREFR::GetParentCell
-		test	eax, eax
-		jz		fltMax
-		mov		edi, eax
-		mov		ecx, esi
-		call	TESObjectREFR::GetParentCell
-		test	eax, eax
-		jz		fltMax
-		cmp		edi, eax
-		jz		calcDist
-		mov		edi, [edi + 0xC0]
-		test	edi, edi
-		jz		fltMax
-		cmp		edi, [eax + 0xC0]
-		jnz		fltMax
-		calcDist :
-		push	7
-			mov		edx, esi
-			mov		ecx, ebx
-			call	GetAxisDistance
-			jmp		done
-			fltMax :
-		fld		kFltMax
-			done :
-		pop		edi
-			pop		esi
-			pop		ebx
-			retn	4
-	}
-}
-*/
 
 __declspec(naked) TESForm* __stdcall LookupFormByRefID(UInt32 refID)
 {
