@@ -3,7 +3,7 @@ An NVSE plugin which adds new functions.
 For heathens who have forsaken the Vanilla-Style way. 
 
 # Requirements
-Requires xNVSE v6.06 or greater.
+Requires xNVSE v6.06 or greater: https://github.com/xNVSE/NVSE/releases.
 
 # Credits
 lStewieAl, c6, Luthien, TommInfinite, Jazzisparis, karut - for their help and the code I stole off all of them.
