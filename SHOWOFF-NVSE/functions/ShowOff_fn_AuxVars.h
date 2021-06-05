@@ -19,8 +19,8 @@ DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetNext, AuxStringMapNext, , 0, 1, kP
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetKeys, AuxStringMapKeys, , 0, 1, kParams_OneString);
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetAll, AuxStringMapGetAll, , 0, 1, kParams_OneInt);
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArrayGetAsArray, AuxStringMapGetAsArr, , 0, 1, kParams_OneString);
-DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArraySetFromArray, AuxStringMapSetFromArr, , 0, 3, kParams_OneString_OneArray_OneOptionalInt);
 
+DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArraySetFromArray, AuxStringMapSetFromArr, , 0, 3, kParams_OneString_OneArray_OneOptionalInt);
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArraySetFloat, AuxStringMapSetFlt, , 0, 3, kParams_TwoStrings_OneDouble);
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArraySetRef, AuxStringMapSetRef, , 0, 3, kParams_TwoStrings_OneForm);
 DEFINE_COMMAND_ALT_PLUGIN(AuxStringMapArraySetString, AuxStringMapSetStr, , 0, 3, kParams_ThreeStrings);
@@ -293,7 +293,7 @@ bool Cmd_AuxStringMapArraySetString_Execute(COMMAND_ARGS)
 	char varName[0x50];
 	char keyName[0x50];
 	char* buffer = GetStrArgBuffer();
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &keyName, &buffer))
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &keyName, buffer))
 	{
 		AuxVariableValue* value = AuxStringMapAddValue(scriptObj, varName, keyName);
 		if (value)

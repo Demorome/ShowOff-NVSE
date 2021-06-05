@@ -393,11 +393,14 @@ extern "C"
 		REG_CMD(AuxStringMapArrayGetFloat)
 		REG_CMD_FORM(AuxStringMapArrayGetRef)
 		REG_CMD_STR(AuxStringMapArrayGetString)
+		
 		REG_CMD_ARR(AuxStringMapArrayGetFirst)
 		REG_CMD_ARR(AuxStringMapArrayGetNext)
+		
 		REG_CMD_ARR(AuxStringMapArrayGetKeys)
 		REG_CMD_ARR(AuxStringMapArrayGetAll) 
 		REG_CMD_ARR(AuxStringMapArrayGetAsArray)
+		
 		REG_CMD(AuxStringMapArraySetFromArray)
 		REG_CMD(AuxStringMapArraySetFloat)
 		REG_CMD(AuxStringMapArraySetRef)
