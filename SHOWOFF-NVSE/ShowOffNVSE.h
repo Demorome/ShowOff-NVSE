@@ -230,8 +230,7 @@ __declspec(naked) void ContainerHoverItemHook()
 	static const UInt32 retnAddr = 0x75CEDA;
 	_asm
 	{
-		call	SetContainerSubtitleStringTo
-		APCost
+		call	SetContainerSubtitleStringToPickpocketAPCost
 
 		originalCode :
 			mov		ecx, [ebp - 4]

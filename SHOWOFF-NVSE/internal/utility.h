@@ -77,6 +77,24 @@ kFltMax = FLT_MAX;
 #define GetRandomInt(n) ThisStdCall<SInt32, SInt32>(0xAA5230, (void*)0x11C4180, n)
 #define GetRandomIntInRange(iMin, iMax) (GetRandomInt(iMax - iMin) + iMin) 
 
+
+// LightCS definitions taken from JG
+class LightCS
+{
+	UInt32	owningThread;
+	UInt32	enterCount;
+
+public:
+	LightCS() : owningThread(0), enterCount(0) {}
+
+	void Enter();
+	void EnterSleep();
+	void Leave();
+};
+
+
+bool fCompare(float lval, float rval);  //copied from JG
+
 typedef void* (__cdecl* memcpy_t)(void*, const void*, size_t);
 extern memcpy_t MemCopy, MemMove;
 

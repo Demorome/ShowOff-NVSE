@@ -478,7 +478,7 @@ extern "C"
 		REG_CMD_ARR(GetQueuedCornerMessages);
 		REG_CMD(GetPCHasFastTravelOverride)
 
-
+		REG_CMD(GetNVSEVersionFullAlt)
 		REG_CMD(TestDemo);
 
 		/*todo =======Function ideas ======

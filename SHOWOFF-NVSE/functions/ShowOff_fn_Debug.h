@@ -44,3 +44,23 @@ bool Cmd_ConditionPrint_Eval(COMMAND_ARGS_EVAL)
 	Console_Print("TestCondition >> 1. thisObj: [%08X] (%s)", refID, edID);
 	return true;
 }
+
+
+#if _DEBUG
+
+DEFINE_CMD_ALT_COND_PLUGIN(GetNVSEVersionFullAlt, , , 0, NULL);
+
+bool Cmd_GetNVSEVersionFullAlt_Execute(COMMAND_ARGS)
+{
+	*result = PACKED_NVSE_VERSION;
+	if (IsConsoleMode())
+		Console_Print("GetNVSEVersionFullAlt >> %f.", result);
+	return true;
+}
+bool Cmd_GetNVSEVersionFullAlt_Eval(COMMAND_ARGS_EVAL)
+{
+	//??
+	return true;
+}
+
+#endif
