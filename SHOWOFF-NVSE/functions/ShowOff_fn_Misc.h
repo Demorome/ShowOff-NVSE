@@ -15,7 +15,7 @@ DEFINE_COMMAND_PLUGIN(PlayerIsUsingTurbo, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(PlayerHasCateyeEnabled, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(PlayerHasImprovedSpotting, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(PlayerIsDrinkingPlacedWater, , 0, 0, NULL);
-DEFINE_COMMAND_PLUGIN(SetPlayerIsAMurderer, , 0, 1, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(SetPCIsAMurderer, , 0, 1, kParams_OneInt);
 DEFINE_CMD_ALT_COND_PLUGIN(IsNight, , "Returns true if it's night according to the current (or specified) climate.", 0, kParams_OneOptionalForm);
 DEFINE_CMD_ALT_COND_PLUGIN(IsLimbCrippled, , "If no args are passed / arg is -1, returns true if actor has any crippled limbs. Otherwise, checks if the specified limb is crippled.", 1, kParams_TwoOptionalInts);
 DEFINE_CMD_ALT_COND_PLUGIN(GetNumCrippledLimbs, , , 1, kParams_OneOptionalInt);
@@ -248,7 +248,7 @@ bool Cmd_PlayerIsDrinkingPlacedWater_Execute(COMMAND_ARGS)
 }
 
 
-bool Cmd_SetPlayerIsAMurderer_Execute(COMMAND_ARGS)
+bool Cmd_SetPCIsAMurderer_Execute(COMMAND_ARGS)
 {
 	UInt32 bIsMurderer = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bIsMurderer)) return true;

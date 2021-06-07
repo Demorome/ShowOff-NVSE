@@ -354,27 +354,33 @@ double __fastcall PreventRepairButton(ContChangesEntry* entry, int bPercent)
 
 void HandleGameHooks()
 {
-	//Modify a "IsInCombat" check to allow NPC activation even if they are in combat.
+
+	NopFunctionCall(0x7ADDC7, 1); // For preventing ShowRaceMenu from resetting active temp effects.
+	PatchMemoryNop(0x7ADDD2, 5); // For preventing ShowRaceMenu from resetting abilities.
+
+
+	
+#if _DEBUG
+
+	// Actor::CalculateSpread hooks.
+	//WriteRelCall(0x8B0F99, UInt32());
+	//WriteRelCall( , UInt32());
+
+
+	// Modify a "IsInCombat" check to allow NPC activation even if they are in combat.
 	WriteRelCall(0x607E70, UINT32(PCCanPickpocketInCombatHOOK));
 	WriteRelCall(0x5FA81F, UINT32(PCCanPickpocketInCombatHOOK));  //Same thing but for Creatures (like Super Mutants).
 
 	// NOTE: When failing the AP cost check, it counts as if you were caught by the actor.
 	// This could cause really weird behavior with the NPC just taking back everything that was previously stolen,
 	// not to mention you would no longer be able to pickpocket them normally after combat.
-	//
-	// Possible solution: open and hook the companion loot exchange menu instead?
-
-	NopFunctionCall(0x7ADDC7, 1); // For preventing ShowRaceMenu from resetting active temp effects.
-	PatchMemoryNop(0x7ADDD2, 5); // For preventing ShowRaceMenu from resetting abilities.
 	
-	//=== Event Handler Stuff
-
-	
-#if _DEBUG
-	//Below isn't working currently...
+	// Below isn't working currently...
 	WriteRelCall(0x77738A, UINT32(ShowPickpocketStringInCombat));
 	WriteRelCall(0x7772C9, UINT32(ShowPickpocketStringInCombat2));
 	//WriteRelCall(0x770C0D, UINT32(ShowPickpocketStringInCombat2)); //breaks health target UI
+	// Possible solution: open and hook the companion loot exchange menu instead?
+	
 
 	if (g_PBIR_On)
 	{

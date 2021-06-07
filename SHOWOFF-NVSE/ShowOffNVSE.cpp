@@ -388,10 +388,7 @@ extern "C"
 		REG_CMD(IsAnimPlayingExCond)
 		REG_CMD(GetNumCompassHostiles)
 
-
-#if _DEBUG  //for functions being tested (or just abandoned).
-
-		//todo: test AuxStringMap serialization / clearing.
+		// === TO DOCUMENT ====
 		REG_CMD(AuxStringMapArrayGetSize)
 		REG_CMD(AuxStringMapArrayGetValueType)
 		REG_CMD(AuxStringMapArrayGetFloat)
@@ -402,31 +399,31 @@ extern "C"
 		REG_CMD_ARR(AuxStringMapArrayGetKeys)
 		REG_CMD_ARR(AuxStringMapArrayGetAll)  //todo: test this
 		REG_CMD_ARR(AuxStringMapArrayGetAsArray)
-		REG_CMD(AuxStringMapArraySetFromArray)  //todo: test huge array (GetGameSetting) + if it gets serialized properly.
+		REG_CMD(AuxStringMapArraySetFromArray)
 		REG_CMD(AuxStringMapArraySetFloat)
 		REG_CMD(AuxStringMapArraySetRef)
 		REG_CMD(AuxStringMapArraySetString)
-		
 		REG_CMD(AuxStringMapArrayEraseKey)
-		REG_CMD(AuxStringMapArrayValidateValues)
+		REG_CMD(AuxStringMapArrayValidateValues)  //todo: test
 		REG_CMD(AuxStringMapArrayDestroy)
-
 		REG_CMD(GetRadiationExtraData)
 		REG_CMD(SetRadiationExtraData)
-		
 		REG_CMD(PlayerHasNightVision)
-		REG_CMD(PlayerIsUsingTurbo) //todo: needs testing
-		REG_CMD(PlayerHasCateyeEnabled)
-		REG_CMD(PlayerHasImprovedSpotting)
 		REG_CMD(PlayerIsDrinkingPlacedWater)
-		REG_CMD(SetPlayerIsAMurderer)
+		REG_CMD(SetPCIsAMurderer)
 		REG_CMD(IsNight)
+
+		//Could use more testing.
 		REG_CMD(IsLimbCrippled)
 		REG_CMD(GetNumCrippledLimbs)
 		REG_CMD(GetCrippledLimbsAsBitMask)
 		REG_CMD(GetNumBrokenEquippedItems)
 		REG_CMD(GetEquippedItemsAsBitMask)
-		//REG_CMD(UnequipItemsFromBitMask)  //tricky to get xData, idk if anyone will ever use this anyways.
+
+
+#if _DEBUG  //for functions being tested (or just abandoned).
+
+
 		REG_CMD(ClearShowoffSavedData)  //todo: test serialization
 
 		//todo: make GetCalculatedEquippedWeight / GetBaseEquippedWeight allow for float min, instead of int min.
@@ -455,8 +452,8 @@ extern "C"
 	
 		REG_CMD(SetBaseActorValue)
 
-		//REG_CMD(DumpGameSettings) //pointless, see GetGameSettings in JIP
 
+		//REG_CMD(UnequipItemsFromBitMask)  //tricky to get xData, idk if anyone will ever use this anyways.
 		//REG_CMD(SetOnHitAltEventHandler);
 
 		REG_CMD(GetItemRefValue);
@@ -470,9 +467,7 @@ extern "C"
 		
 		REG_CMD(SetNoEquip);
 
-		//REG_CMD_ARR(Ar_GetInvalidRefs); //gave up
-		//REG_CMD(GetEquippedWeaponType);  //JIP already made it for TTW.
-		//REG_CMD(IsCornerMessageDisplayed)  //(any corner message). Redundant in the face of GetNumQueuedCornerMessages.
+
 
 		REG_CMD(SetEnableParent);
 		REG_CMD_ARR(GetQueuedCornerMessages);
@@ -481,13 +476,28 @@ extern "C"
 		REG_CMD(GetNVSEVersionFullAlt)
 		REG_CMD(TestDemo);
 
-		/*todo =======Function ideas ======
+		/* todo =======Function ideas ======
 		 *
 		 * GetActorValueShowoff - uses numeric keys like JG, but also has args to get the base/current/etc. Basically all-in-one.
 		 * IsActorInRadius - returns true if the actor is within the Radius extradata of the reference.
 		 * GetCalculatedItemWeight, using parts from GetCalc.equ.weight
 		 * Cmd_ShowSleepWaitMenu::CheckPreconditions -> GetPCCanSleepWait (0x969FA0)
 		 * GetEquippedTotalValue
+
+		 */
+
+
+		
+		/* ===Forever Dead Function Graveyard===
+		 *
+		 *
+		 * //REG_CMD(DumpGameSettings) //pointless, see GetGameSettings in JIP
+		 * //REG_CMD_ARR(Ar_GetInvalidRefs); //not possible via plugin
+		 * //REG_CMD(GetEquippedWeaponType);  //JIP already made it for TTW.
+		 * //REG_CMD(IsCornerMessageDisplayed)  //(any corner message). Redundant in the face of GetNumQueuedCornerMessages.
+		 * //REG_CMD(PlayerIsUsingTurbo) //basically pointless, as it behaves the same as GetAV Turbo == 1, except it doesn't update in pipboy unlike getav.
+		 * //REG_CMD(PlayerHasCateyeEnabled)  //Pointless, since Player.GetAV NightEye does the same thing
+		 * //REG_CMD(PlayerHasImprovedSpotting)  //pointless, just use GetPerkModifier for the "Has Improved Spotting" perk entry.
 
 		 */
 
