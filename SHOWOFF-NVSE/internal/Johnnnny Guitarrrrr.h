@@ -25,6 +25,7 @@ TESActorBase* Actor::GetActorBase()
 	return (xLvlCre && xLvlCre->form) ? (TESActorBase*)xLvlCre->form : (TESActorBase*)baseForm;
 }
 
+// Size is the amount of bytes until the next instruction.
 static void PatchMemoryNop(ULONG_PTR Address, SIZE_T Size)
 {
 	DWORD d = 0;

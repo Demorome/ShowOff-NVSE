@@ -1,6 +1,7 @@
 #pragma once
 #include "GameData.h"
 #include "SafeWrite.h"
+#include "internal/Johnnnny Guitarrrrr.h"
 #include "internal/StewieMagic.h"
 
 //todo: Move non-extern global declarations to main.cpp, add externs here.
@@ -341,6 +342,16 @@ double __fastcall PreventRepairButton(ContChangesEntry* entry, int bPercent)
 }
 
 
+#if _DEBUG
+// Below is reserved for messing around with IDA
+
+
+
+
+// End IDA debug stuff
+#endif
+
+
 void HandleGameHooks()
 {
 	//Modify a "IsInCombat" check to allow NPC activation even if they are in combat.
@@ -353,6 +364,9 @@ void HandleGameHooks()
 	//
 	// Possible solution: open and hook the companion loot exchange menu instead?
 
+	NopFunctionCall(0x7ADDC7, 1); // For preventing ShowRaceMenu from resetting active temp effects.
+	PatchMemoryNop(0x7ADDD2, 5); // For preventing ShowRaceMenu from resetting abilities.
+	
 	//=== Event Handler Stuff
 
 	
@@ -371,6 +385,10 @@ void HandleGameHooks()
 		QueueUIMessage(buf, eEmotion::sad, NULL, NULL, 2.0, 0);
 		 */
 	}
+
+
+
+	//----Below is reserved for messing around with IDA
 	
 #endif
 }
