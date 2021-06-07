@@ -2,6 +2,8 @@
 An NVSE plugin which adds new functions.
 For heathens who have forsaken the Vanilla-Style way. 
 
+Documentation is available here: https://geckwiki.com/index.php?title=Category:Functions_(ShowOff_NVSE)
+
 # Requirements
 Requires xNVSE v6.06 or greater: https://github.com/xNVSE/NVSE/releases.
 
