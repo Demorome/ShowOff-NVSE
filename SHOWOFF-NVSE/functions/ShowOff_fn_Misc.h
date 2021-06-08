@@ -444,14 +444,11 @@ typedef TESBipedModelForm::EPartBit EquippedItemIndex;
 typedef TESBipedModelForm::ESlot EquippedItemSlot;
 
 
-bool Cmd_GetNumBrokenEquippedItems_Eval(COMMAND_ARGS_EVAL)
+UInt32 __fastcall GetNumBrokenEquippedItems_Call(TESObjectREFR* thisObj, float threshold, UInt32 flags)
 {
-	*result = 0;
-	if (!IS_ACTOR(thisObj)) return true;
-	UInt32 const threshold = (UInt32)arg1;
-	UInt32 const flags = (UInt32)arg2;
-
-	UInt32 numBrokenItems = 0;
+	if (!IS_ACTOR(thisObj)) return 0;
+	
+	UInt32 numBrokenItems = 0;  //retun value.
 	for (UInt32 slotIdx = EquippedItemIndex::ePart_Head; slotIdx <= EquippedItemIndex::ePart_BodyAddon3; slotIdx++)
 	{
 		MatchBySlot matcher(slotIdx);
@@ -463,29 +460,40 @@ bool Cmd_GetNumBrokenEquippedItems_Eval(COMMAND_ARGS_EVAL)
 		EquipData equipD = FindEquipped(thisObj, matcher);
 		if (equipD.pForm)
 		{
-			ExtraHealth* pXHealth = equipD.pExtraData ? (ExtraHealth*)equipD.pExtraData->GetByType(kExtraData_Health) : NULL;
-			if (pXHealth)
+			ExtraHealth* pXHealth = equipD.pExtraData ? (ExtraHealth*)equipD.pExtraData->GetByType(kExtraData_Health) : NULL;  // modified health
+			auto pHealth = DYNAMIC_CAST(equipD.pForm, TESForm, TESHealthForm);  // returns base health 
+			if (pXHealth && pHealth)
 			{
-				if (pXHealth->health <= threshold) numBrokenItems++;
+				if ((pXHealth->health / (float)pHealth->health) <= threshold) numBrokenItems++;
+#if _DEBUG
+				Console_Print("GetNumBrokenEquippedItems - health %% check being performed. %%: %f", (pXHealth->health / (float)pHealth->health));
+#endif
 			}
-			else
+			else if (pHealth)
 			{
-				TESHealthForm* pHealth = DYNAMIC_CAST(equipD.pForm, TESForm, TESHealthForm);
-				if (pHealth)
-					if (pHealth->health <= threshold) numBrokenItems++;
+				numBrokenItems++;  // always increment, since it's at 100% health (no modified health extra data).
 			}
 		}
 	}
-	*result = numBrokenItems;
-	return true;
+	return numBrokenItems;
+}
+
+
+bool Cmd_GetNumBrokenEquippedItems_Eval(COMMAND_ARGS_EVAL)
+{
+	float const threshold = *(float*)&arg1 / 100;   //expecting a number like 35, reduce to 0.35
+	UInt32 const flags = (UInt32)arg2;
+	*result = GetNumBrokenEquippedItems_Call(thisObj, threshold, flags);
+	return true; 
 }
 bool Cmd_GetNumBrokenEquippedItems_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	UInt32 threshold = 0;
+	float threshold = 0;
 	UInt32 flags = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &threshold, &flags)) return true;
-	return Cmd_GetNumBrokenEquippedItems_Eval(thisObj, (void*)threshold, (void*)flags, result);
+	*result = GetNumBrokenEquippedItems_Call(thisObj, threshold, flags);
+	return true;
 }
 
 
