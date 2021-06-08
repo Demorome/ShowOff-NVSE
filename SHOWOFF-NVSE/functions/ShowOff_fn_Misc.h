@@ -20,7 +20,7 @@ DEFINE_CMD_ALT_COND_PLUGIN(IsNight, , "Returns true if it's night according to t
 DEFINE_CMD_ALT_COND_PLUGIN(IsLimbCrippled, , "If no args are passed / arg is -1, returns true if actor has any crippled limbs. Otherwise, checks if the specified limb is crippled.", 1, kParams_TwoOptionalInts);
 DEFINE_CMD_ALT_COND_PLUGIN(GetNumCrippledLimbs, , , 1, kParams_OneOptionalInt);
 DEFINE_CMD_ALT_COND_PLUGIN(GetCrippledLimbsAsBitMask, , , 1, kParams_OneOptionalInt);
-DEFINE_CMD_ALT_COND_PLUGIN(GetNumBrokenEquippedItems, , , 1, kParams_TwoOptionalInts);
+DEFINE_CMD_ALT_COND_PLUGIN(GetNumBrokenEquippedItems, , , 1, kParams_OneOptionalFloat_OneOptionalInt);
 DEFINE_CMD_ALT_COND_PLUGIN(GetEquippedItemsAsBitMask, , , 1, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetEquippedWeaponType, , , 1, NULL);
 DEFINE_COMMAND_PLUGIN(ClearShowoffSavedData, "", 0, 1, kParams_OneInt);
@@ -444,10 +444,15 @@ typedef TESBipedModelForm::EPartBit EquippedItemIndex;
 typedef TESBipedModelForm::ESlot EquippedItemSlot;
 
 
-UInt32 __fastcall GetNumBrokenEquippedItems_Call(TESObjectREFR* thisObj, float threshold, UInt32 flags)
+UInt32 __fastcall GetNumBrokenEquippedItems_Call(TESObjectREFR* const thisObj, float threshold, UInt32 const flags)
 {
 	if (!IS_ACTOR(thisObj)) return 0;
+
+#if _DEBUG
+	Console_Print("GetNumBrokenEquippedItems - threshold = %f", threshold);
+#endif
 	
+	threshold /= 100.0F;  //expecting a number like 35, reduce to 0.35;
 	UInt32 numBrokenItems = 0;  //retun value.
 	for (UInt32 slotIdx = EquippedItemIndex::ePart_Head; slotIdx <= EquippedItemIndex::ePart_BodyAddon3; slotIdx++)
 	{
@@ -466,20 +471,22 @@ UInt32 __fastcall GetNumBrokenEquippedItems_Call(TESObjectREFR* thisObj, float t
 			{
 				if ((pXHealth->health / (float)pHealth->health) <= threshold) numBrokenItems++;
 #if _DEBUG
-				Console_Print("GetNumBrokenEquippedItems - health %% check being performed. %%: %f", (pXHealth->health / (float)pHealth->health));
+				Console_Print("GetNumBrokenEquippedItems - health %% check being performed. %%: %f vs %f threshold", (pXHealth->health / (float)pHealth->health), threshold);
 #endif
 			}
 			// never increment if there's no pXHealth, since it's at 100% health (no modified health extra data).
 		}
 	}
+#if _DEBUG
+	Console_Print("GetNumBrokenEquippedItems - result: %d", numBrokenItems);
+#endif
 	return numBrokenItems;
 }
 
-
 bool Cmd_GetNumBrokenEquippedItems_Eval(COMMAND_ARGS_EVAL)
 {
-	float const threshold = *(float*)&arg1 / 100;   //expecting a number like 35, reduce to 0.35
-	UInt32 const flags = (UInt32)arg2;
+	float const threshold = *(float*)&arg1;
+	auto const flags = (UInt32)arg2;
 	*result = GetNumBrokenEquippedItems_Call(thisObj, threshold, flags);
 	return true; 
 }
