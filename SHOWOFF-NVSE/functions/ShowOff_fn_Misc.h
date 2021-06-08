@@ -469,10 +469,7 @@ UInt32 __fastcall GetNumBrokenEquippedItems_Call(TESObjectREFR* thisObj, float t
 				Console_Print("GetNumBrokenEquippedItems - health %% check being performed. %%: %f", (pXHealth->health / (float)pHealth->health));
 #endif
 			}
-			else if (pHealth)
-			{
-				numBrokenItems++;  // always increment, since it's at 100% health (no modified health extra data).
-			}
+			// never increment if there's no pXHealth, since it's at 100% health (no modified health extra data).
 		}
 	}
 	return numBrokenItems;
