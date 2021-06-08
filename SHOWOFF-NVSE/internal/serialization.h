@@ -23,7 +23,7 @@ void LoadGameCallback(void*)
 {
 	const char* currentPath = GetSavePath();
 	g_Lock.Enter();
-	if (strcmp(s_lastLoadedPath, currentPath))
+	if (strcmp(s_lastLoadedPath, currentPath) != 0)
 	{
 		StrCopy(s_lastLoadedPath, currentPath);
 		s_dataChangedFlags = kChangedFlag_All;

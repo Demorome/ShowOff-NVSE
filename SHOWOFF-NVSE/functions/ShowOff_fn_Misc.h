@@ -22,6 +22,7 @@ DEFINE_CMD_ALT_COND_PLUGIN(GetNumCrippledLimbs, , , 1, kParams_OneOptionalInt);
 DEFINE_CMD_ALT_COND_PLUGIN(GetCrippledLimbsAsBitMask, , , 1, kParams_OneOptionalInt);
 DEFINE_CMD_ALT_COND_PLUGIN(GetNumBrokenEquippedItems, , , 1, kParams_TwoOptionalInts);
 DEFINE_CMD_ALT_COND_PLUGIN(GetEquippedItemsAsBitMask, , , 1, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(GetEquippedWeaponType, , , 1, NULL);
 DEFINE_COMMAND_PLUGIN(ClearShowoffSavedData, "", 0, 1, kParams_OneInt);
 DEFINE_CMD_ALT_COND_PLUGIN(GetBaseEquippedWeight, , , 1, kParams_TwoOptionalInts);
 DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedEquippedWeight, , "Accounts for perk effects + weapon mods.", 1, kParams_TwoOptionalInts);
@@ -309,7 +310,8 @@ bool Cmd_IsLimbCrippled_Eval(COMMAND_ARGS_EVAL)
 	else if (limbID <= 6)
 	{
 		limbID += kAVCode_PerceptionCondition;
-		if (actor->avOwner.GetActorValue(limbID) <= threshold) *result = 1;
+		if (actor->avOwner.GetActorValue(limbID) <= threshold) 
+			*result = 1;
 	}
 	return true;
 }
@@ -509,6 +511,7 @@ bool Cmd_GetEquippedItemsAsBitMask_Execute(COMMAND_ARGS)
 	return Cmd_GetEquippedItemsAsBitMask_Eval(thisObj, 0, 0, result);
 }
 
+
 #if 0
 DEFINE_COMMAND_PLUGIN(UnequipItemsFromBitMask, , 1, 1, kParams_OneInt);
 bool Cmd_UnequipItemsFromBitMask_Execute(COMMAND_ARGS)
@@ -534,6 +537,20 @@ bool Cmd_UnequipItemsFromBitMask_Execute(COMMAND_ARGS)
 }
 #endif
 
+bool Cmd_GetEquippedWeaponType_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = 0;
+	if (!IS_ACTOR(thisObj)) return true;
+	TESObjectWEAP* weapon = ((Actor*)thisObj)->GetEquippedWeapon();
+	if (weapon)
+		*result = weapon->eWeaponType;
+	return true;
+}
+bool Cmd_GetEquippedWeaponType_Execute(COMMAND_ARGS)
+{
+	return Cmd_GetEquippedWeaponType_Eval(thisObj, 0, 0, result);
+}
+
 // Copied ClearJIPSavedData
 bool Cmd_ClearShowoffSavedData_Execute(COMMAND_ARGS)
 {
@@ -546,14 +563,9 @@ bool Cmd_ClearShowoffSavedData_Execute(COMMAND_ARGS)
 }
 
 
-bool Cmd_GetBaseEquippedWeight_Eval(COMMAND_ARGS_EVAL)
+float __fastcall GetBaseEquippedWeight_Call(TESObjectREFR* thisObj, UInt32 flags, float minWeight)
 {
-	*result = 0;
-	if (!IS_ACTOR(thisObj)) return true;
-	UInt32 const minWeight = (UInt32)arg1;
-	UInt32 const flags = (UInt32)arg2;
-
-	float totalWeight = 0;
+	float totalWeight = 0;  //return val.
 	for (UInt32 slotIdx = EquippedItemIndex::ePart_Head; slotIdx <= EquippedItemIndex::ePart_BodyAddon3; slotIdx++)
 	{
 		MatchBySlot matcher(slotIdx);
@@ -575,30 +587,34 @@ bool Cmd_GetBaseEquippedWeight_Eval(COMMAND_ARGS_EVAL)
 			}
 		}
 	}
-	*result = totalWeight;
+	return totalWeight;
+}
+
+bool Cmd_GetBaseEquippedWeight_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = 0;
+	if (!IS_ACTOR(thisObj)) return true;
+	float const minWeight = *(float*)&arg1;
+	UInt32 const flags = (UInt32)arg2;
+	*result = GetBaseEquippedWeight_Call(thisObj, flags, minWeight);
 	return true;
 }
 bool Cmd_GetBaseEquippedWeight_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	UInt32 minWeight = 0;
+	float minWeight = 0;
 	UInt32 flags = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &minWeight, &flags)) return true;
-	return Cmd_GetBaseEquippedWeight_Eval(thisObj, (void*)minWeight, (void*)flags, result);
+	*result = GetBaseEquippedWeight_Call(thisObj, flags, minWeight);
+	return true;
 }
 
 
-bool Cmd_GetCalculatedEquippedWeight_Eval(COMMAND_ARGS_EVAL)
+float __fastcall GetCalculatedEquippedWeight_Call(TESObjectREFR* thisObj, UInt32 flags, float minWeight)
 {
-	*result = 0;
-	if (!IS_ACTOR(thisObj)) return true;
-	UInt32 const minWeight = (UInt32)arg1;
-	UInt32 const flags = (UInt32)arg2;
-	Actor* actor = (Actor*)thisObj;
-
-	float totalWeight = 0;
+	float totalWeight = 0;  //return val.
 	bool isHardcore = g_thePlayer->isHardcore;
-	
+
 	for (UInt32 slotIdx = EquippedItemIndex::ePart_Head; slotIdx <= EquippedItemIndex::ePart_BodyAddon3; slotIdx++)
 	{
 		if (flags)  //if flags = 0 (default), every equip slot is checked.
@@ -606,7 +622,7 @@ bool Cmd_GetCalculatedEquippedWeight_Eval(COMMAND_ARGS_EVAL)
 			//Otherwise, return if flag is not toggled on for item.
 			if (flags && !(TESBipedModelForm::MaskForSlot(slotIdx) & flags)) continue;
 		}
-		
+
 		float itemWeight = 0;
 		TESForm* item = nullptr;
 		bool isWeapon = false;
@@ -614,7 +630,7 @@ bool Cmd_GetCalculatedEquippedWeight_Eval(COMMAND_ARGS_EVAL)
 
 		if (slotIdx == EquippedItemIndex::ePart_Weapon) {
 			isWeapon = true;
-			weapInfo = actor->baseProcess->GetWeaponInfo();
+			weapInfo = ((Actor*)thisObj)->baseProcess->GetWeaponInfo();
 			item = weapInfo->type;
 			if (item) {
 				bool hasDecreaseWeightMod = ThisStdCall<bool>(0x4BDA70, weapInfo, TESObjectWEAP::kWeaponModEffect_DecreaseWeight);
@@ -659,20 +675,31 @@ bool Cmd_GetCalculatedEquippedWeight_Eval(COMMAND_ARGS_EVAL)
 				}
 			}
 #endif
-			
-			if (itemWeight >= minWeight) totalWeight += itemWeight;
+
+			if (itemWeight >= minWeight) 
+				totalWeight += itemWeight;
 		}
 	}
-	*result = totalWeight;
+	return totalWeight;
+}
+
+bool Cmd_GetCalculatedEquippedWeight_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = 0;
+	if (!IS_ACTOR(thisObj)) return true;
+	float const minWeight = *(float*)&arg1;
+	UInt32 const flags = (UInt32)arg2;
+	*result = GetCalculatedEquippedWeight_Call(thisObj, flags, minWeight);
 	return true;
 }
 bool Cmd_GetCalculatedEquippedWeight_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	UInt32 minWeight = 0;
+	float minWeight = 0;
 	UInt32 flags = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &minWeight, &flags)) return true;
-	return Cmd_GetCalculatedEquippedWeight_Eval(thisObj, (void*)minWeight, (void*)flags, result);
+	*result = GetCalculatedEquippedWeight_Call(thisObj, flags, minWeight);
+	return true;
 }
 
 

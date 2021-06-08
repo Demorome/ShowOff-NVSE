@@ -47,6 +47,9 @@ bool Cmd_SetOnHitAltEventHandler_Execute(COMMAND_ARGS)
 
 void HandleEventHooks()
 {
+
+	
+#if _DEBUG
 	OnCornerMessage = JGCreateEvent("OnCornerMessage", 0, 0, NULL); 
 	FunctionCallScript = g_scriptInterface->CallFunction;
 	WriteRelCall(0x705379, UINT32(handleCornerMessageEvent));
@@ -55,4 +58,5 @@ void HandleEventHooks()
 	WriteRelCall(0x7EEA6C, UINT32(handleCornerMessageEvent));
 	WriteRelCall(0x833303, UINT32(handleCornerMessageEvent));
 	WriteRelCall(0x8B959B, UINT32(handleCornerMessageEvent));
+#endif
 }

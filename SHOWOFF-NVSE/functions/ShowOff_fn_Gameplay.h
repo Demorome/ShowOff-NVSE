@@ -387,18 +387,6 @@ bool GetEquippedWeaponInfo(TESObjectREFR* thisObj, float range, UInt32 flags)
 {
 	return true;
 }
-bool Cmd_GetEquippedWeaponType_Eval(COMMAND_ARGS_EVAL)
-{
-	TESObjectWEAP* pWeapon;
-	pWeapon->eWeaponType;
-	//*result = 
-	return true;
-}
-bool Cmd_GetEquippedWeaponType_Execute(COMMAND_ARGS)
-{
-	//*result = 
-	return true;
-}
 
 
 

@@ -252,7 +252,7 @@ extern "C"
 
 			if (nvse->isNogore)
 			{
-				char buffer[30] = "NoGore is not supported";
+				char buffer[] = "NoGore is not supported";
 				MessageBoxA(nullptr, buffer, "ShowOff", MB_ICONEXCLAMATION);
 				_ERROR("%s", buffer);
 				return false;
@@ -353,83 +353,83 @@ extern "C"
 
 		// Register script commands
 		// https://geckwiki.com/index.php?title=NVSE_Opcode_Base
-		nvse->SetOpcodeBase(0x3A9F);
+		nvse->SetOpcodeBase(0x3C93);
 
 		/* ONLY COMMANDS WITH LISTED OPCODES SHOULD BE USED IN SCRIPTS */
 		/* DO NO COMMENT OUT AN ALREADY-RELEASED FUNCTION; REGISTER AN EMPTY COMMAND INSTEAD */
-		
-		REG_CMD(ModNumericGameSetting)
-		REG_CMD(ModNumericINISetting)
-		REG_CMD(SetPlayerCanPickpocketEquippedItems)
-		REG_CMD(GetPlayerCanPickpocketEquippedItems)
-		REG_CMD(GetPCHasSleepWaitOverride)
-		REG_CMD(SetPCHasSleepWaitOverride)
-		REG_CMD(ShowingOffDisable)  //Showing off by copying vanilla style way functions! 
-		REG_CMD(ShowingOffEnable) //best to keep undocumented to not waste people's time.
-		REG_CMD(GetNumActorsInRangeFromRef)
-		REG_CMD(GetNumCombatActorsFromActor)
-		REG_CMD(IsWeaponMelee)
-		REG_CMD(IsEquippedWeaponMelee)
-		REG_CMD(IsWeaponRanged)
-		REG_CMD(IsEquippedWeaponRanged)
-		REG_CMD(GetChallengeProgress)
-		REG_CMD(ConditionPrint)
-		REG_CMD(MessageExAltShowoff) //Keep undocumented; don't recommend for general use, extra feature is jank.
-		REG_CMD(GetNumQueuedCornerMessages)
-		REG_CMD(GetCreatureTurningSpeed)
-		REG_CMD(SetCreatureTurningSpeed)
-		REG_CMD(GetCreatureFootWeight)
-		REG_CMD(SetCreatureFootWeight)
-		REG_CMD(SetCreatureReach)
-		REG_CMD(SetCreatureBaseScale) //JG's GetBaseScale should return the creature's base scale, so no need for a GetCreatureBaseScale.
-		REG_CMD(DumpFormList)
-		REG_CMD(ListAddArray)
-		REG_CMD(ListAddList)
-		REG_CMD(IsAnimPlayingExCond)
-		REG_CMD(GetNumCompassHostiles)
+
+		//========v1.00
+		/*3C93*/ REG_CMD(ModNumericGameSetting)
+		/*3C94*/ REG_CMD(ModNumericINISetting)
+		/*3C95*/ REG_CMD(SetPlayerCanPickpocketEquippedItems)
+		/*3C96*/ REG_CMD(GetPlayerCanPickpocketEquippedItems)
+		/*3C97*/ REG_CMD(GetPCHasSleepWaitOverride)
+		/*3C98*/ REG_CMD(SetPCHasSleepWaitOverride)
+		/*3C99*/ REG_CMD(ShowingOffDisable)  //Showing off by copying vanilla style way functions! 
+		/*3C9A*/ REG_CMD(ShowingOffEnable) //best to keep undocumented to not waste people's time.
+		/*3C9B*/ REG_CMD(GetNumActorsInRangeFromRef)
+		/*3C9C*/ REG_CMD(GetNumCombatActorsFromActor)
+		/*3C9D*/ REG_CMD(IsWeaponMelee)
+		/*3C9E*/ REG_CMD(IsEquippedWeaponMelee)
+		/*3C9F*/ REG_CMD(IsWeaponRanged)
+		/*3CA0*/ REG_CMD(IsEquippedWeaponRanged)
+		/*3CA1*/ REG_CMD(GetChallengeProgress)
+		/*3CA2*/ REG_CMD(ConditionPrint)
+		/*3CA3*/ REG_CMD(MessageExAltShowoff) //Keep undocumented; don't recommend for general use, extra feature is jank.
+		/*3CA4*/ REG_CMD(GetNumQueuedCornerMessages)
+		/*3CA5*/ REG_CMD(GetCreatureTurningSpeed)
+		/*3CA6*/ REG_CMD(SetCreatureTurningSpeed)
+		/*3CA7*/ REG_CMD(GetCreatureFootWeight)
+		/*3CA8*/ REG_CMD(SetCreatureFootWeight)
+		/*3CA9*/ REG_CMD(SetCreatureReach)
+		/*3CAA*/ REG_CMD(SetCreatureBaseScale) //JG's GetBaseScale should return the creature's base scale, so no need for a GetCreatureBaseScale.
+		/*3CAB*/ REG_CMD(DumpFormList)
+		/*3CAC*/ REG_CMD(ListAddArray)
+		/*3CAD*/ REG_CMD(ListAddList)
+		/*3CAE*/ REG_CMD(IsAnimPlayingExCond)
+		/*3CAF*/ REG_CMD(GetNumCompassHostiles)
 
 		// === TO DOCUMENT ====
-		REG_CMD(AuxStringMapArrayGetSize)
-		REG_CMD(AuxStringMapArrayGetValueType)
-		REG_CMD(AuxStringMapArrayGetFloat)
-		REG_CMD_FORM(AuxStringMapArrayGetRef)
-		REG_CMD_STR(AuxStringMapArrayGetString)
-		REG_CMD_ARR(AuxStringMapArrayGetFirst)
-		REG_CMD_ARR(AuxStringMapArrayGetNext)
-		REG_CMD_ARR(AuxStringMapArrayGetKeys)
-		REG_CMD_ARR(AuxStringMapArrayGetAll)  //todo: test this
-		REG_CMD_ARR(AuxStringMapArrayGetAsArray)
-		REG_CMD(AuxStringMapArraySetFromArray)
-		REG_CMD(AuxStringMapArraySetFloat)
-		REG_CMD(AuxStringMapArraySetRef)
-		REG_CMD(AuxStringMapArraySetString)
-		REG_CMD(AuxStringMapArrayEraseKey)
-		REG_CMD(AuxStringMapArrayValidateValues)  //todo: test
-		REG_CMD(AuxStringMapArrayDestroy)
-		REG_CMD(GetRadiationExtraData)
-		REG_CMD(SetRadiationExtraData)
-		REG_CMD(PlayerHasNightVision)
-		REG_CMD(PlayerIsDrinkingPlacedWater)
-		REG_CMD(SetPCIsAMurderer)
-		REG_CMD(IsNight)
+		/*3CB0*/ REG_CMD(AuxStringMapArrayGetSize)
+		/*3CB1*/ REG_CMD(AuxStringMapArrayGetValueType)
+		/*3CB3*/ REG_CMD(AuxStringMapArrayGetFloat)
+		/*3CB4*/ REG_CMD_FORM(AuxStringMapArrayGetRef)
+		/*3CB5*/ REG_CMD_STR(AuxStringMapArrayGetString)
+		/*3CB6*/ REG_CMD_ARR(AuxStringMapArrayGetFirst)
+		/*3CB7*/ REG_CMD_ARR(AuxStringMapArrayGetNext)
+		/*3CB8*/ REG_CMD_ARR(AuxStringMapArrayGetKeys)
+		/*3CB9*/ REG_CMD_ARR(AuxStringMapArrayGetAll)  //todo: test this
+		/*3CBA*/ REG_CMD_ARR(AuxStringMapArrayGetAsArray)
+		/*3CBC*/ REG_CMD(AuxStringMapArraySetFromArray)
+		/*3CBD*/ REG_CMD(AuxStringMapArraySetFloat)
+		/*3CBE*/ REG_CMD(AuxStringMapArraySetRef)
+		/*3CBF*/ REG_CMD(AuxStringMapArraySetString)
+		/*3CC0*/ REG_CMD(AuxStringMapArrayEraseKey)
+		/*3CC1*/ REG_CMD(AuxStringMapArrayValidateValues)  //todo: test
+		/*3CC2*/ REG_CMD(AuxStringMapArrayDestroy)
+		/*3CC3*/ REG_CMD(GetRadiationExtraData)
+		/*3CC4*/ REG_CMD(SetRadiationExtraData)
+		/*3CC5*/ REG_CMD(PlayerHasNightVision)
+		/*3CC6*/ REG_CMD(PlayerIsDrinkingPlacedWater)
+		/*3CC7*/ REG_CMD(SetPCIsAMurderer)
+		/*3CC8*/ REG_CMD(IsNight)
 
-		//Could use more testing.
-		REG_CMD(IsLimbCrippled)
-		REG_CMD(GetNumCrippledLimbs)
-		REG_CMD(GetCrippledLimbsAsBitMask)
-		REG_CMD(GetNumBrokenEquippedItems)
-		REG_CMD(GetEquippedItemsAsBitMask)
-
+		// == Could use more testing + Needs documentations ==
+		/*3CC9*/ REG_CMD(IsLimbCrippled)
+		/*3CCA*/ REG_CMD(GetNumCrippledLimbs)
+		/*3CCB*/ REG_CMD(GetCrippledLimbsAsBitMask)
+		/*3CCC*/ REG_CMD(GetNumBrokenEquippedItems)
+		/*3CCD*/ REG_CMD(GetEquippedItemsAsBitMask)
+		/*3CCE*/ REG_CMD(GetEquippedWeaponType)
+		/*3CCF*/ REG_CMD(GetBaseEquippedWeight)
+		/*3CD0*/ REG_CMD(GetCalculatedEquippedWeight)  //NOTE: bWeightlessWorn(Power)Armor from Stewie's is not accounted for.
+		/*3CD1*/ REG_CMD(GetCalculatedMaxCarryWeight)
+		
 
 #if _DEBUG  //for functions being tested (or just abandoned).
 
+		REG_CMD(ClearShowoffSavedData)  //todo: test serialization. Seems broken???
 
-		REG_CMD(ClearShowoffSavedData)  //todo: test serialization
-
-		//todo: make GetCalculatedEquippedWeight / GetBaseEquippedWeight allow for float min, instead of int min.
-		REG_CMD(GetBaseEquippedWeight)
-		REG_CMD(GetCalculatedEquippedWeight)  //NOTE: bWeightlessWorn(Power)Armor from Stewie's is not accounted for.
-		REG_CMD(GetCalculatedMaxCarryWeight)
 
 		//todo: fix whatever is causing the UDFs to not fire despite the hook working.
 		REG_CMD(SetShowOffOnCornerMessageEventHandler)
@@ -483,7 +483,10 @@ extern "C"
 		 * GetCalculatedItemWeight, using parts from GetCalc.equ.weight
 		 * Cmd_ShowSleepWaitMenu::CheckPreconditions -> GetPCCanSleepWait (0x969FA0)
 		 * GetEquippedTotalValue
-
+		 * IsThrowable = 10 and 13 is throw
+		 * IsPlaceable = 11 and 12 is Place
+		 *
+		 *
 		 */
 
 
