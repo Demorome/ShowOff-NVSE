@@ -413,12 +413,15 @@ extern "C"
 		/*3CC6*/ REG_CMD(PlayerIsDrinkingPlacedWater)
 		/*3CC7*/ REG_CMD(SetPCIsAMurderer)
 		/*3CC8*/ REG_CMD(IsNight)
-
-		// == Could use more testing + Needs documentations ==
+		
 		/*3CC9*/ REG_CMD(IsLimbCrippled)
 		/*3CCA*/ REG_CMD(GetNumCrippledLimbs)
 		/*3CCB*/ REG_CMD(GetCrippledLimbsAsBitMask)
 		/*3CCC*/ REG_CMD(GetNumBrokenEquippedItems)
+
+		
+		// == Could use more testing + Needs documentations ==
+
 		/*3CCD*/ REG_CMD(GetEquippedItemsAsBitMask)
 		/*3CCE*/ REG_CMD(GetEquippedWeaponType)
 		/*3CCF*/ REG_CMD(GetBaseEquippedWeight)

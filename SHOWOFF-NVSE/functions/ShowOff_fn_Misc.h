@@ -455,9 +455,9 @@ bool Cmd_GetNumBrokenEquippedItems_Eval(COMMAND_ARGS_EVAL)
 	for (UInt32 slotIdx = EquippedItemIndex::ePart_Head; slotIdx <= EquippedItemIndex::ePart_BodyAddon3; slotIdx++)
 	{
 		MatchBySlot matcher(slotIdx);
-		if (flags)  //if flags = 0 (default), every equip slot is checked.
+		if (flags <= 0)  //if flags = 0 (default), every equip slot is checked.
 		{
-			//Otherwise, return if flag is not toggled on for item.
+			//Otherwise, skip if flag is not toggled on for item.
 			if (flags && !(TESBipedModelForm::MaskForSlot(slotIdx) & flags)) continue;
 		}
 		EquipData equipD = FindEquipped(thisObj, matcher);
@@ -493,7 +493,7 @@ bool Cmd_GetEquippedItemsAsBitMask_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
 	if (!IS_ACTOR(thisObj)) return true;
-	UInt32 flags = 0;
+	UInt32 flags = 0;  //return value.
 	for (UInt32 slotIdx = EquippedItemIndex::ePart_Head; slotIdx <= EquippedItemIndex::ePart_BodyAddon3; slotIdx++)
 	{
 		MatchBySlot matcher(slotIdx);
