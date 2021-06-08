@@ -12,8 +12,6 @@ Requires xNVSE v6.06 or greater: https://github.com/xNVSE/NVSE/releases.
 # Credits
 lStewieAl, c6, Luthien, TommInfinite, Jazzisparis, karut - for their help and the code I stole off all of them.
 
-Special thanks to lStewieAl for sharing their well-decoded IDB, as well as everyone who contributed to that IDB.
-
 Code taken from JohnnyGuitar NVSE: https://www.nexusmods.com/newvegas/mods/66927
 
 Code taken from JIPLN NVSE: https://www.nexusmods.com/newvegas/mods/58277
