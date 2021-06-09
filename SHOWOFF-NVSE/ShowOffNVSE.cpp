@@ -50,7 +50,7 @@
 // Plugin Stuff
 IDebugLog g_Log("ShowOffNVSE.log");
 HMODULE	g_ShowOffHandle;
-UInt32 g_ShowOffVersion = 100;
+UInt32 g_ShowOffVersion = 105;
 
 /*----------Globals------------------------------------------------------------------------
 * It's better to include them in a .cpp file instead of a header file.
