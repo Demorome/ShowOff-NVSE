@@ -4,7 +4,7 @@
 
 enum
 {
-	kChangedFlag_AuxStringMaps = 1 << 1,
+	kChangedFlag_AuxStringMaps = 1 << 0,
 
 	kChangedFlag_All = kChangedFlag_AuxStringMaps //| kChangedFlag_RefMaps | kChangedFlag_LinkedRefs,
 };

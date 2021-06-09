@@ -407,21 +407,17 @@ extern "C"
 		/*3CC0*/ REG_CMD(AuxStringMapArrayEraseKey)
 		/*3CC1*/ REG_CMD(AuxStringMapArrayValidateValues)  //todo: test
 		/*3CC2*/ REG_CMD(AuxStringMapArrayDestroy)
+
 		/*3CC3*/ REG_CMD(GetRadiationExtraData)
 		/*3CC4*/ REG_CMD(SetRadiationExtraData)
-		/*3CC5*/ REG_CMD(PlayerHasNightVision)
+		/*3CC5*/ REG_CMD(PlayerHasNightVisionActive)
 		/*3CC6*/ REG_CMD(PlayerIsDrinkingPlacedWater)
-		/*3CC7*/ REG_CMD(SetPCIsAMurderer)
+		/*3CC7*/ REG_CMD(SetIsPCAMurderer)
 		/*3CC8*/ REG_CMD(IsNight)
-		
 		/*3CC9*/ REG_CMD(IsLimbCrippled)
 		/*3CCA*/ REG_CMD(GetNumCrippledLimbs)
 		/*3CCB*/ REG_CMD(GetCrippledLimbsAsBitMask)
 		/*3CCC*/ REG_CMD(GetNumBrokenEquippedItems)
-
-		
-		// == Could use more testing + Needs documentations ==
-
 		/*3CCD*/ REG_CMD(GetEquippedItemsAsBitMask)
 		/*3CCE*/ REG_CMD(GetEquippedWeaponType)
 		/*3CCF*/ REG_CMD(GetBaseEquippedWeight)

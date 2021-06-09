@@ -159,9 +159,9 @@ AuxStringMapIDsMap::Iterator s_auxStringMapIterator; //need to ensure thread saf
 
 NVSEArrayVar* __fastcall AuxStringMapArrayIterator(Script* scriptObj, char* varName, bool getFirst)
 {
-	ScopedLock lock(&g_Lock);
 	AuxStringMapIDsMap* idsMap = ASMFind(scriptObj, varName);
 	if (!idsMap) return NULL;
+	ScopedLock lock(&g_Lock);
 	if (getFirst || (s_auxStringMapIterator.Table() != idsMap))
 	{
 		s_auxStringMapIterator.Init(*idsMap);
@@ -313,27 +313,26 @@ bool Cmd_AuxStringMapArraySetFromArray_Execute(COMMAND_ARGS)
 	UInt32 arrID = NULL;
 	UINT32 bAppend = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &arrID, &bAppend)) return true;
-	g_Lock.Enter();  //since ModsMap() returns a global.
 	AuxStringMapInfo varInfo(scriptObj, varName);
-	auto findMod = varInfo.ModsMap().Find(varInfo.modIndex);
-	if (findMod)
+	if (!bAppend)  //clear the previous content.
 	{
-		auto findVar = findMod().Find(varName);
-		if (findVar)
+		auto findMod = varInfo.ModsMap().Find(varInfo.modIndex);
+		if (findMod)
 		{
-			if (findVar().Empty() || !bAppend)
+			auto findVar = findMod().Find(varName);
+			if (findVar)
 			{
+				ScopedLock lock(&g_Lock);
 				findVar.Remove();
 				if (findMod().Empty()) findMod.Remove();
 			}
 		}
 	}
-	g_Lock.Leave();
 	NVSEArrayVar* inArr = LookupArrayByID(arrID);
 	if (!inArr) return true;
-	UInt32 size = GetArraySize(inArr);
-	NVSEArrayElement* elements = new NVSEArrayElement[size];
-	NVSEArrayElement* keys = new NVSEArrayElement[size];
+	UInt32 const size = GetArraySize(inArr);
+	auto elements = new NVSEArrayElement[size];
+	auto keys = new NVSEArrayElement[size];
 	GetArrayElements(inArr, elements, keys);
 	if (keys[0].GetType() == NVSEArrayVarInterface::kType_String)  //only works by passing StringMap arrays
 	{

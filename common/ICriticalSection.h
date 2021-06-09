@@ -16,7 +16,7 @@ class ICriticalSection
 
 // Added thanks to JIP:
 
-class ScopedLock  //use this to be safe when doing non-thread-safe things.
+class ScopedLock  //Use this to be safe when doing non-thread-safe things.
 {
 	ICriticalSection* cs;
 

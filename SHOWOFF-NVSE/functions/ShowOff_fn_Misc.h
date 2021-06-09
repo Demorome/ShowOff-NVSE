@@ -10,12 +10,12 @@ DEFINE_CMD_ALT_COND_PLUGIN(GetNumQueuedCornerMessages, , , 0, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(IsAnimPlayingExCond, , "Same as IsAnimPlayingEx, but available as a condition. Had to cut the variationFlags filter.", 1, kParams_JIP_OneInt_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetRadiationExtraData, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SetRadiationExtraData, , 1, 1, kParams_OneFloat);
-DEFINE_COMMAND_PLUGIN(PlayerHasNightVision, , 0, 0, NULL);
-DEFINE_COMMAND_PLUGIN(PlayerIsUsingTurbo, , 0, 0, NULL);
-DEFINE_COMMAND_PLUGIN(PlayerHasCateyeEnabled, , 0, 0, NULL);
-DEFINE_COMMAND_PLUGIN(PlayerHasImprovedSpotting, , 0, 0, NULL);
-DEFINE_COMMAND_PLUGIN(PlayerIsDrinkingPlacedWater, , 0, 0, NULL);
-DEFINE_COMMAND_PLUGIN(SetPCIsAMurderer, , 0, 1, kParams_OneInt);
+DEFINE_CMD_ALT_COND_PLUGIN(PlayerHasNightVisionActive, , , 0, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(PlayerIsUsingTurbo, , , 0, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(PlayerHasCateyeEnabled, , , 0, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(PlayerHasImprovedSpottingActive, , , 0, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(PlayerIsDrinkingPlacedWater, , , 0, NULL);
+DEFINE_COMMAND_PLUGIN(SetIsPCAMurderer, , 0, 1, kParams_OneInt);
 DEFINE_CMD_ALT_COND_PLUGIN(IsNight, , "Returns true if it's night according to the current (or specified) climate.", 0, kParams_OneOptionalForm);
 DEFINE_CMD_ALT_COND_PLUGIN(IsLimbCrippled, , "If no args are passed / arg is -1, returns true if actor has any crippled limbs. Otherwise, checks if the specified limb is crippled.", 1, kParams_TwoOptionalInts);
 DEFINE_CMD_ALT_COND_PLUGIN(GetNumCrippledLimbs, , , 1, kParams_OneOptionalInt);
@@ -198,8 +198,6 @@ bool Cmd_GetRadiationExtraData_Execute(COMMAND_ARGS)
 	}
 	return true;
 }
-
-
 bool Cmd_SetRadiationExtraData_Execute(COMMAND_ARGS)
 {
 	float fNewVal = 0;
@@ -214,7 +212,12 @@ bool Cmd_SetRadiationExtraData_Execute(COMMAND_ARGS)
 }
 
 
-bool Cmd_PlayerHasNightVision_Execute(COMMAND_ARGS)
+bool Cmd_PlayerHasNightVisionActive_Execute(COMMAND_ARGS)
+{
+	*result = g_thePlayer->hasNightVisionApplied;
+	return true;
+}
+bool Cmd_PlayerHasNightVisionActive_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = g_thePlayer->hasNightVisionApplied;
 	return true;
@@ -226,30 +229,46 @@ bool Cmd_PlayerIsUsingTurbo_Execute(COMMAND_ARGS)
 	*result = g_thePlayer->isUsingTurbo;  
 	return true;
 }
-
+bool Cmd_PlayerIsUsingTurbo_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = g_thePlayer->isUsingTurbo;
+	return true;
+}
 
 bool Cmd_PlayerHasCateyeEnabled_Execute(COMMAND_ARGS)
 {
 	*result = g_thePlayer->isCateyeEnabled;
 	return true;
 }
+bool Cmd_PlayerHasCateyeEnabled_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = g_thePlayer->isCateyeEnabled;
+	return true;
+}
 
-
-bool Cmd_PlayerHasImprovedSpotting_Execute(COMMAND_ARGS)
+bool Cmd_PlayerHasImprovedSpottingActive_Execute(COMMAND_ARGS)
 {
 	*result = g_thePlayer->isSpottingImprovedActive;
 	return true;
 }
-
+bool Cmd_PlayerHasImprovedSpottingActive_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = g_thePlayer->isSpottingImprovedActive;
+	return true;
+}
 
 bool Cmd_PlayerIsDrinkingPlacedWater_Execute(COMMAND_ARGS)
 {
 	*result = g_thePlayer->isDrinkingPlacedWater;
 	return true;
 }
+bool Cmd_PlayerIsDrinkingPlacedWater_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = g_thePlayer->isDrinkingPlacedWater;
+	return true;
+}
 
-
-bool Cmd_SetPCIsAMurderer_Execute(COMMAND_ARGS)
+bool Cmd_SetIsPCAMurderer_Execute(COMMAND_ARGS)
 {
 	UInt32 bIsMurderer = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bIsMurderer)) return true;
@@ -447,10 +466,6 @@ typedef TESBipedModelForm::ESlot EquippedItemSlot;
 UInt32 __fastcall GetNumBrokenEquippedItems_Call(TESObjectREFR* const thisObj, float threshold, UInt32 const flags)
 {
 	if (!IS_ACTOR(thisObj)) return 0;
-
-#if _DEBUG
-	Console_Print("GetNumBrokenEquippedItems - threshold = %f", threshold);
-#endif
 	
 	threshold /= 100.0F;  //expecting a number like 35, reduce to 0.35;
 	UInt32 numBrokenItems = 0;  //retun value.

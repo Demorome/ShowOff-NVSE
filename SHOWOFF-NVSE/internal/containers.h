@@ -569,7 +569,7 @@ public:
 	__forceinline void Clear() { free(key); }
 };
 
-template <typename T_Key, typename T_Data> class UnorderedMap  //Replaced with JIP version.
+template <typename T_Key, typename T_Data> class UnorderedMap  // Made by JIP
 {
 	using H_Key = HashedKey<T_Key>;
 	using Key_Arg = std::conditional_t<std::is_scalar_v<T_Key>, T_Key, const T_Key&>;
@@ -616,7 +616,8 @@ template <typename T_Key, typename T_Data> class UnorderedMap  //Replaced with J
 				entries = entries->next;
 				pEntry->Clear();
 				Pool_Free(pEntry, sizeof(Entry));
-			} 			while (entries);
+			}
+			while (entries);
 		}
 
 		UInt32 Size() const
@@ -638,8 +639,8 @@ template <typename T_Key, typename T_Data> class UnorderedMap  //Replaced with J
 
 	__declspec(noinline) void ResizeTable(UInt32 newCount)
 	{
-		Bucket *pBucket = buckets, *pEnd = End(), *newBuckets = (Bucket*)Pool_Alloc_Buckets(newCount);
-		Entry *pEntry, *pTemp;
+		Bucket* pBucket = buckets, * pEnd = End(), *newBuckets = (Bucket*)Pool_Alloc_Buckets(newCount);
+		Entry* pEntry, * pTemp;
 		newCount--;
 		do
 		{
@@ -784,7 +785,7 @@ public:
 		{
 			UInt32 hashVal = HashKey<T_Key>(key);
 			Bucket* pBucket = &buckets[hashVal & (numBuckets - 1)];
-			Entry* pEntry = pBucket->entries, * prev = nullptr;
+			Entry* pEntry = pBucket->entries, *prev = nullptr;
 			while (pEntry)
 			{
 				if (pEntry->key.Match(key, hashVal))
@@ -838,7 +839,6 @@ public:
 
 	void DumpLoads()
 	{
-#if 0
 		UInt32 loadsArray[0x40];
 		MemZero(loadsArray, sizeof(loadsArray));
 		Bucket* pBucket = buckets;
@@ -850,11 +850,10 @@ public:
 			if (maxLoad < entryCount)
 				maxLoad = entryCount;
 		}
-		PrintDebug("Size = %d\nBuckets = %d\n----------------\n", numEntries, numBuckets);
+		_MESSAGE("Size = %d\nBuckets = %d\n----------------\n", numEntries, numBuckets);
 		for (UInt32 iter = 0; iter <= maxLoad; iter++)
-			PrintDebug("%d:\t%05d (%.4f%%)", iter, loadsArray[iter], 100.0 * (double)loadsArray[iter] / numEntries);
-#endif
-	}
+			_MESSAGE("%d:\t%05d (%.4f%%)", iter, loadsArray[iter], 100.0 * (double)loadsArray[iter] / numEntries);
+}
 
 	class Iterator
 	{
