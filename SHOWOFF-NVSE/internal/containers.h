@@ -1136,7 +1136,7 @@ public:
 	};
 };
 
-template <typename T_Data> class Vector  //replaced with JIP definition.
+template <typename T_Data> class Vector  // made by JIP.
 {
 	using Data_Arg = std::conditional_t<std::is_scalar_v<T_Data>, T_Data, T_Data&>;
 

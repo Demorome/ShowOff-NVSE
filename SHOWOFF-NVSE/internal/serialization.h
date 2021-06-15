@@ -12,7 +12,7 @@ enum
 
 void DoLoadGameCleanup() 
 {
-	ScopedLock lock(&g_Lock);
+	ScopedLock lock(g_Lock);
 	if (s_dataChangedFlags & kChangedFlag_AuxStringMaps) s_auxStringMapArraysPerm.Clear();
 	s_dataChangedFlags = 0;
 }
@@ -74,7 +74,7 @@ void LoadGameCallback(void*)
 						{
 							if (!idsMap)
 							{
-								ScopedLock lock(&g_Lock);
+								ScopedLock lock(g_Lock);
 								if (!rVarsMap) rVarsMap = s_auxStringMapArraysPerm.Emplace(modIdx, nVars);
 								idsMap = rVarsMap->Emplace(varName, nVals);
 							}
@@ -108,7 +108,7 @@ void SaveGameCallback(void*)
 	UInt8 buffer1, loopBuffer;
 	UInt16 buffer2;
 
-	ScopedLock lock(&g_Lock);
+	ScopedLock lock(g_Lock);
 	 
 	StrCopy(s_lastLoadedPath, GetSavePath());
 	s_dataChangedFlags = 0;
@@ -143,6 +143,6 @@ void NewGameCallback(void*)
 	s_dataChangedFlags = kChangedFlag_All;
 	DoLoadGameCleanup();
 	
-	ScopedLock lock(&g_Lock);
+	ScopedLock lock(g_Lock);
 	s_lastLoadedPath[0] = 0;
 }

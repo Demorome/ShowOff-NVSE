@@ -1,5 +1,7 @@
 #pragma once
 
+
+#if 0
 class ICriticalSection
 {
 	public:
@@ -15,7 +17,6 @@ class ICriticalSection
 };
 
 // Added thanks to JIP:
-
 class ScopedLock  //Use this to be safe when doing non-thread-safe things.
 {
 	ICriticalSection* cs;
@@ -23,4 +24,51 @@ class ScopedLock  //Use this to be safe when doing non-thread-safe things.
 public:
 	ScopedLock(ICriticalSection* _cs) : cs(_cs) { cs->Enter(); }
 	~ScopedLock() { cs->Leave(); }
+};
+#endif
+
+//Taken from xNVSE, mostly taken from JIP.
+class ICriticalSection
+{
+	DWORD	owningThread;
+	DWORD	enterCount;
+
+public:
+	ICriticalSection() : owningThread(0), enterCount(0) {}
+
+	void Enter()
+	{
+		DWORD currThread = GetCurrentThreadId();
+		if (owningThread == currThread)
+		{
+			enterCount++;
+			return;
+		}
+		DWORD fastIdx = 10000;
+		while (InterlockedCompareExchange(&owningThread, currThread, 0))
+		{
+			if (fastIdx)
+			{
+				fastIdx--;
+				Sleep(0);
+			}
+			else Sleep(1);
+		}
+		enterCount = 1;
+	}
+
+	void Leave()
+	{
+		if (!--enterCount)
+			owningThread = 0;
+	}
+};
+
+class ScopedLock
+{
+	ICriticalSection* m_cs;
+
+public:
+	ScopedLock(ICriticalSection& cs) : m_cs(&cs) { cs.Enter(); }
+	~ScopedLock() { m_cs->Leave(); }
 };

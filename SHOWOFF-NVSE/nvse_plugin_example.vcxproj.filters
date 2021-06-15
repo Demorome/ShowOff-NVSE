@@ -186,6 +186,12 @@
     <ClInclude Include="Events\CustomEventFilters.h">
       <Filter>Events</Filter>
     </ClInclude>
+    <ClInclude Include="internal\json.h">
+      <Filter>internal</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\ShowOff_fn_Files.h">
+      <Filter>functions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

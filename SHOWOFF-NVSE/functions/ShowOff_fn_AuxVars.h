@@ -161,7 +161,7 @@ NVSEArrayVar* __fastcall AuxStringMapArrayIterator(Script* scriptObj, char* varN
 {
 	AuxStringMapIDsMap* idsMap = ASMFind(scriptObj, varName);
 	if (!idsMap) return NULL;
-	ScopedLock lock(&g_Lock);
+	ScopedLock lock(g_Lock);
 	if (getFirst || (s_auxStringMapIterator.Table() != idsMap))
 	{
 		s_auxStringMapIterator.Init(*idsMap);
@@ -258,7 +258,7 @@ AuxVariableValue* __fastcall AuxStringMapAddValue(Script* scriptObj, char* varNa
 		AuxStringMapInfo varInfo(scriptObj, varName);
 		if (varInfo.isPerm)
 			s_dataChangedFlags |= kChangedFlag_AuxStringMaps;
-		ScopedLock lock(&g_Lock);  //since ModsMap() returns the global.
+		ScopedLock lock(g_Lock);  //since ModsMap() returns the global.
 		return &varInfo.ModsMap()[varInfo.modIndex][varName][keyName];
 	}
 	return NULL;
@@ -322,7 +322,7 @@ bool Cmd_AuxStringMapArraySetFromArray_Execute(COMMAND_ARGS)
 			auto findVar = findMod().Find(varName);
 			if (findVar)
 			{
-				ScopedLock lock(&g_Lock);
+				ScopedLock lock(g_Lock);
 				findVar.Remove();
 				if (findMod().Empty()) findMod.Remove();
 			}
@@ -388,7 +388,7 @@ bool Cmd_AuxStringMapArrayEraseKey_Execute(COMMAND_ARGS)
 	if (!findVar) return true;
 	auto findID = findVar().Find(keyName);
 	if (!findID) return true;
-	ScopedLock lock(&g_Lock);
+	ScopedLock lock(g_Lock);
 	findID.Remove();
 	if (findVar().Empty())
 	{
@@ -413,7 +413,7 @@ bool Cmd_AuxStringMapArrayValidateValues_Execute(COMMAND_ARGS)
 	if (!findMod) return true;
 	auto findVar = findMod().Find(varName);
 	if (!findVar) return true;
-	ScopedLock lock(&g_Lock);
+	ScopedLock lock(g_Lock);
 	bool cleaned = false;
 	for (auto idIter = findVar().Begin(); idIter; ++idIter)
 	{
@@ -444,7 +444,7 @@ bool Cmd_AuxStringMapArrayDestroy_Execute(COMMAND_ARGS)
 	if (!findMod) return true;
 	auto findVar = findMod().Find(varName);
 	if (!findVar) return true;
-	ScopedLock lock(&g_Lock);
+	ScopedLock lock(g_Lock);
 	findVar.Remove();
 	if (findMod().Empty()) findMod.Remove();
 	if (varInfo.isPerm)

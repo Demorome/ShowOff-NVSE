@@ -1,5 +1,9 @@
 #pragma once
+#include <stdexcept>
 #include <string>
+
+#include "GameAPI.h"
+#include "GameData.h"
 
 // Copied many things over from JIP LN.
 
@@ -367,7 +371,7 @@ UInt32 __fastcall ByteSwap(UInt32 dword);
 
 void DumpMemImg(void *data, UInt32 size, UInt8 extra = 0);
 
-
+// From JIP
 #define AUX_BUFFER_INIT_SIZE 0x8000
 
 class AuxBuffer
@@ -382,3 +386,78 @@ public:
 extern AuxBuffer s_auxBuffers[3];
 
 UInt8* __fastcall GetAuxBuffer(AuxBuffer& buffer, UInt32 reqSize);
+
+
+// From kNVSE
+inline void Log(const std::string& msg)
+{
+	_MESSAGE(msg.c_str());
+}
+
+// From kNVSE
+inline int HexStringToInt(const std::string& str)
+{
+	char* p;
+	const auto id = strtoul(str.c_str(), &p, 16);
+	if (*p == 0)
+		return id;
+	return -1;
+}
+
+// From kNVSE
+inline void DebugPrint(const std::string& str)
+{
+#if _DEBUG
+	Console_Print(str.c_str());
+#endif
+	Log(str);
+}
+
+// From kNVSE
+inline std::string GetCurPath()
+{
+	char path[MAX_PATH];
+	GetCurrentDirectory(MAX_PATH, path);
+	return path;
+}
+
+inline float TryConvertStrToFloat(std::string const &str)
+{
+	float val = NAN;
+	try
+	{
+		val = stof(str);
+	}
+	catch (const std::invalid_argument& ia)
+	{
+		_MESSAGE("Conversion of Str to Double failed (IA): %s", ia.what());
+	}
+	catch (const std::out_of_range& oor)
+	{
+		_MESSAGE("Conversion of Str to Double failed (OOR): %s", oor.what());
+	}
+	return val;
+}
+
+// Copied from kNVSE (https://github.com/korri123/kNVSE/blob/master/nvse_plugin_example/commands_animation.cpp).
+TESForm* TryConvertStrToForm(std::string const &modName, std::string const &formIdStr)
+{
+	const auto* mod = DataHandler::Get()->LookupModByName(modName.c_str());
+	if (!mod)
+	{
+		Log("TryConvertStrToForm - Mod name " + modName + " was not found");
+	}
+	auto formId = HexStringToInt(formIdStr);
+	if (formId == -1)
+	{
+		Log("TryConvertStrToForm - FormID formatted, got " + formIdStr);
+	}
+	formId = (mod->modIndex << 24) + (formId & 0x00FFFFFF);
+	auto* form = LookupFormByID(formId);
+	if (!form)
+	{
+		Log(FormatString("TryConvertStrToForm - Form %X was not found", formId));
+	}
+	return form;
+}
+

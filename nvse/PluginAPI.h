@@ -355,7 +355,7 @@ struct NVSEArrayVarInterface
 		Array* Array() { return type == kType_Array ? arr : NULL; }
 	};
 
-	struct ElementL : Element
+	struct ElementL : Element  // Keys
 	{
 		ElementL() { type = kType_Invalid; }
 		ElementL(double _num) { type = kType_Numeric; num = _num; }
@@ -383,7 +383,7 @@ struct NVSEArrayVarInterface
 		}
 	};
 
-	struct ElementR : Element
+	struct ElementR : Element  // Values
 	{
 		ElementR() { type = kType_Invalid; }
 		ElementR(double _num) { type = kType_Numeric; num = _num; }
@@ -430,7 +430,7 @@ struct NVSEArrayVarInterface
 	UInt32	(* GetArraySize)(Array* arr);
 	Array*	(* LookupArrayByID)(UInt32 id);
 	bool	(* GetElement)(Array* arr, const Element& key, Element& outElement);
-	bool	(* GetElements)(Array* arr, Element* elements, Element* keys);  //sorted by Keys
+	bool	(* GetElements)(Array* arr, Element* elements, Element* keys);  //sorted by Keys alphabetically / numerically
 
 	// version 2
 	UInt32	(* GetArrayPacked)(Array* arr);
@@ -438,6 +438,13 @@ struct NVSEArrayVarInterface
 };
 typedef NVSEArrayVarInterface::Array NVSEArrayVar;
 typedef NVSEArrayVarInterface::Element NVSEArrayElement;
+
+enum Array_Types
+{
+	kType_Array = 0,
+	kType_Map,
+	kType_StringMap,
+};
 
 #endif
 		

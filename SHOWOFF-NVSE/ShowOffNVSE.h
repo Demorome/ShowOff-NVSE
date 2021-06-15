@@ -14,6 +14,7 @@ extern bool (*ExtractFormatStringArgs)(UInt32 fmtStringPos, char* buffer, COMMAN
 extern NVSEArrayVarInterface* g_arrInterface;
 extern NVSEArrayVar* (*CreateArray)(const NVSEArrayElement* data, UInt32 size, Script* callingScript);
 extern NVSEArrayVar* (*CreateStringMap)(const char** keys, const NVSEArrayElement* values, UInt32 size, Script* callingScript);
+extern NVSEArrayVar* (*CreateMap)(const double* keys, const NVSEArrayElement* values, UInt32 size, Script* callingScript);
 extern bool (*AssignArrayResult)(NVSEArrayVar* arr, double* dest);
 extern void (*SetElement)(NVSEArrayVar* arr, const NVSEArrayElement& key, const NVSEArrayElement& value);
 extern void (*AppendElement)(NVSEArrayVar* arr, const NVSEArrayElement& value);
@@ -163,7 +164,7 @@ bool __fastcall TryCombatPickpocket(ContChangesEntry* selection, SInt32 count, A
 		{
 			ThisStdCall(0x8C00E0, g_thePlayer, actor, 0, 0);
 			char buf[260];
-			ScopedLock lock(&g_Lock);
+			ScopedLock lock(g_Lock);
 			sprintf(buf, "%s", g_fForcePickpocketFailureMessage);
 			QueueUIMessage(buf, eEmotion::sad, NULL, NULL, 2.0, 0);
 
@@ -348,6 +349,20 @@ double __fastcall PreventRepairButton(ContChangesEntry* entry, int bPercent)
 
 
 
+#if 0
+// spreadArgs's value is really low, must've messed something up with SpreadArg...
+void Actor_Spread_PerkModifier_Hook(PerkEntryPointID id, TESObjectREFR* refr, float* spreadArg, ...)
+{
+	ApplyPerkModifiers(id, refr, spreadArg);
+	float spread = *spreadArg;
+	//float spread = *(float*)&spreadArg;
+	//UInt32* argAddr = &spreadArg;
+	Console_Print("Spread: %f", spread);
+	//modify spread by custom stuff.
+	
+}
+#endif
+
 // End IDA debug stuff
 #endif
 
@@ -362,10 +377,11 @@ void HandleGameHooks()
 	
 #if _DEBUG
 
-	// Actor::CalculateSpread hooks.
-	//WriteRelCall(0x8B0F99, UInt32());
-	//WriteRelCall( , UInt32());
 
+	
+#if 0
+	WriteRelCall(0x8B0FF0, UInt32(Actor_Spread_PerkModifier_Hook));
+#endif
 
 	// Modify a "IsInCombat" check to allow NPC activation even if they are in combat.
 	WriteRelCall(0x607E70, UINT32(PCCanPickpocketInCombatHOOK));

@@ -39,6 +39,7 @@
 #include "functions/ShowOff_fn_AuxVars.h" 
 #include "functions/ShowOff_fn_Actors.h"
 #include "functions/ShowOff_fn_Debug.h"
+#include "functions/ShowOff_fn_Files.h"
 
 // Events
 #include "Events/JohnnyEventPredefinitions.h"
@@ -69,7 +70,7 @@ UInt32 g_ShowOffVersion = 105;
 ICriticalSection g_someLock;
 void Func()
 {
-	ScopedLock lock(&g_Lock);
+	ScopedLock lock(g_Lock);
 	// do un-thread safe stuff like modify globals, only a single thread can be here at a time
 
 	//will automatically leave critical section when leaving scope.
@@ -85,6 +86,7 @@ bool (*ExtractFormatStringArgs)(UInt32 fmtStringPos, char* buffer, COMMAND_ARGS_
 NVSEArrayVarInterface* g_arrInterface = nullptr;
 NVSEArrayVar* (*CreateArray)(const NVSEArrayElement* data, UInt32 size, Script* callingScript);
 NVSEArrayVar* (*CreateStringMap)(const char** keys, const NVSEArrayElement* values, UInt32 size, Script* callingScript);
+NVSEArrayVar* (*CreateMap)(const double* keys, const NVSEArrayElement* values, UInt32 size, Script* callingScript);
 bool (*AssignArrayResult)(NVSEArrayVar* arr, double* dest);
 void (*SetElement)(NVSEArrayVar* arr, const NVSEArrayElement& key, const NVSEArrayElement& value);
 void (*AppendElement)(NVSEArrayVar* arr, const NVSEArrayElement& value);
@@ -98,6 +100,7 @@ const char* (*GetStringVar)(UInt32 stringID);
 NVSEMessagingInterface* g_msg = nullptr;
 NVSEScriptInterface* g_scriptInterface = nullptr;
 NVSECommandTableInterface* g_commandInterface = nullptr;
+
 
 //Singletons
 HUDMainMenu* g_HUDMainMenu = nullptr;
@@ -331,6 +334,7 @@ extern "C"
 
 			g_arrInterface = (NVSEArrayVarInterface*)nvse->QueryInterface(kInterface_ArrayVar);
 			CreateArray = g_arrInterface->CreateArray;
+			CreateMap = g_arrInterface->CreateMap;
 			CreateStringMap = g_arrInterface->CreateStringMap;
 			AssignArrayResult = g_arrInterface->AssignCommandResult;
 			SetElement = g_arrInterface->SetElement;
@@ -432,6 +436,9 @@ extern "C"
 
 		//todo: fix whatever is causing the UDFs to not fire despite the hook working.
 		REG_CMD(SetShowOffOnCornerMessageEventHandler)
+
+
+		REG_CMD_ARR(ReadArrayFromJSON)
 
 		
 		//REG_CMD_ARR(Ar_Init);
