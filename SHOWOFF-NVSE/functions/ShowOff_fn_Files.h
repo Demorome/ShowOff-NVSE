@@ -1,11 +1,20 @@
 ﻿#pragma once
 
 #include <filesystem>
-#include "internal/json.h"
 #include <fstream>
-#include <utility>
 
-DEFINE_COMMAND_PLUGIN(ReadArrayFromJSON, , 0, 2, kParams_TwoStrings);
+#include "json.h"
+#include "CommandTable.h"
+#include "GameForms.h"
+#include "GameObjects.h"
+#include "ParamInfos.h"
+#include "PluginAPI.h"
+//#include "ShowOffNVSE.h"
+#include "SO_Utilities.h"
+
+
+
+DEFINE_COMMAND_PLUGIN(ReadArrayFromJSON, , 0, 3, kParams_TwoStrings_OneOptionalInt);
 
 
 
@@ -29,27 +38,7 @@ bool Get_JSON_Val_As_Basic_NVSE_Elem(json::const_reference json_ref, ArrayElemen
 	else if (json_ref.is_string())
 	{
 		// Value can be either a Form or a String - check for Form first, otherwise default to String.
-
-		//todo: Handle possible Form Strings!!
-		// check if first char is "@"
-		// Get the mod name.
-		// Get the partial formId
-		// Return the constructed form element.
-
-		/* JIP syntax:
-			*Forms must be prefixed with '@', followed by the source file name, then ':',
-			and finally the six-digit reference ID (i.e. without the mod index). Example (for Craig Boone): @FalloutNV.esm:096BCE
-		 */
-		
-		if (???)  // Try_Convert_Str_To_Form
-		{
-			
-		}
-		else  // Return string - default case
-		{
-			elem = json_ref.get<std::string>().c_str();
-		}
-		gotVal = true;
+		elem = ConvertStrToElem(json_ref.get<std::string>());
 	}
 	else
 	{
@@ -59,15 +48,15 @@ bool Get_JSON_Val_As_Basic_NVSE_Elem(json::const_reference json_ref, ArrayElemen
 }
 
 
-
 ArrayElementR Read_JSON_As_NVSE_Elem(json::const_reference json_ref, bool forceArrayType, Script *scriptObj)
 {
 	ArrayElementR json_as_elem;  //return val.
+
+	if (Get_JSON_Val_As_Basic_NVSE_Elem(json_ref, json_as_elem)) return json_as_elem;
+	// Code below is only for array-type elements.
+
 	std::vector<std::string> strMapKeys;  // filled when creating a StringMap-type array
 	Vector<ArrayElementR> elems;
-
-	
-
 	for (auto& iter : json_ref.items())
 	{
 		//-----Handle Values
@@ -123,21 +112,20 @@ bool Cmd_ReadArrayFromJSON_Execute(COMMAND_ARGS)
 	std::string JSON_Path = GetCurPath() + json_path;
 	std::string keyPathStr = json_key_path;
 	
-	NVSEArrayVar* resArr = nullptr;
-	
+	NVSEArrayVar* resArr = nullptr;  //assign this value as result.
 	try
 	{
 		std::ifstream i(JSON_Path);
 		json j;
 		i >> j;
-
 		try
 		{
 			json::const_reference ref = j.at(json::json_pointer(keyPathStr));
-
-			if (ref.is_primitive())
+			ArrayElementR elem;
+			if (Get_JSON_Val_As_Basic_NVSE_Elem(ref, elem))  
 			{
-				
+				// Force the creation of a single-element array; Read_JSON_As_NVSE_Elem() would make it a simple element instead.
+				resArr = CreateArray(&elem, 1, scriptObj);
 			}
 			else if (ref.is_array() || ref.is_object())
 			{
@@ -156,6 +144,7 @@ bool Cmd_ReadArrayFromJSON_Execute(COMMAND_ARGS)
 	}
 	catch (json::exception& e)
 	{
+		// Log statements copied from kNVSE.
 		Log("The JSON is incorrectly formatted! It will not be applied.");
 		Log(FormatString("JSON error: %s\n", e.what()));
 	}
@@ -163,3 +152,4 @@ bool Cmd_ReadArrayFromJSON_Execute(COMMAND_ARGS)
 	AssignArrayResult(resArr, result);  //todo: check what happens if empty array is passed!
 	return true;
 }
+//#endif

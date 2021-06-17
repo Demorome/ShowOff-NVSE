@@ -2,11 +2,13 @@
 
 // Everything here was ripped from JIP LN.
 
-extern ICriticalSection g_Lock;
+#include "GameProcess.h"
 
-enum
+extern ICriticalSection g_Lock;  //todo: replace with unique Lock
+
+enum  //Memory Addresses
 {
-	kAddr_AddExtraData = 0x40FF60,
+	kAddr_AddExtraData = 0x40FF60, 
 	kAddr_RemoveExtraType = 0x410140,
 	kAddr_LoadModel = 0x447080,
 	kAddr_ApplyAmmoEffects = 0x59A030,
@@ -45,11 +47,6 @@ UInt16(*ReadRecord16)();
 UInt32(*ReadRecord32)();
 void (*ReadRecord64)(void* outData);
 void (*SkipNBytes)(UInt32 byteNum);
-
-typedef NVSEArrayVarInterface::Array NVSEArrayVar;
-typedef NVSEArrayVarInterface::Element NVSEArrayElement;
-typedef NVSEArrayVarInterface::ElementR ArrayElementR;
-typedef NVSEArrayVarInterface::ElementL ArrayElementL;
 
 UInt8 TESForm::GetOverridingModIdx()
 {

@@ -56,6 +56,10 @@
     <ClCompile Include="internal\containers.cpp">
       <Filter>internal</Filter>
     </ClCompile>
+    <ClCompile Include="functions\ShowOff_fn_Files.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="Hooks.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="functions\ShowOff_fn_Misc.h">
@@ -156,9 +160,6 @@
     <ClInclude Include="functions\ShowOff_fn_Array.h">
       <Filter>functions</Filter>
     </ClInclude>
-    <ClInclude Include="internal\Johnnnny Guitarrrrr.h">
-      <Filter>internal</Filter>
-    </ClInclude>
     <ClInclude Include="functions\ShowOff_fn_Actors.h">
       <Filter>functions</Filter>
     </ClInclude>
@@ -186,12 +187,13 @@
     <ClInclude Include="Events\CustomEventFilters.h">
       <Filter>Events</Filter>
     </ClInclude>
-    <ClInclude Include="internal\json.h">
-      <Filter>internal</Filter>
-    </ClInclude>
     <ClInclude Include="functions\ShowOff_fn_Files.h">
       <Filter>functions</Filter>
     </ClInclude>
+    <ClInclude Include="JSON_Library\json.h">
+      <Filter>JSON Library</Filter>
+    </ClInclude>
+    <ClInclude Include="Hooks.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
@@ -211,6 +213,9 @@
     </Filter>
     <Filter Include="SimpleINI Library">
       <UniqueIdentifier>{a5cf6dd2-1a87-4d23-a159-50e502279200}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="JSON Library">
+      <UniqueIdentifier>{0729c7c5-ebc5-4d68-bab7-59bb7909b244}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

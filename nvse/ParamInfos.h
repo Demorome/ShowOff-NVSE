@@ -226,6 +226,20 @@ static ParamInfo kParams_TwoStrings[2] =
 	{	"string",	kParamType_String,	0	},
 };
 
+static ParamInfo kParams_TwoStrings_OneInt[3] =
+{
+	{	"string",	kParamType_String,	0	},
+	{	"string",	kParamType_String,	0	},
+	{	"int",		kParamType_Integer,	0	},
+};
+
+static ParamInfo kParams_TwoStrings_OneOptionalInt[3] =
+{
+	{	"string",	kParamType_String,	0	},
+	{	"string",	kParamType_String,	0	},
+	{	"int",		kParamType_Integer,	1	},
+};
+
 static ParamInfo kParams_TwoStrings_OneDouble[3] =
 {
 	{	"string",	kParamType_String,	0	},

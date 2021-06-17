@@ -27,7 +27,7 @@ public:
 };
 #endif
 
-//Taken from xNVSE, mostly taken from JIP.
+//Taken from xNVSE, probably mostly made by from JIP.
 class ICriticalSection
 {
 	DWORD	owningThread;

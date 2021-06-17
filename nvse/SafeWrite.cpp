@@ -71,3 +71,63 @@ void WriteRelJle(UInt32 jumpSrc, UInt32 jumpTgt)
 	SafeWrite16(jumpSrc, 0x8E0F);
 	SafeWrite32(jumpSrc + 2, jumpTgt - jumpSrc - 2 - 4);
 }
+
+// Size is the amount of bytes until the next instruction.
+// Credits: Copied from JG, likely made thanks to lStewieAl.
+static void PatchMemoryNop(ULONG_PTR Address, SIZE_T Size)
+{
+	DWORD d = 0;
+	VirtualProtect((LPVOID)Address, Size, PAGE_EXECUTE_READWRITE, &d);
+
+	for (SIZE_T i = 0; i < Size; i++)
+		*(volatile BYTE*)(Address + i) = 0x90; //0x90 == opcode for NOP
+
+	VirtualProtect((LPVOID)Address, Size, d, &d);
+
+	FlushInstructionCache(GetCurrentProcess(), (LPVOID)Address, Size);
+}
+
+// numArgs does not factor in *this objects.
+// Taken from lStewieAl.
+void NopFunctionCall(UInt32 addr, UInt32 numArgs)
+{
+	if (numArgs == 0)
+	{
+		// write 5 byte nop instead of add esp, 0
+		SafeWriteBuf(addr, "\x0F\x1F\x44\x00\x00", 5);
+	}
+	else
+	{
+		UInt32 oldProtect;
+		VirtualProtect((void*)addr, 4, PAGE_EXECUTE_READWRITE, &oldProtect);
+		*(UInt16*)addr = 0xC483; // add esp, X
+		*(UInt8*)(addr + 2) = numArgs * 4;
+		*(UInt16*)(addr + 3) = 0xFF89; // mov edi, edi (nop)
+		VirtualProtect((void*)addr, 4, oldProtect, &oldProtect);
+	}
+}
+
+// Taken from lStewieAl.
+void NopFunctionCall(UInt32 addr)
+{
+	NopFunctionCall(addr, 0);
+}
+
+// Taken from lStewieAl.
+void NopIndirectCall(UInt32 addr, UInt32 numArgs)
+{
+	NopFunctionCall(addr, numArgs);
+	SafeWrite8(addr + 5, 0x90);
+}
+
+// Taken from lStewieAl.
+void NopIndirectCall(UInt32 addr)
+{
+	NopIndirectCall(addr, 0);
+}
+
+// Taken from lStewieAl.
+UInt32 GetRelJumpAddr(UInt32 jumpSrc)
+{
+	return *(UInt32*)(jumpSrc + 1) + jumpSrc + 5;
+}

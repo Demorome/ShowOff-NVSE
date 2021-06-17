@@ -5,11 +5,12 @@
 #include "GameTasks.h"
 #include "GameTiles.h"
 #include "netimmerse.h"
-#include "internal/NiPoint.h"
+#include "NiPoint.h"
 
 
 // Credits: JIPLN, lStewieAl, JG, and surely others.
 
+//#if 0
 class BSGameSound;
 class NiBSBoneLODController;
 class NiBSplineCompTransformInterpolator;
@@ -27,6 +28,7 @@ struct UnreachableCoverLocation;
 class BSAudioManagerThread;
 class ImageSpaceModifierInstanceRB;
 struct NavMeshClosedDoorInfo;
+//#endif
 
 class ExtraDetachTime : public BSExtraData
 {

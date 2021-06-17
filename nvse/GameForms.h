@@ -6,7 +6,7 @@
 #include "internal/containers.h"
 #include "internal/netimmerse.h"
 #include "internal/havok.h"
-#include "stdint.h"
+#include <cstdint>
 
 extern void Console_Print(const char* fmt, ...);
 

@@ -1,52 +1,10 @@
 #pragma once
 #include "GameProcess.h"
-#include "internal/jip_nvse.h"
-#include "internal/decoding.h"
+#include "jip_nvse.h"
+#include "decoding.h"
+#include "SafeWrite.h"
 
 // Everything here was ripped from lStewieAl.
-
-
-// numArgs does not factor in *this objects.
-void NopFunctionCall(UInt32 addr, UInt32 numArgs)
-{
-	if (numArgs == 0)
-	{
-		// write 5 byte nop instead of add esp, 0
-		SafeWriteBuf(addr, "\x0F\x1F\x44\x00\x00", 5);
-	}
-	else
-	{
-		UInt32 oldProtect;
-		VirtualProtect((void*)addr, 4, PAGE_EXECUTE_READWRITE, &oldProtect);
-		*(UInt16*)addr = 0xC483; // add esp, X
-		*(UInt8*)(addr + 2) = numArgs * 4;
-		*(UInt16*)(addr + 3) = 0xFF89; // mov edi, edi (nop)
-		VirtualProtect((void*)addr, 4, oldProtect, &oldProtect);
-	}
-}
-
-void NopFunctionCall(UInt32 addr)
-{
-	NopFunctionCall(addr, 0);
-}
-
-void NopIndirectCall(UInt32 addr, UInt32 numArgs)
-{
-	NopFunctionCall(addr, numArgs);
-	SafeWrite8(addr + 5, 0x90);
-}
-
-void NopIndirectCall(UInt32 addr)
-{
-	NopIndirectCall(addr, 0);
-}
-
-
-UInt32 GetRelJumpAddr(UInt32 jumpSrc)
-{
-	return *(UInt32*)(jumpSrc + 1) + jumpSrc + 5;
-}
-
 
 
 enum

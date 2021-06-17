@@ -1,35 +1,23 @@
+#include "ShowOffNVSE.h"
+
 #include <memory>
 #include <mutex>
 #include <shared_mutex>
-#include <atomic>
 
-#include "nvse/PluginAPI.h"
-#include "nvse/CommandTable.h"
-#include "nvse/GameAPI.h"
-#include "nvse/ParamInfos.h"
-#include "nvse/GameObjects.h"
-#include "nvse/GameUI.h"
-#include "nvse/GameRTTI.h"
-#include "nvse/ArrayVar.h"
-#include "nvse/SafeWrite.h"
-
-#include "common/ICriticalSection.h"
-#include "ShowOffNVSE.h"
 #include "settings.h"
 
 
-#include "GameData.h"
-#include "GameScript.h"
-#include "internal/decoding.h"
-#include "internal/utility.h"
-#include "internal/memory_pool.h"
-#include "internal/containers.h"
-#include "internal/jip_nvse.h"
-#include "internal/StewieMagic.h"
-#include "internal/Johnnnny Guitarrrrr.h"
-
-#include "params.h"
+// From "internal/"
+#include "memory_pool.h"
+#include "containers.h"
 #include "internal/serialization.h"
+#include "jip_nvse.h"
+#include "StewieMagic.h" 
+
+#include "ParamInfos.h"
+//#include "GameObjects.h"
+#include "params.h"
+
 
 // Functions
 #include "functions/ShowOff_fn_Misc.h"
@@ -39,7 +27,7 @@
 #include "functions/ShowOff_fn_AuxVars.h" 
 #include "functions/ShowOff_fn_Actors.h"
 #include "functions/ShowOff_fn_Debug.h"
-#include "functions/ShowOff_fn_Files.h"
+//#include "functions/ShowOff_fn_Files.h"
 
 // Events
 #include "Events/JohnnyEventPredefinitions.h"
@@ -51,7 +39,7 @@
 // Plugin Stuff
 IDebugLog g_Log("ShowOffNVSE.log");
 HMODULE	g_ShowOffHandle;
-UInt32 g_ShowOffVersion = 105;
+UInt32 g_PluginVersion = 105;
 
 /*----------Globals------------------------------------------------------------------------
 * It's better to include them in a .cpp file instead of a header file.
@@ -100,6 +88,10 @@ const char* (*GetStringVar)(UInt32 stringID);
 NVSEMessagingInterface* g_msg = nullptr;
 NVSEScriptInterface* g_scriptInterface = nullptr;
 NVSECommandTableInterface* g_commandInterface = nullptr;
+typedef NVSEArrayVarInterface::Array NVSEArrayVar;
+typedef NVSEArrayVarInterface::Element NVSEArrayElement;
+typedef NVSEArrayVarInterface::ElementR ArrayElementR; //From JIP
+typedef NVSEArrayVarInterface::ElementL ArrayElementL; //From JIP
 
 
 //Singletons
@@ -138,6 +130,17 @@ char* g_fForcePickpocketFailureMessage = nullptr;
 //-PreventBrokenItemRepairing (PBIR) INI globals 
 std::atomic<bool> g_PBIR_On;
 char* g_PBIR_FailMessage = nullptr;
+
+
+// Function-defining Definitions
+#define RegisterScriptCommand(name) nvse->RegisterCommand(&kCommandInfo_ ##name); //Default return type (return a number)
+#define REG_CMD(name) nvse->RegisterCommand(&kCommandInfo_##name);  //Short version of RegisterScriptCommand, from JIP.
+#define REG_TYPED_CMD(name, type) nvse->RegisterTypedCommand(&kCommandInfo_##name,kRetnType_##type);  //from JG
+#define REG_CMD_STR(name) nvse->RegisterTypedCommand(&kCommandInfo_##name, kRetnType_String); //From JIPLN
+#define REG_CMD_ARR(name) nvse->RegisterTypedCommand(&kCommandInfo_##name, kRetnType_Array); //From JIPLN
+#define REG_CMD_FORM(name) nvse->RegisterTypedCommand(&kCommandInfo_##name, kRetnType_Form); //From JIPLN
+#define REG_CMD_AMB(name) nvse->RegisterTypedCommand(&kCommandInfo_##name, kRetnType_Ambiguous); //From JIPLN
+
 
 
 // This is a message handler for nvse events
@@ -230,7 +233,7 @@ extern "C"
 		// fill out the info structure
 		info->infoVersion = PluginInfo::kInfoVersion;
 		info->name = "ShowOffNVSE Plugin";
-		info->version = g_ShowOffVersion;
+		info->version = g_PluginVersion;
 
 		// version checks
 		if (nvse->nvseVersion < PACKED_NVSE_VERSION)  //fixed version check thanks to c6
@@ -283,11 +286,11 @@ extern "C"
 	{
 		if (nvse->isEditor)
 		{
-			_MESSAGE("ShowOffNVSE Loaded successfully (Editor).\nShowOffNVSE plugin version: %u\n", g_ShowOffVersion);
+			_MESSAGE("ShowOffNVSE Loaded successfully (Editor).\nShowOffNVSE plugin version: %u\n", g_PluginVersion);
 		}
 		else
 		{
-			_MESSAGE("ShowOffNVSE Loaded successfully (In-Game).\nShowOffNVSE plugin version: %u\n", g_ShowOffVersion);
+			_MESSAGE("ShowOffNVSE Loaded successfully (In-Game).\nShowOffNVSE plugin version: %u\n", g_PluginVersion);
 		}
 		
 		// register to receive messages from NVSE
@@ -351,7 +354,7 @@ extern "C"
 #endif
 			
 			//HandleINIOptions();  //todo: overhaul INI options + add more before introducing to public
-			HandleGameHooks();
+			//HandleGameHooks();  //todo: re-add after refactoring is done
 			HandleEventHooks();
 		}
 
@@ -360,7 +363,7 @@ extern "C"
 		nvse->SetOpcodeBase(0x3C93);
 
 		/* ONLY COMMANDS WITH LISTED OPCODES SHOULD BE USED IN SCRIPTS */
-		/* DO NO COMMENT OUT AN ALREADY-RELEASED FUNCTION; REGISTER AN EMPTY COMMAND INSTEAD */
+		/* DO NO COMMENT OUT AN ALREADY-RELEASED FUNCTION; REPLACE WITH EMPTY COMMAND INSTEAD */
 
 		//========v1.00
 		/*3C93*/ REG_CMD(ModNumericGameSetting)
@@ -378,7 +381,7 @@ extern "C"
 		/*3C9F*/ REG_CMD(IsWeaponRanged)
 		/*3CA0*/ REG_CMD(IsEquippedWeaponRanged)
 		/*3CA1*/ REG_CMD(GetChallengeProgress)
-		/*3CA2*/ REG_CMD(ConditionPrint)
+		/*3CA2*/ REG_CMD(ConditionPrint) 
 		/*3CA3*/ REG_CMD(MessageExAltShowoff) //Keep undocumented; don't recommend for general use, extra feature is jank.
 		/*3CA4*/ REG_CMD(GetNumQueuedCornerMessages)
 		/*3CA5*/ REG_CMD(GetCreatureTurningSpeed)
@@ -428,7 +431,10 @@ extern "C"
 		/*3CD0*/ REG_CMD(GetCalculatedEquippedWeight)  //NOTE: bWeightlessWorn(Power)Armor from Stewie's is not accounted for.
 		/*3CD1*/ REG_CMD(GetCalculatedMaxCarryWeight)
 		
+		//========v1.??
+		//todo: always check to update/increase your opcode range when adding new functions
 
+		
 #if _DEBUG  //for functions being tested (or just abandoned).
 
 		REG_CMD(ClearShowoffSavedData)  //todo: test serialization. Seems broken???
@@ -438,7 +444,7 @@ extern "C"
 		REG_CMD(SetShowOffOnCornerMessageEventHandler)
 
 
-		REG_CMD_ARR(ReadArrayFromJSON)
+		//REG_CMD_ARR(ReadArrayFromJSON)
 
 		
 		//REG_CMD_ARR(Ar_Init);

@@ -1,4 +1,6 @@
 ﻿#pragma once
+#include "jip_nvse.h"
+
 
 // ripped from JIP LN
 

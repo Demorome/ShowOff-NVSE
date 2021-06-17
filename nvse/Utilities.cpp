@@ -9,7 +9,7 @@
 #include "GameScript.h"
 #endif
 
-#include "internal/utility.h"
+//#include "utility.h"
 
 void DumpClass(void * theClassPtr, UInt32 nIntsToDump)
 {

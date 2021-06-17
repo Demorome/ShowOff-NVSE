@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "GameRTTI.h"
 
 
 DEFINE_COMMAND_ALT_PLUGIN(ShowingOffDisable, ShowingOffDisableAltExCond2, "Does the same thing as vanilla Disable. For showing off!", 1, 1, kParams_OneOptionalInt);

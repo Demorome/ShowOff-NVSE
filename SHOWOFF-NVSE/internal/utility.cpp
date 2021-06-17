@@ -1,13 +1,50 @@
-#include "internal/utility.h"
-#include "nvse/GameAPI.h"
-#include <ctime>
+#include "utility.h"
 
+#include <ctime>
+#include <stdexcept>
+
+#include "GameAPI.h"
+#include "GameData.h"
+#include "GameProcess.h"
+
+
+// From JIP
 memcpy_t MemCopy = memcpy, MemMove = memmove;
 
+// From JIP
+const double
+kDblZero = 0,
+kDblPI = 3.141592653589793,
+kDblPIx2 = 6.283185307179586,
+kDblPIx3d2 = 4.71238898038469,
+kDblPId2 = 1.5707963267948966,
+kDblPId4 = 0.7853981633974483,
+kDblPId6 = 0.5235987755982989,
+kDblPId12 = 0.26179938779914946,
+kDbl2dPI = 0.6366197723675814,
+kDbl4dPI = 1.2732395447351628,
+kDblTanPId6 = 0.5773502691896257,
+kDblTanPId12 = 0.2679491924311227,
+kDblPId180 = 0.017453292519943295;
 
-// Some stuff belongs to NVSE, some to JIP LN, some to JG...
+// From JIP
+const float
+kFltZero = 0.0F,
+kFltHalf = 0.5F,
+kFltOne = 1.0F,
+kFltTwo = 2.0F,
+kFltFour = 4.0F,
+kFltSix = 6.0F,
+kFlt10 = 10.0F,
+kFlt100 = 100.0F,
+kFlt2048 = 2048.0F,
+kFlt4096 = 4096.0F,
+kFlt10000 = 10000.0F,
+kFlt12288 = 12288.0F,
+kFlt40000 = 40000.0F,
+kFltMax = FLT_MAX;
 
-
+// From JG
 void LightCS::Enter()
 {
 	UInt32 threadID = GetCurrentThreadId();
@@ -1208,7 +1245,7 @@ UInt32 __fastcall HexToUInt(const char *str)
 }
 
 
-//Begin JIP string / char stuff
+//===Begin JIP string / char stuff
 
 alignas(16) const UInt8 kLwrCaseConverter[] =
 {
@@ -1257,116 +1294,16 @@ __declspec(noinline) char* GetStrArgBuffer()
 	return s_strBuffer;
 }
 
-//End JIP string/char stuff
+//===End JIP string/char stuff
+
+
+//===Begin JIP File stuff
 
 bool __fastcall FileExists(const char *path)
 {
 	DWORD attr = GetFileAttributes(path);
 	return (attr != INVALID_FILE_ATTRIBUTES) && !(attr & FILE_ATTRIBUTE_DIRECTORY);
 }
-
-bool FileStream::Open(const char *filePath)
-{
-	theFile = CreateFile(filePath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (theFile == INVALID_HANDLE_VALUE)
-		return false;
-	streamLength = GetFileSize(theFile, NULL);
-	return true;
-}
-
-bool FileStream::OpenAt(const char *filePath, UInt32 inOffset)
-{
-	theFile = CreateFile(filePath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (theFile == INVALID_HANDLE_VALUE)
-		return false;
-	streamLength = GetFileSize(theFile, NULL);
-	streamOffset = inOffset;
-	if (streamOffset >= streamLength)
-	{
-		Close();
-		return false;
-	}
-	if (streamOffset)
-		SetFilePointer(theFile, streamOffset, NULL, FILE_BEGIN);
-	return true;
-}
-
-bool FileStream::OpenWrite(const char *filePath)
-{
-	theFile = CreateFile(filePath, GENERIC_WRITE, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (theFile == INVALID_HANDLE_VALUE)
-		return false;
-	streamOffset = streamLength = GetFileSize(theFile, NULL);
-	SetFilePointer(theFile, streamLength, NULL, FILE_BEGIN);
-	return true;
-}
-
-bool FileStream::Create(const char *filePath)
-{
-	theFile = CreateFile(filePath, GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-	return theFile != INVALID_HANDLE_VALUE;
-}
-
-bool FileStream::OpenWriteEx(char *filePath, bool append)
-{
-	MakeAllDirs(filePath);
-	if (append)
-	{
-		if (!OpenWrite(filePath))
-			return false;
-		if (streamLength)
-		{
-			char newLn = '\n';
-			WriteBuf(&newLn, 1);
-		}
-	}
-	else if (!Create(filePath))
-		return false;
-	return true;
-}
-
-void FileStream::SetOffset(UInt32 inOffset)
-{
-	if (inOffset > streamLength)
-		streamOffset = streamLength;
-	else streamOffset = inOffset;
-	SetFilePointer(theFile, streamOffset, NULL, FILE_BEGIN);
-}
-
-void FileStream::ReadBuf(void *outData, UInt32 inLength)
-{
-	UInt32 bytesRead;
-	ReadFile(theFile, outData, inLength, &bytesRead, NULL);
-	streamOffset += bytesRead;
-}
-
-void FileStream::WriteBuf(const void *inData, UInt32 inLength)
-{
-	if (streamOffset > streamLength)
-		SetEndOfFile(theFile);
-	UInt32 bytesWritten;
-	WriteFile(theFile, inData, inLength, &bytesWritten, NULL);
-	streamOffset += bytesWritten;
-	if (streamLength < streamOffset)
-		streamLength = streamOffset;
-}
-
-void FileStream::MakeAllDirs(char *fullPath)
-{
-	char *traverse = fullPath, curr;
-	while (curr = *traverse)
-	{
-		if ((curr == '\\') || (curr == '/'))
-		{
-			*traverse = 0;
-			CreateDirectory(fullPath, NULL);
-			*traverse = '\\';
-		}
-		traverse++;
-	}
-}
-
-//Begin JIP FileStream stuff
 
 bool FileStreamJIP::Open(const char* filePath)
 {
@@ -1474,51 +1411,7 @@ void FileStreamJIP::MakeAllDirs(char* fullPath)
 	}
 }
 
-//End JIP stuff
-
-LineIterator::LineIterator(const char *filePath, char *buffer)
-{
-	dataPtr = buffer;
-	FileStream sourceFile;
-	if (!sourceFile.Open(filePath))
-	{
-		*dataPtr = 3;
-		return;
-	}
-	UInt32 length = sourceFile.GetLength();
-	sourceFile.ReadBuf(dataPtr, length);
-	*(UInt16*)(dataPtr + length) = 0x300;
-	UInt8 data;
-	while (data = *buffer)
-	{
-		if ((data == '\n') || (data == '\r'))
-			*buffer = 0;
-		buffer++;
-	}
-	while (!*dataPtr)
-		dataPtr++;
-}
-
-void LineIterator::Next()
-{
-	while (*dataPtr)
-		dataPtr++;
-	while (!*dataPtr)
-		dataPtr++;
-}
-
-bool FileToBuffer(const char *filePath, char *buffer)
-{
-	FileStream srcFile;
-	if (!srcFile.Open(filePath)) return false;
-	UInt32 length = srcFile.GetLength();
-	if (!length) return false;
-	if (length > kMaxMessageLength)
-		length = kMaxMessageLength;
-	srcFile.ReadBuf(buffer, length);
-	buffer[length] = 0;
-	return true;
-}
+//===End JIP File stuff
 
 void __fastcall GetTimeStamp(char *buffer)
 {
@@ -1602,5 +1495,144 @@ __declspec(naked) UInt8* __fastcall GetAuxBuffer(AuxBuffer& buffer, UInt32 reqSi
 			pop		ecx
 			mov[ecx], eax
 			retn
+	}
+}
+
+// From kNVSE
+inline std::string GetCurPath()
+{
+	char path[MAX_PATH];
+	GetCurrentDirectory(MAX_PATH, path);
+	return path;
+}
+
+// From kNVSE
+inline int HexStringToInt(const std::string& str)
+{
+	char* p;
+	const auto id = strtoul(str.c_str(), &p, 16);
+	if (*p == 0)
+		return id;
+	return -1;
+}
+
+// From kNVSE
+inline void Log(const std::string& msg) 
+{
+	_MESSAGE(msg.c_str());
+}
+
+// Copied from kNVSE (https://github.com/korri123/kNVSE/blob/master/nvse_plugin_example/commands_animation.cpp).
+TESForm* StringToForm_Subroutine(const std::string& modName, const std::string& formIdStr)
+{
+	const auto* mod = DataHandler::Get()->LookupModByName(modName.c_str());
+#if _DEBUG
+	if (!mod)
+	{
+		Log("TryConvertStrToForm - Mod name " + modName + " was not found");
+	}
+#endif
+	auto formId = HexStringToInt(formIdStr);
+#if _DEBUG
+	if (formId == -1)
+	{
+		Log("TryConvertStrToForm - FormID formatted, got " + formIdStr);
+	}
+#endif
+	formId = (mod->modIndex << 24) + (formId & 0x00FFFFFF);
+	auto* form = LookupFormByID(formId);
+#if _DEBUG
+	if (!form)
+	{
+		Log(FormatString("TryConvertStrToForm - Form %X was not found", formId));
+	}
+#endif
+	return form;
+}
+
+inline double TryConvertStrToDouble(std::string const& str)
+{
+	double val = NAN;
+	try
+	{
+		val = stod(str);
+	}
+	catch (const std::invalid_argument& ia)
+	{
+		_MESSAGE("Conversion of Str to Double failed (IA): %s", ia.what());
+	}
+	catch (const std::out_of_range& oor)
+	{
+		_MESSAGE("Conversion of Str to Double failed (OOR): %s", oor.what());
+	}
+	return val;
+}
+
+// Copies after JIP's StringToRef().
+TESForm* __fastcall StringToForm(const std::string& str)  //calls upon _Subroutine
+{
+	// Expected input example: "@FalloutNV.esm:135F19"
+	const std::size_t posOfSeparator = str.find(':');
+	const std::string modStr = str.substr(0, posOfSeparator);  // From "@FalloutNV.esm:135F19", grab "FalloutNV.esm"
+	const std::string formIdStr = str.substr(posOfSeparator + 1);  // From "@FalloutNV.esm:135F19", grab "135F19"
+	return StringToForm_Subroutine(modStr, formIdStr);
+}
+
+
+#if 0
+// Copies from JIP's CreateForType()
+ArrayElementR __fastcall ConvertStrToElem(std::string dataStr)
+{
+	ArrayElementR result;
+	switch (dataStr[0])
+	{
+	case '@':  // Form
+		result = StringToForm(dataStr);  // can pass null forms
+		break;
+
+	default:  // String - number case is ignored, since it is handled beforehand.
+		result = dataStr.c_str();
+	}
+	return result;
+}
+#endif
+
+bool AlchemyItem::IsPoison()
+{
+	EffectItem* effItem;
+	EffectSetting* effSetting = NULL;
+	ListNode<EffectItem>* iter = magicItem.list.list.Head();
+	do
+	{
+		if (!(effItem = iter->data)) continue;
+		effSetting = effItem->setting;
+		if (effSetting && !(effSetting->effectFlags & 4)) return false;
+	} while (iter = iter->next);
+	return effSetting != NULL;
+}
+
+TESActorBase* Actor::GetActorBase()
+{
+	ExtraLeveledCreature* xLvlCre = GetExtraType(extraDataList, LeveledCreature);
+	return (xLvlCre && xLvlCre->form) ? (TESActorBase*)xLvlCre->form : (TESActorBase*)baseForm;
+}
+
+
+
+__declspec(naked) TESObjectCELL* TESObjectREFR::GetParentCell()
+{
+	__asm
+	{
+		mov		eax, [ecx + 0x40]
+		test	eax, eax
+		jnz		done
+		push	kExtraData_PersistentCell
+		add		ecx, 0x44
+		call	BaseExtraList::GetByType
+		test	eax, eax
+		jz		done
+		mov		eax, [eax + 0xC]
+		done:
+		retn
 	}
 }

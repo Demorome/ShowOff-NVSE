@@ -96,38 +96,44 @@
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\JSON_Library;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\SimpleINILibrary;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\internal;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\functions;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\Events;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug GECK|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\JSON_Library;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\SimpleINILibrary;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\internal;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\functions;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\Events;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\JSON_Library;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\SimpleINILibrary;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\internal;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\functions;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\Events;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release GECK|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\JSON_Library;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\SimpleINILibrary;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\internal;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\functions;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\Events;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug ng|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\JSON_Library;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\SimpleINILibrary;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\internal;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\functions;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\Events;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release ng|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\JSON_Library;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\SimpleINILibrary;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\internal;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\functions;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\Events;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;$(SolutionDir)\..\nvse;$(SolutionDir)\..\nvse\nvse;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;NVSE_PLUGIN_EXAMPLE_EXPORTS;RUNTIME_VERSION=0x040020D0;RUNTIME;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MinimalRebuild>true</MinimalRebuild>
+      <MinimalRebuild>false</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader />
@@ -305,6 +311,8 @@
     <ClCompile Include="..\nvse\GameTypes.cpp" />
     <ClCompile Include="..\nvse\SafeWrite.cpp" />
     <ClCompile Include="..\nvse\Utilities.cpp" />
+    <ClCompile Include="functions\ShowOff_fn_Files.cpp" />
+    <ClCompile Include="Hooks.cpp" />
     <ClCompile Include="internal\containers.cpp" />
     <ClCompile Include="internal\memory_pool.cpp" />
     <ClCompile Include="internal\utility.cpp" />
@@ -342,18 +350,18 @@
     <ClInclude Include="functions\ShowOff_fn_Files.h" />
     <ClInclude Include="functions\ShowOff_fn_Misc.h" />
     <ClInclude Include="functions\ShowOff_fn_Settings.h" />
+    <ClInclude Include="Hooks.h" />
     <ClInclude Include="internal\containers.h" />
     <ClInclude Include="internal\decoding.h" />
     <ClInclude Include="internal\havok.h" />
     <ClInclude Include="internal\jip_nvse.h" />
-    <ClInclude Include="internal\Johnnnny Guitarrrrr.h" />
-    <ClInclude Include="internal\json.h" />
     <ClInclude Include="internal\memory_pool.h" />
     <ClInclude Include="internal\netimmerse.h" />
     <ClInclude Include="internal\NiPoint.h" />
     <ClInclude Include="internal\serialization.h" />
     <ClInclude Include="internal\StewieMagic.h" />
     <ClInclude Include="internal\utility.h" />
+    <ClInclude Include="JSON_Library\json.h" />
     <ClInclude Include="settings.h" />
     <ClInclude Include="ShowOffNVSE.h" />
     <ClInclude Include="SimpleINILibrary\SimpleIni.h" />

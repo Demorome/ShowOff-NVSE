@@ -12,3 +12,11 @@ void __stdcall WriteRelCall(UInt32 jumpSrc, UInt32 jumpTgt);
 // 6 bytes
 void WriteRelJnz(UInt32 jumpSrc, UInt32 jumpTgt);
 void WriteRelJle(UInt32 jumpSrc, UInt32 jumpTgt);
+
+static void PatchMemoryNop(ULONG_PTR Address, SIZE_T Size);
+void NopFunctionCall(UInt32 addr, UInt32 numArgs);
+void NopFunctionCall(UInt32 addr);
+void NopIndirectCall(UInt32 addr, UInt32 numArgs);
+void NopIndirectCall(UInt32 addr);
+
+UInt32 GetRelJumpAddr(UInt32 jumpSrc);

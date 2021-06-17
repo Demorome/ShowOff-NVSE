@@ -1,9 +1,10 @@
 #pragma once
 
-#include "internal/utility.h"
-#include "internal/memory_pool.h"
+#include "utility.h"
+#include "memory_pool.h"
 
-// Some container code was taken directly from JIP.
+// Some container code was ripped from JIP.
+
 // Below definitions are used by JIP
 #define MAP_DEFAULT_ALLOC			8
 #define MAP_DEFAULT_BUCKET_COUNT	8
@@ -1140,7 +1141,7 @@ template <typename T_Data> class Vector  // made by JIP.
 {
 	using Data_Arg = std::conditional_t<std::is_scalar_v<T_Data>, T_Data, T_Data&>;
 
-	T_Data* data;		// 00
+	T_Data		*data;		// 00
 	UInt32		numItems;	// 04
 	UInt32		numAlloc;	// 08
 

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "nvse/CommandTable.h"
-#include "nvse/Utilities.h"
+#include "CommandTable.h"
+#include "Utilities.h"
 
 #if RUNTIME
 #include "GameAPI.h"
@@ -438,6 +438,9 @@ struct NVSEArrayVarInterface
 };
 typedef NVSEArrayVarInterface::Array NVSEArrayVar;
 typedef NVSEArrayVarInterface::Element NVSEArrayElement;
+//From JIP:
+typedef NVSEArrayVarInterface::ElementR ArrayElementR;
+typedef NVSEArrayVarInterface::ElementL ArrayElementL;
 
 enum Array_Types
 {

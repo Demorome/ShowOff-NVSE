@@ -160,6 +160,19 @@ public:
 
 std::string FormatString(const char* fmt, ...);
 
+
+// Definitions below are from JIP
+#define GAME_HEAP_ALLOC __asm mov ecx, 0x11F6238 CALL_EAX(0xAA3E40)
+#define GAME_HEAP_FREE  __asm mov ecx, 0x11F6238 CALL_EAX(0xAA4060)
+
+#define GameHeapAlloc(size) ThisStdCall<void*>(0xAA3E40, (void*)0x11F6238, size)
+#define GameHeapFree(ptr) ThisStdCall<void*>(0xAA4060, (void*)0x11F6238, ptr)
+
+#define GetRandomInt(n) ThisStdCall<SInt32, SInt32>(0xAA5230, (void*)0x11C4180, n)
+#define GetRandomIntInRange(iMin, iMax) (GetRandomInt(iMax - iMin) + iMin) 
+
+
+
 // thread-safe template versions of ThisStdCall()
 
 template <typename T_Ret = void, typename ...Args>
