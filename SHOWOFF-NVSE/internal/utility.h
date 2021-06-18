@@ -1,19 +1,19 @@
 #pragma once
 #include <string>
 
-//#include "GameAPI.h"
-//#include "ShowOffNVSE.h"
+//#include "PluginAPI.h"
 
 // Inclusions below fuck up the compiler :thonk: :kms:
 //#include "GameAPI.h"
 //#include "GameData.h"
 //#include "PluginAPI.h"
 //#include "GameForms.h"
-
-// Check out SO_Utilities if you need to use stuff from those files, like TESForm.
+//#include "ShowOffNVSE.h"
 
 
 class TESForm;
+
+
 // From JIP
 extern const double
 kDblZero,

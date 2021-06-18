@@ -2,7 +2,7 @@
 
 #include "Utilities.h"
 #include "NiTypes.h"
-#include "internal/utility.h"
+#include "utility.h"
 #include <functional>
 
 // 8

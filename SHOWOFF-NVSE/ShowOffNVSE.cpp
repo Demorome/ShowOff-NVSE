@@ -88,10 +88,12 @@ const char* (*GetStringVar)(UInt32 stringID);
 NVSEMessagingInterface* g_msg = nullptr;
 NVSEScriptInterface* g_scriptInterface = nullptr;
 NVSECommandTableInterface* g_commandInterface = nullptr;
+#if 0
 typedef NVSEArrayVarInterface::Array NVSEArrayVar;
 typedef NVSEArrayVarInterface::Element NVSEArrayElement;
 typedef NVSEArrayVarInterface::ElementR ArrayElementR; //From JIP
 typedef NVSEArrayVarInterface::ElementL ArrayElementL; //From JIP
+#endif
 
 
 //Singletons

@@ -26,7 +26,7 @@ DEFINE_CMD_ALT_COND_PLUGIN(GetEquippedItemsAsBitMask, , , 1, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetEquippedWeaponType, , , 1, NULL);
 DEFINE_COMMAND_PLUGIN(ClearShowoffSavedData, "", 0, 1, kParams_OneInt);
 DEFINE_CMD_ALT_COND_PLUGIN(GetBaseEquippedWeight, , , 1, kParams_TwoOptionalInts);
-DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedEquippedWeight, , "Accounts for perk effects + weapon mods.", 1, kParams_TwoOptionalInts);
+DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedEquippedWeight, , "Accounts for perk effects + weapon mods.", 1, kParams_OneOptionalFloat_OneOptionalInt);
 DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedMaxCarryWeight, GetMaxCarryWeightPerkModified, "Accounts for GetMaxCarryWeight perk entry.", 1, NULL);
 
 

@@ -3,7 +3,6 @@
 #include <ctime>
 #include <stdexcept>
 
-#include "GameAPI.h"
 #include "GameData.h"
 #include "GameProcess.h"
 
@@ -1579,7 +1578,7 @@ TESForm* __fastcall StringToForm(const std::string& str)  //calls upon _Subrouti
 }
 
 
-#if 0
+#if 0 
 // Copies from JIP's CreateForType()
 ArrayElementR __fastcall ConvertStrToElem(std::string dataStr)
 {
