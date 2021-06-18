@@ -314,7 +314,10 @@
     <ClCompile Include="functions\ShowOff_fn_Files.cpp" />
     <ClCompile Include="Hooks.cpp" />
     <ClCompile Include="internal\containers.cpp" />
+    <ClCompile Include="internal\decoding.cpp" />
+    <ClCompile Include="internal\jip_nvse.cpp" />
     <ClCompile Include="internal\memory_pool.cpp" />
+    <ClCompile Include="internal\StewieMagic.cpp" />
     <ClCompile Include="internal\utility.cpp" />
     <ClCompile Include="ShowOffNVSE.cpp" />
   </ItemGroup>

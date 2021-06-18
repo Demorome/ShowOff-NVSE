@@ -72,21 +72,6 @@ void WriteRelJle(UInt32 jumpSrc, UInt32 jumpTgt)
 	SafeWrite32(jumpSrc + 2, jumpTgt - jumpSrc - 2 - 4);
 }
 
-// Size is the amount of bytes until the next instruction.
-// Credits: Copied from JG, likely made thanks to lStewieAl.
-static void PatchMemoryNop(ULONG_PTR Address, SIZE_T Size)
-{
-	DWORD d = 0;
-	VirtualProtect((LPVOID)Address, Size, PAGE_EXECUTE_READWRITE, &d);
-
-	for (SIZE_T i = 0; i < Size; i++)
-		*(volatile BYTE*)(Address + i) = 0x90; //0x90 == opcode for NOP
-
-	VirtualProtect((LPVOID)Address, Size, d, &d);
-
-	FlushInstructionCache(GetCurrentProcess(), (LPVOID)Address, Size);
-}
-
 // numArgs does not factor in *this objects.
 // Taken from lStewieAl.
 void NopFunctionCall(UInt32 addr, UInt32 numArgs)

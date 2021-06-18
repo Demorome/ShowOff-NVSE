@@ -1,7 +1,8 @@
 #pragma once
 #include <string>
 
-#include "PluginAPI.h"
+//#include "GameAPI.h"
+//#include "ShowOffNVSE.h"
 
 // Inclusions below fuck up the compiler :thonk: :kms:
 //#include "GameAPI.h"
@@ -12,6 +13,7 @@
 // Check out SO_Utilities if you need to use stuff from those files, like TESForm.
 
 
+class TESForm;
 // From JIP
 extern const double
 kDblZero,
@@ -337,4 +339,6 @@ TESForm* StringToForm_Subroutine(const std::string& modName, const std::string& 
 
 TESForm* __fastcall StringToForm(const std::string& str);  //calls upon _Subroutine
 
+#if 0  //todo: deal with ArrayElementR
 ArrayElementR __fastcall ConvertStrToElem(std::string dataStr);
+#endif

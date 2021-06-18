@@ -1,4 +1,5 @@
 #pragma once
+#include "netimmerse.h"
 
 // Partly from JG, and JIP.
 

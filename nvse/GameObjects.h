@@ -3,6 +3,7 @@
 #include "GameForms.h"
 #include "GameBSExtraData.h"
 #include "GameExtraData.h"
+#include "havok.h"
 
 struct ScriptEventList;
 class ActiveEffect;

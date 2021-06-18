@@ -4,7 +4,7 @@
 #include "GameObjects.h"
 #include "CommandTable.h"
 #include "GameRTTI.h"
-#include "internal/utility.h"
+#include "utility.h"
 
 //UInt32 GetDeclaredVariableType(const char* varName, const char* scriptText)
 //{

@@ -10,9 +10,9 @@
 #include "ParamInfos.h"
 #include "PluginAPI.h"
 //#include "ShowOffNVSE.h"
-#include "SO_Utilities.h"
 
 
+#if 0
 
 DEFINE_COMMAND_PLUGIN(ReadArrayFromJSON, , 0, 3, kParams_TwoStrings_OneOptionalInt);
 
@@ -153,3 +153,5 @@ bool Cmd_ReadArrayFromJSON_Execute(COMMAND_ARGS)
 	return true;
 }
 //#endif
+
+#endif

@@ -60,6 +60,15 @@
       <Filter>functions</Filter>
     </ClCompile>
     <ClCompile Include="Hooks.cpp" />
+    <ClCompile Include="internal\StewieMagic.cpp">
+      <Filter>internal</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\jip_nvse.cpp">
+      <Filter>internal</Filter>
+    </ClCompile>
+    <ClCompile Include="internal\decoding.cpp">
+      <Filter>internal</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="functions\ShowOff_fn_Misc.h">

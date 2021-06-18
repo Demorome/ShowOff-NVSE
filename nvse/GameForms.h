@@ -3,13 +3,12 @@
 #include "Utilities.h"
 #include "GameTypes.h"
 #include "GameBSExtraData.h"
-#include "internal/containers.h"
-#include "internal/netimmerse.h"
-#include "internal/havok.h"
+#include "containers.h"
+#include "netimmerse.h"
 #include <cstdint>
+//#include "havok.h"
 
-extern void Console_Print(const char* fmt, ...);
-
+void Console_Print(const char* fmt, ...);
 
 enum FormType
 {
