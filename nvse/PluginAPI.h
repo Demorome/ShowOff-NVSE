@@ -4,7 +4,7 @@
 #include "Utilities.h"
 
 #if RUNTIME
-#include "GameAPI.h"
+//#include "GameAPI.h"
 #endif
 
 struct CommandInfo;

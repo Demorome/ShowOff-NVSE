@@ -1,7 +1,8 @@
 #pragma once
 #include <string>
 
-//#include "PluginAPI.h"
+#include "PluginAPI.h"
+
 
 // Inclusions below fuck up the compiler :thonk: :kms:
 //#include "GameAPI.h"
@@ -339,6 +340,6 @@ TESForm* StringToForm_Subroutine(const std::string& modName, const std::string& 
 
 TESForm* __fastcall StringToForm(const std::string& str);  //calls upon _Subroutine
 
-#if 0  //todo: deal with ArrayElementR
+//#if 0  //todo: deal with ArrayElementR
 ArrayElementR __fastcall ConvertStrToElem(std::string dataStr);
-#endif
+//#endif

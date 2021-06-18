@@ -3,6 +3,7 @@
 #include "GameTiles.h"
 #include "GameTypes.h"
 
+class TESNPC;
 class Menu;
 class SceneGraph;
 class FOPipboyManager;
