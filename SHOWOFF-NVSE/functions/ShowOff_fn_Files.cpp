@@ -88,11 +88,9 @@ bool Cmd_ReadArrayFromJSON_Execute(COMMAND_ARGS)
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &json_path, json_key_path, &forceArrayType)) return true;
 
 	ReplaceChr(json_path, '/', '\\');
-
-	std::string JSON_Path = json_path;
-	JSON_Path = GetCurPath();// +JSON_Path;
-	
+	std::string JSON_Path = GetCurPath() + json_path;
 	std::string keyPathStr = json_key_path;
+	
 	NVSEArrayVar* resArr = nullptr;  //assign this value as result.
 	try
 	{
