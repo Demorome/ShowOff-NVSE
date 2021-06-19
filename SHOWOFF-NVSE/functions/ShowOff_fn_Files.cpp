@@ -37,19 +37,17 @@ ArrayElementR Read_JSON_As_NVSE_Elem(json::const_reference json_ref, bool forceA
 	for (auto& iter : json_ref.items())
 	{
 		//-----Handle Values
-		ArrayElementR elem = Read_JSON_As_NVSE_Elem(iter.value(), forceArrayType, scriptObj);  // Recursion!
+		ArrayElementR elem = Read_JSON_As_NVSE_Elem(iter.value(), forceArrayType, scriptObj);  // Recursion! todo: fix infinite recursion
 		elems.Append(elem);
 
 		//-----Handle Keys
 		if (forceArrayType) continue;  // Array-type array will have its keys automatically populated; do nothing.
-
 		std::string strKey = iter.key();
 		if (strKey.empty())  // guaranteed if "json_ref" is primitive (number, string, etc). Other cases?
 		{
 			Log("Read_JSON_As_NVSE_Elem() - ERROR - Key string was somehow null.");
 			return json_as_elem;  // return invalid elem (would otherwise have to deal with Keys & Elems size mismatch).
 		}
-
 		strMapKeys.emplace_back(strKey);
 	}
 
@@ -81,14 +79,14 @@ ArrayElementR Read_JSON_As_NVSE_Elem(json::const_reference json_ref, bool forceA
 bool Cmd_ReadArrayFromJSON_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-
 	char json_path[MAX_PATH];  // relative to "Fallout New Vegas" folder.
 	char* json_key_path = GetStrArgBuffer();  // the path in the JSON hierarchy
 	UInt32 forceArrayType = false;  // Optional, forces the returned arrays to be "array" type (instead of sometimes appearing as "StringMap", such as in the case of a JSON Object).
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &json_path, json_key_path, &forceArrayType)) return true;
 
 	ReplaceChr(json_path, '/', '\\');
-	std::string JSON_Path = GetCurPath() + json_path;
+	std::string JSON_Path = GetCurPath() + "\\" + json_path;
+	if (!std::filesystem::exists(JSON_Path)) return true;
 	std::string keyPathStr = json_key_path;
 	
 	NVSEArrayVar* resArr = nullptr;  //assign this value as result.
@@ -99,7 +97,7 @@ bool Cmd_ReadArrayFromJSON_Execute(COMMAND_ARGS)
 		i >> j;
 		try
 		{
-			json::const_reference ref = j.at(json::json_pointer(keyPathStr));
+			json::const_reference ref = j.at(json::json_pointer(keyPathStr));  //todo: figure out crashes here
 			ArrayElementR elem;
 			if (Get_JSON_Val_As_Basic_NVSE_Elem(ref, elem))
 			{
@@ -109,7 +107,7 @@ bool Cmd_ReadArrayFromJSON_Execute(COMMAND_ARGS)
 			else if (ref.is_array() || ref.is_object())
 			{
 				// Port the contents of the JSON ref to an NVSE array.
-				resArr = Read_JSON_As_NVSE_Elem(ref, forceArrayType, scriptObj).Array();
+				resArr = Read_JSON_As_NVSE_Elem(ref, forceArrayType, scriptObj).Array();  //todo: figure out stack overflow crashes here
 			}
 		}
 		catch (json::out_of_range& e)
