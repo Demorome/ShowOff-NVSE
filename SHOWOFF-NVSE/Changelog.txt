@@ -1,0 +1,15 @@
+﻿
+This file is here just so I'm reminded to keep track of changes as I do em.
+
+
+//===v1.00 - too lazy to add right now
+
+//===v1.05 - same deal
+
+
+//===v1.10
+
+-Minor refactorings
+-JSON functions:
+???
+-Fixed GetCalculatedEquippedWeight expecting an int "minWeight" instead of a float.

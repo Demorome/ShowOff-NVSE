@@ -338,9 +338,11 @@
     <ClInclude Include="..\nvse\GameTiles.h" />
     <ClInclude Include="..\nvse\GameTypes.h" />
     <ClInclude Include="..\nvse\GameUI.h" />
+    <ClInclude Include="..\nvse\ParamInfos.h" />
     <ClInclude Include="..\nvse\PluginAPI.h" />
     <ClInclude Include="..\nvse\SafeWrite.h" />
     <ClInclude Include="..\nvse\Utilities.h" />
+    <ClInclude Include="Changelog.txt" />
     <ClInclude Include="Events\CustomEventFilters.h" />
     <ClInclude Include="Events\JohnnyEventPredefinitions.h" />
     <ClInclude Include="Events\ShowOffEvents.h" />

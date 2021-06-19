@@ -1498,7 +1498,7 @@ __declspec(naked) UInt8* __fastcall GetAuxBuffer(AuxBuffer& buffer, UInt32 reqSi
 }
 
 // From kNVSE
-inline std::string GetCurPath()
+std::string GetCurPath()
 {
 	char path[MAX_PATH];
 	GetCurrentDirectory(MAX_PATH, path);
@@ -1506,7 +1506,7 @@ inline std::string GetCurPath()
 }
 
 // From kNVSE
-inline int HexStringToInt(const std::string& str)
+int HexStringToInt(const std::string& str)
 {
 	char* p;
 	const auto id = strtoul(str.c_str(), &p, 16);
@@ -1516,7 +1516,7 @@ inline int HexStringToInt(const std::string& str)
 }
 
 // From kNVSE
-inline void Log(const std::string& msg) 
+void Log(const std::string& msg) 
 {
 	_MESSAGE(msg.c_str());
 }
@@ -1549,7 +1549,7 @@ TESForm* StringToForm_Subroutine(const std::string& modName, const std::string& 
 	return form;
 }
 
-inline double TryConvertStrToDouble(std::string const& str)
+double TryConvertStrToDouble(std::string const& str)
 {
 	double val = NAN;
 	try
@@ -1578,7 +1578,6 @@ TESForm* __fastcall StringToForm(const std::string& str)  //calls upon _Subrouti
 }
 
 
-#if 0 
 // Copies from JIP's CreateForType()
 ArrayElementR __fastcall ConvertStrToElem(std::string dataStr)
 {
@@ -1594,7 +1593,6 @@ ArrayElementR __fastcall ConvertStrToElem(std::string dataStr)
 	}
 	return result;
 }
-#endif
 
 bool AlchemyItem::IsPoison()
 {

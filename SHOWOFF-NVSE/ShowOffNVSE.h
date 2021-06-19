@@ -2,9 +2,9 @@
 
 #include <atomic>
 
+#include "ParamInfos.h"
 #include "PluginAPI.h"
 #include "GameUI.h" 
-
 #include "common/ICriticalSection.h"
 #include "GameData.h"
 #include "decoding.h"

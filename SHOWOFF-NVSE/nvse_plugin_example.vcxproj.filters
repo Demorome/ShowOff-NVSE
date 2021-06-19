@@ -203,6 +203,10 @@
       <Filter>JSON Library</Filter>
     </ClInclude>
     <ClInclude Include="Hooks.h" />
+    <ClInclude Include="Changelog.txt" />
+    <ClInclude Include="..\nvse\ParamInfos.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

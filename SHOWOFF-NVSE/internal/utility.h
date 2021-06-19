@@ -315,14 +315,13 @@ UInt8* __fastcall GetAuxBuffer(AuxBuffer& buffer, UInt32 reqSize);
 
 
 // From kNVSE
-inline void Log(const std::string& msg);
-
-// From kNVSE
-inline int HexStringToInt(const std::string& str);
+void Log(const std::string& msg);
+int HexStringToInt(const std::string& str);
+std::string GetCurPath();
 
 #if 0
 // From kNVSE
-inline void DebugPrint(const std::string& str)
+void DebugPrint(const std::string& str)
 {
 #if _DEBUG
 	Console_Print(str.c_str());
@@ -331,15 +330,29 @@ inline void DebugPrint(const std::string& str)
 }
 #endif
 
-// From kNVSE
-inline std::string GetCurPath();
-
-inline double TryConvertStrToDouble(std::string const& str);
-
+double TryConvertStrToDouble(std::string const& str);
 TESForm* StringToForm_Subroutine(const std::string& modName, const std::string& formIdStr);
-
 TESForm* __fastcall StringToForm(const std::string& str);  //calls upon _Subroutine
-
-//#if 0  //todo: deal with ArrayElementR
 ArrayElementR __fastcall ConvertStrToElem(std::string dataStr);
-//#endif
+
+//	Assign rhs to lhs, bypassing operator=
+template <typename T> __forceinline void RawAssign(const T& lhs, const T& rhs)
+{
+	struct Helper
+	{
+		UInt8	bytes[sizeof(T)];
+	};
+	*(Helper*)&lhs = *(Helper*)&rhs;
+}
+
+//	Swap lhs and rhs, bypassing operator=
+template <typename T> __forceinline void RawSwap(const T& lhs, const T& rhs)
+{
+	struct Helper
+	{
+		UInt8	bytes[sizeof(T)];
+	}
+	temp = *(Helper*)&lhs;
+	*(Helper*)&lhs = *(Helper*)&rhs;
+	*(Helper*)&rhs = temp;
+}

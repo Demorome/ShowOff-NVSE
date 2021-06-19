@@ -269,7 +269,7 @@ bool Cmd_ModChallengeProgress_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(CompleteChallenge, "Completes a challenge.", 0, 1, kParams_Tomm_OneForm)
+DEFINE_COMMAND_PLUGIN(CompleteChallenge, "Completes a challenge.", 0, 1, kParams_OneForm)
 bool Cmd_CompleteChallenge_Execute(COMMAND_ARGS)
 {
 	TESChallenge* challenge;

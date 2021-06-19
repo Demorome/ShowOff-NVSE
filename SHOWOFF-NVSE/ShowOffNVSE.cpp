@@ -7,17 +7,11 @@
 #include "settings.h"
 
 
-// From "internal/"
 #include "memory_pool.h"
 #include "containers.h"
 #include "internal/serialization.h"
 #include "jip_nvse.h"
 #include "StewieMagic.h" 
-
-#include "ParamInfos.h"
-//#include "GameObjects.h"
-#include "params.h"
-
 
 // Functions
 #include "functions/ShowOff_fn_Misc.h"
@@ -27,7 +21,7 @@
 #include "functions/ShowOff_fn_AuxVars.h" 
 #include "functions/ShowOff_fn_Actors.h"
 #include "functions/ShowOff_fn_Debug.h"
-//#include "functions/ShowOff_fn_Files.h"
+#include "functions/ShowOff_fn_Files.h"
 
 // Events
 #include "Events/JohnnyEventPredefinitions.h"
@@ -356,7 +350,7 @@ extern "C"
 #endif
 			
 			//HandleINIOptions();  //todo: overhaul INI options + add more before introducing to public
-			//HandleGameHooks();  //todo: re-add after refactoring is done
+			HandleGameHooks();
 			HandleEventHooks();
 		}
 
@@ -446,7 +440,7 @@ extern "C"
 		REG_CMD(SetShowOffOnCornerMessageEventHandler)
 
 
-		//REG_CMD_ARR(ReadArrayFromJSON)
+		REG_CMD_ARR(ReadArrayFromJSON)
 
 		
 		//REG_CMD_ARR(Ar_Init);
