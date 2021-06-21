@@ -4,6 +4,7 @@ DEFINE_COMMAND_ALT_PLUGIN(DumpFormList, FListDump, , 0, 3, kParams_OneFormList_O
 DEFINE_CMD_ALT_COND_PLUGIN(ConditionPrint, , "Returns 1, and prints a message to console. Meant for testing if previous conditions passed.", 0, NULL);
 DEFINE_COMMAND_PLUGIN(GetShowOffDebugMode, , 0, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SetShowOffDebugMode, "Set to 1 to enable debug prints for certain ShowOff functions.", 0, 1, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(IsBaseForm, , 0, 1, kParams_OneForm);
 
 
 bool Cmd_DumpFormList_Execute(COMMAND_ARGS)
@@ -11,8 +12,8 @@ bool Cmd_DumpFormList_Execute(COMMAND_ARGS)
 	BGSListForm* FList = nullptr;
 	char fileName[MAX_PATH] = "default";
 	UInt32 bAppend = 1;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &FList, &fileName, &bAppend) || !IS_TYPE(FList, BGSListForm
-	)) return true;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &FList, &fileName, &bAppend) 
+		|| !IS_TYPE(FList, BGSListForm)) return true;
 
 	if (strcmp(fileName, "default") == 0)  //if they are the same, i.e. filepathStr was not passed.
 	{
@@ -60,11 +61,22 @@ bool Cmd_SetShowOffDebugMode_Execute(COMMAND_ARGS)
 	return true;
 }
 
+bool Cmd_IsBaseForm_Execute(COMMAND_ARGS)
+{
+	*result = false;
+	TESForm* form;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form)) return true;
+	if (form && !IS_REFERENCE(form))
+	{
+		*result = true;
+	}
+	return true;
+}
+
 
 #if _DEBUG
 
 DEFINE_CMD_ALT_COND_PLUGIN(GetNVSEVersionFullAlt, , , 0, NULL);
-
 bool Cmd_GetNVSEVersionFullAlt_Execute(COMMAND_ARGS)
 {
 	*result = PACKED_NVSE_VERSION;

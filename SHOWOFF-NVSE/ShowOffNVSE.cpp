@@ -435,6 +435,7 @@ extern "C"
 		/*3CD3*/ REG_CMD(SetShowOffDebugMode)
 		/*3CD4*/ REG_CMD(UnequipItems)
 		/*3CD5*/ REG_CMD_ARR(GetEquippedItems)
+		/*3CD6*/ REG_CMD(IsBaseForm)
 
 
 
