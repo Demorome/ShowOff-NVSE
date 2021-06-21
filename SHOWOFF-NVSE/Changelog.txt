@@ -20,6 +20,8 @@ This file is here just so I'm reminded to keep track of changes as I do em.
 -New Functions:
 * SetShowOffDebugMode
 * GetShowOffDebugMode
+* UnequipItems
+* GetEquippedItems
 
 
 ******DON'T FORGET TO UPDATE THE PLUGIN VERSION BEFORE EVERY RELEASE*********

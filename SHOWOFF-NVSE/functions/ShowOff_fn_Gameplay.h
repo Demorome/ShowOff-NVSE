@@ -11,6 +11,8 @@ DEFINE_CMD_ALT_COND_PLUGIN(IsEquippedWeaponMelee, , "Returns 1 if the calling ac
 DEFINE_CMD_ALT_COND_PLUGIN(IsWeaponRanged, , "Returns 1 if the weapon's base form is one of the weapon types belonging to NON melee-range weapons.", 1, kParams_OneOptionalObjectID);
 DEFINE_CMD_ALT_COND_PLUGIN(IsEquippedWeaponRanged, , "Returns 1 if the calling actor's equipped weapon's base form is one of the weapon types belonging to NON melee-range weapons.", 1, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetChallengeProgress, , "Returns the progress made on a challenge.", 0, kParams_OneChallenge)
+DEFINE_COMMAND_PLUGIN(UnequipItems, , true, 4, kParams_FourOptionalInts);
+DEFINE_COMMAND_PLUGIN(GetEquippedItems, , true, 1, kParams_OneOptionalInt);
 
 
 bool Cmd_SetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
@@ -199,23 +201,40 @@ bool Cmd_GetChallengeProgress_Eval(COMMAND_ARGS_EVAL)
 	return true;
 }
 
-
-
-#ifdef _DEBUG
-
-DEFINE_COMMAND_PLUGIN(UnequipAllItems, , true, 4, kParams_FourOptionalInts);
-bool Cmd_UnequipAllItems_Execute(COMMAND_ARGS)
+//todo: Could use a lot more testing
+bool Cmd_UnequipItems_Execute(COMMAND_ARGS)
 {
 	UInt32 flags = 0, noEquip = 0, hideMessage = 0, triggerOnUnequip = 1;
 	if (!ExtractArgs(EXTRACT_ARGS, &flags, &noEquip, &hideMessage, &triggerOnUnequip) || NOT_ACTOR(thisObj)) return true;
 	auto eqItems = GetEquippedItemsData(thisObj, flags);
-	for (auto const &iter : eqItems)
+	for (auto const& iter : eqItems)
 	{
 		ExtraDataList* xData = triggerOnUnequip ? iter.pExtraData : nullptr;
 		((Actor*)thisObj)->UnequipItem(iter.pForm, 1, xData, 1, noEquip != 0, hideMessage != 0);
 	}
 	return true;
 }
+
+bool Cmd_GetEquippedItems_Execute(COMMAND_ARGS)
+{
+	UInt32 flags = 0;
+	*result = 0;
+	if (!ExtractArgs(EXTRACT_ARGS, &flags) || NOT_ACTOR(thisObj)) return true;
+	Vector<ArrayElementR> elems;
+	auto eqItems = GetEquippedItemsData(thisObj, flags);
+	for (auto const& iter : eqItems)
+	{
+		ArrayElementR elem = iter.pForm;
+		elems.Append(elem);
+	}
+	auto array = CreateArray(elems.Data(), elems.Size(), scriptObj);
+	AssignArrayResult(array, result);
+	return true;
+}
+
+
+
+#ifdef _DEBUG
 
 
 DEFINE_CMD_ALT_COND_PLUGIN(GetPCHasFastTravelOverride, , "Returns whether or not the player is restricted by EnableFastTravel", 0, NULL);

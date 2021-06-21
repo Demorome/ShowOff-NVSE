@@ -433,6 +433,10 @@ extern "C"
 		//========v1.10
 		/*3CD2*/ REG_CMD(GetShowOffDebugMode)
 		/*3CD3*/ REG_CMD(SetShowOffDebugMode)
+		/*3CD4*/ REG_CMD(UnequipItems)
+		/*3CD5*/ REG_CMD_ARR(GetEquippedItems)
+
+
 
 		//***Current Max OpCode: 0x3CDE (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
@@ -442,7 +446,7 @@ extern "C"
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 
-		REG_CMD(UnequipAllItems)
+		
 		REG_CMD(IsReferenceCloned)
 
 		
