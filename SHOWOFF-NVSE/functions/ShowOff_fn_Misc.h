@@ -1,33 +1,37 @@
 ﻿#pragma once
+
+#include <unordered_set>
+
 #include "GameRTTI.h"
+#include "Utilities.h"
 
 
 DEFINE_COMMAND_ALT_PLUGIN(ShowingOffDisable, ShowingOffDisableAltExCond2, "Does the same thing as vanilla Disable. For showing off!", 1, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_ALT_PLUGIN(ShowingOffEnable, ShowingOffEnableAltExCond2, "Does the same thing as vanilla Enable. For showing off!", 1, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_ALT_PLUGIN(ListAddList, AddFormListToFormList, "", 0, 3, kParams_TwoFormLists_OneOptionalIndex);
 DEFINE_COMMAND_PLUGIN(MessageExAltShowoff, , 0, 22, kParams_JIP_OneFloat_OneInt_OneFormatString);
-DEFINE_CMD_ALT_COND_PLUGIN(IsCornerMessageDisplayed, , "Returns 1/0 depending on if a corner message is displayed.", 0, NULL);
-DEFINE_CMD_ALT_COND_PLUGIN(GetNumQueuedCornerMessages, , , 0, NULL);
-DEFINE_CMD_ALT_COND_PLUGIN(IsAnimPlayingExCond, , "Same as IsAnimPlayingEx, but available as a condition. Had to cut the variationFlags filter.", 1, kParams_JIP_OneInt_OneOptionalInt);
+DEFINE_CMD_ALT_COND_PLUGIN(IsCornerMessageDisplayed, , "Returns 1/0 depending on if a corner message is displayed.", false, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(GetNumQueuedCornerMessages, , , false, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(IsAnimPlayingExCond, , "Same as IsAnimPlayingEx, but available as a condition. Had to cut the variationFlags filter.", true, kParams_JIP_OneInt_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetRadiationExtraData, , 1, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SetRadiationExtraData, , 1, 1, kParams_OneFloat);
-DEFINE_CMD_ALT_COND_PLUGIN(PlayerHasNightVisionActive, , , 0, NULL);
-DEFINE_CMD_ALT_COND_PLUGIN(PlayerIsUsingTurbo, , , 0, NULL);
-DEFINE_CMD_ALT_COND_PLUGIN(PlayerHasCateyeEnabled, , , 0, NULL);
-DEFINE_CMD_ALT_COND_PLUGIN(PlayerHasImprovedSpottingActive, , , 0, NULL);
-DEFINE_CMD_ALT_COND_PLUGIN(PlayerIsDrinkingPlacedWater, , , 0, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(PlayerHasNightVisionActive, , , false, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(PlayerIsUsingTurbo, , , false, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(PlayerHasCateyeEnabled, , , false, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(PlayerHasImprovedSpottingActive, , , false, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(PlayerIsDrinkingPlacedWater, , , false, NULL);
 DEFINE_COMMAND_PLUGIN(SetIsPCAMurderer, , 0, 1, kParams_OneInt);
-DEFINE_CMD_ALT_COND_PLUGIN(IsNight, , "Returns true if it's night according to the current (or specified) climate.", 0, kParams_OneOptionalForm);
-DEFINE_CMD_ALT_COND_PLUGIN(IsLimbCrippled, , "If no args are passed / arg is -1, returns true if actor has any crippled limbs. Otherwise, checks if the specified limb is crippled.", 1, kParams_TwoOptionalInts);
-DEFINE_CMD_ALT_COND_PLUGIN(GetNumCrippledLimbs, , , 1, kParams_OneOptionalInt);
-DEFINE_CMD_ALT_COND_PLUGIN(GetCrippledLimbsAsBitMask, , , 1, kParams_OneOptionalInt);
-DEFINE_CMD_ALT_COND_PLUGIN(GetNumBrokenEquippedItems, , , 1, kParams_OneOptionalFloat_OneOptionalInt);
-DEFINE_CMD_ALT_COND_PLUGIN(GetEquippedItemsAsBitMask, , , 1, NULL);
-DEFINE_CMD_ALT_COND_PLUGIN(GetEquippedWeaponType, , , 1, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(IsNight, , "Returns true if it's night according to the current (or specified) climate.", false, kParams_OneOptionalForm);
+DEFINE_CMD_ALT_COND_PLUGIN(IsLimbCrippled, , "If no args are passed / arg is -1, returns true if actor has any crippled limbs. Otherwise, checks if the specified limb is crippled.", true, kParams_TwoOptionalInts);
+DEFINE_CMD_ALT_COND_PLUGIN(GetNumCrippledLimbs, , , true, kParams_OneOptionalInt);
+DEFINE_CMD_ALT_COND_PLUGIN(GetCrippledLimbsAsBitMask, , , true, kParams_OneOptionalInt);
+DEFINE_CMD_ALT_COND_PLUGIN(GetNumBrokenEquippedItems, , , true, kParams_OneOptionalFloat_OneOptionalInt);
+DEFINE_CMD_ALT_COND_PLUGIN(GetEquippedItemsAsBitMask, , , true, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(GetEquippedWeaponType, , , true, NULL);
 DEFINE_COMMAND_PLUGIN(ClearShowoffSavedData, "", 0, 1, kParams_OneInt);
-DEFINE_CMD_ALT_COND_PLUGIN(GetBaseEquippedWeight, , , 1, kParams_TwoOptionalInts);
-DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedEquippedWeight, , "Accounts for perk effects + weapon mods.", 1, kParams_OneOptionalFloat_OneOptionalInt);
-DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedMaxCarryWeight, GetMaxCarryWeightPerkModified, "Accounts for GetMaxCarryWeight perk entry.", 1, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(GetBaseEquippedWeight, , , true, kParams_OneOptionalFloat_OneOptionalInt);
+DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedEquippedWeight, , "Accounts for perk effects + weapon mods.", true, kParams_OneOptionalFloat_OneOptionalInt);
+DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedMaxCarryWeight, GetMaxCarryWeightPerkModified, "Accounts for GetMaxCarryWeight perk entry.", true, NULL);
 
 
 bool(__cdecl* Cmd_Disable)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5C45E0;
@@ -156,8 +160,8 @@ bool Cmd_GetNumQueuedCornerMessages_Eval(COMMAND_ARGS_EVAL)
 bool Cmd_IsAnimPlayingExCond_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
-	auto category = (UInt32)arg1;
-	auto subType = (UInt32)arg2;  //optional
+	auto const category = (UInt32)arg1;
+	auto const subType = (UInt32)arg2;  //optional
 
 	if (!thisObj) return true;
 	if (category > 5 || category < 1) return true;
@@ -463,39 +467,117 @@ static EquipData FindEquipped(TESObjectREFR* thisObj, FormMatcher& matcher) {
 typedef TESBipedModelForm::EPartBit EquippedItemIndex;
 typedef TESBipedModelForm::ESlot EquippedItemSlot;
 
+// https://stackoverflow.com/questions/50888127/how-can-i-use-an-unordered-set-with-a-custom-struct
+class EquipDataHashFunction {
+public:
+	// id is returned as hash function
+	size_t operator()(const EquipData& t) const
+	{
+		return (size_t)t.pForm;
+	}
+};
 
-UInt32 __fastcall GetNumBrokenEquippedItems_Call(TESObjectREFR* const thisObj, float threshold, UInt32 const flags)
+std::unordered_set<EquipData, EquipDataHashFunction> GetEquippedItemsData(TESObjectREFR* const thisObj, UInt32 const flags)
 {
-	if (!IS_ACTOR(thisObj)) return 0;
+	enum FlagValues {
+		// eSlot_ flags determine which slots to include.
+		eSlot_Head = 0x1 << 0,
+		eSlot_Hair = 0x1 << 1,
+		eSlot_UpperBody = 0x1 << 2,
+		eSlot_LeftHand = 0x1 << 3,
+		eSlot_RightHand = 0x1 << 4,
+		eSlot_Weapon = 0x1 << 5,
+		eSlot_PipBoy = 0x1 << 6,
+		eSlot_Backpack = 0x1 << 7,
+		eSlot_Necklace = 0x1 << 8,
+		eSlot_Headband = 0x1 << 9,
+		eSlot_Hat = 0x1 << 10,
+		eSlot_Eyeglasses = 0x1 << 11,
+		eSlot_Nosering = 0x1 << 12,
+		eSlot_Earrings = 0x1 << 13,
+		eSlot_Mask = 0x1 << 14,
+		eSlot_Choker = 0x1 << 15,
+		eSlot_MouthObject = 0x1 << 16,
+		eSlot_BodyAddon1 = 0x1 << 17,
+		eSlot_BodyAddon2 = 0x1 << 18,
+		eSlot_BodyAddon3 = 0x1 << 19,
+
+		// iFilter_ flags determine what sort of item to include.
+		iFilter_NoUnplayable = 0x1 << 20,
+		iFilter_NoQuestItems = 0x1 << 21,
+	};
+	bool const skipUnplayable = flags & iFilter_NoUnplayable;
+	bool const noQuestItems = flags & iFilter_NoQuestItems;
 	
-	threshold /= 100.0F;  //expecting a number like 35, reduce to 0.35;
-	UInt32 numBrokenItems = 0;  //retun value.
+	// Use a Set so as to avoid having duplicate EquipData
+	// (since forms can occupy multiple equip slots).
+	std::unordered_set<EquipData, EquipDataHashFunction> eqItems;
 	for (UInt32 slotIdx = EquippedItemIndex::ePart_Head; slotIdx <= EquippedItemIndex::ePart_BodyAddon3; slotIdx++)
 	{
-		MatchBySlot matcher(slotIdx);
-		if (flags <= 0)  //if flags = 0 (default), every equip slot is checked.
+		if (flags != 0)  //if flags == 0 (default), every equip slot is checked.
 		{
 			//Otherwise, skip if flag is not toggled on for item.
 			if (flags && !(TESBipedModelForm::MaskForSlot(slotIdx) & flags)) continue;
 		}
+		MatchBySlot matcher(slotIdx);
 		EquipData equipD = FindEquipped(thisObj, matcher);
-		if (equipD.pForm)
+		TESForm* form = equipD.pForm;
+		if (!form) continue;
+		if (skipUnplayable && !IsFormPlayable(form)) continue;
+		if (noQuestItems && form->IsQuestItem()) continue;
+		if (g_ShowFuncDebug)
+			Console_Print("GetEquippedItemsData - SlotIdx: %u Form: [%08X] (%s)", slotIdx, equipD.pForm, equipD.pForm->GetName());
+		eqItems.emplace(equipD);
+	}
+	return eqItems;
+}
+
+#if 0  // probably faster, but ValidBip01Names doesn't give access to ExtraData directly...
+std::unordered_set<EquipData, EquipDataHashFunction> GetEquippedItemsDataAlt(TESObjectREFR* const thisObj, UInt32 const eqSlotFlags)
+{
+	// Use a set so as to avoid having duplicate EquipData
+	// (since forms can occupy multiple equip slots).
+	std::unordered_set<EquipData, EquipDataHashFunction> eqItems;
+	if (!thisObj->IsCharacter()) return eqItems;
+	if (ValidBip01Names* validBip = ((Character*)thisObj)->GetValidBip01Names()) 
+	{
+		for (ValidBip01Names::Data& slotData : validBip->slotData)
 		{
-			ExtraHealth* pXHealth = equipD.pExtraData ? (ExtraHealth*)equipD.pExtraData->GetByType(kExtraData_Health) : NULL;  // modified health
-			auto pHealth = DYNAMIC_CAST(equipD.pForm, TESForm, TESHealthForm);  // returns base health 
-			if (pXHealth && pHealth)
+			TESObjectARMO* armor = slotData.armor;
+			if (armor)  // need to check for type too!
 			{
-				if ((pXHealth->health / (float)pHealth->health) <= threshold) numBrokenItems++;
 #if _DEBUG
-				Console_Print("GetNumBrokenEquippedItems - health %% check being performed. %%: %f vs %f threshold", (pXHealth->health / (float)pHealth->health), threshold);
+				Console_Print("GetEquippedItemsDataAlt - Partmask: %u Form: [%08X] (%s)", armor->bipedModel.partMask, armor, armor->GetName());
 #endif
 			}
-			// never increment if there's no pXHealth, since it's at 100% health (no modified health extra data).
 		}
 	}
-#if _DEBUG
-	Console_Print("GetNumBrokenEquippedItems - result: %d", numBrokenItems);
+	return eqItems;
+}
 #endif
+
+UInt32 __fastcall GetNumBrokenEquippedItems_Call(TESObjectREFR* const thisObj, float threshold, UInt32 const flags)
+{
+	if (!IS_ACTOR(thisObj)) return 0;
+	threshold /= 100.0F;  //expecting a number like 35, reduce to 0.35
+	UInt32 numBrokenItems = 0;  //return value.
+	auto eqItems = GetEquippedItemsData(thisObj, flags);
+	for (auto const &iter : eqItems)
+	{
+		if (!iter.pForm) continue;
+		if (g_ShowFuncDebug)
+			Console_Print("GetNumBrokenEquippedItems - iter form: [%08X] (%s)", iter.pForm, iter.pForm->GetName());
+		ExtraHealth* pXHealth = iter.pExtraData ? (ExtraHealth*)iter.pExtraData->GetByType(kExtraData_Health) : NULL; // modified health
+		auto pHealth = DYNAMIC_CAST(iter.pForm, TESForm, TESHealthForm);  // base health 
+		if (pXHealth && pHealth)  // If there's no pXHealth, it's at 100% health (no modified health extra data).
+		{
+			if ((pXHealth->health / (float)pHealth->health) <= threshold) numBrokenItems++;
+			if (g_ShowFuncDebug)
+				Console_Print("GetNumBrokenEquippedItems - health %% check being performed on %s. %%: %f vs %f threshold", iter.pForm->GetName(), (pXHealth->health / (float)pHealth->health), threshold);
+		}
+		else if (pHealth && threshold >= 1.0F) numBrokenItems++;
+	}
+	Console_Print("GetNumBrokenEquippedItems >> %u", numBrokenItems);
 	return numBrokenItems;
 }
 
@@ -528,10 +610,13 @@ bool Cmd_GetEquippedItemsAsBitMask_Eval(COMMAND_ARGS_EVAL)
 		EquipData equipD = FindEquipped(thisObj, matcher);
 		if (equipD.pForm)
 		{
+			if (g_ShowFuncDebug)
+				Console_Print("GetEquippedItemsAsBitMask - Form: %s, mask to add: %u", equipD.pForm->GetName(), TESBipedModelForm::MaskForSlot(slotIdx));
 			flags |= TESBipedModelForm::MaskForSlot(slotIdx);
 		}
 	}
 	*result = flags;
+	Console_Print("GetEquippedItemsAsBitMask >> %u", flags);
 	return true;
 }
 bool Cmd_GetEquippedItemsAsBitMask_Execute(COMMAND_ARGS)
@@ -591,30 +676,23 @@ bool Cmd_ClearShowoffSavedData_Execute(COMMAND_ARGS)
 }
 
 
-float __fastcall GetBaseEquippedWeight_Call(TESObjectREFR* thisObj, UInt32 flags, float minWeight)
+float __fastcall GetBaseEquippedWeight_Call(TESObjectREFR* const thisObj, UInt32 const flags, float const minWeight)
 {
 	float totalWeight = 0;  //return val.
-	for (UInt32 slotIdx = EquippedItemIndex::ePart_Head; slotIdx <= EquippedItemIndex::ePart_BodyAddon3; slotIdx++)
+	auto eqItems = GetEquippedItemsData(thisObj, flags);
+	for (auto const &iter : eqItems)
 	{
-		MatchBySlot matcher(slotIdx);
-		if (flags)  //if flags = 0 (default), every equip slot is checked.
+		if (!iter.pForm) continue;
+		auto pWeight = DYNAMIC_CAST(iter.pForm, TESForm, TESWeightForm);
+		if (pWeight)
 		{
-			//Otherwise, return if flag is not toggled on for item.
-			if (flags && !(TESBipedModelForm::MaskForSlot(slotIdx) & flags)) continue;
-		}
-		EquipData equipD = FindEquipped(thisObj, matcher);
-		if (equipD.pForm)
-		{
-			TESWeightForm* pWeight = DYNAMIC_CAST(equipD.pForm, TESForm, TESWeightForm);
-			if (pWeight)
+			if (pWeight->weight >= minWeight)
 			{
-				if (pWeight->weight >= minWeight)
-				{
-					totalWeight += pWeight->weight;
-				}
+				totalWeight += pWeight->weight;
 			}
 		}
 	}
+	Console_Print("GetBaseEquippedWeight >> %f", totalWeight);
 	return totalWeight;
 }
 
@@ -637,34 +715,28 @@ bool Cmd_GetBaseEquippedWeight_Execute(COMMAND_ARGS)
 	return true;
 }
 
-
-float __fastcall GetCalculatedEquippedWeight_Call(TESObjectREFR* thisObj, UInt32 flags, float minWeight)
+// Code structure lifted from 0x4D0900 (GetInventoryWeight)
+float __fastcall GetCalculatedEquippedWeight_Call(TESObjectREFR* const thisObj, UInt32 const flags, float const minWeight)
 {
 	float totalWeight = 0;  //return val.
 	bool isHardcore = g_thePlayer->isHardcore;
-
-	for (UInt32 slotIdx = EquippedItemIndex::ePart_Head; slotIdx <= EquippedItemIndex::ePart_BodyAddon3; slotIdx++)
+	if (!thisObj || !((Actor*)thisObj)->baseProcess) return 0.0F;
+	auto eqItems = GetEquippedItemsData(thisObj, flags);
+	for (auto const& iter : eqItems)
 	{
-		if (flags)  //if flags = 0 (default), every equip slot is checked.
-		{
-			//Otherwise, return if flag is not toggled on for item.
-			if (flags && !(TESBipedModelForm::MaskForSlot(slotIdx) & flags)) continue;
-		}
-
+		TESForm* item = iter.pForm;
+		if (!item) continue;
 		float itemWeight = 0;
-		TESForm* item = nullptr;
-		bool isWeapon = false;
+		
+		bool const isWeapon = IS_TYPE(item, TESObjectWEAP);
 		ContChangesEntry* weapInfo = nullptr;
-
-		if (slotIdx == EquippedItemIndex::ePart_Weapon) {
-			isWeapon = true;
-			weapInfo = ((Actor*)thisObj)->baseProcess->GetWeaponInfo();
-			item = weapInfo->type;
-			if (item) {
-				bool hasDecreaseWeightMod = ThisStdCall<bool>(0x4BDA70, weapInfo, TESObjectWEAP::kWeaponModEffect_DecreaseWeight);
-				itemWeight = ThisStdCall<double>(0x4BE380, (TESObjectWEAP*)item, hasDecreaseWeightMod);
-				if (itemWeight >= 10.0)
-				{
+		if (isWeapon) {
+			// Gather more information about the weapon reference (weapon mods).
+			if (!(weapInfo = ((Actor*)thisObj)->baseProcess->GetWeaponInfo())) continue;
+			if (item = weapInfo->type) {
+				bool const hasDecreaseWeightMod = ThisStdCall<bool>(0x4BDA70, weapInfo, TESObjectWEAP::kWeaponModEffect_DecreaseWeight);
+				itemWeight = ThisStdCall<double>(0x4BE380, (TESObjectWEAP*)item, hasDecreaseWeightMod);  //GetWeaponModdedWeight
+				if (itemWeight >= 10.0) {
 					float heavyWeaponWeightMult = 1.0;
 					ApplyPerkModifiers(kPerkEntry_AdjustHeavyWeaponWeight, (Actor*)g_thePlayer, &heavyWeaponWeightMult);
 					itemWeight = itemWeight * heavyWeaponWeightMult;
@@ -672,18 +744,13 @@ float __fastcall GetCalculatedEquippedWeight_Call(TESObjectREFR* thisObj, UInt32
 			}
 		}
 		else {
-			MatchBySlot matcher(slotIdx);
-			EquipData equipD = FindEquipped(thisObj, matcher);
-			item = equipD.pForm;
-			if (item) {
-				itemWeight = CdeclCall<double>(0x48EBC0, item, isHardcore);  // GetItemWeight. isHardcore check only affects ammo, but whatever.
-			}
+			itemWeight = CdeclCall<double>(0x48EBC0, item, isHardcore);  // GetItemWeight. isHardcore check only affects ammo, but whatever.
 		}
 
-		if (itemWeight > 0.0)
+		if (itemWeight > 0.0F)
 		{
 			float hasPackRatFlt = 0.0;
-			ApplyPerkModifiers(kPerkEntry_ModifyLightItems, (Actor*)g_thePlayer, &hasPackRatFlt);
+			ApplyPerkModifiers(kPerkEntry_ModifyLightItems, (Actor*)thisObj, &hasPackRatFlt);
 			if (hasPackRatFlt > 0.0)
 			{
 				float const fPackRatThreshold = *(float*)(0x11C6478 + 4);
@@ -691,7 +758,6 @@ float __fastcall GetCalculatedEquippedWeight_Call(TESObjectREFR* thisObj, UInt32
 				if (fPackRatThreshold >= (double)itemWeight)
 					itemWeight = itemWeight * fPackRatModifier;
 			}
-
 #if 0		// todo: figure out wtf 0x4D0D83 does.
 			if (isWeapon && weapInfo)
 			{
@@ -703,11 +769,14 @@ float __fastcall GetCalculatedEquippedWeight_Call(TESObjectREFR* thisObj, UInt32
 				}
 			}
 #endif
+			if (g_ShowFuncDebug)
+				Console_Print("GetCalculatedEquippedWeight - Item: %s, Calculated Weight: %f", item->GetName(), itemWeight);
 
 			if (itemWeight >= minWeight) 
 				totalWeight += itemWeight;
 		}
 	}
+	Console_Print("GetCalculatedEquippedWeight >> %f", totalWeight);
 	return totalWeight;
 }
 
@@ -731,7 +800,6 @@ bool Cmd_GetCalculatedEquippedWeight_Execute(COMMAND_ARGS)
 }
 
 
-
 bool Cmd_GetCalculatedMaxCarryWeight_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
@@ -748,6 +816,18 @@ bool Cmd_GetCalculatedMaxCarryWeight_Execute(COMMAND_ARGS)
 #if _DEBUG
 
 
+DEFINE_CMD_ALT_COND_PLUGIN(IsReferenceCloned, IsRefrCloned, "Checks if the reference's modIndex is 0xFF", 1, NULL);
+bool Cmd_IsReferenceCloned_Execute(COMMAND_ARGS)
+{
+	//*result = thisObj->IsTemporary();  //todo: figure out what the IsTemporary flag does, cuz it doesn't determine 0xFF stuff.
+	*result = thisObj->IsCloned();
+	return true;
+}
+bool Cmd_IsReferenceCloned_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = thisObj->IsCloned();
+	return true;
+}
 
 
 DEFINE_COMMAND_PLUGIN(SetCellFullNameAlt, "Like SetCellFullName but accepts a string.", 0, 2, kParams_JIP_OneCell_OneString);

@@ -58,8 +58,6 @@ const char * GetObjectClassName(void * obj);
 #define STATIC_ASSERT(a)
 #endif	// RUNTIME
 
-#define SIZEOF_ARRAY(arrayName, elementType) (sizeof(arrayName) / sizeof(elementType))
-
 class TESForm;
 
 class FormMatcher
@@ -67,6 +65,8 @@ class FormMatcher
 public:
 	virtual bool Matches(TESForm* pForm) const = 0;
 };
+
+#define SIZEOF_ARRAY(arrayName, elementType) (sizeof(arrayName) / sizeof(elementType))
 
 namespace MersenneTwister
 {

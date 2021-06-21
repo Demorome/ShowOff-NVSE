@@ -3421,9 +3421,10 @@ struct ValidBip01Names
 	OptionalBone		bones[5];		// 004
 	Data				slotData[20];	// 02C indexed by the EquipSlot
 	Data				unk016C[20];	// 16C indexed by the EquipSlot
-	Character			*character;		// 2AC
+	UInt32				unk2AC;			// 2AC
+	Character			*character;		// 2B0
 };
-STATIC_ASSERT(sizeof(ValidBip01Names) == 0x2B0);
+STATIC_ASSERT(sizeof(ValidBip01Names) == 0x2B4);
 
 // 20
 struct FaceGenData

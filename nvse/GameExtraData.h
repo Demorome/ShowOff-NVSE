@@ -392,6 +392,24 @@ public:
 	struct FoundEquipData{
 		TESForm* pForm;
 		ExtraDataList* pExtraData;
+		
+		// These overloads are used by std::unordered_set to compare elements.
+		FoundEquipData& operator=(const FoundEquipData& t) {
+			this->pForm = t.pForm;
+			this->pExtraData = t.pExtraData;
+			return *this;
+		}
+		bool operator==(const FoundEquipData& t) const {
+			return (this->pForm == t.pForm);
+		}
+		bool operator<(const FoundEquipData& t) const {
+			if (pForm < t.pForm)
+				return true;
+			else if (pForm == t.pForm && pExtraData == t.pExtraData)
+				return true;
+			return false;
+		};
+		
 	};
 	FoundEquipData FindEquipped(FormMatcher& matcher) const;
 

@@ -119,7 +119,7 @@ TESForm * TESForm::CloneForm(bool persist) const
 
 bool TESForm::IsCloned() const
 {
-	return GetModIndex() == 0xff;
+	return GetModIndex() == 0xFF;
 }
 
 // static

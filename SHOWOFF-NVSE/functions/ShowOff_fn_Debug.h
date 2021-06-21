@@ -2,6 +2,8 @@
 
 DEFINE_COMMAND_ALT_PLUGIN(DumpFormList, FListDump, , 0, 3, kParams_OneFormList_OneOptionalString_OneOptionalInt);
 DEFINE_CMD_ALT_COND_PLUGIN(ConditionPrint, , "Returns 1, and prints a message to console. Meant for testing if previous conditions passed.", 0, NULL);
+DEFINE_COMMAND_PLUGIN(GetShowOffDebugMode, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(SetShowOffDebugMode, "Set to 1 to enable debug prints for certain ShowOff functions.", 0, 1, kParams_OneInt);
 
 
 bool Cmd_DumpFormList_Execute(COMMAND_ARGS)
@@ -45,6 +47,19 @@ bool Cmd_ConditionPrint_Eval(COMMAND_ARGS_EVAL)
 	return true;
 }
 
+bool Cmd_GetShowOffDebugMode_Execute(COMMAND_ARGS)
+{
+	*result = g_ShowFuncDebug;
+	return true;
+}
+bool Cmd_SetShowOffDebugMode_Execute(COMMAND_ARGS)
+{
+	UInt32 bOn = false;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bOn)) return true;
+	g_ShowFuncDebug = bOn;
+	return true;
+}
+
 
 #if _DEBUG
 
@@ -54,7 +69,7 @@ bool Cmd_GetNVSEVersionFullAlt_Execute(COMMAND_ARGS)
 {
 	*result = PACKED_NVSE_VERSION;
 	if (IsConsoleMode())
-		Console_Print("GetNVSEVersionFullAlt >> %f.", result);
+		Console_Print("GetNVSEVersionFullAlt >> %f.", result);  //does not work how I'd hoped, lol.
 	return true;
 }
 bool Cmd_GetNVSEVersionFullAlt_Eval(COMMAND_ARGS_EVAL)

@@ -9,9 +9,8 @@
 #include "GameData.h"
 #include "decoding.h"
 
-//todo: Move non-extern global declarations to main.cpp, add externs here.
-
 extern ICriticalSection g_Lock;
+extern std::atomic<bool> g_ShowFuncDebug;
 
 //NVSE Globals
 extern bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);

@@ -33,7 +33,10 @@
 // Plugin Stuff
 IDebugLog g_Log("ShowOffNVSE.log");
 HMODULE	g_ShowOffHandle;
-UInt32 g_PluginVersion = 105;
+UInt32 g_PluginVersion = 110;
+
+// Allows modmakers to toggle ShowOff's debug messages for some of its functions. 
+std::atomic<bool> g_ShowFuncDebug = false;
 
 /*----------Globals------------------------------------------------------------------------
 * It's better to include them in a .cpp file instead of a header file.
@@ -426,6 +429,12 @@ extern "C"
 		/*3CCF*/ REG_CMD(GetBaseEquippedWeight)
 		/*3CD0*/ REG_CMD(GetCalculatedEquippedWeight)  //NOTE: bWeightlessWorn(Power)Armor from Stewie's is not accounted for.
 		/*3CD1*/ REG_CMD(GetCalculatedMaxCarryWeight)
+
+		//========v1.10
+		/*3CD2*/ REG_CMD(GetShowOffDebugMode)
+		/*3CD3*/ REG_CMD(SetShowOffDebugMode)
+
+		//***Current Max OpCode: 0x3CDE (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
 		//========v1.??
 		//todo: always check to update/increase your opcode range when adding new functions
@@ -441,6 +450,7 @@ extern "C"
 
 
 		REG_CMD_ARR(ReadArrayFromJSON)
+		REG_CMD(IsReferenceCloned)
 
 		
 		//REG_CMD_ARR(Ar_Init);
@@ -483,6 +493,8 @@ extern "C"
 
 		REG_CMD(GetNVSEVersionFullAlt)
 		REG_CMD(TestDemo);
+
+		//GetPCHasFastTravelOverride
 
 		/* todo =======Function ideas ======
 		 *

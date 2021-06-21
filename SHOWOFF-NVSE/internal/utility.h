@@ -356,3 +356,5 @@ template <typename T> __forceinline void RawSwap(const T& lhs, const T& rhs)
 	*(Helper*)&lhs = *(Helper*)&rhs;
 	*(Helper*)&rhs = temp;
 }
+
+bool IsFormPlayable(TESForm* form);

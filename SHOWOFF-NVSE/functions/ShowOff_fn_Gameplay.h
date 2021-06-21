@@ -4,7 +4,6 @@
 
 DEFINE_COMMAND_ALT_PLUGIN(SetPlayerCanPickpocketEquippedItems, SetPCCanStealEqItems, "Toggles the ability to pickpocket equipped items.", 0, 1, kParams_OneInt);
 DEFINE_CMD_ALT_COND_PLUGIN(GetPlayerCanPickpocketEquippedItems, GetPCCanStealEqItems, "Checks if the player can pickpocket equipped items.", 0, NULL);
-DEFINE_CMD_ALT_COND_PLUGIN(GetPCHasFastTravelOverride, , "Returns whether or not the player is restricted by EnableFastTravel", 0, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetPCHasSleepWaitOverride, , "Returns whether or not the player has a Sleep/Wait prevention override", 0, NULL);
 DEFINE_COMMAND_PLUGIN(SetPCHasSleepWaitOverride, "Sets whether or not the player has a Sleep/Wait prevention override", 0, 1, kParams_OneInt);
 DEFINE_CMD_ALT_COND_PLUGIN(IsWeaponMelee, , "Returns 1 if the weapon's base form is of one of the three weapon types belonging to melee-range weapons.", 1, kParams_OneOptionalObjectID);
@@ -43,20 +42,6 @@ bool Cmd_GetPlayerCanPickpocketEquippedItems_Eval(COMMAND_ARGS_EVAL)
 bool Cmd_GetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
 {
 	*result = canPlayerPickpocketEqItems();
-	return true;
-}
-
-bool Cmd_GetPCHasFastTravelOverride_Eval(COMMAND_ARGS_EVAL)
-{
-	*result = (g_thePlayer->byte66D & 1) != 0;
-	return true;
-}
-bool Cmd_GetPCHasFastTravelOverride_Execute(COMMAND_ARGS)
-{
-#if _DEBUG
-	Console_Print("%x", g_thePlayer->byte66D);
-#endif
-	*result = (g_thePlayer->byte66D & 1) != 0;
 	return true;
 }
 
@@ -127,9 +112,8 @@ bool Cmd_IsEquippedWeaponMelee_Eval(COMMAND_ARGS_EVAL)
 		else
 		{
 			*result = 1;
-#if _DEBUG
-			Console_Print("IsEquippedWeaponMelee >> 1 >> No equipped weapon found, assuming that the default unarmed is equipped.");
-#endif
+			if (g_ShowFuncDebug)
+				Console_Print("IsEquippedWeaponMelee >> 1 >> No equipped weapon found, assuming that the default unarmed is equipped.");
 		}
 	}
 	return true;
@@ -220,6 +204,20 @@ bool Cmd_GetChallengeProgress_Eval(COMMAND_ARGS_EVAL)
 #ifdef _DEBUG
 
 
+DEFINE_CMD_ALT_COND_PLUGIN(GetPCHasFastTravelOverride, , "Returns whether or not the player is restricted by EnableFastTravel", 0, NULL);
+bool Cmd_GetPCHasFastTravelOverride_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = (g_thePlayer->byte66D & 1) != 0;
+	return true;
+}
+bool Cmd_GetPCHasFastTravelOverride_Execute(COMMAND_ARGS)
+{
+#if _DEBUG
+	Console_Print("%x", g_thePlayer->byte66D);
+#endif
+	* result = (g_thePlayer->byte66D & 1) != 0;
+	return true;
+}
 
 /*Notes on GetChallengeProgress w/ other funcs:*/
 //If the challenge is beaten...

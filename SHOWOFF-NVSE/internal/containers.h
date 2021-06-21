@@ -337,7 +337,6 @@ public:
 };
 #endif
 
-#if 0
 template <typename T_Key> class Set
 {
 protected:
@@ -507,7 +506,6 @@ public:
 		}
 	};
 };
-#endif
 
 template <typename T_Key> __forceinline UInt32 HashKey(T_Key inKey)
 {
@@ -953,188 +951,251 @@ public:
 	Iterator Find(Key_Arg key) { return Iterator(*this, key); }
 };
 
-template <typename T_Key> class UnorderedSet
+// Made by JIP
+template <typename T_Key> class UnorderedSet  
 {
-protected:
-	typedef HashedKey<T_Key> H_Key;
+	using H_Key = HashedKey<T_Key>;
+	using Key_Arg = std::conditional_t<std::is_scalar_v<T_Key>, T_Key, const T_Key&>;
+
+	struct Entry
+	{
+		Entry* next;
+		H_Key		key;
+
+		void Clear() { key.Clear(); }
+	};
 
 	struct Bucket
 	{
-		H_Key		*entries;		// 00
-		UInt8		numEntries;		// 04
-		UInt8		alloc;			// 05
-		UInt8		pad06[2];		// 06
+		Entry* entries;
 
-		__declspec(noinline) H_Key *AddEntry()
+		void Insert(Entry* entry)
 		{
-			if (alloc == numEntries)
-			{
-				alloc += kMapBucketSizeInc;
-				entries = (H_Key*)realloc(entries, sizeof(H_Key) * alloc);
-			}
-			return entries + numEntries++;
+			entry->next = entries;
+			entries = entry;
 		}
 
-		__declspec(noinline) void Clear(bool doFree = true)
+		void Remove(Entry* entry, Entry* prev)
+		{
+			if (prev) prev->next = entry->next;
+			else entries = entry->next;
+			entry->Clear();
+			Pool_Free(entry, sizeof(Entry));
+		}
+
+		void Clear()
 		{
 			if (!entries) return;
-			for (H_Key *entry = entries; numEntries; numEntries--, entry++)
-				entry->Clear();
-			if (doFree)
+			Entry* pEntry;
+			do
 			{
-				free(entries);
-				entries = NULL;
-			}
+				pEntry = entries;
+				entries = entries->next;
+				pEntry->Clear();
+				Pool_Free(pEntry, sizeof(Entry));
+			} 			while (entries);
+		}
+
+		UInt32 Size() const
+		{
+			if (!entries) return 0;
+			UInt32 size = 1;
+			Entry* pEntry = entries;
+			while (pEntry = pEntry->next)
+				size++;
+			return size;
 		}
 	};
 
-	Bucket		*buckets;		// 00
+	Bucket* buckets;		// 00
 	UInt32		numBuckets;		// 04
-	UInt32		numItems;		// 08
+	UInt32		numEntries;		// 08
 
-	__declspec(noinline) void ExpandTable()
+	Bucket* End() const { return buckets + numBuckets; }
+
+	__declspec(noinline) void ResizeTable(UInt32 newCount)
 	{
-		UInt32 newCount = GetNextPrime(numBuckets * 2);
-		Bucket *newBuckets = (Bucket*)calloc(newCount, sizeof(Bucket));
-		H_Key *entry;
-		UInt8 count;
-		for (Bucket *currBucket = buckets; numBuckets; numBuckets--, currBucket++)
+		Bucket* pBucket = buckets, * pEnd = End(), * newBuckets = (Bucket*)Pool_Alloc_Buckets(newCount);
+		Entry* pEntry, * pTemp;
+		newCount--;
+		do
 		{
-			if (entry = currBucket->entries)
+			pEntry = pBucket->entries;
+			while (pEntry)
 			{
-				for (count = currBucket->numEntries; count; count--, entry++)
-					*(newBuckets[entry->GetHash() % newCount].AddEntry()) = *entry;
-				free(currBucket->entries);
+				pTemp = pEntry;
+				pEntry = pEntry->next;
+				newBuckets[pTemp->key.GetHash() & newCount].Insert(pTemp);
 			}
-		}
-		free(buckets);
+			pBucket++;
+		} 		while (pBucket != pEnd);
+		Pool_Free(buckets, numBuckets * sizeof(Bucket));
 		buckets = newBuckets;
-		numBuckets = newCount;
+		numBuckets = newCount + 1;
 	}
 
 public:
-	UnorderedSet(UInt32 _numBuckets = kMapDefaultBucketNum) : buckets(NULL), numBuckets(_numBuckets), numItems(0) {}
+	UnorderedSet(UInt32 _numBuckets = MAP_DEFAULT_BUCKET_COUNT) : buckets(nullptr), numBuckets(_numBuckets), numEntries(0) {}
+	UnorderedSet(std::initializer_list<T_Key> inList) : buckets(nullptr), numBuckets(inList.size()), numEntries(0) { InsertList(inList); }
 	~UnorderedSet()
 	{
 		if (!buckets) return;
-		for (Bucket *bucket = buckets; numBuckets; numBuckets--, bucket++)
-			bucket->Clear();
-		free(buckets);
-		buckets = NULL;
+		Clear();
+		Pool_Free(buckets, numBuckets * sizeof(Bucket));
+		buckets = nullptr;
 	}
 
-	UInt32 Size() const {return numItems;}
-	bool Empty() const {return !numItems;}
+	UInt32 Size() const { return numEntries; }
+	bool Empty() const { return !numEntries; }
 
-	__declspec(noinline) bool Insert(T_Key key)
+	UInt32 BucketCount() const { return numBuckets; }
+
+	void SetBucketCount(UInt32 newCount)
 	{
-		if (!buckets) buckets = (Bucket*)calloc(numBuckets, sizeof(Bucket));
-		else if (numItems == numBuckets) ExpandTable();
-		UInt32 hashVal = H_Key::Hash(key);
-		Bucket &bucket = buckets[hashVal % numBuckets];
-		H_Key *entry = bucket.entries;
-		for (UInt8 count = bucket.numEntries; count; count--, entry++)
-			if (entry->GetHash() == hashVal) return false;
-		entry = bucket.AddEntry();
-		numItems++;
-		entry->Set(key, hashVal);
+		if (buckets)
+		{
+			newCount = AlignBucketCount(newCount);
+			if ((numBuckets != newCount) && (numEntries <= newCount))
+				ResizeTable(newCount);
+		}
+		else numBuckets = newCount;
+	}
+
+	float LoadFactor() const { return (float)numEntries / (float)numBuckets; }
+
+	bool Insert(Key_Arg key)
+	{
+		if (!buckets)
+		{
+			numBuckets = AlignBucketCount(numBuckets);
+			buckets = (Bucket*)Pool_Alloc_Buckets(numBuckets);
+		}
+		else if ((numEntries > numBuckets) && (numBuckets < MAP_MAX_BUCKET_COUNT))
+			ResizeTable(numBuckets << 1);
+		UInt32 hashVal = HashKey<T_Key>(key);
+		Bucket* pBucket = &buckets[hashVal & (numBuckets - 1)];
+		for (Entry* pEntry = pBucket->entries; pEntry; pEntry = pEntry->next)
+			if (pEntry->key.Match(key, hashVal)) return false;
+		numEntries++;
+		Entry* newEntry = ALLOC_NODE(Entry);
+		newEntry->key.Set(key, hashVal);
+		pBucket->Insert(newEntry);
 		return true;
 	}
 
-	bool HasKey(T_Key key) const
+	void InsertList(std::initializer_list<T_Key> inList)
 	{
-		if (!numItems) return false;
-		UInt32 hashVal = H_Key::Hash(key);
-		Bucket &bucket = buckets[hashVal % numBuckets];
-		H_Key *entry = bucket.entries;
-		for (UInt8 count = bucket.numEntries; count; count--, entry++)
-			if (entry->GetHash() == hashVal) return true;
-		return false;
+		for (auto iter = inList.begin(); iter != inList.end(); ++iter)
+			Insert(*iter);
 	}
 
-	bool Erase(T_Key key)
+	bool HasKey(Key_Arg key) const
 	{
-		if (!numItems) return false;
-		UInt32 hashVal = H_Key::Hash(key);
-		Bucket &bucket = buckets[hashVal % numBuckets];
-		H_Key *entry = bucket.entries;
-		for (UInt8 count = bucket.numEntries; count; count--, entry++)
+		if (numEntries)
 		{
-			if (entry->GetHash() != hashVal) continue;
-			entry->Clear();
-			bucket.numEntries--;
-			if (count > 1) *entry = bucket.entries[bucket.numEntries];
-			numItems--;
-			return true;
+			UInt32 hashVal = HashKey<T_Key>(key);
+			for (Entry* pEntry = buckets[hashVal & (numBuckets - 1)].entries; pEntry; pEntry = pEntry->next)
+				if (pEntry->key.Match(key, hashVal)) return true;
 		}
 		return false;
 	}
 
-	bool Clear(bool clrBkt = false)
+	bool Erase(Key_Arg key)
 	{
-		if (!numItems) return false;
-		numItems = 0;
-		Bucket *bucket = buckets;
-		for (UInt32 count = numBuckets; count; count--, bucket++)
+		if (numEntries)
 		{
-			if (clrBkt) bucket->Clear(false);
-			else bucket->numEntries = 0;
+			UInt32 hashVal = HashKey<T_Key>(key);
+			Bucket* pBucket = &buckets[hashVal & (numBuckets - 1)];
+			Entry* pEntry = pBucket->entries, * prev = nullptr;
+			while (pEntry)
+			{
+				if (pEntry->key.Match(key, hashVal))
+				{
+					numEntries--;
+					pBucket->Remove(pEntry, prev);
+					return true;
+				}
+				prev = pEntry;
+				pEntry = pEntry->next;
+			}
 		}
+		return false;
+	}
+
+	bool Clear()
+	{
+		if (!numEntries) return false;
+		Bucket* pBucket = buckets, * pEnd = End();
+		do
+		{
+			pBucket->Clear();
+			pBucket++;
+		} 		while (pBucket != pEnd);
+		numEntries = 0;
 		return true;
+	}
+
+	void DumpLoads()
+	{
+		UInt32 loadsArray[0x40];
+		MemZero(loadsArray, sizeof(loadsArray));
+		Bucket* pBucket = buckets;
+		UInt32 maxLoad = 0, entryCount;
+		for (Bucket* pEnd = End(); pBucket != pEnd; pBucket++)
+		{
+			entryCount = pBucket->Size();
+			loadsArray[entryCount]++;
+			if (maxLoad < entryCount)
+				maxLoad = entryCount;
+		}
+		PrintDebug("Size = %d\nBuckets = %d\n----------------\n", numEntries, numBuckets);
+		for (UInt32 iter = 0; iter <= maxLoad; iter++)
+			PrintDebug("%d:\t%05d (%.4f%%)", iter, loadsArray[iter], 100.0 * (double)loadsArray[iter] / numEntries);
 	}
 
 	class Iterator
 	{
 		friend UnorderedSet;
 
-		UnorderedSet	*table;		// 00
-		UInt32			bucketIdx;	// 04
-		UInt8			entryIdx;	// 08
-		UInt8			pad09[3];	// 09
-		Bucket			*bucket;	// 0C
-		H_Key			*entry;		// 10
+		UnorderedSet* table;
+		Bucket* bucket;
+		Entry* entry;
 
-		void FindValid()
+		void FindNonEmpty()
 		{
-			if (table->numItems)
-				for (; bucketIdx < table->numBuckets; bucketIdx++, bucket++)
-					if (bucket->numEntries && (entry = bucket->entries)) return;
-			entry = NULL;
+			for (Bucket* pEnd = table->End(); bucket != pEnd; bucket++)
+				if (entry = bucket->entries) return;
 		}
 
 	public:
-		void Init(UnorderedSet &_table)
+		void Init(UnorderedSet& _table)
 		{
 			table = &_table;
-			if (table)
+			entry = nullptr;
+			if (table->numEntries)
 			{
-				bucketIdx = 0;
-				entryIdx = 0;
 				bucket = table->buckets;
-				FindValid();
+				FindNonEmpty();
 			}
-			else entry = NULL;
 		}
 
-		T_Key operator*() const {return entry->Get();}
-		T_Key operator->() const {return entry->Get();}
-		bool End() const {return !entry;}
+		Key_Arg operator*() const { return entry->key.Get(); }
+		Key_Arg operator->() const { return entry->key.Get(); }
 
+		explicit operator bool() const { return entry != nullptr; }
 		void operator++()
 		{
-			if (++entryIdx >= bucket->numEntries)
-			{
-				bucketIdx++;
-				entryIdx = 0;
-				bucket++;
-				FindValid();
-			}
-			else entry++;
+			if ((entry = entry->next) || !table->numEntries)
+				return;
+			bucket++;
+			FindNonEmpty();
 		}
 
-		Iterator() : table(NULL), entry(NULL) {}
-		Iterator(UnorderedSet &_table) {Init(_table);}
+		Iterator() : table(nullptr), entry(nullptr) {}
+		Iterator(UnorderedSet& _table) { Init(_table); }
 	};
+
+	Iterator Begin() { return Iterator(*this); }
 };
 
 template <typename T_Data> class Vector  // made by JIP.

@@ -5,6 +5,7 @@
 
 #include "GameData.h"
 #include "GameProcess.h"
+#include "GameRTTI.h"
 
 
 // From JIP
@@ -1632,4 +1633,23 @@ __declspec(naked) TESObjectCELL* TESObjectREFR::GetParentCell()
 		done:
 		retn
 	}
+}
+
+// Copied after NVSE's IsPlayable
+bool IsFormPlayable(TESForm* form)
+{
+	//form->IsItemPlayable()
+	TESBipedModelForm* biped = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
+	if (biped)
+		return biped->IsPlayable();
+	TESObjectWEAP* weap = DYNAMIC_CAST(form, TESForm, TESObjectWEAP);
+	if (weap)
+		return weap->IsPlayable();
+	TESAmmo* ammo = DYNAMIC_CAST(form, TESForm, TESAmmo);
+	if (ammo)
+		return ammo->IsPlayable();
+	TESRace* race = DYNAMIC_CAST(form, TESForm, TESRace);
+	if (race)
+		return race->IsPlayable();
+	return true;
 }

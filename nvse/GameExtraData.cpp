@@ -10,8 +10,8 @@ struct GetMatchingEquipped {
 	EquipData m_found;
 
 	GetMatchingEquipped(FormMatcher& matcher) : m_matcher(matcher) {
-		m_found.pForm = NULL;
-		m_found.pExtraData = NULL;
+		m_found.pForm = nullptr;
+		m_found.pExtraData = nullptr;
 	}
 
 	bool Accept(ExtraContainerChanges::EntryData* pEntryData) {
