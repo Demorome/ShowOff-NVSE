@@ -506,7 +506,7 @@ std::unordered_set<EquipData, EquipDataHashFunction> GetEquippedItemsData(TESObj
 		iFilter_NoUnplayable = 0x1 << 20,
 		iFilter_NoQuestItems = 0x1 << 21,
 	};
-	bool const skipUnplayable = flags & iFilter_NoUnplayable;
+	bool const skipUnplayable = (flags & iFilter_NoUnplayable) || (!flags);
 	bool const noQuestItems = flags & iFilter_NoQuestItems;
 	
 	// Use a Set so as to avoid having duplicate EquipData

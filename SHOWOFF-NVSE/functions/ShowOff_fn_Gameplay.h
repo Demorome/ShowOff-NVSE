@@ -203,6 +203,20 @@ bool Cmd_GetChallengeProgress_Eval(COMMAND_ARGS_EVAL)
 
 #ifdef _DEBUG
 
+DEFINE_COMMAND_PLUGIN(UnequipAllItems, , true, 4, kParams_FourOptionalInts);
+bool Cmd_UnequipAllItems_Execute(COMMAND_ARGS)
+{
+	UInt32 flags = 0, noEquip = 0, hideMessage = 0, triggerOnUnequip = 1;
+	if (!ExtractArgs(EXTRACT_ARGS, &flags, &noEquip, &hideMessage, &triggerOnUnequip) || NOT_ACTOR(thisObj)) return true;
+	auto eqItems = GetEquippedItemsData(thisObj, flags);
+	for (auto const &iter : eqItems)
+	{
+		ExtraDataList* xData = triggerOnUnequip ? iter.pExtraData : nullptr;
+		((Actor*)thisObj)->UnequipItem(iter.pForm, 1, xData, 1, noEquip != 0, hideMessage != 0);
+	}
+	return true;
+}
+
 
 DEFINE_CMD_ALT_COND_PLUGIN(GetPCHasFastTravelOverride, , "Returns whether or not the player is restricted by EnableFastTravel", 0, NULL);
 bool Cmd_GetPCHasFastTravelOverride_Eval(COMMAND_ARGS_EVAL)

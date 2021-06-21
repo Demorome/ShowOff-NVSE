@@ -442,6 +442,10 @@ extern "C"
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 
+		REG_CMD(UnequipAllItems)
+		REG_CMD(IsReferenceCloned)
+
+		
 		REG_CMD(ClearShowoffSavedData)  //todo: test serialization. Seems broken???
 
 
@@ -450,7 +454,6 @@ extern "C"
 
 
 		REG_CMD_ARR(ReadArrayFromJSON)
-		REG_CMD(IsReferenceCloned)
 
 		
 		//REG_CMD_ARR(Ar_Init);

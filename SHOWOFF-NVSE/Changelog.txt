@@ -11,7 +11,7 @@ This file is here just so I'm reminded to keep track of changes as I do em.
 
 -Semi-major refactorings (file inclusion was changed around, behaviors hopefully shouldn't change)
 -Fixed GetCalculatedEquippedWeight and GetBaseEquippedWeight expecting an int "minWeight" instead of a float.
--GetCalculatedEquippedWeight - Fixed nullptr issue
+-GetCalculatedEquippedWeight - Fixed nullptr issue (caused crashes if no weapon was equipped)
 -GetCalculatedEquippedWeight - Fixed "Modify Light Items" adjustement not being calculated per-reference (used to only care about if the player had the effect)
 -For GetCalculatedEquippedWeight / GetBaseEquippedWeight / GetNumBrokenEquippedItems:
 	*Fixed items being counted multiple times if they had multiple equip slots.
