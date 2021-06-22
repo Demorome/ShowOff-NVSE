@@ -38,6 +38,7 @@ DEFINE_COMMAND_ALT_PLUGIN(SetSeedUsingForm, SetFormSeed, , false, 1, kParams_One
 DEFINE_COMMAND_ALT_PLUGIN(GetRandomizerSeed, GetSeed, , false, 0, NULL);
 DEFINE_COMMAND_ALT_PLUGIN(RandSeeded, GenerateSeededRandomNumber, , false, 2, kParams_TwoInts);
 DEFINE_COMMAND_ALT_PLUGIN(GetRandomPercentSeeded, , , false, 0, NULL);
+DEFINE_COMMAND_PLUGIN(AdvanceSeed, "Discards would-be generated numbers to advance in the seed generation pattern.", false, 1, kParams_OneInt);
 DEFINE_CMD_ALT_COND_PLUGIN(IsReferenceCloned, IsRefrCloned, "Checks if the reference's modIndex is 0xFF", true, NULL);
 
 bool(__cdecl* Cmd_Disable)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5C45E0;
@@ -905,7 +906,20 @@ bool Cmd_GetRandomPercentSeeded_Execute(COMMAND_ARGS)
 	return true;
 }
 
-//todo: Advance Seed function
+bool Cmd_AdvanceSeed_Execute(COMMAND_ARGS)
+{
+	*result = false;
+	UInt32 discardAmount;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &discardAmount)) return true;
+	UInt8 const modIdx = scriptObj->GetOverridingModIdx();
+	if (auto currGen = g_ModsAndSeedsMap.Get(modIdx))
+	{
+		ScopedLock lock(g_Lock);
+		currGen->discard(discardAmount);
+		*result = true;
+	}
+	return true;
+}
 
 bool Cmd_IsReferenceCloned_Execute(COMMAND_ARGS)
 {
@@ -987,9 +1001,9 @@ bool Cmd_GetScriptHasFunction_Execute(COMMAND_ARGS)
 				length = *(UInt16*)dataPtr + 6;
 			}
 		}
-		else  //...nor this.
+		else  
 		{
-			if (*opcode == 0x1C)
+			if (*opcode == 0x1C) //...nor this.
 			{
 				opcode = (UInt16*)dataPtr;
 				dataPtr += 2;

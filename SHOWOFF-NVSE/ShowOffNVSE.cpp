@@ -438,7 +438,7 @@ extern "C"
 		/*3CDA*/ REG_CMD(RandSeeded)
 		/*3CDB*/ REG_CMD(GetRandomPercentSeeded)
 		/*3CDC*/ REG_CMD(IsReferenceCloned)
-
+		/*3CDD*/ REG_CMD(AdvanceSeed)
 
 
 		//***Current Max OpCode: 0x3CDE (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
