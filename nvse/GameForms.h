@@ -2507,6 +2507,8 @@ public:
 	UInt32			unkA4;			// A4
 	UInt32			unkA8;			// A8
 	UInt32			unkAC;			// AC
+
+	Script* GetScript() { return 1 == archtype ? (Script*)associatedItem : nullptr; };  //From FOSE
 };
 
 STATIC_ASSERT(sizeof(EffectSetting) == 0xB0);

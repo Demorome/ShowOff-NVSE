@@ -32,6 +32,7 @@ extern const char* (*GetStringVar)(UInt32 stringID);
 extern NVSEMessagingInterface* g_msg;
 extern NVSEScriptInterface* g_scriptInterface;
 extern NVSECommandTableInterface* g_commandInterface;
+extern const CommandInfo* (*GetCmdByName)(const char* name);
 
 //Singletons
 extern HUDMainMenu* g_HUDMainMenu;

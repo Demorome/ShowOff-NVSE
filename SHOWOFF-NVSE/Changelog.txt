@@ -16,6 +16,8 @@ This file is here just so I'm reminded to keep track of changes as I do em.
 -For GetCalculatedEquippedWeight / GetBaseEquippedWeight / GetNumBrokenEquippedItems:
 	*Fixed items being counted multiple times if they had multiple equip slots.
 	*Added two new flags: skipUnplayable and noQuestItems
+	*DEFAULT BEHAVIOR CHANGED: In order to avoid including unplayable items like the pipboy by default-calling the function, 
+		`skipUnplayable` is automatically checked if Flags == 0 (or not provided).
 
 -New Functions:
 * SetShowOffDebugMode
@@ -23,6 +25,11 @@ This file is here just so I'm reminded to keep track of changes as I do em.
 * UnequipItems
 * GetEquippedItems
 * IsBaseForm
-
+* SetRandomizerSeed
+* SetSeedUsingForm
+* GetRandomizerSeed
+* RandSeeded
+* GetRandomPercentSeeded
+* IsReferenceCloned
 
 ******DON'T FORGET TO UPDATE THE PLUGIN VERSION BEFORE EVERY RELEASE*********

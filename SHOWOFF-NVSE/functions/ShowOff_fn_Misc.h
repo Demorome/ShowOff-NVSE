@@ -905,10 +905,12 @@ bool Cmd_GetRandomPercentSeeded_Execute(COMMAND_ARGS)
 	return true;
 }
 
+//todo: Advance Seed function
+
 bool Cmd_IsReferenceCloned_Execute(COMMAND_ARGS)
 {
 	//*result = thisObj->IsTemporary();  //todo: figure out what the IsTemporary flag does, cuz it doesn't determine 0xFF stuff.
-	*result = thisObj->IsCloned();
+	*result = thisObj->IsCloned();  // technically should also work if thisObj is a baseForm? But don't do that.
 	return true;
 }
 bool Cmd_IsReferenceCloned_Eval(COMMAND_ARGS_EVAL)
@@ -917,10 +919,93 @@ bool Cmd_IsReferenceCloned_Eval(COMMAND_ARGS_EVAL)
 	return true;
 }
 
-
+// Copied from FOSE's GetScript.
+Script* GetScriptFromForm(TESForm* form)
+{
+	Script* script = nullptr;  //return value.
+	TESScriptableForm* scriptForm = DYNAMIC_CAST(form, TESForm, TESScriptableForm);
+	if (scriptForm)	// Let's try for a MGEF (?)
+	{
+		script = scriptForm->script;
+	}
+	else
+	{
+		if (EffectSetting* effect = DYNAMIC_CAST(form, TESForm, EffectSetting))
+			script = effect->GetScript();
+		else
+			return DYNAMIC_CAST(form, TESForm, Script);
+	}
+	return script;
+}
 
 
 #if _DEBUG
+
+// Rips off JIP's DisableScriptedActivate in order to check the OpCodes a Script uses.
+DEFINE_COMMAND_PLUGIN(GetScriptHasFunction, "Checks if a script uses a certain Function.", 0, 2, kParams_OneString_OneOptionalForm);
+bool Cmd_GetScriptHasFunction_Execute(COMMAND_ARGS)
+{
+	*result = false;
+	char function[0x50];
+	TESForm* form = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &function, &form)) return true;
+	
+	if (!function[0]) return true;
+	Script* script = nullptr;
+	if (thisObj)
+	{
+		ExtraScript* xScript = GetExtraTypeJIP(&thisObj->extraDataList, Script);
+		if (xScript && !xScript->script && !xScript->eventList)
+			script = xScript->script;
+	}
+	else if (form)
+	{
+		script = GetScriptFromForm(form);
+	}
+	if (!script) return true;
+	
+	UInt8* dataPtr = script->data, *endPtr = dataPtr + script->info.dataLength;
+	dataPtr += 4;
+	const CommandInfo* funcInfo = GetCmdByName(function);
+	if (!funcInfo)
+	{
+		if (g_ShowFuncDebug) Console_Print("GetScriptHasFunction - invalid function name.");
+		return true;
+	}
+	UInt16 lookFor = funcInfo->opcode, *opcode, length;
+	while (dataPtr < endPtr)
+	{
+		opcode = (UInt16*)dataPtr;
+		dataPtr += 2;
+		length = *(UInt16*)dataPtr;
+		dataPtr += 2;
+		if (*opcode == 0x10)  //no idea what this does
+		{
+			if (*(UInt16*)dataPtr != 2)
+			{
+				dataPtr += 2;
+				length = *(UInt16*)dataPtr + 6;
+			}
+		}
+		else  //...nor this.
+		{
+			if (*opcode == 0x1C)
+			{
+				opcode = (UInt16*)dataPtr;
+				dataPtr += 2;
+				length = *(UInt16*)dataPtr;
+				dataPtr += 2;
+			}
+			if (*opcode == lookFor)
+			{
+				*result = true;
+				break;
+			}
+		}
+		dataPtr += length;
+	}
+	return true;
+}
 
 
 DEFINE_COMMAND_PLUGIN(SetCellFullNameAlt, "Like SetCellFullName but accepts a string.", 0, 2, kParams_JIP_OneCell_OneString);

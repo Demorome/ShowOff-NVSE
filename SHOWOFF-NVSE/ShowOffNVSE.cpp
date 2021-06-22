@@ -85,12 +85,7 @@ const char* (*GetStringVar)(UInt32 stringID);
 NVSEMessagingInterface* g_msg = nullptr;
 NVSEScriptInterface* g_scriptInterface = nullptr;
 NVSECommandTableInterface* g_commandInterface = nullptr;
-#if 0
-typedef NVSEArrayVarInterface::Array NVSEArrayVar;
-typedef NVSEArrayVarInterface::Element NVSEArrayElement;
-typedef NVSEArrayVarInterface::ElementR ArrayElementR; //From JIP
-typedef NVSEArrayVarInterface::ElementL ArrayElementL; //From JIP
-#endif
+const CommandInfo* (*GetCmdByName)(const char* name);
 
 
 //Singletons
@@ -328,7 +323,8 @@ extern "C"
 			ExtractFormatStringArgs = g_scriptInterface->ExtractFormatStringArgs;
 			
 			g_commandInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
-
+			GetCmdByName = g_commandInterface->GetByName;
+			
 			//g_??Interface->??; shortcuts are from JiP
 			g_strInterface = (NVSEStringVarInterface*)nvse->QueryInterface(kInterface_StringVar);
 			GetStringVar = g_strInterface->GetString;  
@@ -453,7 +449,7 @@ extern "C"
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 
-
+		REG_CMD(GetScriptHasFunction)
 
 		
 		REG_CMD(GetPCCanSleepInOwnedBeds)
