@@ -981,7 +981,7 @@ bool Cmd_GetScriptHasFunction_Execute(COMMAND_ARGS)
 	if (!funcInfo)
 	{
 		if (g_ShowFuncDebug) Console_Print("GetScriptHasFunction - invalid function name.");
-		return true;
+		return true; 
 	}
 	UInt8* dataPtr = script->data, *endPtr = dataPtr + script->info.dataLength;
 	dataPtr += 4;

@@ -96,37 +96,31 @@
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\JSON_Library;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\SimpleINILibrary;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\internal;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\functions;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\Events;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug GECK|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\JSON_Library;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\SimpleINILibrary;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\internal;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\functions;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\Events;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\JSON_Library;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\SimpleINILibrary;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\internal;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\functions;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\Events;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release GECK|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\JSON_Library;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\SimpleINILibrary;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\internal;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\functions;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\Events;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug ng|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\JSON_Library;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\SimpleINILibrary;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\internal;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\functions;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\Events;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release ng|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\JSON_Library;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\SimpleINILibrary;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\internal;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\functions;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\Events;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
