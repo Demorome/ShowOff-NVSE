@@ -436,6 +436,12 @@ extern "C"
 		/*3CD4*/ REG_CMD(UnequipItems)
 		/*3CD5*/ REG_CMD_ARR(GetEquippedItems)
 		/*3CD6*/ REG_CMD(IsBaseForm)
+		/*3CD7*/ REG_CMD(SetRandomizerSeed)
+		/*3CD8*/ REG_CMD(SetSeedUsingForm)
+		/*3CD9*/ REG_CMD(GetRandomizerSeed)
+		/*3CDA*/ REG_CMD(RandSeeded)
+		/*3CDB*/ REG_CMD(GetRandomPercentSeeded)
+		/*3CDC*/ REG_CMD(IsReferenceCloned)
 
 
 
@@ -447,16 +453,12 @@ extern "C"
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 
-		REG_CMD(SetRandomizerSeed)
-		REG_CMD(SetSeedUsingForm)
-		REG_CMD(GetRandomizerSeed)
-		REG_CMD(RandSeeded)
-		REG_CMD(GetRandomPercentSeeded)
+
+
 		
 		REG_CMD(GetPCCanSleepInOwnedBeds)
 		REG_CMD(SetPCCanSleepInOwnedBeds)
 		
-		REG_CMD(IsReferenceCloned)
 
 		
 		REG_CMD(ClearShowoffSavedData)  //todo: test serialization. Seems broken???

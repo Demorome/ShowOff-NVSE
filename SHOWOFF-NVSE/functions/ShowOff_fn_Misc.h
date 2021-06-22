@@ -33,7 +33,12 @@ DEFINE_COMMAND_PLUGIN(ClearShowoffSavedData, "", 0, 1, kParams_OneInt);
 DEFINE_CMD_ALT_COND_PLUGIN(GetBaseEquippedWeight, , , true, kParams_OneOptionalFloat_OneOptionalInt);
 DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedEquippedWeight, , "Accounts for perk effects + weapon mods.", true, kParams_OneOptionalFloat_OneOptionalInt);
 DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedMaxCarryWeight, GetMaxCarryWeightPerkModified, "Accounts for GetMaxCarryWeight perk entry.", true, NULL);
-
+DEFINE_COMMAND_ALT_PLUGIN(SetRandomizerSeed, SetSeed, , false, 1, kParams_OneOptionalInt);
+DEFINE_COMMAND_ALT_PLUGIN(SetSeedUsingForm, SetFormSeed, , false, 1, kParams_OneOptionalForm);
+DEFINE_COMMAND_ALT_PLUGIN(GetRandomizerSeed, GetSeed, , false, 0, NULL);
+DEFINE_COMMAND_ALT_PLUGIN(RandSeeded, GenerateSeededRandomNumber, , false, 2, kParams_TwoInts);
+DEFINE_COMMAND_ALT_PLUGIN(GetRandomPercentSeeded, , , false, 0, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(IsReferenceCloned, IsRefrCloned, "Checks if the reference's modIndex is 0xFF", true, NULL);
 
 bool(__cdecl* Cmd_Disable)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5C45E0;
 bool(__cdecl* Cmd_Enable)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5C43D0;
@@ -827,9 +832,6 @@ public:
 	}
 };
 
-
-#if _DEBUG
-
 UnorderedMap<UInt32, Random_Engine*> g_ModsAndSeedsMap;
 
 void SetSeedForMod(UInt32 seed, Script* scriptObj)
@@ -844,15 +846,14 @@ void SetSeedForMod(UInt32 seed, Script* scriptObj)
 	g_ModsAndSeedsMap.Emplace(modIdx, newGen);
 }
 
-DEFINE_COMMAND_ALT_PLUGIN(SetRandomizerSeed, SetSeed, , false, 1, kParams_OneOptionalInt);
 bool Cmd_SetRandomizerSeed_Execute(COMMAND_ARGS)
 {
 	UInt32 seed = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &seed)) return true;
 	SetSeedForMod(seed, scriptObj);
-	return true; 
+	return true;
 }
-DEFINE_COMMAND_ALT_PLUGIN(SetSeedUsingForm, SetFormSeed, , false, 1, kParams_OneOptionalForm);
+
 bool Cmd_SetSeedUsingForm_Execute(COMMAND_ARGS)
 {
 	TESForm* seedForm = nullptr;
@@ -862,7 +863,6 @@ bool Cmd_SetSeedUsingForm_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_ALT_PLUGIN(GetRandomizerSeed, GetSeed, , false, 0, NULL);
 bool Cmd_GetRandomizerSeed_Execute(COMMAND_ARGS)
 {
 	*result = NAN;  //uninitialized value
@@ -889,7 +889,6 @@ UInt32 RandSeeded_Call(UInt32 min, UInt32 max, Script* scriptObj)
 	return distribution(*generator);
 }
 
-DEFINE_COMMAND_ALT_PLUGIN(RandSeeded, GenerateSeededRandomNumber, , false, 2, kParams_TwoInts);
 bool Cmd_RandSeeded_Execute(COMMAND_ARGS)
 {
 	*result = NAN;
@@ -899,16 +898,13 @@ bool Cmd_RandSeeded_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_ALT_PLUGIN(GetRandomPercentSeeded, , , false, 0, NULL);
 bool Cmd_GetRandomPercentSeeded_Execute(COMMAND_ARGS)
 {
-	*result = RandSeeded_Call(1, 100, scriptObj);  //NOTE: GetRandomPercent uses 0, 99 as min/max, but I dislike that.
+	//NOTE: GetRandomPercent uses 0, 99 as min/max, but I dislike that.
+	*result = RandSeeded_Call(1, 100, scriptObj);
 	return true;
 }
 
-
-
-DEFINE_CMD_ALT_COND_PLUGIN(IsReferenceCloned, IsRefrCloned, "Checks if the reference's modIndex is 0xFF", true, NULL);
 bool Cmd_IsReferenceCloned_Execute(COMMAND_ARGS)
 {
 	//*result = thisObj->IsTemporary();  //todo: figure out what the IsTemporary flag does, cuz it doesn't determine 0xFF stuff.
@@ -920,6 +916,11 @@ bool Cmd_IsReferenceCloned_Eval(COMMAND_ARGS_EVAL)
 	*result = thisObj->IsCloned();
 	return true;
 }
+
+
+
+
+#if _DEBUG
 
 
 DEFINE_COMMAND_PLUGIN(SetCellFullNameAlt, "Like SetCellFullName but accepts a string.", 0, 2, kParams_JIP_OneCell_OneString);
