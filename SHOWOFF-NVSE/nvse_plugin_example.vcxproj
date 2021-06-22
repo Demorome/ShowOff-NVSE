@@ -96,31 +96,37 @@
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(SolutionDir)Events;$(SolutionDir)internal;$(SolutionDir)functions;$(SolutionDir)JSON_Library;$(SolutionDir)SimpleINILibrary;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug GECK|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(SolutionDir)Events;$(SolutionDir)internal;$(SolutionDir)functions;$(SolutionDir)JSON_Library;$(SolutionDir)SimpleINILibrary;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(SolutionDir)Events;$(SolutionDir)internal;$(SolutionDir)functions;$(SolutionDir)JSON_Library;$(SolutionDir)SimpleINILibrary;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release GECK|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(SolutionDir)Events;$(SolutionDir)internal;$(SolutionDir)functions;$(SolutionDir)JSON_Library;$(SolutionDir)SimpleINILibrary;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug ng|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>$(SolutionDir)Events;$(SolutionDir)internal;$(SolutionDir)functions;$(SolutionDir)JSON_Library;$(SolutionDir)SimpleINILibrary;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release ng|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(SolutionDir)Events;$(SolutionDir)internal;$(SolutionDir)functions;$(SolutionDir)JSON_Library;$(SolutionDir)SimpleINILibrary;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
