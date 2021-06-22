@@ -219,7 +219,7 @@ bool Cmd_GetEquippedItems_Execute(COMMAND_ARGS)
 {
 	UInt32 flags = 0;
 	*result = 0;
-	if (!ExtractArgs(EXTRACT_ARGS, &flags) || NOT_ACTOR(thisObj)) return true;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &flags) || NOT_ACTOR(thisObj)) return true;
 	Vector<ArrayElementR> elems;
 	auto eqItems = GetEquippedItemsData(thisObj, flags);
 	for (auto const& iter : eqItems)
@@ -236,6 +236,26 @@ bool Cmd_GetEquippedItems_Execute(COMMAND_ARGS)
 
 #ifdef _DEBUG
 
+DEFINE_CMD_ALT_COND_PLUGIN(GetPCCanSleepInOwnedBeds, , , 0, NULL);
+bool Cmd_GetPCCanSleepInOwnedBeds_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = GetCanSleepInOwnedBeds();
+	return true;
+}
+bool Cmd_GetPCCanSleepInOwnedBeds_Execute(COMMAND_ARGS)
+{
+	*result = GetCanSleepInOwnedBeds();
+	return true;
+}
+
+DEFINE_COMMAND_PLUGIN(SetPCCanSleepInOwnedBeds, , false, 1, kParams_OneInt);
+bool Cmd_SetPCCanSleepInOwnedBeds_Execute(COMMAND_ARGS)
+{
+	UInt32 bOn;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bOn)) return true;
+	SetCanSleepInOwnedBeds(bOn);
+	return true;
+}
 
 DEFINE_CMD_ALT_COND_PLUGIN(GetPCHasFastTravelOverride, , "Returns whether or not the player is restricted by EnableFastTravel", 0, NULL);
 bool Cmd_GetPCHasFastTravelOverride_Eval(COMMAND_ARGS_EVAL)

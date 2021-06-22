@@ -447,6 +447,14 @@ extern "C"
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 
+		REG_CMD(SetRandomizerSeed)
+		REG_CMD(SetSeedUsingForm)
+		REG_CMD(GetRandomizerSeed)
+		REG_CMD(RandSeeded)
+		REG_CMD(GetRandomPercentSeeded)
+		
+		REG_CMD(GetPCCanSleepInOwnedBeds)
+		REG_CMD(SetPCCanSleepInOwnedBeds)
 		
 		REG_CMD(IsReferenceCloned)
 

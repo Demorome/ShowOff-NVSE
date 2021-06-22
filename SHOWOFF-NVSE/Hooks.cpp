@@ -267,10 +267,37 @@ double __fastcall PreventRepairButton(ContChangesEntry* entry, int bPercent)
 }
 
 
+
+
+
 #if _DEBUG
 // Below is reserved for messing around with IDA
 
+bool GetCanSleepInOwnedBeds()
+{
+	//if (GetRelJumpAddr(0x509690) == 0x32EB) return true;  //flawed since it's not an actual jump
+	return false;
+}
 
+// Copies after lStewieAl's patchSleepInOwnedBeds()
+void SetCanSleepInOwnedBeds(bool bOn)
+{
+	if (bOn && !GetCanSleepInOwnedBeds())
+	{
+		// jump to allow sleep if the bed is owned but the player is activating it
+		SafeWrite16(0x509690, 0x32EB);
+
+		// allow sleeping while trespassing
+		SafeWrite8(0x509737, 0xEB);
+	}
+	else if (GetCanSleepInOwnedBeds())
+	{
+		// Restore original data.
+		//SafeWrite16(0x509690, );
+		//SafeWrite8(0x509737, );
+	}
+
+}
 
 
 #if 0

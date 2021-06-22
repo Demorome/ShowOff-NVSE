@@ -17,11 +17,8 @@ int CalculateCombatPickpocketAPCost(ContChangesEntry* item, Actor* target, signe
 // custom pickpocket code, for ripping items straight out of an opponent's hands/pockets.
 // Code ripped from lStewieAl's Tweaks (TryPickpocket)
 bool __fastcall TryCombatPickpocket(ContChangesEntry* selection, SInt32 count, Actor* actor, signed int itemValue);
-
 void SetContainerSubtitleStringToPickpocketAPCost();
-
 void ContainerHoverItemHook();
-
 void resetPickpocketHooks();
 
 //Replaces a IsInCombat check in the NPC activation code.
@@ -37,10 +34,13 @@ tList<PlayerCharacter::CompassTarget>* __fastcall ShowPickpocketStringInCombat2(
 double __fastcall PreventRepairButton(ContChangesEntry* entry, int bPercent);
 
 
+
+
 #if _DEBUG
 // Below is reserved for messing around with IDA
 
-
+bool GetCanSleepInOwnedBeds();
+void SetCanSleepInOwnedBeds(bool bOn);
 
 
 #if 0

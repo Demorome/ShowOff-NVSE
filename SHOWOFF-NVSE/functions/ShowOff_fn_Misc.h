@@ -1,5 +1,6 @@
 ﻿#pragma once
 
+#include <random>
 #include <unordered_set>
 
 #include "GameRTTI.h"
@@ -813,10 +814,101 @@ bool Cmd_GetCalculatedMaxCarryWeight_Execute(COMMAND_ARGS)
 }
 
 
+// Just so I can store the initial seed.
+// https://www.cplusplus.com/reference/random/default_random_engine/
+class Random_Engine : public std::default_random_engine
+{
+public:
+	UInt32 seed;
+	// constructor that sets seed
+	Random_Engine(UInt32 newSeed)
+	{
+		seed = newSeed;
+	}
+};
+
+
 #if _DEBUG
 
+UnorderedMap<UInt32, Random_Engine*> g_ModsAndSeedsMap;
 
-DEFINE_CMD_ALT_COND_PLUGIN(IsReferenceCloned, IsRefrCloned, "Checks if the reference's modIndex is 0xFF", 1, NULL);
+void SetSeedForMod(UInt32 seed, Script* scriptObj)
+{
+	if (!seed) seed = std::default_random_engine::default_seed;
+	UInt8 const modIdx = scriptObj->GetOverridingModIdx();
+	ScopedLock lock(g_Lock);
+	// Change the engine's seed by just deleting the old engine and creating a new one.
+	auto const oldGen = g_ModsAndSeedsMap.GetErase(modIdx);
+	delete oldGen;  //safe to do even if the pointer is null
+	auto newGen = new Random_Engine(seed);
+	g_ModsAndSeedsMap.Emplace(modIdx, newGen);
+}
+
+DEFINE_COMMAND_ALT_PLUGIN(SetRandomizerSeed, SetSeed, , false, 1, kParams_OneOptionalInt);
+bool Cmd_SetRandomizerSeed_Execute(COMMAND_ARGS)
+{
+	UInt32 seed = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &seed)) return true;
+	SetSeedForMod(seed, scriptObj);
+	return true; 
+}
+DEFINE_COMMAND_ALT_PLUGIN(SetSeedUsingForm, SetFormSeed, , false, 1, kParams_OneOptionalForm);
+bool Cmd_SetSeedUsingForm_Execute(COMMAND_ARGS)
+{
+	TESForm* seedForm = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &seedForm)) return true;
+	UInt32 const seed = seedForm ? seedForm->refID : 0;
+	SetSeedForMod(seed, scriptObj);
+	return true;
+}
+
+DEFINE_COMMAND_ALT_PLUGIN(GetRandomizerSeed, GetSeed, , false, 0, NULL);
+bool Cmd_GetRandomizerSeed_Execute(COMMAND_ARGS)
+{
+	*result = NAN;  //uninitialized value
+	UInt8 const modIdx = scriptObj->GetOverridingModIdx();
+	if (auto const currGen = g_ModsAndSeedsMap.Get(modIdx))
+	{
+		*result = currGen->seed;
+	}
+	return true;
+}
+
+UInt32 RandSeeded_Call(UInt32 min, UInt32 max, Script* scriptObj)
+{
+	UInt8 const modIdx = scriptObj->GetOverridingModIdx();
+	ScopedLock lock(g_Lock);
+	Random_Engine* generator = g_ModsAndSeedsMap.Get(modIdx);
+	if (!generator)
+	{
+		// Make a new generator for the calling Mod w/ default seed, and use that.
+		generator = new Random_Engine(std::default_random_engine::default_seed);
+		g_ModsAndSeedsMap.Emplace(modIdx, generator);
+	}
+	std::uniform_int_distribution const distribution(min, max);
+	return distribution(*generator);
+}
+
+DEFINE_COMMAND_ALT_PLUGIN(RandSeeded, GenerateSeededRandomNumber, , false, 2, kParams_TwoInts);
+bool Cmd_RandSeeded_Execute(COMMAND_ARGS)
+{
+	*result = NAN;
+	UInt32 min, max;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &min, &max)) return true;
+	*result = RandSeeded_Call(min, max, scriptObj);
+	return true;
+}
+
+DEFINE_COMMAND_ALT_PLUGIN(GetRandomPercentSeeded, , , false, 0, NULL);
+bool Cmd_GetRandomPercentSeeded_Execute(COMMAND_ARGS)
+{
+	*result = RandSeeded_Call(1, 100, scriptObj);  //NOTE: GetRandomPercent uses 0, 99 as min/max, but I dislike that.
+	return true;
+}
+
+
+
+DEFINE_CMD_ALT_COND_PLUGIN(IsReferenceCloned, IsRefrCloned, "Checks if the reference's modIndex is 0xFF", true, NULL);
 bool Cmd_IsReferenceCloned_Execute(COMMAND_ARGS)
 {
 	//*result = thisObj->IsTemporary();  //todo: figure out what the IsTemporary flag does, cuz it doesn't determine 0xFF stuff.
