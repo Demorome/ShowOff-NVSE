@@ -955,7 +955,7 @@ bool Cmd_GetScriptHasFunction_Execute(COMMAND_ARGS)
 	if (thisObj)
 	{
 		ExtraScript* xScript = GetExtraTypeJIP(&thisObj->extraDataList, Script);
-		if (xScript && !xScript->script && !xScript->eventList)
+		if (xScript && xScript->script && xScript->eventList)
 			script = xScript->script;
 	}
 	else if (form)
