@@ -962,9 +962,8 @@ bool Cmd_GetScriptHasFunction_Execute(COMMAND_ARGS)
 	*result = false;
 	char function[0x50];
 	TESForm* form = nullptr;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &function, &form)) return true;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &function, &form) || !function[0]) return true;
 	
-	if (!function[0]) return true;
 	Script* script = nullptr;
 	if (thisObj)
 	{
@@ -978,14 +977,14 @@ bool Cmd_GetScriptHasFunction_Execute(COMMAND_ARGS)
 	}
 	if (!script) return true;
 	
-	UInt8* dataPtr = script->data, *endPtr = dataPtr + script->info.dataLength;
-	dataPtr += 4;
 	const CommandInfo* funcInfo = GetCmdByName(function);
 	if (!funcInfo)
 	{
 		if (g_ShowFuncDebug) Console_Print("GetScriptHasFunction - invalid function name.");
 		return true;
 	}
+	UInt8* dataPtr = script->data, *endPtr = dataPtr + script->info.dataLength;
+	dataPtr += 4;
 	UInt16 lookFor = funcInfo->opcode, *opcode, length;
 	while (dataPtr < endPtr)
 	{
@@ -993,7 +992,8 @@ bool Cmd_GetScriptHasFunction_Execute(COMMAND_ARGS)
 		dataPtr += 2;
 		length = *(UInt16*)dataPtr;
 		dataPtr += 2;
-		if (*opcode == 0x10)  //no idea what this does
+#if 0
+		if (*opcode == 0x10)  //"Begin" opcode
 		{
 			if (*(UInt16*)dataPtr != 2)
 			{
@@ -1001,21 +1001,22 @@ bool Cmd_GetScriptHasFunction_Execute(COMMAND_ARGS)
 				length = *(UInt16*)dataPtr + 6;
 			}
 		}
-		else  
+		else
 		{
-			if (*opcode == 0x1C) //...nor this.
+			if (*opcode == 0x1C) //not sure what this is.
 			{
 				opcode = (UInt16*)dataPtr;
 				dataPtr += 2;
 				length = *(UInt16*)dataPtr;
 				dataPtr += 2;
 			}
-			if (*opcode == lookFor)
-			{
-				*result = true;
-				break;
-			}
+#endif
+		if (*opcode == lookFor)
+		{
+			*result = true;
+			break;
 		}
+		//}
 		dataPtr += length;
 	}
 	return true;

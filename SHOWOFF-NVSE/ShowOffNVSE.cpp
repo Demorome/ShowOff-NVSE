@@ -441,7 +441,7 @@ extern "C"
 		/*3CDD*/ REG_CMD(AdvanceSeed)
 
 
-		//***Current Max OpCode: 0x3CDE (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
+		//***Current Max OpCode: 0x3D10 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
 		//========v1.??
 		//todo: always check to update/increase your opcode range when adding new functions
