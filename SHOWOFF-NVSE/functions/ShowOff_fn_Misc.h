@@ -584,7 +584,8 @@ UInt32 __fastcall GetNumBrokenEquippedItems_Call(TESObjectREFR* const thisObj, f
 		}
 		else if (pHealth && threshold >= 1.0F) numBrokenItems++;
 	}
-	Console_Print("GetNumBrokenEquippedItems >> %u", numBrokenItems);
+	if (IsConsoleMode())
+		Console_Print("GetNumBrokenEquippedItems >> %u", numBrokenItems);
 	return numBrokenItems;
 }
 
@@ -623,7 +624,8 @@ bool Cmd_GetEquippedItemsAsBitMask_Eval(COMMAND_ARGS_EVAL)
 		}
 	}
 	*result = flags;
-	Console_Print("GetEquippedItemsAsBitMask >> %u", flags);
+	if (IsConsoleMode())
+		Console_Print("GetEquippedItemsAsBitMask >> %u", flags);
 	return true;
 }
 bool Cmd_GetEquippedItemsAsBitMask_Execute(COMMAND_ARGS)
@@ -677,7 +679,7 @@ bool Cmd_ClearShowoffSavedData_Execute(COMMAND_ARGS)
 	UInt32 auxStringMaps;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &auxStringMaps)) return true;
 	UInt8 modIdx = scriptObj->GetOverridingModIdx();
-	if (auxStringMaps && s_auxStringMapArraysPerm.Erase((auxStringMaps == 2) ? 0xFF : modIdx))
+	if (auxStringMaps && s_auxStringMapArraysPerm.Erase((auxStringMaps == 2) ? 0xFF : modIdx))  //todo: fix .Erase not doing anything! 
 		s_dataChangedFlags |= kChangedFlag_AuxStringMaps;
 	return true;
 }
@@ -699,7 +701,8 @@ float __fastcall GetBaseEquippedWeight_Call(TESObjectREFR* const thisObj, UInt32
 			}
 		}
 	}
-	Console_Print("GetBaseEquippedWeight >> %f", totalWeight);
+	if (IsConsoleMode())
+		Console_Print("GetBaseEquippedWeight >> %f", totalWeight);
 	return totalWeight;
 }
 
@@ -783,7 +786,8 @@ float __fastcall GetCalculatedEquippedWeight_Call(TESObjectREFR* const thisObj, 
 				totalWeight += itemWeight;
 		}
 	}
-	Console_Print("GetCalculatedEquippedWeight >> %f", totalWeight);
+	if (IsConsoleMode())
+		Console_Print("GetCalculatedEquippedWeight >> %f", totalWeight);
 	return totalWeight;
 }
 
@@ -823,8 +827,13 @@ bool Cmd_GetCalculatedMaxCarryWeight_Execute(COMMAND_ARGS)
 // Just so I can store the initial seed.
 // https://www.cplusplus.com/reference/random/default_random_engine/
 class Random_Engine : public std::default_random_engine
-{
+{	
 public:
+	enum SeedStuff
+	{
+		kInvalid_Seed = -1,
+	};
+	
 	UInt32 seed;
 	// constructor that sets seed
 	Random_Engine(UInt32 newSeed)
@@ -866,7 +875,7 @@ bool Cmd_SetSeedUsingForm_Execute(COMMAND_ARGS)
 
 bool Cmd_GetRandomizerSeed_Execute(COMMAND_ARGS)
 {
-	*result = NAN;  //uninitialized value
+	*result = Random_Engine::kInvalid_Seed;
 	UInt8 const modIdx = scriptObj->GetOverridingModIdx();
 	if (auto const currGen = g_ModsAndSeedsMap.Get(modIdx))
 	{
@@ -892,9 +901,9 @@ UInt32 RandSeeded_Call(UInt32 min, UInt32 max, Script* scriptObj)
 
 bool Cmd_RandSeeded_Execute(COMMAND_ARGS)
 {
-	*result = NAN;
+	*result = Random_Engine::kInvalid_Seed;
 	UInt32 min, max;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &min, &max)) return true;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &min, &max) || min > max) return true;
 	*result = RandSeeded_Call(min, max, scriptObj);
 	return true;
 }
@@ -933,6 +942,65 @@ bool Cmd_IsReferenceCloned_Eval(COMMAND_ARGS_EVAL)
 	return true;
 }
 
+
+#if _DEBUG
+
+DEFINE_COMMAND_PLUGIN(GetCalculatedItemValue, , false, 1, kParams_OneOptionalForm);
+bool Cmd_GetCalculatedItemValue_Execute(COMMAND_ARGS)
+{
+	*result = -1;
+	if (thisObj)
+	{
+		//todo: wtf do I do
+		ContChangesEntry tempEntry(NULL, 1, thisObj->baseForm);  //copying after GetCalculatedWeaponDamage from JIP, thx c6.
+		ExtraContainerChanges::ExtendDataList extendData;
+		extendData.Init(&thisObj->extraDataList);
+		tempEntry.extendData = &extendData;
+		*result = ThisStdCall<double>(0x4BD400, &tempEntry);
+	}
+	return true;
+}
+
+DEFINE_COMMAND_PLUGIN(GetCalculatedItemHealth, , false, 2, kParams_OneOptionalForm_OneOptionalInt);
+bool Cmd_GetCalculatedItemHealth_Execute(COMMAND_ARGS)
+{
+	*result = -1;
+	TESForm* form = nullptr;
+	UINT32 returnAsPercent = false;
+	if (thisObj && ExtractArgs(EXTRACT_ARGS, &form, &returnAsPercent))
+	{
+		//todo: wtf do I do
+		ContChangesEntry tempEntry(NULL, 1, thisObj->baseForm);  //copying after GetCalculatedWeaponDamage from JIP, and c6.
+		ExtraContainerChanges::ExtendDataList extendData;
+		extendData.Init(&thisObj->extraDataList);
+		tempEntry.extendData = &extendData;
+
+		//double __thiscall ContChangesEntry::GetHealthPerc(ContChangesEntry * this, int a2)
+		*result = ThisStdCall<double>(0x4BCDB0, &tempEntry, returnAsPercent != 0);
+	}
+	return true;
+}
+
+DEFINE_COMMAND_PLUGIN(GetCalculatedItemWeight, , false, 0, kParams_OneOptionalForm);
+bool Cmd_GetCalculatedItemWeight_Execute(COMMAND_ARGS)
+{
+	*result = -1;
+	//todo: wtf do I do
+	if (thisObj)
+	{
+#if 0
+		ContChangesEntry tempEntry(NULL, 1, thisObj->baseForm);
+		ExtraContainerChanges::ExtendDataList extendData;
+		extendData.Init(&thisObj->extraDataList);
+		tempEntry.extendData = &extendData;
+
+		//double __thiscall ContChangesEntry::GetHealthPerc(ContChangesEntry * this, int a2)
+		//*result = ThisStdCall<double>(0x4BCDB0, &tempEntry, bPercent);
+#endif
+	}
+	return true;
+}
+
 // Copied from FOSE's GetScript.
 Script* GetScriptFromForm(TESForm* form)
 {
@@ -951,9 +1019,6 @@ Script* GetScriptFromForm(TESForm* form)
 	}
 	return script;
 }
-
-
-#if _DEBUG
 
 // Rips off JIP's DisableScriptedActivate in order to check the OpCodes a Script uses.
 DEFINE_COMMAND_PLUGIN(GetScriptHasFunction, "Checks if a script uses a certain Function.", 0, 2, kParams_OneString_OneOptionalForm);
@@ -1073,58 +1138,6 @@ bool Cmd_SetBaseActorValue_Execute(COMMAND_ARGS)
 	actorBase->ModActorValue(actorVal, (valueToSet - currentValue));
 	return true;
 }
-
-DEFINE_COMMAND_PLUGIN(GetItemRefValue, , 1, 0, NULL);
-bool Cmd_GetItemRefValue_Execute(COMMAND_ARGS)
-{
-	*result = -1;
-	if (thisObj)
-	{
-		ContChangesEntry tempEntry(NULL, 1, thisObj->baseForm);  //copying after GetCalculatedWeaponDamage from JIP, thx c6.
-		ExtraContainerChanges::ExtendDataList extendData;
-		extendData.Init(&thisObj->extraDataList);
-		tempEntry.extendData = &extendData;
-		*result = ThisStdCall<double>(0x4BD400, &tempEntry);
-	}
-	return true;
-}
-
-DEFINE_COMMAND_PLUGIN(GetItemRefHealth, , 1, 1, kParams_OneOptionalInt);
-bool Cmd_GetItemRefHealth_Execute(COMMAND_ARGS)
-{
-	*result = -1;
-	UINT32 bPercent = 0;
-	if (thisObj && ExtractArgs(EXTRACT_ARGS, &bPercent))
-	{
-		ContChangesEntry tempEntry(NULL, 1, thisObj->baseForm);  //copying after GetCalculatedWeaponDamage from JIP, and c6.
-		ExtraContainerChanges::ExtendDataList extendData;
-		extendData.Init(&thisObj->extraDataList);
-		tempEntry.extendData = &extendData;
-
-		//double __thiscall ContChangesEntry::GetHealthPerc(ContChangesEntry * this, int a2)
-		*result = ThisStdCall<double>(0x4BCDB0, &tempEntry, bPercent);
-	}
-	return true;
-}
-
-/*
-DEFINE_COMMAND_PLUGIN(GetCalculatedItemWeight, , 1, 0, One);
-bool Cmd_GetCalculatedItemWeight_Execute(COMMAND_ARGS)
-{
-	*result = -1;
-	if (thisObj)
-	{
-		ContChangesEntry tempEntry(NULL, 1, thisObj->baseForm);  
-		ExtraContainerChanges::ExtendDataList extendData;
-		extendData.Init(&thisObj->extraDataList);
-		tempEntry.extendData = &extendData;
-
-		//double __thiscall ContChangesEntry::GetHealthPerc(ContChangesEntry * this, int a2)
-		*result = ThisStdCall<double>(0x4BCDB0, &tempEntry, bPercent);
-	}
-	return true;
-}
-*/
 
 DEFINE_COMMAND_PLUGIN(SetEnableParent, , 1, 1, kParams_OneOptionalForm);
 

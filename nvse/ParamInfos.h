@@ -394,6 +394,12 @@ static ParamInfo kParams_OneOptionalForm[1] =
 	{	"form",	kParamType_AnyForm,	1	},
 };
 
+static ParamInfo kParams_OneOptionalForm_OneOptionalInt[2] =
+{
+	{	"form",	kParamType_AnyForm,	1	},
+	{	"int",kParamType_Integer,		1	},
+};
+
 static ParamInfo kParams_EquipItem[3] =
 {
 	{	"item",			kParamType_ObjectID,	0	},

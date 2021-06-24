@@ -18,6 +18,7 @@ This file is here just so I'm reminded to keep track of changes as I do em.
 	*Added two new flags: skipUnplayable and noQuestItems
 	*DEFAULT BEHAVIOR CHANGED: In order to avoid including unplayable items like the pipboy by default-calling the function, 
 		`skipUnplayable` is automatically checked if Flags == 0 (or not provided).
+		(This also applies to the new GetEquippedItems/UnequipItems functions)
 
 -New Functions:
 * SetShowOffDebugMode
@@ -32,5 +33,6 @@ This file is here just so I'm reminded to keep track of changes as I do em.
 * GetRandomPercentSeeded
 * IsReferenceCloned
 * AdvanceSeed
+
 
 ******DON'T FORGET TO UPDATE THE PLUGIN VERSION BEFORE EVERY RELEASE*********

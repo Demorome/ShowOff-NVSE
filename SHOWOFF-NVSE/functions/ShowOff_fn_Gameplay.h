@@ -163,8 +163,7 @@ bool Cmd_IsEquippedWeaponRanged_Eval(COMMAND_ARGS_EVAL)
 	if (thisObj)
 	{
 		if (!thisObj->IsActor()) return true;
-		TESObjectWEAP* weapon = ((Actor*)thisObj)->GetEquippedWeapon();
-		if (weapon)
+		if (TESObjectWEAP* weapon = ((Actor*)thisObj)->GetEquippedWeapon())
 		{
 			UINT8 weapType = weapon->eWeaponType;
 			*result = weapType >= 3 && weapType <= 13;
@@ -191,7 +190,7 @@ bool Cmd_GetChallengeProgress_Eval(COMMAND_ARGS_EVAL)
 	*result = 0;
 	if (arg1)
 	{
-		TESChallenge* challenge = (TESChallenge*)arg1;
+		auto challenge = (TESChallenge*)arg1;
 		if (IS_TYPE(challenge, TESChallenge))
 			*result = challenge->progress;
 	}
@@ -227,7 +226,7 @@ bool Cmd_GetEquippedItems_Execute(COMMAND_ARGS)
 		ArrayElementR elem = iter.pForm;
 		elems.Append(elem);
 	}
-	auto array = CreateArray(elems.Data(), elems.Size(), scriptObj);
+	auto const array = CreateArray(elems.Data(), elems.Size(), scriptObj);
 	AssignArrayResult(array, result);
 	return true;
 }
