@@ -33,7 +33,7 @@
 // Plugin Stuff
 IDebugLog g_Log("ShowOffNVSE.log");
 HMODULE	g_ShowOffHandle;
-UInt32 g_PluginVersion = 110;
+UInt32 g_PluginVersion = 115;
 
 // Allows modmakers to toggle ShowOff's debug messages for some of its functions. 
 std::atomic<bool> g_ShowFuncDebug = false;

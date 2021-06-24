@@ -40,6 +40,7 @@ DEFINE_COMMAND_ALT_PLUGIN(RandSeeded, GenerateSeededRandomNumber, , false, 2, kP
 DEFINE_COMMAND_ALT_PLUGIN(GetRandomPercentSeeded, , , false, 0, NULL);
 DEFINE_COMMAND_PLUGIN(AdvanceSeed, "Discards would-be generated numbers to advance in the seed generation pattern.", false, 1, kParams_OneInt);
 DEFINE_CMD_ALT_COND_PLUGIN(IsReferenceCloned, IsRefrCloned, "Checks if the reference's modIndex is 0xFF", true, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(IsTemporaryReference, , , false, NULL); //todo: Set equivalents?
 
 bool(__cdecl* Cmd_Disable)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5C45E0;
 bool(__cdecl* Cmd_Enable)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5C43D0;
@@ -932,8 +933,7 @@ bool Cmd_AdvanceSeed_Execute(COMMAND_ARGS)
 
 bool Cmd_IsReferenceCloned_Execute(COMMAND_ARGS)
 {
-	//*result = thisObj->IsTemporary();  //todo: figure out what the IsTemporary flag does, cuz it doesn't determine 0xFF stuff.
-	*result = thisObj->IsCloned();  // technically should also work if thisObj is a baseForm? But don't do that.
+	*result = thisObj->IsCloned();  // technically should also work if thisObj is a baseForm? But maybe don't do that.
 	return true;
 }
 bool Cmd_IsReferenceCloned_Eval(COMMAND_ARGS_EVAL)
@@ -942,8 +942,23 @@ bool Cmd_IsReferenceCloned_Eval(COMMAND_ARGS_EVAL)
 	return true;
 }
 
+bool Cmd_IsTemporaryReference_Execute(COMMAND_ARGS)
+{
+	*result = thisObj->IsTemporary();
+	return true;
+}
+bool Cmd_IsTemporaryReference_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = thisObj->IsTemporary();
+	return true;
+}
 
 #if _DEBUG
+
+
+
+DEFINE_COMMAND_PLUGIN(GetCalculatedItemValue, , false, 1, kParams_OneOptionalForm);
+
 
 DEFINE_COMMAND_PLUGIN(GetCalculatedItemValue, , false, 1, kParams_OneOptionalForm);
 bool Cmd_GetCalculatedItemValue_Execute(COMMAND_ARGS)

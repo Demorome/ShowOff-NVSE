@@ -34,5 +34,22 @@ This file is here just so I'm reminded to keep track of changes as I do em.
 * IsReferenceCloned
 * AdvanceSeed
 
+//===v1.15
+===Bug Fixes:
+* Fixed certain GetEquipped__ functions always printing to console
+* Add RandSeeded safety check (Min must be <= Max) - before, breaking this assertion caused a crash. Returns -1 if this assertion fails.
+* Fix GetRandomizerSeed returning NAN (returns -1 for errors now).
+
+===New Functions:
+* IsTemporaryReference
+
+
+(Template:)
+//===v???
+===Bug Fixes:
+* 
+
+===New Functions:
+*
 
 ******DON'T FORGET TO UPDATE THE PLUGIN VERSION BEFORE EVERY RELEASE*********
