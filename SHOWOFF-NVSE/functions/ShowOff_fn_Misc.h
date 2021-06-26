@@ -40,21 +40,19 @@ DEFINE_COMMAND_ALT_PLUGIN(RandSeeded, GenerateSeededRandomNumber, , false, 2, kP
 DEFINE_COMMAND_ALT_PLUGIN(GetRandomPercentSeeded, , , false, 0, NULL);
 DEFINE_COMMAND_PLUGIN(AdvanceSeed, "Discards would-be generated numbers to advance in the seed generation pattern.", false, 1, kParams_OneInt);
 DEFINE_CMD_ALT_COND_PLUGIN(IsReferenceCloned, IsRefrCloned, "Checks if the reference's modIndex is 0xFF", true, NULL);
-DEFINE_CMD_ALT_COND_PLUGIN(IsTemporaryReference, , , false, NULL); //todo: Set equivalents?
+DEFINE_CMD_ALT_COND_PLUGIN(IsTemporaryReference, IsTempRefr, "Checks if the reference does not persist in the savegame.", false, NULL); //todo: Set equivalents?
+DEFINE_COMMAND_ALT_PLUGIN(HasScriptFunction, ScriptHasFunction, "", true, 3, kParams_JIP_OneString_OneOptionalInt_OneOptionalForm);
+
+
 
 bool(__cdecl* Cmd_Disable)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5C45E0;
-bool(__cdecl* Cmd_Enable)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5C43D0;
-
 bool Cmd_ShowingOffDisable_Execute(COMMAND_ARGS) {
 	return Cmd_Disable(PASS_COMMAND_ARGS);
 }
-
+bool(__cdecl* Cmd_Enable)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5C43D0;
 bool Cmd_ShowingOffEnable_Execute(COMMAND_ARGS) {
 	return Cmd_Enable(PASS_COMMAND_ARGS);
 }
-
-
-
 
 //ripped code from FOSE's ListAddForm
 bool Cmd_ListAddList_Execute(COMMAND_ARGS)
@@ -953,11 +951,80 @@ bool Cmd_IsTemporaryReference_Eval(COMMAND_ARGS_EVAL)
 	return true;
 }
 
+// Rips off JIP's DisableScriptedActivate.
+// Yvile made this work.
+bool __fastcall ScriptHasFunction(Script* script, const CommandInfo* cmdInfo, SInt32 block)
+{
+	UInt8* dataPtr = script->data, * endPtr = dataPtr + script->info.dataLength;
+	dataPtr += 4;
+	UInt16 lookFor = cmdInfo->opcode, * opcode, length;
+	SInt32 blockCur;
+	while (dataPtr < endPtr)
+	{
+		opcode = (UInt16*)dataPtr;
+		dataPtr += 2;
+		length = *(UInt16*)dataPtr;
+		dataPtr += 2;
+		if (*opcode == 0x10) { blockCur = *(UInt16*)dataPtr; }
+		else if (*opcode == 0x11) { if (block == blockCur) break; }
+		else {
+			if (*opcode == 0x1C) {
+				opcode = (UInt16*)dataPtr;
+				dataPtr += 2;
+				length = *(UInt16*)dataPtr;
+				dataPtr += 2;
+			}
+			if (*opcode == lookFor && (block == blockCur || block == -1)) {
+				return true;
+			}
+		}
+		dataPtr += length;
+	}
+	return false;
+}
+
+// Rips off JIP's DisableScriptedActivate in order to check the OpCodes a script uses.
+// Credit to Yvile for making this actually work.
+bool Cmd_HasScriptFunction_Execute(COMMAND_ARGS)
+{
+	*result = false;
+	char varName[0x50];
+	SInt32 block = -1;
+	TESForm* form = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &block, &form) || !varName[0]) return true;
+
+	//todo: test if alternative ways of checking for scripts are needed.
+	if (!form)
+	{
+		if (!thisObj) return true;
+		form = thisObj->baseForm;
+	}
+	Script* script = nullptr;
+	if IS_ID(form, Script)
+		script = (Script*)form;
+	else
+	{
+		TESScriptableForm* scriptable = DYNAMIC_CAST(form, TESForm, TESScriptableForm);
+		script = scriptable ? scriptable->script : NULL;
+		if (!script) return true;
+	}
+	auto cmdInfo = GetCmdByName(varName);
+	if (!cmdInfo)
+	{
+		if (g_ShowFuncDebug || IsConsoleMode()) Console_Print("ScriptHasFunction - invalid function name.");
+		return true;
+	}
+	*result = ScriptHasFunction(script, cmdInfo, block);
+	return true;
+}
+
+
+
+
+
+
 #if _DEBUG
 
-
-
-DEFINE_COMMAND_PLUGIN(GetCalculatedItemValue, , false, 1, kParams_OneOptionalForm);
 
 
 DEFINE_COMMAND_PLUGIN(GetCalculatedItemValue, , false, 1, kParams_OneOptionalForm);
@@ -1035,9 +1102,7 @@ Script* GetScriptFromForm(TESForm* form)
 	return script;
 }
 
-// Rips off JIP's DisableScriptedActivate in order to check the OpCodes a Script uses.
-DEFINE_COMMAND_PLUGIN(GetScriptHasFunction, "Checks if a script uses a certain Function.", 0, 2, kParams_OneString_OneOptionalForm);
-bool Cmd_GetScriptHasFunction_Execute(COMMAND_ARGS)
+bool Cmd_GetScriptHasFunction_OLD_Execute(COMMAND_ARGS)
 {
 	*result = false;
 	char function[0x50];
@@ -1057,49 +1122,7 @@ bool Cmd_GetScriptHasFunction_Execute(COMMAND_ARGS)
 	}
 	if (!script) return true;
 	
-	const CommandInfo* funcInfo = GetCmdByName(function);
-	if (!funcInfo)
-	{
-		if (g_ShowFuncDebug) Console_Print("GetScriptHasFunction - invalid function name.");
-		return true; 
-	}
-	UInt8* dataPtr = script->data, *endPtr = dataPtr + script->info.dataLength;
-	dataPtr += 4;
-	UInt16 lookFor = funcInfo->opcode, *opcode, length;
-	while (dataPtr < endPtr)
-	{
-		opcode = (UInt16*)dataPtr;
-		dataPtr += 2;
-		length = *(UInt16*)dataPtr;
-		dataPtr += 2;
-#if 0
-		if (*opcode == 0x10)  //"Begin" opcode
-		{
-			if (*(UInt16*)dataPtr != 2)
-			{
-				dataPtr += 2;
-				length = *(UInt16*)dataPtr + 6;
-			}
-		}
-		else
-		{
-			if (*opcode == 0x1C) //not sure what this is.
-			{
-				opcode = (UInt16*)dataPtr;
-				dataPtr += 2;
-				length = *(UInt16*)dataPtr;
-				dataPtr += 2;
-			}
-#endif
-		if (*opcode == lookFor)
-		{
-			*result = true;
-			break;
-		}
-		//}
-		dataPtr += length;
-	}
-	return true;
+	//stuff that didn't work.
 }
 
 

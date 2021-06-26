@@ -87,7 +87,6 @@ NVSEScriptInterface* g_scriptInterface = nullptr;
 NVSECommandTableInterface* g_commandInterface = nullptr;
 const CommandInfo* (*GetCmdByName)(const char* name);
 
-
 //Singletons
 HUDMainMenu* g_HUDMainMenu = nullptr;
 TileMenu** g_tileMenuArray = nullptr;
@@ -440,6 +439,9 @@ extern "C"
 		/*3CDC*/ REG_CMD(IsReferenceCloned)
 		/*3CDD*/ REG_CMD(AdvanceSeed)
 
+		//========v1.15
+		/*3CDE*/ REG_CMD(IsTemporaryReference)
+		/*3CDF*/ REG_CMD(HasScriptFunction)
 
 		//***Current Max OpCode: 0x3D10 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
@@ -448,9 +450,6 @@ extern "C"
 
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
-
-		REG_CMD(GetScriptHasFunction)
-
 		
 		REG_CMD(GetPCCanSleepInOwnedBeds)
 		REG_CMD(SetPCCanSleepInOwnedBeds)
@@ -488,8 +487,8 @@ extern "C"
 		//REG_CMD(UnequipItemsFromBitMask)  //tricky to get xData, idk if anyone will ever use this anyways.
 		//REG_CMD(SetOnHitAltEventHandler);
 
-		REG_CMD(GetItemRefValue);
-		REG_CMD(GetItemRefHealth);  //THESE PROBABLY NEED SAFETY CHECKS (check if loaded in mid-high)
+		//REG_CMD(GetItemRefValue);
+		//REG_CMD(GetItemRefHealth);  //THESE PROBABLY NEED SAFETY CHECKS (check if loaded in mid-high)
 		//REG_CMD(GetCalculatedItemWeight);
 
 		//REG_CMD(SetPlayerPickpocketBaseChance);
