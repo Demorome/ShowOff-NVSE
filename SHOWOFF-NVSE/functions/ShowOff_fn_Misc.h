@@ -41,8 +41,6 @@ DEFINE_COMMAND_ALT_PLUGIN(GetRandomPercentSeeded, , , false, 0, NULL);
 DEFINE_COMMAND_PLUGIN(AdvanceSeed, "Discards would-be generated numbers to advance in the seed generation pattern.", false, 1, kParams_OneInt);
 DEFINE_CMD_ALT_COND_PLUGIN(IsReferenceCloned, IsRefrCloned, "Checks if the reference's modIndex is 0xFF", true, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(IsTemporaryReference, IsTempRefr, "Checks if the reference does not persist in the savegame.", false, NULL); //todo: Set equivalents?
-DEFINE_COMMAND_ALT_PLUGIN(HasScriptFunction, ScriptHasFunction, "", true, 3, kParams_JIP_OneString_OneOptionalInt_OneOptionalForm);
-
 
 
 bool(__cdecl* Cmd_Disable)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5C45E0;
@@ -948,73 +946,6 @@ bool Cmd_IsTemporaryReference_Execute(COMMAND_ARGS)
 bool Cmd_IsTemporaryReference_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = thisObj->IsTemporary();
-	return true;
-}
-
-// Rips off JIP's DisableScriptedActivate.
-// Yvile made this work.
-bool __fastcall ScriptHasFunction(Script* script, const CommandInfo* cmdInfo, SInt32 block)
-{
-	UInt8* dataPtr = script->data, * endPtr = dataPtr + script->info.dataLength;
-	dataPtr += 4;
-	UInt16 lookFor = cmdInfo->opcode, * opcode, length;
-	SInt32 blockCur;
-	while (dataPtr < endPtr)
-	{
-		opcode = (UInt16*)dataPtr;
-		dataPtr += 2;
-		length = *(UInt16*)dataPtr;
-		dataPtr += 2;
-		if (*opcode == 0x10) { blockCur = *(UInt16*)dataPtr; }
-		else if (*opcode == 0x11) { if (block == blockCur) break; }
-		else {
-			if (*opcode == 0x1C) {
-				opcode = (UInt16*)dataPtr;
-				dataPtr += 2;
-				length = *(UInt16*)dataPtr;
-				dataPtr += 2;
-			}
-			if (*opcode == lookFor && (block == blockCur || block == -1)) {
-				return true;
-			}
-		}
-		dataPtr += length;
-	}
-	return false;
-}
-
-// Rips off JIP's DisableScriptedActivate in order to check the OpCodes a script uses.
-// Credit to Yvile for making this actually work.
-bool Cmd_HasScriptFunction_Execute(COMMAND_ARGS)
-{
-	*result = false;
-	char varName[0x50];
-	SInt32 block = -1;
-	TESForm* form = nullptr;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &block, &form) || !varName[0]) return true;
-
-	//todo: test if alternative ways of checking for scripts are needed.
-	if (!form)
-	{
-		if (!thisObj) return true;
-		form = thisObj->baseForm;
-	}
-	Script* script = nullptr;
-	if IS_ID(form, Script)
-		script = (Script*)form;
-	else
-	{
-		TESScriptableForm* scriptable = DYNAMIC_CAST(form, TESForm, TESScriptableForm);
-		script = scriptable ? scriptable->script : NULL;
-		if (!script) return true;
-	}
-	auto cmdInfo = GetCmdByName(varName);
-	if (!cmdInfo)
-	{
-		if (g_ShowFuncDebug || IsConsoleMode()) Console_Print("ScriptHasFunction - invalid function name.");
-		return true;
-	}
-	*result = ScriptHasFunction(script, cmdInfo, block);
 	return true;
 }
 

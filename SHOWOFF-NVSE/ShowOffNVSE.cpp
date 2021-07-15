@@ -441,7 +441,10 @@ extern "C"
 
 		//========v1.15
 		/*3CDE*/ REG_CMD(IsTemporaryReference)
-		/*3CDF*/ REG_CMD(HasScriptFunction)
+		/*3CDF*/ REG_CMD(GetPCHasScriptedFastTravelOverride)
+		/*3CE0*/ REG_CMD(GetPCCanFastTravel)  //CheckAllowFastTravel 0x93D660
+
+
 
 		//***Current Max OpCode: 0x3D10 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
@@ -451,29 +454,20 @@ extern "C"
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 		
+		REG_CMD_ARR(ReadArrayFromJSON)
+		//more JSON functions...
+		
 		REG_CMD(GetPCCanSleepInOwnedBeds)
 		REG_CMD(SetPCCanSleepInOwnedBeds)
 		
-
-		
 		REG_CMD(ClearShowoffSavedData)  //todo: test serialization. Seems broken???
-
 
 		//todo: fix whatever is causing the UDFs to not fire despite the hook working.
 		REG_CMD(SetShowOffOnCornerMessageEventHandler)
-
-
-		REG_CMD_ARR(ReadArrayFromJSON)
-
 		
 		//REG_CMD_ARR(Ar_Init);
-		REG_CMD(SetCellFullNameAlt)
 		REG_CMD(HasAnyScriptPackage)
 
-		//These two functions are useless, the setting functions already safety check and even report if the setting could not be found via func result.
-		REG_CMD(IsGameSetting) //For use in scripts to safety check; any other gamesetting function can already be used in console to check if a gamesetting exists.
-		REG_CMD(IsINISetting) //Uses the GetNumericINISetting "SettingName:CategoryName" format
-		
 		REG_CMD(SetProjectileRefFlag)
 		REG_CMD(GetProjectileRefFlag)
 
@@ -498,25 +492,22 @@ extern "C"
 		
 		REG_CMD(SetNoEquip);
 
-
+		//REG_CMD(GetPCCanSleepWait)  //0x969FA0
 
 		REG_CMD(SetEnableParent);
 		REG_CMD_ARR(GetQueuedCornerMessages);
-		REG_CMD(GetPCHasFastTravelOverride)
 
 		REG_CMD(GetNVSEVersionFullAlt)
 		REG_CMD(TestDemo);
 
-		//GetPCHasFastTravelOverride
-
+		
 		/* todo =======Function ideas ======
 		 *
 		 * GetActorValueShowoff - uses numeric keys like JG, but also has args to get the base/current/etc. Basically all-in-one.
 		 * IsActorInRadius - returns true if the actor is within the Radius extradata of the reference.
 		 * GetCalculatedItemWeight, using parts from GetCalc.equ.weight
-		 * Cmd_ShowSleepWaitMenu::CheckPreconditions -> GetPCCanSleepWait (0x969FA0)
 		 * GetEquippedTotalValue
-		 * IsThrowable = 10 and 13 is throw
+		 * IsWeaponThrowable = 10 and 13 is throw
 		 * IsPlaceable = 11 and 12 is Place
 		 *
 		 *
@@ -534,7 +525,10 @@ extern "C"
 		 * //REG_CMD(PlayerIsUsingTurbo) //basically pointless, as it behaves the same as GetAV Turbo == 1, except it doesn't update in pipboy unlike getav.
 		 * //REG_CMD(PlayerHasCateyeEnabled)  //Pointless, since Player.GetAV NightEye does the same thing
 		 * //REG_CMD(PlayerHasImprovedSpotting)  //pointless, just use GetPerkModifier for the "Has Improved Spotting" perk entry.
-
+		//REG_CMD(SetCellFullNameAlt)
+			//These two functions are useless, the setting functions already safety check and even report if the setting could not be found via func result.
+		REG_CMD(IsGameSetting) //For use in scripts to safety check; any other gamesetting function can already be used in console to check if a gamesetting exists.
+		REG_CMD(IsINISetting) //Uses the GetNumericINISetting "SettingName:CategoryName" format
 		 */
 
 #endif

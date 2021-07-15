@@ -42,7 +42,9 @@ This file is here just so I'm reminded to keep track of changes as I do em.
 
 ===New Functions:
 * IsTemporaryReference
-* HasScriptFunction
+* GetPCHasScriptedFastTravelOverride
+* GetPCCanFastTravel
+
 
 (Template:)
 //===v???

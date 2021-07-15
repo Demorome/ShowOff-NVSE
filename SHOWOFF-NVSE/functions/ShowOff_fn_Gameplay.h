@@ -13,6 +13,7 @@ DEFINE_CMD_ALT_COND_PLUGIN(IsEquippedWeaponRanged, , "Returns 1 if the calling a
 DEFINE_CMD_ALT_COND_PLUGIN(GetChallengeProgress, , "Returns the progress made on a challenge.", 0, kParams_OneChallenge)
 DEFINE_COMMAND_PLUGIN(UnequipItems, , true, 4, kParams_FourOptionalInts);
 DEFINE_COMMAND_PLUGIN(GetEquippedItems, , true, 1, kParams_OneOptionalInt);
+DEFINE_CMD_ALT_COND_PLUGIN(GetPCCanFastTravel, , , false, NULL);
 
 
 bool Cmd_SetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
@@ -65,7 +66,6 @@ bool Cmd_SetPCHasSleepWaitOverride_Execute(COMMAND_ARGS)
 		g_thePlayer->canSleepWait = !bOn;
 	return true;
 }
-
 
 bool Cmd_IsWeaponMelee_Eval(COMMAND_ARGS_EVAL)
 {
@@ -231,9 +231,73 @@ bool Cmd_GetEquippedItems_Execute(COMMAND_ARGS)
 	return true;
 }
 
+DEFINE_CMD_ALT_COND_PLUGIN(GetPCHasScriptedFastTravelOverride, , "Returns whether or not the player is restricted by EnableFastTravel", 0, NULL);
+bool Cmd_GetPCHasScriptedFastTravelOverride_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = (g_thePlayer->byte66D & 1) == 0;
+	return true;
+}
+bool Cmd_GetPCHasScriptedFastTravelOverride_Execute(COMMAND_ARGS)
+{
+	*result = (g_thePlayer->byte66D & 1) == 0;
+	return true;
+}
+
+bool Cmd_GetPCCanFastTravel_Eval(COMMAND_ARGS_EVAL)
+{
+	// Credits to Jazz for the "silence QueueUIMessage" trick (see AddNoteNS).
+	SafeWrite8((UInt32)QueueUIMessage, 0xC3);	// RETN
+	auto canFastTravelAddr = GetRelJumpAddr(0x798026); // call the function indirectly for compatibility with Stewie tweaks, kudos to Stewie.
+	*result = ThisStdCall<bool>(canFastTravelAddr, g_thePlayer);
+	//*result = ThisStdCall<bool>((UInt32)0x93D660, g_thePlayer);
+	SafeWrite8((UInt32)QueueUIMessage, 0x55);	// PUSH EBP
+	return true;
+}
+bool Cmd_GetPCCanFastTravel_Execute(COMMAND_ARGS)
+{
+	return Cmd_GetPCCanFastTravel_Eval(thisObj, 0, 0, result);
+}
 
 
 #ifdef _DEBUG
+
+
+DEFINE_CMD_ALT_COND_PLUGIN(IsWeaponTrowable, , , 1, kParams_OneOptionalObjectID);
+bool Cmd_IsWeaponTrowable_Eval(COMMAND_ARGS_EVAL)
+{
+	//Console_Print("thisObj: [%0.8X]", thisObj->baseForm->GetId());
+	*result = 0;
+	TESForm* form;
+	if (arg1) form = (TESForm*)arg1;
+	else if (thisObj) form = thisObj->baseForm;
+	else return true;
+	auto const weapon = DYNAMIC_CAST(form, TESForm, TESObjectWEAP);
+	if (!weapon) return true;
+	UINT8 weapType = weapon->eWeaponType;
+	//*result = weapType <= 2;
+	return true;
+}
+bool Cmd_IsWeaponTrowable_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	TESObjectWEAP* weapon = NULL;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &weapon)) return true;
+	return Cmd_IsWeaponTrowable_Eval(thisObj, weapon, 0, result);
+}
+
+DEFINE_CMD_ALT_COND_PLUGIN(GetPCCanSleepWait, , , 0, NULL);
+bool Cmd_GetPCCanSleepWait_Eval(COMMAND_ARGS_EVAL)
+{
+	//todo: verify if it works with script overrides and stewie features.
+	*result = g_thePlayer->canSleepWait;
+	return true;
+}
+bool Cmd_GetPCCanSleepWait_Execute(COMMAND_ARGS)
+{
+	*result = g_thePlayer->canSleepWait;
+	return true;
+}
+
 
 DEFINE_CMD_ALT_COND_PLUGIN(GetPCCanSleepInOwnedBeds, , , 0, NULL);
 bool Cmd_GetPCCanSleepInOwnedBeds_Eval(COMMAND_ARGS_EVAL)
@@ -253,21 +317,6 @@ bool Cmd_SetPCCanSleepInOwnedBeds_Execute(COMMAND_ARGS)
 	UInt32 bOn;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bOn)) return true;
 	SetCanSleepInOwnedBeds(bOn);
-	return true;
-}
-
-DEFINE_CMD_ALT_COND_PLUGIN(GetPCHasFastTravelOverride, , "Returns whether or not the player is restricted by EnableFastTravel", 0, NULL);
-bool Cmd_GetPCHasFastTravelOverride_Eval(COMMAND_ARGS_EVAL)
-{
-	*result = (g_thePlayer->byte66D & 1) != 0;
-	return true;
-}
-bool Cmd_GetPCHasFastTravelOverride_Execute(COMMAND_ARGS)
-{
-#if _DEBUG
-	Console_Print("%x", g_thePlayer->byte66D);
-#endif
-	* result = (g_thePlayer->byte66D & 1) != 0;
 	return true;
 }
 
