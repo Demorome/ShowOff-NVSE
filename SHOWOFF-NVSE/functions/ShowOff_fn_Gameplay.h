@@ -14,6 +14,8 @@ DEFINE_CMD_ALT_COND_PLUGIN(GetChallengeProgress, , "Returns the progress made on
 DEFINE_COMMAND_PLUGIN(UnequipItems, , true, 4, kParams_FourOptionalInts);
 DEFINE_COMMAND_PLUGIN(GetEquippedItems, , true, 1, kParams_OneOptionalInt);
 DEFINE_CMD_ALT_COND_PLUGIN(GetPCCanFastTravel, , , false, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(WeaponHasFlag, , , false, kParams_OneInt_OneOptionalObjectID);
+DEFINE_CMD_ALT_COND_PLUGIN(ActorHasBaseFlag, , , false, kParams_OneInt_OneOptionalActorBase);
 
 
 bool Cmd_SetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
@@ -258,11 +260,100 @@ bool Cmd_GetPCCanFastTravel_Execute(COMMAND_ARGS)
 	return Cmd_GetPCCanFastTravel_Eval(thisObj, 0, 0, result);
 }
 
+bool Cmd_WeaponHasFlag_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = 0;
+	UInt32 flagToCheck = (UInt32)arg1;
+	if (flagToCheck > 21) return true;
+	TESForm* form;
+	if (arg2) form = (TESForm*)arg2;
+	else if (thisObj) form = thisObj->baseForm;
+	else return true;
+	auto const weapon = DYNAMIC_CAST(form, TESForm, TESObjectWEAP);
+	if (!weapon) return true;
+	if (flagToCheck < 8)  //check Flags1 (0-7)
+	{
+		*result = weapon->weaponFlags1.Extract(flagToCheck);
+	}
+	else  //check Flags2 (0-13)
+	{
+		flagToCheck -= 8;  //set the base to 0. At flagToCheck == 8, this equals 0.
+		*result = weapon->weaponFlags2.Extract(flagToCheck);
+	}
+	return true;
+}
+bool Cmd_WeaponHasFlag_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	UInt32 flagToCheck;
+	TESObjectWEAP* weapon = NULL;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &flagToCheck, &weapon)) return true;
+	return Cmd_WeaponHasFlag_Eval(thisObj, (void*)flagToCheck, weapon, result);
+}
+
+bool Cmd_ActorHasBaseFlag_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = 0;
+	UInt32 flagToCheck = (UInt32)arg1;
+	if (flagToCheck > 31) return true;
+	TESForm* form;
+	if (arg2) form = (TESForm*)arg2;
+	else if (thisObj) form = thisObj->baseForm;
+	else return true;
+	auto const actor = DYNAMIC_CAST(form, TESForm, TESActorBase);
+	if (!actor) return true;
+	if (flagToCheck < 16)  //check FlagsLow (0-15)
+	{
+		UInt32 lowFlags = actor->baseData.flags & 0xFFFF;  //copied from NVSE's GetActorBaseFlagsLow
+		*result = (lowFlags >> flagToCheck) & 1;
+	}
+	else  //check FlagsHigh (0-15)
+	{
+		flagToCheck -= 16;  //set the base to 0. At flagToCheck == 16, this equals 0.
+		UInt32 highFlags = (actor->baseData.flags >> 16) & 0xFFFF;  //copied from NVSE's GetActorBaseFlagsHigh
+		*result = (highFlags >> flagToCheck) & 1;
+	}
+	return true;
+}
+bool Cmd_ActorHasBaseFlag_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	UInt32 flagToCheck;
+	TESActorBase* actor = NULL;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &flagToCheck, &actor)) return true;
+	return Cmd_ActorHasBaseFlag_Eval(thisObj, (void*)flagToCheck, actor, result);
+}
+
 
 #ifdef _DEBUG
 
+DEFINE_COMMAND_PLUGIN(TryDropWeapon, , true, 0, NULL);
+bool Cmd_TryDropWeapon_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	if (!thisObj || NOT_ACTOR(thisObj))
+		return true;
+	Actor* actor = (Actor*)thisObj;
+	if (!actor->baseProcess) return true;
+	//actor->GetEquippedWeapon()
+	// Retrieve info about actor's weapon, for comparison later.
+	ContChangesEntry* weaponInfo = actor->baseProcess->GetWeaponInfo();
+	if (!weaponInfo || !weaponInfo->type) return true;  //actor has no weapon to unequip
+	SInt32 prevCount = weaponInfo->countDelta;
+#if _DEBUG
+	Console_Print("TryDropWeapon >> Count delta: %i", prevCount);
+#endif
 
-DEFINE_CMD_ALT_COND_PLUGIN(IsWeaponTrowable, , , 1, kParams_OneOptionalObjectID);
+	ThisStdCall<void>(0x89F580, actor);  //Actor::TryDropWeapon. Triggers OnDrop blocktype.
+
+	// Check if a weapon has been dropped.
+	weaponInfo = actor->baseProcess->GetWeaponInfo();
+	if (!weaponInfo || !weaponInfo->type || weaponInfo->countDelta != prevCount) *result = 1;  //weapon has been removed.
+	return true;
+}
+
+
+DEFINE_CMD_ALT_COND_PLUGIN(IsWeaponTrowable, , , true, kParams_OneOptionalObjectID);
 bool Cmd_IsWeaponTrowable_Eval(COMMAND_ARGS_EVAL)
 {
 	//Console_Print("thisObj: [%0.8X]", thisObj->baseForm->GetId());

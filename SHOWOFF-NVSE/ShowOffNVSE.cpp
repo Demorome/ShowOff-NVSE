@@ -443,6 +443,8 @@ extern "C"
 		/*3CDE*/ REG_CMD(IsTemporaryReference)
 		/*3CDF*/ REG_CMD(GetPCHasScriptedFastTravelOverride)
 		/*3CE0*/ REG_CMD(GetPCCanFastTravel)  //CheckAllowFastTravel 0x93D660
+		/*3CE1*/ REG_CMD(WeaponHasFlag)
+		/*3CE2*/ REG_CMD(ActorHasBaseFlag)
 
 
 
@@ -454,6 +456,8 @@ extern "C"
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 		
+		REG_CMD(TryDropWeapon)
+
 		REG_CMD_ARR(ReadArrayFromJSON)
 		//more JSON functions...
 		
