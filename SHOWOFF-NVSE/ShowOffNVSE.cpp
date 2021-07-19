@@ -456,6 +456,9 @@ extern "C"
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 		
+		REG_CMD(CanBeMoved)
+
+		REG_CMD_FORM(GetActorPreferredWeapon)
 		REG_CMD(TryDropWeapon)
 
 		REG_CMD_ARR(ReadArrayFromJSON)

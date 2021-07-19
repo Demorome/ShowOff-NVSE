@@ -325,7 +325,37 @@ bool Cmd_ActorHasBaseFlag_Execute(COMMAND_ARGS)
 }
 
 
+
+
 #ifdef _DEBUG
+
+
+DEFINE_CMD_ALT_COND_PLUGIN(CanBeMoved, , , true, NULL);
+bool Cmd_CanBeMoved_Eval(COMMAND_ARGS_EVAL)
+{
+	if (!thisObj) return true;
+	*result = ThisStdCall<bool>(0x572C80, thisObj);  //just does some formType check + allows any dynamic object
+	return true;
+}
+bool Cmd_CanBeMoved_Execute(COMMAND_ARGS)
+{
+	return Cmd_CanBeMoved_Eval(thisObj, 0, 0, result);
+}
+
+
+DEFINE_COMMAND_PLUGIN(GetActorPreferredWeapon, , true, 1, kParams_OneOptionalInt);
+bool Cmd_GetActorPreferredWeapon_Execute(COMMAND_ARGS)
+{
+	//todo: current configuration gives garbage forms, need to fix that. Perhaps not calling it right?
+	*result = 0;
+	UInt32 combatWeaponType = 6;
+	if (!thisObj || NOT_ACTOR(thisObj) || !ExtractArgsEx(EXTRACT_ARGS_EX, &combatWeaponType))
+		return true;
+	auto weapForm = ThisStdCall<TESObjectWEAP*>(0x891C80, thisObj, combatWeaponType); //Actor::GetPreferredWeapon
+	if (weapForm)
+		REFR_RES = weapForm->refID;  
+	return true;
+}
 
 DEFINE_COMMAND_PLUGIN(TryDropWeapon, , true, 0, NULL);
 bool Cmd_TryDropWeapon_Execute(COMMAND_ARGS)
