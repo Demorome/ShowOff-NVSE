@@ -11,6 +11,7 @@ void __stdcall WriteRelCall(UInt32 jumpSrc, UInt32 jumpTgt);
 
 // 6 bytes
 void WriteRelJnz(UInt32 jumpSrc, UInt32 jumpTgt);
+void WriteRelJe(UInt32 jumpSrc, UInt32 jumpTgt);
 void WriteRelJle(UInt32 jumpSrc, UInt32 jumpTgt);
 
 // Size is the amount of bytes until the next instruction.

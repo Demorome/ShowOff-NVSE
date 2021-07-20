@@ -445,6 +445,8 @@ extern "C"
 		/*3CE0*/ REG_CMD(GetPCCanFastTravel)  //CheckAllowFastTravel 0x93D660
 		/*3CE1*/ REG_CMD(WeaponHasFlag)
 		/*3CE2*/ REG_CMD(ActorHasBaseFlag)
+		/*3CE3*/ REG_CMD(RemoveAllItemsShowOff)
+
 
 
 
@@ -457,7 +459,6 @@ extern "C"
 #if _DEBUG  //for functions being tested (or just abandoned).
 		
 		REG_CMD(CanBeMoved)
-
 		REG_CMD_FORM(GetActorPreferredWeapon)
 		REG_CMD(TryDropWeapon)
 

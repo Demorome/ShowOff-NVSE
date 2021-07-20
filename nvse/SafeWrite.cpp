@@ -32,7 +32,8 @@ void __stdcall SafeWriteBuf(UInt32 addr, void * data, UInt32 len)
 	VirtualProtect((void*)addr, len, oldProtect, &oldProtect);
 }
 
-void __stdcall WriteRelJump(UInt32 jumpSrc, UInt32 jumpTgt)
+// Use if it's not a 2 byte jz
+void __stdcall WriteRelJump(UInt32 jumpSrc, UInt32 jumpTgt)  
 {
 	// ask to be able to modify the desired region of code (normally programs prevent code being modified by other code to prevent exploits)
 	UInt32 oldProtect;
@@ -60,8 +61,15 @@ void __stdcall WriteRelCall(UInt32 jumpSrc, UInt32 jumpTgt)
 
 void WriteRelJnz(UInt32 jumpSrc, UInt32 jumpTgt)
 {
-	// jnz rel32
+	// jnz rel32, same as jne
 	SafeWrite16(jumpSrc, 0x850F);
+	SafeWrite32(jumpSrc + 2, jumpTgt - jumpSrc - 2 - 4);
+}
+
+__declspec(noinline) void WriteRelJe(UInt32 jumpSrc, UInt32 jumpTgt)
+{
+	// je rel32, same as jz
+	SafeWrite16(jumpSrc, 0x840F);
 	SafeWrite32(jumpSrc + 2, jumpTgt - jumpSrc - 2 - 4);
 }
 

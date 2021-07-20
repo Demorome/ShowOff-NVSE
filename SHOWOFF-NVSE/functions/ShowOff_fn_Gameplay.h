@@ -16,6 +16,7 @@ DEFINE_COMMAND_PLUGIN(GetEquippedItems, , true, 1, kParams_OneOptionalInt);
 DEFINE_CMD_ALT_COND_PLUGIN(GetPCCanFastTravel, , , false, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(WeaponHasFlag, , , false, kParams_OneInt_OneOptionalObjectID);
 DEFINE_CMD_ALT_COND_PLUGIN(ActorHasBaseFlag, , , false, kParams_OneInt_OneOptionalActorBase);
+DEFINE_COMMAND_PLUGIN(RemoveAllItemsShowOff, , true, 4, kParams_TwoOptionalInts_OneOptionalContainerRef_OneOptionalList);
 
 
 bool Cmd_SetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
@@ -324,12 +325,81 @@ bool Cmd_ActorHasBaseFlag_Execute(COMMAND_ARGS)
 	return Cmd_ActorHasBaseFlag_Eval(thisObj, (void*)flagToCheck, actor, result);
 }
 
+bool Cmd_RemoveAllItemsShowOff_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	enum FunctionFlags
+	{
+		kFlag_None = 0,
+		kFlag_RetainOwnership = 0x1 << 0,  //only applies if a target is specified
+		kFlag_SuppressMessages = 0x1 << 1,  //only applies if a target is specified
+		kFlag_AllowRemovalOfQuestItemsFromPlayer = 0x1 << 2,
+		kFlag_AllowRemovalOfUnplayableBipedItems = 0x1 << 3,
+		kFlag_Unk1 = 0x1 << 4,
+		kFlag_Unk2 = 0x1 << 5,
+	};
+	UInt32 flags = kFlag_None;
+	SInt32 typeCode = -1;  //-1 = all
+	TESObjectREFR* targetContainer = nullptr;
+	BGSListForm* exceptionFormList = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &flags, &typeCode, &targetContainer, &exceptionFormList)) return true;
+	if (!thisObj || !typeCode || !thisObj->GetContainer() || (targetContainer && !targetContainer->GetContainer()))
+		return true;
+	//ExtraContainerChanges* xChanges = (ExtraContainerChanges*)thisObj->extraDataList.GetByType(kExtraData_ContainerChanges);  //ripped from NVSE's EquipItem2
+	void* xChanges = ThisStdCall<void*>(0x418520, &thisObj->extraDataList);
+	if (!xChanges) return true;
+
+	// Extract flags
+	bool retainOwnership = flags & kFlag_RetainOwnership;
+	bool suppressMessages = flags & kFlag_SuppressMessages;
+	bool removeQuestItemsIfPlayer = flags & kFlag_AllowRemovalOfQuestItemsFromPlayer;
+	bool removeUnplayableBipedItems = flags & kFlag_AllowRemovalOfUnplayableBipedItems;
+	bool unk1 = flags & kFlag_Unk1;
+	bool unk2 = flags & kFlag_Unk2;
+
+	// Modify the code for RemoveAllItems
+	if (removeQuestItemsIfPlayer)
+	{
+		WriteRelJump(0x4CE4B8, 0x4CE559);  // make the long jump at 0x4CE4B8 unconditional
+		WriteRelJump(0x4CEDCE, 0x4CEE75);  // same concept
+	}
+	if (removeUnplayableBipedItems)
+	{
+		SafeWrite8(0x4CE571, 0xEB);  // make short jump unconditional
+		PatchMemoryNop(0x4CED5D, 6);  // make the long jump never happen
+	}
+
+	// Call RemoveAllItems with the new modifications
+	ThisStdCall<void>(0x4CE340, xChanges, thisObj, targetContainer, unk1, retainOwnership, unk2, suppressMessages, typeCode, exceptionFormList);
+
+	// Revert code modifications
+	if (removeQuestItemsIfPlayer)
+	{
+		WriteRelJe(0x4CE4B8, 0x4CE559); // revert back to long Jump if Zero
+		WriteRelJe(0x4CEDCE, 0x4CEE75); // same concept
+	}
+	if (removeUnplayableBipedItems)
+	{
+		SafeWrite8(0x4CE571, 0x74); // revert back to short Jump if Zero
+		WriteRelJe(0x4CED5D, 0x4CFBCA); // re-write long Jump if Zero
+	}
+
+	// Wrap up
+	ThisStdCall<void>(0x952C30, g_thePlayer, thisObj); // ComputeShouldRecalculateQuestTargets()
+	*result = 1; //function worked as expected.
+	return true;
+}
+
+
 
 
 
 #ifdef _DEBUG
 
 
+
+
+// Kinda pointless in the face of JIP's IsMobile
 DEFINE_CMD_ALT_COND_PLUGIN(CanBeMoved, , , true, NULL);
 bool Cmd_CanBeMoved_Eval(COMMAND_ARGS_EVAL)
 {

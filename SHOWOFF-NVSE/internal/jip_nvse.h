@@ -241,8 +241,7 @@ struct AuxStringMapInfo
 	AuxStringMapModsMap& ModsMap() { return isPerm ? s_auxStringMapArraysPerm : s_auxStringMapArraysTemp; }
 };
 
-extern std::atomic<UInt8> s_dataChangedFlags; //For AuxVar serialization.
-
+extern std::atomic<UInt8> s_dataChangedFlags; // For AuxVar serialization.
 
 #if 0 //not gonna bother with this for now
 DebugLog s_log, s_debug, s_missingTextures;

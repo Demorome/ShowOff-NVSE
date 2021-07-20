@@ -142,4 +142,23 @@ UInt32 __fastcall GetSubjectID(TESForm* form, TESObjectREFR* thisObj)
 	return 0;
 }
 
-std::atomic<UInt8> s_dataChangedFlags = 0; //For AuxVar serialization.
+std::atomic<UInt8> s_dataChangedFlags = 0; // For AuxVar serialization.
+
+
+__declspec(naked) ExtraContainerChanges::EntryDataList* TESObjectREFR::GetContainerChangesList()
+{
+	__asm
+	{
+		push	kExtraData_ContainerChanges
+		add		ecx, 0x44
+		call	BaseExtraList::GetByType
+		test	eax, eax
+		jz		done
+		mov		eax, [eax + 0xC]
+		test	eax, eax
+		jz		done
+		mov		eax, [eax]
+		done:
+		retn
+	}
+}

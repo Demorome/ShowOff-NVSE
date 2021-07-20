@@ -1965,3 +1965,36 @@ static ParamInfo kParams_JIP_OneObjectID_OneOptionalString[] =
 	{"Object ID", kParamType_ObjectID, 0},
 	{"String", kParamType_String, 1}
 };
+
+
+// ShowOff stuff
+
+static ParamInfo kParams_TwoOptionalInts_OneOptionalContainerRef_OneOptionalList[4] =
+{
+	{	"int",	kParamType_Integer,	1	},
+	{	"int",	kParamType_Integer,	1	},
+	{	"container reference",	kParamType_Container,	1	},
+	{	"form list",	kParamType_FormList,	1	},
+};
+
+static ParamInfo kParams_ThreeOptionalInts_OneOptionalContainerRef_TwoOptionalInts_OneOptionalList[7] =
+{
+	{	"int",	kParamType_Integer,	1	},
+	{	"int",	kParamType_Integer,	1	},
+	{	"int",	kParamType_Integer,	1	},
+	{	"container reference",	kParamType_Container,	1	},
+	{	"int",	kParamType_Integer,	1	},
+	{	"int",	kParamType_Integer,	1	},
+	{	"form list",	kParamType_FormList,	1	},
+};
+
+static ParamInfo kParams_OneOptionalContainerRef_FiveOptionalInts_OneOptionalList[7] =
+{
+	{	"container reference",	kParamType_Container,	1	},
+	{	"int",	kParamType_Integer,	1	},
+	{	"int",	kParamType_Integer,	1	},
+	{	"int",	kParamType_Integer,	1	},
+	{	"int",	kParamType_Integer,	1	},
+	{	"int",	kParamType_Integer,	1	},
+	{	"form list",	kParamType_FormList,	1	},
+};
