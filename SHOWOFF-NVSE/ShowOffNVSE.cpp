@@ -192,6 +192,8 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		g_screenWidth = *(UInt32*)0x11C73E0;
 		g_screenHeight = *(UInt32*)0x11C7190;
 
+		Console_Print("ShowOff NVSE version: %.2f", (g_PluginVersion / 100.0F));
+
 		break;
 
 	//case NVSEMessagingInterface::kMessage_MainGameLoop:
@@ -458,7 +460,6 @@ extern "C"
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 		
-		REG_CMD(CanBeMoved)
 		REG_CMD_FORM(GetActorPreferredWeapon)
 		REG_CMD(TryDropWeapon)
 
@@ -507,6 +508,7 @@ extern "C"
 
 		REG_CMD(GetNVSEVersionFullAlt)
 		REG_CMD(TestDemo);
+		REG_CMD(CanBeMoved)
 
 		
 		/* todo =======Function ideas ======
@@ -525,7 +527,7 @@ extern "C"
 		
 		/* ===Forever Dead Function Graveyard===
 		 *
-		 *
+		 * 
 		 * //REG_CMD(DumpGameSettings) //pointless, see GetGameSettings in JIP
 		 * //REG_CMD_ARR(Ar_GetInvalidRefs); //not possible via plugin
 		 * //REG_CMD(GetEquippedWeaponType);  //JIP already made it for TTW.
@@ -537,7 +539,8 @@ extern "C"
 			//These two functions are useless, the setting functions already safety check and even report if the setting could not be found via func result.
 		REG_CMD(IsGameSetting) //For use in scripts to safety check; any other gamesetting function can already be used in console to check if a gamesetting exists.
 		REG_CMD(IsINISetting) //Uses the GetNumericINISetting "SettingName:CategoryName" format
-		 */
+		 */		
+
 
 #endif
 

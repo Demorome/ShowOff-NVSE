@@ -18,7 +18,6 @@ DEFINE_CMD_ALT_COND_PLUGIN(WeaponHasFlag, , , false, kParams_OneInt_OneOptionalO
 DEFINE_CMD_ALT_COND_PLUGIN(ActorHasBaseFlag, , , false, kParams_OneInt_OneOptionalActorBase);
 DEFINE_COMMAND_PLUGIN(RemoveAllItemsShowOff, , true, 4, kParams_TwoOptionalInts_OneOptionalContainerRef_OneOptionalList);
 
-
 bool Cmd_SetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
 {
 	UInt32 bOn;

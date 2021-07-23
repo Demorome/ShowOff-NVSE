@@ -35,6 +35,10 @@ This file is here just so I'm reminded to keep track of changes as I do em.
 * AdvanceSeed
 
 //===v1.15
+
+===Misc:
+* When the game starts, there is now a console print that says if ShowOff is running and what version it's at.
+
 ===Bug Fixes:
 * Fixed certain GetEquipped__ functions always printing to console
 * Add RandSeeded safety check (Min must be <= Max) - before, breaking this assertion caused a crash. Returns -1 if this assertion fails.
@@ -47,6 +51,8 @@ This file is here just so I'm reminded to keep track of changes as I do em.
 * WeaponHasFlag
 * ActorHasBaseFlag
 * RemoveAllItemsShowOff
+
+
 
 (Template:)
 //===v???
