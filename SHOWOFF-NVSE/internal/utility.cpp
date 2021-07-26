@@ -1638,7 +1638,6 @@ __declspec(naked) TESObjectCELL* TESObjectREFR::GetParentCell()
 // Copied after NVSE's IsPlayable
 bool IsFormPlayable(TESForm* form)
 {
-	//form->IsItemPlayable()
 	TESBipedModelForm* biped = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
 	if (biped)
 		return biped->IsPlayable();
@@ -1653,3 +1652,40 @@ bool IsFormPlayable(TESForm* form)
 		return race->IsPlayable();
 	return true;
 }
+
+bool IsItemPlayable(TESForm* form)
+{
+	TESBipedModelForm* biped = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
+	if (biped)
+		return biped->IsPlayable();
+	TESObjectWEAP* weap = DYNAMIC_CAST(form, TESForm, TESObjectWEAP);
+	if (weap)
+		return weap->IsPlayable();
+	TESAmmo* ammo = DYNAMIC_CAST(form, TESForm, TESAmmo);
+	if (ammo)
+		return ammo->IsPlayable();
+	return true;
+}
+
+short GetEquipType(TESForm* form)  // Ammo is not equip-able in the same sense as Weapons and Armor.
+{
+	if (IS_TYPE(form, TESObjectWEAP)) {
+		return kEquipType_Weapon;
+	}
+	if (DYNAMIC_CAST(form, TESForm, TESBipedModelForm)) {
+		return kEquipType_Armor;
+	}
+	return false;
+}
+
+bool IsEquipableItemPlayable(TESForm* form)  // Ammo is not equip-able in the same sense.
+{
+	TESBipedModelForm* biped = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
+	if (biped)
+		return biped->IsPlayable();
+	TESObjectWEAP* weap = DYNAMIC_CAST(form, TESForm, TESObjectWEAP);
+	if (weap)
+		return weap->IsPlayable();
+	return true;
+}
+

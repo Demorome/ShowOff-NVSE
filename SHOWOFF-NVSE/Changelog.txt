@@ -38,6 +38,11 @@ This file is here just so I'm reminded to keep track of changes as I do em.
 
 ===Misc:
 * When the game starts, there is now a console print that says if ShowOff is running and what version it's at.
+* Optimized GetEquipped__ functions.
+
+===DEFAULT BEHAVIOR CHANGES:
+*GetEquipped__ functions now account for items that have no equip slots (I didn't realize they could be equipped), no matter what the equip slot filters are.
+In order to filter those out, there is now a new flag: NoSlotlessItems
 
 ===Bug Fixes:
 * Fixed certain GetEquipped__ functions always printing to console

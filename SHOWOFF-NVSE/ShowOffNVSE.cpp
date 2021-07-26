@@ -442,11 +442,11 @@ extern "C"
 		/*3CDD*/ REG_CMD(AdvanceSeed)
 
 		//========v1.15
-		/*3CDE*/ REG_CMD(IsTemporaryReference)
+		/*3CDE*/ REG_CMD(IsTemporaryReference)  // KEEP UNDOCUMENTED, does not behave as I expected it to.
 		/*3CDF*/ REG_CMD(GetPCHasScriptedFastTravelOverride)
 		/*3CE0*/ REG_CMD(GetPCCanFastTravel)  //CheckAllowFastTravel 0x93D660
-		/*3CE1*/ REG_CMD(WeaponHasFlag)
-		/*3CE2*/ REG_CMD(ActorHasBaseFlag)
+		/*3CE1*/ REG_CMD(GetWeaponHasFlag)
+		/*3CE2*/ REG_CMD(GetActorHasBaseFlag)
 		/*3CE3*/ REG_CMD(RemoveAllItemsShowOff)
 
 

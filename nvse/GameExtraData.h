@@ -3,6 +3,8 @@
 #include "Utilities.h"
 #include "GameBSExtraData.h"
 #include "GameForms.h"
+#include <unordered_set>
+
 
 /*    Class							     vtbl	  Type  Size
  *   ----------------------------		------		--  --
@@ -167,7 +169,7 @@ enum
 	kExtraData_RagdollData,
 	kExtraData_ContainerChanges,
 	kExtraData_Worn,
-	kExtraData_WornLeft,
+	kExtraData_WornLeft,  // Oblivion leftover, unused in NV.
 	kExtraData_PackageStartLocation,
 	kExtraData_Package,
 	kExtraData_TrespassPackage,
@@ -381,7 +383,7 @@ public:
 
 	Data	*data;	// 00C
 
-	EntryData *GetByType(TESForm * type);
+	EntryData *GetByType(TESForm *type);
 
 	void DebugDump();
 	void Cleanup();	// clean up unneeded extra data from each EntryData
@@ -392,7 +394,7 @@ public:
 	struct FoundEquipData{
 		TESForm* pForm;
 		ExtraDataList* pExtraData;
-		
+
 		// These overloads are used by std::unordered_set to compare elements.
 		FoundEquipData& operator=(const FoundEquipData& t) {
 			this->pForm = t.pForm;
@@ -409,15 +411,31 @@ public:
 				return true;
 			return false;
 		};
-		
 	};
+
+#if 0
 	FoundEquipData FindEquipped(FormMatcher& matcher) const;
+#endif
 
 	EntryDataList* GetEntryDataList() const {
 		return data ? data->objList : NULL;
 	}
 };
 typedef ExtraContainerChanges::EntryData ContChangesEntry;
+typedef ExtraContainerChanges::FoundEquipData EquipData;
+
+// https://stackoverflow.com/questions/50888127/how-can-i-use-an-unordered-set-with-a-custom-struct
+class EquipDataHashFunction {
+public:
+	// id is returned as hash function
+	size_t operator()(const EquipData& t) const
+	{
+		return (size_t)t.pForm;
+	}
+};
+typedef std::unordered_set<EquipData, EquipDataHashFunction> EquipDataSet;
+
+EquipDataSet FindEquippedItems(ExtraContainerChanges* contChanges, UInt32 filterFlags);
 
 // Finds an ExtraDataList in an ExtendDataList
 class ExtraDataListInExtendDataListMatcher
@@ -528,8 +546,6 @@ public:
 		return (match && match->type && match->type->TryGetREFRParent() && m_toMatch == match->type->TryGetREFRParent()->refID);
 	}
 };
-
-typedef ExtraContainerChanges::FoundEquipData EquipData;
 
 extern ExtraContainerChanges::ExtendDataList* ExtraContainerChangesExtendDataListCreate(ExtraDataList* pExtraDataList = NULL);
 extern void ExtraContainerChangesExtendDataListFree(ExtraContainerChanges::ExtendDataList* xData, bool bFreeList = false);

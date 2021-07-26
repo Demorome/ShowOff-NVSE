@@ -358,3 +358,12 @@ template <typename T> __forceinline void RawSwap(const T& lhs, const T& rhs)
 }
 
 bool IsFormPlayable(TESForm* form);
+bool IsItemPlayable(TESForm* form);
+
+enum EquipableObjects
+{
+	kEquipType_Weapon = 1,
+	kEquipType_Armor = 2,
+};
+short GetEquipType(TESForm* form);
+bool IsEquipableItemPlayable(TESForm* form);

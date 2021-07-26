@@ -417,158 +417,30 @@ bool Cmd_GetCrippledLimbsAsBitMask_Execute(COMMAND_ARGS)
 }
 
 
-// Get Equipped Object utility functions, from FOSE.
-class MatchBySlot : public FormMatcher
-{
-	UInt32 m_slotMask;
-public:
-	MatchBySlot(UInt32 slot) : m_slotMask(TESBipedModelForm::MaskForSlot(slot)) {}
-	bool Matches(TESForm* pForm) const {
-		UInt32 formMask = 0;
-		if (pForm) {
-			if (IS_TYPE(pForm, TESObjectWEAP)) {
-				formMask = TESBipedModelForm::eSlot_Weapon;
-			}
-			else {
-				TESBipedModelForm* pBip = DYNAMIC_CAST(pForm, TESForm, TESBipedModelForm);
-				if (pBip) {
-					formMask = pBip->partMask;
-				}
-			}
-		}
-		return (formMask & m_slotMask) != 0;
-	}
-};
 
-class MatchBySlotMask : public FormMatcher
-{
-	UInt32 m_targetMask;
-	UInt32 m_targetData;
-public:
-	MatchBySlotMask(UInt32 targetMask, UInt32 targetData) : m_targetMask(targetMask) {}
-	bool Matches(TESForm* pForm) const {
-		UInt32 slotMask = 0;
-		if (pForm) {
-			if (IS_TYPE(pForm, TESObjectWEAP)) {
-				slotMask = TESBipedModelForm::ePart_Weapon;
-			}
-			else {
-				TESBipedModelForm* pBip = DYNAMIC_CAST(pForm, TESForm, TESBipedModelForm);
-				if (pBip) {
-					slotMask = pBip->partMask;
-				}
-			}
-		}
-		return ((slotMask & m_targetMask) == m_targetData);
-	}
-};
-
+#if 0
 static EquipData FindEquipped(TESObjectREFR* thisObj, FormMatcher& matcher) {
 	ExtraContainerChanges* pContainerChanges = static_cast<ExtraContainerChanges*>(thisObj->extraDataList.GetByType(kExtraData_ContainerChanges));
 	return (pContainerChanges) ? pContainerChanges->FindEquipped(matcher) : EquipData();
 }
+#endif
+
+static EquipDataSet GetEquippedItems(TESObjectREFR* actorRef, UInt32 const filterFlags) {
+	auto const pContainerChanges = dynamic_cast<ExtraContainerChanges*>(actorRef->extraDataList.GetByType(kExtraData_ContainerChanges));
+	return pContainerChanges ? FindEquippedItems(pContainerChanges, filterFlags) : EquipDataSet();
+}
 
 typedef TESBipedModelForm::EPartBit EquippedItemIndex;
 typedef TESBipedModelForm::ESlot EquippedItemSlot;
-
-// https://stackoverflow.com/questions/50888127/how-can-i-use-an-unordered-set-with-a-custom-struct
-class EquipDataHashFunction {
-public:
-	// id is returned as hash function
-	size_t operator()(const EquipData& t) const
-	{
-		return (size_t)t.pForm;
-	}
-};
-
-std::unordered_set<EquipData, EquipDataHashFunction> GetEquippedItemsData(TESObjectREFR* const thisObj, UInt32 const flags)
-{
-	enum FlagValues {
-		// eSlot_ flags determine which slots to include.
-		eSlot_Head = 0x1 << 0,
-		eSlot_Hair = 0x1 << 1,
-		eSlot_UpperBody = 0x1 << 2,
-		eSlot_LeftHand = 0x1 << 3,
-		eSlot_RightHand = 0x1 << 4,
-		eSlot_Weapon = 0x1 << 5,
-		eSlot_PipBoy = 0x1 << 6,
-		eSlot_Backpack = 0x1 << 7,
-		eSlot_Necklace = 0x1 << 8,
-		eSlot_Headband = 0x1 << 9,
-		eSlot_Hat = 0x1 << 10,
-		eSlot_Eyeglasses = 0x1 << 11,
-		eSlot_Nosering = 0x1 << 12,
-		eSlot_Earrings = 0x1 << 13,
-		eSlot_Mask = 0x1 << 14,
-		eSlot_Choker = 0x1 << 15,
-		eSlot_MouthObject = 0x1 << 16,
-		eSlot_BodyAddon1 = 0x1 << 17,
-		eSlot_BodyAddon2 = 0x1 << 18,
-		eSlot_BodyAddon3 = 0x1 << 19,
-
-		// iFilter_ flags determine what sort of item to include.
-		iFilter_NoUnplayable = 0x1 << 20,
-		iFilter_NoQuestItems = 0x1 << 21,
-	};
-	bool const skipUnplayable = (flags & iFilter_NoUnplayable) || (!flags);
-	bool const noQuestItems = flags & iFilter_NoQuestItems;
-	
-	// Use a Set so as to avoid having duplicate EquipData
-	// (since forms can occupy multiple equip slots).
-	std::unordered_set<EquipData, EquipDataHashFunction> eqItems;
-	for (UInt32 slotIdx = EquippedItemIndex::ePart_Head; slotIdx <= EquippedItemIndex::ePart_BodyAddon3; slotIdx++)
-	{
-		if (flags != 0)  //if flags == 0 (default), every equip slot is checked.
-		{
-			//Otherwise, skip if flag is not toggled on for item.
-			if (flags && !(TESBipedModelForm::MaskForSlot(slotIdx) & flags)) continue;
-		}
-		MatchBySlot matcher(slotIdx);
-		EquipData equipD = FindEquipped(thisObj, matcher);
-		TESForm* form = equipD.pForm;
-		if (!form) continue;
-		if (skipUnplayable && !IsFormPlayable(form)) continue;
-		if (noQuestItems && form->IsQuestItem()) continue;
-		if (g_ShowFuncDebug)
-			Console_Print("GetEquippedItemsData - SlotIdx: %u Form: [%08X] (%s)", slotIdx, equipD.pForm, equipD.pForm->GetName());
-		eqItems.emplace(equipD);
-	}
-	return eqItems;
-}
-
-#if 0  // probably faster, but ValidBip01Names doesn't give access to ExtraData directly...
-std::unordered_set<EquipData, EquipDataHashFunction> GetEquippedItemsDataAlt(TESObjectREFR* const thisObj, UInt32 const eqSlotFlags)
-{
-	// Use a set so as to avoid having duplicate EquipData
-	// (since forms can occupy multiple equip slots).
-	std::unordered_set<EquipData, EquipDataHashFunction> eqItems;
-	if (!thisObj->IsCharacter()) return eqItems;
-	if (ValidBip01Names* validBip = ((Character*)thisObj)->GetValidBip01Names()) 
-	{
-		for (ValidBip01Names::Data& slotData : validBip->slotData)
-		{
-			TESObjectARMO* armor = slotData.armor;
-			if (armor)  // need to check for type too!
-			{
-#if _DEBUG
-				Console_Print("GetEquippedItemsDataAlt - Partmask: %u Form: [%08X] (%s)", armor->bipedModel.partMask, armor, armor->GetName());
-#endif
-			}
-		}
-	}
-	return eqItems;
-}
-#endif
 
 UInt32 __fastcall GetNumBrokenEquippedItems_Call(TESObjectREFR* const thisObj, float threshold, UInt32 const flags)
 {
 	if (!IS_ACTOR(thisObj)) return 0;
 	threshold /= 100.0F;  //expecting a number like 35, reduce to 0.35
 	UInt32 numBrokenItems = 0;  //return value.
-	auto eqItems = GetEquippedItemsData(thisObj, flags);
+	auto eqItems = GetEquippedItems(thisObj, flags);
 	for (auto const &iter : eqItems)
 	{
-		if (!iter.pForm) continue;
 		if (g_ShowFuncDebug)
 			Console_Print("GetNumBrokenEquippedItems - iter form: [%08X] (%s)", iter.pForm, iter.pForm->GetName());
 		ExtraHealth* pXHealth = iter.pExtraData ? (ExtraHealth*)iter.pExtraData->GetByType(kExtraData_Health) : NULL; // modified health
@@ -603,12 +475,13 @@ bool Cmd_GetNumBrokenEquippedItems_Execute(COMMAND_ARGS)
 	return true;
 }
 
-
+// TODO: re-do the whole thing
 bool Cmd_GetEquippedItemsAsBitMask_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
 	if (!IS_ACTOR(thisObj)) return true;
 	UInt32 flags = 0;  //return value.
+#if 0
 	for (UInt32 slotIdx = EquippedItemIndex::ePart_Head; slotIdx <= EquippedItemIndex::ePart_BodyAddon3; slotIdx++)
 	{
 		MatchBySlot matcher(slotIdx);
@@ -620,6 +493,7 @@ bool Cmd_GetEquippedItemsAsBitMask_Eval(COMMAND_ARGS_EVAL)
 			flags |= TESBipedModelForm::MaskForSlot(slotIdx);
 		}
 	}
+#endif
 	*result = flags;
 	if (IsConsoleMode())
 		Console_Print("GetEquippedItemsAsBitMask >> %u", flags);
@@ -685,7 +559,7 @@ bool Cmd_ClearShowoffSavedData_Execute(COMMAND_ARGS)
 float __fastcall GetBaseEquippedWeight_Call(TESObjectREFR* const thisObj, UInt32 const flags, float const minWeight)
 {
 	float totalWeight = 0;  //return val.
-	auto eqItems = GetEquippedItemsData(thisObj, flags);
+	auto eqItems = GetEquippedItems(thisObj, flags);
 	for (auto const &iter : eqItems)
 	{
 		if (!iter.pForm) continue;
@@ -728,7 +602,7 @@ float __fastcall GetCalculatedEquippedWeight_Call(TESObjectREFR* const thisObj, 
 	float totalWeight = 0;  //return val.
 	bool isHardcore = g_thePlayer->isHardcore;
 	if (!thisObj || !((Actor*)thisObj)->baseProcess) return 0.0F;
-	auto eqItems = GetEquippedItemsData(thisObj, flags);
+	auto eqItems = GetEquippedItems(thisObj, flags);
 	for (auto const& iter : eqItems)
 	{
 		TESForm* item = iter.pForm;
@@ -736,8 +610,8 @@ float __fastcall GetCalculatedEquippedWeight_Call(TESObjectREFR* const thisObj, 
 		float itemWeight = 0;
 		
 		bool const isWeapon = IS_TYPE(item, TESObjectWEAP);
-		ContChangesEntry* weapInfo = nullptr;
 		if (isWeapon) {
+			ContChangesEntry* weapInfo = nullptr;
 			// Gather more information about the weapon reference (weapon mods).
 			if (!(weapInfo = ((Actor*)thisObj)->baseProcess->GetWeaponInfo())) continue;
 			if (item = weapInfo->type) {

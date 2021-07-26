@@ -14,8 +14,8 @@ DEFINE_CMD_ALT_COND_PLUGIN(GetChallengeProgress, , "Returns the progress made on
 DEFINE_COMMAND_PLUGIN(UnequipItems, , true, 4, kParams_FourOptionalInts);
 DEFINE_COMMAND_PLUGIN(GetEquippedItems, , true, 1, kParams_OneOptionalInt);
 DEFINE_CMD_ALT_COND_PLUGIN(GetPCCanFastTravel, , , false, NULL);
-DEFINE_CMD_ALT_COND_PLUGIN(WeaponHasFlag, , , false, kParams_OneInt_OneOptionalObjectID);
-DEFINE_CMD_ALT_COND_PLUGIN(ActorHasBaseFlag, , , false, kParams_OneInt_OneOptionalActorBase);
+DEFINE_CMD_ALT_COND_PLUGIN(GetWeaponHasFlag, WeaponHasFlag, , false, kParams_OneInt_OneOptionalObjectID);
+DEFINE_CMD_ALT_COND_PLUGIN(GetActorHasBaseFlag, ActorHasBaseFlag, , false, kParams_OneInt_OneOptionalActorBase);
 DEFINE_COMMAND_PLUGIN(RemoveAllItemsShowOff, , true, 4, kParams_TwoOptionalInts_OneOptionalContainerRef_OneOptionalList);
 
 bool Cmd_SetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
@@ -207,7 +207,7 @@ bool Cmd_UnequipItems_Execute(COMMAND_ARGS)
 {
 	UInt32 flags = 0, noEquip = 0, hideMessage = 0, triggerOnUnequip = 1;
 	if (!ExtractArgs(EXTRACT_ARGS, &flags, &noEquip, &hideMessage, &triggerOnUnequip) || NOT_ACTOR(thisObj)) return true;
-	auto eqItems = GetEquippedItemsData(thisObj, flags);
+	auto eqItems = GetEquippedItems(thisObj, flags);
 	for (auto const& iter : eqItems)
 	{
 		ExtraDataList* xData = triggerOnUnequip ? iter.pExtraData : nullptr;
@@ -222,7 +222,7 @@ bool Cmd_GetEquippedItems_Execute(COMMAND_ARGS)
 	*result = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &flags) || NOT_ACTOR(thisObj)) return true;
 	Vector<ArrayElementR> elems;
-	auto eqItems = GetEquippedItemsData(thisObj, flags);
+	auto eqItems = GetEquippedItems(thisObj, flags);
 	for (auto const& iter : eqItems)
 	{
 		ArrayElementR elem = iter.pForm;
@@ -260,7 +260,7 @@ bool Cmd_GetPCCanFastTravel_Execute(COMMAND_ARGS)
 	return Cmd_GetPCCanFastTravel_Eval(thisObj, 0, 0, result);
 }
 
-bool Cmd_WeaponHasFlag_Eval(COMMAND_ARGS_EVAL)
+bool Cmd_GetWeaponHasFlag_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
 	UInt32 flagToCheck = (UInt32)arg1;
@@ -288,10 +288,10 @@ bool Cmd_WeaponHasFlag_Execute(COMMAND_ARGS)
 	UInt32 flagToCheck;
 	TESObjectWEAP* weapon = NULL;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &flagToCheck, &weapon)) return true;
-	return Cmd_WeaponHasFlag_Eval(thisObj, (void*)flagToCheck, weapon, result);
+	return Cmd_GetWeaponHasFlag_Eval(thisObj, (void*)flagToCheck, weapon, result);
 }
 
-bool Cmd_ActorHasBaseFlag_Eval(COMMAND_ARGS_EVAL)
+bool Cmd_GetActorHasBaseFlag_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
 	UInt32 flagToCheck = (UInt32)arg1;
@@ -315,13 +315,13 @@ bool Cmd_ActorHasBaseFlag_Eval(COMMAND_ARGS_EVAL)
 	}
 	return true;
 }
-bool Cmd_ActorHasBaseFlag_Execute(COMMAND_ARGS)
+bool Cmd_GetActorHasBaseFlag_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	UInt32 flagToCheck;
 	TESActorBase* actor = NULL;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &flagToCheck, &actor)) return true;
-	return Cmd_ActorHasBaseFlag_Eval(thisObj, (void*)flagToCheck, actor, result);
+	return Cmd_GetActorHasBaseFlag_Eval(thisObj, (void*)flagToCheck, actor, result);
 }
 
 bool Cmd_RemoveAllItemsShowOff_Execute(COMMAND_ARGS)
@@ -330,14 +330,15 @@ bool Cmd_RemoveAllItemsShowOff_Execute(COMMAND_ARGS)
 	enum FunctionFlags
 	{
 		kFlag_None = 0,
-		kFlag_RetainOwnership = 0x1 << 0,  //only applies if a target is specified
-		kFlag_SuppressMessages = 0x1 << 1,  //only applies if a target is specified
-		kFlag_AllowRemovalOfQuestItemsFromPlayer = 0x1 << 2,
-		kFlag_AllowRemovalOfUnplayableBipedItems = 0x1 << 3,
-		kFlag_Unk1 = 0x1 << 4,
-		kFlag_Unk2 = 0x1 << 5,
+		kFlag_RetainOwnership =						1 << 0,  //only applies if a target is specified
+		kFlag_SuppressMessages =					1 << 1,  //only applies if a target is specified
+		kFlag_AllowRemovalOfQuestItemsFromPlayer =	1 << 2,
+		kFlag_AllowRemovalOfUnplayableBipedItems =	1 << 3,
+		kFlag_Unk1 =								1 << 4,  // todo: figure out what these two bools do for the vanilla function.
+		kFlag_Unk2 =								1 << 5,
+		kFlag_IgnoreAllUnplayableItems =			1 << 6  // Overrides kFlag_AllowRemovalOfUnplayableBipedItems. TODO: not yet implemented.
 	};
-	UInt32 flags = kFlag_None;
+	UInt32 flags = kFlag_None;  // Default
 	SInt32 typeCode = -1;  //-1 = all
 	TESObjectREFR* targetContainer = nullptr;
 	BGSListForm* exceptionFormList = nullptr;
@@ -355,6 +356,7 @@ bool Cmd_RemoveAllItemsShowOff_Execute(COMMAND_ARGS)
 	bool removeUnplayableBipedItems = flags & kFlag_AllowRemovalOfUnplayableBipedItems;
 	bool unk1 = flags & kFlag_Unk1;
 	bool unk2 = flags & kFlag_Unk2;
+	bool ignoreAllUnplayableItems = flags & kFlag_IgnoreAllUnplayableItems;
 
 	// Modify the code for RemoveAllItems
 	if (removeQuestItemsIfPlayer)
@@ -362,11 +364,22 @@ bool Cmd_RemoveAllItemsShowOff_Execute(COMMAND_ARGS)
 		WriteRelJump(0x4CE4B8, 0x4CE559);  // make the long jump at 0x4CE4B8 unconditional
 		WriteRelJump(0x4CEDCE, 0x4CEE75);  // same concept
 	}
-	if (removeUnplayableBipedItems)
+	if (!ignoreAllUnplayableItems)
 	{
-		SafeWrite8(0x4CE571, 0xEB);  // make short jump unconditional
-		PatchMemoryNop(0x4CED5D, 6);  // make the long jump never happen
+		if (removeUnplayableBipedItems)
+		{
+			SafeWrite8(0x4CE571, 0xEB);  // make short jump unconditional
+			PatchMemoryNop(0x4CED5D, 6);  // make the long jump never happen
+		}
 	}
+	else
+	{
+		//todo: Write a jmp to extract the form mid-loop.
+
+		
+		// Check the form via IsItemPlayable. If it passes, jmp back to removal, otherwise jmp to go to the next form.
+	}
+
 
 	// Call RemoveAllItems with the new modifications
 	ThisStdCall<void>(0x4CE340, xChanges, thisObj, targetContainer, unk1, retainOwnership, unk2, suppressMessages, typeCode, exceptionFormList);
@@ -377,12 +390,19 @@ bool Cmd_RemoveAllItemsShowOff_Execute(COMMAND_ARGS)
 		WriteRelJe(0x4CE4B8, 0x4CE559); // revert back to long Jump if Zero
 		WriteRelJe(0x4CEDCE, 0x4CEE75); // same concept
 	}
-	if (removeUnplayableBipedItems)
+	if (!ignoreAllUnplayableItems)
 	{
-		SafeWrite8(0x4CE571, 0x74); // revert back to short Jump if Zero
-		WriteRelJe(0x4CED5D, 0x4CFBCA); // re-write long Jump if Zero
+		if (removeUnplayableBipedItems)
+		{
+			SafeWrite8(0x4CE571, 0x74); // revert back to short Jump if Zero
+			WriteRelJe(0x4CED5D, 0x4CFBCA); // re-write long Jump if Zero
+		}
 	}
-
+	else
+	{
+		// TODO
+	}
+	
 	// Wrap up
 	ThisStdCall<void>(0x952C30, g_thePlayer, thisObj); // ComputeShouldRecalculateQuestTargets()
 	*result = 1; //function worked as expected.
