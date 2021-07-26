@@ -35,8 +35,12 @@ IDebugLog g_Log("ShowOffNVSE.log");
 HMODULE	g_ShowOffHandle;
 UInt32 g_PluginVersion = 115;
 
-// Allows modmakers to toggle ShowOff's debug messages for some of its functions. 
+// Allows modmakers to toggle ShowOff's debug messages for some of its functions.
+#ifdef _DEBUG
+std::atomic<bool> g_ShowFuncDebug = true;
+#else
 std::atomic<bool> g_ShowFuncDebug = false;
+#endif
 
 /*----------Globals------------------------------------------------------------------------
 * It's better to include them in a .cpp file instead of a header file.
@@ -459,7 +463,9 @@ extern "C"
 
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
-		
+
+
+		// IsBipedForm
 		REG_CMD_FORM(GetActorPreferredWeapon)
 		REG_CMD(TryDropWeapon)
 

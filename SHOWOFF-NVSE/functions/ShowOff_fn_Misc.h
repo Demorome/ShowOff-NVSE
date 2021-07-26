@@ -425,7 +425,7 @@ static EquipData FindEquipped(TESObjectREFR* thisObj, FormMatcher& matcher) {
 }
 #endif
 
-static EquipDataSet GetEquippedItems(TESObjectREFR* actorRef, UInt32 const filterFlags) {
+static EquipDataSet GetEquippedItems(TESObjectREFR* actorRef, UInt32 const filterFlags = 0) {
 	auto const pContainerChanges = dynamic_cast<ExtraContainerChanges*>(actorRef->extraDataList.GetByType(kExtraData_ContainerChanges));
 	return pContainerChanges ? FindEquippedItems(pContainerChanges, filterFlags) : EquipDataSet();
 }
@@ -475,28 +475,23 @@ bool Cmd_GetNumBrokenEquippedItems_Execute(COMMAND_ARGS)
 	return true;
 }
 
-// TODO: re-do the whole thing
 bool Cmd_GetEquippedItemsAsBitMask_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
 	if (!IS_ACTOR(thisObj)) return true;
-	UInt32 flags = 0;  //return value.
-#if 0
-	for (UInt32 slotIdx = EquippedItemIndex::ePart_Head; slotIdx <= EquippedItemIndex::ePart_BodyAddon3; slotIdx++)
+	UInt32 equipSlotMask = 0;  //return value.
+	auto eqItems = GetEquippedItems(thisObj, 0b10011111111111111111111);  // Retrieve all equipped items that have equip slots (including non-playables!).
+	for (auto const& iter : eqItems)
 	{
-		MatchBySlot matcher(slotIdx);
-		EquipData equipD = FindEquipped(thisObj, matcher);
-		if (equipD.pForm)
-		{
-			if (g_ShowFuncDebug)
-				Console_Print("GetEquippedItemsAsBitMask - Form: %s, mask to add: %u", equipD.pForm->GetName(), TESBipedModelForm::MaskForSlot(slotIdx));
-			flags |= TESBipedModelForm::MaskForSlot(slotIdx);
-		}
+		auto form = iter.pForm;
+		auto const formSlotMask = GetFormEquipSlotMask(form);
+		equipSlotMask |= formSlotMask;
+		if (g_ShowFuncDebug)
+			Console_Print("GetEquippedItemsAsBitMask - Form: %s, mask to add: %x", form->GetName(), formSlotMask);
 	}
-#endif
-	*result = flags;
+	*result = equipSlotMask;
 	if (IsConsoleMode())
-		Console_Print("GetEquippedItemsAsBitMask >> %u", flags);
+		Console_Print("GetEquippedItemsAsBitMask >> %x", equipSlotMask);
 	return true;
 }
 bool Cmd_GetEquippedItemsAsBitMask_Execute(COMMAND_ARGS)
@@ -886,48 +881,6 @@ bool Cmd_GetCalculatedItemWeight_Execute(COMMAND_ARGS)
 #endif
 	}
 	return true;
-}
-
-// Copied from FOSE's GetScript.
-Script* GetScriptFromForm(TESForm* form)
-{
-	Script* script = nullptr;  //return value.
-	TESScriptableForm* scriptForm = DYNAMIC_CAST(form, TESForm, TESScriptableForm);
-	if (scriptForm)	// Let's try for a MGEF (?)
-	{
-		script = scriptForm->script;
-	}
-	else
-	{
-		if (EffectSetting* effect = DYNAMIC_CAST(form, TESForm, EffectSetting))
-			script = effect->GetScript();
-		else
-			return DYNAMIC_CAST(form, TESForm, Script);
-	}
-	return script;
-}
-
-bool Cmd_GetScriptHasFunction_OLD_Execute(COMMAND_ARGS)
-{
-	*result = false;
-	char function[0x50];
-	TESForm* form = nullptr;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &function, &form) || !function[0]) return true;
-	
-	Script* script = nullptr;
-	if (thisObj)
-	{
-		ExtraScript* xScript = GetExtraTypeJIP(&thisObj->extraDataList, Script);
-		if (xScript && xScript->script && xScript->eventList)
-			script = xScript->script;
-	}
-	else if (form)
-	{
-		script = GetScriptFromForm(form);
-	}
-	if (!script) return true;
-	
-	//stuff that didn't work.
 }
 
 

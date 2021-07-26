@@ -1689,3 +1689,30 @@ bool IsEquipableItemPlayable(TESForm* form)  // Ammo is not equip-able in the sa
 	return true;
 }
 
+// Inspired by FOSE's MatchBySlot
+UInt32 GetFormEquipSlotMask(TESForm* form)
+{
+	UInt32 equipSlotMask = 0;  // return value
+	if (IS_TYPE(form, TESObjectWEAP)) {
+		equipSlotMask = TESBipedModelForm::eSlot_Weapon;
+	}
+	else
+	{
+		TESBipedModelForm* pBip = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
+		if (pBip)
+			equipSlotMask = pBip->partMask;
+	}
+	return equipSlotMask;
+}
+
+// If any slot bits from slotMask match with the slot bits from the form, returns true.
+bool MatchAnySlotForForm(TESForm* form, UInt32 slotMask)
+{
+	auto const formSlotMask = GetFormEquipSlotMask(form);
+	return (formSlotMask & slotMask) != 0;
+}
+
+bool MatchAnyEquipSlots(UInt32 slotMask1, UInt32 slotMask2)
+{
+	return (slotMask1 & slotMask2) != 0;
+}

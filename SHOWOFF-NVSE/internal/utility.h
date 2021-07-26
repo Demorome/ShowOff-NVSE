@@ -367,3 +367,7 @@ enum EquipableObjects
 };
 short GetEquipType(TESForm* form);
 bool IsEquipableItemPlayable(TESForm* form);
+
+UInt32 GetFormEquipSlotMask(TESForm* form);
+bool MatchAnySlotForForm(TESForm* form, UInt32 slotMask);
+bool MatchAnyEquipSlots(UInt32 slotMask1, UInt32 slotMask2);

@@ -282,7 +282,7 @@ bool Cmd_GetWeaponHasFlag_Eval(COMMAND_ARGS_EVAL)
 	}
 	return true;
 }
-bool Cmd_WeaponHasFlag_Execute(COMMAND_ARGS)
+bool Cmd_GetWeaponHasFlag_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	UInt32 flagToCheck;
