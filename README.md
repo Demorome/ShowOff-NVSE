@@ -7,6 +7,8 @@ Documentation is available [here, on GeckWiki.com](https://geckwiki.com/index.ph
 Releases are published [here, on Github](https://github.com/Demorome/Showoff-NVSE/releases).\
 (Used to be on Nexus, recently changed)
 
+If you wish to leave a comment, I will occasionally check the comment section [here, on Nexus](https://www.nexusmods.com/newvegas/mods/72541?tab=posts).
+
 
 # Engine Tweaks
 
