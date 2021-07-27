@@ -21,7 +21,7 @@ If you wish to leave a comment, I will occasionally check the comment section [h
 
 
 # Requirements
-Requires xNVSE v6.06 or greater: https://github.com/xNVSE/NVSE/releases.
+Requires xNVSE v6.0.6 or greater: https://github.com/xNVSE/NVSE/releases.
 
 
 # Installation
