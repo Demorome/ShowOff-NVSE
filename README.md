@@ -22,6 +22,10 @@ Releases are published here: https://github.com/Demorome/Showoff-NVSE/releases
 Requires xNVSE v6.06 or greater: https://github.com/xNVSE/NVSE/releases.
 
 
+# Installation
+`ShowOffNVSE.dll` must end up under `Fallout New Vegas/Data/nvse/plugins/..` (in the `plugins` folder).
+
+
 # Credits
 lStewieAl, c6, Luthien, TommInfinite, Jazzisparis, karut - for their help and the code I stole off all of them.
 
