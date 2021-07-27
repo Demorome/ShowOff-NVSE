@@ -1,5 +1,5 @@
 # Showoff-NVSE
-An NVSE plugin which adds new functions, as well as some engine-level tweaks.
+An NVSE plugin which adds new functions, as well as some engine-level tweaks.\
 For heathens who have forsaken the Vanilla-Style way. 
 
 Documentation is available [here, on GeckWiki.com](https://geckwiki.com/index.php?title=Category:Functions_(ShowOff_NVSE)).
