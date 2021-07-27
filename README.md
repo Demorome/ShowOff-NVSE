@@ -27,7 +27,7 @@ Requires xNVSE v6.06 or greater: https://github.com/xNVSE/NVSE/releases.
 
 
 # Credits
-lStewieAl, c6, Luthien, TommInfinite, Jazzisparis, karut - for their help and the code I stole off all of them.
+Kormakur, lStewieAl, c6, Luthien, TommInfinite, Jazzisparis, karut - for their help and the code I stole off all of them.
 
 Code taken from JohnnyGuitar NVSE: https://www.nexusmods.com/newvegas/mods/66927
 
@@ -47,6 +47,9 @@ Brofield for SimpleINI: https://github.com/brofield/simpleini.
 
 Trooper for showing off his abilities, and some functions made specifically to show off. 
 
+Anro - motivating me to push this thing out.
+
+Kormakur (again) - The single best thing to happen to New Vegas scripting.
 
 # See Also
 Crash Logger (https://www.nexusmods.com/newvegas/mods/72317) - if you're getting crashes with a DLL, this is the best thing to report issues to the author.
