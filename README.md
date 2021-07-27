@@ -4,7 +4,8 @@ For heathens who have forsaken the Vanilla-Style way.
 
 Documentation is available here: https://geckwiki.com/index.php?title=Category:Functions_(ShowOff_NVSE)
 
-Releases are published here: https://www.nexusmods.com/newvegas/mods/72541
+Releases are published here: https://github.com/Demorome/Showoff-NVSE/releases
+(Used to be on Nexus, recently changed)
 
 # Requirements
 Requires xNVSE v6.06 or greater: https://github.com/xNVSE/NVSE/releases.
