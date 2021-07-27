@@ -27,7 +27,7 @@ Requires xNVSE v6.06 or greater: https://github.com/xNVSE/NVSE/releases.
 
 
 # Credits
-Kormakur, lStewieAl, c6, Luthien, TommInfinite, Jazzisparis, karut - for their help and the code I stole off all of them.
+Kormakur, lStewieAl, c6, Luthien, TommInfinite, Jazzisparis, karut - for their invaluable help and the code I stole off all of them.
 
 * Code taken from JohnnyGuitar NVSE: https://www.nexusmods.com/newvegas/mods/66927
 
