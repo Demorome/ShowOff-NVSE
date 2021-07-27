@@ -34,7 +34,7 @@ Requires xNVSE v6.0.6 or greater: https://github.com/xNVSE/NVSE/releases.
 This is a series of questions that generally get asked on pages for other NVSE plugins.
 
 Q. Does this mod replace JIP LN NVSE Plugin, JohnnyGuitar NVSE, and SUP NVSE?\
-A. No, ShowOff does not replace those plugins. It is meant to be installed and used along side them.
+A. No, ShowOff does not replace those plugins. It is meant to be installed and used alongside them.
 
 Q. Will you support NVSE 5.1.4?\
 A. No. Due to features in xNVSE that this plugins need, it is not feasible to support legacy versions of NVSE.
