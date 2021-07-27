@@ -42,10 +42,11 @@ A. No. Due to features in xNVSE that this plugins need, it is not feasible to su
 If you have anymore questions, feel free to join us on the [xNVSE community Discord server](https://discord.com/invite/EebN93s). 
 
 # Permissions
-All releases are free to be used by anyone.\ 
+All releases are free to be used by anyone.\
 As for redistribution or taking code from this plugin for your own use...
 
-Keep in mind that much of the ShowOff NVSE code is taken from others - I (Demorome) try to make it clear from where such code came from.\
+Keep in mind that much of the ShowOff NVSE code is taken from others .\
+I (Demorome) try to make it clear from where such code came from.\
 If you want to use code I took from someone else, you should ask the original creator for permission.\
 Besides that, you may use any of my code anywhere without asking for my permission, so long as you credit me.
 
