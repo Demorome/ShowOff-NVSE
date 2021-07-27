@@ -38,9 +38,6 @@ A. No, ShowOff does not replace those plugins. It is meant to be installed and u
 Q. Will you support NVSE 5.1.4?\
 A. No. Due to features in xNVSE that this plugins need, it is not feasible to support legacy versions of NVSE.
 
-Q. My Anti-virus says this mod is a virus. Is this true?\
-A. No, it is a false positive. Due to the way NVSE plugins work, some AVs flag them as malicious. Be sure to add an exception in your anti-virus.
-
 If you have anymore questions, feel free to join us on the [xNVSE community Discord server](https://discord.com/invite/EebN93s). 
 
 
