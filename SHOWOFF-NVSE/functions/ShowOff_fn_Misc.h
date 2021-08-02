@@ -27,7 +27,7 @@ DEFINE_CMD_ALT_COND_PLUGIN(IsLimbCrippled, , "If no args are passed / arg is -1,
 DEFINE_CMD_ALT_COND_PLUGIN(GetNumCrippledLimbs, , , true, kParams_OneOptionalInt);
 DEFINE_CMD_ALT_COND_PLUGIN(GetCrippledLimbsAsBitMask, , , true, kParams_OneOptionalInt);
 DEFINE_CMD_ALT_COND_PLUGIN(GetNumBrokenEquippedItems, , , true, kParams_OneOptionalFloat_OneOptionalInt);
-DEFINE_CMD_ALT_COND_PLUGIN(GetEquippedItemsAsBitMask, , , true, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(GetEquippedItemsAsBitMask, GetOccupiedEquipSlots, , true, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetEquippedWeaponType, , , true, NULL);
 DEFINE_COMMAND_PLUGIN(ClearShowoffSavedData, "", 0, 1, kParams_OneInt);
 DEFINE_CMD_ALT_COND_PLUGIN(GetBaseEquippedWeight, , , true, kParams_OneOptionalFloat_OneOptionalInt);
@@ -439,19 +439,27 @@ UInt32 __fastcall GetNumBrokenEquippedItems_Call(TESObjectREFR* const thisObj, f
 	threshold /= 100.0F;  //expecting a number like 35, reduce to 0.35
 	UInt32 numBrokenItems = 0;  //return value.
 	auto eqItems = GetEquippedItems(thisObj, flags);
-	for (auto const &iter : eqItems)
+	for (auto iter : eqItems)
 	{
 		if (g_ShowFuncDebug)
 			Console_Print("GetNumBrokenEquippedItems - iter form: [%08X] (%s)", iter.pForm, iter.pForm->GetName());
-		ExtraHealth* pXHealth = iter.pExtraData ? (ExtraHealth*)iter.pExtraData->GetByType(kExtraData_Health) : NULL; // modified health
-		auto pHealth = DYNAMIC_CAST(iter.pForm, TESForm, TESHealthForm);  // base health 
-		if (pXHealth && pHealth)  // If there's no pXHealth, it's at 100% health (no modified health extra data).
+		
+		auto const pHealth = DYNAMIC_CAST(iter.pForm, TESForm, TESHealthForm);  // base health
+		if (!pHealth) continue;
+		float baseHealth = pHealth->health;
+
+		//todo: modify baseHealth if the item is a weapon by checking if it has the weapon mod equipped (check xData)
+		// Check if Jazz's code at https://discord.com/channels/711228477382328331/816602410012639262/869359398978469911 gets released (could be used here).
+
+		ExtraHealth* pXHealth = iter.pExtraData ? (ExtraHealth*)iter.pExtraData->GetByType(kExtraData_Health) : NULL; // modified health data
+		if (pXHealth)  // If there's no pXHealth, it's at 100% health (no modified health extra data).
 		{
-			if ((pXHealth->health / (float)pHealth->health) <= threshold) numBrokenItems++;
+			float const currentHealth = pXHealth->health;
+			if ((currentHealth / baseHealth) <= threshold) numBrokenItems++;
 			if (g_ShowFuncDebug)
 				Console_Print("GetNumBrokenEquippedItems - health %% check being performed on %s. %%: %f vs %f threshold", iter.pForm->GetName(), (pXHealth->health / (float)pHealth->health), threshold);
 		}
-		else if (pHealth && threshold >= 1.0F) numBrokenItems++;
+		else if (threshold >= 1.0F) numBrokenItems++;
 	}
 	if (IsConsoleMode())
 		Console_Print("GetNumBrokenEquippedItems >> %u", numBrokenItems);

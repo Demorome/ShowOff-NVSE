@@ -13,10 +13,13 @@ DEFINE_CMD_ALT_COND_PLUGIN(IsEquippedWeaponRanged, , "Returns 1 if the calling a
 DEFINE_CMD_ALT_COND_PLUGIN(GetChallengeProgress, , "Returns the progress made on a challenge.", 0, kParams_OneChallenge)
 DEFINE_COMMAND_PLUGIN(UnequipItems, , true, 4, kParams_FourOptionalInts);
 DEFINE_COMMAND_PLUGIN(GetEquippedItems, , true, 1, kParams_OneOptionalInt);
+DEFINE_CMD_ALT_COND_PLUGIN(GetPCHasScriptedFastTravelOverride, , "Returns whether or not the player is restricted by EnableFastTravel", 0, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetPCCanFastTravel, , , false, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetWeaponHasFlag, WeaponHasFlag, , false, kParams_OneInt_OneOptionalObjectID);
 DEFINE_CMD_ALT_COND_PLUGIN(GetActorHasBaseFlag, ActorHasBaseFlag, , false, kParams_OneInt_OneOptionalActorBase);
 DEFINE_COMMAND_PLUGIN(RemoveAllItemsShowOff, , true, 4, kParams_TwoOptionalInts_OneOptionalContainerRef_OneOptionalList);
+DEFINE_COMMAND_PLUGIN(ForceWeaponJamAnim, ForceJamAnim, true, 0, NULL);
+
 
 bool Cmd_SetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
 {
@@ -233,7 +236,6 @@ bool Cmd_GetEquippedItems_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_CMD_ALT_COND_PLUGIN(GetPCHasScriptedFastTravelOverride, , "Returns whether or not the player is restricted by EnableFastTravel", 0, NULL);
 bool Cmd_GetPCHasScriptedFastTravelOverride_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = (g_thePlayer->byte66D & 1) == 0;
@@ -409,11 +411,39 @@ bool Cmd_RemoveAllItemsShowOff_Execute(COMMAND_ARGS)
 	return true;
 }
 
+bool Cmd_ForceWeaponJamAnim_Execute(COMMAND_ARGS)
+{
+	*result = false;
+	if (IS_ACTOR(thisObj))
+	{
+		auto actor = (Actor*)thisObj;
+		if (auto const weapn = actor->GetEquippedWeapon())
+		{
+			// Copies the code at 0x89667E for post-reload jamming.
+			auto animGroupID = ThisStdCall<UInt32>(0x51E2A0, weapn, 0) + 23;  // TESObjectWEAP::GetReloadAnimGroup + 23
+			auto animKey = ThisStdCall<UInt16>(0x897910, actor, animGroupID, 0, 0, 0);  //Actor__GetAnimKey
+			if (CdeclCall<UInt32>(0x5F2440, animKey) == animGroupID)  // calls AnimGroupID::GetGroupID, which gets the lowers bits of animKey.
+			{
+				if (auto animData = actor->GetAnimData())
+				{
+					ThisStdCall<void*>(0x8B28C0, actor, animGroupID, animData);  // Actor::8B28C0
+					auto const animSeqElem = animData->animSequence[4];  // 4 = kSequence_Weapon
+					actor->SetAnimActionAndSequence(9, animSeqElem);  // 9 = kAnimAction_Reload
+					actor->Unk_12C(animKey, true);
+					*result = true;
+				}
+			}
+		}
+	}
+	return true;
+}
+
 
 
 
 
 #ifdef _DEBUG
+
 
 
 

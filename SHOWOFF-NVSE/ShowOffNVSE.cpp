@@ -33,7 +33,7 @@
 // Plugin Stuff
 IDebugLog g_Log("ShowOffNVSE.log");
 HMODULE	g_ShowOffHandle;
-UInt32 g_PluginVersion = 115;
+UInt32 g_PluginVersion = 117;
 
 // Allows modmakers to toggle ShowOff's debug messages for some of its functions.
 #ifdef _DEBUG
@@ -452,6 +452,7 @@ extern "C"
 		/*3CE1*/ REG_CMD(GetWeaponHasFlag)
 		/*3CE2*/ REG_CMD(GetActorHasBaseFlag)
 		/*3CE3*/ REG_CMD(RemoveAllItemsShowOff)
+		/*3CE4*/ REG_CMD(ForceWeaponJamAnim)
 
 
 

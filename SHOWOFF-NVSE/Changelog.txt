@@ -50,12 +50,18 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 * Fix GetRandomizerSeed returning NAN (returns -1 for errors now).
 
 ===New Functions:
-* IsTemporaryReference
+* IsTemporaryReference - this should be kept undocumented, I didn't sufficiently test it.
 * GetPCHasScriptedFastTravelOverride
 * GetPCCanFastTravel
 * WeaponHasFlag
 * ActorHasBaseFlag
 * RemoveAllItemsShowOff
+
+
+//===v1.17
+
+===New Functions:
+* ForceWeaponJamAnim
 
 
 

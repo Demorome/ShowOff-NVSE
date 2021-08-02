@@ -167,3 +167,9 @@ ExtraContainerExtendDataArray	Actor::GetEquippedExtendDataList()
 	return outExtendData;
 }
 */
+
+
+void Actor::SetAnimActionAndSequence(SInt32 animAction, BSAnimGroupSequence* animGroupSeq)
+{
+	ThisStdCall<void>(0x8A73E0, this, animAction, animGroupSeq);
+}

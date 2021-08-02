@@ -558,7 +558,7 @@ public:
 	virtual void		Unk_129(void);
 	virtual void		Unk_12A(void);
 	virtual void		Unk_12B(void);
-	virtual void		Unk_12C(void);
+	virtual void		Unk_12C(UInt16 animKey, bool unk1);
 	virtual void		Unk_12D(void);
 	virtual void		DoHealthDamage(Actor *attacker, float damage);
 	virtual void		Unk_12F(void);
@@ -714,7 +714,7 @@ public:
 	BackUpPackage *AddBackUpPackage(TESObjectREFR *targetRef, TESObjectCELL *targetCell, UInt32 flags);
 	void TurnToFaceObject(TESObjectREFR *target);
 	void TurnAngle(float angle);
-	void HandleSetAnimSequence(SInt32 animAction, BSAnimGroupSequence *animGroupSeq);
+	void SetAnimActionAndSequence(SInt32 animAction, BSAnimGroupSequence *animGroupSeq);
 	void PlayIdle(TESIdleForm *idleAnim);
 	float GetKillXP();
 	void DismemberLimb(UInt32 bodyPartID, bool explode);
