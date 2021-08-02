@@ -7,10 +7,10 @@
 #include "Utilities.h"
 
 
-DEFINE_COMMAND_ALT_PLUGIN(ShowingOffDisable, DisableIFYouDidntNotice, SnigDisSecret, DisablesSecretChild, "Does the same thing as vanilla Disable. For showing off!", 1, 1, kParams_OneOptionalInt);
-DEFINE_COMMAND_ALT_PLUGIN(ShowingOffEnable, EnableIFYouDidntNotice, SnigEnSecret, EnablesSecretChild, "Does the same thing as vanilla Enable. For showing off!", 1, 1, kParams_OneOptionalInt);
-DEFINE_COMMAND_ALT_PLUGIN(DisableAlt, DisableTheSecond, SnigDis, "Ignores the EnableParent limitation.", true, 1, kParams_OneOptionalInt);
-DEFINE_COMMAND_ALT_PLUGIN(EnableAlt, EnableTheSecond, SnigEn, "Ignores the EnableParent limitation.", true, 1, kParams_OneOptionalInt);
+DEFINE_COMMAND_ALT_PLUGIN(ShowingOffDisable, DisableIFYouDidntNotice, "Does the same thing as vanilla Disable. For showing off!", 1, 1, kParams_OneOptionalInt);
+DEFINE_COMMAND_ALT_PLUGIN(ShowingOffEnable, EnableIFYouDidntNotice, "Does the same thing as vanilla Enable. For showing off!", 1, 1, kParams_OneOptionalInt);
+DEFINE_COMMAND_ALT_PLUGIN(DisableAlt, SnigOff, "Ignores the EnableParent limitation.", true, 1, kParams_OneOptionalInt);
+DEFINE_COMMAND_ALT_PLUGIN(EnableAlt, SnigOn, "Ignores the EnableParent limitation.", true, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_ALT_PLUGIN(ListAddList, AddFormListToFormList, "", 0, 3, kParams_TwoFormLists_OneOptionalIndex);
 DEFINE_COMMAND_PLUGIN(MessageExAltShowoff, , 0, 22, kParams_JIP_OneFloat_OneInt_OneFormatString);
 DEFINE_CMD_ALT_COND_PLUGIN(IsCornerMessageDisplayed, , "Returns 1/0 depending on if a corner message is displayed.", false, NULL);
@@ -24,7 +24,7 @@ DEFINE_CMD_ALT_COND_PLUGIN(PlayerHasCateyeEnabled, , , false, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(PlayerHasImprovedSpottingActive, , , false, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(PlayerIsDrinkingPlacedWater, , , false, NULL);
 DEFINE_COMMAND_PLUGIN(SetIsPCAMurderer, , 0, 1, kParams_OneInt);
-DEFINE_CMD_ALT_COND_PLUGIN(IsNight, , "Returns true if it's night according to the current (or specified) climate.", false, kParams_OneOptionalForm);
+DEFINE_CMD_ALT_COND_PLUGIN(IsNight, BloodyTears, "Returns true if it's night according to the current (or specified) climate.", false, kParams_OneOptionalForm);
 DEFINE_CMD_ALT_COND_PLUGIN(IsLimbCrippled, , "If no args are passed / arg is -1, returns true if actor has any crippled limbs. Otherwise, checks if the specified limb is crippled.", true, kParams_TwoOptionalInts);
 DEFINE_CMD_ALT_COND_PLUGIN(GetNumCrippledLimbs, , , true, kParams_OneOptionalInt);
 DEFINE_CMD_ALT_COND_PLUGIN(GetCrippledLimbsAsBitMask, , , true, kParams_OneOptionalInt);
