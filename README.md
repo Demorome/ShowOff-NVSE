@@ -68,6 +68,8 @@ Brofield for SimpleINI: https://github.com/brofield/simpleini.
 
 AVeryUncreativeUsername / Trooper - for showing off his abilities,  coming up with the name, banner, and various functions.
 
+CivisRomanus - For coming up with the the phrases which inspired this mod's name. 
+
 Anro - motivating me to push this thing out.
 
 Kormakur (again) - The single best thing to happen to New Vegas scripting.
