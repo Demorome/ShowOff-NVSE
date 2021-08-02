@@ -2,13 +2,15 @@
 
 #include <random>
 #include <unordered_set>
-
 #include "GameRTTI.h"
+#include "SafeWrite.h"
 #include "Utilities.h"
 
 
 DEFINE_COMMAND_ALT_PLUGIN(ShowingOffDisable, ShowingOffDisableAltExCond2, "Does the same thing as vanilla Disable. For showing off!", 1, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_ALT_PLUGIN(ShowingOffEnable, ShowingOffEnableAltExCond2, "Does the same thing as vanilla Enable. For showing off!", 1, 1, kParams_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(DisableAlt, "Ignores the EnableParent limitation.", true, 1, kParams_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(EnableAlt, "Ignores the EnableParent limitation.", true, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_ALT_PLUGIN(ListAddList, AddFormListToFormList, "", 0, 3, kParams_TwoFormLists_OneOptionalIndex);
 DEFINE_COMMAND_PLUGIN(MessageExAltShowoff, , 0, 22, kParams_JIP_OneFloat_OneInt_OneFormatString);
 DEFINE_CMD_ALT_COND_PLUGIN(IsCornerMessageDisplayed, , "Returns 1/0 depending on if a corner message is displayed.", false, NULL);
@@ -50,6 +52,32 @@ bool Cmd_ShowingOffDisable_Execute(COMMAND_ARGS) {
 bool(__cdecl* Cmd_Enable)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5C43D0;
 bool Cmd_ShowingOffEnable_Execute(COMMAND_ARGS) {
 	return Cmd_Enable(PASS_COMMAND_ARGS);
+}
+
+bool Cmd_DisableAlt_Execute(COMMAND_ARGS)
+{
+	// Modify code to skip over the "If this has an EnableParent" check.
+	WriteRelJump(0x5C465D, 0x5C4740);
+	
+	bool const success = Cmd_Disable(PASS_COMMAND_ARGS);
+
+	// Undo code modification.
+	WriteRelJe(0x5C465D, 0x5C4740);
+
+	return success;
+}
+
+bool Cmd_EnableAlt_Execute(COMMAND_ARGS)
+{
+	// Modify code to skip over the "If this has an EnableParent" check.
+	WriteRelJump(0x5C4437, 0x5C451D);
+	
+	bool const success = Cmd_Enable(PASS_COMMAND_ARGS);
+
+	// Undo code modification.
+	WriteRelJe(0x5C4437, 0x5C451D);
+	
+	return success;
 }
 
 //ripped code from FOSE's ListAddForm

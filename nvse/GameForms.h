@@ -607,9 +607,10 @@ public:
 	const char* RefToString();
 	TESLeveledList* GetLvlList();
 	void SetJIPFlag(UInt8 jipFlag, bool bSet);
-	bool IsQuestItem2() { return flags & kFormFlags_QuestItem; };
-	bool IsDisabled() { return flags & kFormFlags_IsPermanent; };
-	bool IsDeleted() { return flags & kFormFlags_Deleted; };
+	bool IsQuestItem2() { return flags & kFormFlags_QuestItem; }
+	bool IsDisabled() { return flags & kFormFlags_IsPermanent; }
+	bool IsDeleted() { return flags & kFormFlags_Deleted; }
+	bool GetDontSave() { return flags & kFormFlags_DontSaveForm; }
 	
 	MEMBER_FN_PREFIX(TESForm);
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525

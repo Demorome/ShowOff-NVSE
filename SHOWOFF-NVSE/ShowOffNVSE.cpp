@@ -453,7 +453,8 @@ extern "C"
 		/*3CE2*/ REG_CMD(GetActorHasBaseFlag)
 		/*3CE3*/ REG_CMD(RemoveAllItemsShowOff)
 		/*3CE4*/ REG_CMD(ForceWeaponJamAnim)
-
+		/*3CE5*/ REG_CMD(DisableAlt)
+		/*3CE6*/ REG_CMD(EnableAlt)
 
 
 
@@ -462,10 +463,11 @@ extern "C"
 		//========v1.??
 		//todo: always check to update/increase your opcode range when adding new functions
 
+
+
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
-
-
+		
 		// IsBipedForm
 		REG_CMD_FORM(GetActorPreferredWeapon)
 		REG_CMD(TryDropWeapon)

@@ -448,6 +448,7 @@ bool Cmd_ForceWeaponJamAnim_Execute(COMMAND_ARGS)
 
 
 
+
 // Kinda pointless in the face of JIP's IsMobile
 DEFINE_CMD_ALT_COND_PLUGIN(CanBeMoved, , , true, NULL);
 bool Cmd_CanBeMoved_Eval(COMMAND_ARGS_EVAL)
