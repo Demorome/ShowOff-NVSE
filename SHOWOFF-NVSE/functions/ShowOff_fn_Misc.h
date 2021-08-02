@@ -7,8 +7,8 @@
 #include "Utilities.h"
 
 
-DEFINE_COMMAND_ALT_PLUGIN(ShowingOffDisable, ShowingOffDisableAltExCond2, "Does the same thing as vanilla Disable. For showing off!", 1, 1, kParams_OneOptionalInt);
-DEFINE_COMMAND_ALT_PLUGIN(ShowingOffEnable, ShowingOffEnableAltExCond2, "Does the same thing as vanilla Enable. For showing off!", 1, 1, kParams_OneOptionalInt);
+DEFINE_COMMAND_ALT_PLUGIN(ShowingOffDisable, DisableIFYouDidntNotice, "Does the same thing as vanilla Disable. For showing off!", 1, 1, kParams_OneOptionalInt);
+DEFINE_COMMAND_ALT_PLUGIN(ShowingOffEnable, EnableIFYouDidntNotice, "Does the same thing as vanilla Enable. For showing off!", 1, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(DisableAlt, "Ignores the EnableParent limitation.", true, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(EnableAlt, "Ignores the EnableParent limitation.", true, 1, kParams_OneOptionalInt);
 DEFINE_COMMAND_ALT_PLUGIN(ListAddList, AddFormListToFormList, "", 0, 3, kParams_TwoFormLists_OneOptionalIndex);
@@ -58,7 +58,7 @@ bool Cmd_DisableAlt_Execute(COMMAND_ARGS)
 {
 	// Modify code to skip over the "If this has an EnableParent" check.
 	WriteRelJump(0x5C465D, 0x5C4740);
-	
+
 	bool const success = Cmd_Disable(PASS_COMMAND_ARGS);
 
 	// Undo code modification.
@@ -71,12 +71,12 @@ bool Cmd_EnableAlt_Execute(COMMAND_ARGS)
 {
 	// Modify code to skip over the "If this has an EnableParent" check.
 	WriteRelJump(0x5C4437, 0x5C451D);
-	
+
 	bool const success = Cmd_Enable(PASS_COMMAND_ARGS);
 
 	// Undo code modification.
 	WriteRelJe(0x5C4437, 0x5C451D);
-	
+
 	return success;
 }
 
@@ -104,7 +104,7 @@ bool Cmd_ListAddList_Execute(COMMAND_ARGS)
 
 	// Need to append elements to our own array in order to iterate backwards, to append in descending key order.
 	std::vector<TESForm*> formArr;
-	
+
 	for (tList<TESForm>::Iterator iter = pToAppendList->list.Begin(); !iter.End(); ++iter)
 	{
 		TESForm* form = iter.Get();
@@ -165,7 +165,7 @@ bool Cmd_MessageExAltShowoff_Execute(COMMAND_ARGS)
 // Inspired by JIP's "ClearMessageQueue"
 bool Cmd_IsCornerMessageDisplayed_Execute(COMMAND_ARGS)
 {
-	*result = !g_HUDMainMenu->queuedMessages.Empty();  
+	*result = !g_HUDMainMenu->queuedMessages.Empty();
 	//*result = (bool)g_HUDMainMenu->currMsgKey;
 	//another way to check. Seems to be a bit slower to update when initially adding a message to the queue.
 	return true;
@@ -263,7 +263,7 @@ bool Cmd_PlayerHasNightVisionActive_Eval(COMMAND_ARGS_EVAL)
 
 bool Cmd_PlayerIsUsingTurbo_Execute(COMMAND_ARGS)
 {
-	*result = g_thePlayer->isUsingTurbo;  
+	*result = g_thePlayer->isUsingTurbo;
 	return true;
 }
 bool Cmd_PlayerIsUsingTurbo_Eval(COMMAND_ARGS_EVAL)
@@ -323,7 +323,7 @@ bool Cmd_IsNight_Eval(COMMAND_ARGS_EVAL)
 	float sunrise, sunset;
 	if (climate && IS_TYPE(climate, TESClimate))
 	{
-		sunrise = ThisStdCall<UInt8>(0x595F10, climate, 1) / 6.0F;  //sunrise begin sprinkled with adjustments. 
+		sunrise = ThisStdCall<UInt8>(0x595F10, climate, 1) / 6.0F;  //sunrise begin sprinkled with adjustments.
 		sunset = ThisStdCall<UInt8>(0x595F10, climate, 2) / 6.0F;  //Second arg determines which type of time to check.
 	}
 	else
@@ -366,7 +366,7 @@ bool Cmd_IsLimbCrippled_Eval(COMMAND_ARGS_EVAL)
 	else if (limbID <= 6)
 	{
 		limbID += kAVCode_PerceptionCondition;
-		if (actor->avOwner.GetActorValue(limbID) <= threshold) 
+		if (actor->avOwner.GetActorValue(limbID) <= threshold)
 			*result = 1;
 	}
 	return true;
@@ -471,7 +471,7 @@ UInt32 __fastcall GetNumBrokenEquippedItems_Call(TESObjectREFR* const thisObj, f
 	{
 		if (g_ShowFuncDebug)
 			Console_Print("GetNumBrokenEquippedItems - iter form: [%08X] (%s)", iter.pForm, iter.pForm->GetName());
-		
+
 		auto const pHealth = DYNAMIC_CAST(iter.pForm, TESForm, TESHealthForm);  // base health
 		if (!pHealth) continue;
 		float baseHealth = pHealth->health;
@@ -499,7 +499,7 @@ bool Cmd_GetNumBrokenEquippedItems_Eval(COMMAND_ARGS_EVAL)
 	float const threshold = *(float*)&arg1;
 	auto const flags = (UInt32)arg2;
 	*result = GetNumBrokenEquippedItems_Call(thisObj, threshold, flags);
-	return true; 
+	return true;
 }
 bool Cmd_GetNumBrokenEquippedItems_Execute(COMMAND_ARGS)
 {
@@ -581,7 +581,7 @@ bool Cmd_ClearShowoffSavedData_Execute(COMMAND_ARGS)
 	UInt32 auxStringMaps;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &auxStringMaps)) return true;
 	UInt8 modIdx = scriptObj->GetOverridingModIdx();
-	if (auxStringMaps && s_auxStringMapArraysPerm.Erase((auxStringMaps == 2) ? 0xFF : modIdx))  //todo: fix .Erase not doing anything! 
+	if (auxStringMaps && s_auxStringMapArraysPerm.Erase((auxStringMaps == 2) ? 0xFF : modIdx))  //todo: fix .Erase not doing anything!
 		s_dataChangedFlags |= kChangedFlag_AuxStringMaps;
 	return true;
 }
@@ -639,7 +639,7 @@ float __fastcall GetCalculatedEquippedWeight_Call(TESObjectREFR* const thisObj, 
 		TESForm* item = iter.pForm;
 		if (!item) continue;
 		float itemWeight = 0;
-		
+
 		bool const isWeapon = IS_TYPE(item, TESObjectWEAP);
 		if (isWeapon) {
 			ContChangesEntry* weapInfo = nullptr;
@@ -684,7 +684,7 @@ float __fastcall GetCalculatedEquippedWeight_Call(TESObjectREFR* const thisObj, 
 			if (g_ShowFuncDebug)
 				Console_Print("GetCalculatedEquippedWeight - Item: %s, Calculated Weight: %f", item->GetName(), itemWeight);
 
-			if (itemWeight >= minWeight) 
+			if (itemWeight >= minWeight)
 				totalWeight += itemWeight;
 		}
 	}
@@ -729,13 +729,13 @@ bool Cmd_GetCalculatedMaxCarryWeight_Execute(COMMAND_ARGS)
 // Just so I can store the initial seed.
 // https://www.cplusplus.com/reference/random/default_random_engine/
 class Random_Engine : public std::default_random_engine
-{	
+{
 public:
 	enum SeedStuff
 	{
 		kInvalid_Seed = -1,
 	};
-	
+
 	UInt32 seed;
 	// constructor that sets seed
 	Random_Engine(UInt32 newSeed)
@@ -924,15 +924,15 @@ DEFINE_COMMAND_PLUGIN(SetCellFullNameAlt, "Like SetCellFullName but accepts a st
 bool Cmd_SetCellFullNameAlt_Execute(COMMAND_ARGS)
 {
 	TESObjectCELL* cell;
-	char newName[256]; 
-	
+	char newName[256];
+
 	ExtractArgsEx(EXTRACT_ARGS_EX, &cell, &newName);
 	if (!cell) return true;
 
 	TESFullName* fullName = &cell->fullName;  //wtf. Seems to work, idk why
 	ThisStdCall(0x489100, fullName, newName);  //rip, needs something more to save-bake
 	//fullName->name.Set(newName); //crashes
-	
+
 	return true;
 }
 
@@ -954,8 +954,8 @@ bool Cmd_GetQueuedCornerMessages_Execute(COMMAND_ARGS)
 }
 
 // Takes from JIP's "ModBaseAV"
-DEFINE_COMMAND_ALT_PLUGIN(SetBaseActorValue, SetBaseAV, , 0, 3, kParams_JIP_OneActorValue_OneFloat_OneOptionalActorBase); 
-bool Cmd_SetBaseActorValue_Execute(COMMAND_ARGS) 
+DEFINE_COMMAND_ALT_PLUGIN(SetBaseActorValue, SetBaseAV, , 0, 3, kParams_JIP_OneActorValue_OneFloat_OneOptionalActorBase);
+bool Cmd_SetBaseActorValue_Execute(COMMAND_ARGS)
 {
 	UInt32 actorVal;
 	float valueToSet;
