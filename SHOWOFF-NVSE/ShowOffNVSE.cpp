@@ -459,7 +459,7 @@ extern "C"
 		/*3CE6*/ REG_CMD(EnableAlt)
 		/*3CE7*/ REG_CMD(GetCalculatedSkillPoints)
 		/*3CE8*/ REG_CMD(GetLevelUpMenuPoints)
-		/*3CE9*/ REG_CMD(ToggleQuestMessages)
+		/*3CE9*/ REG_CMD(ToggleQuestMessages)  // SuppressQuestMessages from JIP is probably way better implemented.
 
 		
 
