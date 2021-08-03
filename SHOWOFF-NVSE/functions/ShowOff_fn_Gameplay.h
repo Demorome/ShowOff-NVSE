@@ -484,7 +484,10 @@ bool Cmd_GetLevelUpMenuPoints_Execute(COMMAND_ARGS)
 			if (bCheckAssigned)
 				*result = menu->numAssignedPerks;
 			else
-				*result = menu->numPerksToAssign;
+			{
+				// menu->numPerksToAssign is always set to something in vanilla, it's the availablePerks.Empty() that determines if no perk menu is shown.
+				*result = menu->availablePerks.Empty() ? 0 : menu->numPerksToAssign;
+			}
 		}
 		else  // Check for Skills
 		{
