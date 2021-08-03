@@ -459,6 +459,7 @@ extern "C"
 		/*3CE6*/ REG_CMD(EnableAlt)
 		/*3CE7*/ REG_CMD(GetCalculatedSkillPoints)
 		/*3CE8*/ REG_CMD(GetLevelUpMenuPoints)
+		/*3CE9*/ REG_CMD(ToggleQuestMessages)
 
 		
 
@@ -473,7 +474,6 @@ extern "C"
 #if _DEBUG  //for functions being tested (or just abandoned).
 
 		
-
 		
 		// IsBipedForm
 		REG_CMD_FORM(GetActorPreferredWeapon)

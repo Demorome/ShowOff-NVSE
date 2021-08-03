@@ -43,6 +43,7 @@ DEFINE_COMMAND_ALT_PLUGIN(GetRandomPercentSeeded, , , false, 0, NULL);
 DEFINE_COMMAND_PLUGIN(AdvanceSeed, "Discards would-be generated numbers to advance in the seed generation pattern.", false, 1, kParams_OneInt);
 DEFINE_CMD_ALT_COND_PLUGIN(IsReferenceCloned, IsRefrCloned, "Checks if the reference's modIndex is 0xFF", true, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(IsTemporaryReference, IsTempRefr, "Checks if the reference does not persist in the savegame.", false, NULL); //todo: Set equivalents?
+DEFINE_COMMAND_PLUGIN(ToggleQuestMessages, , false, 1, kParams_OneInt);
 
 
 bool(__cdecl* Cmd_Disable)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5C45E0;
@@ -855,7 +856,35 @@ bool Cmd_IsTemporaryReference_Eval(COMMAND_ARGS_EVAL)
 }
 
 
+std::atomic<bool> questMsgEnabled = true;
 
+bool Cmd_ToggleQuestMessages_Execute(COMMAND_ARGS)
+{
+	UInt32 bOn;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bOn))
+		return true;
+	if (!bOn && questMsgEnabled)
+	{
+		// Kill the QuestUpdateManager::Append/PrependToQueue functions
+		NopFunctionCall(0x76BADC, 1);
+		NopFunctionCall(0x76BAEB, 1);
+
+		NopFunctionCall(0x76BAAC, 1);
+		NopFunctionCall(0x76BABB, 1);
+		questMsgEnabled = false;
+	}
+	else if (bOn && !questMsgEnabled)
+	{
+		// Restore the Calls
+		WriteRelCall(0x76BADC, 0x905820);
+		WriteRelCall(0x76BAEB, 0x83FD60);
+
+		WriteRelCall(0x76BAAC, 0x5AE3D0);
+		WriteRelCall(0x76BABB, 0x83FD60);
+		questMsgEnabled = true;
+	}
+	return true;
+}
 
 
 
@@ -865,9 +894,6 @@ bool Cmd_IsTemporaryReference_Eval(COMMAND_ARGS_EVAL)
 
 
 #if _DEBUG
-
-
-
 
 
 
