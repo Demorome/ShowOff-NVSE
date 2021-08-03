@@ -22,6 +22,11 @@ DEFINE_COMMAND_PLUGIN(ForceWeaponJamAnim, ForceJamAnim, true, 0, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedSkillPoints, GetCalculatedSkillPointsEarnedPerLevel, "Gets the amount of skill points the player would get for their current level.", false, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetLevelUpMenuPoints, , false, 2, kParams_TwoOptionalInts);
 DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedPerkPoints, GetCalculatedPerkPointsEarnedPerLevel, "Gets the amount of perk points the player would get for their current level.", false, kParams_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(GetLevelUpMenuCurrentPage, , false, 0, NULL);
+DEFINE_COMMAND_PLUGIN(SetLevelUpMenuCurrentPage, , false, 1, kParams_OneInt);
+
+
+
 
 bool Cmd_SetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
 {
@@ -528,6 +533,35 @@ bool Cmd_GetCalculatedPerkPoints_Execute(COMMAND_ARGS)
 }
 
 
+bool Cmd_GetLevelUpMenuCurrentPage_Execute(COMMAND_ARGS)
+{
+	*result = -1;
+	if (auto const menu = LevelUpMenu::GetSingleton())
+	{
+		*result = menu->currentPage;
+	}
+	return true;
+}
+
+bool Cmd_SetLevelUpMenuCurrentPage_Execute(COMMAND_ARGS)
+{
+	*result = false;
+	SInt32 page;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &page) || page > 2)  // Allow going to page = 2 in order to close the menu.
+		return true;
+
+	if (auto const menu = LevelUpMenu::GetSingleton())
+	{
+		if (menu->currentPage != page)
+		{
+			ThisStdCall<void>(0x785830, menu, page);  // LevelUpMenu::SetCurrentPage
+			*result = true;
+		}
+	}
+	return true;
+}
+
+
 
 
 
@@ -538,6 +572,7 @@ bool Cmd_GetCalculatedPerkPoints_Execute(COMMAND_ARGS)
 
 
 #ifdef _DEBUG
+
 
 
 

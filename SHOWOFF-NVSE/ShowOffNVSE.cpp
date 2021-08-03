@@ -33,7 +33,7 @@
 // Plugin Stuff
 IDebugLog g_Log("ShowOffNVSE.log");
 HMODULE	g_ShowOffHandle;
-UInt32 g_PluginVersion = 117;
+UInt32 g_PluginVersion = 120;
 
 // Allows modmakers to toggle ShowOff's debug messages for some of its functions.
 #ifdef _DEBUG
@@ -463,9 +463,12 @@ extern "C"
 
 		//========v1.20
 		/*3CEA*/ REG_CMD(GetCalculatedPerkPoints)
-
+		/*3CEB*/ REG_CMD(GetLevelUpMenuCurrentPage)
+		/*3CEC*/ REG_CMD(SetLevelUpMenuCurrentPage)
 		
 
+
+		
 		//***Current Max OpCode: 0x3D10 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
 		//========v1.??
