@@ -69,6 +69,15 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 * ToggleQuestMessages
 
 
+//===v1.20
+
+===Bug Fixes:
+* ToggleQuestMessages now also silences quest objective messages.
+
+===New Functions:
+* 
+
+
 
 
 (Template:)

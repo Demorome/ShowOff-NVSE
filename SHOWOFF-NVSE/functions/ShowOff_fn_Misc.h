@@ -879,6 +879,10 @@ bool Cmd_ToggleQuestMessages_Execute(COMMAND_ARGS)
 
 		NopFunctionCall(0x76BAAC, 1);
 		NopFunctionCall(0x76BABB, 1);
+
+		WriteRelJump(0x77A5BD, 0x77A646);  // Make return jmp for HUDMainMenu::SetQuestUpdateText always true (does nothing).
+		// Was able to account for this thanks to JIP's SuppressQuestMessages function.
+		
 		questMsgEnabled = false;
 		*result = true;
 	}
@@ -890,6 +894,9 @@ bool Cmd_ToggleQuestMessages_Execute(COMMAND_ARGS)
 
 		WriteRelCall(0x76BAAC, 0x5AE3D0);
 		WriteRelCall(0x76BABB, 0x83FD60);
+
+		WriteRelJe(0x77A5BD, 0x77A646);
+		
 		questMsgEnabled = true;
 		*result = true;
 	}
