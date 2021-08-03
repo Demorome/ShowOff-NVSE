@@ -467,6 +467,8 @@ extern "C"
 
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
+
+		REG_CMD(GetLevelUpMenuPoints)
 		
 		// IsBipedForm
 		REG_CMD_FORM(GetActorPreferredWeapon)

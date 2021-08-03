@@ -442,10 +442,56 @@ bool Cmd_ForceWeaponJamAnim_Execute(COMMAND_ARGS)
 
 
 
+
+
+
+
 #ifdef _DEBUG
 
 
 
+
+
+
+
+
+
+DEFINE_COMMAND_PLUGIN(GetLevelUpMenuPoints, , false, 2, kParams_TwoOptionalInts);
+bool Cmd_GetLevelUpMenuPoints_Execute(COMMAND_ARGS)
+{
+	*result = -1;
+	UInt32 bCheckPerks = true;  // if false, will check for Skills instead.
+	UInt32 bCheckAssigned = true;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bCheckPerks, bCheckAssigned))
+		return true;
+
+	if (auto const menu = LevelUpMenu::GetSingleton())
+	{
+		if (bCheckPerks)
+		{
+			if (bCheckAssigned)
+			{
+				*result = menu->numAssignedPerks;
+			}
+			else
+			{
+				*result = menu->numPerksToAssign;
+			}
+		}
+		else  // Check for Skills
+		{
+			if (bCheckAssigned)
+			{
+				*result = menu->numAssignedSkillPoints;
+			}
+			else
+			{
+				*result = menu->numSkillPointsToAssign;
+			}
+		}
+	}
+	return true;
+}
 
 
 
