@@ -19,9 +19,9 @@ DEFINE_CMD_ALT_COND_PLUGIN(GetWeaponHasFlag, WeaponHasFlag, , false, kParams_One
 DEFINE_CMD_ALT_COND_PLUGIN(GetActorHasBaseFlag, ActorHasBaseFlag, , false, kParams_OneInt_OneOptionalActorBase);
 DEFINE_COMMAND_PLUGIN(RemoveAllItemsShowOff, , true, 4, kParams_TwoOptionalInts_OneOptionalContainerRef_OneOptionalList);
 DEFINE_COMMAND_PLUGIN(ForceWeaponJamAnim, ForceJamAnim, true, 0, NULL);
-DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedSkillPoints, GetCalculatedSkillPointsEarnedPerLevel, "Gets the amount of skill points the player would get each level.", false, kParams_OneOptionalInt);
+DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedSkillPoints, GetCalculatedSkillPointsEarnedPerLevel, "Gets the amount of skill points the player would get for their current level.", false, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetLevelUpMenuPoints, , false, 2, kParams_TwoOptionalInts);
-
+DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedPerkPoints, GetCalculatedPerkPointsEarnedPerLevel, "Gets the amount of perk points the player would get for their current level.", false, kParams_OneOptionalInt);
 
 bool Cmd_SetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
 {
@@ -501,6 +501,35 @@ bool Cmd_GetLevelUpMenuPoints_Execute(COMMAND_ARGS)
 }
 
 
+bool Cmd_GetCalculatedPerkPoints_Eval(COMMAND_ARGS_EVAL)
+{
+	UInt32 levelOverride = 0;
+	if (arg1) levelOverride = (UInt32)arg1;
+
+	auto avOwner = &g_thePlayer->avOwner;
+	auto level = levelOverride ? levelOverride : avOwner->GetLevel();
+	level += LevelUpMenu::GetSingleton() ? 0 : 1;  // Add +1 level to accurately predict the outcome for the next level up, if not in levelup menu.
+	auto const gs_iLevelsPerPerk = GetIntGameSetting(0x11CD074);
+
+	if (level % gs_iLevelsPerPerk)  // no perks can be chosen
+		*result = 0;
+	else
+		*result = GetINIValFromTweaks("iPerksPerLevel", 1); // Compatibility with Tweaks. If the INI/setting is not present, will default to 1.
+
+	return true;
+}
+bool Cmd_GetCalculatedPerkPoints_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	UInt32 levelOverride = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &levelOverride))
+		return true;
+	return Cmd_GetCalculatedPerkPoints_Eval(thisObj, (void*)levelOverride, 0, result);
+}
+
+
+
+
 
 
 
@@ -509,9 +538,6 @@ bool Cmd_GetLevelUpMenuPoints_Execute(COMMAND_ARGS)
 
 
 #ifdef _DEBUG
-
-
-
 
 
 

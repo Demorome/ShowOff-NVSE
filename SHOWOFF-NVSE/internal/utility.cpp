@@ -1716,3 +1716,18 @@ bool MatchAnyEquipSlots(UInt32 slotMask1, UInt32 slotMask2)
 {
 	return (slotMask1 & slotMask2) != 0;
 }
+
+float GetFltGameSetting(UInt32 addr)
+{
+	return *(float*)(addr + 4);  // "the value of the gamesetting is always at +4" -c6
+}
+
+SInt32 GetIntGameSetting(UInt32 addr)
+{
+	return *(SInt32*)(addr + 4);
+}
+
+bool IsDllRunning(const char* dll)
+{
+	return GetModuleHandleA(dll);
+}

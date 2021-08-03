@@ -1,12 +1,37 @@
 ﻿#pragma once
 #include <SimpleINILibrary\SimpleIni.h>
+#include "utility.h"
 #define INI_NAME "ShowOff_nvse.ini"
 #define MO2_VFS_DLL_NAME "usvfs_x86.dll"
+#define TWEAKS_INI_NAME "nvse_stewie_tweaks.ini"
+#define TWEAKS_DLL_NAME "nvse_stewie_tweaks.dll"
 
-
-//-- Read INI values.
 
 extern HMODULE g_ShowOffHandle;
+
+
+
+int GetINIValFromPlugin(const char* iniName, const char* section, const char* key, int defaultVal = 0)
+{
+	char iniPath[MAX_PATH];
+	GetModuleFileNameA(g_ShowOffHandle, iniPath, MAX_PATH);
+	strcpy((strrchr(iniPath, '\\') + 1), iniName);
+	
+	CSimpleIniA ini;
+	ini.SetUnicode();
+	ini.LoadFile(iniPath);
+	
+	return ini.GetLongValue(section, key, defaultVal);
+}
+
+int GetINIValFromTweaks(const char* key, int defaultVal = 0)
+{
+	if (!IsDllRunning(TWEAKS_DLL_NAME)) 
+		return defaultVal;
+	return GetINIValFromPlugin(TWEAKS_INI_NAME, "Tweaks", key, defaultVal);
+}
+
+
 
 // INI usage copied from lStewieAl's Tweaks (settings.h)
 void HandleINIOptions()

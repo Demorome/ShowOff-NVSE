@@ -69,7 +69,7 @@ std::atomic<char*> doesn't really work.
 */
 ICriticalSection g_Lock;
 
-//NVSE Globals
+// NVSE Globals
 bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
 bool (*ExtractFormatStringArgs)(UInt32 fmtStringPos, char* buffer, COMMAND_ARGS_EX, UInt32 maxParams, ...);  // From JIP_NVSE.H
 NVSEArrayVarInterface* g_arrInterface = nullptr;
@@ -91,7 +91,7 @@ NVSEScriptInterface* g_scriptInterface = nullptr;
 NVSECommandTableInterface* g_commandInterface = nullptr;
 const CommandInfo* (*GetCmdByName)(const char* name);
 
-//Singletons
+// Singletons
 HUDMainMenu* g_HUDMainMenu = nullptr;
 TileMenu** g_tileMenuArray = nullptr;
 UInt32 g_screenWidth = 0;
@@ -105,7 +105,7 @@ DataHandler* g_dataHandler = nullptr;
 BSAudioManager* g_audioManager = nullptr;
 Sky** g_currentSky = nullptr;
 
-//-Hook Globals
+// Hook Globals
 std::atomic<bool> g_canPlayerPickpocketInCombat = false;
 
 
@@ -461,6 +461,9 @@ extern "C"
 		/*3CE8*/ REG_CMD(GetLevelUpMenuPoints)
 		/*3CE9*/ REG_CMD(ToggleQuestMessages)  // SuppressQuestMessages from JIP is probably way better implemented.
 
+		//========v1.20
+		/*3CEA*/ REG_CMD(GetCalculatedPerkPoints)
+
 		
 
 		//***Current Max OpCode: 0x3D10 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
@@ -473,7 +476,7 @@ extern "C"
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 
-		
+
 		
 		// IsBipedForm
 		REG_CMD_FORM(GetActorPreferredWeapon)

@@ -371,3 +371,9 @@ bool IsEquipableItemPlayable(TESForm* form);
 UInt32 GetFormEquipSlotMask(TESForm* form);
 bool MatchAnySlotForForm(TESForm* form, UInt32 slotMask);
 bool MatchAnyEquipSlots(UInt32 slotMask1, UInt32 slotMask2);
+
+float GetFltGameSetting(UInt32 addr);
+SInt32 GetIntGameSetting(UInt32 addr);
+
+bool IsDllRunning(const char* dll);
+
