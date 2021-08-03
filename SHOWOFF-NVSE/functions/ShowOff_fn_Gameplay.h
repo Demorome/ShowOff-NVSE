@@ -19,6 +19,7 @@ DEFINE_CMD_ALT_COND_PLUGIN(GetWeaponHasFlag, WeaponHasFlag, , false, kParams_One
 DEFINE_CMD_ALT_COND_PLUGIN(GetActorHasBaseFlag, ActorHasBaseFlag, , false, kParams_OneInt_OneOptionalActorBase);
 DEFINE_COMMAND_PLUGIN(RemoveAllItemsShowOff, , true, 4, kParams_TwoOptionalInts_OneOptionalContainerRef_OneOptionalList);
 DEFINE_COMMAND_PLUGIN(ForceWeaponJamAnim, ForceJamAnim, true, 0, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedSkillPoints, GetCalculatedSkillPointsEarnedPerLevel, "Gets the amount of skill points the player would get each level.", false, kParams_OneOptionalInt);
 
 
 bool Cmd_SetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
@@ -439,6 +440,35 @@ bool Cmd_ForceWeaponJamAnim_Execute(COMMAND_ARGS)
 }
 
 
+bool Cmd_GetCalculatedSkillPoints_Eval(COMMAND_ARGS_EVAL)
+{
+	// Vanilla code at 0x648BC0 replicated thanks to Nukem and lStewieAl's efforts (which I slightly tweaked).
+	UInt32 levelOverride = 0;
+	if (arg1) levelOverride = (UInt32)arg1;
+
+	auto avOwner = &g_thePlayer->avOwner;
+	auto level = levelOverride ? levelOverride : avOwner->GetLevel();
+	level += LevelUpMenu::GetSingleton() ? 0 : 1;  // Add +1 level to accurately predict the outcome for the next level up, if not in levelup menu.
+	auto intelligence = avOwner->GetNormalizedPermanentAV(kAVCode_Intelligence);
+	intelligence = min(intelligence, 10);
+
+	auto const calculateSkillPointsAddr = GetRelJumpAddr(0x648BF0); // get the function address indirectly for compatibility with lStewieAl's tweaks (see patchCustomSkillPointFormula())
+	float skillPoints = CdeclCall<int>(calculateSkillPointsAddr, intelligence, level);
+	ApplyPerkModifiers(kPerkEntry_AdjustGainedSkillPoints, g_thePlayer, &skillPoints);
+	*result = skillPoints;
+	return true;
+}
+bool Cmd_GetCalculatedSkillPoints_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	UInt32 levelOverride = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &levelOverride))
+		return true;
+	return Cmd_GetCalculatedSkillPoints_Eval(thisObj, (void*)levelOverride, 0, result);
+}
+
+
+
 
 
 
@@ -499,6 +529,7 @@ bool Cmd_GetLevelUpMenuPoints_Execute(COMMAND_ARGS)
 DEFINE_CMD_ALT_COND_PLUGIN(CanBeMoved, , , true, NULL);
 bool Cmd_CanBeMoved_Eval(COMMAND_ARGS_EVAL)
 {
+	*result = 0;
 	if (!thisObj) return true;
 	*result = ThisStdCall<bool>(0x572C80, thisObj);  //just does some formType check + allows any dynamic object
 	return true;
