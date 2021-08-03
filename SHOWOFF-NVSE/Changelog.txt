@@ -73,6 +73,7 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 
 ===Bug Fixes:
 * ToggleQuestMessages now also silences quest objective messages.
+* GetLevelUpMenuPoints now accounts for iLevelsPerPerk gamesetting (and skipping getting perks each level or so).
 
 ===New Functions:
 * 
