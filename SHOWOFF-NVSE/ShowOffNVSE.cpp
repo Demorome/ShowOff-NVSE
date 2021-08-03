@@ -452,11 +452,15 @@ extern "C"
 		/*3CE1*/ REG_CMD(GetWeaponHasFlag)
 		/*3CE2*/ REG_CMD(GetActorHasBaseFlag)
 		/*3CE3*/ REG_CMD(RemoveAllItemsShowOff)
+
+		//========v1.17
 		/*3CE4*/ REG_CMD(ForceWeaponJamAnim)
 		/*3CE5*/ REG_CMD(DisableAlt)
 		/*3CE6*/ REG_CMD(EnableAlt)
 		/*3CE7*/ REG_CMD(GetCalculatedSkillPoints)
+		/*3CE8*/ REG_CMD(GetLevelUpMenuPoints)
 
+		
 
 		//***Current Max OpCode: 0x3D10 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
@@ -468,7 +472,7 @@ extern "C"
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 
-		REG_CMD(GetLevelUpMenuPoints)
+		
 
 		
 		// IsBipedForm

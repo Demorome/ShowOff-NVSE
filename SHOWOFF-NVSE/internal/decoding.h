@@ -1607,8 +1607,8 @@ public:
 	TileImage* tileStatsIconBadge;
 	UInt32 numAssignedSkillPoints;
 	UInt32 numAssignedPerks;
-	UInt32 numSkillPointsToAssign;
-	UInt32 numPerksToAssign;
+	UInt32 numSkillPointsToAssign;  // Max amount, not the amount left.
+	UInt32 numPerksToAssign;  // Max amount, not the amount left.
 	ListBox<ActorValueCode> skillListBox;
 	ListBox<BGSPerk> perkListBox;
 	tList<BGSPerk> availablePerks; // perks to show in the perk listBox

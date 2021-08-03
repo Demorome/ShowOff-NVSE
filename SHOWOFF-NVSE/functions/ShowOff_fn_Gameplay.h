@@ -20,6 +20,7 @@ DEFINE_CMD_ALT_COND_PLUGIN(GetActorHasBaseFlag, ActorHasBaseFlag, , false, kPara
 DEFINE_COMMAND_PLUGIN(RemoveAllItemsShowOff, , true, 4, kParams_TwoOptionalInts_OneOptionalContainerRef_OneOptionalList);
 DEFINE_COMMAND_PLUGIN(ForceWeaponJamAnim, ForceJamAnim, true, 0, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedSkillPoints, GetCalculatedSkillPointsEarnedPerLevel, "Gets the amount of skill points the player would get each level.", false, kParams_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(GetLevelUpMenuPoints, , false, 2, kParams_TwoOptionalInts);
 
 
 bool Cmd_SetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
@@ -468,6 +469,34 @@ bool Cmd_GetCalculatedSkillPoints_Execute(COMMAND_ARGS)
 }
 
 
+bool Cmd_GetLevelUpMenuPoints_Execute(COMMAND_ARGS)
+{
+	*result = -1;
+	UInt32 bCheckPerks = false;  // if false, will check for Skills instead.
+	UInt32 bCheckAssigned = false;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bCheckPerks, &bCheckAssigned))
+		return true;
+
+	if (auto const menu = LevelUpMenu::GetSingleton())
+	{
+		if (bCheckPerks)
+		{
+			if (bCheckAssigned)
+				*result = menu->numAssignedPerks;
+			else
+				*result = menu->numPerksToAssign;
+		}
+		else  // Check for Skills
+		{
+			if (bCheckAssigned)
+				*result = menu->numAssignedSkillPoints;
+			else
+				*result = menu->numSkillPointsToAssign;
+		}
+	}
+	return true;
+}
+
 
 
 
@@ -484,44 +513,6 @@ bool Cmd_GetCalculatedSkillPoints_Execute(COMMAND_ARGS)
 
 
 
-
-
-DEFINE_COMMAND_PLUGIN(GetLevelUpMenuPoints, , false, 2, kParams_TwoOptionalInts);
-bool Cmd_GetLevelUpMenuPoints_Execute(COMMAND_ARGS)
-{
-	*result = -1;
-	UInt32 bCheckPerks = true;  // if false, will check for Skills instead.
-	UInt32 bCheckAssigned = true;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bCheckPerks, bCheckAssigned))
-		return true;
-
-	if (auto const menu = LevelUpMenu::GetSingleton())
-	{
-		if (bCheckPerks)
-		{
-			if (bCheckAssigned)
-			{
-				*result = menu->numAssignedPerks;
-			}
-			else
-			{
-				*result = menu->numPerksToAssign;
-			}
-		}
-		else  // Check for Skills
-		{
-			if (bCheckAssigned)
-			{
-				*result = menu->numAssignedSkillPoints;
-			}
-			else
-			{
-				*result = menu->numSkillPointsToAssign;
-			}
-		}
-	}
-	return true;
-}
 
 
 
