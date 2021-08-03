@@ -43,7 +43,7 @@ DEFINE_COMMAND_ALT_PLUGIN(GetRandomPercentSeeded, , , false, 0, NULL);
 DEFINE_COMMAND_PLUGIN(AdvanceSeed, "Discards would-be generated numbers to advance in the seed generation pattern.", false, 1, kParams_OneInt);
 DEFINE_CMD_ALT_COND_PLUGIN(IsReferenceCloned, IsRefrCloned, "Checks if the reference's modIndex is 0xFF", true, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(IsTemporaryReference, IsTempRefr, "Checks if the reference does not persist in the savegame.", false, NULL); //todo: Set equivalents?
-DEFINE_COMMAND_PLUGIN(ToggleQuestMessages, , false, 1, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(ToggleQuestMessages, , false, 1, kParams_OneOptionalInt);
 
 
 bool(__cdecl* Cmd_Disable)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5C45E0;
@@ -860,9 +860,17 @@ std::atomic<bool> questMsgEnabled = true;
 
 bool Cmd_ToggleQuestMessages_Execute(COMMAND_ARGS)
 {
-	UInt32 bOn;
+	*result = 0;
+	SInt32 bOn = -1;  // If -1 (default), return the toggle status.
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bOn))
 		return true;
+	
+	if (bOn == -1)
+	{
+		*result = questMsgEnabled;
+		return true;
+	}
+	
 	if (!bOn && questMsgEnabled)
 	{
 		// Kill the QuestUpdateManager::Append/PrependToQueue functions
@@ -872,6 +880,7 @@ bool Cmd_ToggleQuestMessages_Execute(COMMAND_ARGS)
 		NopFunctionCall(0x76BAAC, 1);
 		NopFunctionCall(0x76BABB, 1);
 		questMsgEnabled = false;
+		*result = true;
 	}
 	else if (bOn && !questMsgEnabled)
 	{
@@ -882,6 +891,7 @@ bool Cmd_ToggleQuestMessages_Execute(COMMAND_ARGS)
 		WriteRelCall(0x76BAAC, 0x5AE3D0);
 		WriteRelCall(0x76BABB, 0x83FD60);
 		questMsgEnabled = true;
+		*result = true;
 	}
 	return true;
 }
