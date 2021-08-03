@@ -716,6 +716,7 @@ public:
 	void TurnAngle(float angle);
 	void SetAnimActionAndSequence(SInt32 animAction, BSAnimGroupSequence *animGroupSeq);
 	void PlayIdle(TESIdleForm *idleAnim);
+	UInt32 GetLevel();
 	float GetKillXP();
 	void DismemberLimb(UInt32 bodyPartID, bool explode);
 	void EquipItemAlt(ExtraContainerChanges::EntryData *itemEntry, bool noUnequip, bool noMessage);

@@ -173,3 +173,16 @@ void Actor::SetAnimActionAndSequence(SInt32 animAction, BSAnimGroupSequence* ani
 {
 	ThisStdCall<void>(0x8A73E0, this, animAction, animGroupSeq);
 }
+
+// From JIP
+__declspec(naked) UInt32 Actor::GetLevel()
+{
+	__asm
+	{
+		mov		ecx, [ecx + 0x20]
+		add		ecx, 0x30
+		CALL_EAX(0x47DED0)
+		movzx	eax, ax
+		retn
+	}
+}

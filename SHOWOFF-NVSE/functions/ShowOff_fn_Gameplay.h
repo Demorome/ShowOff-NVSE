@@ -579,6 +579,49 @@ bool Cmd_SetLevelUpMenuCurrentPage_Execute(COMMAND_ARGS)
 
 
 
+DEFINE_COMMAND_PLUGIN(ShowPerkMenu, , false, 2, kParams_TwoOptionalInts);
+bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
+{
+	*result = 0;  // result = hasShownPerks
+	SInt32 numPerks = -1;
+	UInt32 bOverrideLevelsPerPerk = false;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &numPerks, &bOverrideLevelsPerPerk))
+		return true;
+
+	if (bOverrideLevelsPerPerk)
+	{
+		PatchMemoryNop(0x784F47, 6);  // remove jump if not zero
+	}
+	SafeWriteBuf(0x7850D5, "\x6A\x01", 2);  // replace "push 0" to "push 1", making it open to the Perk page.
+		
+	CdeclCall<void>(0x706270); // LevelUpMenu::Create_()
+	if (auto const menu = LevelUpMenu::GetSingleton())
+	{
+		if (!menu->availablePerks.Empty())
+		{
+			if (numPerks > -1)
+				menu->numPerksToAssign = numPerks;
+			//ThisStdCall<void>(0x785830, menu, 1);  // LevelUpMenu::SetCurrentPage. Page 1 = perks.
+			*result = true;
+		}
+		else
+		{
+			// todo: Force the closure of this new LevelUpMenu somehow...
+			
+		}
+	}
+
+	if (bOverrideLevelsPerPerk)
+	{
+		WriteRelJnz(0x784F47, 0x78507A);  // restore the jump if not zero
+	}
+	SafeWriteBuf(0x7850D5, "\x6A\x00", 2);
+	
+	return true;
+}
+
+
+
 
 // Kinda pointless in the face of JIP's IsMobile
 DEFINE_CMD_ALT_COND_PLUGIN(CanBeMoved, , , true, NULL);
