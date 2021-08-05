@@ -17,7 +17,7 @@ const char * TraitIDToName(int id);	// slow
 class NiNode;
 class Menu;
 
-enum
+enum TileValues
 {
 	kTileValue_x =					0xFA1,
 	kTileValue_y,

@@ -574,48 +574,70 @@ bool Cmd_SetLevelUpMenuCurrentPage_Execute(COMMAND_ARGS)
 #ifdef _DEBUG
 
 
+// CAUTION: not thread-safe, not sure what this could cause if you tried to summon the lvlup menu multiple times quickly.
+UInt32 g_PickablePerkCount = 0;
 
+// Credits to Tweaks' PerkMenuCheckAvailablePerksHook() for providing a structure for this WriteRelJump ASM.
+void __fastcall SetPerkAlphaIfRequirementsNotMet_Hook(Tile* tile, void* edx, TileValues alphaTrait, float alpha, bool a4)
+{
+	if (alpha == 255.0F)  // Perk is pickable
+	{
+		g_PickablePerkCount++;
+	}
+	ThisStdCall(0xA012D0, tile, alphaTrait, alpha, a4);
+}
 
-
-
-
-DEFINE_COMMAND_PLUGIN(ShowPerkMenu, , false, 2, kParams_TwoOptionalInts);
+DEFINE_COMMAND_PLUGIN(ShowPerkMenu, , false, 1, kParams_OneOptionalInt);
 bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
 {
 	*result = 0;  // result = hasShownPerks
 	SInt32 numPerks = -1;
-	UInt32 bOverrideLevelsPerPerk = false;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &numPerks, &bOverrideLevelsPerPerk))
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &numPerks))
 		return true;
 
-	if (bOverrideLevelsPerPerk)
-	{
-		PatchMemoryNop(0x784F47, 6);  // remove jump if not zero
-	}
-	SafeWriteBuf(0x7850D5, "\x6A\x01", 2);  // replace "push 0" to "push 1", making it open to the Perk page.
+	// NOTE: requires Tweaks' bLevelUpAlwaysShowsPerks to be set to 1 for this to work properly.
+	// This is so that the perk list is always initialized, otherwise this func can fail.
+	// todo: check other perk-related Tweaks for compatibility
+	// todo: check the tweaks ini for those tweaks.
+	
 		
 	CdeclCall<void>(0x706270); // LevelUpMenu::Create_()
 	if (auto const menu = LevelUpMenu::GetSingleton())
 	{
 		if (!menu->availablePerks.Empty())
 		{
+			// Count the amount of Pickable perks (g_PickablePerkCount)
+			WriteRelCall(0x78653D, (UInt32)SetPerkAlphaIfRequirementsNotMet_Hook);
+
+			// LevelUpMenu::SetCurrentPage. Page 1 = perks.
+			ThisStdCall<void>(0x785830, menu, 1);  
+			
 			if (numPerks > -1)
+			{
+				numPerks = min(numPerks, g_PickablePerkCount);
 				menu->numPerksToAssign = numPerks;
-			//ThisStdCall<void>(0x785830, menu, 1);  // LevelUpMenu::SetCurrentPage. Page 1 = perks.
+				g_PickablePerkCount = 0;
+			}
+
+			WriteRelCall(0x78653D, 0xA012D0);  // restore call.
+
+			menu->tileBtnBack->SetFloat(kTileValue_visible, 0);  // credit to Stewie for this trick to hide the "Back" btn.
 			*result = true;
+		
 		}
 		else
 		{
-			// todo: Force the closure of this new LevelUpMenu somehow...
+			// force the closure of this new LevelUpMenu somehow?
+			// actually, bLevelUpAlwaysShowsPerks from Tweaks might be able to fix this.
+			// todo: test if this still works when all perks have been obtained (no perks left)
+
+			// LevelUpMenu::Update - ???
+			ThisStdCall<void>(0x785E20, menu);
 			
+			// Set the page to be at the end of the menu (closing it).
+			ThisStdCall<void>(0x785830, menu, 2);  
 		}
 	}
-
-	if (bOverrideLevelsPerPerk)
-	{
-		WriteRelJnz(0x784F47, 0x78507A);  // restore the jump if not zero
-	}
-	SafeWriteBuf(0x7850D5, "\x6A\x00", 2);
 	
 	return true;
 }
