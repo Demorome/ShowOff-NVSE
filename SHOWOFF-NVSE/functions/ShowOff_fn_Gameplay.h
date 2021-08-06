@@ -8,7 +8,7 @@ DEFINE_CMD_ALT_COND_PLUGIN(GetPCHasSleepWaitOverride, , "Returns whether or not 
 DEFINE_COMMAND_PLUGIN(SetPCHasSleepWaitOverride, "Sets whether or not the player has a Sleep/Wait prevention override", 0, 1, kParams_OneInt);
 DEFINE_CMD_ALT_COND_PLUGIN(IsWeaponMelee, , "Returns 1 if the weapon's base form is of one of the three weapon types belonging to melee-range weapons.", 1, kParams_OneOptionalObjectID);
 DEFINE_CMD_ALT_COND_PLUGIN(IsEquippedWeaponMelee, , "Returns 1 if the calling actor's equipped weapon's base form is of one of the three weapon types belonging to melee-range weapons.", 1, NULL);
-DEFINE_CMD_ALT_COND_PLUGIN(IsWeaponRanged, , "Returns 1 if the weapon's base form is one of the weapon types belonging to NON melee-range weapons.", 1, kParams_OneOptionalObjectID);
+DEFINE_CMD_ALT_COND_PLUGIN(IsWeaponRanged, CanThisThingHitFar, "Returns 1 if the weapon's base form is one of the weapon types belonging to NON melee-range weapons.", 1, kParams_OneOptionalObjectID);
 DEFINE_CMD_ALT_COND_PLUGIN(IsEquippedWeaponRanged, , "Returns 1 if the calling actor's equipped weapon's base form is one of the weapon types belonging to NON melee-range weapons.", 1, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetChallengeProgress, , "Returns the progress made on a challenge.", 0, kParams_OneChallenge)
 DEFINE_COMMAND_PLUGIN(UnequipItems, , true, 4, kParams_FourOptionalInts);
@@ -24,7 +24,7 @@ DEFINE_COMMAND_PLUGIN(GetLevelUpMenuPoints, , false, 2, kParams_TwoOptionalInts)
 DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedPerkPoints, GetCalculatedPerkPointsEarnedPerLevel, "Gets the amount of perk points the player would get for their current level.", false, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetLevelUpMenuCurrentPage, , false, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SetLevelUpMenuCurrentPage, , false, 1, kParams_OneInt);
-DEFINE_COMMAND_PLUGIN(ShowPerkMenu, , false, 1, kParams_OneOptionalInt);
+DEFINE_CMD_ALT_COND_PLUGIN(ShowPerkMenu, IfIDecideToGoWithYourFunctionWhatAreTheBenefits, false, 1, kParams_OneOptionalInt);
 
 
 
