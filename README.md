@@ -28,6 +28,8 @@ Requires xNVSE v6.0.6 or greater: https://github.com/xNVSE/NVSE/releases.
 # Installation
 `ShowOffNVSE.dll` must end up under `Fallout New Vegas/Data/nvse/plugins/..` (in the `plugins` folder).
 
+Installing the .zip file from a mod manager should also work.
+
 
 # Questions-&-Answers
 
