@@ -24,6 +24,7 @@ DEFINE_COMMAND_PLUGIN(GetLevelUpMenuPoints, , false, 2, kParams_TwoOptionalInts)
 DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedPerkPoints, GetCalculatedPerkPointsEarnedPerLevel, "Gets the amount of perk points the player would get for their current level.", false, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetLevelUpMenuCurrentPage, , false, 0, NULL);
 DEFINE_COMMAND_PLUGIN(SetLevelUpMenuCurrentPage, , false, 1, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(ShowPerkMenu, , false, 1, kParams_OneOptionalInt);
 
 
 
@@ -562,18 +563,6 @@ bool Cmd_SetLevelUpMenuCurrentPage_Execute(COMMAND_ARGS)
 }
 
 
-
-
-
-
-
-
-
-
-
-#ifdef _DEBUG
-
-
 // CAUTION: not thread-safe, not sure what this could cause if you tried to summon the lvlup menu multiple times quickly.
 UInt32 g_PickablePerkCount = 0;
 
@@ -587,7 +576,6 @@ void __fastcall SetPerkAlphaIfRequirementsNotMet_Hook(Tile* tile, void* edx, Til
 	ThisStdCall(0xA012D0, tile, alphaTrait, alpha, a4);
 }
 
-DEFINE_COMMAND_PLUGIN(ShowPerkMenu, , false, 1, kParams_OneOptionalInt);
 bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
 {
 	*result = 0;  // result = hasShownPerks
@@ -595,12 +583,9 @@ bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &numPerks))
 		return true;
 
-	// NOTE: requires Tweaks' bLevelUpAlwaysShowsPerks to be set to 1 for this to work properly.
-	// This is so that the perk list is always initialized, otherwise this func can fail.
-	// todo: check other perk-related Tweaks for compatibility
-	// todo: check the tweaks ini for those tweaks.
-	
-		
+	// NOTE: Tweaks' bLevelUpAlwaysShowsPerks can be useful for allowing perk previews when the player has no perk points for this level-up.
+	// Seems to work fine with iPerksPerLevel
+
 	CdeclCall<void>(0x706270); // LevelUpMenu::Create_()
 	if (auto const menu = LevelUpMenu::GetSingleton())
 	{
@@ -610,8 +595,8 @@ bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
 			WriteRelCall(0x78653D, (UInt32)SetPerkAlphaIfRequirementsNotMet_Hook);
 
 			// LevelUpMenu::SetCurrentPage. Page 1 = perks.
-			ThisStdCall<void>(0x785830, menu, 1);  
-			
+			ThisStdCall<void>(0x785830, menu, 1);
+
 			if (numPerks > -1)
 			{
 				numPerks = min(numPerks, g_PickablePerkCount);
@@ -623,24 +608,45 @@ bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
 
 			menu->tileBtnBack->SetFloat(kTileValue_visible, 0);  // credit to Stewie for this trick to hide the "Back" btn.
 			*result = true;
-		
+
 		}
 		else
 		{
-			// force the closure of this new LevelUpMenu somehow?
-			// actually, bLevelUpAlwaysShowsPerks from Tweaks might be able to fix this.
-			// todo: test if this still works when all perks have been obtained (no perks left)
+			//== Force the closure of this new LevelUpMenu
 
-			// LevelUpMenu::Update - ???
-			ThisStdCall<void>(0x785E20, menu);
-			
-			// Set the page to be at the end of the menu (closing it).
-			ThisStdCall<void>(0x785830, menu, 2);  
+			// Ignore check for if the menu->title tile is visible.
+			PatchMemoryNop(0xA1D936, 5);
+
+			// Set the page to be at the end of the menu (closing it).		// Cuz I'm too lazy to figure out the call signature for LevelUpMenu::Close() directly.
+			ThisStdCall<void>(0x785830, menu, 2);
+
+			// Restore jump for the menu->title visibilty check.
+			WriteRelJump(0xA1D936, 0xA1D9D4);
 		}
 	}
-	
 	return true;
 }
+
+
+
+
+
+
+
+
+
+
+
+#ifdef _DEBUG
+
+
+
+
+
+
+
+
+
 
 
 

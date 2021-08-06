@@ -465,7 +465,7 @@ extern "C"
 		/*3CEA*/ REG_CMD(GetCalculatedPerkPoints)
 		/*3CEB*/ REG_CMD(GetLevelUpMenuCurrentPage)
 		/*3CEC*/ REG_CMD(SetLevelUpMenuCurrentPage)
-		
+		/*3CED*/ REG_CMD(ShowPerkMenu)
 
 
 		
@@ -479,7 +479,7 @@ extern "C"
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 
-		REG_CMD(ShowPerkMenu)
+		
 		
 		// IsBipedForm
 		REG_CMD_FORM(GetActorPreferredWeapon)
