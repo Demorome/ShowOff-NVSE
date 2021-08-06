@@ -25,7 +25,7 @@ DEFINE_COMMAND_PLUGIN(GetLevelUpMenuPoints, , false, 2, kParams_TwoOptionalInts)
 DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedPerkPoints, GetCalculatedPerkPointsEarnedPerLevel, "Gets the amount of perk points the player would get for their current level.", false, kParams_OneOptionalInt);
 DEFINE_COMMAND_ALT_PLUGIN(GetLevelUpMenuCurrentPage, GetLevelUpMenuPage, "", false, 0, NULL);
 DEFINE_COMMAND_ALT_PLUGIN(SetLevelUpMenuCurrentPage, SetLevelUpMenuPage, "", false, 1, kParams_OneInt);
-DEFINE_COMMAND_PLUGIN(ShowPerkMenu, "Opens the Level-Up menu to the Perk-menu page, and prevents going back to Skills tab.", false, 2, kParams_JIP_OneOptionalInt_OneOptionalString);
+DEFINE_COMMAND_ALT_PLUGIN(ShowPerkMenu, IfIDecideToGoWithYourFunctionWhatAreThePerks, "Opens the Level-Up menu to the Perk-menu page, and prevents going back to Skills tab.", false, 2, kParams_JIP_OneOptionalInt_OneOptionalString);
 
 
 
