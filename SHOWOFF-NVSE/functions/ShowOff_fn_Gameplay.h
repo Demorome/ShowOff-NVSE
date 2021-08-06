@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "Hooks.h"
 #include "SafeWrite.h"
+#include "GameSettings.h"
 
 DEFINE_COMMAND_ALT_PLUGIN(SetPlayerCanPickpocketEquippedItems, SetPCCanStealEqItems, "Toggles the ability to pickpocket equipped items.", 0, 1, kParams_OneInt);
 DEFINE_CMD_ALT_COND_PLUGIN(GetPlayerCanPickpocketEquippedItems, GetPCCanStealEqItems, "Checks if the player can pickpocket equipped items.", 0, NULL);
@@ -22,9 +23,9 @@ DEFINE_COMMAND_PLUGIN(ForceWeaponJamAnim, ForceJamAnim, true, 0, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedSkillPoints, GetCalculatedSkillPointsEarnedPerLevel, "Gets the amount of skill points the player would get for their current level.", false, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetLevelUpMenuPoints, , false, 2, kParams_TwoOptionalInts);
 DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedPerkPoints, GetCalculatedPerkPointsEarnedPerLevel, "Gets the amount of perk points the player would get for their current level.", false, kParams_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN(GetLevelUpMenuCurrentPage, , false, 0, NULL);
-DEFINE_COMMAND_PLUGIN(SetLevelUpMenuCurrentPage, , false, 1, kParams_OneInt);
-DEFINE_COMMAND_PLUGIN(ShowPerkMenu, , false, 1, kParams_OneOptionalInt);
+DEFINE_COMMAND_ALT_PLUGIN(GetLevelUpMenuCurrentPage, GetLevelUpMenuPage, "", false, 0, NULL);
+DEFINE_COMMAND_ALT_PLUGIN(SetLevelUpMenuCurrentPage, SetLevelUpMenuPage, "", false, 1, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(ShowPerkMenu, "Opens the Level-Up menu to the Perk-menu page, and prevents going back to Skills tab.", false, 2, kParams_JIP_OneOptionalInt_OneOptionalString);
 
 
 
@@ -580,14 +581,17 @@ bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
 {
 	*result = 0;  // result = hasShownPerks
 	SInt32 numPerks = -1;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &numPerks))
+	char menuTitleBuf[0x1000];  // allows changing the title of the Lvl-Up Menu to something more fitting.
+	menuTitleBuf[0] = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &numPerks, &menuTitleBuf))
 		return true;
 
 	// NOTE: Tweaks' bLevelUpAlwaysShowsPerks can be useful for allowing perk previews when the player has no perk points for this level-up.
 	// Seems to work fine with iPerksPerLevel
 
 	CdeclCall<void>(0x706270); // LevelUpMenu::Create_()
-	if (auto const menu = LevelUpMenu::GetSingleton())
+	auto const menu = LevelUpMenu::GetSingleton();
+	if (menu)
 	{
 		if (!menu->availablePerks.Empty())
 		{
@@ -605,10 +609,8 @@ bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
 			}
 
 			WriteRelCall(0x78653D, 0xA012D0);  // restore call.
-
 			menu->tileBtnBack->SetFloat(kTileValue_visible, 0);  // credit to Stewie for this trick to hide the "Back" btn.
 			*result = true;
-
 		}
 		else
 		{
@@ -620,10 +622,17 @@ bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
 			// Set the page to be at the end of the menu (closing it).		// Cuz I'm too lazy to figure out the call signature for LevelUpMenu::Close() directly.
 			ThisStdCall<void>(0x785830, menu, 2);
 
-			// Restore jump for the menu->title visibilty check.
+			// Restore jump for the menu->title visibility check.
 			WriteRelJump(0xA1D936, 0xA1D9D4);
 		}
 	}
+
+	// Change the title of the menu (sLevelUpTitleText gamesetting determines it by default).
+	if (menuTitleBuf[0] && *result && menu)
+	{
+		menu->tileTitle->SetString(kTileValue_string, menuTitleBuf);
+	}
+	
 	return true;
 }
 
