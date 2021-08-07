@@ -50,6 +50,8 @@ __declspec(naked) float ExtraContainerChanges::EntryData::GetItemHealthPerc(bool
 	__asm	jmp		procAddr
 }
 
+// Detection value is between -100 and 500, < 0 being undetected.
+// Checks how well the calling actor can see the "detected" actor.
 int Actor::GetDetectionValue(Actor* detected)
 {
 	if (baseProcess && !baseProcess->processLevel)

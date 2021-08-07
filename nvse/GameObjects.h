@@ -722,6 +722,9 @@ public:
 	void EquipItemAlt(ExtraContainerChanges::EntryData *itemEntry, bool noUnequip, bool noMessage);
 	void EquipContainer(TESContainer *container);
 	bool HasNoPath();
+	bool IsInvisible();
+	SInt32 GetDetectionLevelAlt(Actor* target, bool calculateSneakLevel);
+	bool Detects(Actor* target);
 };
 
 // 1C0

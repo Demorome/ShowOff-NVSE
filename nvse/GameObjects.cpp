@@ -1,4 +1,6 @@
 #include "GameObjects.h"
+
+#include "decoding.h"  // newly added
 #include "GameRTTI.h"
 #include "GameExtraData.h"
 #include "GameTasks.h"
@@ -185,4 +187,30 @@ __declspec(naked) UInt32 Actor::GetLevel()
 		movzx	eax, ax
 		retn
 	}
+}
+
+bool Actor::IsInvisible()
+{
+	return (avOwner.Fn_02(kAVCode_Invisibility) > 0) || (avOwner.Fn_02(kAVCode_Chameleon) > 0);
+}
+
+SInt32 Actor::GetDetectionLevelAlt(Actor* target, bool calculateSneakLevel)
+{
+	bool isTargetInCombat;
+	if (target->IsPlayerRef())
+		isTargetInCombat = ((PlayerCharacter*)target)->pcInCombat;
+	else
+		isTargetInCombat = target->isInCombat;
+
+	bool out = false;  // throwaway variable to reference.
+	
+	// SInt32 __thiscall Actor_GetDetected(Actor *this, bool calculateSneakLevel, Actor *toDetect, int *out, char a5, bool isTargetInCombat, int a7, int a8)
+	return ThisStdCall<SInt32>(0x8A0D10, this, calculateSneakLevel, target, &out, 0, isTargetInCombat, 0, 0);
+}
+
+// Same-ish code as what's used for Cmd_GetDetected_Eval
+bool Actor::Detects(Actor* target)
+{
+	SInt32 const detectionLevel = this->GetDetectionLevelAlt(target, false);
+	return detectionLevel > 0;
 }

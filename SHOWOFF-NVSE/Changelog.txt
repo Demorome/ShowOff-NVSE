@@ -82,6 +82,18 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 * ShowPerkMenu
 
 
+//===v1.25
+
+===Changes:
+* GetNumActorsInRangeFromRef and GetNumCombatActorsFromActor both have a new OnlyDetectedActors filter flag.
+
+===Bug Fixes:
+*
+
+===New Functions:
+*
+
+
 
 
 (Template:)

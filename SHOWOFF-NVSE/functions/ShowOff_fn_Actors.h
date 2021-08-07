@@ -11,7 +11,6 @@ DEFINE_COMMAND_PLUGIN(SetCreatureBaseScale, , 0, 2, kParams_OneFloat_OneOptional
 DEFINE_CMD_ALT_COND_PLUGIN(GetNumCompassHostiles, , "Returns the amount of hostile actors on compass, w/ optional filters.", 0, kParams_OneOptionalFloat_OneOptionalInt);
 
 
-//No Invisible Actor filter - credits to JG for that bit of code.
 
 
 //Code ripped from both JIP (GetActorsByProcessingLevel) and SUP (FindClosestActorFromRef).
@@ -19,22 +18,20 @@ UInt32 __fastcall GetNumActorsInRangeFromRef_Call(TESObjectREFR* const thisObj, 
 {
 	if (range <= 0) return 0;
 	if (!thisObj) return 0;
-
-#define DebugGetNumActorsInRangeFromRef _DEBUG
-
+	bool isThisObjActor = IS_ACTOR(thisObj);
+	
 	enum functionFlags
 	{
-		kFlag_noDeadActors = 1,
-		kFlag_noInvisibleActors = 2,
-		maxFlags = kFlag_noDeadActors | kFlag_noInvisibleActors,
+		kFlag_noDeadActors =		1 << 0,
+		kFlag_noInvisibleActors =	1 << 1,
+		kFlag_onlyDetectedActors =	1 << 2,
 	};
-	
 	bool const noDeadActors = flags & kFlag_noDeadActors;
 	bool const noInvisibleActors = flags & kFlag_noInvisibleActors;
+	bool const onlyDetectedActors = (flags & kFlag_onlyDetectedActors) && isThisObjActor;
 
-#if DebugGetNumActorsInRangeFromRef 
-	_MESSAGE("DebugGetNumActorsInRangeFromRef - begin dump for thisObj %s (%08x)", thisObj->GetName(), thisObj->refID);
-#endif
+	if (g_ShowFuncDebug)
+		_MESSAGE("DebugGetNumActorsInRangeFromRef - begin dump for thisObj %s (%08x)", thisObj->GetName(), thisObj->refID);
 	
 	MobileObject** objArray = g_processManager->objects.data, ** arrEnd = objArray;
 	objArray += g_processManager->beginOffsets[0];  //Only objects in High process.
@@ -45,14 +42,16 @@ UInt32 __fastcall GetNumActorsInRangeFromRef_Call(TESObjectREFR* const thisObj, 
 		auto actor = (Actor*)*objArray;
 		if (actor && actor->IsActor() && actor != thisObj)
 		{
-#if DebugGetNumActorsInRangeFromRef 
-			_MESSAGE("Current actor >>> %08x (%s). isDead: %d, distance: %f", actor->refID, actor->GetName(), actor->GetDead(), GetDistance3D(thisObj, actor));
-#endif
+			if (g_ShowFuncDebug)
+				_MESSAGE("Current actor >>> %08x (%s). isDead: %d, distance: %f", actor->refID, actor->GetName(), actor->GetDead(), GetDistance3D(thisObj, actor));
 			
 			if (noDeadActors && actor->GetDead())
 				continue;
 
-			if (noInvisibleActors && actor->avOwner.Fn_02(kAVCode_Invisibility) > 0 || actor->avOwner.Fn_02(kAVCode_Chameleon) > 0)
+			if (noInvisibleActors && actor->IsInvisible())
+				continue;
+
+			if (onlyDetectedActors && !((Actor*)thisObj)->Detects(actor))
 				continue;
 			
 			if (GetDistance3D(thisObj, actor) <= range)
@@ -70,7 +69,6 @@ UInt32 __fastcall GetNumActorsInRangeFromRef_Call(TESObjectREFR* const thisObj, 
 			numActors++;
 	}
 
-#undef DebugGetNumActorsInRangeFromRef
 	return numActors; 
 }
 
@@ -81,12 +79,11 @@ bool Cmd_GetNumActorsInRangeFromRef_Eval(COMMAND_ARGS_EVAL)
 }
 bool Cmd_GetNumActorsInRangeFromRef_Execute(COMMAND_ARGS)
 {
+	*result = 0;
 	float range = 0;
 	UINT32 flags = 0;
 	if (ExtractArgs(EXTRACT_ARGS, &range, &flags))
 		*result = GetNumActorsInRangeFromRef_Call(thisObj, range, flags);
-	else
-		*result = 0;
 	return true;
 }
 
@@ -101,46 +98,44 @@ UInt32 __fastcall GetNumCombatActorsFromActorCALL(TESObjectREFR* thisObj, float 
 	if (!thisObj->IsActor()) return 0;
 	//Even if the calling actor is dead, they could still have combat targets, so we don't filter that out.
 
-#define DebugGetNumCombatActorsFromActor _DEBUG
-
-#if DebugGetNumCombatActorsFromActor 
-	_MESSAGE("DebugGetNumActorsInRangeFromRef - begin dump for thisObj %s (%08x)", thisObj->GetName(), thisObj->refID);
-#endif
+	if (g_ShowFuncDebug)
+		_MESSAGE("DebugGetNumActorsInRangeFromRef - begin dump for thisObj %s (%08x)", thisObj->GetName(), thisObj->refID);
 
 	enum functionFlags
 	{
-		kFlag_GetAllies = 1,
-		kFlag_GetTargets = 2,
-		kFlag_AlliesAndTargets = kFlag_GetAllies | kFlag_GetTargets,
-		kFlag_NoInvisibleActors = 4,
+		kFlag_GetAllies = 1 << 0,
+		kFlag_GetTargets = 1 << 1,
+		kFlag_AlliesAndTargets = kFlag_GetAllies | kFlag_GetTargets,  // default flag.
+		kFlag_NoInvisibleActors = 1 << 2,
+		kFlag_OnlyDetectedActors = 1 << 3,
 	};
 	if (!flags) flags = kFlag_AlliesAndTargets;
 	bool const getAllies = flags & kFlag_GetAllies;
 	bool const getTargets = flags & kFlag_GetTargets;
 	bool const noInvisibleActors = flags & kFlag_NoInvisibleActors;
+	bool const onlyDetectedActors = flags & kFlag_OnlyDetectedActors;
 
 	UINT32 numActors = 0;
 	auto IncrementNumActorsIfChecksPass = [&](Actor* actor)
 	{
 		if (actor && (actor != thisObj))  
 		{
-#if DebugGetNumCombatActorsFromActor 
-			_MESSAGE("Current actor >>> %08x (%s). isDead: %d, distance: %f", actor->refID, actor->GetName(), actor->GetDead(), GetDistance3D(thisObj, actor));
-#endif
-			if (noInvisibleActors && actor->avOwner.Fn_02(kAVCode_Invisibility) > 0 || actor->avOwner.Fn_02(kAVCode_Chameleon) > 0)
+			if (g_ShowFuncDebug)
+				_MESSAGE("Current actor >>> %08x (%s). isDead: %d, distance: %f", actor->refID, actor->GetName(), actor->GetDead(), GetDistance3D(thisObj, actor));
+
+			if (noInvisibleActors && actor->IsInvisible())
+				return;
+
+			if (onlyDetectedActors && !((Actor*)thisObj)->Detects(actor))
 				return;
 			
 			if (range > 0.0F)
 			{
 				if (GetDistance3D(thisObj, actor) <= range)
-				{
 					numActors++;
-				}
 			}
 			else
-			{
 				numActors++;
-			}
 		}
 	};
 	
@@ -179,7 +174,7 @@ UInt32 __fastcall GetNumCombatActorsFromActorCALL(TESObjectREFR* thisObj, float 
 			{
 				for (UInt32 count = actor->combatAllies->size; count; count--, actorsArr++)
 				{
-					actor = *actorsArr;
+					actor = *actorsArr;  // actor is redefined, so be careful! It is no longer thisObj in the loop.
 					IncrementNumActorsIfChecksPass(actor);
 				}
 			}
@@ -198,7 +193,6 @@ UInt32 __fastcall GetNumCombatActorsFromActorCALL(TESObjectREFR* thisObj, float 
 		}
 
 	}
-#undef DebugGetNumCombatActorsFromActor
 	return numActors;
 }
 
@@ -359,7 +353,7 @@ UInt32 __fastcall GetNumCompassHostiles_Call(TESObjectREFR* const thisObj, float
 		PlayerCharacter::CompassTarget* target = iter.Get();
 		if (target->isHostile)
 		{
-			if (skipInvisible && (target->target->avOwner.Fn_02(kAVCode_Invisibility) > 0 || target->target->avOwner.Fn_02(kAVCode_Chameleon) > 0)) {
+			if (skipInvisible && target->target->IsInvisible()) {
 				continue;
 			}
 			auto distToPlayer = target->target->GetPos()->CalculateDistSquared(playerPos);
@@ -401,7 +395,20 @@ bool Cmd_GetNumCompassHostiles_Execute(COMMAND_ARGS)
 
 
 
+
+
+
+
+
 #ifdef _DEBUG
+
+
+
+
+
+
+
+
 
 
 
