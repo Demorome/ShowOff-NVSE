@@ -1969,6 +1969,13 @@ static ParamInfo kParams_JIP_OneObjectID_OneOptionalString[] =
 
 // ShowOff stuff
 
+static ParamInfo kParams_TwoOptionalInts_OneOptionalString[3] =
+{
+	{"Integer", kParamType_Integer, 1},
+	{"Integer", kParamType_Integer, 1},
+	{"String", kParamType_String, 1}
+};
+
 static ParamInfo kParams_TwoOptionalInts_OneOptionalContainerRef_OneOptionalList[4] =
 {
 	{	"int",	kParamType_Integer,	1	},

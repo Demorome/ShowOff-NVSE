@@ -467,6 +467,10 @@ extern "C"
 		/*3CEC*/ REG_CMD(SetLevelUpMenuCurrentPage)
 		/*3CED*/ REG_CMD(ShowPerkMenu)
 
+		//========v1.25
+		/*3CEE*/ REG_CMD(ShowSkillMenu)
+
+
 
 		
 		//***Current Max OpCode: 0x3D10 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
@@ -478,8 +482,8 @@ extern "C"
 
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
+		
 
-		REG_CMD(ShowSkillMenu)  // alias: ShowSkillsMenu
 		
 		// IsBipedForm
 		REG_CMD_FORM(GetActorPreferredWeapon)
