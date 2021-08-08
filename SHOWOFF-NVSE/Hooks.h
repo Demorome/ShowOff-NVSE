@@ -33,7 +33,7 @@ tList<PlayerCharacter::CompassTarget>* __fastcall ShowPickpocketStringInCombat2(
 
 double __fastcall PreventRepairButton(ContChangesEntry* entry, int bPercent);
 
-
+extern UInt32 g_LvlUpMenuUnspentPoints[2];  // Skill points, followed by Perks.
 
 
 #if _DEBUG

@@ -609,6 +609,7 @@ bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
 
 			WriteRelCall(0x78653D, 0xA012D0);  // restore call.
 			menu->tileBtnBack->SetFloat(kTileValue_visible, 0);  // credit to Stewie for this trick to hide the "Back" btn.
+			menu->numSkillPointsToAssign = 0;  // add compat. with GetLevelUpMenuUnspentPoints.
 			*result = true;
 		}
 		else
@@ -645,6 +646,7 @@ void __fastcall LevelUpMenuSetInitialPageHook(LevelUpMenu* menu, void* edx, int 
 {
 	auto const endPageID = Tile::TraitNameToID("_EndPage");
 	menu->tile->SetFloat(endPageID, 0);  // prevent going to the Perk page.
+	menu->numPerksToAssign = 0;  // compatibility with GetLevelUpMenuUnspentPoints
 	
 	menu->SetCurrentPage(pageNumber);
 	if (!menu->numSkillPointsToAssign && !g_ShowMenuDespiteNoPoints)
@@ -719,6 +721,21 @@ bool Cmd_ShowSkillMenu_Execute(COMMAND_ARGS)
 
 
 
+
+DEFINE_COMMAND_PLUGIN(GetLevelUpMenuUnspentPoints, , false, 1, kParams_OneInt);
+
+bool Cmd_GetLevelUpMenuUnspentPoints_Execute(COMMAND_ARGS)
+{
+	*result = -1;
+	UInt32 showSkills;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &showSkills))
+		return true;
+	if (showSkills)
+		*result = g_LvlUpMenuUnspentPoints[0];
+	else
+		*result = g_LvlUpMenuUnspentPoints[1];
+	return true;
+}
 
 
 

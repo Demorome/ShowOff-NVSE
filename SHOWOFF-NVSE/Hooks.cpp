@@ -266,6 +266,28 @@ double __fastcall PreventRepairButton(ContChangesEntry* entry, int bPercent)
 	return result;
 }
 
+UInt32 g_LvlUpMenuUnspentPoints[2] = { 0, 0 }; // Skill points, followed by Perks.
+
+namespace GetLevelUpMenuUnspentPoints
+{
+	void __fastcall CloseMenu_Hook()
+	{
+		if (LevelUpMenu* const menu = *(LevelUpMenu**)0x11D9FDC)
+		{
+			g_LvlUpMenuUnspentPoints[0] = menu->numSkillPointsToAssign - menu->numAssignedSkillPoints;
+			g_LvlUpMenuUnspentPoints[1] = menu->numPerksToAssign - menu->numAssignedPerks;
+		}
+		CdeclCall(0x7851D0);  // LevelUpMenu::Close()
+	}
+
+	void WriteRetrievalHook() { WriteRelCall(0x785866, (UInt32)CloseMenu_Hook); }
+}
+
+
+
+
+
+
 
 
 
@@ -318,13 +340,30 @@ void Actor_Spread_PerkModifier_Hook(PerkEntryPointID id, TESObjectREFR* refr, fl
 #endif
 
 
+
+
+
+
+
+
+
+
 void HandleGameHooks()
 {
-
 	NopFunctionCall(0x7ADDC7, 1); // For preventing ShowRaceMenu from resetting active temp effects.
 	PatchMemoryNop(0x7ADDD2, 5); // For preventing ShowRaceMenu from resetting abilities.
 
+	GetLevelUpMenuUnspentPoints::WriteRetrievalHook();
+	
 
+
+
+
+
+
+
+	
+	
 
 #if _DEBUG
 
