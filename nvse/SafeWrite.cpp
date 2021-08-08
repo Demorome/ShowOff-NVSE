@@ -120,6 +120,7 @@ void NopIndirectCall(UInt32 addr)
 }
 
 // Taken from lStewieAl.
+// Returns the address of the jump/called function, assuming there is one.
 UInt32 GetRelJumpAddr(UInt32 jumpSrc)
 {
 	return *(UInt32*)(jumpSrc + 1) + jumpSrc + 5;

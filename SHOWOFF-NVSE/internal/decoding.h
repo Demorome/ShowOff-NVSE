@@ -1591,7 +1591,8 @@ public:
 	enum Pages
 	{
 		kSkillSelection = 0,
-		kPerkSelection = 1
+		kPerkSelection = 1,
+		kCloseMenu = 2,  // (any value >= 2 could work)
 	};
 
 	UInt32 currentPage; // 0 for skills, 1 for perks
@@ -1613,6 +1614,8 @@ public:
 	ListBox<BGSPerk> perkListBox;
 	tList<BGSPerk> availablePerks; // perks to show in the perk listBox
 
+	void SetCurrentPage(Pages newPage) { ThisStdCall(0x785830, this, newPage); }
+	void SetCurrentPage(int newPage) { ThisStdCall(0x785830, this, newPage); }
 	static LevelUpMenu* GetSingleton() { return *(LevelUpMenu**)0x11D9FDC; }
 };
 STATIC_ASSERT(sizeof(LevelUpMenu) == 0xCC);

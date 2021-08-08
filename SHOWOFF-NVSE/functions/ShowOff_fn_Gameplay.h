@@ -579,7 +579,7 @@ void __fastcall SetPerkAlphaIfRequirementsNotMet_Hook(Tile* tile, void* edx, Til
 
 bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
 {
-	*result = 0;  // result = hasShownPerks
+	*result = false;  // result = hasShownPerks
 	SInt32 numPerks = -1;
 	char menuTitleBuf[0x1000];  // allows changing the title of the Lvl-Up Menu to something more fitting.
 	menuTitleBuf[0] = 0;
@@ -597,9 +597,7 @@ bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
 		{
 			// Count the amount of Pickable perks (g_PickablePerkCount)
 			WriteRelCall(0x78653D, (UInt32)SetPerkAlphaIfRequirementsNotMet_Hook);
-
-			// LevelUpMenu::SetCurrentPage. Page 1 = perks.
-			ThisStdCall<void>(0x785830, menu, 1);
+			menu->SetCurrentPage(LevelUpMenu::kPerkSelection);
 
 			if (numPerks > -1)
 			{
@@ -615,15 +613,9 @@ bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
 		else
 		{
 			//== Force the closure of this new LevelUpMenu
-
-			// Ignore check for if the menu->title tile is visible.
-			PatchMemoryNop(0xA1D936, 5);
-
-			// Set the page to be at the end of the menu (closing it).		// Cuz I'm too lazy to figure out the call signature for LevelUpMenu::Close() directly.
-			ThisStdCall<void>(0x785830, menu, 2);
-
-			// Restore jump for the menu->title visibility check.
-			WriteRelJump(0xA1D936, 0xA1D9D4);
+			// In order to pass the first check for the function called at 0x785265 (Menu::SetFadeOut, check at 0xA1D92A), set title tile visibility to non-null.
+			menu->tile->SetFloat(kTileValue_visible, 1);
+			menu->SetCurrentPage(LevelUpMenu::kCloseMenu);  // close the menu (will flash in/out nearly instantly). 
 		}
 	}
 
@@ -632,7 +624,6 @@ bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
 	{
 		menu->tileTitle->SetString(kTileValue_string, menuTitleBuf);
 	}
-	
 	return true;
 }
 
@@ -649,12 +640,58 @@ bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
 #ifdef _DEBUG
 
 
+SInt32 g_NumSkillsOverride = -1;
+
+// Function structure ripped from Stewie's Tweaks.
+void __fastcall LevelUpMenuSetInitialPageHook(LevelUpMenu* menu, void* edx, int pageNumber)
+{
+	if (g_NumSkillsOverride > -1)
+		menu->numSkillPointsToAssign = g_NumSkillsOverride;
+	menu->SetCurrentPage(pageNumber);
+	if (!menu->numSkillPointsToAssign)
+	{
+		//== Close the menu; no Skills to assign.
+		// In order to pass the first check for the function called at 0x785265 (Menu::SetFadeOut, check at 0xA1D92A), set title tile visibility to non-null.
+		menu->tile->SetFloat(kTileValue_visible, 1);
+		menu->SetCurrentPage(LevelUpMenu::kCloseMenu);  // menu flash in/out for a frame.
+	}
+}
+
+DEFINE_COMMAND_ALT_PLUGIN(ShowSkillMenu, ShowSkillsMenu, "Opens the Level-Up menu to the Skills page, and sets that this is the last page (no visiting perks).", false, 2, kParams_JIP_OneOptionalInt_OneOptionalString);
+
+bool Cmd_ShowSkillMenu_Execute(COMMAND_ARGS)
+{
+	*result = false;  // result = hasShownSkillMenu
+	SInt32 numSkills = -1;
+	char menuTitleBuf[0x1000];  // allows changing the title of the Lvl-Up Menu to something more fitting.
+	menuTitleBuf[0] = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &numSkills, &menuTitleBuf))
+		return true;
 
 
+	//== Override the amount of Skills to allot.
+	if (numSkills > -1)
+		g_NumSkillsOverride = numSkills;
+	auto const SetupPageAddr = GetRelJumpAddr(0x7850DD);  // retain compatibility with Tweaks' bSkipSkillMenuIfNoPointsToAssign.
+	WriteRelCall(0x7850DD, (UInt32)LevelUpMenuSetInitialPageHook);
+	CdeclCall<void>(0x706270); // LevelUpMenu::Create_()
+	WriteRelCall(0x7850DD, SetupPageAddr);  // restore original call.
+	g_NumSkillsOverride = -1;
+	
+	auto const menu = LevelUpMenu::GetSingleton();
+	if (menu)
+	{
+		//todo: prevent going to perk page
+		*result = true;
+	}
 
-
-
-
+	// Change the title of the menu (sLevelUpTitleText gamesetting determines it by default).
+	if (menuTitleBuf[0] && *result && menu)
+	{
+		menu->tileTitle->SetString(kTileValue_string, menuTitleBuf);
+	}
+	return true;
+}
 
 
 
