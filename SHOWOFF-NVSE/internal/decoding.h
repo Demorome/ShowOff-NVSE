@@ -1616,6 +1616,7 @@ public:
 
 	void SetCurrentPage(Pages newPage) { ThisStdCall(0x785830, this, newPage); }
 	void SetCurrentPage(int newPage) { ThisStdCall(0x785830, this, newPage); }
+	void SetChooseSkillOrPerkNumberText() { ThisStdCall(0x785990, this); }
 	static LevelUpMenu* GetSingleton() { return *(LevelUpMenu**)0x11D9FDC; }
 };
 STATIC_ASSERT(sizeof(LevelUpMenu) == 0xCC);

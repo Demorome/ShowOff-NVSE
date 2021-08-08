@@ -469,8 +469,9 @@ extern "C"
 
 		//========v1.25
 		/*3CEE*/ REG_CMD(ShowSkillMenu)
-
-
+		/*3CEF*/ REG_CMD(GetLevelUpMenuUnspentPoints)  //todo: consider making the result serialized.
+		/*3CF0*/ REG_CMD(SetLevelUpMenuCanExitEarly)
+		/*3CF1*/ REG_CMD(SetLevelUpMenuPoints)
 
 		
 		//***Current Max OpCode: 0x3D10 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
@@ -482,8 +483,9 @@ extern "C"
 
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
+
 		
-		REG_CMD(GetLevelUpMenuUnspentPoints)
+		//REG_CMD(GetLevelUpMenuCanExitEarly)
 		
 		// IsBipedForm
 		REG_CMD_FORM(GetActorPreferredWeapon)

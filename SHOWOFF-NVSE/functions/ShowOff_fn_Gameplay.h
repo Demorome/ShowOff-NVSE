@@ -27,6 +27,9 @@ DEFINE_COMMAND_ALT_PLUGIN(GetLevelUpMenuCurrentPage, GetLevelUpMenuPage, "", fal
 DEFINE_COMMAND_ALT_PLUGIN(SetLevelUpMenuCurrentPage, SetLevelUpMenuPage, "", false, 1, kParams_OneInt);
 DEFINE_COMMAND_ALT_PLUGIN(ShowPerkMenu, IfIDecideToGoWithYourFunctionWhatAreThePerks, "Opens the Level-Up menu to the Perk-menu page, and prevents going back to Skills tab.", false, 2, kParams_JIP_OneOptionalInt_OneOptionalString);
 DEFINE_COMMAND_ALT_PLUGIN(ShowSkillMenu, ShowSkillsMenu, "Opens the Level-Up menu to the Skills page, and sets that this is the last page (no visiting perks).", false, 2, kParams_TwoOptionalInts_OneOptionalString);
+DEFINE_COMMAND_PLUGIN(GetLevelUpMenuUnspentPoints, , false, 1, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(SetLevelUpMenuCanExitEarly, , false, 1, kParams_OneInt);  //todo: Get is a WIP, also "SetLevelUpMenuCanExitEarly 0" does not work currently.
+DEFINE_COMMAND_PLUGIN(SetLevelUpMenuPoints, , false, 2, kParams_TwoInts);
 
 
 
@@ -703,7 +706,85 @@ bool Cmd_ShowSkillMenu_Execute(COMMAND_ARGS)
 	return true;
 }
 
+bool Cmd_GetLevelUpMenuUnspentPoints_Execute(COMMAND_ARGS)
+{
+	*result = -1;
+	UInt32 showSkills;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &showSkills))
+		return true;
+	if (showSkills)
+		*result = g_LvlUpMenuUnspentPoints[0];
+	else
+		*result = g_LvlUpMenuUnspentPoints[1];
+	return true;
+}
 
+bool Cmd_SetLevelUpMenuCanExitEarly_Execute(COMMAND_ARGS)
+{
+	*result = false;  // result = setSuccess
+	UInt32 canExitEarly;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &canExitEarly))
+		return true;
+	if (auto const menu = LevelUpMenu::GetSingleton())
+	{
+		if (canExitEarly)
+		{
+			menu->tileBtnContinue->SetFloat(kTileValue_target, 1);
+		}
+		else
+		{
+			//todo: set up something to reset to normal behavior.
+			// not that important for now, probably not something too useful.
+		}
+		*result = true;
+	}
+	return true;
+}
+
+bool Cmd_SetLevelUpMenuPoints_Execute(COMMAND_ARGS)
+{
+	*result = false;
+	UInt32 bChangeAssignedPoints;  // if false, change maxPoints
+	UInt32 iNewPoints;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bChangeAssignedPoints, &iNewPoints))
+		return true;
+
+	if (auto const menu = LevelUpMenu::GetSingleton())
+	{
+		auto const currentPage = menu->currentPage;
+		if (bChangeAssignedPoints)
+		{
+			if (currentPage == LevelUpMenu::kPerkSelection)
+				menu->numAssignedPerks = iNewPoints;
+			else if (currentPage == LevelUpMenu::kSkillSelection)
+				menu->numAssignedSkillPoints = iNewPoints;
+			else
+				return true;
+
+			// Change UI Traits.
+			auto const g_CurrPoints = *(UInt32*)0x11D9FD8;  // g_levelUpMenu_Trait_CurrPoints
+			menu->tile->SetFloat(g_CurrPoints, iNewPoints);  // changes wheter or not the player can go to the next page.
+			*result = true;
+		}
+		else
+		{
+			if (currentPage == LevelUpMenu::kPerkSelection && !menu->availablePerks.Empty())
+				menu->numPerksToAssign = iNewPoints;
+			else if (currentPage == LevelUpMenu::kSkillSelection)
+				menu->numSkillPointsToAssign = iNewPoints;
+			else
+				return true;
+
+			// Change UI Traits.
+			auto const g_MaxPoints = *(UInt32*)0x11D9FD4;  // g_levelUpMenu_Trait_MaxPoints
+			menu->tile->SetFloat(g_MaxPoints, iNewPoints);
+			*result = true;
+		}
+		if (*result)
+			menu->SetChooseSkillOrPerkNumberText();  // refresh the skill/perk amount text.
+	}
+	return true;
+}
 
 
 
@@ -722,21 +803,21 @@ bool Cmd_ShowSkillMenu_Execute(COMMAND_ARGS)
 
 
 
-DEFINE_COMMAND_PLUGIN(GetLevelUpMenuUnspentPoints, , false, 1, kParams_OneInt);
 
-bool Cmd_GetLevelUpMenuUnspentPoints_Execute(COMMAND_ARGS)
+
+
+
+
+DEFINE_COMMAND_PLUGIN(GetLevelUpMenuCanExitEarly, , false, 0, NULL);
+bool Cmd_GetLevelUpMenuCanExitEarly_Execute(COMMAND_ARGS)
 {
 	*result = -1;
-	UInt32 showSkills;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &showSkills))
-		return true;
-	if (showSkills)
-		*result = g_LvlUpMenuUnspentPoints[0];
-	else
-		*result = g_LvlUpMenuUnspentPoints[1];
+	if (auto const menu = LevelUpMenu::GetSingleton())
+	{
+		// todo: figure out how to detect if the _target tilevalue was overriden.
+	}
 	return true;
 }
-
 
 
 
