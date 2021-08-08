@@ -26,7 +26,7 @@ DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedPerkPoints, GetCalculatedPerkPointsEarne
 DEFINE_COMMAND_ALT_PLUGIN(GetLevelUpMenuCurrentPage, GetLevelUpMenuPage, "", false, 0, NULL);
 DEFINE_COMMAND_ALT_PLUGIN(SetLevelUpMenuCurrentPage, SetLevelUpMenuPage, "", false, 1, kParams_OneInt);
 DEFINE_COMMAND_ALT_PLUGIN(ShowPerkMenu, IfIDecideToGoWithYourFunctionWhatAreThePerks, "Opens the Level-Up menu to the Perk-menu page, and prevents going back to Skills tab.", false, 2, kParams_JIP_OneOptionalInt_OneOptionalString);
-DEFINE_COMMAND_ALT_PLUGIN(ShowSkillMenu, ShowSkillsMenu, "Opens the Level-Up menu to the Skills page, and sets that this is the last page (no visiting perks).", false, 2, kParams_TwoOptionalInts_OneOptionalString);
+DEFINE_COMMAND_ALT_PLUGIN(ShowSkillMenu, ShowSkillsMenu, "Opens the Level-Up menu to the Skills page, and sets that this is the last page (no visiting perks).", false, 3, kParams_TwoOptionalInts_OneOptionalString);
 DEFINE_COMMAND_PLUGIN(GetLevelUpMenuUnspentPoints, , false, 1, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(SetLevelUpMenuCanExitEarly, , false, 1, kParams_OneInt);  //todo: Get is a WIP, also "SetLevelUpMenuCanExitEarly 0" does not work currently.
 DEFINE_COMMAND_PLUGIN(SetLevelUpMenuPoints, , false, 2, kParams_TwoInts);
