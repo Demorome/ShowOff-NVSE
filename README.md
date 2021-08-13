@@ -8,17 +8,12 @@ Releases are published [here, on Github](https://github.com/Demorome/Showoff-NVS
 (Used to be on Nexus, recently changed)
 
 If you wish to leave a comment, I (Demorome) will occasionally check the comment section [here, on Nexus](https://www.nexusmods.com/newvegas/mods/72541?tab=posts).\
-You may also contact Demorome directly on Discord. Username: `Demorome#2870`
+You may also contact me directly on Discord. Username: `Demorome#2870`
 
 
 # Engine Tweaks
 
     -Prevent ShowRaceMenu from resetting Ability and temporary Actor Effects.
-
-
-# INI Tweaks:
-
-    -Not yet added, INI functionality has been pushed back till later.
 
 
 # Requirements
