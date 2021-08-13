@@ -1,14 +1,14 @@
 ﻿#pragma once
 
-DEFINE_CMD_ALT_COND_PLUGIN(GetNumActorsInRangeFromRef, , "Returns the amount of actors that are a certain distance nearby to the calling reference.", 1, kParams_OneFloat_OneOptionalInt);
-DEFINE_CMD_ALT_COND_PLUGIN(GetNumCombatActorsFromActor, , "Returns the amount of actors that are allies/targets to the calling actor, with optional filters.", 1, kParams_OneOptionalFloat_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN_SO(GetCreatureTurningSpeed, , false, kParams_OneOptionalActorBase);  //copied after GetCreatureCombatSkill from JG
-DEFINE_COMMAND_PLUGIN(SetCreatureTurningSpeed, , 0, 2, kParams_OneFloat_OneOptionalActorBase);
-DEFINE_COMMAND_PLUGIN(GetCreatureFootWeight, , 0, 1, kParams_OneOptionalActorBase);
-DEFINE_COMMAND_PLUGIN(SetCreatureFootWeight, , 0, 2, kParams_OneFloat_OneOptionalActorBase);
-DEFINE_COMMAND_PLUGIN(SetCreatureReach, , 0, 2, kParams_OneInt_OneOptionalActorBase);
-DEFINE_COMMAND_PLUGIN(SetCreatureBaseScale, , 0, 2, kParams_OneFloat_OneOptionalActorBase);
-DEFINE_CMD_ALT_COND_PLUGIN(GetNumCompassHostiles, , "Returns the amount of hostile actors on compass, w/ optional filters.", 0, kParams_OneOptionalFloat_OneOptionalInt);
+DEFINE_CMD_COND_PLUGIN(GetNumActorsInRangeFromRef, "Returns the amount of actors that are a certain distance nearby to the calling reference.", true, kParams_OneFloat_OneOptionalInt);
+DEFINE_CMD_COND_PLUGIN(GetNumCombatActorsFromActor, "Returns the amount of actors that are allies/targets to the calling actor, with optional filters.", true, kParams_OneOptionalFloat_OneOptionalInt);
+DEFINE_CMD_COND_PLUGIN(GetCreatureTurningSpeed, , false, kParams_OneOptionalActorBase);  //copied after GetCreatureCombatSkill from JG
+DEFINE_COMMAND_PLUGIN(SetCreatureTurningSpeed, , false, kParams_OneFloat_OneOptionalActorBase);
+DEFINE_CMD_COND_PLUGIN(GetCreatureFootWeight, , false, kParams_OneOptionalActorBase);
+DEFINE_COMMAND_PLUGIN(SetCreatureFootWeight, , false, kParams_OneFloat_OneOptionalActorBase);
+DEFINE_COMMAND_PLUGIN(SetCreatureReach, , false, kParams_OneInt_OneOptionalActorBase);
+DEFINE_COMMAND_PLUGIN(SetCreatureBaseScale, , false, kParams_OneFloat_OneOptionalActorBase);
+DEFINE_CMD_COND_PLUGIN(GetNumCompassHostiles, "Returns the amount of hostile actors on compass, w/ optional filters.", false, kParams_OneOptionalFloat_OneOptionalInt);
 
 
 
@@ -44,16 +44,13 @@ UInt32 __fastcall GetNumActorsInRangeFromRef_Call(TESObjectREFR* const thisObj, 
 		{
 			if (g_ShowFuncDebug)
 				_MESSAGE("Current actor >>> %08x (%s). isDead: %d, distance: %f", actor->refID, actor->GetName(), actor->GetDead(), GetDistance3D(thisObj, actor));
-			
+		
 			if (noDeadActors && actor->GetDead())
 				continue;
-
 			if (noInvisibleActors && actor->IsInvisible())
 				continue;
-
 			if (onlyDetectedActors && !((Actor*)thisObj)->Detects(actor))
 				continue;
-			
 			if (GetDistance3D(thisObj, actor) <= range)
 				numActors++;
 		}
@@ -64,7 +61,6 @@ UInt32 __fastcall GetNumActorsInRangeFromRef_Call(TESObjectREFR* const thisObj, 
 	{
 		if (noDeadActors && g_thePlayer->GetDead())
 			return numActors;
-		
 		if (GetDistance3D(thisObj, g_thePlayer) <= range)
 			numActors++;
 	}
@@ -204,7 +200,7 @@ bool Cmd_GetNumCombatActorsFromActor_Eval(COMMAND_ARGS_EVAL)
 bool Cmd_GetNumCombatActorsFromActor_Execute(COMMAND_ARGS)
 {
 	float range = 0.0F;
-	UINT32 flags = 0;
+	UInt32 flags = 0;
 	if (ExtractArgs(EXTRACT_ARGS, &range, &flags))
 		*result = GetNumCombatActorsFromActorCALL(thisObj, range, flags);
 	else
@@ -213,6 +209,12 @@ bool Cmd_GetNumCombatActorsFromActor_Execute(COMMAND_ARGS)
 }
 
 // Credits to JIP LN for the GetCreature__ code format.
+bool Cmd_GetCreatureTurningSpeed_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = 
+	return true;
+}
+
 bool Cmd_GetCreatureTurningSpeed_Execute(COMMAND_ARGS)
 {
 	*result = -1;
@@ -412,7 +414,7 @@ bool Cmd_GetNumCompassHostiles_Execute(COMMAND_ARGS)
 
 
 
-DEFINE_CMD_ALT_COND_PLUGIN(HasAnyScriptPackage, , , 1, NULL);
+DEFINE_CMD_COND_PLUGIN(HasAnyScriptPackage, "", true, NULL);
 bool Cmd_HasAnyScriptPackage_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;

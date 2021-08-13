@@ -3,33 +3,33 @@
 #include "SafeWrite.h"
 #include "GameSettings.h"
 
-DEFINE_COMMAND_ALT_PLUGIN(SetPlayerCanPickpocketEquippedItems, SetPCCanStealEqItems, "Toggles the ability to pickpocket equipped items.", 0, 1, kParams_OneInt);
-DEFINE_CMD_ALT_COND_PLUGIN(GetPlayerCanPickpocketEquippedItems, GetPCCanStealEqItems, "Checks if the player can pickpocket equipped items.", 0, NULL);
-DEFINE_CMD_ALT_COND_PLUGIN(GetPCHasSleepWaitOverride, , "Returns whether or not the player has a Sleep/Wait prevention override", 0, NULL);
-DEFINE_COMMAND_PLUGIN(SetPCHasSleepWaitOverride, "Sets whether or not the player has a Sleep/Wait prevention override", 0, 1, kParams_OneInt);
-DEFINE_CMD_ALT_COND_PLUGIN(IsWeaponMelee, , "Returns 1 if the weapon's base form is of one of the three weapon types belonging to melee-range weapons.", 1, kParams_OneOptionalObjectID);
-DEFINE_CMD_ALT_COND_PLUGIN(IsEquippedWeaponMelee, , "Returns 1 if the calling actor's equipped weapon's base form is of one of the three weapon types belonging to melee-range weapons.", 1, NULL);
-DEFINE_CMD_ALT_COND_PLUGIN(IsWeaponRanged, , "Returns 1 if the weapon's base form is one of the weapon types belonging to NON melee-range weapons.", 1, kParams_OneOptionalObjectID);
-DEFINE_CMD_ALT_COND_PLUGIN(IsEquippedWeaponRanged, , "Returns 1 if the calling actor's equipped weapon's base form is one of the weapon types belonging to NON melee-range weapons.", 1, NULL);
-DEFINE_CMD_ALT_COND_PLUGIN(GetChallengeProgress, , "Returns the progress made on a challenge.", 0, kParams_OneChallenge)
-DEFINE_COMMAND_PLUGIN(UnequipItems, , true, 4, kParams_FourOptionalInts);
-DEFINE_COMMAND_PLUGIN(GetEquippedItems, , true, 1, kParams_OneOptionalInt);
-DEFINE_CMD_ALT_COND_PLUGIN(GetPCHasScriptedFastTravelOverride, , "Returns whether or not the player is restricted by EnableFastTravel", 0, NULL);
-DEFINE_CMD_ALT_COND_PLUGIN(GetPCCanFastTravel, , , false, NULL);
-DEFINE_CMD_ALT_COND_PLUGIN(GetWeaponHasFlag, WeaponHasFlag, , false, kParams_OneInt_OneOptionalObjectID);
-DEFINE_CMD_ALT_COND_PLUGIN(GetActorHasBaseFlag, ActorHasBaseFlag, , false, kParams_OneInt_OneOptionalActorBase);
-DEFINE_COMMAND_PLUGIN(RemoveAllItemsShowOff, , true, 4, kParams_TwoOptionalInts_OneOptionalContainerRef_OneOptionalList);
-DEFINE_COMMAND_PLUGIN(ForceWeaponJamAnim, ForceJamAnim, true, 0, NULL);
+DEFINE_COMMAND_ALT_PLUGIN(SetPlayerCanPickpocketEquippedItems, SetPCCanStealEqItems, "Toggles the ability to pickpocket equipped items.", false, kParams_OneInt);
+DEFINE_CMD_ALT_COND_PLUGIN(GetPlayerCanPickpocketEquippedItems, GetPCCanStealEqItems, "Checks if the player can pickpocket equipped items.", false, NULL);
+DEFINE_CMD_COND_PLUGIN(GetPCHasSleepWaitOverride, "Returns whether or not the player has a Sleep/Wait prevention override", false, NULL);
+DEFINE_COMMAND_PLUGIN(SetPCHasSleepWaitOverride, "Sets whether or not the player has a Sleep/Wait prevention override", false, kParams_OneInt);
+DEFINE_CMD_COND_PLUGIN(IsWeaponMelee, "Returns 1 if the weapon's base form is of one of the three weapon types belonging to melee-range weapons.", true, kParams_OneOptionalObjectID);
+DEFINE_CMD_COND_PLUGIN(IsEquippedWeaponMelee, "Returns 1 if the calling actor's equipped weapon's base form is of one of the three weapon types belonging to melee-range weapons.", true, NULL);
+DEFINE_CMD_COND_PLUGIN(IsWeaponRanged, "Returns 1 if the weapon's base form is one of the weapon types belonging to NON melee-range weapons.", true, kParams_OneOptionalObjectID);
+DEFINE_CMD_COND_PLUGIN(IsEquippedWeaponRanged, "Returns 1 if the calling actor's equipped weapon's base form is one of the weapon types belonging to NON melee-range weapons.", true, NULL);
+DEFINE_CMD_COND_PLUGIN(GetChallengeProgress, "Returns the progress made on a challenge.", false, kParams_OneChallenge)
+DEFINE_COMMAND_PLUGIN(UnequipItems, "", true, kParams_FourOptionalInts);
+DEFINE_COMMAND_PLUGIN(GetEquippedItems, "", true, kParams_OneOptionalInt);
+DEFINE_CMD_COND_PLUGIN(GetPCHasScriptedFastTravelOverride, "Returns whether or not the player is restricted by EnableFastTravel", false, NULL);
+DEFINE_CMD_COND_PLUGIN(GetPCCanFastTravel, "", false, NULL);
+DEFINE_CMD_ALT_COND_PLUGIN(GetWeaponHasFlag, WeaponHasFlag, "", false, kParams_OneInt_OneOptionalObjectID);
+DEFINE_CMD_ALT_COND_PLUGIN(GetActorHasBaseFlag, ActorHasBaseFlag, "", false, kParams_OneInt_OneOptionalActorBase);
+DEFINE_COMMAND_PLUGIN(RemoveAllItemsShowOff, "", true, kParams_TwoOptionalInts_OneOptionalContainerRef_OneOptionalList);
+DEFINE_COMMAND_ALT_PLUGIN(ForceWeaponJamAnim, ForceJamAnim, "", true, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedSkillPoints, GetCalculatedSkillPointsEarnedPerLevel, "Gets the amount of skill points the player would get for their current level.", false, kParams_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN(GetLevelUpMenuPoints, , false, 2, kParams_TwoOptionalInts);
+DEFINE_COMMAND_PLUGIN(GetLevelUpMenuPoints, "", false, kParams_TwoOptionalInts);
 DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedPerkPoints, GetCalculatedPerkPointsEarnedPerLevel, "Gets the amount of perk points the player would get for their current level.", false, kParams_OneOptionalInt);
-DEFINE_COMMAND_ALT_PLUGIN(GetLevelUpMenuCurrentPage, GetLevelUpMenuPage, "", false, 0, NULL);
-DEFINE_COMMAND_ALT_PLUGIN(SetLevelUpMenuCurrentPage, SetLevelUpMenuPage, "", false, 1, kParams_OneInt);
-DEFINE_COMMAND_ALT_PLUGIN(ShowPerkMenu, IfIDecideToGoWithYourFunctionWhatAreThePerks, "Opens the Level-Up menu to the Perk-menu page, and prevents going back to Skills tab.", false, 2, kParams_JIP_OneOptionalInt_OneOptionalString);
-DEFINE_COMMAND_ALT_PLUGIN(ShowSkillMenu, ShowSkillsMenu, "Opens the Level-Up menu to the Skills page, and sets that this is the last page (no visiting perks).", false, 3, kParams_TwoOptionalInts_OneOptionalString);
-DEFINE_COMMAND_PLUGIN(GetLevelUpMenuUnspentPoints, , false, 1, kParams_OneInt);
-DEFINE_COMMAND_PLUGIN(SetLevelUpMenuCanExitEarly, , false, 1, kParams_OneInt);  //todo: Get is a WIP, also "SetLevelUpMenuCanExitEarly 0" does not work currently.
-DEFINE_COMMAND_PLUGIN(SetLevelUpMenuPoints, , false, 2, kParams_TwoInts);
+DEFINE_COMMAND_ALT_PLUGIN(GetLevelUpMenuCurrentPage, GetLevelUpMenuPage, "", false, NULL);
+DEFINE_COMMAND_ALT_PLUGIN(SetLevelUpMenuCurrentPage, SetLevelUpMenuPage, "", false, kParams_OneInt);
+DEFINE_COMMAND_ALT_PLUGIN(ShowPerkMenu, IfIDecideToGoWithYourFunctionWhatAreThePerks, "Opens the Level-Up menu to the Perk-menu page, and prevents going back to Skills tab.", false, kParams_JIP_OneOptionalInt_OneOptionalString);
+DEFINE_COMMAND_ALT_PLUGIN(ShowSkillMenu, ShowSkillsMenu, "Opens the Level-Up menu to the Skills page, and sets that this is the last page (no visiting perks).", false, kParams_TwoOptionalInts_OneOptionalString);
+DEFINE_COMMAND_PLUGIN(GetLevelUpMenuUnspentPoints, "", false, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(SetLevelUpMenuCanExitEarly, "", false, kParams_OneInt);  //todo: Get is a WIP, also "SetLevelUpMenuCanExitEarly 0" does not work currently.
+DEFINE_COMMAND_PLUGIN(SetLevelUpMenuPoints, "", false, kParams_TwoInts);
 
 
 
@@ -831,7 +831,7 @@ bool Cmd_SetLevelUpMenuPoints_Execute(COMMAND_ARGS)
 
 
 
-DEFINE_COMMAND_PLUGIN(GetLevelUpMenuCanExitEarly, , false, 0, NULL);
+DEFINE_COMMAND_PLUGIN(GetLevelUpMenuCanExitEarly, "", false, NULL);
 bool Cmd_GetLevelUpMenuCanExitEarly_Execute(COMMAND_ARGS)
 {
 	*result = -1;
@@ -859,7 +859,7 @@ bool Cmd_CanBeMoved_Execute(COMMAND_ARGS)
 }
 
 
-DEFINE_COMMAND_PLUGIN(GetActorPreferredWeapon, , true, 1, kParams_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(GetActorPreferredWeapon, "", true, kParams_OneOptionalInt);
 bool Cmd_GetActorPreferredWeapon_Execute(COMMAND_ARGS)
 {
 	//todo: current configuration gives garbage forms, need to fix that. Perhaps not calling it right?
@@ -873,7 +873,7 @@ bool Cmd_GetActorPreferredWeapon_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(TryDropWeapon, , true, 0, NULL);
+DEFINE_COMMAND_PLUGIN(TryDropWeapon, "", true, NULL);
 bool Cmd_TryDropWeapon_Execute(COMMAND_ARGS)
 {
 	*result = 0;
@@ -899,7 +899,7 @@ bool Cmd_TryDropWeapon_Execute(COMMAND_ARGS)
 }
 
 
-DEFINE_CMD_ALT_COND_PLUGIN(IsWeaponTrowable, , , true, kParams_OneOptionalObjectID);
+DEFINE_CMD_COND_PLUGIN(IsWeaponTrowable, "", true, kParams_OneOptionalObjectID);
 bool Cmd_IsWeaponTrowable_Eval(COMMAND_ARGS_EVAL)
 {
 	//Console_Print("thisObj: [%0.8X]", thisObj->baseForm->GetId());
@@ -922,7 +922,7 @@ bool Cmd_IsWeaponTrowable_Execute(COMMAND_ARGS)
 	return Cmd_IsWeaponTrowable_Eval(thisObj, weapon, 0, result);
 }
 
-DEFINE_CMD_ALT_COND_PLUGIN(GetPCCanSleepWait, , , 0, NULL);
+DEFINE_CMD_COND_PLUGIN(GetPCCanSleepWait, "", false, NULL);
 bool Cmd_GetPCCanSleepWait_Eval(COMMAND_ARGS_EVAL)
 {
 	//todo: verify if it works with script overrides and stewie features.
@@ -936,7 +936,7 @@ bool Cmd_GetPCCanSleepWait_Execute(COMMAND_ARGS)
 }
 
 
-DEFINE_CMD_ALT_COND_PLUGIN(GetPCCanSleepInOwnedBeds, , , 0, NULL);
+DEFINE_CMD_COND_PLUGIN(GetPCCanSleepInOwnedBeds, "", false, NULL);
 bool Cmd_GetPCCanSleepInOwnedBeds_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = GetCanSleepInOwnedBeds();
@@ -948,7 +948,7 @@ bool Cmd_GetPCCanSleepInOwnedBeds_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(SetPCCanSleepInOwnedBeds, , false, 1, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(SetPCCanSleepInOwnedBeds, "", false, kParams_OneInt);
 bool Cmd_SetPCCanSleepInOwnedBeds_Execute(COMMAND_ARGS)
 {
 	UInt32 bOn;
@@ -967,8 +967,8 @@ bool Cmd_SetPCCanSleepInOwnedBeds_Execute(COMMAND_ARGS)
 //......Afterwards, once triggered normally, the challenge will be completed once more, doing "Progress -= Threshold". After this, you could still have Progress > Threshold.
 
 
-DEFINE_COMMAND_PLUGIN(SetChallengeProgress, "Changes the progress made on a challenge to a specific value.", 0, 2, kParams_OneForm_OneInt)
-DEFINE_COMMAND_PLUGIN(ModChallengeProgress, "Modifies the progress made on a challenge.", 0, 2, kParams_OneForm_OneInt)
+DEFINE_COMMAND_PLUGIN(SetChallengeProgress, "Changes the progress made on a challenge to a specific value.", false, kParams_OneForm_OneInt)
+DEFINE_COMMAND_PLUGIN(ModChallengeProgress, "Modifies the progress made on a challenge.", false, kParams_OneForm_OneInt)
 
 //Going into negative seems to work fine, it just delays the challenge progress.
 //It also looks weird since it shows "0/x" progress when it returns to 0.
@@ -1005,7 +1005,7 @@ bool Cmd_ModChallengeProgress_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(CompleteChallenge, "Completes a challenge.", 0, 1, kParams_OneForm)
+DEFINE_COMMAND_PLUGIN(CompleteChallenge, "Completes a challenge.", false, kParams_OneForm)
 bool Cmd_CompleteChallenge_Execute(COMMAND_ARGS)
 {
 	TESChallenge* challenge;
@@ -1021,7 +1021,7 @@ bool Cmd_CompleteChallenge_Execute(COMMAND_ARGS)
 
 
 
-DEFINE_COMMAND_PLUGIN(GetProjectileRefFlag, , 1, 0, NULL);
+DEFINE_COMMAND_PLUGIN(GetProjectileRefFlag, "", false, NULL);
 bool Cmd_GetProjectileRefFlag_Execute(COMMAND_ARGS)
 {
 	GrenadeProjectile* projectile = (GrenadeProjectile*)thisObj;
@@ -1033,7 +1033,7 @@ bool Cmd_GetProjectileRefFlag_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(SetProjectileRefFlag, , 1, 1, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(SetProjectileRefFlag, "", true, kParams_OneInt);
 bool Cmd_SetProjectileRefFlag_Execute(COMMAND_ARGS)
 {
 	UInt32 flag;
@@ -1047,7 +1047,7 @@ bool Cmd_SetProjectileRefFlag_Execute(COMMAND_ARGS)
 
 
 
-DEFINE_COMMAND_PLUGIN(SetPCCanPickpocketInCombat, , 0, 1, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(SetPCCanPickpocketInCombat, "", false, kParams_OneInt);
 bool Cmd_SetPCCanPickpocketInCombat_Execute(COMMAND_ARGS)
 {
 	UInt32 bOn;
@@ -1057,7 +1057,7 @@ bool Cmd_SetPCCanPickpocketInCombat_Execute(COMMAND_ARGS)
 }
 
 // Ripped code from JIPLN's "SetNoUnequip"
-DEFINE_COMMAND_PLUGIN(SetNoEquip, "Returns 1 if the inventory ref was sucessfully set to NoEquip (or the flag was properly cleared). Returns 2 if it was already set.", 1, 1, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(SetNoEquip, "Returns 1 if the inventory ref was sucessfully set to NoEquip (or the flag was properly cleared). Returns 2 if it was already set.", true, kParams_OneInt);
 bool Cmd_SetNoEquip_Execute(COMMAND_ARGS)
 {
 	*result = 0;
