@@ -86,6 +86,7 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 
 ===Changes:
 * GetNumActorsInRangeFromRef and GetNumCombatActorsFromActor both have a new OnlyDetectedActors filter flag.
+* GetCreatureTurningSpeed and GetCreatureFootWeight are made available as condition functions.
 
 ===Bug Fixes:
 *
