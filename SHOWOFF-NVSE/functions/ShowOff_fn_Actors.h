@@ -2,12 +2,12 @@
 
 DEFINE_CMD_COND_PLUGIN(GetNumActorsInRangeFromRef, "Returns the amount of actors that are a certain distance nearby to the calling reference.", true, kParams_OneFloat_OneOptionalInt);
 DEFINE_CMD_COND_PLUGIN(GetNumCombatActorsFromActor, "Returns the amount of actors that are allies/targets to the calling actor, with optional filters.", true, kParams_OneOptionalFloat_OneOptionalInt);
-DEFINE_CMD_COND_PLUGIN(GetCreatureTurningSpeed, , false, kParams_OneOptionalActorBase);  //copied after GetCreatureCombatSkill from JG
-DEFINE_COMMAND_PLUGIN(SetCreatureTurningSpeed, , false, kParams_OneFloat_OneOptionalActorBase);
-DEFINE_CMD_COND_PLUGIN(GetCreatureFootWeight, , false, kParams_OneOptionalActorBase);
-DEFINE_COMMAND_PLUGIN(SetCreatureFootWeight, , false, kParams_OneFloat_OneOptionalActorBase);
-DEFINE_COMMAND_PLUGIN(SetCreatureReach, , false, kParams_OneInt_OneOptionalActorBase);
-DEFINE_COMMAND_PLUGIN(SetCreatureBaseScale, , false, kParams_OneFloat_OneOptionalActorBase);
+DEFINE_CMD_COND_PLUGIN(GetCreatureTurningSpeed, "", false, kParams_OneOptionalActorBase);  //copied after GetCreatureCombatSkill from JG
+DEFINE_COMMAND_PLUGIN(SetCreatureTurningSpeed, "", false, kParams_OneFloat_OneOptionalActorBase);
+DEFINE_CMD_COND_PLUGIN(GetCreatureFootWeight, "", false, kParams_OneOptionalActorBase);
+DEFINE_COMMAND_PLUGIN(SetCreatureFootWeight, "", false, kParams_OneFloat_OneOptionalActorBase);
+DEFINE_COMMAND_PLUGIN(SetCreatureReach, "", false, kParams_OneInt_OneOptionalActorBase);
+DEFINE_COMMAND_PLUGIN(SetCreatureBaseScale, "", false, kParams_OneFloat_OneOptionalActorBase);
 DEFINE_CMD_COND_PLUGIN(GetNumCompassHostiles, "Returns the amount of hostile actors on compass, w/ optional filters.", false, kParams_OneOptionalFloat_OneOptionalInt);
 
 
