@@ -1,7 +1,20 @@
 ﻿#include "ShowOff_fn_Files.h"
+#include "nvse/Utilities.h"
 
 #include <filesystem>
 #include <fstream>
+
+//Creates a folder relative to the main folder (\Fallout New Vegas\)
+//Made by anhatthezoo, requested by Trooper.
+bool Cmd_CreateFolder_Execute(COMMAND_ARGS) {
+	*result = 0;
+	char folderPath[MAX_PATH]; // relative to "Fallout New Vegas" folder.
+	std::string vegasPath = GetFalloutDirectory();
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &folderPath)) {
+		
+		std::filesystem::create_directories(vegasPath + folderPath);
+	}
+}
 
 bool Get_JSON_Val_As_Basic_NVSE_Elem(json::const_reference json_ref, ArrayElementR& elem)
 {
