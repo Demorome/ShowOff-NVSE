@@ -16,11 +16,6 @@ You may also contact Demorome directly on Discord. Username: `Demorome#2870`
     -Prevent ShowRaceMenu from resetting Ability and temporary Actor Effects.
 
 
-# INI Tweaks:
-
-    -Not yet added, INI functionality has been pushed back till later.
-
-
 # Requirements
 Requires xNVSE v6.0.6 or greater: https://github.com/xNVSE/NVSE/releases.
 
