@@ -5,7 +5,7 @@
 
 // Code mostly ripped from FOSE's gamesetting functions (GetNumericGameSetting etc).
 
-DEFINE_COMMAND_PLUGIN(IsGameSetting, "Checks if a string refers to a valid Gamesetting", 0, 1, kParams_OneString);
+DEFINE_COMMAND_PLUGIN(IsGameSetting, "Checks if a string refers to a valid Gamesetting", false, kParams_OneString);
 bool Cmd_IsGameSetting_Execute(COMMAND_ARGS)
 {
 	char settingName[512];
@@ -28,7 +28,7 @@ bool Cmd_IsGameSetting_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(IsINISetting, "Checks if a string refers to a valid FalloutPrefs.ini / Fallout.ini setting.", 0, 1, kParams_OneString);
+DEFINE_COMMAND_PLUGIN(IsINISetting, "Checks if a string refers to a valid FalloutPrefs.ini / Fallout.ini setting.", false, kParams_OneString);
 bool Cmd_IsINISetting_Execute(COMMAND_ARGS)
 {
 	char settingName[512];
@@ -50,7 +50,7 @@ bool Cmd_IsINISetting_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(ModNumericINISetting, , 0, 2, kParams_OneString_OneFloat);
+DEFINE_COMMAND_PLUGIN(ModNumericINISetting, "", false, kParams_OneString_OneFloat);
 bool Cmd_ModNumericINISetting_Execute(COMMAND_ARGS)
 {
 	char settingName[512];
@@ -83,7 +83,7 @@ bool Cmd_ModNumericINISetting_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(ModNumericINISettingAlt, , 0, 2, kParams_OneString_OneFloat);
+DEFINE_COMMAND_PLUGIN(ModNumericINISettingAlt, "", false, kParams_OneString_OneFloat);
 bool Cmd_ModNumericINISettingAlt_Execute(COMMAND_ARGS)
 {
 	char settingName[512];
@@ -116,7 +116,7 @@ bool Cmd_ModNumericINISettingAlt_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(ModNumericGameSetting, , 0, 2, kParams_OneString_OneFloat);
+DEFINE_COMMAND_PLUGIN(ModNumericGameSetting, "", false, kParams_OneString_OneFloat);
 bool Cmd_ModNumericGameSetting_Execute(COMMAND_ARGS)
 {
 	char settingName[512];

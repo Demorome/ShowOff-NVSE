@@ -435,7 +435,42 @@ public:
 };
 typedef std::unordered_set<EquipData, EquipDataHashFunction> EquipDataSet;
 
-EquipDataSet FindEquippedItems(ExtraContainerChanges* contChanges, UInt32 filterFlags);
+namespace FindEquipped  // to prevent confusing conflicts with flag names.
+{
+	enum FindEquipped_Flags {
+		// eSlot_ flags determine which equip slots to include.
+		eSlot_Head = 1 << 0,
+		eSlot_Hair = 1 << 1,
+		eSlot_UpperBody = 1 << 2,
+		eSlot_LeftHand = 1 << 3,
+		eSlot_RightHand = 1 << 4,
+		eSlot_Weapon = 1 << 5,
+		eSlot_PipBoy = 1 << 6,
+		eSlot_Backpack = 1 << 7,
+		eSlot_Necklace = 1 << 8,
+		eSlot_Headband = 1 << 9,
+		eSlot_Hat = 1 << 10,
+		eSlot_Eyeglasses = 1 << 11,
+		eSlot_Nosering = 1 << 12,
+		eSlot_Earrings = 1 << 13,
+		eSlot_Mask = 1 << 14,
+		eSlot_Choker = 1 << 15,
+		eSlot_MouthObject = 1 << 16,
+		eSlot_BodyAddon1 = 1 << 17,
+		eSlot_BodyAddon2 = 1 << 18,
+		eSlot_BodyAddon3 = 1 << 19,
+		eSlot_AllSlots = 0xFFFFF,  // bits 0-19 toggled on.
+		// 0000 0000 0000 0000 0000 - 20 bits
+
+		// iFilter_ flags determine what sort of item to include.
+		iFilter_NoUnplayable = 1 << 20,
+		iFilter_NoQuestItems = 1 << 21,
+		iFilter_NoSlotlessItems = 1 << 22,
+		iFilter_AllSlotsNoSlotless = 0b10011111111111111111111,
+	};
+}
+
+EquipDataSet FindEquippedItems(ExtraContainerChanges* contChanges, UInt32 const filterFlags);
 
 // Finds an ExtraDataList in an ExtendDataList
 class ExtraDataListInExtendDataListMatcher

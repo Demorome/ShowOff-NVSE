@@ -8,39 +8,9 @@
 #include "utility.h"
 
 
-
 EquipDataSet FindEquippedItems(ExtraContainerChanges* contChanges, UInt32 const filterFlags)
 {
-	enum FlagValues {
-		// eSlot_ flags determine which equip slots to include.
-		eSlot_Head = 1 << 0,
-		eSlot_Hair = 1 << 1,
-		eSlot_UpperBody = 1 << 2,
-		eSlot_LeftHand = 1 << 3,
-		eSlot_RightHand = 1 << 4,
-		eSlot_Weapon = 1 << 5,
-		eSlot_PipBoy = 1 << 6,
-		eSlot_Backpack = 1 << 7,
-		eSlot_Necklace = 1 << 8,
-		eSlot_Headband = 1 << 9,
-		eSlot_Hat = 1 << 10,
-		eSlot_Eyeglasses = 1 << 11,
-		eSlot_Nosering = 1 << 12,
-		eSlot_Earrings = 1 << 13,
-		eSlot_Mask = 1 << 14,
-		eSlot_Choker = 1 << 15,
-		eSlot_MouthObject = 1 << 16,
-		eSlot_BodyAddon1 = 1 << 17,
-		eSlot_BodyAddon2 = 1 << 18,
-		eSlot_BodyAddon3 = 1 << 19,
-		eSlot_AllSlots = 0xFFFFF,  // bits 0-19 toggled on.
-		// 0000 0000 0000 0000 0000 - 20 bits
-
-		// iFilter_ flags determine what sort of item to include.
-		iFilter_NoUnplayable =		1 << 20,
-		iFilter_NoQuestItems =		1 << 21,
-		iFilter_NoSlotlessItems =	1 << 22,
-	};
+	using namespace FindEquipped;  // make flag enum values visible.
 	bool const skipUnplayable = (filterFlags & iFilter_NoUnplayable) || !filterFlags;
 	bool const noQuestItems = filterFlags & iFilter_NoQuestItems;
 	bool const noSlotlessItems = filterFlags & iFilter_NoSlotlessItems;
@@ -63,7 +33,8 @@ EquipDataSet FindEquippedItems(ExtraContainerChanges* contChanges, UInt32 const 
 			
 			// Here, filterFlags is used purely for the first 19 bits it has (equip slot bits).
 			// If it is null, then skip the check (by default, any equip slot forms are allowed).
-			if (formSlotMask && filterFlags && !MatchAnyEquipSlots(formSlotMask, filterFlags)) continue;
+			if (formSlotMask && filterFlags && !MatchAnyEquipSlots(formSlotMask, filterFlags)) 
+				continue;
 
 			// Form conditions passed, now check if the form is actually equipped.
 			for (auto xDataIter = itemIter->extendData->Begin(); !xDataIter.End(); ++xDataIter)

@@ -2,48 +2,50 @@
 
 #include <random>
 #include <unordered_set>
+
+#include "GameExtraData.h"
 #include "GameRTTI.h"
 #include "SafeWrite.h"
 #include "Utilities.h"
 
 
-DEFINE_COMMAND_ALT_PLUGIN(ShowingOffDisable, DisableIFYouDidntNotice, "Does the same thing as vanilla Disable. For showing off!", 1, 1, kParams_OneOptionalInt);
-DEFINE_COMMAND_ALT_PLUGIN(ShowingOffEnable, EnableIFYouDidntNotice, "Does the same thing as vanilla Enable. For showing off!", 1, 1, kParams_OneOptionalInt);
-DEFINE_COMMAND_ALT_PLUGIN(DisableAlt, SnigOff, "Ignores the EnableParent limitation.", true, 1, kParams_OneOptionalInt);
-DEFINE_COMMAND_ALT_PLUGIN(EnableAlt, SnigOn, "Ignores the EnableParent limitation.", true, 1, kParams_OneOptionalInt);
-DEFINE_COMMAND_ALT_PLUGIN(ListAddList, AddFormListToFormList, "", 0, 3, kParams_TwoFormLists_OneOptionalIndex);
-DEFINE_COMMAND_PLUGIN(MessageExAltShowoff, , 0, 22, kParams_JIP_OneFloat_OneInt_OneFormatString);
-DEFINE_CMD_ALT_COND_PLUGIN(IsCornerMessageDisplayed, , "Returns 1/0 depending on if a corner message is displayed.", false, NULL);
-DEFINE_CMD_ALT_COND_PLUGIN(GetNumQueuedCornerMessages, , , false, NULL);
-DEFINE_CMD_ALT_COND_PLUGIN(IsAnimPlayingExCond, , "Same as IsAnimPlayingEx, but available as a condition. Had to cut the variationFlags filter.", true, kParams_JIP_OneInt_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN(GetRadiationExtraData, , 1, 0, NULL);
-DEFINE_COMMAND_PLUGIN(SetRadiationExtraData, , 1, 1, kParams_OneFloat);
-DEFINE_CMD_ALT_COND_PLUGIN(PlayerHasNightVisionActive, , , false, NULL);
-DEFINE_CMD_ALT_COND_PLUGIN(PlayerIsUsingTurbo, , , false, NULL);
-DEFINE_CMD_ALT_COND_PLUGIN(PlayerHasCateyeEnabled, , , false, NULL);
-DEFINE_CMD_ALT_COND_PLUGIN(PlayerHasImprovedSpottingActive, , , false, NULL);
-DEFINE_CMD_ALT_COND_PLUGIN(PlayerIsDrinkingPlacedWater, , , false, NULL);
-DEFINE_COMMAND_PLUGIN(SetIsPCAMurderer, , 0, 1, kParams_OneInt);
+DEFINE_COMMAND_ALT_PLUGIN(ShowingOffDisable, DisableIFYouDidntNotice, "Does the same thing as vanilla Disable. For showing off!", true, kParams_OneOptionalInt);
+DEFINE_COMMAND_ALT_PLUGIN(ShowingOffEnable, EnableIFYouDidntNotice, "Does the same thing as vanilla Enable. For showing off!", true, kParams_OneOptionalInt);
+DEFINE_COMMAND_ALT_PLUGIN(DisableAlt, SnigOff, "Ignores the EnableParent limitation.", true, kParams_OneOptionalInt);
+DEFINE_COMMAND_ALT_PLUGIN(EnableAlt, SnigOn, "Ignores the EnableParent limitation.", true, kParams_OneOptionalInt);
+DEFINE_COMMAND_ALT_PLUGIN(ListAddList, AddFormListToFormList, "", false, kParams_TwoFormLists_OneOptionalIndex);
+DEFINE_COMMAND_PLUGIN(MessageExAltShowoff, "", false, kParams_JIP_OneFloat_OneInt_OneFormatString);
+DEFINE_CMD_COND_PLUGIN(IsCornerMessageDisplayed, "Returns 1/0 depending on if a corner message is displayed.", false, NULL);
+DEFINE_CMD_COND_PLUGIN(GetNumQueuedCornerMessages, "", false, NULL);
+DEFINE_CMD_COND_PLUGIN(IsAnimPlayingExCond, "Same as IsAnimPlayingEx, but available as a condition. Had to cut the variationFlags filter.", true, kParams_JIP_OneInt_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(GetRadiationExtraData, "", true, NULL);
+DEFINE_COMMAND_PLUGIN(SetRadiationExtraData, "", true, kParams_OneFloat);
+DEFINE_CMD_COND_PLUGIN(PlayerHasNightVisionActive, "", false, NULL);
+DEFINE_CMD_COND_PLUGIN(PlayerIsUsingTurbo, "", false, NULL);
+DEFINE_CMD_COND_PLUGIN(PlayerHasCateyeEnabled, "", false, NULL);
+DEFINE_CMD_COND_PLUGIN(PlayerHasImprovedSpottingActive, "", false, NULL);
+DEFINE_CMD_COND_PLUGIN(PlayerIsDrinkingPlacedWater, "", false, NULL);
+DEFINE_COMMAND_PLUGIN(SetIsPCAMurderer, "", false , kParams_OneInt);
 DEFINE_CMD_ALT_COND_PLUGIN(IsNight, BloodyTears, "Returns true if it's night according to the current (or specified) climate.", false, kParams_OneOptionalForm);
-DEFINE_CMD_ALT_COND_PLUGIN(IsLimbCrippled, , "If no args are passed / arg is -1, returns true if actor has any crippled limbs. Otherwise, checks if the specified limb is crippled.", true, kParams_TwoOptionalInts);
-DEFINE_CMD_ALT_COND_PLUGIN(GetNumCrippledLimbs, , , true, kParams_OneOptionalInt);
-DEFINE_CMD_ALT_COND_PLUGIN(GetCrippledLimbsAsBitMask, , , true, kParams_OneOptionalInt);
-DEFINE_CMD_ALT_COND_PLUGIN(GetNumBrokenEquippedItems, , , true, kParams_OneOptionalFloat_OneOptionalInt);
+DEFINE_CMD_COND_PLUGIN(IsLimbCrippled, "If no args are passed / arg is -1, returns true if actor has any crippled limbs. Otherwise, checks if the specified limb is crippled.", true, kParams_TwoOptionalInts);
+DEFINE_CMD_COND_PLUGIN(GetNumCrippledLimbs, "", true, kParams_OneOptionalInt);
+DEFINE_CMD_COND_PLUGIN(GetCrippledLimbsAsBitMask, "", true, kParams_OneOptionalInt);
+DEFINE_CMD_COND_PLUGIN(GetNumBrokenEquippedItems, "", true, kParams_OneOptionalFloat_OneOptionalInt);
 DEFINE_CMD_ALT_COND_PLUGIN(GetEquippedItemsAsBitMask, GetOccupiedEquipSlots, , true, NULL);
-DEFINE_CMD_ALT_COND_PLUGIN(GetEquippedWeaponType, , , true, NULL);
-DEFINE_COMMAND_PLUGIN(ClearShowoffSavedData, "", 0, 1, kParams_OneInt);
-DEFINE_CMD_ALT_COND_PLUGIN(GetBaseEquippedWeight, , , true, kParams_OneOptionalFloat_OneOptionalInt);
-DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedEquippedWeight, , "Accounts for perk effects + weapon mods.", true, kParams_OneOptionalFloat_OneOptionalInt);
+DEFINE_CMD_COND_PLUGIN(GetEquippedWeaponType, "", true, NULL);
+DEFINE_COMMAND_PLUGIN(ClearShowoffSavedData, "", false, kParams_OneInt);
+DEFINE_CMD_COND_PLUGIN(GetBaseEquippedWeight, "", true, kParams_OneOptionalFloat_OneOptionalInt);
+DEFINE_CMD_COND_PLUGIN(GetCalculatedEquippedWeight, "Accounts for perk effects + weapon mods.", true, kParams_OneOptionalFloat_OneOptionalInt);
 DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedMaxCarryWeight, GetMaxCarryWeightPerkModified, "Accounts for GetMaxCarryWeight perk entry.", true, NULL);
-DEFINE_COMMAND_ALT_PLUGIN(SetRandomizerSeed, SetSeed, , false, 1, kParams_OneOptionalInt);
-DEFINE_COMMAND_ALT_PLUGIN(SetSeedUsingForm, SetFormSeed, , false, 1, kParams_OneOptionalForm);
-DEFINE_COMMAND_ALT_PLUGIN(GetRandomizerSeed, GetSeed, , false, 0, NULL);
-DEFINE_COMMAND_ALT_PLUGIN(RandSeeded, GenerateSeededRandomNumber, , false, 2, kParams_TwoInts);
-DEFINE_COMMAND_ALT_PLUGIN(GetRandomPercentSeeded, , , false, 0, NULL);
-DEFINE_COMMAND_PLUGIN(AdvanceSeed, "Discards would-be generated numbers to advance in the seed generation pattern.", false, 1, kParams_OneInt);
+DEFINE_COMMAND_ALT_PLUGIN(SetRandomizerSeed, SetSeed, "", false, kParams_OneOptionalInt);
+DEFINE_COMMAND_ALT_PLUGIN(SetSeedUsingForm, SetFormSeed, "", false, kParams_OneOptionalForm);
+DEFINE_COMMAND_ALT_PLUGIN(GetRandomizerSeed, GetSeed, "", false, NULL);
+DEFINE_COMMAND_ALT_PLUGIN(RandSeeded, GenerateSeededRandomNumber, "", false, kParams_TwoInts);
+DEFINE_COMMAND_PLUGIN(GetRandomPercentSeeded, "", false, NULL);
+DEFINE_COMMAND_PLUGIN(AdvanceSeed, "Discards would-be generated numbers to advance in the seed generation pattern.", false, kParams_OneInt);
 DEFINE_CMD_ALT_COND_PLUGIN(IsReferenceCloned, IsRefrCloned, "Checks if the reference's modIndex is 0xFF", true, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(IsTemporaryReference, IsTempRefr, "Checks if the reference does not persist in the savegame.", false, NULL); //todo: Set equivalents?
-DEFINE_COMMAND_PLUGIN(ToggleQuestMessages, , false, 1, kParams_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(ToggleQuestMessages, "", false, kParams_OneOptionalInt);
 
 
 bool(__cdecl* Cmd_Disable)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5C45E0;
@@ -517,7 +519,7 @@ bool Cmd_GetEquippedItemsAsBitMask_Eval(COMMAND_ARGS_EVAL)
 	*result = 0;
 	if (!IS_ACTOR(thisObj)) return true;
 	UInt32 equipSlotMask = 0;  //return value.
-	auto eqItems = GetEquippedItems(thisObj, 0b10011111111111111111111);  // Retrieve all equipped items that have equip slots (including non-playables!).
+	auto eqItems = GetEquippedItems(thisObj, FindEquipped::iFilter_AllSlotsNoSlotless);
 	for (auto const& iter : eqItems)
 	{
 		auto form = iter.pForm;
@@ -925,7 +927,7 @@ bool Cmd_ToggleQuestMessages_Execute(COMMAND_ARGS)
 
 
 
-DEFINE_COMMAND_PLUGIN(GetCalculatedItemValue, , false, 1, kParams_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(GetCalculatedItemValue, "", false, kParams_OneOptionalForm);
 bool Cmd_GetCalculatedItemValue_Execute(COMMAND_ARGS)
 {
 	*result = -1;
@@ -941,7 +943,7 @@ bool Cmd_GetCalculatedItemValue_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(GetCalculatedItemHealth, , false, 2, kParams_OneOptionalForm_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(GetCalculatedItemHealth, "", false, kParams_OneOptionalForm_OneOptionalInt);
 bool Cmd_GetCalculatedItemHealth_Execute(COMMAND_ARGS)
 {
 	*result = -1;
@@ -961,7 +963,7 @@ bool Cmd_GetCalculatedItemHealth_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(GetCalculatedItemWeight, , false, 0, kParams_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(GetCalculatedItemWeight, "", false, kParams_OneOptionalForm);
 bool Cmd_GetCalculatedItemWeight_Execute(COMMAND_ARGS)
 {
 	*result = -1;
@@ -982,7 +984,7 @@ bool Cmd_GetCalculatedItemWeight_Execute(COMMAND_ARGS)
 }
 
 
-DEFINE_COMMAND_PLUGIN(SetCellFullNameAlt, "Like SetCellFullName but accepts a string.", 0, 2, kParams_JIP_OneCell_OneString);
+DEFINE_COMMAND_PLUGIN(SetCellFullNameAlt, "Like SetCellFullName but accepts a string.", false, kParams_JIP_OneCell_OneString);
 bool Cmd_SetCellFullNameAlt_Execute(COMMAND_ARGS)
 {
 	TESObjectCELL* cell;
@@ -999,7 +1001,7 @@ bool Cmd_SetCellFullNameAlt_Execute(COMMAND_ARGS)
 }
 
 // Takes from JIP's ClearMessageQueue.
-DEFINE_COMMAND_PLUGIN(GetQueuedCornerMessages, "Returns the queued corner messages as a multidimensional array.", 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(GetQueuedCornerMessages, "Returns the queued corner messages as a multidimensional array.", false, NULL);
 bool Cmd_GetQueuedCornerMessages_Execute(COMMAND_ARGS)
 {
 	NVSEArrayVar* msgArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
@@ -1016,7 +1018,7 @@ bool Cmd_GetQueuedCornerMessages_Execute(COMMAND_ARGS)
 }
 
 // Takes from JIP's "ModBaseAV"
-DEFINE_COMMAND_ALT_PLUGIN(SetBaseActorValue, SetBaseAV, , 0, 3, kParams_JIP_OneActorValue_OneFloat_OneOptionalActorBase);
+DEFINE_COMMAND_ALT_PLUGIN(SetBaseActorValue, SetBaseAV, "", false, kParams_JIP_OneActorValue_OneFloat_OneOptionalActorBase);
 bool Cmd_SetBaseActorValue_Execute(COMMAND_ARGS)
 {
 	UInt32 actorVal;
@@ -1033,7 +1035,7 @@ bool Cmd_SetBaseActorValue_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(SetEnableParent, , 1, 1, kParams_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(SetEnableParent, "", true, kParams_OneOptionalForm);
 
 //Stole some code from JIP (TESObjectREFR::SetLinkedRef)
 bool Cmd_SetEnableParent_Execute(COMMAND_ARGS)
@@ -1102,7 +1104,7 @@ void __fastcall TestDemoFunc(double *stuff)
 }
 
 // Does whatever I want it to at the time.
-DEFINE_COMMAND_PLUGIN(TestDemo, , 0, 0, NULL);
+DEFINE_COMMAND_PLUGIN(TestDemo, "", false, NULL);
 bool Cmd_TestDemo_Execute(COMMAND_ARGS)
 {
 	UInt32 bInt = 0;

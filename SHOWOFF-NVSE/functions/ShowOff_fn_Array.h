@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-DEFINE_COMMAND_ALT_PLUGIN(ListAddArray, AddArrayToFormList, "", 0, 3, kParams_OneFormlist_OneArray_OneOptionalIndex);
+DEFINE_COMMAND_ALT_PLUGIN(ListAddArray, AddArrayToFormList, "", false, kParams_OneFormlist_OneArray_OneOptionalIndex);
 
 
 
@@ -70,7 +70,7 @@ bool Cmd_Ar_Init_Execute(COMMAND_ARGS)
 #endif
 
 
-DEFINE_COMMAND_PLUGIN(Ar_GetInvalidRefs, "", 0, 2, kParams_OneArray);  //failed experiment
+DEFINE_COMMAND_PLUGIN(Ar_GetInvalidRefs, "", false, kParams_OneArray);  //failed experiment
 bool Cmd_Ar_GetInvalidRefs_Execute(COMMAND_ARGS)
 {
 	//Code stolen off TommInfinite's Ar_HasInvalidRefs.
