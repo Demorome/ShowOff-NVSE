@@ -4,16 +4,17 @@
 #include <filesystem>
 #include <fstream>
 
-//Creates a folder relative to the main folder (\Fallout New Vegas\)
 //Made by anhatthezoo, requested by Trooper.
-bool Cmd_CreateFolder_Execute(COMMAND_ARGS) {
-	*result = 0;
+bool Cmd_CreateFolder_Execute(COMMAND_ARGS)
+{
+	*result = false;
 	char folderPath[MAX_PATH]; // relative to "Fallout New Vegas" folder.
-	std::string vegasPath = GetFalloutDirectory();
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &folderPath)) {
-		
-		std::filesystem::create_directories(vegasPath + folderPath);
+	folderPath[0] = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &folderPath) && folderPath[0])
+	{
+		*result = std::filesystem::create_directories(GetFalloutDirectory() + folderPath);
 	}
+	return true;
 }
 
 bool Get_JSON_Val_As_Basic_NVSE_Elem(json::const_reference json_ref, ArrayElementR& elem)

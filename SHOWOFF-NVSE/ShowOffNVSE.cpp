@@ -472,9 +472,7 @@ extern "C"
 		/*3CEF*/ REG_CMD(GetLevelUpMenuUnspentPoints)  //todo: consider making the result serialized.
 		/*3CF0*/ REG_CMD(SetLevelUpMenuCanExitEarly)
 		/*3CF1*/ REG_CMD(SetLevelUpMenuPoints)
-
-		//========v1.2?
-			     REG_CMD(CreateFolder)
+		/*3CF2*/ REG_CMD(CreateFolder)
 
 		
 		//***Current Max OpCode: 0x3D10 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
