@@ -484,7 +484,11 @@ extern "C"
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 
+
+
 		
+		//todo: REG_CMD(GetLevelUpMenuMaxPoints)
+		//
 		//REG_CMD(GetLevelUpMenuCanExitEarly)
 		
 		// IsBipedForm

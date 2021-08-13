@@ -743,7 +743,7 @@ bool Cmd_SetLevelUpMenuCanExitEarly_Execute(COMMAND_ARGS)
 
 bool Cmd_SetLevelUpMenuPoints_Execute(COMMAND_ARGS)
 {
-	*result = false;
+	*result = false;  // result = bSuccessfulChange
 	UInt32 bChangeAssignedPoints;  // if false, change maxPoints
 	UInt32 iNewPoints;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bChangeAssignedPoints, &iNewPoints))
@@ -751,27 +751,47 @@ bool Cmd_SetLevelUpMenuPoints_Execute(COMMAND_ARGS)
 
 	if (auto const menu = LevelUpMenu::GetSingleton())
 	{
+
+		
+		// TODO: limit iNewPoints to prevent softlocking!!!!!!!!!!!!!
+		// TODO: note that Tweaks' PerksPerLevel prevents the amount of perks from resetting when allotting one (?):
+		/*
+		 	// remove call resetting selected Perks when one is selected
+			NopFunctionCall(0x785B2C, 1);
+		*/
 		auto const currentPage = menu->currentPage;
 		if (bChangeAssignedPoints)
 		{
 			if (currentPage == LevelUpMenu::kPerkSelection)
+			{
+				iNewPoints = min(menu->numPerksToAssign, iNewPoints);
 				menu->numAssignedPerks = iNewPoints;
+			}
 			else if (currentPage == LevelUpMenu::kSkillSelection)
+			{
+				iNewPoints = min(menu->numSkillPointsToAssign, iNewPoints);
 				menu->numAssignedSkillPoints = iNewPoints;
+			}
 			else
 				return true;
 
 			// Change UI Traits.
 			auto const g_CurrPoints = *(UInt32*)0x11D9FD8;  // g_levelUpMenu_Trait_CurrPoints
-			menu->tile->SetFloat(g_CurrPoints, iNewPoints);  // changes wheter or not the player can go to the next page.
+			menu->tile->SetFloat(g_CurrPoints, iNewPoints);  // changes whether or not the player can go to the next page.
 			*result = true;
 		}
 		else
 		{
 			if (currentPage == LevelUpMenu::kPerkSelection && !menu->availablePerks.Empty())
+			{
+				// todo: ??
 				menu->numPerksToAssign = iNewPoints;
+			}
 			else if (currentPage == LevelUpMenu::kSkillSelection)
+			{
+				// todo: skill point capping normally occurs around 0x7856B2
 				menu->numSkillPointsToAssign = iNewPoints;
+			}
 			else
 				return true;
 
@@ -793,6 +813,9 @@ bool Cmd_SetLevelUpMenuPoints_Execute(COMMAND_ARGS)
 
 
 
+
+
+
 #ifdef _DEBUG
 
 
@@ -801,7 +824,7 @@ bool Cmd_SetLevelUpMenuPoints_Execute(COMMAND_ARGS)
 
 
 
-
+//GetLevelUpMenuMaxPoints
 
 
 

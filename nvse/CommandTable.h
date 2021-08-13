@@ -160,6 +160,10 @@ struct ParamInfo
 #define DEFINE_COMMAND_ALT_PLUGIN(name, altName, description, refRequired, numParams, paramInfo) \
 	DEFINE_CMD_FULL(name, altName, description, refRequired, numParams, paramInfo, NULL)
 
+//todo: TEST THESE DEFINES
+#define DEFINE_COMMAND_PLUGIN_SO(name, description, refRequired, paramInfo) \
+	DEFINE_CMD_FULL(name, , description, refRequired, (sizeof(paramInfo) / sizeof(ParamInfo)), paramInfo, NULL)
+
 // for commands which can be used as conditionals
 #define DEFINE_CMD_ALT_COND_ANY(name, altName, description, refRequired, paramInfo, parser) \
 	extern bool Cmd_ ## name ## _Execute(COMMAND_ARGS); \
