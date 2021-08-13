@@ -120,7 +120,7 @@ bool Cmd_IsEquippedWeaponMelee_Eval(COMMAND_ARGS_EVAL)
 {
 	// Not recommended to use this function for certain perk effects, like Calculate Weap. Damage;
 	// since it will affect the DAM that appears in the UI for other weapons, as long as the currently equipped weapon is a melee weap.
-	*result = 0;
+	*result = false;
 	if (thisObj)
 	{
 		if (!thisObj->IsActor()) return true;
@@ -131,7 +131,7 @@ bool Cmd_IsEquippedWeaponMelee_Eval(COMMAND_ARGS_EVAL)
 		}
 		else
 		{
-			*result = 1;
+			*result = true;
 			if (g_ShowFuncDebug)
 				Console_Print("IsEquippedWeaponMelee >> 1 >> No equipped weapon found, assuming that the default unarmed is equipped.");
 		}

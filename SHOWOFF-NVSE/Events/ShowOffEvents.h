@@ -2,7 +2,7 @@
 
 // Credits to Karut (from JohnnyGuitar) for making the Event Framework.
 
-DEFINE_COMMAND_PLUGIN(SetShowOffOnCornerMessageEventHandler, , false, kParams_Event);
+DEFINE_COMMAND_PLUGIN(SetShowOffOnCornerMessageEventHandler, "", false, kParams_Event);
 
 
 EventInformation* OnCornerMessage;

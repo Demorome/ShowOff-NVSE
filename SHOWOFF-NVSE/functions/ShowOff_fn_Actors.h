@@ -208,32 +208,31 @@ bool Cmd_GetNumCombatActorsFromActor_Execute(COMMAND_ARGS)
 	return true;
 }
 
-// Credits to JIP LN for the GetCreature__ code format.
 bool Cmd_GetCreatureTurningSpeed_Eval(COMMAND_ARGS_EVAL)
 {
-	*result = 
+	*result = -1;
+	TESForm* form;
+	if (arg1)
+		form = (TESForm*)arg1;
+	else if (thisObj)
+		form = thisObj->baseForm;
+	else return true;
+	if (auto const creature = DYNAMIC_CAST(form, TESForm, TESCreature))
+		*result = creature->turningSpeed;
 	return true;
 }
-
 bool Cmd_GetCreatureTurningSpeed_Execute(COMMAND_ARGS)
 {
 	*result = -1;
 	TESCreature* creature = NULL;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &creature)) return true;
-	if (!creature)
-	{
-		if (!thisObj || !thisObj->IsActor()) return true;
-		creature = (TESCreature*)((Actor*)thisObj)->GetActorBase();
-	}
-	if IS_TYPE(creature, TESCreature)
-		*result = creature->turningSpeed;
-	return true;
+	return Cmd_GetCreatureTurningSpeed_Eval(thisObj, creature, 0, result);
 }
 
-
+// Credits to JIP LN for the SetCreature__ code format.
 bool Cmd_SetCreatureTurningSpeed_Execute(COMMAND_ARGS)
 {
-	*result = 0;
+	*result = false;
 	TESCreature* creature = NULL;
 	float turningSpeed = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &turningSpeed, &creature) || turningSpeed < 0) return true;
@@ -245,25 +244,30 @@ bool Cmd_SetCreatureTurningSpeed_Execute(COMMAND_ARGS)
 	if IS_TYPE(creature, TESCreature)
 	{
 		creature->turningSpeed = turningSpeed;
-		*result = 1;
+		*result = true;
 	}
 	return true;
 }
 
-
+bool Cmd_GetCreatureFootWeight_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = -1;
+	TESForm* form;
+	if (arg1)
+		form = (TESForm*)arg1;
+	else if (thisObj)
+		form = thisObj->baseForm;
+	else return true;
+	if (auto const creature = DYNAMIC_CAST(form, TESForm, TESCreature))
+		*result = creature->footWeight;
+	return true;
+}
 bool Cmd_GetCreatureFootWeight_Execute(COMMAND_ARGS)
 {
 	*result = -1;
 	TESCreature* creature = NULL;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &creature)) return true;
-	if (!creature)
-	{
-		if (!thisObj || !thisObj->IsActor()) return true;
-		creature = (TESCreature*)((Actor*)thisObj)->GetActorBase();
-	}
-	if IS_TYPE(creature, TESCreature)
-		*result = creature->footWeight;
-	return true;
+	return Cmd_GetCreatureFootWeight_Eval(thisObj, creature, 0, result);
 }
 
 

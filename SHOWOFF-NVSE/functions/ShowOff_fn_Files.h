@@ -7,7 +7,7 @@
 // JSON API docs: https://nlohmann.github.io/json/api/basic_json/
 
 
-DEFINE_COMMAND_PLUGIN(ReadArrayFromJSON, , false, kParams_TwoStrings_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(ReadArrayFromJSON, "", false, kParams_TwoStrings_OneOptionalInt);
 
 
 
