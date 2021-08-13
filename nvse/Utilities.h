@@ -5,7 +5,7 @@ class Script;
 
 void DumpClass(void * theClassPtr, UInt32 nIntsToDump = 512);
 const char * GetObjectClassName(void * obj);
-//const std::string & GetFalloutDirectory(void);
+const std::string & GetFalloutDirectory(void);
 //std::string GetNVSEConfigOption(const char * section, const char * key);
 //bool GetNVSEConfigOption_UInt32(const char * section, const char * key, UInt32 * dataOut);
 
