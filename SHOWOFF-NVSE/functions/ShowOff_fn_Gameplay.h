@@ -91,13 +91,9 @@ bool Cmd_IsWeaponMelee_Eval(COMMAND_ARGS_EVAL)
 	*result = 0;
 	TESForm* form;
 	if (arg1)
-	{
 		form = (TESForm*)arg1;
-	}
 	else if (thisObj)
-	{
 		form = thisObj->baseForm;
-	}
 	else return true;
 
 	auto const weapon = DYNAMIC_CAST(form, TESForm, TESObjectWEAP);
@@ -126,9 +122,7 @@ bool Cmd_IsEquippedWeaponMelee_Eval(COMMAND_ARGS_EVAL)
 		if (!thisObj->IsActor()) return true;
 		TESObjectWEAP* weapon = ((Actor*)thisObj)->GetEquippedWeapon();
 		if (weapon)
-		{
 			*result = weapon->eWeaponType <= 2;
-		}
 		else
 		{
 			*result = true;
