@@ -31,7 +31,9 @@ DEFINE_COMMAND_PLUGIN(GetLevelUpMenuUnspentPoints, "", false, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(SetLevelUpMenuCanExitEarly, "", false, kParams_OneInt);  //todo: Get is a WIP, also "SetLevelUpMenuCanExitEarly 0" does not work currently.
 DEFINE_COMMAND_PLUGIN(SetLevelUpMenuPoints, "", false, kParams_TwoInts);
 DEFINE_COMMAND_PLUGIN(GetExplosionRefSource, "", true, NULL);
-
+DEFINE_COMMAND_PLUGIN(SetExplosionRefSource, "", true, kParams_OneActorRef);
+DEFINE_COMMAND_PLUGIN(GetExplosionRefRadius, "Accounts for AdjustExplosionRadius perk entry point.", true, NULL);
+DEFINE_COMMAND_PLUGIN(SetExplosionRefRadius, "", true, kParams_OneFloat);
 
 
 
@@ -807,10 +809,50 @@ bool Cmd_GetExplosionRefSource_Execute(COMMAND_ARGS)
 	*result = 0;
 	if (auto const explosion = DYNAMIC_CAST(thisObj, TESObjectREFR, Explosion))
 	{
-		REFR_RES = explosion->source->refID;
+		if (explosion->source)
+			REFR_RES = explosion->source->refID;
 	}
 	return true;
 }
+bool Cmd_SetExplosionRefSource_Execute(COMMAND_ARGS)
+{
+	*result = false;
+	Actor* newSource;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &newSource) || !IS_ACTOR(newSource))
+		return true;
+	if (auto const explosion = DYNAMIC_CAST(thisObj, TESObjectREFR, Explosion))
+	{
+		explosion->source = newSource;
+		*result = true;
+	}
+	return true;
+}
+
+
+bool Cmd_GetExplosionRefRadius_Execute(COMMAND_ARGS)
+{
+	*result = -1;
+	if (auto const explosion = DYNAMIC_CAST(thisObj, TESObjectREFR, Explosion))
+	{
+		*result = explosion->radius;
+	}
+	return true;
+}
+bool Cmd_SetExplosionRefRadius_Execute(COMMAND_ARGS)
+{
+	*result = false;
+	float newRadius;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &newRadius))
+		return true;
+	if (auto const explosion = DYNAMIC_CAST(thisObj, TESObjectREFR, Explosion))
+	{
+		explosion->radius = newRadius;
+		*result = true;
+	}
+	return true;
+}
+
+
 
 
 
@@ -824,10 +866,13 @@ bool Cmd_GetExplosionRefSource_Execute(COMMAND_ARGS)
 
 
 
-
-
-
 //todo: GetLevelUpMenuMaxPoints
+
+
+
+
+
+
 
 
 

@@ -815,8 +815,8 @@ public:
 
 	float			unk088;			// 088
 	float			unk08C;			// 08C
-	float			unk090;			// 090
-	float			unk094;			// 094
+	float			unk090;			// 090, always 0?
+	float			radius;			// 094
 	float			unk098;			// 098
 	float			unk09C;			// 09C
 	NiRefObject		*object0A0;		// 0A0
