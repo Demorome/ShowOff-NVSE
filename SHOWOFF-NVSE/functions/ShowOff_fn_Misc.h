@@ -30,7 +30,7 @@ DEFINE_CMD_ALT_COND_PLUGIN(IsNight, BloodyTears, "Returns true if it's night acc
 DEFINE_CMD_COND_PLUGIN(IsLimbCrippled, "If no args are passed / arg is -1, returns true if actor has any crippled limbs. Otherwise, checks if the specified limb is crippled.", true, kParams_TwoOptionalInts);
 DEFINE_CMD_COND_PLUGIN(GetNumCrippledLimbs, "", true, kParams_OneOptionalInt);
 DEFINE_CMD_COND_PLUGIN(GetCrippledLimbsAsBitMask, "", true, kParams_OneOptionalInt);
-DEFINE_CMD_COND_PLUGIN(GetNumBrokenEquippedItems, "", true, kParams_OneOptionalFloat_OneOptionalInt);
+DEFINE_CMD_ALT_COND_PLUGIN(GetNumBrokenEquippedItems, GetNumBrokenEq, "", true, kParams_OneOptionalFloat_OneOptionalInt);
 DEFINE_CMD_ALT_COND_PLUGIN(GetEquippedItemsAsBitMask, GetOccupiedEquipSlots, , true, NULL);
 DEFINE_CMD_COND_PLUGIN(GetEquippedWeaponType, "", true, NULL);
 DEFINE_COMMAND_PLUGIN(ClearShowoffSavedData, "", false, kParams_OneInt);
