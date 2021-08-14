@@ -815,9 +815,9 @@ public:
 
 	float			unk088;			// 088
 	float			unk08C;			// 08C
-	float			unk090;			// 090, always 0?
+	float			fBuildTime;		// 090
 	float			radius;			// 094
-	float			unk098;			// 098
+	float			ISRadius;		// 098
 	float			unk09C;			// 09C
 	NiRefObject		*object0A0;		// 0A0
 	tList<void>		list0A4;		// 0A4

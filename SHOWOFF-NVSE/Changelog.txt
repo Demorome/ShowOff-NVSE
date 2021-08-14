@@ -87,6 +87,8 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 ===Changes:
 * GetNumActorsInRangeFromRef and GetNumCombatActorsFromActor both have a new OnlyDetectedActors filter flag.
 * GetCreatureTurningSpeed and GetCreatureFootWeight are made available as condition functions.
+* Added alias to GetNumBrokenEquippedItems -> GetNumBrokenEq 
+
 
 ===Bug Fixes:
 *
@@ -99,6 +101,8 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 * Get/SetExplosionRefSource
 * CreateFolder (made by anhatthezoo!)
 * Get/SetExplosionRefRadius
+* GetActorValueDamage (alias: GetAVDamage)
+
 
 
 (Template:)

@@ -1592,7 +1592,7 @@ public:
 	virtual int		Fn_02(UInt32 avCode);					// GetActorValue internal, result in EAX
 	virtual float	GetActorValue(UInt32 avCode);			// GetActorValue (used from Eval) result in EAX
 	virtual float	GetTempActorValue(UInt32 avCode);					// GetBaseActorValue04 (internal) result in st
-	virtual float	GetActorValueDamage(UInt32 avCode);
+	virtual float	GetActorValueDamage(UInt32 avCode);					// Returns the negative damage modifier
 	virtual float	GetPermActorValue(UInt32 avCode);					// GetDamageActorValue or GetModifiedActorValue		called from Fn_08, result in st, added to Fn_01
 	virtual UInt32	GetNormalizedPermanentAV(UInt32 avCode);					// Manipulate GetPermanentActorValue, maybe convert to integer.
 	virtual float	GetPermanentActorValue(UInt32 avCode);	// GetPermanentActorValue (used from Eval) result in EAX

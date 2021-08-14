@@ -9,6 +9,7 @@ DEFINE_COMMAND_PLUGIN(SetCreatureFootWeight, "", false, kParams_OneFloat_OneOpti
 DEFINE_COMMAND_PLUGIN(SetCreatureReach, "", false, kParams_OneInt_OneOptionalActorBase);
 DEFINE_COMMAND_PLUGIN(SetCreatureBaseScale, "", false, kParams_OneFloat_OneOptionalActorBase);
 DEFINE_CMD_COND_PLUGIN(GetNumCompassHostiles, "Returns the amount of hostile actors on compass, w/ optional filters.", false, kParams_OneOptionalFloat_OneOptionalInt);
+DEFINE_COMMAND_ALT_PLUGIN(GetActorValueDamage, GetAVDamage, "Returns the damage modifier applied to the actor's AV", true, kParams_OneActorValue);
 
 
 
@@ -398,6 +399,22 @@ bool Cmd_GetNumCompassHostiles_Execute(COMMAND_ARGS)
 	return true;
 }
 
+bool Cmd_GetActorValueDamage_Execute(COMMAND_ARGS)
+{
+	*result = -1;
+	UInt32 avCode;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &avCode))
+		return true;
+	if (auto const actor = DYNAMIC_CAST(thisObj, TESObjectREFR, Actor))
+	{
+		*result = actor->avOwner.GetActorValueDamage(avCode) * -1;  // multiply by -1 to invert the sign, since it otherwise gives the negative damage modifier.
+	}
+	return true;
+}
+
+
+
+
 
 
 
@@ -407,6 +424,7 @@ bool Cmd_GetNumCompassHostiles_Execute(COMMAND_ARGS)
 
 
 #ifdef _DEBUG
+
 
 
 
