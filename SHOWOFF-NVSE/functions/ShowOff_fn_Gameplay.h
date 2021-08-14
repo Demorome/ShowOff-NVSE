@@ -30,6 +30,7 @@ DEFINE_COMMAND_ALT_PLUGIN(ShowSkillMenu, ShowSkillsMenu, "Opens the Level-Up men
 DEFINE_COMMAND_PLUGIN(GetLevelUpMenuUnspentPoints, "", false, kParams_OneInt);
 DEFINE_COMMAND_PLUGIN(SetLevelUpMenuCanExitEarly, "", false, kParams_OneInt);  //todo: Get is a WIP, also "SetLevelUpMenuCanExitEarly 0" does not work currently.
 DEFINE_COMMAND_PLUGIN(SetLevelUpMenuPoints, "", false, kParams_TwoInts);
+DEFINE_COMMAND_PLUGIN(GetExplosionRefSource, "", true, NULL);
 
 
 
@@ -801,7 +802,15 @@ bool Cmd_SetLevelUpMenuPoints_Execute(COMMAND_ARGS)
 }
 
 
-
+bool Cmd_GetExplosionRefSource_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	if (auto const explosion = DYNAMIC_CAST(thisObj, TESObjectREFR, Explosion))
+	{
+		REFR_RES = explosion->source->refID;
+	}
+	return true;
+}
 
 
 
@@ -818,7 +827,7 @@ bool Cmd_SetLevelUpMenuPoints_Execute(COMMAND_ARGS)
 
 
 
-//GetLevelUpMenuMaxPoints
+//todo: GetLevelUpMenuMaxPoints
 
 
 

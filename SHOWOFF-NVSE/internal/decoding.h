@@ -823,7 +823,8 @@ public:
 	tList<void>		list0A4;		// 0A4
 	UInt32			unk0AC[6];		// 0AC
 	NiRefObject		*object0C4;		// 0C4
-	UInt32			unk0C8[2];		// 0C8
+	Actor*			source;			// 0C8
+	UInt32			unk0CC;			// 0CC
 	NiRefObject		*object0D0;		// 0D0
 	UInt32			unk0D4[11];		// 0D4
 	float			unk100;			// 100

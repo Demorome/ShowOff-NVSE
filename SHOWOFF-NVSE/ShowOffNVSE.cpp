@@ -473,7 +473,9 @@ extern "C"
 		/*3CF0*/ REG_CMD(SetLevelUpMenuCanExitEarly)
 		/*3CF1*/ REG_CMD(SetLevelUpMenuPoints)
 		/*3CF2*/ REG_CMD(CreateFolder)
+		/*3CF3*/ REG_CMD(GetExplosionRefSource)
 
+		
 		
 		//***Current Max OpCode: 0x3D10 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
@@ -486,7 +488,7 @@ extern "C"
 #if _DEBUG  //for functions being tested (or just abandoned).
 
 
-
+		
 		
 		//todo: REG_CMD(GetLevelUpMenuMaxPoints)
 		//

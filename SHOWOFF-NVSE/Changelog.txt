@@ -96,7 +96,8 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 * GetLevelUpMenuUnspentPoints
 * SetLevelUpMenuCanExitEarly
 * SetLevelUpMenuPoints
-
+* GetExplosionRefSource
+* CreateFolder (made by anhatthezoo!)
 
 
 
