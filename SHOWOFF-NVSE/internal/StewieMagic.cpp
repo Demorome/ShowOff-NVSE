@@ -1,5 +1,6 @@
 ﻿#include "StewieMagic.h"
 #include "SafeWrite.h"
+#include "GameEffects.h"
 
 
 void (*ToggleMenus)(bool toggleON) = ((void(__cdecl*)(bool))(0x703810));
@@ -90,4 +91,69 @@ ExtraDataList* ExtraContainerChanges::EntryData::GetEquippedExtra()
 		} while (xdlIter = xdlIter->next);
 	}
 	return NULL;
+}
+
+signed int EffectItem::GetSkillCode()
+{
+	return ThisStdCall<signed int>(0x403EA0, this);
+}
+
+// Credits: 99% ripped off from Stewie's GetPlayerHealthEffectsSum() function.
+float Actor::GetHealthEffectsSum()
+{
+	auto const effects = this->magicTarget.GetEffectList();
+	float sum = 0;
+	for (auto iter = effects->Begin(); !iter.End(); ++iter)
+	{
+		auto effect = iter.Get();
+		EffectItem* effectItem = effect->effectItem;
+		if (!effect->bApplied || effect->duration <= 0 || !effectItem || effectItem->GetSkillCode() != kAVCode_Health || !effectItem->setting) continue;
+
+		sum += effectItem->magnitude * (effect->duration - effect->timeElapsed);
+	}
+	float const medicineSkillMult = this->cvOwner.GetMedicineSkillMult(); //todo: check if this only applies to player.
+	sum *= medicineSkillMult;
+	//todo: apply Survival skill mult too?
+
+	ApplyPerkModifiers(kPerkEntry_ModifyRecoveredHealth, this, &sum);  //todo: check if this only applies to player.
+	//todo: look into 0x406A84, and try to find other places where healing is applied.
+	// 0x81660B is also relevant.
+
+	return sum;
+}
+
+namespace Radio
+{
+	TESObjectREFR* GetCurrentStation()
+	{
+		TESObjectREFR* station = nullptr;
+		if (RadioEntry::GetSingleton())
+		{
+			station = RadioEntry::GetSingleton()->radioRef;
+		}
+
+		return station;
+	}
+	
+	void (*SetEnabled)(bool toggleON) = (void(__cdecl*)(bool))0x8324E0;
+	void (*SetStation)(TESObjectREFR* station, bool toggleON) = (void(__cdecl*)(TESObjectREFR*, bool))0x832240;
+	bool GetEnabled() { return *(UInt8*)0x11DD434; }
+	tList<TESObjectREFR>* GetFoundStations() { return (tList<TESObjectREFR>*)0x11DD59C; };
+	void GetNearbyStations(tList<TESObjectREFR>* dst)
+	{
+		CdeclCall(0x4FF1A0, g_thePlayer, dst, nullptr);
+	}
+
+	void SetActiveStation(TESObjectREFR* station)
+	{
+		if (GetEnabled())
+		{
+			// stops the current playing dialogue line
+			SetEnabled(false);
+		}
+
+		SetEnabled(true);
+
+		SetStation(station, true);
+	}
 }

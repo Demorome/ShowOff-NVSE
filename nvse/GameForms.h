@@ -923,6 +923,7 @@ public:
 	//void ModDuration(float modBy);
 	//void SetRange(UInt32 range);
 	//bool IsHostile() const;
+	signed int EffectItem::GetSkillCode();
 };
 
 // 10
@@ -1605,7 +1606,6 @@ public:
 
 STATIC_ASSERT(sizeof(ActorValueOwner) == 0x004);
 
-STATIC_ASSERT(sizeof(ActorValueOwner) == 0x004);
 
 class CachedValuesOwner
 {
@@ -1613,22 +1613,24 @@ public:
 	CachedValuesOwner();
 	~CachedValuesOwner();
 
-	virtual float	Fn_00(void);
-	virtual float	Fn_01(void);
-	virtual float	Fn_02(void);
-	virtual float	Fn_03(void);
-	virtual float	Fn_04(void);
-	virtual float	Fn_05(void);
-	virtual float	Fn_06(void);
-	virtual float	Fn_07(void);
-	virtual float	Fn_08(void);
-	virtual float	Fn_09(void);
-	virtual float	Fn_0A(void);
-	virtual UInt32	Fn_0B(void);
-	virtual UInt32	Fn_0C(void);
-	virtual float	Fn_0D(void);
-	virtual float	Fn_0E(void);
-	virtual bool	Fn_0F(void);
+	// Decoded virtual function names taken from Stewie's Tweaks (may not be the primary origin).
+	virtual float	GetRadius(void);
+	virtual float	GetWidthX(void);
+	virtual float	GetWidthY(void);
+	virtual float	GetHeight(void);
+	virtual float	GetDPS(void);
+	virtual float	GetMedicineSkillMult(void);
+	virtual float	GetSurvivalSkillMult(void);
+	virtual float	GetParalysis(void);
+	virtual float	GetHealRate(void);
+	virtual float	GetHealRate2(void);
+	virtual float	GetPerceptionCondition(void);
+	virtual UInt32	GetEyeHeight(void);
+	virtual UInt32	GetUnkShouldAttack(void);
+	virtual float	GetAssistance(void);
+	virtual float	GetWalkSpeedMult(void);
+	virtual float	GetRunSpeedMult(void);
+	virtual bool	GetHasNoCrippledLimbs(void);
 };
 
 STATIC_ASSERT(sizeof(CachedValuesOwner) == 0x004);

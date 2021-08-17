@@ -906,6 +906,83 @@ bool Cmd_ToggleQuestMessages_Execute(COMMAND_ARGS)
 }
 
 
+namespace PipboyRadioFunctions
+{
+	enum RadioInfo
+	{
+		kData_TopicInfos = 1,
+		kData_Topics,
+		kData_Quests,
+		kData_Actors,
+		kData_ResponseFilename,
+		kData_ResponseString,
+	};
+}
+
+DEFINE_COMMAND_PLUGIN(GetPipboyRadioVoiceEntryData, "", false, kParams_OneInt_OneOptionalInt);
+bool Cmd_GetPipboyRadioVoiceEntryData_Execute(COMMAND_ARGS)
+{
+	using namespace PipboyRadioFunctions;
+	*result = 0;
+	UInt32 info;
+	UInt32 bGetDeep = 0;  // if true, return a multidimensional array with the info for each individual VoiceEntryList that is queued.
+	if (!ExtractArgs(EXTRACT_ARGS, &info, &bGetDeep))
+		return true;
+
+	auto GetAndAppendVoiceEntryData = [&](Radio::VoiceEntryList* const voiceList, NVSEArrayVar* arrToAppendTo)
+	{
+		for (auto iter = voiceList->voiceEntries.Begin(); !iter.End(); iter.Next())
+		{
+			ArrayElementR elem;
+			switch (info)
+			{
+			case kData_TopicInfos:
+				elem = iter.Get()->topicInfo;
+				break;
+			case kData_Topics:
+				elem = iter.Get()->topic;
+				break;
+			case kData_Quests:
+				elem = iter.Get()->quest;
+				break;
+			case kData_Actors:
+				elem = iter.Get()->actor;
+				break;
+			case kData_ResponseFilename:
+				elem = iter.Get()->response->fileName;
+				break;
+			case kData_ResponseString:
+				elem = iter.Get()->response->str.CStr();
+				break;
+			}
+			g_arrInterface->AppendElement(arrToAppendTo, elem);
+		}
+	};
+
+	auto const outArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+	if (auto const radio = Radio::RadioEntry::GetSingleton())
+	{
+		Radio::VoiceEntryList* const voiceList = radio->unk04.unk00;
+		if (!voiceList) return true;
+		if (!bGetDeep)
+		{
+			GetAndAppendVoiceEntryData(voiceList, outArr);
+		}
+		else
+		{
+			for (auto iter = voiceList; iter; iter = voiceList->next)
+			{
+				NVSEArrayVar* innerArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+				GetAndAppendVoiceEntryData(iter, innerArr);
+				g_arrInterface->AppendElement(outArr, ArrayElementR(innerArr));
+			}
+		}
+	}
+	g_arrInterface->AssignCommandResult(outArr, result);
+	return true;
+}
+
+
 
 
 
@@ -921,6 +998,16 @@ bool Cmd_ToggleQuestMessages_Execute(COMMAND_ARGS)
 
 
 
+// Result fluctuates wildly, can't be used to predict anything.
+DEFINE_COMMAND_PLUGIN(GetPipBoyRadioSoundTimeRemaining, "", false, NULL);
+bool Cmd_GetPipBoyRadioSoundTimeRemaining_Execute(COMMAND_ARGS)
+{
+	if (auto const radio = Radio::RadioEntry::GetSingleton())
+		*result = radio->unk04.soundTimeRemaining0C;
+	else
+		*result = 0;
+	return true;
+}
 
 
 

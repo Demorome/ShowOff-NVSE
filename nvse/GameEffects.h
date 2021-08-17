@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObjects.h"
+
 // 48
 class ActiveEffect
 {

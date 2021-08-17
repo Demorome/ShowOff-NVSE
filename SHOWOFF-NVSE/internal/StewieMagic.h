@@ -84,3 +84,64 @@ enum ContainerMode
 	kTeammate = 3,
 	kRockItLauncher = 4
 };
+
+
+// 1C
+struct VoiceEntry
+{
+	struct Response
+	{
+		String str;
+		char* fileName;
+	};
+
+	tList<void> list00;
+	Response* response;
+	TESTopicInfo* topicInfo;
+	TESTopic* topic;
+	TESQuest* quest;
+	Actor* actor;
+};
+
+namespace Radio
+{
+	struct RadioEntry
+	{
+
+		struct Struct04
+		{
+
+			struct Struct00
+			{
+				tList<VoiceEntry> voiceEntries;
+				Struct00* next;
+			};
+
+			Struct00* unk00;
+			UInt32 unk04;
+			UInt32 rng08;
+			UInt32 soundTimeRemaining0C;
+			UInt8 byte10;
+			UInt8 byte11;
+			UInt8 gap12[2];
+			UInt32 flags;
+			tList<void> list18;
+		};
+
+
+		TESObjectREFR* radioRef;
+		Struct04 unk04;
+
+		static RadioEntry* GetSingleton() { return *(RadioEntry**)0x11DD42C; }  // Gets the active pipboy radio.
+	};
+
+	TESObjectREFR* GetCurrentStation();
+	typedef RadioEntry::Struct04::Struct00 VoiceEntryList;
+
+	extern void (*SetEnabled)(bool toggleON);
+	extern void (*SetStation)(TESObjectREFR* station, bool toggleON);
+	bool GetEnabled();
+	tList<TESObjectREFR>* GetFoundStations();
+	void GetNearbyStations(tList<TESObjectREFR>* dst);
+	void SetActiveStation(TESObjectREFR* station);
+}

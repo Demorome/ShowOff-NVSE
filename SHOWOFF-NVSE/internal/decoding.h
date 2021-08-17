@@ -3502,7 +3502,7 @@ public:
 		BSSimpleArray<void>	*array04;
 	};
 
-	UInt16							dismemberedMask;	// 0C
+	UInt16							dismemberedMask;	// 0C, checked at 0x4303E0
 	UInt8							pad0E[2];			// 0E
 	int								unk10;				// 10
 	TESObjectWEAP					*weapon;			// 14

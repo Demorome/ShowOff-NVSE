@@ -866,13 +866,25 @@ bool Cmd_SetExplosionRefRadius_Execute(COMMAND_ARGS)
 
 
 
+
+
+
+
+
+
 //todo: GetLevelUpMenuMaxPoints
 
 
-
-
-
-
+DEFINE_COMMAND_PLUGIN(GetHealthEffectsSum, "", true, NULL);
+bool Cmd_GetHealthEffectsSum_Execute(COMMAND_ARGS)
+{
+	*result = -1;
+	if (auto const actor = DYNAMIC_CAST(thisObj, TESObjectREFR, Actor))
+	{
+		*result = actor->GetHealthEffectsSum();
+	}
+	return true;
+}
 
 
 

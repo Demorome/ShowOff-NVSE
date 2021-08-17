@@ -725,6 +725,7 @@ public:
 	bool IsInvisible();
 	SInt32 GetDetectionLevelAlt(Actor* target, bool calculateSneakLevel);
 	bool Detects(Actor* target);
+	float GetHealthEffectsSum();
 };
 
 // 1C0
