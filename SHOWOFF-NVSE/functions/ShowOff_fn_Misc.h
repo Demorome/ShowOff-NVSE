@@ -46,6 +46,7 @@ DEFINE_COMMAND_PLUGIN(AdvanceSeed, "Discards would-be generated numbers to advan
 DEFINE_CMD_ALT_COND_PLUGIN(IsReferenceCloned, IsRefrCloned, "Checks if the reference's modIndex is 0xFF", true, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(IsTemporaryReference, IsTempRefr, "Checks if the reference does not persist in the savegame.", false, NULL); //todo: Set equivalents?
 DEFINE_COMMAND_PLUGIN(ToggleQuestMessages, "", false, kParams_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(GetPipboyRadioVoiceEntryData, "", false, kParams_OneInt_OneOptionalInt);
 
 
 bool(__cdecl* Cmd_Disable)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5C45E0;
@@ -919,7 +920,6 @@ namespace PipboyRadioFunctions
 	};
 }
 
-DEFINE_COMMAND_PLUGIN(GetPipboyRadioVoiceEntryData, "", false, kParams_OneInt_OneOptionalInt);
 bool Cmd_GetPipboyRadioVoiceEntryData_Execute(COMMAND_ARGS)
 {
 	using namespace PipboyRadioFunctions;
@@ -929,58 +929,68 @@ bool Cmd_GetPipboyRadioVoiceEntryData_Execute(COMMAND_ARGS)
 	if (!ExtractArgs(EXTRACT_ARGS, &info, &bGetDeep))
 		return true;
 
-	auto GetAndAppendVoiceEntryData = [&](Radio::VoiceEntryList* const voiceList, NVSEArrayVar* arrToAppendTo)
+	auto GetAndAppendVoiceEntryData = [&](tList<VoiceEntry> const &voiceEntries, NVSEArrayVar* arrToAppendTo)
 	{
-		for (auto iter = voiceList->voiceEntries.Begin(); !iter.End(); iter.Next())
+		for (auto iter = voiceEntries.Begin(); !iter.End(); iter.Next())
 		{
 			ArrayElementR elem;
+			auto const voiceEntry = iter.Get();
+			if (!voiceEntry) continue;
 			switch (info)
 			{
 			case kData_TopicInfos:
-				elem = iter.Get()->topicInfo;
+				if (voiceEntry->topicInfo)  // NOTE: seems to give an invalid TESForm pointer sometimes, if looping through all voicelists, causing an error.
+					elem = voiceEntry->topicInfo;
 				break;
 			case kData_Topics:
-				elem = iter.Get()->topic;
+				if (voiceEntry->topic)
+					elem = voiceEntry->topic;
 				break;
 			case kData_Quests:
-				elem = iter.Get()->quest;
+				elem = voiceEntry->quest;
 				break;
 			case kData_Actors:
-				elem = iter.Get()->actor;
+				elem = voiceEntry->actor;
 				break;
 			case kData_ResponseFilename:
-				elem = iter.Get()->response->fileName;
+				if (voiceEntry->response)
+					elem = voiceEntry->response->fileName;
 				break;
 			case kData_ResponseString:
-				elem = iter.Get()->response->str.CStr();
+				if (voiceEntry->response)
+					elem = voiceEntry->response->str.CStr();
 				break;
 			}
-			g_arrInterface->AppendElement(arrToAppendTo, elem);
+			if (elem.IsValid())
+				g_arrInterface->AppendElement(arrToAppendTo, elem);  //todo: fix crash here!!!
 		}
 	};
 
-	auto const outArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+	auto outArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 	if (auto const radio = Radio::RadioEntry::GetSingleton())
 	{
-		Radio::VoiceEntryList* const voiceList = radio->unk04.unk00;
+		Radio::VoiceEntryList* voiceList = radio->unk04.unk00;
 		if (!voiceList) return true;
 		if (!bGetDeep)
 		{
-			GetAndAppendVoiceEntryData(voiceList, outArr);
+			GetAndAppendVoiceEntryData(voiceList->voiceEntries, outArr);
 		}
-		else
+		else 
 		{
-			for (auto iter = voiceList; iter; iter = voiceList->next)
-			{
-				NVSEArrayVar* innerArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
-				GetAndAppendVoiceEntryData(iter, innerArr);
-				g_arrInterface->AppendElement(outArr, ArrayElementR(innerArr));
-			}
+			//for (; voiceList; voiceList = voiceList->next)
+			do {
+				auto innerArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+				GetAndAppendVoiceEntryData(voiceList->voiceEntries, innerArr); // TODO: fix crash that occurs around here!!!
+				if (g_arrInterface->GetArraySize(innerArr) > 0)
+					g_arrInterface->AppendElement(outArr, ArrayElementR(innerArr));
+				voiceList = voiceList->next;
+			} while (voiceList);
 		}
 	}
 	g_arrInterface->AssignCommandResult(outArr, result);
 	return true;
 }
+
 
 
 
@@ -996,6 +1006,27 @@ bool Cmd_GetPipboyRadioVoiceEntryData_Execute(COMMAND_ARGS)
 
 
 
+
+
+
+
+DEFINE_COMMAND_PLUGIN(GetPipboyRadioSounds, "", false, NULL);
+bool Cmd_GetPipboyRadioSounds_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	if (auto const radio = Radio::RadioEntry::GetSingleton())
+	{
+		Sound* test;
+		auto const outArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+		for (auto iter = radio->unk04.sounds.Begin(); !iter.End(); iter.Next())
+		{
+			//todo: find a way to get meaningful info from a Sound*
+			//g_arrInterface->AppendElement(outArr, ArrayElementR(*iter.Get()));
+		}
+		g_arrInterface->AssignCommandResult(outArr, result);
+	}
+	return true;
+}
 
 
 // Result fluctuates wildly, can't be used to predict anything.

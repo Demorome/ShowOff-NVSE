@@ -478,7 +478,7 @@ extern "C"
 		/*3CF5*/ REG_CMD(SetExplosionRefRadius)
 		/*3CF6*/ REG_CMD(SetExplosionRefSource)
 		/*3CF7*/ REG_CMD(GetActorValueDamage)
-		/*3CF8*/ REG_CMD_ARR(GetPipboyRadioVoiceEntryData)
+		/*3CF8*/ REG_CMD_ARR(GetPipboyRadioVoiceEntryData)  // todo: FIX CRASHING (when music plays and arg1 = 1?)
 
 
 		
@@ -493,8 +493,9 @@ extern "C"
 #if _DEBUG  //for functions being tested (or just abandoned).
 
 
-		
+		REG_CMD_ARR(GetPipboyRadioSounds)
 		REG_CMD(GetPipBoyRadioSoundTimeRemaining)
+		
 		REG_CMD(GetHealthEffectsSum)
 		
 		//todo: REG_CMD(GetLevelUpMenuMaxPoints)

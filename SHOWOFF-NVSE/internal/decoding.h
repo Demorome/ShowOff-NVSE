@@ -373,14 +373,14 @@ public:
 
 struct Sound
 {
-	UInt32 unk00;
+	UInt32 soundID;
 	UInt8 byte04;
 	UInt8 pad05;
 	UInt8 pad06;
 	UInt8 pad07;
 	UInt32 unk08;
 
-	Sound() : unk00(0xFFFFFFFF), byte04(0), unk08(0) {}
+	Sound() : soundID(0xFFFFFFFF), byte04(0), unk08(0) {}
 
 
 	Sound(const char* soundPath, UInt32 flags)

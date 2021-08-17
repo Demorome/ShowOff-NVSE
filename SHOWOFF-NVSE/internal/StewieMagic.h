@@ -125,7 +125,7 @@ namespace Radio
 			UInt8 byte11;
 			UInt8 gap12[2];
 			UInt32 flags;
-			tList<void> list18;
+			tList<Sound*> sounds;
 		};
 
 
