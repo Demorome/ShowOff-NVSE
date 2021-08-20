@@ -6,7 +6,7 @@
 
 
 
-DEFINE_COMMAND_PLUGIN(CreateFolder, "", false, kParams_OneString);
+DEFINE_COMMAND_ALT_PLUGIN(CreateFolder, CreateDirectory, "", false, kParams_OneString);
 
 
 //==JSON functions==\\
