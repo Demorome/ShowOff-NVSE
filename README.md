@@ -1,5 +1,5 @@
 # Showoff-NVSE
-An NVSE plugin which adds new functions, as well as some engine-level tweaks.\
+An NVSE plugin which adds 70+ new functions, as well as some engine-level tweaks.\
 For heathens who have forsaken the Vanilla-Style way. 
 
 Documentation is available [here, on GeckWiki.com](https://geckwiki.com/index.php?title=Category:Functions_(ShowOff_NVSE)).
@@ -34,7 +34,10 @@ Q. Does this mod replace JIP LN NVSE Plugin, JohnnyGuitar NVSE, and SUP NVSE?\
 A. No, ShowOff does not replace those plugins. It is meant to be installed and used alongside them.
 
 Q. Will you support NVSE 5.1.4?\
-A. No. Due to features in xNVSE that this plugins need, it is not feasible to support legacy versions of NVSE.
+A. No. Due to features in xNVSE that this plugin needs, it is not feasible to support legacy versions of NVSE.
+
+Q. My Anti-virus says this mod is a virus. Is this true?\
+A. No, it is a false positive. Due to the way NVSE plugins work, some AVs flag them as malicious. Be sure to add an exception in your anti-virus. If you are stil skeptical, you can read the code right here on the Github page. 
 
 If you have anymore questions, feel free to join us on the [xNVSE community Discord server](https://discord.com/invite/EebN93s). 
 
@@ -48,7 +51,9 @@ If you want to use code I took from someone else, you should ask the original cr
 Besides that, you may use any of my code anywhere without asking for my permission, so long as you credit me.
 
 # Credits
-Kormakur, lStewieAl, c6, Luthien, TommInfinite, Jazzisparis, karut - for their invaluable help and the code I stole off all of them.
+This plugin was created and is maintained by Demorome and AVeryUncreativeUsername (Trooper)
+
+Special thanks to Kormakur, lStewieAl, c6, Luthien, TommInfinite, Jazzisparis, and karut - for their invaluable help and the code I stole off all of them.
 
 Code has been taken from the following plugins:
 * [JohnnyGuitar NVSE](https://www.nexusmods.com/newvegas/mods/66927)
