@@ -4,7 +4,7 @@ For heathens who have forsaken the Vanilla-Style way.
 
 Documentation is available [here, on GeckWiki.com](https://geckwiki.com/index.php?title=Category:Functions_(ShowOff_NVSE)).
 
-Releases are published [here, on Github](https://github.com/Demorome/Showoff-NVSE/releases).\
+Releases are published [here, on Github](https://github.com/Demorome/Showoff-NVSE/releases).
 
 If you wish to leave a comment, I (Demorome) will occasionally check the comment section [here, on Nexus](https://www.nexusmods.com/newvegas/mods/72541?tab=posts).\
 You may also contact me directly on Discord. Username: `Demorome#2870`
