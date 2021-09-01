@@ -254,9 +254,9 @@ bool Cmd_GetEquippedItemRefs_Execute(COMMAND_ARGS)
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &flags) || NOT_ACTOR(thisObj)) return true;
 	Vector<ArrayElementR> elems;
 	auto eqItems = GetEquippedItems(thisObj, flags);
-	for (auto const& iter : eqItems)
+	for (auto const& [baseItem, xData] : eqItems)
 	{
-		auto const itemRef = InventoryRefCreate((Actor*)thisObj, iter.pForm, 1, iter.pExtraData);
+		auto const itemRef = InventoryRefCreate((Actor*)thisObj, baseItem, 1, xData);
 		ArrayElementR elem = itemRef;
 		elems.Append(elem);
 	}
