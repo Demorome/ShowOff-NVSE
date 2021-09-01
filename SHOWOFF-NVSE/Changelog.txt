@@ -103,6 +103,7 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 * CreateFolder (made by anhatthezoo!)
 * GetActorValueDamage (alias: GetAVDamage)
 * GetPipboyRadioVoiceEntryData
+* GetEquippedItemRefs
 
 
 (Template:)
