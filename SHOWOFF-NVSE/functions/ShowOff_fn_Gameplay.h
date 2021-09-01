@@ -14,7 +14,7 @@ DEFINE_CMD_COND_PLUGIN(IsEquippedWeaponRanged, "Returns 1 if the calling actor's
 DEFINE_CMD_COND_PLUGIN(GetChallengeProgress, "Returns the progress made on a challenge.", false, kParams_OneChallenge)
 DEFINE_COMMAND_PLUGIN(UnequipItems, "", true, kParams_FourOptionalInts);
 DEFINE_COMMAND_PLUGIN(GetEquippedItems, "", true, kParams_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN(GetEquippedItemsRefs, "", true, kParams_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(GetEquippedItemRefs, "", true, kParams_OneOptionalInt);
 DEFINE_CMD_COND_PLUGIN(GetPCHasScriptedFastTravelOverride, "Returns whether or not the player is restricted by EnableFastTravel", false, NULL);
 DEFINE_CMD_COND_PLUGIN(GetPCCanFastTravel, "", false, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetWeaponHasFlag, WeaponHasFlag, "", false, kParams_OneInt_OneOptionalObjectID);
@@ -893,7 +893,7 @@ bool Cmd_SetExplosionRefRadius_Execute(COMMAND_ARGS)
 std::map<UInt32, std::vector<Script*>> g_noEquipMap;
 
 // Differs from NoUnequip extradata mechanic! It's also not savebaked.
-bool Cmd_SetNoEquip_Execute(COMMAND_ARGS)
+bool Cmd_SetNoEquipForm_Execute(COMMAND_ARGS)
 {
 	*result = false;
 	TESForm* item;
@@ -904,8 +904,8 @@ bool Cmd_SetNoEquip_Execute(COMMAND_ARGS)
 	ScopedLock lock(g_Lock);
 	if (bNoEquip)
 	{
-		//todo: stuff
-		*result = g_noEquipMap.try_emplace(item->refID, udf_opt).second;
+		//todo: stuff for udf list
+		//*result = g_noEquipMap.try_emplace(item->refID, udf_opt).second;
 	}
 	else
 	{
