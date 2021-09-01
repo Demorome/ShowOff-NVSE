@@ -488,7 +488,7 @@ extern "C"
 		/*3CF6*/ REG_CMD(SetExplosionRefSource)
 		/*3CF7*/ REG_CMD(GetActorValueDamage)
 		/*3CF8*/ REG_CMD_ARR(GetPipboyRadioVoiceEntryData)  // todo: FIX CRASHING (when music plays and arg1 = 1?)
-		/*3CF9*/ REG_CMD_ARR(GetEquippedItemRefs);
+		/*3CF9*/ REG_CMD_ARR(GetEquippedItemRefs)
 
 		
 		//***Current Max OpCode: 0x3D10 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)

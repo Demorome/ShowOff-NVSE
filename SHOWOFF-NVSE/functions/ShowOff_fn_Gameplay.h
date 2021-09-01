@@ -876,7 +876,7 @@ bool Cmd_SetExplosionRefRadius_Execute(COMMAND_ARGS)
 
 
 
-
+std::map<UInt32, std::vector<Script*>> g_noEquipMap;
 
 
 #ifdef _DEBUG
@@ -890,7 +890,7 @@ bool Cmd_SetExplosionRefRadius_Execute(COMMAND_ARGS)
 
 
 // todo: use JG event handler list instead
-std::map<UInt32, std::vector<Script*>> g_noEquipMap;
+
 
 // Differs from NoUnequip extradata mechanic! It's also not savebaked.
 bool Cmd_SetNoEquipForm_Execute(COMMAND_ARGS)
