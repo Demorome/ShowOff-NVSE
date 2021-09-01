@@ -51,7 +51,6 @@ void HandleEventHooks()
 	
 #if _DEBUG
 	OnCornerMessage = JGCreateEvent("OnCornerMessage", 0, 0, NULL); 
-	FunctionCallScript = g_scriptInterface->CallFunction;
 	WriteRelCall(0x705379, UINT32(handleCornerMessageEvent));
 	WriteRelCall(0x7EE74D, UINT32(handleCornerMessageEvent));
 	WriteRelCall(0x7EE87D, UINT32(handleCornerMessageEvent));

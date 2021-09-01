@@ -611,6 +611,7 @@ public:
 	bool IsDisabled() { return flags & kFormFlags_IsPermanent; }
 	bool IsDeleted() { return flags & kFormFlags_Deleted; }
 	bool GetDontSave() { return flags & kFormFlags_DontSaveForm; }
+	bool IsItem();
 	
 	MEMBER_FN_PREFIX(TESForm);
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525

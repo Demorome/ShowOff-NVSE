@@ -243,6 +243,11 @@ struct AuxStringMapInfo
 
 extern std::atomic<UInt8> s_dataChangedFlags; // For AuxVar serialization.
 
+
+
+
+
+
 #if 0 //not gonna bother with this for now
 DebugLog s_log, s_debug, s_missingTextures;
 

@@ -99,8 +99,8 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 * SetLevelUpMenuCanExitEarly
 * SetLevelUpMenuPoints
 * Get/SetExplosionRefSource
-* CreateFolder (made by anhatthezoo!)
 * Get/SetExplosionRefRadius
+* CreateFolder (made by anhatthezoo!)
 * GetActorValueDamage (alias: GetAVDamage)
 * GetPipboyRadioVoiceEntryData
 

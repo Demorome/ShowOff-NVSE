@@ -1,8 +1,6 @@
 ﻿#pragma once
 #include "Events/EventFilteringInterface.h"
 
-bool (*FunctionCallScript)(Script* funcScript, TESObjectREFR* callingObj, TESObjectREFR* container, NVSEArrayElement* result, UInt8 numArgs, ...);
-NVSEArrayElement EventResultPtr;
 class EventInformation;
 void* __fastcall GenericCreateFilter(void** maxFilters, UInt32 numFilters);
 

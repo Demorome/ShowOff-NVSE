@@ -284,16 +284,68 @@ namespace GetLevelUpMenuUnspentPoints
 }
 
 
+// Item activation and equipping is conflated here.
+bool __fastcall CanActivateItemHook(TESForm* item, void* edx)
+{
+	bool canActivate = true;
+	if (g_noEquipMap.find(item->refID) != g_noEquipMap.end())
+	{
+		canActivate = false;
+	}
+	return canActivate;
+}
+
+//todo: figure out proper way to format function.
+void __fastcall RunNoEquipScripts(Actor* actor, void* edx, TESForm* item)
+{
+	auto const &functionList = g_noEquipMap[item->refID];
+	for (auto const &function : functionList)
+	{
+		FunctionCallScriptAlt(function, actor, 1, item);
+	}
+}
 
 
+__declspec(naked) void OnActivateInventoryItemHook()
+{
+	static const UInt32 retnAddr = 0x88C87F;
+	_asm
+	{
+		call CanActivateItemHook
+		cmp eax, 1
+		jne noActivate
+		jmp doNormal
+		
+	doNormal:
+		// todo: test if default behavior is unchanged.
+		mov eax, 0x401170
+		call eax
+		jmp retnAddr
+		
+	noActivate:
+		//todo: figure out how to organize the stack to give actor, item, etc.
+		call RunNoEquipScripts
+		retn
+	}
+	/*
+	_asm
+	{
+		test eax, eax
+		je noMessage
+		push eax
+		push dword ptr ss : [ebp - 0x18]
+		mov eax, 0x5151AA
+		jmp eax
 
-
-
-
+		noMessage :
+		mov eax, 0x5151ED
+			jmp eax
+	}
+	*/
+}
 
 
 #if _DEBUG
-// Below is reserved for messing around with IDA
 
 bool GetCanSleepInOwnedBeds()
 {
@@ -339,15 +391,6 @@ void Actor_Spread_PerkModifier_Hook(PerkEntryPointID id, TESObjectREFR* refr, fl
 // End IDA debug stuff
 #endif
 
-
-
-
-
-
-
-
-
-
 void HandleGameHooks()
 {
 	NopFunctionCall(0x7ADDC7, 1); // For preventing ShowRaceMenu from resetting active temp effects.
@@ -356,11 +399,12 @@ void HandleGameHooks()
 	GetLevelUpMenuUnspentPoints::WriteRetrievalHook();
 	
 
+	//==For functions.
 
+	// replace "call TESForm__DoGetTypeID"
+	//todo: WriteRelJump(0x88C87A, (UInt32)OnActivateInventoryItemHook);  
 
-
-
-
+	
 
 	
 	

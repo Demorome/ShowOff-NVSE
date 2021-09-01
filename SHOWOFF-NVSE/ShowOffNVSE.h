@@ -33,6 +33,10 @@ extern NVSEMessagingInterface* g_msg;
 extern NVSEScriptInterface* g_scriptInterface;
 extern NVSECommandTableInterface* g_commandInterface;
 extern const CommandInfo* (*GetCmdByName)(const char* name);
+extern bool (*FunctionCallScript)(Script* funcScript, TESObjectREFR* callingObj, TESObjectREFR* container, NVSEArrayElement* result, UInt8 numArgs, ...);
+extern NVSEArrayElement EventResultPtr;
+extern bool (*FunctionCallScriptAlt)(Script* funcScript, TESObjectREFR* callingObj, UInt8 numArgs, ...);
+extern TESObjectREFR* (*InventoryRefCreate)(TESObjectREFR* container, TESForm* itemForm, SInt32 countDelta, ExtraDataList* xData);
 
 //Singletons
 extern HUDMainMenu* g_HUDMainMenu;
@@ -50,6 +54,7 @@ extern Sky** g_currentSky;
 
 //-Hook Globals
 extern std::atomic<bool> g_canPlayerPickpocketInCombat;
+extern std::map<UInt32, std::vector<Script*>> g_noEquipMap;
 
 //-Force Pickpocketting INI globals (enabled via function)
 extern std::atomic<float> g_fForcePickpocketBaseAPCost;

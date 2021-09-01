@@ -300,7 +300,9 @@ extern "C"
 			PluginHandle nvsePluginHandle = nvse->GetPluginHandle();  //from JiPLN
 			
 			NVSEDataInterface* nvseData = (NVSEDataInterface*)nvse->QueryInterface(kInterface_Data);
-			InventoryRefGetForID = (InventoryRef * (*)(UInt32))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID);
+			InventoryRefGetForID = (InventoryRef * (*)(UInt32 refID))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID);
+			InventoryRefCreate = (TESObjectREFR * (*)(TESObjectREFR* container, TESForm *itemForm, SInt32 countDelta, ExtraDataList *xData))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceCreateEntry);
+
 
 			// From JiPLN (jip_nvse.cpp) 
 			NVSESerializationInterface* serialization = (NVSESerializationInterface*)nvse->QueryInterface(kInterface_Serialization);
@@ -326,6 +328,8 @@ extern "C"
 			g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 			ExtractArgsEx = g_scriptInterface->ExtractArgsEx;
 			ExtractFormatStringArgs = g_scriptInterface->ExtractFormatStringArgs;
+			FunctionCallScript = g_scriptInterface->CallFunction;
+			FunctionCallScriptAlt = g_scriptInterface->CallFunctionAlt;
 			
 			g_commandInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 			GetCmdByName = g_commandInterface->GetByName;
@@ -346,6 +350,7 @@ extern "C"
 			LookupArrayByID = g_arrInterface->LookupArrayByID;
 			GetElement = g_arrInterface->GetElement;
 			GetArrayElements = g_arrInterface->GetElements;
+
 #if 0
 			auto johnnyGuitar = GetModuleHandle("johnnyguitar.dll");
 			JGCreateEvent = (CreateScriptEvent)GetProcAddress(johnnyGuitar, "JGCreateEvent");
@@ -479,7 +484,7 @@ extern "C"
 		/*3CF6*/ REG_CMD(SetExplosionRefSource)
 		/*3CF7*/ REG_CMD(GetActorValueDamage)
 		/*3CF8*/ REG_CMD_ARR(GetPipboyRadioVoiceEntryData)  // todo: FIX CRASHING (when music plays and arg1 = 1?)
-
+		/*3CF9*/ REG_CMD_ARR(GetEquippedItemRefs);
 
 		
 		//***Current Max OpCode: 0x3D10 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
@@ -492,6 +497,7 @@ extern "C"
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 
+		REG_CMD(GetHealthExtraData)
 
 		REG_CMD_ARR(GetPipboyRadioSounds)
 		REG_CMD(GetPipBoyRadioSoundTimeRemaining)

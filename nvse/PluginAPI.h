@@ -537,6 +537,8 @@ struct NVSEScriptInterface
 		ScriptEventList * eventList, ...);
 	bool	(* ExtractFormatStringArgs)(UInt32 fmtStringPos, char* buffer, ParamInfo * paramInfo, void * scriptDataIn, 
 		UInt32 * scriptDataOffset, Script * scriptObj, ScriptEventList * eventList, UInt32 maxParams, ...);
+
+	bool	(* CallFunctionAlt)(Script* funcScript, TESObjectREFR* callingObj, UInt8 numArgs, ...);
 };
 
 #endif
@@ -559,23 +561,30 @@ struct NVSEDataInterface
 
 		kNVSEData_SingletonMax,
 	};
-	void * (* GetSingleton)(UInt32 singletonID);
-	enum  {
+	void* (*GetSingleton)(UInt32 singletonID);
+	enum {
 		kNVSEData_InventoryReferenceCreate = 1,
 		kNVSEData_InventoryReferenceGetForRefID,
 		kNVSEData_InventoryReferenceGetRefBySelf,
 		kNVSEData_ArrayVarMapDeleteBySelf,
 		kNVSEData_StringVarMapDeleteBySelf,
+		kNVSEData_LambdaDeleteAllForScript,
+		kNVSEData_InventoryReferenceCreateEntry,
+		kNVSEData_LambdaSaveVariableList,
+		kNVSEData_LambdaUnsaveVariableList,
 
+		kNVSEData_IsScriptLambda,
+		kNVSEData_HasScriptCommand,
+		kNVSEData_DecompileScript,
 		kNVSEData_FuncMax,
 	};
-	void * (* GetFunc)(UInt32 funcID);
-	enum  {
+	void* (*GetFunc)(UInt32 funcID);
+	enum {
 		kNVSEData_NumPreloadMods = 1,
 
 		kNVSEData_DataMax,
 	};
-	void * (* GetData)(UInt32 dataID);
+	void* (*GetData)(UInt32 dataID);
 };
 #endif
 

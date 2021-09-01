@@ -443,6 +443,22 @@ bool Cmd_GetActorValueDamage_Execute(COMMAND_ARGS)
 
 
 
+DEFINE_CMD_ALT_COND_PLUGIN(GetHealthExtraData, GetExtraHealth, "", true, NULL);
+bool Cmd_GetHealthExtraData_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = -1;
+	if (!thisObj) return true;
+	if (auto xHealth = (ExtraHealth*)thisObj->extraDataList.GetByType(kExtraData_Health))
+	{
+		*result = xHealth->health;
+	}
+	return true;
+}
+bool Cmd_GetHealthExtraData_Execute(COMMAND_ARGS)
+{
+	return Cmd_GetHealthExtraData_Eval(thisObj, 0, 0, result);
+}
+
 
 DEFINE_CMD_COND_PLUGIN(HasAnyScriptPackage, "", true, NULL);
 bool Cmd_HasAnyScriptPackage_Eval(COMMAND_ARGS_EVAL)

@@ -14,6 +14,7 @@ DEFINE_CMD_COND_PLUGIN(IsEquippedWeaponRanged, "Returns 1 if the calling actor's
 DEFINE_CMD_COND_PLUGIN(GetChallengeProgress, "Returns the progress made on a challenge.", false, kParams_OneChallenge)
 DEFINE_COMMAND_PLUGIN(UnequipItems, "", true, kParams_FourOptionalInts);
 DEFINE_COMMAND_PLUGIN(GetEquippedItems, "", true, kParams_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(GetEquippedItemsRefs, "", true, kParams_OneOptionalInt);
 DEFINE_CMD_COND_PLUGIN(GetPCHasScriptedFastTravelOverride, "Returns whether or not the player is restricted by EnableFastTravel", false, NULL);
 DEFINE_CMD_COND_PLUGIN(GetPCCanFastTravel, "", false, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetWeaponHasFlag, WeaponHasFlag, "", false, kParams_OneInt_OneOptionalObjectID);
@@ -239,6 +240,24 @@ bool Cmd_GetEquippedItems_Execute(COMMAND_ARGS)
 	for (auto const& iter : eqItems)
 	{
 		ArrayElementR elem = iter.pForm;
+		elems.Append(elem);
+	}
+	auto const array = CreateArray(elems.Data(), elems.Size(), scriptObj);
+	AssignArrayResult(array, result);
+	return true;
+}
+
+bool Cmd_GetEquippedItemRefs_Execute(COMMAND_ARGS)
+{
+	UInt32 flags = 0;
+	*result = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &flags) || NOT_ACTOR(thisObj)) return true;
+	Vector<ArrayElementR> elems;
+	auto eqItems = GetEquippedItems(thisObj, flags);
+	for (auto const& iter : eqItems)
+	{
+		auto const itemRef = InventoryRefCreate((Actor*)thisObj, iter.pForm, 1, iter.pExtraData);
+		ArrayElementR elem = itemRef;
 		elems.Append(elem);
 	}
 	auto const array = CreateArray(elems.Data(), elems.Size(), scriptObj);
@@ -828,7 +847,6 @@ bool Cmd_SetExplosionRefSource_Execute(COMMAND_ARGS)
 	return true;
 }
 
-
 bool Cmd_GetExplosionRefRadius_Execute(COMMAND_ARGS)
 {
 	*result = -1;
@@ -866,6 +884,35 @@ bool Cmd_SetExplosionRefRadius_Execute(COMMAND_ARGS)
 
 
 
+
+
+
+
+
+// todo: use JG event handler list instead
+std::map<UInt32, std::vector<Script*>> g_noEquipMap;
+
+// Differs from NoUnequip extradata mechanic! It's also not savebaked.
+bool Cmd_SetNoEquip_Execute(COMMAND_ARGS)
+{
+	*result = false;
+	TESForm* item;
+	UInt32 bNoEquip;
+	Script* udf_opt = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &item, &bNoEquip, &udf_opt) || !item->IsItem())
+		return true;
+	ScopedLock lock(g_Lock);
+	if (bNoEquip)
+	{
+		//todo: stuff
+		*result = g_noEquipMap.try_emplace(item->refID, udf_opt).second;
+	}
+	else
+	{
+		*result = g_noEquipMap.erase(item->refID);
+	}
+	return true;
+}
 
 
 
