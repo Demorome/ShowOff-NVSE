@@ -1,4 +1,5 @@
 ﻿#pragma once
+
 #include "Hooks.h"
 #include "SafeWrite.h"
 #include "GameSettings.h"
@@ -876,7 +877,20 @@ bool Cmd_SetExplosionRefRadius_Execute(COMMAND_ARGS)
 
 
 
-std::map<UInt32, std::vector<Script*>> g_noEquipMap;
+
+
+
+
+std::set<RefID> g_noEquipMap;
+
+
+
+
+
+
+
+
+
 
 
 #ifdef _DEBUG
@@ -889,8 +903,8 @@ std::map<UInt32, std::vector<Script*>> g_noEquipMap;
 
 
 
-// todo: use JG event handler list instead
 
+DEFINE_COMMAND_PLUGIN(SetNoEquipForm, "Sets whether or not there's a prevention for an item baseform from being activated from the inventory menu.", true, kParams_OneForm_OneInt);
 
 // Differs from NoUnequip extradata mechanic! It's also not savebaked.
 bool Cmd_SetNoEquipForm_Execute(COMMAND_ARGS)
@@ -898,20 +912,43 @@ bool Cmd_SetNoEquipForm_Execute(COMMAND_ARGS)
 	*result = false;
 	TESForm* item;
 	UInt32 bNoEquip;
-	Script* udf_opt = nullptr;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &item, &bNoEquip, &udf_opt) || !item->IsItem())
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &item, &bNoEquip) || !item->IsItem())
 		return true;
 	ScopedLock lock(g_Lock);
 	if (bNoEquip)
 	{
-		//todo: stuff for udf list
-		//*result = g_noEquipMap.try_emplace(item->refID, udf_opt).second;
+		*result = g_noEquipMap.emplace(item->refID).second;
 	}
 	else
 	{
 		*result = g_noEquipMap.erase(item->refID);
 	}
 	return true;
+}
+
+DEFINE_COMMAND_PLUGIN(GetNoEquipForm, "Returns whether or not there's a prevention for an item baseform from being activated from the inventory menu.", true, kParams_OneForm);
+bool Cmd_GetNoEquipForm_Execute(COMMAND_ARGS)
+{
+	*result = false;
+	TESForm* item;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &item) || !item->IsItem())
+		return true;
+	*result = g_noEquipMap.find(item->refID) != g_noEquipMap.end();
+	return true;
+}
+
+// todo: port + use JG event handler list system
+bool Cmd_SetOnNoEquipEventHandler_Execute(COMMAND_ARGS)
+{
+	*result = false;
+	Script* func;
+	TESForm* itemFilter = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &func, &itemFilter) || !itemFilter->IsItem())
+		return true;
+	/*
+		//todo: stuff for udf list
+	*result = g_noEquipMap.erase(item->refID);
+	*/
 }
 
 

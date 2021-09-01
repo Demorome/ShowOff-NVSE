@@ -298,11 +298,12 @@ bool __fastcall CanActivateItemHook(TESForm* item, void* edx)
 //todo: figure out proper way to format function.
 void __fastcall RunNoEquipScripts(Actor* actor, void* edx, TESForm* item)
 {
-	auto const &functionList = g_noEquipMap[item->refID];
+	/*auto const& functionList = ? ? ?
 	for (auto const &function : functionList)
 	{
 		FunctionCallScriptAlt(function, actor, 1, item);
 	}
+	*/
 }
 
 
