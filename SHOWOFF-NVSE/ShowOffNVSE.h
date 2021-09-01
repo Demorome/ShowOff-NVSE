@@ -36,7 +36,7 @@ extern const CommandInfo* (*GetCmdByName)(const char* name);
 extern bool (*FunctionCallScript)(Script* funcScript, TESObjectREFR* callingObj, TESObjectREFR* container, NVSEArrayElement* result, UInt8 numArgs, ...);
 extern NVSEArrayElement EventResultPtr;
 extern bool (*FunctionCallScriptAlt)(Script* funcScript, TESObjectREFR* callingObj, UInt8 numArgs, ...);
-extern TESObjectREFR* (*InventoryRefCreate)(TESObjectREFR* container, TESForm* itemForm, SInt32 countDelta, ExtraDataList* xData);
+extern TESObjectREFR* (__stdcall *InventoryRefCreate)(TESObjectREFR* container, TESForm* itemForm, SInt32 countDelta, ExtraDataList* xData);
 
 //Singletons
 extern HUDMainMenu* g_HUDMainMenu;
