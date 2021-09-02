@@ -207,6 +207,7 @@
     <ClInclude Include="..\nvse\ParamInfos.h">
       <Filter>nvse</Filter>
     </ClInclude>
+    <ClInclude Include="SOTypes.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

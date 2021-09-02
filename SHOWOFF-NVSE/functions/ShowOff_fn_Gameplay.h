@@ -881,7 +881,7 @@ bool Cmd_SetExplosionRefRadius_Execute(COMMAND_ARGS)
 
 
 
-std::set<RefID> g_noEquipMap;
+ActorAndItemPairs g_noEquipMap;
 
 
 
@@ -904,54 +904,66 @@ std::set<RefID> g_noEquipMap;
 
 
 
-DEFINE_COMMAND_PLUGIN(SetNoEquipForm, "Sets whether or not there's a prevention for an item baseform from being activated from the inventory menu.", true, kParams_OneForm_OneInt);
+DEFINE_COMMAND_ALT_PLUGIN(SetNoEquipShowOff, SetNoEquipSO, "Sets whether or not there's a prevention for an item baseform from being activated from the inventory menu.", true, kParams_OneForm_OneInt);
 
 // Differs from NoUnequip extradata mechanic! It's also not savebaked.
-bool Cmd_SetNoEquipForm_Execute(COMMAND_ARGS)
+bool Cmd_SetNoEquipShowOff_Execute(COMMAND_ARGS)
 {
 	*result = false;
 	TESForm* item;
 	UInt32 bNoEquip;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &item, &bNoEquip) || !item->IsItem())
+	Script* function = nullptr;	// UDF event script which passes "this" = actor and 1 arg: baseItem. Or ItemInvRef if possible!
+	// This function is called whenever "NoEquip" is being checked.
+	// If any functions that are called return false (SetFunctionValue), then the item cannot be equipped.
+	
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &item, &bNoEquip, &function))
 		return true;
-	
-	//todo: make noEquipMap a set for the actor ref this func is called on.
-	
-	ScopedLock lock(g_Lock);
-	if (bNoEquip)
+
+	// Don't need a valid actor + item if the function is specified.
+	if (function)
 	{
-		*result = g_noEquipMap.emplace(item->refID).second;
+		// TODO: each mod can only assign one function
 	}
 	else
 	{
-		*result = g_noEquipMap.erase(item->refID);
+		ActorRefID const actorID = IS_ACTOR(thisObj) ? thisObj->refID : 0;
+		ItemRefID const itemID = (item && item->IsItem()) ? item->refID : 0;
+		if (!itemID && !actorID)  // at least one must be there for filtering, otherwise useless/dangerous.
+			return true;
+		ActorAndItemPair const noEquipData{ actorID, itemID };
+		ScopedLock lock(g_Lock);
+		if (bNoEquip)
+		{
+			*result = g_noEquipMap.insert(noEquipData).second;
+		}
+		else
+		{
+			*result = g_noEquipMap.erase(noEquipData);
+		}
 	}
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(GetNoEquipForm, "Returns whether or not there's a prevention for an item baseform from being activated from the inventory menu.", true, kParams_OneForm);
-bool Cmd_GetNoEquipForm_Execute(COMMAND_ARGS)
+DEFINE_COMMAND_ALT_PLUGIN(GetNoEquipShowOff, GetNoEquipSO, "Returns whether or not there's a prevention for an item baseform from being activated from the inventory menu.", true, kParams_OneForm);
+bool Cmd_GetNoEquipShowOff_Execute(COMMAND_ARGS)
 {
 	*result = false;
 	TESForm* item;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &item) || !item->IsItem())
+	UInt32 bGetFunction = false;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &item, &bGetFunction))
 		return true;
-	*result = g_noEquipMap.find(item->refID) != g_noEquipMap.end();
-	return true;
-}
 
-// todo: port + use JG event handler list system
-bool Cmd_SetOnNoEquipEventHandler_Execute(COMMAND_ARGS)
-{
-	*result = false;
-	Script* func;
-	TESForm* itemFilter = nullptr;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &func, &itemFilter) || !itemFilter->IsItem())
-		return true;
-	/*
-		//todo: stuff for udf list
-	*result = g_noEquipMap.erase(item->refID);
-	*/
+	if (bGetFunction)
+	{
+		// todo???
+		// Each mod can only have one function set up for this, so get the calling modIndex.
+	}
+	else if (item && item->IsItem() && IS_ACTOR(thisObj))
+	{
+		ActorAndItemPair const noEquipData{ thisObj->refID, item->refID };
+		*result = g_noEquipMap.find(noEquipData) != g_noEquipMap.end();
+	}
+	return true;
 }
 
 

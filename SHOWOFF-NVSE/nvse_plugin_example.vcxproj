@@ -370,6 +370,7 @@
     <ClInclude Include="settings.h" />
     <ClInclude Include="ShowOffNVSE.h" />
     <ClInclude Include="SimpleINILibrary\SimpleIni.h" />
+    <ClInclude Include="SOTypes.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

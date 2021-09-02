@@ -315,14 +315,19 @@ __declspec(naked) void OnActivateInventoryItemHook()
 {
 	static const UInt32 doNormalAddr = 0x88C87F;
 	static const UInt32 endFuncAddr = 0x88D27A;
-	static const UInt32 actorOffset = -0x80;
-	static const UInt32 itemOffset = 0x8;
+
+	// Global variables do not work for "[ebp - someVal]"-style statements; use enum instead.
+	enum {
+		actorOffset = -0x80,
+		itemOffset = 0x8,
+	};
+
 	_asm
 	{
 		// ignore the line prior (mov ecx, [ebp+item])
-		mov ecx, [ebp - 0x80]  // actorOffset
+		mov ecx, [ebp + actorOffset]  // actorOffset
 		push ecx
-		mov ecx, [ebp + 0x8]  // itemOffset
+		mov ecx, [ebp + itemOffset]  // itemOffset
 		call CanActivateItemHook
 		cmp eax, 1
 		jne noActivate
@@ -335,26 +340,8 @@ __declspec(naked) void OnActivateInventoryItemHook()
 		jmp doNormalAddr
 		
 	noActivate:
-		//todo: figure out how to organize the stack to give actor, item, etc.
-		//call RunNoEquipScripts
-
 		jmp endFuncAddr
 	}
-	/*
-	_asm
-	{
-		test eax, eax
-		je noMessage
-		push eax
-		push dword ptr ss : [ebp - 0x18]
-		mov eax, 0x5151AA
-		jmp eax
-
-	noMessage :
-		mov eax, 0x5151ED
-		jmp eax
-	}
-	*/
 }
 
 

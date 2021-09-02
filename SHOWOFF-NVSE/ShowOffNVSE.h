@@ -1,7 +1,6 @@
 #pragma once
 
 #include <atomic>
-#include <set>
 
 #include "ParamInfos.h"
 #include "PluginAPI.h"
@@ -9,8 +8,7 @@
 #include "common/ICriticalSection.h"
 #include "GameData.h"
 #include "decoding.h"
-
-typedef UInt32 RefID;
+#include "SOTypes.h"
 
 extern ICriticalSection g_Lock;
 extern std::atomic<bool> g_ShowFuncDebug;
@@ -57,7 +55,7 @@ extern Sky** g_currentSky;
 
 //-Hook Globals
 extern std::atomic<bool> g_canPlayerPickpocketInCombat;
-extern std::set<RefID> g_noEquipMap;
+extern ActorAndItemPairs g_noEquipMap;
 
 //-Force Pickpocketting INI globals (enabled via function)
 extern std::atomic<float> g_fForcePickpocketBaseAPCost;
