@@ -904,7 +904,7 @@ ActorAndItemPairs g_noEquipMap;
 
 
 
-DEFINE_COMMAND_ALT_PLUGIN(SetNoEquipShowOff, SetNoEquipSO, "Sets whether or not there's a prevention for an item baseform from being activated from the inventory menu.", true, kParams_OneForm_OneInt);
+DEFINE_COMMAND_ALT_PLUGIN(SetNoEquipShowOff, SetNoEquipSO, "Sets whether or not there's a prevention for an item baseform from being activated from an actor's inventory.", true, kParams_OneForm_OneInt);
 
 ActorAndItemPair ExtractActorAndItem(TESObjectREFR* thisObj, TESForm* item)
 {
@@ -951,7 +951,7 @@ bool Cmd_SetNoEquipShowOff_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_ALT_PLUGIN(GetNoEquipShowOff, GetNoEquipSO, "Returns whether or not there's a prevention for an item baseform from being activated from the inventory menu.", true, kParams_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(GetNoEquipShowOff, GetNoEquipSO, "Returns whether or not there's a prevention for an item baseform from being activated from an actor's inventory.", true, kParams_OneForm);
 bool Cmd_GetNoEquipShowOff_Execute(COMMAND_ARGS)
 {
 	*result = false;
