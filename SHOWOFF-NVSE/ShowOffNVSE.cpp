@@ -501,7 +501,7 @@ extern "C"
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 
-		REG_CMD(SetNoEquipForm)
+		REG_CMD(SetNoEquipShowOff)
 		REG_CMD(GetHealthExtraData)
 
 		REG_CMD_ARR(GetPipboyRadioSounds)

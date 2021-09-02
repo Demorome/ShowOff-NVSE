@@ -906,6 +906,17 @@ ActorAndItemPairs g_noEquipMap;
 
 DEFINE_COMMAND_ALT_PLUGIN(SetNoEquipShowOff, SetNoEquipSO, "Sets whether or not there's a prevention for an item baseform from being activated from the inventory menu.", true, kParams_OneForm_OneInt);
 
+ActorAndItemPair ExtractActorAndItem(TESObjectREFR* thisObj, TESForm* item)
+{
+	ActorAndItemPair actorAndItem;
+	if (IS_REFERENCE(item)) item = ((TESObjectREFR*)item)->baseForm;
+	ActorRefID const actorID = IS_ACTOR(thisObj) ? thisObj->refID : 0;
+	ItemRefID const itemID = (item && item->IsItem()) ? item->refID : 0;
+	if (!itemID && !actorID)  // at least one must be there for filtering, otherwise useless/dangerous.
+		return actorAndItem;
+	return actorAndItem = { actorID, itemID };
+}
+
 // Differs from NoUnequip extradata mechanic! It's also not savebaked.
 bool Cmd_SetNoEquipShowOff_Execute(COMMAND_ARGS)
 {
@@ -926,11 +937,7 @@ bool Cmd_SetNoEquipShowOff_Execute(COMMAND_ARGS)
 	}
 	else
 	{
-		ActorRefID const actorID = IS_ACTOR(thisObj) ? thisObj->refID : 0;
-		ItemRefID const itemID = (item && item->IsItem()) ? item->refID : 0;
-		if (!itemID && !actorID)  // at least one must be there for filtering, otherwise useless/dangerous.
-			return true;
-		ActorAndItemPair const noEquipData{ actorID, itemID };
+		auto const noEquipData = ExtractActorAndItem(thisObj, item);
 		ScopedLock lock(g_Lock);
 		if (bNoEquip)
 		{
@@ -958,9 +965,9 @@ bool Cmd_GetNoEquipShowOff_Execute(COMMAND_ARGS)
 		// todo???
 		// Each mod can only have one function set up for this, so get the calling modIndex.
 	}
-	else if (item && item->IsItem() && IS_ACTOR(thisObj))
+	else
 	{
-		ActorAndItemPair const noEquipData{ thisObj->refID, item->refID };
+		auto const noEquipData = ExtractActorAndItem(thisObj, item);
 		*result = g_noEquipMap.find(noEquipData) != g_noEquipMap.end();
 	}
 	return true;
