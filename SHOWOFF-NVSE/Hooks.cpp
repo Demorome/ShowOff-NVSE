@@ -289,9 +289,8 @@ bool __fastcall CanActivateItemHook(TESForm* item, void* edx, Actor* actor)
 {
 	bool canActivate = true;
 
-	Console_Print("help: [%08X], %s, type: %u", actor->refID, actor->GetName(), actor->typeID);
-	
-	if (!IS_ACTOR(actor)) return true;  //todo: remove this test
+	if (g_ShowFuncDebug)
+		Console_Print("CanActivateItemHook: Item: [%08X], %s, type: %u, Actor: [%08X], %s, type: %u", item->refID, item->GetName(), item->typeID, actor->refID, actor->GetName(), actor->typeID);
 	
 	if (g_noEquipMap.find(item->refID) != g_noEquipMap.end())
 	{
@@ -321,9 +320,9 @@ __declspec(naked) void OnActivateInventoryItemHook()
 	_asm
 	{
 		// ignore the line prior (mov ecx, [ebp+item])
-		mov ecx, [ebp + actorOffset]
+		mov ecx, [ebp - 0x80]  // actorOffset
 		push ecx
-		mov ecx, [ebp + itemOffset]
+		mov ecx, [ebp + 0x8]  // itemOffset
 		call CanActivateItemHook
 		cmp eax, 1
 		jne noActivate
