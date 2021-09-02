@@ -302,6 +302,7 @@ void __fastcall RunNoEquipScripts(Actor* actor, void* edx, TESForm* item)
  * Todo: maybe do something about that? ^
  * NOTE: Can prevent script functions like EquipItem from working.
  * If the NPC's best weapon can no longer be equipped, it can no longer wield a weapon, even via `EquipItem SomeOtherWeap`.
+ * ^ TODO: check 0x6047C0 for a way to fix this.
 */
 bool __fastcall CanActivateItemHook(TESForm* item, void* edx, Actor* actor)
 {
@@ -325,10 +326,8 @@ bool __fastcall CanActivateItemHook(TESForm* item, void* edx, Actor* actor)
 		// 
 	}
 
-	//if (g_ShowFuncDebug)
-	//	Console_Print("CanActivateItemHook: CanActivate: %i, Item: [%08X], %s, type: %u, Actor: [%08X], %s, type: %u", canActivate, item->refID, item->GetName(), item->typeID, actor->refID, actor->GetName(), actor->typeID);
-
-	// TODO >> WHY THE FUCK DOES IT CAUSE ACTORS TO BUG OUT HARD IF NO CONSOLE PRINT IS THERE??
+	if (g_ShowFuncDebug)
+		Console_Print("CanActivateItemHook: CanActivate: %i, Item: [%08X], %s, type: %u, Actor: [%08X], %s, type: %u", canActivate, item->refID, item->GetName(), item->typeID, actor->refID, actor->GetName(), actor->typeID);
 	
 	return canActivate;
 }
@@ -352,13 +351,12 @@ __declspec(naked) void OnActivateInventoryItemHook()
 		push ecx
 		mov ecx, [ebp + itemOffset]
 		call CanActivateItemHook
-		cmp eax, 1
+		cmp al, 1
 		jne noActivate
-		jmp doNormal
 		
 	doNormal:
-		// todo: test if default behavior is unchanged.
-		mov eax, 0x401170
+		mov ecx, [ebp + itemOffset]
+		mov eax, 0x401170	// TESForm__DoGetTypeID
 		call eax
 		jmp doNormalAddr
 		
