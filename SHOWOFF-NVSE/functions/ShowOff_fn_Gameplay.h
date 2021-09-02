@@ -914,6 +914,9 @@ bool Cmd_SetNoEquipForm_Execute(COMMAND_ARGS)
 	UInt32 bNoEquip;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &item, &bNoEquip) || !item->IsItem())
 		return true;
+	
+	//todo: make noEquipMap a set for the actor ref this func is called on.
+	
 	ScopedLock lock(g_Lock);
 	if (bNoEquip)
 	{

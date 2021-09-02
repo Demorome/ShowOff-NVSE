@@ -285,9 +285,14 @@ namespace GetLevelUpMenuUnspentPoints
 
 
 // Item activation and equipping is conflated here.
-bool __fastcall CanActivateItemHook(TESForm* item, void* edx)
+bool __fastcall CanActivateItemHook(TESForm* item, void* edx, Actor* actor)
 {
 	bool canActivate = true;
+
+	Console_Print("help: [%08X], %s, type: %u", actor->refID, actor->GetName(), actor->typeID);
+	
+	if (!IS_ACTOR(actor)) return true;  //todo: remove this test
+	
 	if (g_noEquipMap.find(item->refID) != g_noEquipMap.end())
 	{
 		canActivate = false;
@@ -309,9 +314,16 @@ void __fastcall RunNoEquipScripts(Actor* actor, void* edx, TESForm* item)
 
 __declspec(naked) void OnActivateInventoryItemHook()
 {
-	static const UInt32 retnAddr = 0x88C87F;
+	static const UInt32 doNormalAddr = 0x88C87F;
+	static const UInt32 endFuncAddr = 0x88D27A;
+	static const UInt32 actorOffset = -0x80;
+	static const UInt32 itemOffset = 0x8;
 	_asm
 	{
+		// ignore the line prior (mov ecx, [ebp+item])
+		mov ecx, [ebp + actorOffset]
+		push ecx
+		mov ecx, [ebp + itemOffset]
 		call CanActivateItemHook
 		cmp eax, 1
 		jne noActivate
@@ -321,12 +333,13 @@ __declspec(naked) void OnActivateInventoryItemHook()
 		// todo: test if default behavior is unchanged.
 		mov eax, 0x401170
 		call eax
-		jmp retnAddr
+		jmp doNormalAddr
 		
 	noActivate:
 		//todo: figure out how to organize the stack to give actor, item, etc.
-		call RunNoEquipScripts
-		retn
+		//call RunNoEquipScripts
+
+		jmp endFuncAddr
 	}
 	/*
 	_asm
@@ -338,9 +351,9 @@ __declspec(naked) void OnActivateInventoryItemHook()
 		mov eax, 0x5151AA
 		jmp eax
 
-		noMessage :
+	noMessage :
 		mov eax, 0x5151ED
-			jmp eax
+		jmp eax
 	}
 	*/
 }
@@ -402,8 +415,7 @@ void HandleGameHooks()
 
 	//==For functions.
 
-	// replace "call TESForm__DoGetTypeID"
-	//todo: WriteRelJump(0x88C87A, (UInt32)OnActivateInventoryItemHook);  
+
 
 	
 
@@ -412,7 +424,9 @@ void HandleGameHooks()
 
 #if _DEBUG
 
-
+	
+	// replace "call TESForm__DoGetTypeID"
+	WriteRelJump(0x88C87A, (UInt32)OnActivateInventoryItemHook);
 
 #if 0
 	WriteRelCall(0x8B0FF0, UInt32(Actor_Spread_PerkModifier_Hook));
