@@ -910,8 +910,8 @@ ActorAndItemPair ExtractActorAndItem(TESObjectREFR* thisObj, TESForm* item)
 {
 	ActorAndItemPair actorAndItem;
 	if (IS_REFERENCE(item)) item = ((TESObjectREFR*)item)->baseForm;
-	ActorRefID const actorID = IS_ACTOR(thisObj) ? thisObj->refID : 0;
-	ItemRefID const itemID = (item && item->IsItem()) ? item->refID : 0;
+	ActorRefID const actorID = IS_ACTOR(thisObj) ? thisObj->refID : NULL;
+	ItemRefID const itemID = (item && item->IsItem()) ? item->refID : NULL;
 	if (!itemID && !actorID)  // at least one must be there for filtering, otherwise useless/dangerous.
 		return actorAndItem;
 	return actorAndItem = { actorID, itemID };

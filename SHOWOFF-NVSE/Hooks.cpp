@@ -291,9 +291,12 @@ bool __fastcall CanActivateItemHook(TESForm* item, void* edx, Actor* actor)
 	
 	if (g_ShowFuncDebug)
 		Console_Print("CanActivateItemHook: Item: [%08X], %s, type: %u, Actor: [%08X], %s, type: %u", item->refID, item->GetName(), item->typeID, actor->refID, actor->GetName(), actor->typeID);
-	
+
+	// Spaghetti to account for pairs which have null members (generic filters).
 	ActorAndItemPair const actorAndItem = { actor->refID, item->refID };
-	if (g_noEquipMap.find(actorAndItem) != g_noEquipMap.end())
+	ActorAndItemPair const nullAndItem = { NULL, item->refID };
+	ActorAndItemPair const actorAndNull = { actor->refID, NULL };
+	if (g_noEquipMap.find(actorAndItem) != g_noEquipMap.end() || g_noEquipMap.find(nullAndItem) != g_noEquipMap.end() || g_noEquipMap.find(actorAndNull) != g_noEquipMap.end())
 	{
 		canActivate = false;
 	}
