@@ -104,6 +104,7 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 * GetActorValueDamage (alias: GetAVDamage)
 * GetPipboyRadioVoiceEntryData
 * GetEquippedItemRefs
+* Set/GetNoEquipShowOff (alias: Set/GetNoEquipSO)
 
 
 (Template:)

@@ -489,7 +489,8 @@ extern "C"
 		/*3CF7*/ REG_CMD(GetActorValueDamage)
 		/*3CF8*/ REG_CMD_ARR(GetPipboyRadioVoiceEntryData)  // todo: FIX CRASHING (when music plays and arg1 = 1?)
 		/*3CF9*/ REG_CMD_ARR(GetEquippedItemRefs)
-
+		/*3CFA*/ REG_CMD(SetNoEquipShowOff)
+		/*3CFB*/ REG_CMD(GetNoEquipShowOff)
 		
 		//***Current Max OpCode: 0x3D10 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
@@ -501,7 +502,7 @@ extern "C"
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 
-		REG_CMD(SetNoEquipShowOff)
+		
 		REG_CMD(GetHealthExtraData)
 
 		REG_CMD_ARR(GetPipboyRadioSounds)

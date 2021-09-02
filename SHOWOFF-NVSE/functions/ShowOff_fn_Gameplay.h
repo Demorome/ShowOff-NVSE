@@ -36,7 +36,8 @@ DEFINE_COMMAND_PLUGIN(GetExplosionRefSource, "", true, NULL);
 DEFINE_COMMAND_PLUGIN(SetExplosionRefSource, "", true, kParams_OneActorRef);
 DEFINE_COMMAND_PLUGIN(GetExplosionRefRadius, "Accounts for AdjustExplosionRadius perk entry point.", true, NULL);
 DEFINE_COMMAND_PLUGIN(SetExplosionRefRadius, "", true, kParams_OneFloat);
-
+DEFINE_COMMAND_ALT_PLUGIN(SetNoEquipShowOff, SetNoEquipSO, "Sets whether or not there's a prevention for an item baseform from being activated from an actor's inventory.", false, kParams_OneForm_OneInt_OneOptionalScript);
+DEFINE_COMMAND_ALT_PLUGIN(GetNoEquipShowOff, GetNoEquipSO, "Returns whether or not there's a prevention for an item baseform from being activated from an actor's inventory.", false, kParams_OneForm_OneInt);
 
 
 bool Cmd_SetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
@@ -871,42 +872,9 @@ bool Cmd_SetExplosionRefRadius_Execute(COMMAND_ARGS)
 	return true;
 }
 
-
-
-
-
-
-
-
-
-
-
 ActorAndItemPairs g_noEquipMap;
 
-
-
-
-
-
-
-
-
-
-
-#ifdef _DEBUG
-
-
-
-
-
-
-
-
-
-
-DEFINE_COMMAND_ALT_PLUGIN(SetNoEquipShowOff, SetNoEquipSO, "Sets whether or not there's a prevention for an item baseform from being activated from an actor's inventory.", false, kParams_OneForm_OneInt);
-
-bool TryExtractActorItemPair(TESObjectREFR* thisObj, TESForm* item, ActorAndItemPair &actorAndItemOut)
+bool TryExtractActorItemPair(TESObjectREFR* thisObj, TESForm* item, ActorAndItemPair& actorAndItemOut)
 {
 	if (IS_REFERENCE(item)) item = ((TESObjectREFR*)item)->baseForm;
 	ActorRefID const actorID = IS_ACTOR(thisObj) ? thisObj->refID : NULL;
@@ -926,12 +894,12 @@ bool Cmd_SetNoEquipShowOff_Execute(COMMAND_ARGS)
 	Script* function = nullptr;	// UDF event script which passes "this" = actor and 1 arg: baseItem. Or ItemInvRef if possible!
 	// This function is called whenever "NoEquip" is being checked.
 	// If any functions that are called return false (SetFunctionValue), then the item cannot be equipped.
-	
+
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &item, &bNoEquip, &function))
 		return true;
 
 	// Don't need a valid actor + item if the function is specified.
-	if (function)
+	if (function && IS_TYPE(function, Script))
 	{
 		// TODO: each mod can only assign one function
 	}
@@ -953,7 +921,6 @@ bool Cmd_SetNoEquipShowOff_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_ALT_PLUGIN(GetNoEquipShowOff, GetNoEquipSO, "Returns whether or not there's a prevention for an item baseform from being activated from an actor's inventory.", false, kParams_OneForm);
 bool Cmd_GetNoEquipShowOff_Execute(COMMAND_ARGS)
 {
 	*result = false;
@@ -976,6 +943,27 @@ bool Cmd_GetNoEquipShowOff_Execute(COMMAND_ARGS)
 	}
 	return true;
 }
+
+
+
+
+
+
+
+
+
+#ifdef _DEBUG
+
+
+
+
+
+
+
+
+
+
+
 
 
 

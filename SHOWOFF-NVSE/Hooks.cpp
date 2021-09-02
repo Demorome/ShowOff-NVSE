@@ -295,7 +295,14 @@ void __fastcall RunNoEquipScripts(Actor* actor, void* edx, TESForm* item)
 	*/
 }
 
-// Item activation and equipping is conflated here.
+/*
+ * Item activation and equipping is conflated here.
+ * Certain funcs will prevent item activation early, such as if you're at max health while activating a stimpak (0x780E97).
+ * The above would result in this code not running at all.
+ * Todo: maybe do something about that? ^
+ * NOTE: Can prevent script functions like EquipItem from working.
+ * If the NPC's best weapon can no longer be equipped, it can no longer wield a weapon, even via `EquipItem SomeOtherWeap`.
+*/
 bool __fastcall CanActivateItemHook(TESForm* item, void* edx, Actor* actor)
 {
 	bool canActivate = true;
@@ -318,11 +325,14 @@ bool __fastcall CanActivateItemHook(TESForm* item, void* edx, Actor* actor)
 		// 
 	}
 
-	if (g_ShowFuncDebug)
-		Console_Print("CanActivateItemHook: CanActivate: %i, Item: [%08X], %s, type: %u, Actor: [%08X], %s, type: %u", canActivate, item->refID, item->GetName(), item->typeID, actor->refID, actor->GetName(), actor->typeID);
+	//if (g_ShowFuncDebug)
+	//	Console_Print("CanActivateItemHook: CanActivate: %i, Item: [%08X], %s, type: %u, Actor: [%08X], %s, type: %u", canActivate, item->refID, item->GetName(), item->typeID, actor->refID, actor->GetName(), actor->typeID);
 
+	// TODO >> WHY THE FUCK DOES IT CAUSE ACTORS TO BUG OUT HARD IF NO CONSOLE PRINT IS THERE??
+	
 	return canActivate;
 }
+
 
 __declspec(naked) void OnActivateInventoryItemHook()
 {
@@ -338,9 +348,9 @@ __declspec(naked) void OnActivateInventoryItemHook()
 	_asm
 	{
 		// ignore the line prior (mov ecx, [ebp+item])
-		mov ecx, [ebp + actorOffset]  // actorOffset
+		mov ecx, [ebp + actorOffset]
 		push ecx
-		mov ecx, [ebp + itemOffset]  // itemOffset
+		mov ecx, [ebp + itemOffset]
 		call CanActivateItemHook
 		cmp eax, 1
 		jne noActivate
@@ -414,7 +424,8 @@ void HandleGameHooks()
 
 	//==For functions.
 
-
+	// replace "call TESForm__DoGetTypeID"
+	WriteRelJump(0x88C87A, (UInt32)OnActivateInventoryItemHook); // for SetNoEquipShowOff
 
 	
 
@@ -424,8 +435,7 @@ void HandleGameHooks()
 #if _DEBUG
 
 	
-	// replace "call TESForm__DoGetTypeID"
-	WriteRelJump(0x88C87A, (UInt32)OnActivateInventoryItemHook);
+	
 
 #if 0
 	WriteRelCall(0x8B0FF0, UInt32(Actor_Spread_PerkModifier_Hook));
