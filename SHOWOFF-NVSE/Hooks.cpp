@@ -284,13 +284,21 @@ namespace GetLevelUpMenuUnspentPoints
 }
 
 
+//todo: figure out proper way to format function.
+void __fastcall RunNoEquipScripts(Actor* actor, void* edx, TESForm* item)
+{
+	/*auto const& functionList = ? ? ?
+	for (auto const &function : functionList)
+	{
+		FunctionCallScriptAlt(function, actor, 1, item);
+	}
+	*/
+}
+
 // Item activation and equipping is conflated here.
 bool __fastcall CanActivateItemHook(TESForm* item, void* edx, Actor* actor)
 {
 	bool canActivate = true;
-
-	if (g_ShowFuncDebug)
-		Console_Print("CanActivateItemHook: Item: [%08X], %s, type: %u, Actor: [%08X], %s, type: %u", item->refID, item->GetName(), item->typeID, actor->refID, actor->GetName(), actor->typeID);
 
 	// Spaghetti to account for pairs which have null members (generic filters).
 	ActorAndItemPair const actorAndItem = { actor->refID, item->refID };
@@ -307,22 +315,14 @@ bool __fastcall CanActivateItemHook(TESForm* item, void* edx, Actor* actor)
 	
 	if (canActivate)  // todo: loop thru functions list, break if any return false.
 	{
-		//
+		// 
 	}
+
+	if (g_ShowFuncDebug)
+		Console_Print("CanActivateItemHook: CanActivate: %i, Item: [%08X], %s, type: %u, Actor: [%08X], %s, type: %u", canActivate, item->refID, item->GetName(), item->typeID, actor->refID, actor->GetName(), actor->typeID);
+
 	return canActivate;
 }
-
-//todo: figure out proper way to format function.
-void __fastcall RunNoEquipScripts(Actor* actor, void* edx, TESForm* item)
-{
-	/*auto const& functionList = ? ? ?
-	for (auto const &function : functionList)
-	{
-		FunctionCallScriptAlt(function, actor, 1, item);
-	}
-	*/
-}
-
 
 __declspec(naked) void OnActivateInventoryItemHook()
 {

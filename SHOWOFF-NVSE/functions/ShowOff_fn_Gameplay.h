@@ -904,17 +904,17 @@ ActorAndItemPairs g_noEquipMap;
 
 
 
-DEFINE_COMMAND_ALT_PLUGIN(SetNoEquipShowOff, SetNoEquipSO, "Sets whether or not there's a prevention for an item baseform from being activated from an actor's inventory.", true, kParams_OneForm_OneInt);
+DEFINE_COMMAND_ALT_PLUGIN(SetNoEquipShowOff, SetNoEquipSO, "Sets whether or not there's a prevention for an item baseform from being activated from an actor's inventory.", false, kParams_OneForm_OneInt);
 
-ActorAndItemPair ExtractActorAndItem(TESObjectREFR* thisObj, TESForm* item)
+bool TryExtractActorItemPair(TESObjectREFR* thisObj, TESForm* item, ActorAndItemPair &actorAndItemOut)
 {
-	ActorAndItemPair actorAndItem;
 	if (IS_REFERENCE(item)) item = ((TESObjectREFR*)item)->baseForm;
 	ActorRefID const actorID = IS_ACTOR(thisObj) ? thisObj->refID : NULL;
 	ItemRefID const itemID = (item && item->IsItem()) ? item->refID : NULL;
 	if (!itemID && !actorID)  // at least one must be there for filtering, otherwise useless/dangerous.
-		return actorAndItem;
-	return actorAndItem = { actorID, itemID };
+		return false;
+	actorAndItemOut = { actorID, itemID };
+	return true;
 }
 
 // Differs from NoUnequip extradata mechanic! It's also not savebaked.
@@ -937,7 +937,9 @@ bool Cmd_SetNoEquipShowOff_Execute(COMMAND_ARGS)
 	}
 	else
 	{
-		auto const noEquipData = ExtractActorAndItem(thisObj, item);
+		ActorAndItemPair noEquipData;
+		if (!TryExtractActorItemPair(thisObj, item, noEquipData))
+			return true;
 		ScopedLock lock(g_Lock);
 		if (bNoEquip)
 		{
@@ -951,7 +953,7 @@ bool Cmd_SetNoEquipShowOff_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_ALT_PLUGIN(GetNoEquipShowOff, GetNoEquipSO, "Returns whether or not there's a prevention for an item baseform from being activated from an actor's inventory.", true, kParams_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(GetNoEquipShowOff, GetNoEquipSO, "Returns whether or not there's a prevention for an item baseform from being activated from an actor's inventory.", false, kParams_OneForm);
 bool Cmd_GetNoEquipShowOff_Execute(COMMAND_ARGS)
 {
 	*result = false;
@@ -967,7 +969,9 @@ bool Cmd_GetNoEquipShowOff_Execute(COMMAND_ARGS)
 	}
 	else
 	{
-		auto const noEquipData = ExtractActorAndItem(thisObj, item);
+		ActorAndItemPair noEquipData;
+		if (!TryExtractActorItemPair(thisObj, item, noEquipData))
+			return true;
 		*result = g_noEquipMap.find(noEquipData) != g_noEquipMap.end();
 	}
 	return true;
