@@ -11,10 +11,10 @@ EventInformation* OnCornerMessage;
 bool __fastcall CornerMessageEventHook(HUDMainMenu* menu, void* edx, char* msgText, eEmotion IconType, char* iconPath, char* soundPath, float displayTime, bool instantEndCurrentMessage)
 {
 	for (auto const& callback : OnCornerMessage->EventCallbacks) {
-		FunctionCallScript(callback.ScriptForEvent, nullptr, nullptr, &EventResultPtr, OnCornerMessage->numMaxArgs);
+		FunctionCallScript(callback.ScriptForEvent, nullptr, nullptr, &EventResultPtr, OnCornerMessage->numMaxArgs, msgText, IconType, iconPath, soundPath, displayTime);
 	}
 #if _DEBUG
-	//Console_Print("==Testing hook==\n -msgText: %s\n -IconType: %d\n -iconPath: %s\n -soundPath: %s\n -displayTime: %f\n -instantEndCurrentMessage: %d", msgText, IconType, iconPath, soundPath, displayTime, instantEndCurrentMessage);
+	Console_Print("==CornerMessageEventHook==\n -msgText: %s\n -IconType: %d\n -iconPath: %s\n -soundPath: %s\n -displayTime: %f\n -instantEndCurrentMessage: %d", msgText, IconType, iconPath, soundPath, displayTime, instantEndCurrentMessage);
 #endif
 	return ThisStdCall_B(0x775380, menu, msgText, IconType, iconPath, soundPath, displayTime, instantEndCurrentMessage);
 }
@@ -51,7 +51,7 @@ void HandleEventHooks()
 	
 #if _DEBUG
 	// todo: add args
-	OnCornerMessage = JGCreateEvent("OnCornerMessage", 0, 0, NULL); 
+	OnCornerMessage = JGCreateEvent("OnCornerMessage", 5, 0, NULL); 
 	WriteRelCall(0x705379, (UInt32)CornerMessageEventHook);
 	WriteRelCall(0x7EE74D, (UInt32)CornerMessageEventHook);
 	WriteRelCall(0x7EE87D, (UInt32)CornerMessageEventHook);
