@@ -206,9 +206,13 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 
 		break;
 
-	//case NVSEMessagingInterface::kMessage_MainGameLoop:
-		//_MESSAGE("MainLOOP");
-		//break;
+	case NVSEMessagingInterface::kMessage_MainGameLoop:
+		for (const auto& EventInfo : EventsArray)
+		{
+			EventInfo->AddQueuedEvents();
+			EventInfo->DeleteEvents();
+		}
+		break;
 
 	case NVSEMessagingInterface::kMessage_RuntimeScriptError:
 		//_MESSAGE("Received runtime script error message %s", msg->data);

@@ -80,9 +80,10 @@ public:
 	void virtual RemoveEvent(Script* script, void** filters);
 };
 
-
+/* UNUSED
 EventContainerInterface* (_cdecl* CreateScriptEvent)(const char* EventName, UInt8 maxArgs, UInt8 maxFilters, void* (__fastcall* CustomConstructor)(void**, UInt32));
 void(__cdecl* FreeScriptEvent)(EventContainerInterface*& toRemove);
+*/
 
 class BaseEventClass
 {
