@@ -1,4 +1,5 @@
 ﻿#pragma once
+
 class JohnnyEventFiltersOneFormOneInt : EventHandlerInterface
 {
 
@@ -17,6 +18,7 @@ public:
 
 	JohnnyEventFiltersOneFormOneInt(void** filters, UInt32 nuFilters)
 	{
+
 		numFilters = nuFilters;
 		Filters = new RefUnorderedSet[numFilters];
 		GenFilters = new GenericFilters[numFilters];

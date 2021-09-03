@@ -1,9 +1,9 @@
 ﻿#pragma once
-#include "Events/EventFilteringInterface.h"
+#include "events/EventFilteringInterface.h"
+#include <unordered_set>
 
 class EventInformation;
 void* __fastcall GenericCreateFilter(void** maxFilters, UInt32 numFilters);
-
 
 class JohnnyEventFiltersForm : EventHandlerInterface
 {
@@ -188,6 +188,7 @@ public:
 		rLock.unlock();
 		BaseEventClass NewEvent;
 		NewEvent.ScriptForEvent = script;
+		NewEvent.capturedLambdaVars = LambdaVariableContext(script);
 		if (maxFilters)
 		{
 
@@ -195,7 +196,7 @@ public:
 			NewEvent.eventFilter->SetUpFiltering();
 		}
 		std::unique_lock wLock(QueueRWLock);
-		this->EventQueueAdd.push_back(NewEvent);
+		this->EventQueueAdd.push_back(std::move(NewEvent));
 	}
 	void virtual RemoveEvent(Script* script, void** filters)
 	{
@@ -204,10 +205,9 @@ public:
 		{
 			if (script == it->ScriptForEvent)
 			{
-				UInt32 maxFilters = it->eventFilter->GetNumFilters();
-
-				if (maxFilters)
+				if (auto eventFilters = it->eventFilter)
 				{
+					UInt32 maxFilters = eventFilters->GetNumFilters();
 					for (int i = 0; i < maxFilters; i++)
 					{
 						if (!(it->eventFilter->IsFilterEqual(filters[i], i))) goto NotFound;
@@ -223,8 +223,7 @@ public:
 	}
 	void virtual AddQueuedEvents()
 	{
-
-		EventCallbacks.insert(EventCallbacks.end(), EventQueueAdd.begin(), EventQueueAdd.end());
+		EventCallbacks.insert(EventCallbacks.end(), std::make_move_iterator(EventQueueAdd.begin()), std::make_move_iterator(EventQueueAdd.end()));
 		EventQueueAdd.clear();
 	}
 	void virtual DeleteEvents()
@@ -234,9 +233,8 @@ public:
 		{
 			if (it->GetDeleted())
 			{
-				UInt32 maxFilters = it->eventFilter->GetNumFilters();
 
-				if (maxFilters)
+				if (it->eventFilter)
 				{
 					delete it->eventFilter;
 				}
@@ -283,6 +281,7 @@ EventInfo __cdecl JGCreateEvent(const char* EventName, UInt8 maxArgs, UInt8 maxF
 
 }
 
+
 void __cdecl JGFreeEvent(EventInfo& toRemove)
 {
 	std::lock_guard<std::mutex> lock(EventsArrayMutex);
@@ -295,16 +294,3 @@ void __cdecl JGFreeEvent(EventInfo& toRemove)
 	}
 	toRemove = NULL;
 }
-
-#if 0
-typedef EventInfo (_cdecl* CreateScriptEvent)(const char* EventName, UInt8 maxArgs, UInt8 maxFilters, void* (__fastcall* CreatorFunction)(void**, UInt32));
-EventInfo (_cdecl* JGCreateEvent)(const char* EventName, UInt8 maxArgs, UInt8 maxFilters, void* (__fastcall* CreatorFunction)(void**, UInt32));
-
-typedef void(__cdecl* FreeScriptEvent)(EventInfo& toRemove);
-void(__cdecl* JGFreeEvent)(EventInfo& toRemove);
-#endif
-
-
-
-
-

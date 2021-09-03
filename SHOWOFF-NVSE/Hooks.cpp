@@ -304,7 +304,7 @@ void __fastcall RunNoEquipScripts(Actor* actor, void* edx, TESForm* item)
  * If the NPC's best weapon can no longer be equipped, it can no longer wield a weapon, even via `EquipItem SomeOtherWeap`.
  * ^ TODO: check 0x6047C0 for a way to fix this.
 */
-bool __fastcall CanActivateItemHook(TESForm* item, void* edx, Actor* actor)
+bool __fastcall CanActivateItemHook(TESForm* item, Actor* actor)
 {
 	bool canActivate = true;
 
@@ -332,10 +332,10 @@ bool __fastcall CanActivateItemHook(TESForm* item, void* edx, Actor* actor)
 	return canActivate;
 }
 
-
+// Refactored thanks to lStewieAl!
+// Kormakur also helped fix a bug with "cmp, al 1" -> "test al, al"
 __declspec(naked) void OnActivateInventoryItemHook()
 {
-	static const UInt32 doNormalAddr = 0x88C87F;
 	static const UInt32 endFuncAddr = 0x88D27A;
 
 	// Global variables do not work for "[ebp - someVal]"-style statements; use enum instead.
@@ -347,20 +347,19 @@ __declspec(naked) void OnActivateInventoryItemHook()
 	_asm
 	{
 		// ignore the line prior (mov ecx, [ebp+item])
-		mov ecx, [ebp + actorOffset]
-		push ecx
 		mov ecx, [ebp + itemOffset]
+		mov edx, [ebp + actorOffset]
 		call CanActivateItemHook
-		cmp al, 1
-		jne noActivate
+		test al, al
+		je noActivate
 		
 	doNormal:
 		mov ecx, [ebp + itemOffset]
-		mov eax, 0x401170	// TESForm__DoGetTypeID
-		call eax
-		jmp doNormalAddr
+		movzx eax, byte ptr[ecx + 4] // TESForm->typeID
+		ret
 		
 	noActivate:
+		pop ecx // pop the pushed return address from call
 		jmp endFuncAddr
 	}
 }
@@ -423,7 +422,7 @@ void HandleGameHooks()
 	//==For functions.
 
 	// replace "call TESForm__DoGetTypeID"
-	WriteRelJump(0x88C87A, (UInt32)OnActivateInventoryItemHook); // for SetNoEquipShowOff
+	WriteRelCall(0x88C87A, (UInt32)OnActivateInventoryItemHook); // for SetNoEquipShowOff
 
 	
 
