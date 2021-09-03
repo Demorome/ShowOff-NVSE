@@ -1,6 +1,6 @@
 ﻿#pragma once
 
-#include "LambdaVariableContext.h"
+#include "LambdaVarContext.h"
 
 //From JohnnyGuitar NVSE
 
@@ -91,7 +91,7 @@ public:
 	ULONG_PTR Flags = 0;
 	Script* ScriptForEvent = NULL;
 	EventHandlerInterface* eventFilter = NULL;
-	LambdaVariableContext capturedLambdaVars;
+	LambdaVarContext capturedLambdaVars;
 
 	BaseEventClass() : capturedLambdaVars(nullptr) {}
 

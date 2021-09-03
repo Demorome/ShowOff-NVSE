@@ -188,7 +188,7 @@ public:
 		rLock.unlock();
 		BaseEventClass NewEvent;
 		NewEvent.ScriptForEvent = script;
-		NewEvent.capturedLambdaVars = LambdaVariableContext(script);
+		NewEvent.capturedLambdaVars = LambdaVarContext(script);
 		if (maxFilters)
 		{
 

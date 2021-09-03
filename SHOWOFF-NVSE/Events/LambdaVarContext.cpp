@@ -1,19 +1,19 @@
-﻿#include "LambdaVariableContext.h"
+﻿#include "LambdaVarContext.h"
 
 // Taken from JohnnyGuitar, made by Kormakur.
 
-LambdaVariableContext::LambdaVariableContext(Script* scriptLambda) : scriptLambda(scriptLambda)
+LambdaVarContext::LambdaVarContext(Script* scriptLambda) : scriptLambda(scriptLambda)
 {
 	if (scriptLambda)
 		CaptureLambdaVars(scriptLambda);
 }
 
-LambdaVariableContext::LambdaVariableContext(LambdaVariableContext&& other) noexcept : scriptLambda(other.scriptLambda)
+LambdaVarContext::LambdaVarContext(LambdaVarContext&& other) noexcept : scriptLambda(other.scriptLambda)
 {
 	other.scriptLambda = nullptr;
 }
 
-LambdaVariableContext& LambdaVariableContext::operator=(LambdaVariableContext&& other) noexcept
+LambdaVarContext& LambdaVarContext::operator=(LambdaVarContext&& other) noexcept
 {
 	if (this == &other)
 		return *this;
@@ -24,7 +24,7 @@ LambdaVariableContext& LambdaVariableContext::operator=(LambdaVariableContext&& 
 	return *this;
 }
 
-LambdaVariableContext::~LambdaVariableContext()
+LambdaVarContext::~LambdaVarContext()
 {
 	if (this->scriptLambda)
 		UncaptureLambdaVars(this->scriptLambda);

@@ -69,7 +69,7 @@
     <ClCompile Include="internal\decoding.cpp">
       <Filter>internal</Filter>
     </ClCompile>
-    <ClCompile Include="Events\LambdaVariableContext.cpp">
+    <ClCompile Include="Events\LambdaVarContext.cpp">
       <Filter>Events</Filter>
     </ClCompile>
   </ItemGroup>
@@ -211,7 +211,7 @@
       <Filter>nvse</Filter>
     </ClInclude>
     <ClInclude Include="SOTypes.h" />
-    <ClInclude Include="Events\LambdaVariableContext.h">
+    <ClInclude Include="Events\LambdaVarContext.h">
       <Filter>Events</Filter>
     </ClInclude>
   </ItemGroup>
