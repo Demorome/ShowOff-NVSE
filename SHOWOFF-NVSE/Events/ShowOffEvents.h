@@ -8,10 +8,10 @@ DEFINE_COMMAND_PLUGIN(SetShowOffOnCornerMessageEventHandler, "", false, kParams_
 EventInformation* OnCornerMessage;
 
 
-bool __fastcall handleCornerMessageEvent(HUDMainMenu* menu, void* edx, char* msgText, eEmotion IconType, char* iconPath, char* soundPath, float displayTime, bool instantEndCurrentMessage)
+bool __fastcall CornerMessageEventHook(HUDMainMenu* menu, void* edx, char* msgText, eEmotion IconType, char* iconPath, char* soundPath, float displayTime, bool instantEndCurrentMessage)
 {
 	for (auto const& callback : OnCornerMessage->EventCallbacks) {
-		FunctionCallScript(callback.ScriptForEvent, NULL, 0, &EventResultPtr, OnCornerMessage->numMaxArgs);
+		FunctionCallScript(callback.ScriptForEvent, nullptr, nullptr, &EventResultPtr, OnCornerMessage->numMaxArgs);
 	}
 #if _DEBUG
 	//Console_Print("==Testing hook==\n -msgText: %s\n -IconType: %d\n -iconPath: %s\n -soundPath: %s\n -displayTime: %f\n -instantEndCurrentMessage: %d", msgText, IconType, iconPath, soundPath, displayTime, instantEndCurrentMessage);
@@ -22,8 +22,8 @@ bool __fastcall handleCornerMessageEvent(HUDMainMenu* menu, void* edx, char* msg
 
 bool Cmd_SetShowOffOnCornerMessageEventHandler_Execute(COMMAND_ARGS)
 {
-	UInt32 setOrRemove = 0;
-	Script* script = nullptr;
+	UInt32 setOrRemove;
+	Script* script;
 	UInt32 flags = 0;  //reserved for future use
 	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags) || NOT_TYPE(script, Script))) return true;
 	if (OnCornerMessage)
@@ -50,12 +50,13 @@ void HandleEventHooks()
 
 	
 #if _DEBUG
+	// todo: add args
 	OnCornerMessage = JGCreateEvent("OnCornerMessage", 0, 0, NULL); 
-	WriteRelCall(0x705379, UINT32(handleCornerMessageEvent));
-	WriteRelCall(0x7EE74D, UINT32(handleCornerMessageEvent));
-	WriteRelCall(0x7EE87D, UINT32(handleCornerMessageEvent));
-	WriteRelCall(0x7EEA6C, UINT32(handleCornerMessageEvent));
-	WriteRelCall(0x833303, UINT32(handleCornerMessageEvent));
-	WriteRelCall(0x8B959B, UINT32(handleCornerMessageEvent));
+	WriteRelCall(0x705379, (UInt32)CornerMessageEventHook);
+	WriteRelCall(0x7EE74D, (UInt32)CornerMessageEventHook);
+	WriteRelCall(0x7EE87D, (UInt32)CornerMessageEventHook);
+	WriteRelCall(0x7EEA6C, (UInt32)CornerMessageEventHook);
+	WriteRelCall(0x833303, (UInt32)CornerMessageEventHook);
+	WriteRelCall(0x8B959B, (UInt32)CornerMessageEventHook);
 #endif
 }

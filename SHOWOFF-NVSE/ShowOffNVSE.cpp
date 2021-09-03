@@ -94,6 +94,8 @@ bool (*FunctionCallScript)(Script* funcScript, TESObjectREFR* callingObj, TESObj
 NVSEArrayElement EventResultPtr;
 bool (*FunctionCallScriptAlt)(Script* funcScript, TESObjectREFR* callingObj, UInt8 numArgs, ...);
 TESObjectREFR* (__stdcall *InventoryRefCreate)(TESObjectREFR* container, TESForm* itemForm, SInt32 countDelta, ExtraDataList* xData);
+_CaptureLambdaVars CaptureLambdaVars;
+_UncaptureLambdaVars UncaptureLambdaVars;
 
 // Singletons
 HUDMainMenu* g_HUDMainMenu = nullptr;
@@ -306,7 +308,8 @@ extern "C"
 			NVSEDataInterface* nvseData = (NVSEDataInterface*)nvse->QueryInterface(kInterface_Data);
 			InventoryRefGetForID = (InventoryRef * (*)(UInt32 refID))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID);
 			InventoryRefCreate = (TESObjectREFR * (__stdcall*)(TESObjectREFR* container, TESForm *itemForm, SInt32 countDelta, ExtraDataList *xData))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceCreateEntry);
-
+			CaptureLambdaVars = (_CaptureLambdaVars)nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaSaveVariableList);
+			UncaptureLambdaVars = (_UncaptureLambdaVars)nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaUnsaveVariableList);
 
 			// From JiPLN (jip_nvse.cpp) 
 			NVSESerializationInterface* serialization = (NVSESerializationInterface*)nvse->QueryInterface(kInterface_Serialization);
