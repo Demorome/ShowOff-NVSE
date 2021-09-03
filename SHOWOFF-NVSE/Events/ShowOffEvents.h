@@ -7,11 +7,15 @@ DEFINE_COMMAND_PLUGIN(SetShowOffOnCornerMessageEventHandler, "", false, kParams_
 
 EventInformation* OnCornerMessage;
 
-
+// iconPath and soundPath can be null.
 bool __fastcall CornerMessageEventHook(HUDMainMenu* menu, void* edx, char* msgText, eEmotion IconType, char* iconPath, char* soundPath, float displayTime, bool instantEndCurrentMessage)
 {
+	std::string iconPathStr = "<void>", soundPathStr = "<void>";
+	if (iconPath && iconPath[0]) iconPathStr = iconPath;
+	if (soundPath && soundPath[0]) soundPathStr = soundPath;
+	
 	for (auto const& callback : OnCornerMessage->EventCallbacks) {
-		FunctionCallScript(callback.ScriptForEvent, nullptr, nullptr, &EventResultPtr, OnCornerMessage->numMaxArgs, msgText, IconType, iconPath, soundPath, displayTime);
+		FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnCornerMessage->numMaxArgs, msgText, IconType, iconPathStr.c_str(), soundPathStr.c_str(), *(UInt32*)&displayTime);
 	}
 #if _DEBUG
 	Console_Print("==CornerMessageEventHook==\n -msgText: %s\n -IconType: %d\n -iconPath: %s\n -soundPath: %s\n -displayTime: %f\n -instantEndCurrentMessage: %d", msgText, IconType, iconPath, soundPath, displayTime, instantEndCurrentMessage);

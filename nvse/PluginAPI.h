@@ -491,6 +491,7 @@ struct NVSECommandTableInterface
  *	as an NVSEArrayVarInterface::Element. If the script returned nothing, the result
  *	is of type kType_Invalid. Up to 5 arguments can be passed in, of type
  *	int, float, or char*; support for passing arrays will be implemented later.
+ *	To pass a float, one must do the following: *(UInt32*)&myFloat
  *
  *	GetFunctionParams() returns the number of parameters expected by a function
  *	script. Returns -1 if the script is not a valid function script. Otherwise, if

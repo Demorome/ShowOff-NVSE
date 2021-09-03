@@ -84,6 +84,8 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 
 //===v1.25
 
+*AS OF THIS VERSION, xNVSE 6.2.3 is now required.*
+
 ===Changes:
 * GetNumActorsInRangeFromRef and GetNumCombatActorsFromActor both have a new OnlyDetectedActors filter flag.
 * GetCreatureTurningSpeed and GetCreatureFootWeight are made available as condition functions.
