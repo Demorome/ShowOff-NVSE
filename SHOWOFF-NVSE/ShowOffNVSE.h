@@ -8,6 +8,7 @@
 #include "common/ICriticalSection.h"
 #include "GameData.h"
 #include "decoding.h"
+#include "SOTypes.h"
 
 extern ICriticalSection g_Lock;
 extern std::atomic<bool> g_ShowFuncDebug;
@@ -33,6 +34,10 @@ extern NVSEMessagingInterface* g_msg;
 extern NVSEScriptInterface* g_scriptInterface;
 extern NVSECommandTableInterface* g_commandInterface;
 extern const CommandInfo* (*GetCmdByName)(const char* name);
+extern bool (*FunctionCallScript)(Script* funcScript, TESObjectREFR* callingObj, TESObjectREFR* container, NVSEArrayElement* result, UInt8 numArgs, ...);
+extern NVSEArrayElement EventResultPtr;
+extern bool (*FunctionCallScriptAlt)(Script* funcScript, TESObjectREFR* callingObj, UInt8 numArgs, ...);
+extern TESObjectREFR* (__stdcall *InventoryRefCreate)(TESObjectREFR* container, TESForm* itemForm, SInt32 countDelta, ExtraDataList* xData);
 
 //Singletons
 extern HUDMainMenu* g_HUDMainMenu;
@@ -50,6 +55,7 @@ extern Sky** g_currentSky;
 
 //-Hook Globals
 extern std::atomic<bool> g_canPlayerPickpocketInCombat;
+extern ActorAndItemPairs g_noEquipMap;
 
 //-Force Pickpocketting INI globals (enabled via function)
 extern std::atomic<float> g_fForcePickpocketBaseAPCost;
@@ -77,6 +83,7 @@ extern char* g_PBIR_FailMessage;
 #define IS_TYPE(form, type) (*(UInt32*)form == kVtbl_##type)  
 #define NOT_ID(form, type) (form->typeID != kFormType_##type) 
 #define IS_ID(form, type) (form->typeID == kFormType_##type)
+
 
 
 

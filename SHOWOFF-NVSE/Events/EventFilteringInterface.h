@@ -1,16 +1,17 @@
 ﻿#pragma once
-#include <unordered_set>
+
+#include "LambdaVarContext.h"
 
 //From JohnnyGuitar NVSE
 
 union GenericFilters
 {
-	void*		ptr;
-	TESForm*	form;
-	UInt32      refID;
-	int         intVal;
-	float       fltVal;
-	char*		str;
+	void* ptr;
+	TESForm* form;
+	UInt32        refID;
+	int            intVal;
+	float        fltVal;
+	char* str;
 	GenericFilters()
 	{
 		this->ptr = NULL;
@@ -71,12 +72,29 @@ public:
 
 };
 
+
+class EventContainerInterface
+{
+public:
+	void virtual RegisterEvent(Script* script, void** filters);
+	void virtual RemoveEvent(Script* script, void** filters);
+};
+
+/* UNUSED
+EventContainerInterface* (_cdecl* CreateScriptEvent)(const char* EventName, UInt8 maxArgs, UInt8 maxFilters, void* (__fastcall* CustomConstructor)(void**, UInt32));
+void(__cdecl* FreeScriptEvent)(EventContainerInterface*& toRemove);
+*/
+
 class BaseEventClass
 {
 public:
 	ULONG_PTR Flags = 0;
-	Script* ScriptForEvent;
-	EventHandlerInterface* eventFilter;
+	Script* ScriptForEvent = NULL;
+	EventHandlerInterface* eventFilter = NULL;
+	LambdaVarContext capturedLambdaVars;
+
+	BaseEventClass() : capturedLambdaVars(nullptr) {}
+
 	enum GlobalEventFlags
 	{
 		kEventFlag_Deleted = 1 << 0,
@@ -88,7 +106,7 @@ public:
 	}
 	void SetDeleted(bool doSet)
 	{
+
 		doSet ? Flags |= kEventFlag_Deleted : Flags &= ~kEventFlag_Deleted;
 	}
 };
-

@@ -311,6 +311,7 @@
     <ClCompile Include="..\nvse\GameTypes.cpp" />
     <ClCompile Include="..\nvse\SafeWrite.cpp" />
     <ClCompile Include="..\nvse\Utilities.cpp" />
+    <ClCompile Include="Events\LambdaVarContext.cpp" />
     <ClCompile Include="functions\ShowOff_fn_Files.cpp" />
     <ClCompile Include="Hooks.cpp" />
     <ClCompile Include="internal\containers.cpp" />
@@ -345,6 +346,7 @@
     <ClInclude Include="Changelog.txt" />
     <ClInclude Include="Events\CustomEventFilters.h" />
     <ClInclude Include="Events\JohnnyEventPredefinitions.h" />
+    <ClInclude Include="Events\LambdaVarContext.h" />
     <ClInclude Include="Events\ShowOffEvents.h" />
     <ClInclude Include="Events\EventFilteringInterface.h" />
     <ClInclude Include="functions\ShowOff_fn_Actors.h" />
@@ -370,6 +372,7 @@
     <ClInclude Include="settings.h" />
     <ClInclude Include="ShowOffNVSE.h" />
     <ClInclude Include="SimpleINILibrary\SimpleIni.h" />
+    <ClInclude Include="SOTypes.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

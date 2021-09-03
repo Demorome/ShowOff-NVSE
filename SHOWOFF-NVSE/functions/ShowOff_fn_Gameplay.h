@@ -1,4 +1,5 @@
 ﻿#pragma once
+
 #include "Hooks.h"
 #include "SafeWrite.h"
 #include "GameSettings.h"
@@ -14,6 +15,7 @@ DEFINE_CMD_COND_PLUGIN(IsEquippedWeaponRanged, "Returns 1 if the calling actor's
 DEFINE_CMD_COND_PLUGIN(GetChallengeProgress, "Returns the progress made on a challenge.", false, kParams_OneChallenge)
 DEFINE_COMMAND_PLUGIN(UnequipItems, "", true, kParams_FourOptionalInts);
 DEFINE_COMMAND_PLUGIN(GetEquippedItems, "", true, kParams_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(GetEquippedItemRefs, "", true, kParams_OneOptionalInt);
 DEFINE_CMD_COND_PLUGIN(GetPCHasScriptedFastTravelOverride, "Returns whether or not the player is restricted by EnableFastTravel", false, NULL);
 DEFINE_CMD_COND_PLUGIN(GetPCCanFastTravel, "", false, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetWeaponHasFlag, WeaponHasFlag, "", false, kParams_OneInt_OneOptionalObjectID);
@@ -34,7 +36,8 @@ DEFINE_COMMAND_PLUGIN(GetExplosionRefSource, "", true, NULL);
 DEFINE_COMMAND_PLUGIN(SetExplosionRefSource, "", true, kParams_OneActorRef);
 DEFINE_COMMAND_PLUGIN(GetExplosionRefRadius, "Accounts for AdjustExplosionRadius perk entry point.", true, NULL);
 DEFINE_COMMAND_PLUGIN(SetExplosionRefRadius, "", true, kParams_OneFloat);
-
+DEFINE_COMMAND_ALT_PLUGIN(SetNoEquipShowOff, SetNoEquipSO, "Sets whether or not there's a prevention for an item baseform from being activated from an actor's inventory.", false, kParams_OneForm_OneInt_OneOptionalScript);
+DEFINE_COMMAND_ALT_PLUGIN(GetNoEquipShowOff, GetNoEquipSO, "Returns whether or not there's a prevention for an item baseform from being activated from an actor's inventory.", false, kParams_OneForm_OneInt);
 
 
 bool Cmd_SetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
@@ -239,6 +242,24 @@ bool Cmd_GetEquippedItems_Execute(COMMAND_ARGS)
 	for (auto const& iter : eqItems)
 	{
 		ArrayElementR elem = iter.pForm;
+		elems.Append(elem);
+	}
+	auto const array = CreateArray(elems.Data(), elems.Size(), scriptObj);
+	AssignArrayResult(array, result);
+	return true;
+}
+
+bool Cmd_GetEquippedItemRefs_Execute(COMMAND_ARGS)
+{
+	UInt32 flags = 0;
+	*result = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &flags) || NOT_ACTOR(thisObj)) return true;
+	Vector<ArrayElementR> elems;
+	auto eqItems = GetEquippedItems(thisObj, flags);
+	for (auto const& [baseItem, xData] : eqItems)
+	{
+		auto const itemRef = InventoryRefCreate((Actor*)thisObj, baseItem, 1, xData);
+		ArrayElementR elem = itemRef;
 		elems.Append(elem);
 	}
 	auto const array = CreateArray(elems.Data(), elems.Size(), scriptObj);
@@ -828,7 +849,6 @@ bool Cmd_SetExplosionRefSource_Execute(COMMAND_ARGS)
 	return true;
 }
 
-
 bool Cmd_GetExplosionRefRadius_Execute(COMMAND_ARGS)
 {
 	*result = -1;
@@ -852,6 +872,77 @@ bool Cmd_SetExplosionRefRadius_Execute(COMMAND_ARGS)
 	return true;
 }
 
+ActorAndItemPairs g_noEquipMap;
+
+bool TryExtractActorItemPair(TESObjectREFR* thisObj, TESForm* item, ActorAndItemPair& actorAndItemOut)
+{
+	if (IS_REFERENCE(item)) item = ((TESObjectREFR*)item)->baseForm;
+	ActorRefID const actorID = IS_ACTOR(thisObj) ? thisObj->refID : NULL;
+	ItemRefID const itemID = (item && item->IsItem()) ? item->refID : NULL;
+	if (!itemID && !actorID)  // at least one must be there for filtering, otherwise useless/dangerous.
+		return false;
+	actorAndItemOut = { actorID, itemID };
+	return true;
+}
+
+// Differs from NoUnequip extradata mechanic! It's also not savebaked.
+bool Cmd_SetNoEquipShowOff_Execute(COMMAND_ARGS)
+{
+	*result = false;
+	TESForm* item;
+	UInt32 bNoEquip;
+	Script* function = nullptr;	// UDF event script which passes "this" = actor and 1 arg: baseItem. Or ItemInvRef if possible!
+	// This function is called whenever "NoEquip" is being checked.
+	// If any functions that are called return false (SetFunctionValue), then the item cannot be equipped.
+
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &item, &bNoEquip, &function))
+		return true;
+
+	// Don't need a valid actor + item if the function is specified.
+	if (function && IS_TYPE(function, Script))
+	{
+		// TODO: each mod can only assign one function
+	}
+	else
+	{
+		ActorAndItemPair noEquipData;
+		if (!TryExtractActorItemPair(thisObj, item, noEquipData))
+			return true;
+		ScopedLock lock(g_Lock);
+		if (bNoEquip)
+		{
+			*result = g_noEquipMap.insert(noEquipData).second;
+		}
+		else
+		{
+			*result = g_noEquipMap.erase(noEquipData);
+		}
+	}
+	return true;
+}
+
+bool Cmd_GetNoEquipShowOff_Execute(COMMAND_ARGS)
+{
+	*result = false;
+	TESForm* item;
+	UInt32 bGetFunction = false;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &item, &bGetFunction))
+		return true;
+
+	if (bGetFunction)
+	{
+		// todo???
+		// Each mod can only have one function set up for this, so get the calling modIndex.
+	}
+	else
+	{
+		ActorAndItemPair noEquipData;
+		if (!TryExtractActorItemPair(thisObj, item, noEquipData))
+			return true;
+		*result = g_noEquipMap.find(noEquipData) != g_noEquipMap.end();
+	}
+	return true;
+}
 
 
 
@@ -862,6 +953,13 @@ bool Cmd_SetExplosionRefRadius_Execute(COMMAND_ARGS)
 
 
 #ifdef _DEBUG
+
+
+
+
+
+
+
 
 
 

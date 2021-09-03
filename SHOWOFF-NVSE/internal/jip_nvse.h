@@ -37,8 +37,6 @@ enum  //Memory Addresses
 #define NOT_ACTOR(form) ((*(UInt32**)form)[0x40] != kAddr_ReturnTrue)
 #define IS_NODE(object) ((*(UInt32**)object)[3] == kAddr_ReturnThis)
 
-
-
 extern bool (*WriteRecord)(UInt32 type, UInt32 version, const void* buffer, UInt32 length);
 extern bool (*WriteRecordData)(const void* buffer, UInt32 length);
 extern bool (*GetNextRecordInfo)(UInt32* type, UInt32* version, UInt32* length);
@@ -242,6 +240,11 @@ struct AuxStringMapInfo
 };
 
 extern std::atomic<UInt8> s_dataChangedFlags; // For AuxVar serialization.
+
+
+
+
+
 
 #if 0 //not gonna bother with this for now
 DebugLog s_log, s_debug, s_missingTextures;

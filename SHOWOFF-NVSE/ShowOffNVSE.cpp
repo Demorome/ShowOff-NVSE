@@ -90,6 +90,12 @@ NVSEMessagingInterface* g_msg = nullptr;
 NVSEScriptInterface* g_scriptInterface = nullptr;
 NVSECommandTableInterface* g_commandInterface = nullptr;
 const CommandInfo* (*GetCmdByName)(const char* name);
+bool (*FunctionCallScript)(Script* funcScript, TESObjectREFR* callingObj, TESObjectREFR* container, NVSEArrayElement* result, UInt8 numArgs, ...);
+NVSEArrayElement EventResultPtr;
+bool (*FunctionCallScriptAlt)(Script* funcScript, TESObjectREFR* callingObj, UInt8 numArgs, ...);
+TESObjectREFR* (__stdcall *InventoryRefCreate)(TESObjectREFR* container, TESForm* itemForm, SInt32 countDelta, ExtraDataList* xData);
+_CaptureLambdaVars CaptureLambdaVars;
+_UncaptureLambdaVars UncaptureLambdaVars;
 
 // Singletons
 HUDMainMenu* g_HUDMainMenu = nullptr;
@@ -200,9 +206,13 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 
 		break;
 
-	//case NVSEMessagingInterface::kMessage_MainGameLoop:
-		//_MESSAGE("MainLOOP");
-		//break;
+	case NVSEMessagingInterface::kMessage_MainGameLoop:
+		for (const auto& EventInfo : EventsArray)
+		{
+			EventInfo->AddQueuedEvents();
+			EventInfo->DeleteEvents();
+		}
+		break;
 
 	case NVSEMessagingInterface::kMessage_RuntimeScriptError:
 		//_MESSAGE("Received runtime script error message %s", msg->data);
@@ -300,7 +310,10 @@ extern "C"
 			PluginHandle nvsePluginHandle = nvse->GetPluginHandle();  //from JiPLN
 			
 			NVSEDataInterface* nvseData = (NVSEDataInterface*)nvse->QueryInterface(kInterface_Data);
-			InventoryRefGetForID = (InventoryRef * (*)(UInt32))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID);
+			InventoryRefGetForID = (InventoryRef * (*)(UInt32 refID))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID);
+			InventoryRefCreate = (TESObjectREFR * (__stdcall*)(TESObjectREFR* container, TESForm *itemForm, SInt32 countDelta, ExtraDataList *xData))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceCreateEntry);
+			CaptureLambdaVars = (_CaptureLambdaVars)nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaSaveVariableList);
+			UncaptureLambdaVars = (_UncaptureLambdaVars)nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaUnsaveVariableList);
 
 			// From JiPLN (jip_nvse.cpp) 
 			NVSESerializationInterface* serialization = (NVSESerializationInterface*)nvse->QueryInterface(kInterface_Serialization);
@@ -326,6 +339,8 @@ extern "C"
 			g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 			ExtractArgsEx = g_scriptInterface->ExtractArgsEx;
 			ExtractFormatStringArgs = g_scriptInterface->ExtractFormatStringArgs;
+			FunctionCallScript = g_scriptInterface->CallFunction;
+			FunctionCallScriptAlt = g_scriptInterface->CallFunctionAlt;
 			
 			g_commandInterface = (NVSECommandTableInterface*)nvse->QueryInterface(kInterface_CommandTable);
 			GetCmdByName = g_commandInterface->GetByName;
@@ -346,6 +361,7 @@ extern "C"
 			LookupArrayByID = g_arrInterface->LookupArrayByID;
 			GetElement = g_arrInterface->GetElement;
 			GetArrayElements = g_arrInterface->GetElements;
+
 #if 0
 			auto johnnyGuitar = GetModuleHandle("johnnyguitar.dll");
 			JGCreateEvent = (CreateScriptEvent)GetProcAddress(johnnyGuitar, "JGCreateEvent");
@@ -479,8 +495,9 @@ extern "C"
 		/*3CF6*/ REG_CMD(SetExplosionRefSource)
 		/*3CF7*/ REG_CMD(GetActorValueDamage)
 		/*3CF8*/ REG_CMD_ARR(GetPipboyRadioVoiceEntryData)  // todo: FIX CRASHING (when music plays and arg1 = 1?)
-
-
+		/*3CF9*/ REG_CMD_ARR(GetEquippedItemRefs)
+		/*3CFA*/ REG_CMD(SetNoEquipShowOff)
+		/*3CFB*/ REG_CMD(GetNoEquipShowOff)
 		
 		//***Current Max OpCode: 0x3D10 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
@@ -492,6 +509,8 @@ extern "C"
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 
+		
+		REG_CMD(GetHealthExtraData)
 
 		REG_CMD_ARR(GetPipboyRadioSounds)
 		REG_CMD(GetPipBoyRadioSoundTimeRemaining)

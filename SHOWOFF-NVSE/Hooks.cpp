@@ -284,16 +284,88 @@ namespace GetLevelUpMenuUnspentPoints
 }
 
 
+//todo: figure out proper way to format function.
+void __fastcall RunNoEquipScripts(Actor* actor, void* edx, TESForm* item)
+{
+	/*auto const& functionList = ? ? ?
+	for (auto const &function : functionList)
+	{
+		FunctionCallScriptAlt(function, actor, 1, item);
+	}
+	*/
+}
 
+/*
+ * Item activation and equipping is conflated here.
+ * Certain funcs will prevent item activation early, such as if you're at max health while activating a stimpak (0x780E97).
+ * The above would result in this code not running at all.
+ * Todo: maybe do something about that? ^
+ * NOTE: Can prevent script functions like EquipItem from working.
+ * If the NPC's best weapon can no longer be equipped, it can no longer wield a weapon, even via `EquipItem SomeOtherWeap`.
+ * ^ TODO: check 0x6047C0 for a way to fix this.
+*/
+bool __fastcall CanActivateItemHook(TESForm* item, Actor* actor)
+{
+	bool canActivate = true;
 
+	// Spaghetti to account for pairs which have null members (generic filters).
+	ActorAndItemPair const actorAndItem = { actor->refID, item->refID };
+	ActorAndItemPair const nullAndItem = { NULL, item->refID };
+	ActorAndItemPair const actorAndNull = { actor->refID, NULL };
+	for (auto const &iter : g_noEquipMap)
+	{
+		if (actorAndItem == iter || nullAndItem == iter || actorAndNull == iter)
+		{
+			canActivate = false;
+			break;
+		}
+	}
+	
+	if (canActivate)  // todo: loop thru functions list, break if any return false.
+	{
+		// 
+	}
 
+	if (g_ShowFuncDebug)
+		Console_Print("CanActivateItemHook: CanActivate: %i, Item: [%08X], %s, type: %u, Actor: [%08X], %s, type: %u", canActivate, item->refID, item->GetName(), item->typeID, actor->refID, actor->GetName(), actor->typeID);
+	
+	return canActivate;
+}
 
+// Refactored thanks to lStewieAl!
+// Kormakur also helped fix a bug with "cmp, al 1" -> "test al, al"
+__declspec(naked) void OnActivateInventoryItemHook()
+{
+	static const UInt32 endFuncAddr = 0x88D27A;
 
+	// Global variables do not work for "[ebp - someVal]"-style statements; use enum instead.
+	enum {
+		actorOffset = -0x80,
+		itemOffset = 0x8,
+	};
 
+	_asm
+	{
+		// ignore the line prior (mov ecx, [ebp+item])
+		mov ecx, [ebp + itemOffset]
+		mov edx, [ebp + actorOffset]
+		call CanActivateItemHook
+		test al, al
+		je noActivate
+		
+	doNormal:
+		mov ecx, [ebp + itemOffset]
+		movzx eax, byte ptr[ecx + 4] // TESForm->typeID
+		ret
+		
+	noActivate:
+		pop ecx // pop the pushed return address from call
+		jmp endFuncAddr
+	}
+}
 
 
 #if _DEBUG
-// Below is reserved for messing around with IDA
 
 bool GetCanSleepInOwnedBeds()
 {
@@ -339,15 +411,6 @@ void Actor_Spread_PerkModifier_Hook(PerkEntryPointID id, TESObjectREFR* refr, fl
 // End IDA debug stuff
 #endif
 
-
-
-
-
-
-
-
-
-
 void HandleGameHooks()
 {
 	NopFunctionCall(0x7ADDC7, 1); // For preventing ShowRaceMenu from resetting active temp effects.
@@ -356,18 +419,20 @@ void HandleGameHooks()
 	GetLevelUpMenuUnspentPoints::WriteRetrievalHook();
 	
 
+	//==For functions.
 
+	// replace "call TESForm__DoGetTypeID"
+	WriteRelCall(0x88C87A, (UInt32)OnActivateInventoryItemHook); // for SetNoEquipShowOff
 
-
-
-
+	
 
 	
 	
 
 #if _DEBUG
 
-
+	
+	
 
 #if 0
 	WriteRelCall(0x8B0FF0, UInt32(Actor_Spread_PerkModifier_Hook));

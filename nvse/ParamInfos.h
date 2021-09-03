@@ -378,6 +378,13 @@ static ParamInfo kParams_OneForm_OneInt[2] =
 	{	"int",	kParamType_Integer, 0	},
 };
 
+static ParamInfo kParams_OneForm_OneInt_OneOptionalScript[3] =
+{
+	{	"form",	kParamType_AnyForm,	0	},
+	{	"int",	kParamType_Integer, 0	},
+	{	"script",	kParamType_AnyForm, 1	},
+};
+
 static ParamInfo kParams_OneForm[1] =
 {
 	{	"form",	kParamType_AnyForm,	0	},
