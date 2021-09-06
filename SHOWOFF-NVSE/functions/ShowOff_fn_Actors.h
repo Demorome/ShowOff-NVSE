@@ -19,7 +19,7 @@ UInt32 __fastcall GetNumActorsInRangeFromRef_Call(TESObjectREFR* const thisObj, 
 {
 	if (range <= 0) return 0;
 	if (!thisObj) return 0;
-	bool isThisObjActor = IS_ACTOR(thisObj);
+	bool const isThisObjActor = IS_ACTOR(thisObj);
 	
 	enum functionFlags
 	{

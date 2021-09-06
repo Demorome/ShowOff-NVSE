@@ -56,6 +56,7 @@ extern Sky** g_currentSky;
 //-Hook Globals
 extern std::atomic<bool> g_canPlayerPickpocketInCombat;
 extern ActorAndItemPairs g_noEquipMap;
+extern mod_and_function_map g_NoEquipFunctions;
 
 //-Force Pickpocketting INI globals (enabled via function)
 extern std::atomic<float> g_fForcePickpocketBaseAPCost;
