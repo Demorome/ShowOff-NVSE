@@ -84,7 +84,7 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 
 //===v1.25
 
-*AS OF THIS VERSION, xNVSE 6.2.3 is now required.*
+*AS OF THIS VERSION, xNVSE 6.2.3 or greater is required.*
 
 ===Changes:
 * GetNumActorsInRangeFromRef and GetNumCombatActorsFromActor both have a new OnlyDetectedActors filter flag.
@@ -93,18 +93,20 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 
 
 ===Bug Fixes:
-*
+* Nada
 
 ===New Functions:
 * ShowSkillMenu
 * GetLevelUpMenuUnspentPoints
 * SetLevelUpMenuCanExitEarly
 * SetLevelUpMenuPoints
+; These will go undocumented until I further refine them while finishing my remake of Delay Level Up.
+
 * Get/SetExplosionRefSource
 * Get/SetExplosionRefRadius
 * CreateFolder (made by anhatthezoo!)
 * GetActorValueDamage (alias: GetAVDamage)
-* GetPipboyRadioVoiceEntryData
+* GetPipboyRadioVoiceEntryData  ; quite buggy atm
 * GetEquippedItemRefs
 * Set/GetNoEquipShowOff (alias: Set/GetNoEquipSO)
 

@@ -19,4 +19,13 @@ public:
 	LambdaVarContext(LambdaVarContext&& other) noexcept;
 	LambdaVarContext& operator=(LambdaVarContext&& other) noexcept;
 	~LambdaVarContext();
+
+	[[nodiscard]] Script* Get() const { return scriptLambda; }
+
+	// copied from JIP
+	bool operator==(const LambdaVarContext& rhs) const { return scriptLambda == rhs.scriptLambda; }
+	bool operator!=(const LambdaVarContext& rhs) const { return scriptLambda != rhs.scriptLambda; }
+	bool operator<(const LambdaVarContext& rhs) const { return scriptLambda < rhs.scriptLambda; }
 };
+
+typedef LambdaVarContext Function;

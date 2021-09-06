@@ -283,18 +283,6 @@ namespace GetLevelUpMenuUnspentPoints
 	void WriteRetrievalHook() { WriteRelCall(0x785866, (UInt32)CloseMenu_Hook); }
 }
 
-
-//todo: figure out proper way to format function.
-void __fastcall RunNoEquipScripts(Actor* actor, void* edx, TESForm* item)
-{
-	/*auto const& functionList = ? ? ?
-	for (auto const &function : functionList)
-	{
-		FunctionCallScriptAlt(function, actor, 1, item);
-	}
-	*/
-}
-
 /*
  * Item activation and equipping is conflated here.
  * Certain funcs will prevent item activation early, such as if you're at max health while activating a stimpak (0x780E97).
@@ -321,9 +309,18 @@ bool __fastcall CanActivateItemHook(TESForm* item, Actor* actor)
 		}
 	}
 	
-	if (canActivate)  // todo: loop thru functions list, break if any return false.
+	if (canActivate)
 	{
-		// 
+		for (auto const &iter : g_NoEquipFunctions)
+		{
+			NVSEArrayElement elem;
+			FunctionCallScript(iter.second.Get(), actor, nullptr, &elem, 1, item);	// todo: try passing an inventory ref instead. Would require extracting extra data from the function args.
+			if (!elem.Bool())	// todo: TEST
+			{
+				canActivate = false;
+				break;
+			}
+		}
 	}
 
 	if (g_ShowFuncDebug)

@@ -348,11 +348,27 @@ struct NVSEArrayVarInterface
 		bool IsValid() const { return type != kType_Invalid; }
 		UInt8 GetType() const { return type; }
 
-		UInt32 Raw() { return raw; }
-		double Number() { return type == kType_Numeric ? num : 0; }
-		TESForm* Form() { return type == kType_Form ? form : NULL; }
-		const char* String() { return type == kType_String ? str : NULL; }
-		Array* Array() { return type == kType_Array ? arr : NULL; }
+		[[nodiscard]] UInt32 Raw() const  { return raw; }
+		[[nodiscard]] double Number() const  { return type == kType_Numeric ? num : 0; }
+		[[nodiscard]] TESForm* Form() const  { return type == kType_Form ? form : NULL; }
+		[[nodiscard]] const char* String() const { return type == kType_String ? str : NULL; }
+		[[nodiscard]] Array* Array() const { return type == kType_Array ? arr : NULL; }
+		[[nodiscard]] bool Bool() const
+		{
+			switch (type)
+			{
+			case kType_Numeric:
+				return num != 0.0;
+			case kType_Form:
+				return form != nullptr;
+			case kType_Array:
+				return arr != nullptr;
+			case kType_String:
+				return str && str[0];
+			default:
+				return false;
+			}
+		}
 	};
 
 	struct ElementL : Element  // Keys
@@ -434,7 +450,17 @@ struct NVSEArrayVarInterface
 
 	// version 2
 	UInt32	(* GetArrayPacked)(Array* arr);
+	
+	enum ContainerTypes
+	{
+		kArrType_Invalid = -1,
+		kArrType_Array = 0,
+		kArrType_Map,
+		kArrType_StringMap
+	};
 
+	int		(*GetContainerType)(Array* arr);
+	bool	(*ArrayHasKey)(Array* arr, const Element& key);
 };
 typedef NVSEArrayVarInterface::Array NVSEArrayVar;
 typedef NVSEArrayVarInterface::Element NVSEArrayElement;

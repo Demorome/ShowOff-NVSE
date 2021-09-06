@@ -873,6 +873,7 @@ bool Cmd_SetExplosionRefRadius_Execute(COMMAND_ARGS)
 }
 
 ActorAndItemPairs g_noEquipMap;
+mod_and_function_map g_NoEquipFunctions;  // Each mod can only assign one function.
 
 bool TryExtractActorItemPair(TESObjectREFR* thisObj, TESForm* item, ActorAndItemPair& actorAndItemOut)
 {
@@ -891,7 +892,7 @@ bool Cmd_SetNoEquipShowOff_Execute(COMMAND_ARGS)
 	*result = false;
 	TESForm* item;
 	UInt32 bNoEquip;
-	Script* function = nullptr;	// UDF event script which passes "this" = actor and 1 arg: baseItem. Or ItemInvRef if possible!
+	Script* function = nullptr;	// UDF event script which passes "this" = actor and 1 arg: baseItem. todo: ItemInvRef if possible!
 	// This function is called whenever "NoEquip" is being checked.
 	// If any functions that are called return false (SetFunctionValue), then the item cannot be equipped.
 
@@ -901,7 +902,14 @@ bool Cmd_SetNoEquipShowOff_Execute(COMMAND_ARGS)
 	// Don't need a valid actor + item if the function is specified.
 	if (function && IS_TYPE(function, Script))
 	{
-		// TODO: each mod can only assign one function
+		if (bNoEquip)
+		{
+			g_NoEquipFunctions.insert_or_assign(scriptObj->GetOverridingModIdx(), function);
+		}
+		else
+		{
+			g_NoEquipFunctions.erase(scriptObj->GetOverridingModIdx());
+		}
 	}
 	else
 	{
@@ -921,9 +929,10 @@ bool Cmd_SetNoEquipShowOff_Execute(COMMAND_ARGS)
 	return true;
 }
 
+// Can return a bool or a ref.
 bool Cmd_GetNoEquipShowOff_Execute(COMMAND_ARGS)
 {
-	*result = false;
+	*result = 0;
 	TESForm* item;
 	UInt32 bGetFunction = false;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &item, &bGetFunction))
@@ -931,8 +940,10 @@ bool Cmd_GetNoEquipShowOff_Execute(COMMAND_ARGS)
 
 	if (bGetFunction)
 	{
-		// todo???
-		// Each mod can only have one function set up for this, so get the calling modIndex.
+		if (auto const &iter = g_NoEquipFunctions.find(scriptObj->GetOverridingModIdx()); iter != g_NoEquipFunctions.end())
+		{
+			REFR_RES = iter->second.Get()->refID;
+		}
 	}
 	else
 	{
