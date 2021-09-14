@@ -54,7 +54,7 @@ Code has been taken from the following plugins:
 * [JohnnyGuitar NVSE](https://www.nexusmods.com/newvegas/mods/66927)
 * [JIPLN NVSE](https://www.nexusmods.com/newvegas/mods/58277) 
 * [lStewieAl's Tweaks](https://www.nexusmods.com/newvegas/mods/66347)
-* [SUP NVSE](https://www.nexusmods.com/newvegas/mods/71878)
+* [SUP NVSE](https://www.nexusmods.com/newvegas/mods/73160)
 
 This plugin wouldn't be possible without everyone who contributed to (x)NVSE, and who made the example plugin.
 
