@@ -2,26 +2,10 @@
 
 // Credits to Karut (from JohnnyGuitar) for making the Event Framework.
 
-DEFINE_COMMAND_PLUGIN(SetShowOffOnCornerMessageEventHandler, "", false, kParams_Event);
+DEFINE_COMMAND_ALT_PLUGIN(SetShowOffOnCornerMessageEventHandler, SetOnCornerMessageEventHandler, "", false, kParams_Event);
 
 
 EventInformation* OnCornerMessage;
-
-// iconPath and soundPath can be null.
-bool __fastcall CornerMessageEventHook(HUDMainMenu* menu, void* edx, char* msgText, eEmotion IconType, char* iconPath, char* soundPath, float displayTime, bool instantEndCurrentMessage)
-{
-	std::string iconPathStr = "<void>", soundPathStr = "<void>";
-	if (iconPath && iconPath[0]) iconPathStr = iconPath;
-	if (soundPath && soundPath[0]) soundPathStr = soundPath;
-	
-	for (auto const& callback : OnCornerMessage->EventCallbacks) {
-		FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnCornerMessage->numMaxArgs, msgText, IconType, iconPathStr.c_str(), soundPathStr.c_str(), *(UInt32*)&displayTime);
-	}
-#if _DEBUG
-	Console_Print("==CornerMessageEventHook==\n -msgText: %s\n -IconType: %d\n -iconPath: %s\n -soundPath: %s\n -displayTime: %f\n -instantEndCurrentMessage: %d", msgText, IconType, iconPath, soundPath, displayTime, instantEndCurrentMessage);
-#endif
-	return ThisStdCall_B(0x775380, menu, msgText, IconType, iconPath, soundPath, displayTime, instantEndCurrentMessage);
-}
 
 
 bool Cmd_SetShowOffOnCornerMessageEventHandler_Execute(COMMAND_ARGS)
@@ -49,18 +33,45 @@ bool Cmd_SetOnHitAltEventHandler_Execute(COMMAND_ARGS)
 */
 
 
-void HandleEventHooks()
+namespace CornerMessageHooks
 {
+	// iconPath and soundPath can be null.
+	bool __fastcall CornerMessageEventHook(HUDMainMenu* menu, void* edx, char* msgText, eEmotion IconType, char* iconPath, char* soundPath, float displayTime, bool instantEndCurrentMessage)
+	{
+		std::string iconPathStr = "<void>", soundPathStr = "<void>";
+		if (iconPath && iconPath[0]) iconPathStr = iconPath;
+		if (soundPath && soundPath[0]) soundPathStr = soundPath;
 
-	
+		for (auto const& callback : OnCornerMessage->EventCallbacks) {
+			FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnCornerMessage->numMaxArgs, msgText, IconType, iconPathStr.c_str(), soundPathStr.c_str(), *(UInt32*)&displayTime);
+		}
 #if _DEBUG
-	// todo: add args
-	OnCornerMessage = JGCreateEvent("OnCornerMessage", 5, 0, NULL); 
-	WriteRelCall(0x705379, (UInt32)CornerMessageEventHook);
-	WriteRelCall(0x7EE74D, (UInt32)CornerMessageEventHook);
-	WriteRelCall(0x7EE87D, (UInt32)CornerMessageEventHook);
-	WriteRelCall(0x7EEA6C, (UInt32)CornerMessageEventHook);
-	WriteRelCall(0x833303, (UInt32)CornerMessageEventHook);
-	WriteRelCall(0x8B959B, (UInt32)CornerMessageEventHook);
+		Console_Print("==CornerMessageEventHook==\n -msgText: %s\n -IconType: %d\n -iconPath: %s\n -soundPath: %s\n -displayTime: %f\n -instantEndCurrentMessage: %d", msgText, IconType, iconPath, soundPath, displayTime, instantEndCurrentMessage);
 #endif
+		return ThisStdCall_B(0x775380, menu, msgText, IconType, iconPath, soundPath, displayTime, instantEndCurrentMessage);
+	}
+	
+	void WriteHook()
+	{
+		std::array cornerMessageHookJmpSrc{ 0x705379, 0x7EE74D, 0x7EE87D, 0x7EEA6C, 0x833303, 0x8B959B };
+		for (auto const jmpSrc : cornerMessageHookJmpSrc)
+		{
+			WriteRelCall(jmpSrc, (UInt32)CornerMessageEventHook);
+		}
+	}
+}
+
+
+void RegisterEvents()
+{
+	// todo: add args
+	OnCornerMessage = JGCreateEvent("OnCornerMessage", 5, 0, NULL);
+}
+
+namespace HandleHooks
+{
+	void HandleEventHooks()
+	{
+		CornerMessageHooks::WriteHook();
+	}
 }

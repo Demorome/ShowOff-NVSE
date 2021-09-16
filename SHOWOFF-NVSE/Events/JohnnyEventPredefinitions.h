@@ -126,13 +126,12 @@ public:
 	UInt8 numMaxArgs;
 	UInt8 numMaxFilters;
 	std::vector<BaseEventClass> EventCallbacks;
-	EventInformation(const char* EventName, UInt8& numMaxArgs, UInt8& numMaxFilters, void* (__fastcall* CreatorFunction)(void**, UInt32))
+	EventInformation(const char* EventName, UInt8& numMaxArgs, UInt8& numMaxFilters, void* (__fastcall* CreatorFunction)(void**, UInt32) = GenericCreateFilter)
 	{
 		this->EventName = EventName;
 		this->numMaxArgs = numMaxArgs;
 		this->numMaxFilters = numMaxFilters;
-		this->CreateFilter = GenericCreateFilter;
-		if (CreatorFunction) this->CreateFilter = CreatorFunction;
+		this->CreateFilter = CreatorFunction;
 	}
 	virtual ~EventInformation()
 	{
@@ -153,7 +152,7 @@ public:
 	void virtual RegisterEvent(Script* script, void** filters)
 	{
 		UInt32 maxFilters = this->numMaxFilters;
-		for (std::vector<BaseEventClass>::iterator it = this->EventCallbacks.begin(); it != this->EventCallbacks.end(); ++it)
+		for (auto it = this->EventCallbacks.begin(); it != this->EventCallbacks.end(); ++it)
 		{
 			if (script == it->ScriptForEvent)
 			{
@@ -169,7 +168,7 @@ public:
 
 		}
 		std::shared_lock rLock(QueueRWLock);
-		for (std::vector<BaseEventClass>::iterator it = this->EventQueueAdd.begin(); it != this->EventQueueAdd.end(); ++it)
+		for (auto it = this->EventQueueAdd.begin(); it != this->EventQueueAdd.end(); ++it)
 		{
 
 			if (script == it->ScriptForEvent)

@@ -59,7 +59,6 @@
     <ClCompile Include="functions\ShowOff_fn_Files.cpp">
       <Filter>functions</Filter>
     </ClCompile>
-    <ClCompile Include="Hooks.cpp" />
     <ClCompile Include="internal\StewieMagic.cpp">
       <Filter>internal</Filter>
     </ClCompile>
@@ -71,6 +70,12 @@
     </ClCompile>
     <ClCompile Include="Events\LambdaVarContext.cpp">
       <Filter>Events</Filter>
+    </ClCompile>
+    <ClCompile Include="MiscHooks.cpp">
+      <Filter>Hooks</Filter>
+    </ClCompile>
+    <ClCompile Include="MenuHooks.cpp">
+      <Filter>Hooks</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -205,7 +210,6 @@
     <ClInclude Include="JSON_Library\json.h">
       <Filter>JSON Library</Filter>
     </ClInclude>
-    <ClInclude Include="Hooks.h" />
     <ClInclude Include="Changelog.txt" />
     <ClInclude Include="..\nvse\ParamInfos.h">
       <Filter>nvse</Filter>
@@ -213,6 +217,12 @@
     <ClInclude Include="SOTypes.h" />
     <ClInclude Include="Events\LambdaVarContext.h">
       <Filter>Events</Filter>
+    </ClInclude>
+    <ClInclude Include="MiscHooks.h">
+      <Filter>Hooks</Filter>
+    </ClInclude>
+    <ClInclude Include="MenuHooks.h">
+      <Filter>Hooks</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -236,6 +246,9 @@
     </Filter>
     <Filter Include="JSON Library">
       <UniqueIdentifier>{0729c7c5-ebc5-4d68-bab7-59bb7909b244}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Hooks">
+      <UniqueIdentifier>{6733d51a-42d1-47e3-88b6-38464b4c4e65}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

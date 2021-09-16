@@ -202,6 +202,8 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		g_screenWidth = *(UInt32*)0x11C73E0;
 		g_screenHeight = *(UInt32*)0x11C7190;
 
+		HandleHooks::HandleDelayedGameHooks();
+
 		Console_Print("ShowOff NVSE version: %.2f", (g_PluginVersion / 100.0F));
 
 		break;
@@ -290,7 +292,6 @@ extern "C"
 		return true;
 	}
 
-
 	bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	{
 		if (nvse->isEditor)
@@ -370,8 +371,9 @@ extern "C"
 #endif
 			
 			//HandleINIOptions();  //todo: overhaul INI options + add more before introducing to public
-			HandleGameHooks();
-			HandleEventHooks();
+			HandleHooks::HandleGameHooks();
+			HandleHooks::HandleEventHooks();
+			RegisterEvents();
 		}
 
 		// Register script commands

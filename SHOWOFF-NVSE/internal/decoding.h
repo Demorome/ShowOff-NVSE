@@ -1348,6 +1348,10 @@ public:
 		kTeammate,
 		kRockItLauncher
 	};
+	static ContainerMenu* GetSingleton() { return *(ContainerMenu**)(0x11D93F8); }
+	static ContChangesEntry* GetSelection() { return *(ContChangesEntry**)(0x11D93FC); }
+	void HandleMouseoverAlt(int a2, int a3) { ThisStdCall(0x75CF70, this, a2, a3); }
+	static void SetSelection(ContChangesEntry* entry) { *(ContChangesEntry**)(0x11D93FC) = entry; }
 
 	TileImage* tile028;		// 028
 	TileText* tile02C;		// 02C
@@ -1384,10 +1388,6 @@ public:
 	MenuItemEntryList* currentItems;	// 0F8
 	UInt32				unk0FC;			// 0FC
 	Sound				menuSound;		// 100
-
-	static ContainerMenu* GetSingleton() { return *(ContainerMenu**)(0x11D93F8); }
-	static ContChangesEntry* GetSelection() { return *(ContChangesEntry**)(0x11D93FC); }
-	static void SetSelection(ContChangesEntry* entry) { *(ContChangesEntry**)(0x11D93FC) = entry; }
 };
 STATIC_ASSERT(sizeof(ContainerMenu) == 0x10C);
 
@@ -1588,13 +1588,19 @@ public:
 		kLevelUp_Minus = 0xD,
 		kLevelUp_Plus = 0xE,
 	};
-
 	enum Pages
 	{
 		kSkillSelection = 0,
 		kPerkSelection = 1,
 		kCloseMenu = 2,  // (any value >= 2 could work)
 	};
+
+	void SetCurrentPage(Pages newPage) { ThisStdCall(0x785830, this, newPage); }
+	void SetCurrentPage(int newPage) { ThisStdCall(0x785830, this, newPage); }
+	void SetChooseSkillOrPerkNumberText() { ThisStdCall(0x785990, this); }
+	// Can change numSkillPointsToAssign.
+	void SetupSkillAndPerkListBoxes() { ThisStdCall(0x785540, this); } 
+	static LevelUpMenu* GetSingleton() { return *(LevelUpMenu**)0x11D9FDC; }
 
 	UInt32 currentPage; // 0 for skills, 1 for perks
 	TileText* tileTitle;
@@ -1614,11 +1620,6 @@ public:
 	ListBox<ActorValueCode> skillListBox;
 	ListBox<BGSPerk> perkListBox;
 	tList<BGSPerk> availablePerks; // perks to show in the perk listBox
-
-	void SetCurrentPage(Pages newPage) { ThisStdCall(0x785830, this, newPage); }
-	void SetCurrentPage(int newPage) { ThisStdCall(0x785830, this, newPage); }
-	void SetChooseSkillOrPerkNumberText() { ThisStdCall(0x785990, this); }
-	static LevelUpMenu* GetSingleton() { return *(LevelUpMenu**)0x11D9FDC; }
 };
 STATIC_ASSERT(sizeof(LevelUpMenu) == 0xCC);
 
