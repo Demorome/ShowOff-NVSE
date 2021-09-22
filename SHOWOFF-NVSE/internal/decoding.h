@@ -1598,9 +1598,26 @@ public:
 	void SetCurrentPage(Pages newPage) { ThisStdCall(0x785830, this, newPage); }
 	void SetCurrentPage(int newPage) { ThisStdCall(0x785830, this, newPage); }
 	void SetChooseSkillOrPerkNumberText() { ThisStdCall(0x785990, this); }
+	
 	// Can change numSkillPointsToAssign.
-	void SetupSkillAndPerkListBoxes() { ThisStdCall(0x785540, this); } 
+	void SetupSkillAndPerkListBoxes() { ThisStdCall(0x785540, this); }
+	
 	static LevelUpMenu* GetSingleton() { return *(LevelUpMenu**)0x11D9FDC; }
+
+	static LevelUpMenu* Create()
+	{
+		CdeclCall<void>(0x706270);
+		return GetSingleton();
+	}
+	
+	// Has a workaround for the bug that occurs when closing the menu on the same frame it was opened.
+	void Close()
+	{
+		//== Force the closure of this new LevelUpMenu
+		// In order to pass the first check for the function called at 0x785265 (Menu::SetFadeOut, check at 0xA1D92A), set title tile visibility to non-null.
+		tile->SetFloat(kTileValue_visible, 1);
+		SetCurrentPage(kCloseMenu);  // close the menu (will flash in/out nearly instantly). 
+	}
 
 	UInt32 currentPage; // 0 for skills, 1 for perks
 	TileText* tileTitle;

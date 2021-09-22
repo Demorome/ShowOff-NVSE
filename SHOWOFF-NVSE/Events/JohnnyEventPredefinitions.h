@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "events/EventFilteringInterface.h"
+#include "EventFilteringInterface.h"
 #include <unordered_set>
 
 class EventInformation;

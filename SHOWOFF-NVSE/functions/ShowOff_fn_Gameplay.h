@@ -611,10 +611,7 @@ bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
 
 	// NOTE: Tweaks' bLevelUpAlwaysShowsPerks can be useful for allowing perk previews when the player has no perk points for this level-up.
 	// Seems to work fine with iPerksPerLevel
-
-	CdeclCall<void>(0x706270); // LevelUpMenu::Create_()
-	auto const menu = LevelUpMenu::GetSingleton();
-	if (menu)
+	if (auto const menu = LevelUpMenu::Create())
 	{
 		if (!menu->availablePerks.Empty())
 		{
@@ -636,17 +633,14 @@ bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
 		}
 		else
 		{
-			//== Force the closure of this new LevelUpMenu
-			// In order to pass the first check for the function called at 0x785265 (Menu::SetFadeOut, check at 0xA1D92A), set title tile visibility to non-null.
-			menu->tile->SetFloat(kTileValue_visible, 1);
-			menu->SetCurrentPage(LevelUpMenu::kCloseMenu);  // close the menu (will flash in/out nearly instantly). 
+			menu->Close();
 		}
-	}
 
-	// Change the title of the menu (sLevelUpTitleText gamesetting determines it by default).
-	if (menuTitleBuf[0] && *result && menu)
-	{
-		menu->tileTitle->SetString(kTileValue_string, menuTitleBuf);
+		// Change the title of the menu (sLevelUpTitleText gamesetting determines it by default).
+		if (menuTitleBuf[0] && *result)
+		{
+			menu->tileTitle->SetString(kTileValue_string, menuTitleBuf);
+		}
 	}
 	return true;
 }
@@ -681,12 +675,6 @@ void __fastcall LevelUpMenuSetInitialPageHook(LevelUpMenu* menu, void* edx, int 
 	}
 }
 
-void CreateLevelUpMenu()
-{
-	// LevelUpMenu::Create_()
-	CdeclCall<void>(0x706270);
-}
-
 // Based around Stewie's SkipSkillMenuIfNoPointsToAssign.
 bool Cmd_ShowSkillMenu_Execute(COMMAND_ARGS)
 {
@@ -709,7 +697,14 @@ bool Cmd_ShowSkillMenu_Execute(COMMAND_ARGS)
 	WriteRelCall(0x7850DD, (UInt32)LevelUpMenuSetInitialPageHook);
 	g_ShowMenuDespiteNoPoints = showMenuDespiteNoPoints != 0;
 
-	CreateLevelUpMenu();
+	if (auto const menu = LevelUpMenu::Create())
+	{
+		*result = true;
+
+		// Change the title of the menu (sLevelUpTitleText game-setting determines it by default).
+		if (menuTitleBuf[0])
+			menu->tileTitle->SetString(kTileValue_string, menuTitleBuf);
+	}
 
 	// Restore calls.
 	if (numSkills > -1)
@@ -719,16 +714,6 @@ bool Cmd_ShowSkillMenu_Execute(COMMAND_ARGS)
 	}
 	g_ShowMenuDespiteNoPoints = true;
 	WriteRelCall(0x7850DD, setupPageAddr);
-
-	// Check if menu opened successfully
-	if (auto const menu = LevelUpMenu::GetSingleton())
-	{
-		*result = true;
-		
-		// Change the title of the menu (sLevelUpTitleText gamesetting determines it by default).
-		if (menuTitleBuf[0])
-			menu->tileTitle->SetString(kTileValue_string, menuTitleBuf);
-	}
 	
 	return true;
 }
