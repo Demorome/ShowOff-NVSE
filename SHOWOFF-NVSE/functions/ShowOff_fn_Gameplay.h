@@ -586,20 +586,6 @@ bool Cmd_SetLevelUpMenuCurrentPage_Execute(COMMAND_ARGS)
 	return true;
 }
 
-
-// CAUTION: not thread-safe, not sure what this could cause if you tried to summon the lvlup menu multiple times quickly.
-UInt32 g_PickablePerkCount = 0;
-
-// Credits to Tweaks' PerkMenuCheckAvailablePerksHook() for providing a structure for this WriteRelJump ASM.
-void __fastcall SetPerkAlphaIfRequirementsNotMet_Hook(Tile* tile, void* edx, TileValues alphaTrait, float alpha, bool a4)
-{
-	if (alpha == 255.0F)  // Perk is pickable
-	{
-		g_PickablePerkCount++;
-	}
-	ThisStdCall(0xA012D0, tile, alphaTrait, alpha, a4);
-}
-
 bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
 {
 	*result = false;  // result = hasShownPerks
@@ -615,31 +601,30 @@ bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
 	{
 		if (!menu->availablePerks.Empty())
 		{
-			// Count the amount of Pickable perks (g_PickablePerkCount)
-			WriteRelCall(0x78653D, (UInt32)SetPerkAlphaIfRequirementsNotMet_Hook);
 			menu->SetCurrentPage(LevelUpMenu::kPerkSelection);
 
 			if (numPerks > -1)
 			{
-				numPerks = min(numPerks, g_PickablePerkCount);
-				menu->numPerksToAssign = numPerks;
-				g_PickablePerkCount = 0;
+				auto const numAvailablePerks = menu->availablePerks.Count();
+				menu->numPerksToAssign = min(numPerks, numAvailablePerks);
 			}
+			
+			// Hide "Back" button
+			// Credit to Stewie for this trick
+			menu->tileBtnBack->SetFloat(kTileValue_visible, 0);  
 
-			WriteRelCall(0x78653D, 0xA012D0);  // restore call.
-			menu->tileBtnBack->SetFloat(kTileValue_visible, 0);  // credit to Stewie for this trick to hide the "Back" btn.
-			menu->numSkillPointsToAssign = 0;  // add compat. with GetLevelUpMenuUnspentPoints.
+			// Add compat. with GetLevelUpMenuUnspentPoints (avoid weirdness).
+			menu->numSkillPointsToAssign = 0;
+			
+			// Change the title of the menu (sLevelUpTitleText gamesetting determines it by default).
+			if (menuTitleBuf[0])
+				menu->tileTitle->SetString(kTileValue_string, menuTitleBuf);
+			
 			*result = true;
 		}
 		else
 		{
 			menu->Close();
-		}
-
-		// Change the title of the menu (sLevelUpTitleText gamesetting determines it by default).
-		if (menuTitleBuf[0] && *result)
-		{
-			menu->tileTitle->SetString(kTileValue_string, menuTitleBuf);
 		}
 	}
 	return true;

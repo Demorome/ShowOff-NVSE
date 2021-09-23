@@ -1,6 +1,10 @@
 ﻿#pragma once
 #include "decoding.h"
 
+enum IDAFunctionNames
+{
+};
+
 namespace HandleHooks
 {
 	void HandleGameHooks();
