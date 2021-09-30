@@ -384,13 +384,13 @@ bool Cmd_RemoveAllItemsShowOff_Execute(COMMAND_ARGS)
 	if (!xChanges) return true;
 
 	// Extract flags
-	bool retainOwnership = flags & kFlag_RetainOwnership;
-	bool suppressMessages = flags & kFlag_SuppressMessages;
-	bool removeQuestItemsIfPlayer = flags & kFlag_AllowRemovalOfQuestItemsFromPlayer;
-	bool removeUnplayableBipedItems = flags & kFlag_AllowRemovalOfUnplayableBipedItems;
-	bool unk1 = flags & kFlag_Unk1;
-	bool unk2 = flags & kFlag_Unk2;
-	bool ignoreAllUnplayableItems = flags & kFlag_IgnoreAllUnplayableItems;
+	bool const retainOwnership = flags & kFlag_RetainOwnership;
+	bool const suppressMessages = flags & kFlag_SuppressMessages;
+	bool const removeQuestItemsIfPlayer = flags & kFlag_AllowRemovalOfQuestItemsFromPlayer;
+	bool const removeUnplayableBipedItems = flags & kFlag_AllowRemovalOfUnplayableBipedItems;
+	bool const unk1 = flags & kFlag_Unk1;
+	bool const unk2 = flags & kFlag_Unk2;
+	bool const ignoreAllUnplayableItems = flags & kFlag_IgnoreAllUnplayableItems;
 
 	// Modify the code for RemoveAllItems
 	if (removeQuestItemsIfPlayer)
@@ -601,13 +601,12 @@ bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
 	{
 		if (!menu->availablePerks.Empty())
 		{
-			menu->SetCurrentPage(LevelUpMenu::kPerkSelection);
-
 			if (numPerks > -1)
 			{
-				auto const numAvailablePerks = menu->availablePerks.Count();
-				menu->numPerksToAssign = min(numPerks, numAvailablePerks);
+				menu->SetNumPerksToAssign(numPerks);
 			}
+			
+			menu->SetCurrentPage(LevelUpMenu::kPerkSelection);
 			
 			// Hide "Back" button
 			// Credit to Stewie for this trick

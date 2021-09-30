@@ -112,6 +112,16 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 
 
 
+//===v1.30
+
+===Bug Fixes:
+*Nada
+
+===New Functions:
+*Get/SetIngestibleConsumeSound
+
+
+
 
 
 ====== (Template:)

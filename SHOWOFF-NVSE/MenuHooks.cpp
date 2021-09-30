@@ -106,7 +106,8 @@ namespace PreventInvItemActivation
 		static const UInt32 endFuncAddr = 0x88D27A;
 
 		// Global variables do not work for "[ebp - someVal]"-style statements; use enum instead.
-		enum {
+		enum Offsets
+		{
 			actorOffset = -0x80,
 			itemOffset = 0x8,
 		};
@@ -120,14 +121,14 @@ namespace PreventInvItemActivation
 			test al, al
 			je noActivate
 
-			doNormal :
+		doNormal :
 			mov ecx, [ebp + itemOffset]
-				movzx eax, byte ptr[ecx + 4] // TESForm->typeID
-				ret
+			movzx eax, byte ptr[ecx + 4] // TESForm->typeID
+			ret
 
-				noActivate :
+		noActivate :
 			pop ecx // pop the pushed return address from call
-				jmp endFuncAddr
+			jmp endFuncAddr
 		}
 	}
 

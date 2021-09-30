@@ -1731,3 +1731,13 @@ bool IsDllRunning(const char* dll)
 {
 	return GetModuleHandleA(dll);
 }
+
+TESForm* TryExtractBaseForm(TESForm* form, TESObjectREFR* thisObj)
+{
+	form = form->TryGetREFRParent();
+	if (!form) {
+		if (!thisObj || !thisObj->baseForm) return nullptr;
+		form = thisObj->baseForm;
+	}
+	return form;
+}

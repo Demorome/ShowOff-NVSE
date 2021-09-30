@@ -21,6 +21,7 @@
 #include "functions/ShowOff_fn_Actors.h"
 #include "functions/ShowOff_fn_Debug.h"
 #include "functions/ShowOff_fn_Files.h"
+#include "functions/ShowOff_fn_Items.h"
 
 // Events
 #include "Events/JohnnyEventPredefinitions.h"
@@ -500,6 +501,10 @@ extern "C"
 		/*3CFA*/ REG_CMD(SetNoEquipShowOff)
 		/*3CFB*/ REG_CMD_AMB(GetNoEquipShowOff)	// can return a form (function) or a bool.
 		/*3CFC*/ REG_CMD(SetShowOffOnCornerMessageEventHandler)
+
+		//========v1.30
+		/*3CFD*/ REG_CMD_FORM(GetIngestibleConsumeSound)
+		/*3CFE*/ REG_CMD(SetIngestibleConsumeSound)
 
 		
 		//***Current Max OpCode: 0x3D10 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)

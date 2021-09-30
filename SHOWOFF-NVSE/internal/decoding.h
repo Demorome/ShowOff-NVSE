@@ -1601,7 +1601,15 @@ public:
 	
 	// Can change numSkillPointsToAssign.
 	void SetupSkillAndPerkListBoxes() { ThisStdCall(0x785540, this); }
-	
+
+	// Capped by the max amount of available perks.
+	// Call this before calling SetCurrentPage so the initial perk count is accurate (will be 1 otherwise).
+	void SetNumPerksToAssign(int newCount)
+	{
+		auto const numAvailablePerks = availablePerks.Count();
+		numPerksToAssign = min(newCount, numAvailablePerks);
+	}
+
 	static LevelUpMenu* GetSingleton() { return *(LevelUpMenu**)0x11D9FDC; }
 
 	static LevelUpMenu* Create()

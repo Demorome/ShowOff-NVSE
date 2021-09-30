@@ -224,6 +224,9 @@
     <ClInclude Include="MenuHooks.h">
       <Filter>Hooks</Filter>
     </ClInclude>
+    <ClInclude Include="functions\ShowOff_fn_Items.h">
+      <Filter>functions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

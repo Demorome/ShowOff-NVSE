@@ -356,6 +356,7 @@
     <ClInclude Include="functions\ShowOff_fn_Debug.h" />
     <ClInclude Include="functions\ShowOff_fn_Gameplay.h" />
     <ClInclude Include="functions\ShowOff_fn_Files.h" />
+    <ClInclude Include="functions\ShowOff_fn_Items.h" />
     <ClInclude Include="functions\ShowOff_fn_Misc.h" />
     <ClInclude Include="functions\ShowOff_fn_Settings.h" />
     <ClInclude Include="MenuHooks.h" />

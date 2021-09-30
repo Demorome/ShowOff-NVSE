@@ -3,9 +3,11 @@
 // Credits to Karut (from JohnnyGuitar) for making the Event Framework.
 
 DEFINE_COMMAND_ALT_PLUGIN(SetShowOffOnCornerMessageEventHandler, SetOnCornerMessageEventHandler, "", false, kParams_Event);
+DEFINE_COMMAND_ALT_PLUGIN(SetShowOffOnActorValueChangeEventHandler, SetOnAVChangeEventHandler, "", false, kParams_Event);	//TODO: change args
 
 
 EventInformation* OnCornerMessage;
+EventInformation* OnActorValueChange;
 
 
 bool Cmd_SetShowOffOnCornerMessageEventHandler_Execute(COMMAND_ARGS)
@@ -19,6 +21,23 @@ bool Cmd_SetShowOffOnCornerMessageEventHandler_Execute(COMMAND_ARGS)
 		if (setOrRemove)
 			OnCornerMessage->RegisterEvent(script, NULL);
 		else OnCornerMessage->RemoveEvent(script, NULL);
+	}
+	return true;
+}
+
+bool Cmd_SetShowOffOnActorValueChangeEventHandler_Execute(COMMAND_ARGS)
+{
+	UInt32 setOrRemove;
+	Script* script;
+	UInt32 flags = 0;  //reserved for future use
+	//todo: extract AV code filter, positive or negative change bool filter
+	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags) || NOT_TYPE(script, Script))) return true;
+	if (OnActorValueChange)
+	{
+		//TODO: Add filters
+		if (setOrRemove)
+			OnActorValueChange->RegisterEvent(script, NULL);
+		else OnActorValueChange->RemoveEvent(script, NULL);
 	}
 	return true;
 }
@@ -64,10 +83,80 @@ namespace CornerMessageHooks
 	}
 }
 
+namespace ActorValueChangeHooks
+{
+	void __fastcall ActorValueChange_EventHandler(ActorValueOwner *avOwner, int avCode, float previousVal, float newVal, ActorValueOwner *attackerAvOwner)
+	{
+		// todo: get forms from avOwners, pass to UDF
+		
+		for (auto const& callback : OnActorValueChange->EventCallbacks) 
+		{
+			FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnActorValueChange->numMaxArgs, *(UInt32*)&previousVal, *(UInt32*)&newVal);
+		}
+		
+#if _DEBUG
+		Console_Print("==ActorValueChangeHook==\n");
+#endif
+	}
+
+	__declspec(naked) void HandleAVChangeHook()
+	{
+		static const UInt32 overwrittenFuncAddr = 0x406D70;
+		
+		enum Offsets
+		{
+			avCode = 0xC,
+			affectedAvOwner = 0x8,
+			attackerAvOwner = 0x18,
+			newVal = 0x14,
+			previousVal = 0x10,
+		};
+
+		_asm
+		{
+			push    ebp
+			mov     ebp, esp
+
+			
+			// Call GetActorValueInfo (what was overwritten)
+			// AV code was pushed on stack right before this.
+			call overwrittenFuncAddr
+			// result is now in eax, which will not be affected before being checked at 0x66EE60.
+
+			
+			// Set up to call ActorValueChange_EventHandler
+			/*
+			mov ecx, [ebp + affectedAvOwner]
+			mov edx, [ebp + avCode]
+
+			// Is pushing directly a bad thing?
+			push [ebp + affectedAvOwner]
+			push [ebp + newVal]
+			push [ebp + previousVal]
+			
+			call ActorValueChange_EventHandler
+			*/
+			// Function is __fastcall, so no need to clean up the args.
+
+			
+			mov     esp, ebp
+			pop     ebp
+			// Pop return address from the stack (given by Call).
+			ret
+		}
+	}
+	
+	void WriteHook()
+	{
+		// Replace "GetActorValueInfo(avCode)" call
+		WriteRelCall(0x66EE58, (UInt32)HandleAVChangeHook);
+	}
+}
 
 void RegisterEvents()
 {
 	OnCornerMessage = JGCreateEvent("OnCornerMessage", 5, 0, NULL);
+	OnActorValueChange = JGCreateEvent("OnActorValueChange", 4, 0, NULL);
 }
 
 namespace HandleHooks
@@ -75,5 +164,6 @@ namespace HandleHooks
 	void HandleEventHooks()
 	{
 		CornerMessageHooks::WriteHook();
+		//ActorValueChangeHooks::WriteHook();
 	}
 }
