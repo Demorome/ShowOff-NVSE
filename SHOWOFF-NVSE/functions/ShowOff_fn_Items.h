@@ -2,7 +2,7 @@
 #include "utility.h"
 
 
-DEFINE_COMMAND_PLUGIN(GetIngestibleConsumeSound, "", false, NULL);
+DEFINE_COMMAND_PLUGIN(GetIngestibleConsumeSound, "", false, kParams_OneOptionalForm);
 bool Cmd_GetIngestibleConsumeSound_Execute(COMMAND_ARGS)
 {
 	*result = 0;
@@ -22,15 +22,15 @@ bool Cmd_GetIngestibleConsumeSound_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(SetIngestibleConsumeSound, "", false, NULL);
+DEFINE_COMMAND_PLUGIN(SetIngestibleConsumeSound, "", false, kParams_OneForm_OneOptionalForm);
 bool Cmd_SetIngestibleConsumeSound_Execute(COMMAND_ARGS)
 {
 	//Returns if the change was successful or not.
 	*result = false;
 	
-	TESForm* form = nullptr;
 	TESSound* newSound;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form, &newSound) || NOT_TYPE(newSound, TESSound))
+	TESForm* form = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &newSound, &form) || NOT_TYPE(newSound, TESSound))
 	{
 		return true;
 	}

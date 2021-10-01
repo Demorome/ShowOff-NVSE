@@ -372,6 +372,12 @@ static ParamInfo kParams_OneForm_OneOptionalObjectRef[2] =
 	{	"ref",	kParamType_ObjectRef,	1	},
 };
 
+static ParamInfo kParams_OneForm_OneOptionalForm[2] =
+{
+	{	"form",	kParamType_AnyForm,		0	},
+	{	"form",	kParamType_AnyForm,	1	},
+};
+
 static ParamInfo kParams_OneForm_OneInt[2] =
 {
 	{	"form",	kParamType_AnyForm,	0	},
