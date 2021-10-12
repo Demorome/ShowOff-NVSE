@@ -1,8 +1,9 @@
 ﻿#pragma once
 
-#include "Hooks.h"
+#include "MiscHooks.h"
 #include "SafeWrite.h"
 #include "GameSettings.h"
+#include "MenuHooks.h"
 
 DEFINE_COMMAND_ALT_PLUGIN(SetPlayerCanPickpocketEquippedItems, SetPCCanStealEqItems, "Toggles the ability to pickpocket equipped items.", false, kParams_OneInt);
 DEFINE_CMD_ALT_COND_PLUGIN(GetPlayerCanPickpocketEquippedItems, GetPCCanStealEqItems, "Checks if the player can pickpocket equipped items.", false, NULL);
@@ -45,7 +46,7 @@ bool Cmd_SetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
 	UInt32 bOn;
 	if (NUM_ARGS && ExtractArgsEx(EXTRACT_ARGS_EX, &bOn))
 	{
-		bool bCheck = canPlayerPickpocketEqItems();
+		bool bCheck = PickpocketEquippedItems::CanPlayerPickpocketEqItems();
 		if (bOn && !bCheck)
 		{
 			// replace check in ContainerMenu::ShouldHideItem while pickpocketting for item being worn, with a check the target is a child
@@ -63,12 +64,12 @@ bool Cmd_SetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
 
 bool Cmd_GetPlayerCanPickpocketEquippedItems_Eval(COMMAND_ARGS_EVAL)
 {
-	*result = canPlayerPickpocketEqItems();
+	*result = PickpocketEquippedItems::CanPlayerPickpocketEqItems();
 	return true;
 }
 bool Cmd_GetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
 {
-	*result = canPlayerPickpocketEqItems();
+	*result = PickpocketEquippedItems::CanPlayerPickpocketEqItems();
 	return true;
 }
 
@@ -383,13 +384,13 @@ bool Cmd_RemoveAllItemsShowOff_Execute(COMMAND_ARGS)
 	if (!xChanges) return true;
 
 	// Extract flags
-	bool retainOwnership = flags & kFlag_RetainOwnership;
-	bool suppressMessages = flags & kFlag_SuppressMessages;
-	bool removeQuestItemsIfPlayer = flags & kFlag_AllowRemovalOfQuestItemsFromPlayer;
-	bool removeUnplayableBipedItems = flags & kFlag_AllowRemovalOfUnplayableBipedItems;
-	bool unk1 = flags & kFlag_Unk1;
-	bool unk2 = flags & kFlag_Unk2;
-	bool ignoreAllUnplayableItems = flags & kFlag_IgnoreAllUnplayableItems;
+	bool const retainOwnership = flags & kFlag_RetainOwnership;
+	bool const suppressMessages = flags & kFlag_SuppressMessages;
+	bool const removeQuestItemsIfPlayer = flags & kFlag_AllowRemovalOfQuestItemsFromPlayer;
+	bool const removeUnplayableBipedItems = flags & kFlag_AllowRemovalOfUnplayableBipedItems;
+	bool const unk1 = flags & kFlag_Unk1;
+	bool const unk2 = flags & kFlag_Unk2;
+	bool const ignoreAllUnplayableItems = flags & kFlag_IgnoreAllUnplayableItems;
 
 	// Modify the code for RemoveAllItems
 	if (removeQuestItemsIfPlayer)
@@ -585,20 +586,6 @@ bool Cmd_SetLevelUpMenuCurrentPage_Execute(COMMAND_ARGS)
 	return true;
 }
 
-
-// CAUTION: not thread-safe, not sure what this could cause if you tried to summon the lvlup menu multiple times quickly.
-UInt32 g_PickablePerkCount = 0;
-
-// Credits to Tweaks' PerkMenuCheckAvailablePerksHook() for providing a structure for this WriteRelJump ASM.
-void __fastcall SetPerkAlphaIfRequirementsNotMet_Hook(Tile* tile, void* edx, TileValues alphaTrait, float alpha, bool a4)
-{
-	if (alpha == 255.0F)  // Perk is pickable
-	{
-		g_PickablePerkCount++;
-	}
-	ThisStdCall(0xA012D0, tile, alphaTrait, alpha, a4);
-}
-
 bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
 {
 	*result = false;  // result = hasShownPerks
@@ -610,42 +597,34 @@ bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
 
 	// NOTE: Tweaks' bLevelUpAlwaysShowsPerks can be useful for allowing perk previews when the player has no perk points for this level-up.
 	// Seems to work fine with iPerksPerLevel
-
-	CdeclCall<void>(0x706270); // LevelUpMenu::Create_()
-	auto const menu = LevelUpMenu::GetSingleton();
-	if (menu)
+	if (auto const menu = LevelUpMenu::Create())
 	{
 		if (!menu->availablePerks.Empty())
 		{
-			// Count the amount of Pickable perks (g_PickablePerkCount)
-			WriteRelCall(0x78653D, (UInt32)SetPerkAlphaIfRequirementsNotMet_Hook);
-			menu->SetCurrentPage(LevelUpMenu::kPerkSelection);
-
 			if (numPerks > -1)
 			{
-				numPerks = min(numPerks, g_PickablePerkCount);
-				menu->numPerksToAssign = numPerks;
-				g_PickablePerkCount = 0;
+				menu->SetNumPerksToAssign(numPerks);
 			}
+			
+			menu->SetCurrentPage(LevelUpMenu::kPerkSelection);
+			
+			// Hide "Back" button
+			// Credit to Stewie for this trick
+			menu->tileBtnBack->SetFloat(kTileValue_visible, 0);  
 
-			WriteRelCall(0x78653D, 0xA012D0);  // restore call.
-			menu->tileBtnBack->SetFloat(kTileValue_visible, 0);  // credit to Stewie for this trick to hide the "Back" btn.
-			menu->numSkillPointsToAssign = 0;  // add compat. with GetLevelUpMenuUnspentPoints.
+			// Add compat. with GetLevelUpMenuUnspentPoints (avoid weirdness).
+			menu->numSkillPointsToAssign = 0;
+			
+			// Change the title of the menu (sLevelUpTitleText gamesetting determines it by default).
+			if (menuTitleBuf[0])
+				menu->tileTitle->SetString(kTileValue_string, menuTitleBuf);
+			
 			*result = true;
 		}
 		else
 		{
-			//== Force the closure of this new LevelUpMenu
-			// In order to pass the first check for the function called at 0x785265 (Menu::SetFadeOut, check at 0xA1D92A), set title tile visibility to non-null.
-			menu->tile->SetFloat(kTileValue_visible, 1);
-			menu->SetCurrentPage(LevelUpMenu::kCloseMenu);  // close the menu (will flash in/out nearly instantly). 
+			menu->Close();
 		}
-	}
-
-	// Change the title of the menu (sLevelUpTitleText gamesetting determines it by default).
-	if (menuTitleBuf[0] && *result && menu)
-	{
-		menu->tileTitle->SetString(kTileValue_string, menuTitleBuf);
 	}
 	return true;
 }
@@ -657,7 +636,7 @@ SInt32 g_NumSkillsOverride = -1;
 void __fastcall SetupSkillAndPerkListBoxesHook(LevelUpMenu* menu, void* edx)
 {
 	menu->numSkillPointsToAssign = g_NumSkillsOverride;
-	ThisStdCall(0x785540, menu);  // LevelUpMenu::SetupSkillAndPerkListBoxes. May change numSkillPointsToAssign.
+	menu->SetupSkillAndPerkListBoxes();
 }
 
 bool g_ShowMenuDespiteNoPoints = true;
@@ -674,11 +653,13 @@ void __fastcall LevelUpMenuSetInitialPageHook(LevelUpMenu* menu, void* edx, int 
 	{
 		//== Close the menu.
 		// In order to pass the first check for the function called at 0x785265 (Menu::SetFadeOut, check at 0xA1D92A), set title tile visibility to non-null.
+		// Menu still flashes in/out for a frame.
 		menu->tile->SetFloat(kTileValue_visible, 1);
-		menu->SetCurrentPage(LevelUpMenu::kCloseMenu);  // menu flashes in/out for a frame.
+		menu->SetCurrentPage(LevelUpMenu::kCloseMenu);
 	}
 }
 
+// Based around Stewie's SkipSkillMenuIfNoPointsToAssign.
 bool Cmd_ShowSkillMenu_Execute(COMMAND_ARGS)
 {
 	*result = false;  // result = hasShownSkillMenu
@@ -700,8 +681,14 @@ bool Cmd_ShowSkillMenu_Execute(COMMAND_ARGS)
 	WriteRelCall(0x7850DD, (UInt32)LevelUpMenuSetInitialPageHook);
 	g_ShowMenuDespiteNoPoints = showMenuDespiteNoPoints != 0;
 
-	// LevelUpMenu::Create_()
-	CdeclCall<void>(0x706270); 
+	if (auto const menu = LevelUpMenu::Create())
+	{
+		*result = true;
+
+		// Change the title of the menu (sLevelUpTitleText game-setting determines it by default).
+		if (menuTitleBuf[0])
+			menu->tileTitle->SetString(kTileValue_string, menuTitleBuf);
+	}
 
 	// Restore calls.
 	if (numSkills > -1)
@@ -711,15 +698,6 @@ bool Cmd_ShowSkillMenu_Execute(COMMAND_ARGS)
 	}
 	g_ShowMenuDespiteNoPoints = true;
 	WriteRelCall(0x7850DD, setupPageAddr);
-
-	// Check if menu opened successfully
-	auto const menu = LevelUpMenu::GetSingleton();
-	if (menu)
-		*result = true;
-
-	// Change the title of the menu (sLevelUpTitleText gamesetting determines it by default).
-	if (menuTitleBuf[0] && *result && menu)
-		menu->tileTitle->SetString(kTileValue_string, menuTitleBuf);
 	
 	return true;
 }
@@ -731,9 +709,9 @@ bool Cmd_GetLevelUpMenuUnspentPoints_Execute(COMMAND_ARGS)
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &showSkills))
 		return true;
 	if (showSkills)
-		*result = g_LvlUpMenuUnspentPoints[0];
+		*result = GetLevelUpMenuUnspentPoints::g_LvlUpMenuUnspentPoints[0];
 	else
-		*result = g_LvlUpMenuUnspentPoints[1];
+		*result = GetLevelUpMenuUnspentPoints::g_LvlUpMenuUnspentPoints[1];
 	return true;
 }
 
@@ -904,7 +882,7 @@ bool Cmd_SetNoEquipShowOff_Execute(COMMAND_ARGS)
 	{
 		if (bNoEquip)
 		{
-			g_NoEquipFunctions.insert_or_assign(scriptObj->GetOverridingModIdx(), function);
+			g_NoEquipFunctions.insert_or_assign(scriptObj->GetOverridingModIdx(), Function(function));
 		}
 		else
 		{
@@ -1108,12 +1086,12 @@ bool Cmd_GetPCCanSleepWait_Execute(COMMAND_ARGS)
 DEFINE_CMD_COND_PLUGIN(GetPCCanSleepInOwnedBeds, "", false, NULL);
 bool Cmd_GetPCCanSleepInOwnedBeds_Eval(COMMAND_ARGS_EVAL)
 {
-	*result = GetCanSleepInOwnedBeds();
+	//*result = GetCanSleepInOwnedBeds();
 	return true;
 }
 bool Cmd_GetPCCanSleepInOwnedBeds_Execute(COMMAND_ARGS)
 {
-	*result = GetCanSleepInOwnedBeds();
+	//*result = GetCanSleepInOwnedBeds();
 	return true;
 }
 
@@ -1122,7 +1100,7 @@ bool Cmd_SetPCCanSleepInOwnedBeds_Execute(COMMAND_ARGS)
 {
 	UInt32 bOn;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bOn)) return true;
-	SetCanSleepInOwnedBeds(bOn);
+	//SetCanSleepInOwnedBeds(bOn);
 	return true;
 }
 

@@ -1348,6 +1348,10 @@ public:
 		kTeammate,
 		kRockItLauncher
 	};
+	static ContainerMenu* GetSingleton() { return *(ContainerMenu**)(0x11D93F8); }
+	static ContChangesEntry* GetSelection() { return *(ContChangesEntry**)(0x11D93FC); }
+	void HandleMouseoverAlt(int a2, int a3) { ThisStdCall(0x75CF70, this, a2, a3); }
+	static void SetSelection(ContChangesEntry* entry) { *(ContChangesEntry**)(0x11D93FC) = entry; }
 
 	TileImage* tile028;		// 028
 	TileText* tile02C;		// 02C
@@ -1384,10 +1388,6 @@ public:
 	MenuItemEntryList* currentItems;	// 0F8
 	UInt32				unk0FC;			// 0FC
 	Sound				menuSound;		// 100
-
-	static ContainerMenu* GetSingleton() { return *(ContainerMenu**)(0x11D93F8); }
-	static ContChangesEntry* GetSelection() { return *(ContChangesEntry**)(0x11D93FC); }
-	static void SetSelection(ContChangesEntry* entry) { *(ContChangesEntry**)(0x11D93FC) = entry; }
 };
 STATIC_ASSERT(sizeof(ContainerMenu) == 0x10C);
 
@@ -1588,13 +1588,44 @@ public:
 		kLevelUp_Minus = 0xD,
 		kLevelUp_Plus = 0xE,
 	};
-
 	enum Pages
 	{
 		kSkillSelection = 0,
 		kPerkSelection = 1,
 		kCloseMenu = 2,  // (any value >= 2 could work)
 	};
+
+	void SetCurrentPage(Pages newPage) { ThisStdCall(0x785830, this, newPage); }
+	void SetCurrentPage(int newPage) { ThisStdCall(0x785830, this, newPage); }
+	void SetChooseSkillOrPerkNumberText() { ThisStdCall(0x785990, this); }
+	
+	// Can change numSkillPointsToAssign.
+	void SetupSkillAndPerkListBoxes() { ThisStdCall(0x785540, this); }
+
+	// Capped by the max amount of available perks.
+	// Call this before calling SetCurrentPage so the initial perk count is accurate (will be 1 otherwise).
+	void SetNumPerksToAssign(int newCount)
+	{
+		auto const numAvailablePerks = availablePerks.Count();
+		numPerksToAssign = min(newCount, numAvailablePerks);
+	}
+
+	static LevelUpMenu* GetSingleton() { return *(LevelUpMenu**)0x11D9FDC; }
+
+	static LevelUpMenu* Create()
+	{
+		CdeclCall<void>(0x706270);
+		return GetSingleton();
+	}
+	
+	// Has a workaround for the bug that occurs when closing the menu on the same frame it was opened.
+	void Close()
+	{
+		//== Force the closure of this new LevelUpMenu
+		// In order to pass the first check for the function called at 0x785265 (Menu::SetFadeOut, check at 0xA1D92A), set title tile visibility to non-null.
+		tile->SetFloat(kTileValue_visible, 1);
+		SetCurrentPage(kCloseMenu);  // close the menu (will flash in/out nearly instantly). 
+	}
 
 	UInt32 currentPage; // 0 for skills, 1 for perks
 	TileText* tileTitle;
@@ -1613,12 +1644,7 @@ public:
 	UInt32 numPerksToAssign;  // Max amount, not the amount left.
 	ListBox<ActorValueCode> skillListBox;
 	ListBox<BGSPerk> perkListBox;
-	tList<BGSPerk> availablePerks; // perks to show in the perk listBox
-
-	void SetCurrentPage(Pages newPage) { ThisStdCall(0x785830, this, newPage); }
-	void SetCurrentPage(int newPage) { ThisStdCall(0x785830, this, newPage); }
-	void SetChooseSkillOrPerkNumberText() { ThisStdCall(0x785990, this); }
-	static LevelUpMenu* GetSingleton() { return *(LevelUpMenu**)0x11D9FDC; }
+	tList<BGSPerk> availablePerks; // perks to show in the perk listBox (with full alpha)
 };
 STATIC_ASSERT(sizeof(LevelUpMenu) == 0xCC);
 

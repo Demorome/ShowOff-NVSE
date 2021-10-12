@@ -91,27 +91,41 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 * GetCreatureTurningSpeed and GetCreatureFootWeight are made available as condition functions.
 * Added alias to GetNumBrokenEquippedItems -> GetNumBrokenEq 
 
-
 ===Bug Fixes:
 * Nada
 
 ===New Functions:
-* ShowSkillMenu
-* GetLevelUpMenuUnspentPoints
-* SetLevelUpMenuCanExitEarly
-* SetLevelUpMenuPoints
-; These will go undocumented until I further refine them while finishing my remake of Delay Level Up.
-
 * Get/SetExplosionRefSource
 * Get/SetExplosionRefRadius
 * CreateFolder (made by anhatthezoo!)
 * GetActorValueDamage (alias: GetAVDamage)
-* GetPipboyRadioVoiceEntryData  ; quite buggy atm
 * GetEquippedItemRefs
+* SetShowOffOnCornerMessageEventHandler
+
+===WIP (registered but unfinished)
+* ShowSkillMenu
+* GetLevelUpMenuUnspentPoints
+* SetLevelUpMenuCanExitEarly
+* SetLevelUpMenuPoints
+* GetPipboyRadioVoiceEntryData  ; quite buggy atm
 * Set/GetNoEquipShowOff (alias: Set/GetNoEquipSO)
 
 
-(Template:)
+
+//===v1.30
+
+===Bug Fixes:
+*Nada
+
+===New Functions:
+*Get/SetIngestibleConsumeSound
+
+
+
+
+
+====== (Template:)
+
 //===v???
 ===Bug Fixes:
 * 

@@ -6,7 +6,6 @@
 
 #include "settings.h"
 
-
 #include "memory_pool.h"
 #include "containers.h"
 #include "internal/serialization.h"
@@ -22,6 +21,7 @@
 #include "functions/ShowOff_fn_Actors.h"
 #include "functions/ShowOff_fn_Debug.h"
 #include "functions/ShowOff_fn_Files.h"
+#include "functions/ShowOff_fn_Items.h"
 
 // Events
 #include "Events/JohnnyEventPredefinitions.h"
@@ -141,8 +141,8 @@ char* g_PBIR_FailMessage = nullptr;
 #define REG_TYPED_CMD(name, type) nvse->RegisterTypedCommand(&kCommandInfo_##name,kRetnType_##type);  //from JG
 #define REG_CMD_STR(name) nvse->RegisterTypedCommand(&kCommandInfo_##name, kRetnType_String); //From JIPLN
 #define REG_CMD_ARR(name) nvse->RegisterTypedCommand(&kCommandInfo_##name, kRetnType_Array); //From JIPLN
-#define REG_CMD_FORM(name) nvse->RegisterTypedCommand(&kCommandInfo_##name, kRetnType_Form); //From JIPLN
-#define REG_CMD_AMB(name) nvse->RegisterTypedCommand(&kCommandInfo_##name, kRetnType_Ambiguous); //From JIPLN
+#define REG_CMD_FORM(name) nvse->RegisterTypedCommand(&kCommandInfo_##name, kRetnType_Form);
+#define REG_CMD_AMB(name) nvse->RegisterTypedCommand(&kCommandInfo_##name, kRetnType_Ambiguous);
 
 
 
@@ -152,7 +152,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 {
 	switch (msg->type)
 	{
-	case NVSEMessagingInterface::kMessage_LoadGame: // Credits to C6 for the help.
+	case NVSEMessagingInterface::kMessage_LoadGame:
 		break;
 	case NVSEMessagingInterface::kMessage_SaveGame:
 		break;
@@ -201,6 +201,8 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		g_tileMenuArray = *(TileMenu***)0x11F350C; 
 		g_screenWidth = *(UInt32*)0x11C73E0;
 		g_screenHeight = *(UInt32*)0x11C7190;
+
+		HandleHooks::HandleDelayedGameHooks();
 
 		Console_Print("ShowOff NVSE version: %.2f", (g_PluginVersion / 100.0F));
 
@@ -290,7 +292,6 @@ extern "C"
 		return true;
 	}
 
-
 	bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	{
 		if (nvse->isEditor)
@@ -370,8 +371,9 @@ extern "C"
 #endif
 			
 			//HandleINIOptions();  //todo: overhaul INI options + add more before introducing to public
-			HandleGameHooks();
-			HandleEventHooks();
+			HandleHooks::HandleGameHooks();
+			HandleHooks::HandleEventHooks();
+			RegisterEvents();
 		}
 
 		// Register script commands
@@ -498,6 +500,12 @@ extern "C"
 		/*3CF9*/ REG_CMD_ARR(GetEquippedItemRefs)
 		/*3CFA*/ REG_CMD(SetNoEquipShowOff)
 		/*3CFB*/ REG_CMD_AMB(GetNoEquipShowOff)	// can return a form (function) or a bool.
+		/*3CFC*/ REG_CMD(SetShowOffOnCornerMessageEventHandler)
+
+		//========v1.30
+		/*3CFD*/ REG_CMD_FORM(GetIngestibleConsumeSound)
+		/*3CFE*/ REG_CMD(SetIngestibleConsumeSound)
+
 		
 		//***Current Max OpCode: 0x3D10 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
@@ -532,9 +540,6 @@ extern "C"
 		REG_CMD(SetPCCanSleepInOwnedBeds)
 		
 		REG_CMD(ClearShowoffSavedData)  //todo: test serialization. Seems broken???
-
-		//todo: fix whatever is causing the UDFs to not fire despite the hook working.
-		REG_CMD(SetShowOffOnCornerMessageEventHandler)
 		
 		//REG_CMD_ARR(Ar_Init);
 		REG_CMD(HasAnyScriptPackage)
