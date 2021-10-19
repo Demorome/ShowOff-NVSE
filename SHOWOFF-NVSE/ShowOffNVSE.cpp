@@ -506,6 +506,8 @@ extern "C"
 		/*3CFD*/ REG_CMD_FORM(GetIngestibleConsumeSound)
 		/*3CFE*/ REG_CMD(SetIngestibleConsumeSound)
 		/*3CFF*/ REG_CMD(SetFactionCombatReactionTemp)
+		/*3D00*/ REG_CMD(GetEquippedItemRefForItem)
+
 
 		
 		//***Current Max OpCode: 0x3D10 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
