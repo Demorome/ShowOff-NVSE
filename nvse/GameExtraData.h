@@ -351,7 +351,7 @@ public:
 	{
 		ExtendDataList	*extendData;
 		SInt32			countDelta;
-		TESForm			*type;
+		TESForm			*type;	// the base item
 
 		EntryData(ListNode<ExtraDataList> *extend, SInt32 count, TESForm *item) :
 			extendData((ExtendDataList*)extend), countDelta(count), type(item) {}

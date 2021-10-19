@@ -14,14 +14,10 @@ DEFINE_CMD_COND_PLUGIN(IsEquippedWeaponMelee, "Returns 1 if the calling actor's 
 DEFINE_CMD_COND_PLUGIN(IsWeaponRanged, "Returns 1 if the weapon's base form is one of the weapon types belonging to NON melee-range weapons.", true, kParams_OneOptionalObjectID);
 DEFINE_CMD_COND_PLUGIN(IsEquippedWeaponRanged, "Returns 1 if the calling actor's equipped weapon's base form is one of the weapon types belonging to NON melee-range weapons.", true, NULL);
 DEFINE_CMD_COND_PLUGIN(GetChallengeProgress, "Returns the progress made on a challenge.", false, kParams_OneChallenge)
-DEFINE_COMMAND_PLUGIN(UnequipItems, "", true, kParams_FourOptionalInts);
-DEFINE_COMMAND_PLUGIN(GetEquippedItems, "", true, kParams_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN(GetEquippedItemRefs, "", true, kParams_OneOptionalInt);
 DEFINE_CMD_COND_PLUGIN(GetPCHasScriptedFastTravelOverride, "Returns whether or not the player is restricted by EnableFastTravel", false, NULL);
 DEFINE_CMD_COND_PLUGIN(GetPCCanFastTravel, "", false, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetWeaponHasFlag, WeaponHasFlag, "", false, kParams_OneInt_OneOptionalObjectID);
 DEFINE_CMD_ALT_COND_PLUGIN(GetActorHasBaseFlag, ActorHasBaseFlag, "", false, kParams_OneInt_OneOptionalActorBase);
-DEFINE_COMMAND_PLUGIN(RemoveAllItemsShowOff, "", true, kParams_TwoOptionalInts_OneOptionalContainerRef_OneOptionalList);
 DEFINE_COMMAND_ALT_PLUGIN(ForceWeaponJamAnim, ForceJamAnim, "", true, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedSkillPoints, GetCalculatedSkillPointsEarnedPerLevel, "Gets the amount of skill points the player would get for their current level.", false, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetLevelUpMenuPoints, "", false, kParams_TwoOptionalInts);
@@ -219,54 +215,6 @@ bool Cmd_GetChallengeProgress_Eval(COMMAND_ARGS_EVAL)
 	return true;
 }
 
-//todo: Could use a lot more testing
-bool Cmd_UnequipItems_Execute(COMMAND_ARGS)
-{
-	UInt32 flags = 0, noEquip = 0, hideMessage = 0, triggerOnUnequip = 1;
-	if (!ExtractArgs(EXTRACT_ARGS, &flags, &noEquip, &hideMessage, &triggerOnUnequip) || NOT_ACTOR(thisObj)) return true;
-	auto eqItems = GetEquippedItems(thisObj, flags);
-	for (auto const& iter : eqItems)
-	{
-		ExtraDataList* xData = triggerOnUnequip ? iter.pExtraData : nullptr;
-		((Actor*)thisObj)->UnequipItem(iter.pForm, 1, xData, 1, noEquip != 0, hideMessage != 0);
-	}
-	return true;
-}
-
-bool Cmd_GetEquippedItems_Execute(COMMAND_ARGS)
-{
-	UInt32 flags = 0;
-	*result = 0;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &flags) || NOT_ACTOR(thisObj)) return true;
-	Vector<ArrayElementR> elems;
-	auto eqItems = GetEquippedItems(thisObj, flags);
-	for (auto const& iter : eqItems)
-	{
-		ArrayElementR elem = iter.pForm;
-		elems.Append(elem);
-	}
-	auto const array = CreateArray(elems.Data(), elems.Size(), scriptObj);
-	AssignArrayResult(array, result);
-	return true;
-}
-
-bool Cmd_GetEquippedItemRefs_Execute(COMMAND_ARGS)
-{
-	UInt32 flags = 0;
-	*result = 0;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &flags) || NOT_ACTOR(thisObj)) return true;
-	Vector<ArrayElementR> elems;
-	auto eqItems = GetEquippedItems(thisObj, flags);
-	for (auto const& [baseItem, xData] : eqItems)
-	{
-		auto const itemRef = InventoryRefCreate((Actor*)thisObj, baseItem, 1, xData);
-		ArrayElementR elem = itemRef;
-		elems.Append(elem);
-	}
-	auto const array = CreateArray(elems.Data(), elems.Size(), scriptObj);
-	AssignArrayResult(array, result);
-	return true;
-}
 
 bool Cmd_GetPCHasScriptedFastTravelOverride_Eval(COMMAND_ARGS_EVAL)
 {
