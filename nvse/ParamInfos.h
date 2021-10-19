@@ -2018,3 +2018,14 @@ static ParamInfo kParams_OneOptionalContainerRef_FiveOptionalInts_OneOptionalLis
 	{	"int",	kParamType_Integer,	1	},
 	{	"form list",	kParamType_FormList,	1	},
 };
+
+static ParamInfo kParams_TwoFactions_OneInt_TwoOptionalInts[] =
+{
+	{	"faction1",	kParamType_Faction,	0	},
+	{	"faction2",	kParamType_Faction,	0	},
+
+	{	"int",kParamType_Integer,		0	},
+	
+	{	"int",kParamType_Integer,		1	},
+	{	"int",kParamType_Integer,		1	},
+};

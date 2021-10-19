@@ -1708,7 +1708,7 @@ public:
 
 	struct Reaction
 	{
-		enum
+		enum // Combat Reactions
 		{
 			kNeutral = 0,
 			kEnemy,
@@ -1718,7 +1718,7 @@ public:
 
 		TESFaction	* faction;
 		SInt32		modifier;
-		UInt32		reaction;
+		UInt32		combatReaction;
 	};
 
 	tList <Reaction>	reactions;	// 4
@@ -2194,6 +2194,21 @@ public:
 	{	SetFlag(kFlag_SpecialCombat, bSpec);	}
 	const char* GetNthRankName(UInt32 whichRank, bool bFemale = false);
 	void SetNthRankName(const char* newName, UInt32 whichRank, bool bFemale);
+
+	enum FactionCombatReaction
+	{
+		kFriend = 3,
+		kAlly = 2,
+		kEnemy = 1,
+		kNeutral = 0
+	};
+	
+	void SetAllyOrEnemyTemp(TESFaction* faction2, int factionReaction)
+	{
+		// TESReactionForm::SetAllyOrEnemy
+		ThisStdCall<void>(0x48C220, &this->reaction, faction2, factionReaction);
+		//this->MarkAsModified(4); 
+	}
 };
 
 STATIC_ASSERT(sizeof(TESFaction) == 0x4C);
