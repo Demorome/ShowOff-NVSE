@@ -125,6 +125,7 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 	*SetEnemyTemp (alias: SetEnemyShowOff)
 *GetEquippedItemRefForItem
 *TopicInfoGetResponseStrings
+*TopicInfoSetResponseStrings
 
 
 

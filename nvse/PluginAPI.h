@@ -451,7 +451,7 @@ struct NVSEArrayVarInterface
 	// version 2
 	UInt32	(* GetArrayPacked)(Array* arr);
 	
-	enum ContainerTypes
+	enum ContainerTypes : int
 	{
 		kArrType_Invalid = -1,
 		kArrType_Array = 0,
@@ -459,7 +459,7 @@ struct NVSEArrayVarInterface
 		kArrType_StringMap
 	};
 
-	int		(*GetContainerType)(Array* arr);
+	ContainerTypes (*GetContainerType)(Array* arr);
 	bool	(*ArrayHasKey)(Array* arr, const Element& key);
 };
 typedef NVSEArrayVarInterface::Array NVSEArrayVar;

@@ -512,6 +512,7 @@ extern "C"
 		/*3D01*/ REG_CMD(SetAllyTemp)
 		/*3D02*/ REG_CMD(SetEnemyTemp)
 		/*3D03*/ REG_CMD_ARR(TopicInfoGetResponseStrings)
+		/*3D04*/ REG_CMD(TopicInfoSetResponseStrings)
 
 
 		
@@ -526,8 +527,8 @@ extern "C"
 #if _DEBUG  //for functions being tested (or just abandoned).
 
 
-
 		
+			
 		REG_CMD(GetHealthExtraData)
 
 		REG_CMD_ARR(GetPipboyRadioSounds)
