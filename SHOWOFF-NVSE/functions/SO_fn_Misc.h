@@ -728,78 +728,9 @@ bool Cmd_GetPipboyRadioVoiceEntryData_Execute(COMMAND_ARGS)
 	return true;
 }
 
-static ParamInfo kParams_SetFactionCombatReaction[] =
-{
-	{	"faction1",	kParamType_Faction,	0	},
-	{	"faction2",	kParamType_Faction,	0	},
 
-	{	"setAllyOrEnemy (int)",kParamType_Integer,		0	},
 
-	{	"F1toF2Flag (int)",kParamType_Integer,		1	},
-	{	"F2toF1Flag (int)",kParamType_Integer,		1	},
-};
 
-DEFINE_COMMAND_PLUGIN(SetFactionCombatReactionTemp, "Sets the combat reaction between two factions. Unlike SetAlly/SetEnemy, isn't savebaked.", false, kParams_SetFactionCombatReaction);
-bool Cmd_SetFactionCombatReactionTemp_Execute(COMMAND_ARGS)
-{
-	*result = 0; //bSuccess
-	TESFaction* faction1, * faction2;
-	UInt32 setAllyOrEnemy;	// emulate SetAlly or SetEnemy
-
-	// If setAlly, and if true, then faction1 will react as a Friend to F2, otherwise Ally.
-	// If setEnemy, and if true, then F2 will react as Neutral to F1, otherwise Enemy.
-	UInt32 F1toF2Flag = 0;
-
-	// (inverse faction1 with F2)
-	UInt32 F2toF1Flag = 0;
-
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &faction1, &faction2, &setAllyOrEnemy, &F1toF2Flag, &F2toF1Flag))
-		return true;
-
-	if (setAllyOrEnemy)  // setAlly
-	{
-		if (F1toF2Flag)
-		{
-			faction1->SetAllyOrEnemyTemp(faction2, TESFaction::kFriend);
-		}
-		else
-		{
-			faction1->SetAllyOrEnemyTemp(faction2, TESFaction::kAlly);
-		}
-
-		if (F2toF1Flag)
-		{
-			faction2->SetAllyOrEnemyTemp(faction1, TESFaction::kFriend);
-		}
-		else
-		{
-			faction2->SetAllyOrEnemyTemp(faction1, TESFaction::kAlly);
-		}
-	}
-	else  // setEnemy
-	{
-		if (F1toF2Flag)
-		{
-			faction1->SetAllyOrEnemyTemp(faction2, TESFaction::kNeutral);
-		}
-		else
-		{
-			faction1->SetAllyOrEnemyTemp(faction2, TESFaction::kEnemy);
-		}
-
-		if (F2toF1Flag)
-		{
-			faction2->SetAllyOrEnemyTemp(faction1, TESFaction::kNeutral);
-		}
-		else
-		{
-			faction2->SetAllyOrEnemyTemp(faction1, TESFaction::kEnemy);
-		}
-	}
-
-	*result = 1;
-	return true;
-}
 
 
 
