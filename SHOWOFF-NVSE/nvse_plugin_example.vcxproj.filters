@@ -230,6 +230,9 @@
     <ClInclude Include="functions\SO_fn_Factions.h">
       <Filter>functions</Filter>
     </ClInclude>
+    <ClInclude Include="functions\SO_fn_Topics.h">
+      <Filter>functions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

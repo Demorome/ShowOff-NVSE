@@ -23,6 +23,7 @@
 #include "functions/SO_fn_Files.h"
 #include "functions/SO_fn_Items.h"
 #include "functions/SO_fn_Factions.h"
+#include "functions/SO_fn_Topics.h"
 
 // Events
 #include "Events/JohnnyEventPredefinitions.h"
@@ -510,6 +511,8 @@ extern "C"
 		/*3D00*/ REG_CMD(GetEquippedItemRefForItem)
 		/*3D01*/ REG_CMD(SetAllyTemp)
 		/*3D02*/ REG_CMD(SetEnemyTemp)
+		/*3D03*/ REG_CMD_ARR(TopicInfoGetResponseStrings)
+
 
 		
 		//***Current Max OpCode: 0x3D10 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
@@ -521,6 +524,8 @@ extern "C"
 
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
+
+
 
 		
 		REG_CMD(GetHealthExtraData)

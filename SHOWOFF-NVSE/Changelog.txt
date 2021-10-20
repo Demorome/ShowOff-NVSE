@@ -124,6 +124,7 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 	*SetAllyTemp (alias: SetAllyShowOff)
 	*SetEnemyTemp (alias: SetEnemyShowOff)
 *GetEquippedItemRefForItem
+*TopicInfoGetResponseStrings
 
 
 
