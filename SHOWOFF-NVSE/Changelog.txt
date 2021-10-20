@@ -124,11 +124,11 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 	*SetAllyTemp (alias: SetAllyShowOff)
 	*SetEnemyTemp (alias: SetEnemyShowOff)
 *GetEquippedItemRefForItem
-*TopicInfoGetResponseStrings
-*TopicInfoSetResponseStrings
+*TopicInfoGet/SetResponseStrings
+*(WIP functions from last update are still not done, sorry!)
 
-
-
+===Credits:
+-Trooper for documenting and suggesting SetAlly/EnemyTemp
 
 
 ====== (Template:)
