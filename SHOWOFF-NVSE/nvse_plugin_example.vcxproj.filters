@@ -77,6 +77,7 @@
     <ClCompile Include="MenuHooks.cpp">
       <Filter>Hooks</Filter>
     </ClCompile>
+    <ClCompile Include="settings.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="functions\SO_fn_Misc.h">

@@ -75,7 +75,18 @@ namespace CornerMessageHooks
 	
 	void WriteHook()
 	{
-		std::array cornerMessageHookJmpSrc{ 0x705379, 0x7EE74D, 0x7EE87D, 0x7EEA6C, 0x833303, 0x8B959B };
+		// SPECIAL CASE: 0x8B959B is Nop'd by Tweaks if bNoCrippleCriticalMessages = 1 && g_bPatchCripple = 1.
+		auto const tweakConflictAdr = 0x8B959B;
+		
+		std::vector cornerMessageHookJmpSrc{ 0x705379, 0x7EE74D, 0x7EE87D, 0x7EEA6C, 0x833303, tweakConflictAdr };
+
+		if (GetINIValFromTweaks("bNoCrippleCriticalMessages")
+			&& GetINIValFromTweaks("bPatchCripple", "Cripple-Critical Messages"))
+		{
+			cornerMessageHookJmpSrc.erase(
+				std::find(cornerMessageHookJmpSrc.begin(), cornerMessageHookJmpSrc.end(), tweakConflictAdr)
+			);
+		}
 		for (auto const jmpSrc : cornerMessageHookJmpSrc)
 		{
 			WriteRelCall(jmpSrc, (UInt32)CornerMessageEventHook);

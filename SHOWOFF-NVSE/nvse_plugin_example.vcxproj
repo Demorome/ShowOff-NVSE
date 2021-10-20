@@ -321,6 +321,7 @@
     <ClCompile Include="internal\memory_pool.cpp" />
     <ClCompile Include="internal\StewieMagic.cpp" />
     <ClCompile Include="internal\utility.cpp" />
+    <ClCompile Include="settings.cpp" />
     <ClCompile Include="ShowOffNVSE.cpp" />
   </ItemGroup>
   <ItemGroup>
