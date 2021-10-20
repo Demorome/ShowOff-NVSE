@@ -396,7 +396,7 @@ bool Cmd_GetEquippedItemRefForItem_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	TESForm* itemForm;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &itemForm)
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &itemForm) && itemForm
 		&& IS_ACTOR(thisObj)
 		&& itemForm->IsItem() && !IS_REFERENCE(itemForm))
 	{

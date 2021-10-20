@@ -2170,7 +2170,7 @@ public:
 	UInt32			crimeCount44;	// 44
 	UInt32			crimeCount48;	// 48
 
-	bool IsFlagSet(UInt32 flag)
+	bool IsFlagSet(UInt32 flag) const
 	{
 		return (factionFlags & flag) != 0;
 	}
@@ -2195,7 +2195,7 @@ public:
 	const char* GetNthRankName(UInt32 whichRank, bool bFemale = false);
 	void SetNthRankName(const char* newName, UInt32 whichRank, bool bFemale);
 
-	enum FactionCombatReaction
+	enum FactionCombatReaction : int
 	{
 		kFriend = 3,
 		kAlly = 2,
@@ -2209,6 +2209,9 @@ public:
 		ThisStdCall<void>(0x48C220, &this->reaction, faction2, factionReaction);
 		//this->MarkAsModified(4); 
 	}
+
+	// Imitates SetAlly/SetEnemy. If setAllyOrEnemy == 1, then will set as ally/friend.
+	void SetFactionCombatReactionTemp(TESFaction* faction2, bool setAllyOrEnemy, bool F1toF2Flag, bool F2toF1Flag);
 };
 
 STATIC_ASSERT(sizeof(TESFaction) == 0x4C);

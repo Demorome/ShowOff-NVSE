@@ -12,16 +12,18 @@
 #include "jip_nvse.h"
 #include "StewieMagic.h" 
 
-// Functions
-#include "functions/ShowOff_fn_Misc.h"
-#include "functions/ShowOff_fn_Settings.h"
-#include "functions/ShowOff_fn_Gameplay.h"
-#include "functions/ShowOff_fn_Array.h"
-#include "functions/ShowOff_fn_AuxVars.h" 
-#include "functions/ShowOff_fn_Actors.h"
-#include "functions/ShowOff_fn_Debug.h"
-#include "functions/ShowOff_fn_Files.h"
-#include "functions/ShowOff_fn_Items.h"
+// Functions (SO = ShowOff).
+#include "functions/SO_fn_Misc.h"
+#include "functions/SO_fn_Settings.h"
+#include "functions/SO_fn_Gameplay.h"
+#include "functions/SO_fn_Array.h"
+#include "functions/SO_fn_AuxVars.h" 
+#include "functions/SO_fn_Actors.h"
+#include "functions/SO_fn_Debug.h"
+#include "functions/SO_fn_Files.h"
+#include "functions/SO_fn_Items.h"
+#include "functions/SO_fn_Factions.h"
+#include "functions/SO_fn_Topics.h"
 
 // Events
 #include "Events/JohnnyEventPredefinitions.h"
@@ -33,7 +35,7 @@
 // Plugin Stuff
 IDebugLog g_Log("ShowOffNVSE.log");
 HMODULE	g_ShowOffHandle;
-UInt32 g_PluginVersion = 125;
+UInt32 g_PluginVersion = 130;
 
 // Allows modmakers to toggle ShowOff's debug messages for some of its functions.
 #ifdef _DEBUG
@@ -505,8 +507,12 @@ extern "C"
 		//========v1.30
 		/*3CFD*/ REG_CMD_FORM(GetIngestibleConsumeSound)
 		/*3CFE*/ REG_CMD(SetIngestibleConsumeSound)
-		/*3CFF*/ REG_CMD(SetFactionCombatReactionTemp)
+		/*3CFF*/ REG_CMD(SetFactionCombatReactionTemp) /*A merge of SetAllyTemp and SetEnemyTemp. Now undocumented since it's clearer to use the other two.*/
 		/*3D00*/ REG_CMD(GetEquippedItemRefForItem)
+		/*3D01*/ REG_CMD(SetAllyTemp)
+		/*3D02*/ REG_CMD(SetEnemyTemp)
+		/*3D03*/ REG_CMD_ARR(TopicInfoGetResponseStrings)
+		/*3D04*/ REG_CMD(TopicInfoSetResponseStrings)
 
 
 		
@@ -520,7 +526,9 @@ extern "C"
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 
+
 		
+			
 		REG_CMD(GetHealthExtraData)
 
 		REG_CMD_ARR(GetPipboyRadioSounds)

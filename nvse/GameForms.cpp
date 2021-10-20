@@ -809,6 +809,71 @@ void TESFaction::SetNthRankName(const char* newName, UInt32 whichRank, bool bFem
 	}
 }
 
+void TESFaction::SetFactionCombatReactionTemp(TESFaction* faction2, bool setAllyOrEnemy, bool F1toF2Flag, bool F2toF1Flag)
+{
+	int const newReaction = setAllyOrEnemy ? kAlly : kEnemy;
+	int  F1ReactionToF2, F2ReactionToF1;
+	if (setAllyOrEnemy) // setAlly
+	{
+		F1ReactionToF2 = newReaction + (F1toF2Flag ? 1 : 0);
+		F2ReactionToF1 = newReaction + (F2toF1Flag ? 1 : 0);
+	}
+	else // setEnemy
+	{
+		// Need to substract since Enemy flag is the default,
+		// and the other flag (kNeutral) is lower.
+		F1ReactionToF2 = newReaction - (F1toF2Flag ? 1 : 0);
+		F2ReactionToF1 = newReaction - (F2toF1Flag ? 1 : 0);
+	}
+
+	this->SetAllyOrEnemyTemp(faction2, F1ReactionToF2);
+	faction2->SetAllyOrEnemyTemp(this, F2ReactionToF1);
+	
+	/* ==Messier but equivalent code from an older version==
+	 *
+	if (setAllyOrEnemy)  // setAlly
+	{
+		if (F1toF2Flag)
+		{
+			faction1->SetAllyOrEnemyTemp(faction2, TESFaction::kFriend);
+		}
+		else
+		{
+			faction1->SetAllyOrEnemyTemp(faction2, TESFaction::kAlly);
+		}
+
+		if (F2toF1Flag)
+		{
+			faction2->SetAllyOrEnemyTemp(faction1, TESFaction::kFriend);
+		}
+		else
+		{
+			faction2->SetAllyOrEnemyTemp(faction1, TESFaction::kAlly);
+		}
+	}
+	else  // setEnemy
+	{
+		if (F1toF2Flag)
+		{
+			faction1->SetAllyOrEnemyTemp(faction2, TESFaction::kNeutral);
+		}
+		else
+		{
+			faction1->SetAllyOrEnemyTemp(faction2, TESFaction::kEnemy);
+		}
+
+		if (F2toF1Flag)
+		{
+			faction2->SetAllyOrEnemyTemp(faction1, TESFaction::kNeutral);
+		}
+		else
+		{
+			faction2->SetAllyOrEnemyTemp(faction1, TESFaction::kEnemy);
+		}
+	}
+	*/
+}
+
 #if 0
 UInt32 EffectItemList::CountItems() const
 {

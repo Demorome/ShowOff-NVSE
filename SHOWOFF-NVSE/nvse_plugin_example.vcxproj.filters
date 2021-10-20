@@ -56,7 +56,7 @@
     <ClCompile Include="internal\containers.cpp">
       <Filter>internal</Filter>
     </ClCompile>
-    <ClCompile Include="functions\ShowOff_fn_Files.cpp">
+    <ClCompile Include="functions\SO_fn_Files.cpp">
       <Filter>functions</Filter>
     </ClCompile>
     <ClCompile Include="internal\StewieMagic.cpp">
@@ -79,7 +79,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="functions\ShowOff_fn_Misc.h">
+    <ClInclude Include="functions\SO_fn_Misc.h">
       <Filter>functions</Filter>
     </ClInclude>
     <ClInclude Include="internal\containers.h">
@@ -155,10 +155,10 @@
     <ClInclude Include="..\nvse\Utilities.h">
       <Filter>nvse</Filter>
     </ClInclude>
-    <ClInclude Include="functions\ShowOff_fn_Settings.h">
+    <ClInclude Include="functions\SO_fn_Settings.h">
       <Filter>functions</Filter>
     </ClInclude>
-    <ClInclude Include="functions\ShowOff_fn_Gameplay.h">
+    <ClInclude Include="functions\SO_fn_Gameplay.h">
       <Filter>functions</Filter>
     </ClInclude>
     <ClInclude Include="internal\NiPoint.h">
@@ -174,13 +174,13 @@
     <ClInclude Include="SimpleINILibrary\SimpleIni.h">
       <Filter>SimpleINI Library</Filter>
     </ClInclude>
-    <ClInclude Include="functions\ShowOff_fn_Array.h">
+    <ClInclude Include="functions\SO_fn_Array.h">
       <Filter>functions</Filter>
     </ClInclude>
-    <ClInclude Include="functions\ShowOff_fn_Actors.h">
+    <ClInclude Include="functions\SO_fn_Actors.h">
       <Filter>functions</Filter>
     </ClInclude>
-    <ClInclude Include="functions\ShowOff_fn_Debug.h">
+    <ClInclude Include="functions\SO_fn_Debug.h">
       <Filter>functions</Filter>
     </ClInclude>
     <ClInclude Include="Events\ShowOffEvents.h">
@@ -192,7 +192,7 @@
     <ClInclude Include="internal\memory_pool.h">
       <Filter>internal</Filter>
     </ClInclude>
-    <ClInclude Include="functions\ShowOff_fn_AuxVars.h">
+    <ClInclude Include="functions\SO_fn_AuxVars.h">
       <Filter>functions</Filter>
     </ClInclude>
     <ClInclude Include="internal\serialization.h">
@@ -204,7 +204,7 @@
     <ClInclude Include="Events\CustomEventFilters.h">
       <Filter>Events</Filter>
     </ClInclude>
-    <ClInclude Include="functions\ShowOff_fn_Files.h">
+    <ClInclude Include="functions\SO_fn_Files.h">
       <Filter>functions</Filter>
     </ClInclude>
     <ClInclude Include="JSON_Library\json.h">
@@ -224,7 +224,13 @@
     <ClInclude Include="MenuHooks.h">
       <Filter>Hooks</Filter>
     </ClInclude>
-    <ClInclude Include="functions\ShowOff_fn_Items.h">
+    <ClInclude Include="functions\SO_fn_Items.h">
+      <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\SO_fn_Factions.h">
+      <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="functions\SO_fn_Topics.h">
       <Filter>functions</Filter>
     </ClInclude>
   </ItemGroup>
