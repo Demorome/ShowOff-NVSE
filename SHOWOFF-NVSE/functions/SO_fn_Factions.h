@@ -65,7 +65,7 @@ bool Cmd_SetAllyTemp_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_ALT_PLUGIN(SetEnemyTemp, SetEnemyShowOff, "Sets the combat reaction between two factions to enemy/neutral status. Unlike SetAlly, isn't savebaked.", false, kParams_SetAllyOrEnemyTemp);
+DEFINE_COMMAND_ALT_PLUGIN(SetEnemyTemp, SetEnemyShowOff, "Sets the combat reaction between two factions to enemy/neutral status. Unlike SetEnemy, isn't savebaked.", false, kParams_SetAllyOrEnemyTemp);
 bool Cmd_SetEnemyTemp_Execute(COMMAND_ARGS)
 {
 	*result = 0; //bSuccess

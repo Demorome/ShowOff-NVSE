@@ -120,6 +120,9 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 ===New Functions:
 *Get/SetIngestibleConsumeSound
 *SetFactionCombatReactionTemp
+- The above is still registered, but was split in two for readability:
+	*SetAllyTemp (alias: SetAllyShowOff)
+	*SetEnemyTemp (alias: SetEnemyShowOff)
 *GetEquippedItemRefForItem
 
 
