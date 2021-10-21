@@ -115,7 +115,7 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 //===v1.30
 
 ===Bug Fixes:
-*Nada
+*Fix conflict with Stewie's Tweaks that broke bNoCrippleCriticalMessages=1 + g_bPatchCripple=1. 
 
 ===New Functions:
 *Get/SetIngestibleConsumeSound
@@ -129,6 +129,7 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 
 ===Credits:
 -Trooper for documenting and suggesting SetAlly/EnemyTemp
+*lStewieAl for helping fix the conflict.
 
 
 ====== (Template:)
