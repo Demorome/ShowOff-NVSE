@@ -955,21 +955,4 @@ bool Cmd_SetEnableParent_Execute(COMMAND_ARGS)
 	return true;
 }
 
-double g_TestDemoVar = 0;
-
-void __fastcall TestDemoFunc(double *stuff)
-{
-	*stuff -= 1;
-}
-
-// Does whatever I want it to at the time.
-DEFINE_COMMAND_PLUGIN(TestDemo, "", false, NULL);
-bool Cmd_TestDemo_Execute(COMMAND_ARGS)
-{
-	UInt32 bInt = 0;
-	//if (!ExtractArgsEx(EXTRACT_ARGS_EX)) return true;
-	*result = g_thePlayer->hasNightVisionApplied;
-	return true;
-}
-
 #endif

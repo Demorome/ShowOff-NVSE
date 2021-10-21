@@ -73,20 +73,25 @@ namespace CornerMessageHooks
 		return ThisStdCall_B(0x775380, menu, msgText, IconType, iconPath, soundPath, displayTime, instantEndCurrentMessage);
 	}
 	
-	void WriteHook()
+	void WriteDelayedHook()
 	{
 		// SPECIAL CASE: 0x8B959B is Nop'd by Tweaks if bNoCrippleCriticalMessages = 1 && g_bPatchCripple = 1.
-		auto const tweakConflictAdr = 0x8B959B;
-		
-		std::vector cornerMessageHookJmpSrc{ 0x705379, 0x7EE74D, 0x7EE87D, 0x7EEA6C, 0x833303, tweakConflictAdr };
+		auto const tweakConflictAddr = 0x8B959B;
+		auto const vanillaDerefAddr = 0xEBBDE0E8;
 
-		if (GetINIValFromTweaks("bNoCrippleCriticalMessages")
-			&& GetINIValFromTweaks("bPatchCripple", "Cripple-Critical Messages"))
+		// TODO: write a RelJump inside the function itself for compatibility.
+		
+		std::vector cornerMessageHookJmpSrc{ 0x705379, 0x7EE74D, 0x7EE87D, 0x7EEA6C, 0x833303, tweakConflictAddr };
+
+		// Credits for hook collision detection method goes to lStewieAl.
+		if (*(UInt32*)tweakConflictAddr != vanillaDerefAddr)
 		{
 			cornerMessageHookJmpSrc.erase(
-				std::find(cornerMessageHookJmpSrc.begin(), cornerMessageHookJmpSrc.end(), tweakConflictAdr)
+				std::find(cornerMessageHookJmpSrc.begin(), cornerMessageHookJmpSrc.end(), tweakConflictAddr)
 			);
+			_MESSAGE("Conflict detected with (presumably) Tweaks, preventing hook from being installed at %x", tweakConflictAddr);
 		}
+		
 		for (auto const jmpSrc : cornerMessageHookJmpSrc)
 		{
 			WriteRelCall(jmpSrc, (UInt32)CornerMessageEventHook);
@@ -174,7 +179,12 @@ namespace HandleHooks
 {
 	void HandleEventHooks()
 	{
-		CornerMessageHooks::WriteHook();
 		//ActorValueChangeHooks::WriteHook();
 	}
+
+	void HandleDelayedEventHooks()
+	{
+		CornerMessageHooks::WriteDelayedHook();
+	}
+
 }

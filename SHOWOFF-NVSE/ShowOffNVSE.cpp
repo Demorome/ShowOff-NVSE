@@ -205,6 +205,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		g_screenHeight = *(UInt32*)0x11C7190;
 
 		HandleHooks::HandleDelayedGameHooks();
+		HandleHooks::HandleDelayedEventHooks();
 
 		Console_Print("ShowOff NVSE version: %.2f", (g_PluginVersion / 100.0F));
 
@@ -226,6 +227,16 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 	}
 }
 
+
+// Does whatever I want it to at the time.
+DEFINE_COMMAND_PLUGIN(TestDemo, "", false, NULL);
+bool Cmd_TestDemo_Execute(COMMAND_ARGS)
+{
+	UInt32 bInt = 0;
+	//if (!ExtractArgsEx(EXTRACT_ARGS_EX)) return true;
+	Console_Print("[%12X]", *(UInt32*)0x8B959B);
+	return true;
+}
 
 //No idea why the extern "C" is there.
 extern "C"
@@ -586,6 +597,8 @@ extern "C"
 
 		REG_CMD(GetNVSEVersionFullAlt)
 		REG_CMD(TestDemo);
+
+		
 		REG_CMD(CanBeMoved)
 
 		
