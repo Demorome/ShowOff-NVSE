@@ -35,7 +35,7 @@
 // Plugin Stuff
 IDebugLog g_Log("ShowOffNVSE.log");
 HMODULE	g_ShowOffHandle;
-UInt32 g_PluginVersion = 130;
+UInt32 g_PluginVersion = 131;
 
 // Allows modmakers to toggle ShowOff's debug messages for some of its functions.
 #ifdef _DEBUG
@@ -524,6 +524,9 @@ extern "C"
 		/*3D02*/ REG_CMD(SetEnemyTemp)
 		/*3D03*/ REG_CMD_ARR(TopicInfoGetResponseStrings)
 		/*3D04*/ REG_CMD(TopicInfoSetResponseStrings)
+
+		//========v1.31
+		/*3D05*/ REG_CMD(TopicInfoSetNthResponseString)
 
 
 		

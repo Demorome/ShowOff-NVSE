@@ -132,6 +132,11 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 *lStewieAl for helping fix the conflict.
 
 
+//===v1.31
+===New Function:
+*TopicInfoSetNthResponseString
+
+
 ====== (Template:)
 
 //===v???

@@ -58,6 +58,34 @@ bool Cmd_TopicInfoSetResponseStrings_Execute(COMMAND_ARGS)
 	return true;
 }
 
+DEFINE_COMMAND_PLUGIN(TopicInfoSetNthResponseString, "", false, kParams_OneForm_OneInt_OneString);
+bool Cmd_TopicInfoSetNthResponseString_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	TESTopicInfo* tInfo;
+	UInt32 responseIdx;
+	char newResponseStr[0x10000];
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &tInfo, &responseIdx, &newResponseStr) && IS_ID(tInfo, TESTopicInfo)
+		&& newResponseStr[0])
+	{
+		auto const response = ThisStdCall<TESTopicInfoResponse**>(0x61E780, tInfo, nullptr);
+		uint32_t loopCounter = 0;
+		for (auto responseIter = *response; responseIter; responseIter = responseIter->next)
+		{
+			// Does nothing if responseIdx is too high, but still loops around.
+			if (loopCounter == responseIdx)
+			{
+				responseIter->responseText.Set(newResponseStr);
+				break;
+			}
+			loopCounter++;
+		}
+		*result = 1;
+	}
+	return true;
+}
+
+
 
 
 
