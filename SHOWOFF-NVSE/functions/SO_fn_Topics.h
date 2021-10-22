@@ -76,11 +76,11 @@ bool Cmd_TopicInfoSetNthResponseString_Execute(COMMAND_ARGS)
 			if (loopCounter == responseIdx)
 			{
 				responseIter->responseText.Set(newResponseStr);
-				break;
+				*result = 1;
+				return true;
 			}
 			loopCounter++;
 		}
-		*result = 1;
 	}
 	return true;
 }
