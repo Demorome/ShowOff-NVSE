@@ -1734,9 +1734,11 @@ bool IsDllRunning(const char* dll)
 
 TESForm* TryExtractBaseForm(TESForm* form, TESObjectREFR* thisObj)
 {
-	form = form->TryGetREFRParent();
-	if (!form) {
-		if (!thisObj || !thisObj->baseForm) return nullptr;
+	if (form) {
+		form = form->TryGetREFRParent();
+	}
+	
+	if (!form && thisObj) {
 		form = thisObj->baseForm;
 	}
 	return form;

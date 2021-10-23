@@ -408,7 +408,32 @@ bool Cmd_GetEquippedItemRefForItem_Execute(COMMAND_ARGS)
 	return true;
 }
 
+// NOTE: Does not account for DestructibleObject data, which can store its own health.
+DEFINE_CMD_COND_PLUGIN(GetCanHaveHealth, "Returns 1 if the item/actor form can be given health data, 0 otherwise.", false, kParams_OneOptionalForm);
+bool Cmd_GetCanHaveHealth_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = 0;	//canHaveHealth
 
+	if (auto const base_form = TryExtractBaseForm((TESForm*)arg1, thisObj))
+	{
+		if (DYNAMIC_CAST(base_form, TESForm, TESHealthForm))
+		{
+			*result = 1;
+		}
+	}
+
+	return true;
+}
+bool Cmd_GetCanHaveHealth_Execute(COMMAND_ARGS)
+{
+	*result = 0;	//canHaveHealth
+	TESForm* form = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &form))
+	{
+		return Cmd_GetCanHaveHealth_Eval(thisObj, form, nullptr, result);
+	}
+	return true;
+}
 
 
 

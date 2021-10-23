@@ -35,7 +35,7 @@
 // Plugin Stuff
 IDebugLog g_Log("ShowOffNVSE.log");
 HMODULE	g_ShowOffHandle;
-UInt32 g_PluginVersion = 131;
+UInt32 g_PluginVersion = 135;
 
 // Allows modmakers to toggle ShowOff's debug messages for some of its functions.
 #ifdef _DEBUG
@@ -528,6 +528,9 @@ extern "C"
 		//========v1.31
 		/*3D05*/ REG_CMD(TopicInfoSetNthResponseString)
 
+		//========v1.35
+		/*3D06*/ REG_CMD(GetCanHaveHealth)
+
 
 		
 		//***Current Max OpCode: 0x3D10 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
@@ -541,7 +544,6 @@ extern "C"
 #if _DEBUG  //for functions being tested (or just abandoned).
 
 
-		
 			
 		REG_CMD(GetHealthExtraData)
 

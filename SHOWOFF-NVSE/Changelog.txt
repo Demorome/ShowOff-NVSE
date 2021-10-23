@@ -137,6 +137,14 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 *TopicInfoSetNthResponseString
 
 
+//===v1.35
+===Bug Fixes:
+* 
+
+===New Functions:
+*GetCanHaveHealth
+
+
 ====== (Template:)
 
 //===v???
