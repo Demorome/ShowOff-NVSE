@@ -529,7 +529,7 @@ extern "C"
 		/*3D05*/ REG_CMD(TopicInfoSetNthResponseString)
 
 		//========v1.35
-		/*3D06*/ REG_CMD(GetCanHaveHealth)
+		/*3D06*/ REG_CMD(GetItemCanHaveHealth)
 
 
 		

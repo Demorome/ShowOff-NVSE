@@ -142,7 +142,7 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 * 
 
 ===New Functions:
-*GetCanHaveHealth
+*GetItemCanHaveHealth
 
 
 ====== (Template:)
