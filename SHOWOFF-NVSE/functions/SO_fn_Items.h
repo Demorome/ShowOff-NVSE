@@ -529,7 +529,8 @@ bool Cmd_GetCalculatedItemValue_Eval(COMMAND_ARGS_EVAL)
 		}
 
 		auto itemVal = 0.0;
-		if (auto const bAccountForBarterChanges = (UInt32)arg2)	// optional arg 
+		if (auto const bAccountForBarterChanges = (UInt32)arg2;
+			bAccountForBarterChanges && BarterMenu::Get())
 		{
 			auto const brtMenu = BarterMenu::Get();
 
@@ -541,7 +542,7 @@ bool Cmd_GetCalculatedItemValue_Eval(COMMAND_ARGS_EVAL)
 			// Calculate Item Price, without barter mults.
 			// BUG: above may not work reliably when used as a condition (function may be evaluated before barter mult perk effect is applied).
 			// Accounts for item mods and conditions as well.
-			ThisStdCall<double>(0x4BD400, &tempEntry);
+			itemVal = ThisStdCall<double>(0x4BD400, &tempEntry);
 		}
 
 		*result = itemVal;
