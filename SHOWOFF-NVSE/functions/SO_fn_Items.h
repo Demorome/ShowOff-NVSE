@@ -566,24 +566,65 @@ bool Cmd_GetCalculatedItemValue_Execute(COMMAND_ARGS)
 
 
 
-DEFINE_COMMAND_PLUGIN(GetCalculatedItemWeight, "", false, kParams_OneOptionalObject);
+DEFINE_CMD_COND_PLUGIN(GetCalculatedItemWeight, "", false, kParams_OneOptionalObject);
+
+bool tList_IsEmpty_ReturnFalse_Hook(tList<void*>* thisList, void* edx)
+{
+	return false;
+}
+
+bool Cmd_GetCalculatedItemWeight_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = -1;
+
+	//todo: Check 0x57728A, call GetInventoryWeight with a pseudo ExtraContainerChanges::Data (?).
+	if (thisObj)
+	{
+		if (auto const invRef = InventoryRefGetForID(thisObj->refID))
+		{
+			if (auto contChangesData = ExtraContainerChanges::Data::Create(invRef->containerRef))
+			{
+				contChangesData->objList->Append(invRef->entry);
+
+				// feeble attempt to fix potential multithreading issues, since code is being overwritten here.
+				ScopedLock lockCodeOverwrites(g_Lock);
+				
+				// Skip code which adds up the weight for each item in the owner / container.
+				WriteRelCall(0x4D09CB, (UInt32)tList_IsEmpty_ReturnFalse_Hook);
+				
+				//Via supreme jank, call GetInventoryWeight.
+				//Has to be done, since there is no other function that can return the modified weight,
+				//and writing a new one could get invalidated by hooks/changes from other plugins.
+				auto itemWeight = ThisStdCall<double>(0x4D0900, contChangesData, g_thePlayer->isHardcore);
+
+				// Undo previous code change.
+				WriteRelCall(0x4D09CB, 0x8256D0);
+
+
+				*result = itemWeight;
+
+				//todo: implement
+				//contChangesData->Destroy();
+			}
+		}
+	}
+	else if (auto const baseItem = (TESForm*)arg1)
+	{
+		*result = baseItem->GetModifiedWeight(g_thePlayer->isHardcore);
+	}
+
+	return true;
+}
+
+
 bool Cmd_GetCalculatedItemWeight_Execute(COMMAND_ARGS)
 {
 	*result = -1;
-	//todo: Check out 0x57728A, call GetInventoryWeight with a pseudo ExtraContainerChanges::Data (?).
-	if (thisObj)
-	{
-#if 0
-		ContChangesEntry tempEntry(NULL, 1, thisObj->baseForm);
-		ExtraContainerChanges::ExtendDataList extendData;
-		extendData.Init(&thisObj->extraDataList);
-		tempEntry.extendData = &extendData;
+	TESForm* baseItem;
+	if (!ExtractArgs(EXTRACT_ARGS, &baseItem))
+		return true;
 
-		//double __thiscall ContChangesEntry::GetHealthPerc(ContChangesEntry * this, int a2)
-		//*result = ThisStdCall<double>(0x4BCDB0, &tempEntry, bPercent);
-#endif
-	}
-	return true;
+	return Cmd_GetCalculatedItemWeight_Eval(thisObj, baseItem, nullptr, result);
 }
 
 

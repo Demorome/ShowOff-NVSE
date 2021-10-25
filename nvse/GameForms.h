@@ -601,7 +601,10 @@ public:
 	bool IsItemPlayable();
 	UInt32 GetItemValue();
 	float GetWeight();
-	float GetModifiedWeight();
+
+	// Accounts for ammo hardcore mode weight changes, normal base weight otherwise.
+	double GetModifiedWeight(bool isHardcore);
+	
 	UInt8 GetOverridingModIdx();
 	const char* GetDescriptionText();
 	const char* RefToString();

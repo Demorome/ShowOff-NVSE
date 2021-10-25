@@ -249,6 +249,12 @@ ExtraContainerChanges::Data *ExtraContainerChanges::Data::Create(TESObjectREFR *
 	data->owner = owner;
 	data->objList = (EntryDataList*)GameHeapAlloc(sizeof(EntryDataList));
 	data->objList->Init();
+
+	//additions from JIP
+	data->totalWgCurrent = -1.0F;
+	data->totalWgLast = -1.0F;
+	data->byte10 = 0;
+	
 	return data;
 }
 

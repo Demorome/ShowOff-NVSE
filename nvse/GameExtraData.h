@@ -378,6 +378,7 @@ public:
 		UInt8			pad[3];
 
 		static Data *Create(TESObjectREFR *owner);
+		void Destroy();
 		float GetInventoryWeight();
 	};
 

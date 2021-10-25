@@ -46,6 +46,11 @@ float TESForm::GetWeight()
 	return 0.0F;
 }
 
+double TESForm::GetModifiedWeight(bool isHardcore)
+{
+	return ThisStdCall<double>(0x48EBC0, this, isHardcore);
+}
+
 UInt8 TESForm::GetModIndex() const
 {
 	return modIndex;

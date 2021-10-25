@@ -112,6 +112,7 @@ BSWin32Audio* g_bsWin32Audio = nullptr;
 DataHandler* g_dataHandler = nullptr;
 BSAudioManager* g_audioManager = nullptr;
 Sky** g_currentSky = nullptr;
+RefID g_xMarkerFormID = 0x3B;
 
 // Hook Globals
 std::atomic<bool> g_canPlayerPickpocketInCombat = false;
@@ -546,6 +547,7 @@ extern "C"
 		REG_CMD(GetItemCanRepairTarget)
 		REG_CMD(GetItemCanBeRepairedByTarget)
 		REG_CMD(GetCalculatedItemValue)
+		REG_CMD(GetCalculatedItemWeight)
 			
 		REG_CMD(GetHealthExtraData)
 
@@ -586,8 +588,7 @@ extern "C"
 		//REG_CMD(UnequipItemsFromBitMask)  //tricky to get xData, idk if anyone will ever use this anyways.
 		//REG_CMD(SetOnHitAltEventHandler);
 
-		//REG_CMD(GetItemRefHealth);  //THESE PROBABLY NEED SAFETY CHECKS (check if loaded in mid-high)
-		//REG_CMD(GetCalculatedItemWeight);
+		//REG_CMD(GetItemRefHealth);
 
 		//REG_CMD(SetPlayerPickpocketBaseChance);
 		//REG_CMD(GetFastTravelFlags);
