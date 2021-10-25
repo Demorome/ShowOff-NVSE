@@ -508,7 +508,7 @@ bool Cmd_GetItemCanBeRepairedByTarget_Execute(COMMAND_ARGS)
 }
 
 
-DEFINE_CMD_COND_PLUGIN(GetCalculatedItemValue, "Returns the item's value, affected by condition and any attached weapon mods.", false, kParams_OneOptionalObject_OneOptionalInt);
+DEFINE_CMD_COND_PLUGIN(GetCalculatedItemValue, "Returns the item's value, affected by condition and any attached weapon mods (and extra).", false, kParams_OneOptionalObject_OneOptionalInt);
 bool Cmd_GetCalculatedItemValue_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = -1;
@@ -539,7 +539,8 @@ bool Cmd_GetCalculatedItemValue_Eval(COMMAND_ARGS_EVAL)
 		else
 		{
 			// Calculate Item Price, without barter mults.
-			// Accounts for item mods and conditions
+			// BUG: above may not work reliably when used as a condition (function may be evaluated before barter mult perk effect is applied).
+			// Accounts for item mods and conditions as well.
 			ThisStdCall<double>(0x4BD400, &tempEntry);
 		}
 
@@ -568,7 +569,7 @@ DEFINE_COMMAND_PLUGIN(GetCalculatedItemWeight, "", false, kParams_OneOptionalObj
 bool Cmd_GetCalculatedItemWeight_Execute(COMMAND_ARGS)
 {
 	*result = -1;
-	//todo: wtf do I do
+	//todo: Check out 0x57728A, call GetInventoryWeight with a pseudo ExtraContainerChanges::Data (?).
 	if (thisObj)
 	{
 #if 0
