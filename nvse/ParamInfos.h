@@ -296,6 +296,20 @@ static ParamInfo kParams_OneOptionalObject[1] =
    {	"target item",	kParamType_TESObject,	1	},
 };
 
+static ParamInfo kParams_OneOptionalObject_OneOptionalInt[2] =
+{
+   {	"target item",	kParamType_TESObject,	1	},
+	{	"int",	kParamType_Integer,	1	},
+};
+
+static ParamInfo kParams_TwoOptionalObjects[2] =
+{
+   {	"target item",	kParamType_TESObject,	1	},
+	{	"target item",	kParamType_TESObject,	1	},
+};
+
+
+
 static ParamInfo kParams_OneString_OneOptionalObject[2] =
 {
 	{	"string",		kParamType_String,			0	},

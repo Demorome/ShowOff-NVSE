@@ -6,6 +6,7 @@
 #include "GameData.h"
 #include "GameProcess.h"
 #include "GameRTTI.h"
+#include "jip_nvse.h"
 
 
 // From JIP
@@ -1742,4 +1743,18 @@ TESForm* TryExtractBaseForm(TESForm* form, TESObjectREFR* thisObj)
 		form = thisObj->baseForm;
 	}
 	return form;
+}
+
+TESObjectREFR* TryGetREFR(TESForm* optionalForm, TESObjectREFR* thisObj)
+{
+	TESObjectREFR* result = nullptr;
+	if (optionalForm && IS_REFERENCE(optionalForm))
+	{
+		result = (TESObjectREFR*)optionalForm;
+	}
+	else if (thisObj)
+	{
+		result = thisObj;
+	}
+	return result;
 }

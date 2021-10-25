@@ -751,6 +751,9 @@ bool Cmd_GetPipboyRadioVoiceEntryData_Execute(COMMAND_ARGS)
 
 
 
+
+
+
 DEFINE_COMMAND_PLUGIN(GetPipboyRadioSounds, "", false, NULL);
 bool Cmd_GetPipboyRadioSounds_Execute(COMMAND_ARGS)
 {
@@ -782,65 +785,6 @@ bool Cmd_GetPipBoyRadioSoundTimeRemaining_Execute(COMMAND_ARGS)
 }
 
 
-
-
-
-
-DEFINE_COMMAND_PLUGIN(GetCalculatedItemValue, "", false, kParams_OneOptionalForm);
-bool Cmd_GetCalculatedItemValue_Execute(COMMAND_ARGS)
-{
-	*result = -1;
-	if (thisObj)
-	{
-		//todo: wtf do I do
-		ContChangesEntry tempEntry(NULL, 1, thisObj->baseForm);  //copying after GetCalculatedWeaponDamage from JIP, thx c6.
-		ExtraContainerChanges::ExtendDataList extendData;
-		extendData.Init(&thisObj->extraDataList);
-		tempEntry.extendData = &extendData;
-		*result = ThisStdCall<double>(0x4BD400, &tempEntry);
-	}
-	return true;
-}
-
-DEFINE_COMMAND_PLUGIN(GetCalculatedItemHealth, "", false, kParams_OneOptionalForm_OneOptionalInt);
-bool Cmd_GetCalculatedItemHealth_Execute(COMMAND_ARGS)
-{
-	*result = -1;
-	TESForm* form = nullptr;
-	UINT32 returnAsPercent = false;
-	if (thisObj && ExtractArgs(EXTRACT_ARGS, &form, &returnAsPercent))
-	{
-		//todo: wtf do I do
-		ContChangesEntry tempEntry(NULL, 1, thisObj->baseForm);  //copying after GetCalculatedWeaponDamage from JIP, and c6.
-		ExtraContainerChanges::ExtendDataList extendData;
-		extendData.Init(&thisObj->extraDataList);
-		tempEntry.extendData = &extendData;
-
-		//double __thiscall ContChangesEntry::GetHealthPerc(ContChangesEntry * this, int a2)
-		*result = ThisStdCall<double>(0x4BCDB0, &tempEntry, returnAsPercent != 0);
-	}
-	return true;
-}
-
-DEFINE_COMMAND_PLUGIN(GetCalculatedItemWeight, "", false, kParams_OneOptionalForm);
-bool Cmd_GetCalculatedItemWeight_Execute(COMMAND_ARGS)
-{
-	*result = -1;
-	//todo: wtf do I do
-	if (thisObj)
-	{
-#if 0
-		ContChangesEntry tempEntry(NULL, 1, thisObj->baseForm);
-		ExtraContainerChanges::ExtendDataList extendData;
-		extendData.Init(&thisObj->extraDataList);
-		tempEntry.extendData = &extendData;
-
-		//double __thiscall ContChangesEntry::GetHealthPerc(ContChangesEntry * this, int a2)
-		//*result = ThisStdCall<double>(0x4BCDB0, &tempEntry, bPercent);
-#endif
-	}
-	return true;
-}
 
 
 DEFINE_COMMAND_PLUGIN(SetCellFullNameAlt, "Like SetCellFullName but accepts a string.", false, kParams_JIP_OneCell_OneString);

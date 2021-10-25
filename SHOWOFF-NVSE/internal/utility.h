@@ -378,4 +378,4 @@ SInt32 GetIntGameSetting(UInt32 addr);
 bool IsDllRunning(const char* dll);
 
 TESForm* TryExtractBaseForm(TESForm* form, TESObjectREFR* thisObj);
-
+TESObjectREFR* TryGetREFR(TESForm* optionalForm, TESObjectREFR* thisObj);

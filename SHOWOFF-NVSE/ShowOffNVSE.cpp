@@ -543,7 +543,9 @@ extern "C"
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 
-
+		REG_CMD(GetItemCanRepairTarget)
+		REG_CMD(GetItemCanBeRepairedByTarget)
+		REG_CMD(GetCalculatedItemValue)
 			
 		REG_CMD(GetHealthExtraData)
 
@@ -584,7 +586,6 @@ extern "C"
 		//REG_CMD(UnequipItemsFromBitMask)  //tricky to get xData, idk if anyone will ever use this anyways.
 		//REG_CMD(SetOnHitAltEventHandler);
 
-		//REG_CMD(GetItemRefValue);
 		//REG_CMD(GetItemRefHealth);  //THESE PROBABLY NEED SAFETY CHECKS (check if loaded in mid-high)
 		//REG_CMD(GetCalculatedItemWeight);
 

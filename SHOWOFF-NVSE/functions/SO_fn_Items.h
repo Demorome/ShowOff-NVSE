@@ -443,6 +443,168 @@ bool Cmd_GetItemCanHaveHealth_Execute(COMMAND_ARGS)
 #if _DEBUG
 
 
+bool CanItemRepairTarget(TESForm* repairingItem, TESForm* itemToRepair)
+{
+	// Works even if the forms aren't guaranteed to be items, and if either are null.
+	return ThisStdCall_B(0x47BB50, (TESObjectARMO*)repairingItem, (TESObjectARMO*)itemToRepair);
+}
+
+DEFINE_CMD_COND_PLUGIN(GetItemCanRepairTarget, "", false, kParams_TwoOptionalObjects);
+bool Cmd_GetItemCanRepairTarget_Eval(COMMAND_ARGS_EVAL)
+{
+	TESForm* repairingItem = thisObj;
+	TESForm* itemTarget = nullptr;
+	if (!repairingItem)
+	{
+		repairingItem = (TESForm*)arg1;
+		itemTarget = (TESForm*)arg2;
+	}
+	else
+	{
+		itemTarget = (TESForm*)arg1;
+	}
+
+	*result = CanItemRepairTarget(repairingItem, itemTarget);
+	return true;
+}
+bool Cmd_GetItemCanRepairTarget_Execute(COMMAND_ARGS)
+{
+	TESForm* repairingItem = nullptr;	// if thisObj is non-null, then this is actually itemTarget.
+	TESForm* itemTarget = nullptr;
+	
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &repairingItem, &itemTarget))
+		return true;
+	
+	return Cmd_GetItemCanRepairTarget_Eval(thisObj, repairingItem, itemTarget, result);
+}
+
+DEFINE_CMD_COND_PLUGIN(GetItemCanBeRepairedByTarget, "Inverse of GetItemCanRepairTarget.", false, kParams_TwoOptionalObjects);
+bool Cmd_GetItemCanBeRepairedByTarget_Eval(COMMAND_ARGS_EVAL)
+{
+	TESForm* itemToRepair = thisObj;
+	TESForm* itemTarget = nullptr;	// target = repairingItem
+	if (!itemToRepair)
+	{
+		itemToRepair = (TESForm*)arg1;
+		itemTarget = (TESForm*)arg2;
+	}
+	else
+	{
+		itemTarget = (TESForm*)arg1;
+	}
+
+	*result = CanItemRepairTarget(itemTarget, itemToRepair);
+	return true;
+}
+bool Cmd_GetItemCanBeRepairedByTarget_Execute(COMMAND_ARGS)
+{
+	TESForm* itemToRepair = nullptr;	// if thisObj is non-null, then this is actually itemTarget.
+	TESForm* itemTarget = nullptr;
+
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &itemToRepair, &itemTarget))
+		return true;
+
+	return Cmd_GetItemCanBeRepairedByTarget_Eval(thisObj, itemToRepair, itemTarget, result);
+}
+
+
+DEFINE_CMD_COND_PLUGIN(GetCalculatedItemValue, "Returns the item's value, affected by condition and any attached weapon mods.", false, kParams_OneOptionalObject_OneOptionalInt);
+bool Cmd_GetCalculatedItemValue_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = -1;
+	auto baseItem = (TESForm*)arg1;	// optional arg
+	auto const itemRef = thisObj;
+		
+	if (baseItem = TryExtractBaseForm(baseItem, thisObj); 
+		baseItem && baseItem->IsItem())
+	{
+		// Count = 1, so this doesn't account for stacked item references.
+		ContChangesEntry tempEntry(NULL, 1, baseItem);  //copied after GetCalculatedWeaponDamage from JIP, thx for the pointer c6.
+
+		if (itemRef)	// trust it is an item ref...
+		{
+			ExtraContainerChanges::ExtendDataList extendData;
+			extendData.Init(&itemRef->extraDataList);
+			tempEntry.extendData = &extendData;
+		}
+
+		auto itemVal = 0.0;
+		if (auto const bAccountForBarterChanges = (UInt32)arg2)	// optional arg 
+		{
+			auto const brtMenu = BarterMenu::Get();
+
+			//todo: check if it accounts for Barter skill effects
+			itemVal = brtMenu->CalculateItemPrice(&tempEntry);
+		}
+		else
+		{
+			// Calculate Item Price, without barter mults.
+			// Accounts for item mods and conditions
+			ThisStdCall<double>(0x4BD400, &tempEntry);
+		}
+
+		*result = itemVal;
+	}
+
+	return true;
+}
+bool Cmd_GetCalculatedItemValue_Execute(COMMAND_ARGS)
+{
+	*result = -1;
+	TESForm* item = nullptr;
+	UInt32 bAccountForBarterChanges = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &item, &bAccountForBarterChanges))
+		return true;
+
+	return Cmd_GetCalculatedItemValue_Eval(thisObj, item, (void*)bAccountForBarterChanges, result);
+}
+
+
+
+
+
+
+DEFINE_COMMAND_PLUGIN(GetCalculatedItemWeight, "", false, kParams_OneOptionalObject);
+bool Cmd_GetCalculatedItemWeight_Execute(COMMAND_ARGS)
+{
+	*result = -1;
+	//todo: wtf do I do
+	if (thisObj)
+	{
+#if 0
+		ContChangesEntry tempEntry(NULL, 1, thisObj->baseForm);
+		ExtraContainerChanges::ExtendDataList extendData;
+		extendData.Init(&thisObj->extraDataList);
+		tempEntry.extendData = &extendData;
+
+		//double __thiscall ContChangesEntry::GetHealthPerc(ContChangesEntry * this, int a2)
+		//*result = ThisStdCall<double>(0x4BCDB0, &tempEntry, bPercent);
+#endif
+	}
+	return true;
+}
+
+
+
+DEFINE_COMMAND_PLUGIN(GetCalculatedItemHealth, "", false, kParams_OneOptionalForm_OneOptionalInt);
+bool Cmd_GetCalculatedItemHealth_Execute(COMMAND_ARGS)
+{
+	*result = -1;
+	TESForm* form = nullptr;
+	UINT32 returnAsPercent = false;
+	if (thisObj && ExtractArgs(EXTRACT_ARGS, &form, &returnAsPercent))
+	{
+		//todo: wtf do I do
+		ContChangesEntry tempEntry(NULL, 1, thisObj->baseForm);  //copying after GetCalculatedWeaponDamage from JIP, and c6.
+		ExtraContainerChanges::ExtendDataList extendData;
+		extendData.Init(&thisObj->extraDataList);
+		tempEntry.extendData = &extendData;
+
+		//double __thiscall ContChangesEntry::GetHealthPerc(ContChangesEntry * this, int a2)
+		*result = ThisStdCall<double>(0x4BCDB0, &tempEntry, returnAsPercent != 0);
+	}
+	return true;
+}
 
 
 #endif

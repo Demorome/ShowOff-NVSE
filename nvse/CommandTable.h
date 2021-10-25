@@ -76,7 +76,7 @@ enum ParamType
 	kParamType_LeveledChar =			0x3A,	// AddNPCToLeveledList		kFormType_LeveledCharacter
 	kParamType_LeveledCreature =		0x3B,	// AddCreatureToLeveledList	kFormType_LeveledCreature
 	kParamType_LeveledItem =			0x3C,	// AddItemToLeveledList		kFormType_LeveledItem
-	kParamType_AnyForm =				0x3D,	// AddFormToFormList		any form
+	kParamType_AnyForm =				0x3D,	// AddFormToFormList		any form. IS NOT VALID FOR CONDITION ARGS!
 
 	// new vegas
 	kParamType_Reputation =				0x3E,	//							kFormType_Reputation
