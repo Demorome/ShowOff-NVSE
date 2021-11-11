@@ -904,7 +904,31 @@ bool Cmd_GetNoEquipShowOff_Execute(COMMAND_ARGS)
 
 
 
+DEFINE_COMMAND_PLUGIN(SetPlantedExplosive, "", true, kParams_OneInt_OneOptionalForm);
+bool Cmd_SetPlantedExplosive_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	UInt32 bPlanted;
+	TESForm* itemToPlant = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bPlanted, &itemToPlant))
+		return true;
+	
+	if (auto const actor = DYNAMIC_CAST(thisObj, TESObjectREFR, Actor))
+	{
+		auto hiProc = (HighProcess*)actor->baseProcess;
+		if (!hiProc || hiProc->processLevel)
+			return true;
 
+		if (auto const menu = ContainerMenu::GetSingleton())
+		{
+			//todo: call the check function before adding item.
+			menu->list078.Insert(itemToPlant);
+		}
+		hiProc->plantedExplosive = bPlanted != 0;
+		*result = 1;
+	}
+	return true;
+}
 
 
 //todo: GetLevelUpMenuMaxPoints
