@@ -5324,6 +5324,11 @@ public:
 	// 06:	Depth of Field: Distance
 	// 07:	Depth of Field: Range
 	// 08:	Full-Screen Motion Blur: Strength
+
+	void Trigger(float strength, int target)
+	{
+		CdeclCall(0x5299A0, this, strength, target);
+	}
 };
 STATIC_ASSERT(sizeof(TESImageSpaceModifier) == 0x730);
 

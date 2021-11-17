@@ -204,7 +204,7 @@ bool GetNumericINISetting(char* settingName, double* result)
 				*result = val;
 				bResult = true;
 			}
-		};
+		}
 	}
 
 	return bResult;

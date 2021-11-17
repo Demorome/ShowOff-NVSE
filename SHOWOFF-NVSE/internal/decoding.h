@@ -1725,7 +1725,7 @@ public:
 	Tile* GetTileForItem(ContChangesEntry* itemEntry) const
 	{
 		// Call MenuItemsList::TileFromItem
-		// todo: check if itemEntry needs to have an extra *
+		// TODO: remove this, doesn't work how I expected
 		return ThisStdCall<Tile*>(0x7A22D0, this->currentItems, itemEntry);
 	}
 

@@ -1728,6 +1728,12 @@ SInt32 GetIntGameSetting(UInt32 addr)
 	return *(SInt32*)(addr + 4);
 }
 
+char* GetStrGameSetting(UInt32 addr)
+{
+	return *(char**)(addr + 4);
+}
+
+
 bool IsDllRunning(const char* dll)
 {
 	return GetModuleHandleA(dll);

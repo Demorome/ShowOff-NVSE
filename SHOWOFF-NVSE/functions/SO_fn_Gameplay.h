@@ -902,6 +902,53 @@ bool Cmd_GetNoEquipShowOff_Execute(COMMAND_ARGS)
 
 
 
+DEFINE_COMMAND_PLUGIN(ApplyAddictionEffect, "", true, kParams_OneForm_OneOptionalInt);
+bool Cmd_ApplyAddictionEffect_Execute(COMMAND_ARGS)
+{
+	auto const actor = DYNAMIC_CAST(thisObj, TESObjectREFR, Actor);
+	AlchemyItem* alchItem;
+	UInt32 bShowMsg = true;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &alchItem, &bShowMsg)
+		|| !actor || !alchItem || !IS_TYPE(alchItem, AlchemyItem))
+	{
+		return true;
+	}
+
+	//TODO: apply addiction effect, cuz that apparently doesn't happen where I thought it would...
+	
+	if (auto const umonEffInAlchItm = ThisStdCall<EffectItem*>(0x406200, &alchItem->magicItem.list))
+	{
+		ThisStdCall(0x824570, &actor->magicTarget, umonEffInAlchItm, &alchItem->magicItem, 0);
+	}
+
+	MagicItem* withdrawalMagicItem = nullptr;
+	if (alchItem->withdrawalEffect) {
+		withdrawalMagicItem = &alchItem->withdrawalEffect->magicItem;
+	}
+	// MagicTarget::HandleWithdrawal
+	ThisStdCall(0x824DF0, &actor->magicTarget, &alchItem->magicItem, withdrawalMagicItem);
+
+	if (const bool showAddictionEffect = actor->IsPlayerRef()
+		&& !ThisStdCall_B(0x825610, &actor->magicTarget, &alchItem->magicItem, 1))
+	{
+		IncPCMiscStat(kMiscStat_TimesAddicted);
+
+		// Apply imagespace modifier
+		auto const kBloodISFXd = 0x19482;
+		auto const imod = DYNAMIC_CAST(LookupFormByID(kBloodISFXd), TESForm, TESImageSpaceModifier);
+		imod->Trigger(1.0, 0);
+
+		if (bShowMsg)
+		{
+			auto const itemName = alchItem->magicItem.name.CStr();
+			auto const sChemsAddicted = GetStrGameSetting(0x11D4CF0);
+			auto const msgStr = FormatString(sChemsAddicted, itemName);
+			QueueUIMessage(msgStr.c_str(), eEmotion::sad, nullptr, "UIHealthChemsAddicted", 2.0, 0);
+		}
+	}
+
+	return true;
+}
 
 
 DEFINE_COMMAND_PLUGIN(SetPlantedExplosive, "", true, kParams_OneInt_OneOptionalForm);

@@ -57,17 +57,22 @@ namespace CornerMessageHooks
 	// iconPath and soundPath can be null.
 	bool __fastcall CornerMessageEventHook(HUDMainMenu* menu, void* edx, char* msgText, eEmotion IconType, char* iconPath, char* soundPath, float displayTime, bool instantEndCurrentMessage)
 	{
+		bool bFireEvent = true;
+		
 		// Avoid throwing exceptions with bad char*
 		std::string msgTextStr, iconPathStr, soundPathStr;
 		msgTextStr = iconPathStr = soundPathStr = "<void>";
 		if (msgText && msgText[0]) msgTextStr = msgText;
+		else bFireEvent = false;
 		if (iconPath && iconPath[0]) iconPathStr = iconPath;
 		if (soundPath && soundPath[0]) soundPathStr = soundPath;
 
-		for (auto const& callback : OnCornerMessage->EventCallbacks) {
-			FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnCornerMessage->numMaxArgs, msgTextStr.c_str(), IconType, iconPathStr.c_str(), soundPathStr.c_str(), *(UInt32*)&displayTime);
+		if (bFireEvent) {
+			for (auto const& callback : OnCornerMessage->EventCallbacks) {
+				FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnCornerMessage->numMaxArgs, msgTextStr.c_str(), IconType, iconPathStr.c_str(), soundPathStr.c_str(), *(UInt32*)&displayTime);
+			}
 		}
-#if _DEBUG
+#if false
 		Console_Print("==CornerMessageEventHook==\n -msgText: %s\n -IconType: %d\n -iconPath: %s\n -soundPath: %s\n -displayTime: %f\n -instantEndCurrentMessage: %d", msgText, IconType, iconPath, soundPath, displayTime, instantEndCurrentMessage);
 #endif
 		return ThisStdCall_B(0x775380, menu, msgText, IconType, iconPath, soundPath, displayTime, instantEndCurrentMessage);

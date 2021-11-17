@@ -512,16 +512,21 @@ DEFINE_CMD_COND_PLUGIN(GetCalculatedItemValue, "Returns the item's value, affect
 bool Cmd_GetCalculatedItemValue_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = -1;
-	auto baseItem = (TESForm*)arg1;	// optional arg
-	auto const itemRef = thisObj;
+	auto baseItem = (TESForm*)arg2;	// optional arg
+	auto const itemRef = thisObj;	// trust it is an item ref...
 		
 	if (baseItem = TryExtractBaseForm(baseItem, thisObj); 
 		baseItem && baseItem->IsItem())
 	{
+		auto const invRef = InventoryRefGetForID(thisObj->refID);
+		
 		// Count = 1, so this doesn't account for stacked item references.
-		ContChangesEntry tempEntry(NULL, 1, baseItem);  //copied after GetCalculatedWeaponDamage from JIP, thx for the pointer c6.
+		//copied after GetCalculatedWeaponDamage from JIP, thx for the pointer c6.
+		ContChangesEntry tempEntry(NULL, 1, baseItem);
+		if (invRef)
+			tempEntry = *invRef->entry;
 
-		if (itemRef)	// trust it is an item ref...
+		if (!invRef && itemRef)
 		{
 			ExtraContainerChanges::ExtendDataList extendData;
 			extendData.Init(&itemRef->extraDataList);
@@ -529,18 +534,18 @@ bool Cmd_GetCalculatedItemValue_Eval(COMMAND_ARGS_EVAL)
 		}
 
 		auto itemVal = 0.0;
-		if (auto const bAccountForBarterChanges = (UInt32)arg2;
+		if (auto const bAccountForBarterChanges = (UInt32)arg1;
 			bAccountForBarterChanges && BarterMenu::Get())
 		{
 			auto const brtMenu = BarterMenu::Get();
 
 			//todo: check if it accounts for Barter skill effects
+			// BUG: above may not work reliably when used as a condition (function may be evaluated before barter mult perk effect is applied).
 			itemVal = brtMenu->CalculateItemPrice(&tempEntry);
 		}
 		else
 		{
-			// Calculate Item Price, without barter mults.
-			// BUG: above may not work reliably when used as a condition (function may be evaluated before barter mult perk effect is applied).
+			// Calculate Item Price, without barter mults. 
 			// Accounts for item mods and conditions as well.
 			itemVal = ThisStdCall<double>(0x4BD400, &tempEntry);
 		}
@@ -553,12 +558,12 @@ bool Cmd_GetCalculatedItemValue_Eval(COMMAND_ARGS_EVAL)
 bool Cmd_GetCalculatedItemValue_Execute(COMMAND_ARGS)
 {
 	*result = -1;
-	TESForm* item = nullptr;
 	UInt32 bAccountForBarterChanges = 0;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &item, &bAccountForBarterChanges))
+	TESForm* item = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bAccountForBarterChanges, &item))
 		return true;
 
-	return Cmd_GetCalculatedItemValue_Eval(thisObj, item, (void*)bAccountForBarterChanges, result);
+	return Cmd_GetCalculatedItemValue_Eval(thisObj, (void*)bAccountForBarterChanges, item, result);
 }
 
 
