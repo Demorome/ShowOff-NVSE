@@ -421,6 +421,72 @@ bool Cmd_GetActorValueDamage_Execute(COMMAND_ARGS)
 	return Cmd_GetActorValueDamage_Eval(thisObj, (void*)avCode, 0, result);
 }
 
+namespace SayTo	//functions related to SayTo
+{
+	enum GetExtraData_Request
+	{
+		kData_Topic,
+		kData_TopicInfo,
+		kData_Speaker,
+		kData_Quest
+	};
+
+	// Credits: copies after JIP's CCCSayTo
+	bool GetExtraData_Call(COMMAND_ARGS, GetExtraData_Request request)
+	{
+		*result = 0;
+		if (NOT_ACTOR(thisObj)) return true;
+		ExtraSayToTopicInfo* xSayTo = GetExtraTypeJIP(&thisObj->extraDataList, SayToTopicInfo);
+		if (xSayTo) {
+			switch (request)
+			{
+			case kData_Speaker:
+				REFR_RES = xSayTo->speaker->refID;
+				break;
+			case kData_Topic:
+				REFR_RES = xSayTo->topic->refID;
+				break;
+			case kData_TopicInfo:
+				REFR_RES = xSayTo->info->refID;
+				break;
+			case kData_Quest:
+				REFR_RES = xSayTo->quest->refID;
+				break;
+			}
+		}
+		return true;
+	}
+}
+
+DEFINE_COMMAND_PLUGIN(SayTo_GetSpeakingActor, "", true, NULL);
+bool Cmd_SayTo_GetSpeakingActor_Execute(COMMAND_ARGS)
+{
+	return SayTo::GetExtraData_Call(PASS_COMMAND_ARGS, SayTo::kData_Speaker);
+}
+
+DEFINE_COMMAND_PLUGIN(SayTo_GetTopic, "", true, NULL);
+bool Cmd_SayTo_GetTopic_Execute(COMMAND_ARGS)
+{
+	return SayTo::GetExtraData_Call(PASS_COMMAND_ARGS, SayTo::kData_Topic);
+}
+
+DEFINE_COMMAND_PLUGIN(SayTo_GetTopicInfo, "", true, NULL);
+bool Cmd_SayTo_GetTopicInfo_Execute(COMMAND_ARGS)
+{
+	return SayTo::GetExtraData_Call(PASS_COMMAND_ARGS, SayTo::kData_TopicInfo);
+}
+
+DEFINE_COMMAND_PLUGIN(SayTo_GetQuest, "", true, NULL);
+bool Cmd_SayTo_GetQuest_Execute(COMMAND_ARGS)
+{
+	return SayTo::GetExtraData_Call(PASS_COMMAND_ARGS, SayTo::kData_Quest);
+}
+
+
+
+
+
+
 
 
 
