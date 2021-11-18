@@ -531,7 +531,11 @@ extern "C"
 
 		//========v1.35
 		/*3D06*/ REG_CMD(GetItemCanHaveHealth)
-
+		/*3D07*/ REG_CMD_FORM(SayTo_GetSpeakingActor)
+		/*3D08*/ REG_CMD_FORM(SayTo_GetTopic)
+		/*3D09*/ REG_CMD_FORM(SayTo_GetTopicInfo)
+		/*3D0A*/ REG_CMD_FORM(SayTo_GetQuest)
+		/*3D0B*/ REG_CMD(FormListRemoveForm)
 
 		
 		//***Current Max OpCode: 0x3D10 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
@@ -540,10 +544,10 @@ extern "C"
 		//todo: always check to update/increase your opcode range when adding new functions
 
 
-
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 
+		REG_CMD_FORM(SayTo_GetUnk)
 		REG_CMD(ApplyAddictionEffect)
 		REG_CMD(SetPlantedExplosive)
 		

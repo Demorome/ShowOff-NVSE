@@ -42,6 +42,8 @@ DEFINE_CMD_ALT_COND_PLUGIN(IsReferenceCloned, IsRefrCloned, "Checks if the refer
 DEFINE_CMD_ALT_COND_PLUGIN(IsTemporaryReference, IsTempRefr, "Checks if the reference does not persist in the savegame.", false, NULL); //todo: Set equivalents?
 DEFINE_COMMAND_PLUGIN(ToggleQuestMessages, "", false, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetPipboyRadioVoiceEntryData, "", false, kParams_OneInt_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(FormListRemoveForm, "", false, kParams_OneFormList_OneForm);
+
 
 
 bool(__cdecl* Cmd_Disable)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5C45E0;
@@ -725,6 +727,21 @@ bool Cmd_GetPipboyRadioVoiceEntryData_Execute(COMMAND_ARGS)
 		}
 	}
 	g_arrInterface->AssignCommandResult(outArr, result);
+	return true;
+}
+
+// Credits to NVSE's ListRemoveForm for most of the code.
+// Savebaked version of the above function.
+bool Cmd_FormListRemoveForm_Execute(COMMAND_ARGS)
+{
+	*result = eListInvalid;	//index of removed form.
+	BGSListForm* pListForm;
+	TESForm* pForm;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pListForm, &pForm))
+		return true;
+	SInt32 const index = pListForm->RemoveForm(pForm);
+	pListForm->MarkAsModified(0x80000000);
+	*result = index;
 	return true;
 }
 

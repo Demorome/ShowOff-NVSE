@@ -221,10 +221,17 @@ static ParamInfo kParams_Axis[1] =
 	{	"axis",	kParamType_Axis,	0	},
 };
 
-static ParamInfo kParams_FormList[1] =
+static ParamInfo kParams_OneFormList[1] =
 {
 	{	"form list", kParamType_FormList,	0		},
 };
+
+static ParamInfo kParams_OneFormList_OneForm[2] =
+{
+	{	"form list", kParamType_FormList,	0		},
+	{	"form", kParamType_AnyForm,	0		},
+};
+
 
 static ParamInfo kParams_OneFormList_OneOptionalString[2] =
 {

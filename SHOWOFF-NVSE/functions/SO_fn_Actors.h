@@ -550,7 +550,17 @@ bool Cmd_HasAnyScriptPackage_Execute(COMMAND_ARGS)
 	return Cmd_HasAnyScriptPackage_Eval(thisObj, 0, 0, result);
 }
 
-
+DEFINE_COMMAND_PLUGIN(SayTo_GetUnk, "", true, NULL);
+bool Cmd_SayTo_GetUnk_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	if (NOT_ACTOR(thisObj)) return true;
+	if (ExtraSayToTopicInfo* xSayTo = GetExtraTypeJIP(&thisObj->extraDataList, SayToTopicInfo)) 
+	{
+		//REFR_RES = ThisStdCall<Actor*>(0x8A553C, ((Actor*)thisObj))->refID;
+	}
+	return true;
+}
 
 
 #endif
