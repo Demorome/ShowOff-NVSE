@@ -555,6 +555,8 @@ extern "C"
 		REG_CMD(GetItemCanBeRepairedByTarget)
 		REG_CMD(GetCalculatedItemValue)
 		REG_CMD(GetCalculatedItemWeight)
+
+		REG_CMD(TestMatrix)
 			
 		REG_CMD(GetHealthExtraData)
 

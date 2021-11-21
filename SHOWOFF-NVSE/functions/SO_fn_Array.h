@@ -1,10 +1,9 @@
 ﻿#pragma once
-
-DEFINE_COMMAND_ALT_PLUGIN(ListAddArray, AddArrayToFormList, "", false, kParams_OneFormlist_OneArray_OneOptionalIndex);
-
+#include <armadillo>
 
 
 //ripped code from FOSE's ListAddForm
+DEFINE_COMMAND_ALT_PLUGIN(ListAddArray, AddArrayToFormList, "", false, kParams_OneFormlist_OneArray_OneOptionalIndex);
 bool Cmd_ListAddArray_Execute(COMMAND_ARGS)
 {
 	*result = 1;
@@ -49,7 +48,46 @@ bool Cmd_ListAddArray_Execute(COMMAND_ARGS)
 
 
 
+
+
+
 #ifdef _DEBUG
+
+DEFINE_COMMAND_PLUGIN(TestMatrix, "debug matrix function", false, NULL);
+
+bool Cmd_TestMatrix_Execute(COMMAND_ARGS)
+{
+	// Initialize the random generator
+	arma::arma_rng::set_seed_random();
+
+	std::stringstream stream;
+
+	// Create a 4x4 random matrix and print it on the screen
+	arma::Mat<double> A = arma::randu(4, 4);
+	stream << "A:\n" << A << "\n";
+
+	// Multiply A with his transpose:
+	stream << "A * A.t() =\n";
+	stream << A * A.t() << "\n";
+
+	// Access/Modify rows and columns from the array:
+	A.row(0) = A.row(1) + A.row(3);
+	A.col(3).zeros();
+	stream << "add rows 1 and 3, store result in row 0, also fill 4th column with zeros:\n";
+	stream << "A:\n" << A << "\n";
+
+	arma::Mat<double>B = arma::diagmat(A);
+	stream << "B:\n" << B << "\n";
+
+	Console_Print_Long(stream.str());
+
+	// Save matrices A and B:
+	A.save("A_mat.txt", arma::arma_ascii);
+	B.save("B_mat.txt", arma::arma_ascii);
+
+	return true;
+}
+
 
 #if 0  //difficulties figuring out ambiguous-type extraction
 DEFINE_COMMAND_PLUGIN(Ar_Init, , "Initializes a numeric array with the specified value, repeated over X keys.", 0, 3, kParams_OneBasicType);
