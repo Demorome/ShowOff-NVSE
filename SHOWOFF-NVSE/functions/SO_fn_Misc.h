@@ -755,7 +755,7 @@ bool Cmd_GetZoneRespawns_Execute(COMMAND_ARGS)
 		return true;
 	if (auto const zone = DYNAMIC_CAST(form, TESForm, BGSEncounterZone))
 	{
-		*result = zone->zoneFlags & BGSEncounterZone::kEncounterZone_NoRespawns == 0;
+		*result = (zone->zoneFlags & BGSEncounterZone::kEncounterZone_NoRespawns) == 0;
 	}
 	return true;
 }
