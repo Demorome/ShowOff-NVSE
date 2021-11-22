@@ -5979,10 +5979,16 @@ public:
 	BGSEncounterZone();
 	~BGSEncounterZone();
 
+	enum ZoneFlags : UInt8
+	{
+		kEncounterZone_NoRespawns = 1,
+		kEncounterZone_StrictMinimumLevel = 2
+	};
+
 	TESForm*	owner;						// 018
 	UInt8		rank;						// 01C
 	UInt8		minLevel;					// 01D
-	UInt8		zoneFlags;					// 01E
+	ZoneFlags	zoneFlags;					// 01E
 	UInt8		pad01C;						// 01F
 	UInt32		unk020[4];					// 020
 };

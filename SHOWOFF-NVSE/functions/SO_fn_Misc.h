@@ -43,6 +43,8 @@ DEFINE_CMD_ALT_COND_PLUGIN(IsTemporaryReference, IsTempRefr, "Checks if the refe
 DEFINE_COMMAND_PLUGIN(ToggleQuestMessages, "", false, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetPipboyRadioVoiceEntryData, "", false, kParams_OneInt_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(FormListRemoveForm, "", false, kParams_OneFormList_OneForm);
+DEFINE_COMMAND_PLUGIN(GetZoneRespawns, "Returns if an Encounter Zone has the NoRespawn flag set or not.", false, kParams_OneForm);
+
 
 
 
@@ -744,6 +746,34 @@ bool Cmd_FormListRemoveForm_Execute(COMMAND_ARGS)
 	*result = index;
 	return true;
 }
+
+bool Cmd_GetZoneRespawns_Execute(COMMAND_ARGS)
+{
+	*result = -1;	//bRespawns. -1 if could not extract the form.
+	TESForm* form;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form))
+		return true;
+	if (auto const zone = DYNAMIC_CAST(form, TESForm, BGSEncounterZone))
+	{
+		*result = zone->zoneFlags & BGSEncounterZone::kEncounterZone_NoRespawns == 0;
+	}
+	return true;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
