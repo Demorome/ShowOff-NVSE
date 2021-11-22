@@ -44,6 +44,7 @@ DEFINE_COMMAND_PLUGIN(ToggleQuestMessages, "", false, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetPipboyRadioVoiceEntryData, "", false, kParams_OneInt_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(FormListRemoveForm, "", false, kParams_OneFormList_OneForm);
 DEFINE_COMMAND_PLUGIN(GetZoneRespawns, "Returns if an Encounter Zone has the NoRespawn flag set or not.", false, kParams_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(ClearCinematicTextQueue, ClearQuestMessageQueue, "", false, NULL);
 
 
 
@@ -760,7 +761,12 @@ bool Cmd_GetZoneRespawns_Execute(COMMAND_ARGS)
 	return true;
 }
 
-
+bool Cmd_ClearCinematicTextQueue_Execute(COMMAND_ARGS)
+{
+	CdeclCall(0x77F500); // HUDMainMenu::HideQuestLocationText
+	// Idea stolen from JG's QueueCinematicText
+	return true;
+}
 
 
 
