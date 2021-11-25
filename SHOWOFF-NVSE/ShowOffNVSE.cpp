@@ -539,7 +539,6 @@ extern "C"
 		/*3D0B*/ REG_CMD(FormListRemoveForm)
 		/*3D0C*/ REG_CMD(GetZoneRespawns)
 		/*3D0D*/ REG_CMD(ClearCinematicTextQueue)
-		/*3D0E*/ REG_CMD(Flt_Equals)
 
 		
 		//***Current Max OpCode: 0x3D10 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
@@ -550,6 +549,8 @@ extern "C"
 
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
+
+		REG_CMD(Flt_Equals)	// not needed; xNVSE's eval already uses this for "==" operator.
 
 		REG_CMD_FORM(SayTo_GetUnk)
 		REG_CMD(ApplyAddictionEffect)

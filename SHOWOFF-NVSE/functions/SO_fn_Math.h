@@ -5,8 +5,10 @@
 
 /*When comparing two float values for equality, due to internal conversions between singleand double precision,
  *it's better to check if the absolute difference is less than epsilon (0.0001)
- *-Jazzisparis
- *May not be needed if the Double Precision Fix from JIP LN is enabled. */
+ *
+ *(The Double Precision Fix from JIP LN) alleviates the problem with operator ==,
+ *but doesn't eliminate it entirely. Checking absolute difference against an epsilon is far more computationally expensive than a simple comparison, obviously
+ *-Jazzisparis */
 DEFINE_COMMAND_ALT_PLUGIN(Flt_Equals, Float_Equals, "Returns true if the absolute difference between two floats is less than epsilon (0.0001)", false, kParams_TwoDoubles);
 bool Cmd_Flt_Equals_Execute(COMMAND_ARGS)
 {
@@ -22,8 +24,24 @@ bool Cmd_Flt_Equals_Execute(COMMAND_ARGS)
 
 #if _DEBUG
 
-DEFINE_COMMAND_PLUGIN(TestMatrix, "debug matrix function", false, NULL);
 
+DEFINE_COMMAND_PLUGIN(Matrix_Multiply, "Returns the matrix multiplication result of two matrix arrays.", false, NULL);
+bool Cmd_Matrix_MultiplyExecute(COMMAND_ARGS)
+{
+
+
+	return true;
+}
+
+DEFINE_COMMAND_PLUGIN(Matrix_IsMatrix, "Returns the matrix multiplication result of two matrix arrays.", false, NULL);
+bool Cmd_Matrix_IsMatrix_Execute(COMMAND_ARGS)
+{
+
+
+	return true;
+}
+
+DEFINE_COMMAND_PLUGIN(TestMatrix, "debug matrix function", false, NULL);
 bool Cmd_TestMatrix_Execute(COMMAND_ARGS)
 {
 	// Initialize the random generator
