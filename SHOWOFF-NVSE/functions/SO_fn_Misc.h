@@ -45,6 +45,7 @@ DEFINE_COMMAND_PLUGIN(GetPipboyRadioVoiceEntryData, "", false, kParams_OneInt_On
 DEFINE_COMMAND_PLUGIN(FormListRemoveForm, "", false, kParams_OneFormList_OneForm);
 DEFINE_COMMAND_PLUGIN(GetZoneRespawns, "Returns if an Encounter Zone has the NoRespawn flag set or not.", false, kParams_OneForm);
 DEFINE_COMMAND_ALT_PLUGIN(ClearCinematicTextQueue, ClearQuestMessageQueue, "", false, NULL);
+DEFINE_COMMAND_ALT_PLUGIN(GetCellEncounterZone, GetCellZone, "", false, kParams_OneForm);
 
 
 
@@ -765,6 +766,21 @@ bool Cmd_ClearCinematicTextQueue_Execute(COMMAND_ARGS)
 {
 	CdeclCall(0x77F500); // HUDMainMenu::HideQuestLocationText
 	// Idea stolen from JG's QueueCinematicText
+	return true;
+}
+
+//Credits to LN's GetZone function for most of the code here.
+bool Cmd_GetCellEncounterZone_Execute(COMMAND_ARGS)
+{
+	*result = 0;	//zone form
+	TESForm* form;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form))
+		return true;
+	if (auto const cell = DYNAMIC_CAST(form, TESForm, TESObjectCELL)) {
+		ExtraEncounterZone* xEncZone = GetExtraTypeJIP(&cell->extraDataList, EncounterZone);
+		if (xEncZone && xEncZone->zone) 
+			REFR_RES = xEncZone->zone->refID;
+	}
 	return true;
 }
 
