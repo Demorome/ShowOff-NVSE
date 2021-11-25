@@ -953,6 +953,7 @@
     <ClInclude Include="functions\SO_fn_Gameplay.h" />
     <ClInclude Include="functions\SO_fn_Files.h" />
     <ClInclude Include="functions\SO_fn_Items.h" />
+    <ClInclude Include="functions\SO_fn_Math.h" />
     <ClInclude Include="functions\SO_fn_Misc.h" />
     <ClInclude Include="functions\SO_fn_Settings.h" />
     <ClInclude Include="functions\SO_fn_Topics.h" />

@@ -106,6 +106,12 @@ static ParamInfo kParams_TwoFloats[2] =
 	{	"float",	kParamType_Float,	0 },
 };
 
+static ParamInfo kParams_TwoDoubles[2] =
+{
+	{	"double",	kParamType_Double,	0 },
+	{	"double",	kParamType_Double,	0 },
+};
+
 // static ParamInfo kParams_OneSpellItem[1] =
 // {
 // 	{	"spell", kParamType_SpellItem, 0 }, 

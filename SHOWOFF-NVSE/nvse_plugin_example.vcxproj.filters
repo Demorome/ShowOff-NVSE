@@ -2016,6 +2016,9 @@
     <ClInclude Include="Armadillo Library\armadillo_bits\xvec_htrans_meat.hpp">
       <Filter>External Libraries\Armadillo Library %28Matrices%29</Filter>
     </ClInclude>
+    <ClInclude Include="functions\SO_fn_Math.h">
+      <Filter>functions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

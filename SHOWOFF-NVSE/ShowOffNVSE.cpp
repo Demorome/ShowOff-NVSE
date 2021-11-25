@@ -24,6 +24,7 @@
 #include "functions/SO_fn_Items.h"
 #include "functions/SO_fn_Factions.h"
 #include "functions/SO_fn_Topics.h"
+#include "functions/SO_fn_Math.h"
 
 // Events
 #include "Events/JohnnyEventPredefinitions.h"
@@ -538,6 +539,8 @@ extern "C"
 		/*3D0B*/ REG_CMD(FormListRemoveForm)
 		/*3D0C*/ REG_CMD(GetZoneRespawns)
 		/*3D0D*/ REG_CMD(ClearCinematicTextQueue)
+		/*3D0E*/ REG_CMD(Flt_Equals)
+
 		
 		//***Current Max OpCode: 0x3D10 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
