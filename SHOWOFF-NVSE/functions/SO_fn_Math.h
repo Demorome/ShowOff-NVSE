@@ -116,7 +116,7 @@ NVSEArrayVar* GetMatrixAsArray(arma::Mat<double>& matrix, Script* callingScript)
 	return resArr;
 }
 
-DEFINE_COMMAND_PLUGIN(Matrix_Multiply, "Returns the matrix multiplication result of two matrix arrays.", false, kParams_TwoArrayIDs);
+DEFINE_COMMAND_ALT_PLUGIN(Matrix_Multiply, Matrix_Mult, "Returns the matrix multiplication result of two matrix arrays.", false, kParams_TwoArrayIDs);
 bool Cmd_Matrix_Multiply_Execute(COMMAND_ARGS)
 {
 	*result = 0;	// resulting matrix
@@ -140,6 +140,21 @@ bool Cmd_Matrix_Multiply_Execute(COMMAND_ARGS)
 				return true;
 			}
 		}
+	}
+	return true;
+}
+
+DEFINE_COMMAND_PLUGIN(Matrix_Transpose, "Returns the transpose of the array matrix.", false, kParams_OneArrayID);
+bool Cmd_Matrix_Transpose_Execute(COMMAND_ARGS)
+{
+	*result = 0;	// transposeArr
+	UInt32 arrID;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID))
+		return true;
+	if (auto const matrix = GetMatrixFromArray(g_arrInterface->LookupArrayByID(arrID)))
+	{
+		arma::Mat<double> transpose = matrix.value().t();
+		g_arrInterface->AssignCommandResult(GetMatrixAsArray(transpose, scriptObj), result);
 	}
 	return true;
 }
