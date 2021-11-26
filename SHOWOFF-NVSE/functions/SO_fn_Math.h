@@ -144,6 +144,34 @@ bool Cmd_Matrix_Multiply_Execute(COMMAND_ARGS)
 	return true;
 }
 
+DEFINE_COMMAND_PLUGIN(Matrix_AddMatrix, "Returns the addition of two matrices with equal # of rows and columns.", false, kParams_TwoArrayIDs);
+bool Cmd_Matrix_AddMatrix_Execute(COMMAND_ARGS)
+{
+	*result = 0;	// resulting matrix
+	UInt32 arrA_ID, arrB_ID;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrA_ID, &arrB_ID))
+		return true;
+	auto const arrA = g_arrInterface->LookupArrayByID(arrA_ID);
+	auto const arrB = g_arrInterface->LookupArrayByID(arrB_ID);
+	if (arrA && arrB)
+	{
+		auto matrixA = GetMatrixFromArray(arrA);
+		auto matrixB = GetMatrixFromArray(arrB);
+		if (matrixA && matrixB)
+		{
+			try {
+				arma::Mat<double> resMatrix = (*matrixA) + (*matrixB);
+				if (auto const matrixAsArray = GetMatrixAsArray(resMatrix, scriptObj))
+					g_arrInterface->AssignCommandResult(matrixAsArray, result);
+			}
+			catch (std::logic_error& err) {	//invalid matrix sizes for addition
+				return true;
+			}
+		}
+	}
+	return true;
+}
+
 DEFINE_COMMAND_PLUGIN(Matrix_Transpose, "Returns the transpose of the array matrix.", false, kParams_OneArrayID);
 bool Cmd_Matrix_Transpose_Execute(COMMAND_ARGS)
 {

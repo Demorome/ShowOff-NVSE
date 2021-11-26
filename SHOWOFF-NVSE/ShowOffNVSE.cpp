@@ -550,6 +550,7 @@ extern "C"
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 
+		REG_CMD_ARR(Matrix_AddMatrix)
 		REG_CMD_ARR(Matrix_Transpose)
 		REG_CMD(Matrix_Dump)
 		REG_CMD(Matrix_IsMatrix)
