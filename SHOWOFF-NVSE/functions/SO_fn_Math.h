@@ -46,6 +46,7 @@ std::optional<arma::Mat<double>> GetMatrixFromArray(ArrayData_JIP &arrData)
 }
 */
 
+//Assumes array is packed
 std::optional<arma::Mat<double>> GetMatrixFromArray(NVSEArrayVar* arr)
 {
 	ArrayData const arrData(arr, true);	//assume isPacked
@@ -126,21 +127,17 @@ bool Cmd_Matrix_Multiply_Execute(COMMAND_ARGS)
 	auto const arrB = g_arrInterface->LookupArrayByID(arrB_ID);
 	if (arrA && arrB)
 	{
-		if (int const typeA = g_arrInterface->GetContainerType(arrA); 
-			typeA == NVSEArrayVarInterface::kArrType_Array && typeA == g_arrInterface->GetContainerType(arrB))
+		auto matrixA = GetMatrixFromArray(arrA);
+		auto matrixB = GetMatrixFromArray(arrB);
+		if (matrixA && matrixB)
 		{
-			auto matrixA = GetMatrixFromArray(arrA);
-			auto matrixB = GetMatrixFromArray(arrB);
-			if (matrixA && matrixB)
-			{
-				try{
-					arma::Mat<double> resMatrix = (*matrixA) * (*matrixB);
-					if (auto const matrixAsArray = GetMatrixAsArray(resMatrix, scriptObj))
-						g_arrInterface->AssignCommandResult(matrixAsArray, result);
-				}
-				catch (std::logic_error&err){	//invalid matrix sizes for multiplication
-					return true;
-				}
+			try{
+				arma::Mat<double> resMatrix = (*matrixA) * (*matrixB);
+				if (auto const matrixAsArray = GetMatrixAsArray(resMatrix, scriptObj))
+					g_arrInterface->AssignCommandResult(matrixAsArray, result);
+			}
+			catch (std::logic_error&err){	//invalid matrix sizes for multiplication
+				return true;
 			}
 		}
 	}
@@ -155,8 +152,12 @@ bool Cmd_Matrix_IsMatrix_Execute(COMMAND_ARGS)
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID))
 		return true;
 	auto const arrA = g_arrInterface->LookupArrayByID(arrID);
-	if (auto const matrix = GetMatrixFromArray(arrA))
-		*result = true;
+	if (g_arrInterface->GetContainerType(arrA) == NVSEArrayVarInterface::kArrType_Array)
+	{
+		if (auto const matrix = GetMatrixFromArray(arrA))
+			*result = true;
+		
+	}
 	return true;
 }
 
