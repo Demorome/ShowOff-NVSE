@@ -85,7 +85,25 @@ extern char* g_PBIR_FailMessage;
 #define NOT_ID(form, type) (form->typeID != kFormType_##type) 
 #define IS_ID(form, type) (form->typeID == kFormType_##type)
 
+struct ArrayData
+{
+	UInt32			size;
+	std::unique_ptr<NVSEArrayElement[]> vals;
+	std::unique_ptr<NVSEArrayElement[]> keys;
 
+	ArrayData(NVSEArrayVar* srcArr, bool isPacked)
+	{
+		size = GetArraySize(srcArr);
+		if (size)
+		{
+			vals = std::make_unique<NVSEArrayElement[]>(size);
+			keys = isPacked ? nullptr : std::make_unique<NVSEArrayElement[]>(size);
+			if (!GetArrayElements(srcArr, vals.get(), keys.get()))
+				size = 0;
+		}
+	}
+	~ArrayData() = default;
+};
 
 
 

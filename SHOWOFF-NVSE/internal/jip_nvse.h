@@ -53,13 +53,14 @@ extern UInt32(*ReadRecord32)();
 extern void (*ReadRecord64)(void* outData);
 extern void (*SkipNBytes)(UInt32 byteNum);
 
-struct ArrayData
+//todo: fix bug where second element in a 2D array is somehow nullptr, and not an inner array.
+struct ArrayData_JIP
 {
 	UInt32			size;
 	ArrayElementR* vals;
 	ArrayElementR* keys;
 
-	ArrayData(NVSEArrayVar* srcArr, bool isPacked)
+	ArrayData_JIP(NVSEArrayVar* srcArr, bool isPacked)
 	{
 		size = GetArraySize(srcArr);
 		if (size)
@@ -74,7 +75,7 @@ struct ArrayData
 		}
 	}
 
-	~ArrayData()
+	~ArrayData_JIP()
 	{
 		if (size)
 		{

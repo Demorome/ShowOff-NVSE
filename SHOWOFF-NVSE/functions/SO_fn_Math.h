@@ -8,7 +8,7 @@
 #if _DEBUG
 
 /*
-std::optional<arma::Mat<double>> GetMatrixFromArray(ArrayData &arrData)
+std::optional<arma::Mat<double>> GetMatrixFromArray(ArrayData_JIP &arrData)
 {
 	if (arrData.size <= 0)
 		return {};
@@ -54,7 +54,7 @@ std::optional<arma::Mat<double>> GetMatrixFromArray(NVSEArrayVar* arr)
 	
 	arma::Mat<double> matrix;
 	if (bool const is2D = arrData.vals[0].GetType() == NVSEArrayVarInterface::kType_Array;
-		is2D == false)
+		is2D == true)
 	{
 		int n_cols = -1;
 		for (int i = 0; i < arrData.size; i++)	//assume each elem is an array.
@@ -70,9 +70,9 @@ std::optional<arma::Mat<double>> GetMatrixFromArray(NVSEArrayVar* arr)
 			
 			//Populate current row with column data contained in internal (row) array.
 			arma::Row<double> NthRow(innerArrData.size);
-			for (int k = 0; i < innerArrData.size; k++)	//assume each elem is a number.
+			for (int k = 0; k < innerArrData.size; k++)	//assume each elem is a number.
 			{
-				NthRow(i) = innerArrData.vals[i].Number();
+				NthRow(k) = innerArrData.vals[k].Number();
 			}
 			matrix.insert_rows(i, NthRow);
 		}
@@ -133,20 +133,51 @@ bool Cmd_Matrix_Multiply_Execute(COMMAND_ARGS)
 			auto matrixB = GetMatrixFromArray(arrB);
 			if (matrixA && matrixB)
 			{
-				arma::Mat<double> resMatrix = (*matrixA) * (*matrixB);
-				if (auto const matrixAsArray = GetMatrixAsArray(resMatrix, scriptObj))
-					g_arrInterface->AssignCommandResult(matrixAsArray, result);
+				try{
+					arma::Mat<double> resMatrix = (*matrixA) * (*matrixB);
+					if (auto const matrixAsArray = GetMatrixAsArray(resMatrix, scriptObj))
+						g_arrInterface->AssignCommandResult(matrixAsArray, result);
+				}
+				catch (std::logic_error&err){	//invalid matrix sizes for multiplication
+					return true;
+				}
 			}
 		}
 	}
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(Matrix_IsMatrix, "Returns the matrix multiplication result of two matrix arrays.", false, NULL);
+DEFINE_COMMAND_PLUGIN(Matrix_IsMatrix, "Checks if an array is convertible to a matrix.", false, kParams_OneArrayID);
 bool Cmd_Matrix_IsMatrix_Execute(COMMAND_ARGS)
 {
+	*result = false;	// isMatrix (bool)
+	UInt32 arrID;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID))
+		return true;
+	auto const arrA = g_arrInterface->LookupArrayByID(arrID);
+	if (auto const matrix = GetMatrixFromArray(arrA))
+		*result = true;
+	return true;
+}
 
-
+DEFINE_COMMAND_PLUGIN(Matrix_Dump, "Dumps the matrix array in console, in matrix notation.", false, kParams_OneArrayID);
+bool Cmd_Matrix_Dump_Execute(COMMAND_ARGS)
+{
+	UInt32 arrID;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID))
+		return true;
+	auto const arrA = g_arrInterface->LookupArrayByID(arrID);
+	if (auto const matrix = GetMatrixFromArray(arrA))
+	{
+		Console_Print("** Dumping Array %u as Matrix **", arrID);
+		std::stringstream stream;
+		stream << (*matrix);
+		Console_Print_Long(stream.str());
+	}
+	else
+	{
+		Console_Print("Matrix_Dump >> Array %u is not a valid Matrix.", arrID);
+	}
 	return true;
 }
 

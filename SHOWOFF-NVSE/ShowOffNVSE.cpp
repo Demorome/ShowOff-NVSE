@@ -550,7 +550,9 @@ extern "C"
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 
-		REG_CMD(Matrix_Multiply)
+		REG_CMD(Matrix_Dump)
+		REG_CMD(Matrix_IsMatrix)
+		REG_CMD_ARR(Matrix_Multiply)
 		REG_CMD(Flt_Equals)	// not needed; xNVSE's eval already uses this for "==" operator.
 
 		REG_CMD_FORM(SayTo_GetUnk)
