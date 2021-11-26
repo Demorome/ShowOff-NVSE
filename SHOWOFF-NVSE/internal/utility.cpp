@@ -1764,3 +1764,19 @@ TESObjectREFR* TryGetREFR(TESForm* optionalForm, TESObjectREFR* thisObj)
 	}
 	return result;
 }
+
+__declspec(noinline) UInt8* AuxBuffer::Get(UInt32 bufIdx, UInt32 reqSize)
+{
+	thread_local AuxBuffer s_auxBuffers[3];
+	AuxBuffer* auxBuf = &s_auxBuffers[bufIdx];
+	if (auxBuf->size < reqSize)
+	{
+		auxBuf->size = reqSize;
+		if (auxBuf->ptr)
+			_aligned_free(auxBuf->ptr);
+		auxBuf->ptr = (UInt8*)_aligned_malloc(reqSize, 0x10);
+	}
+	else if (!auxBuf->ptr)
+		auxBuf->ptr = (UInt8*)_aligned_malloc(auxBuf->size, 0x10);
+	return auxBuf->ptr;
+}

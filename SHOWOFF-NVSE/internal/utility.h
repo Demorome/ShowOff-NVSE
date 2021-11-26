@@ -305,6 +305,8 @@ class AuxBuffer
 
 public:
 	AuxBuffer() : ptr(NULL), size(AUX_BUFFER_INIT_SIZE) {}
+
+	static UInt8* Get(UInt32 bufIdx, UInt32 reqSize);
 };
 
 extern AuxBuffer s_auxBuffers[3];

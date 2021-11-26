@@ -516,8 +516,13 @@ static ParamInfo kParams_OneIntOneForm[2] =
 };
 
 // Array is passed as an int; array type otherwise requires Compiler Override.
-static ParamInfo kParams_OneArray[1] =
+static ParamInfo kParams_OneArrayID[1] =
 {
+	{	"array",	kParamType_Integer, 0	},
+};
+static ParamInfo kParams_TwoArrayIDs[2] =
+{
+	{	"array",	kParamType_Integer, 0	},
 	{	"array",	kParamType_Integer, 0	},
 };
 

@@ -53,6 +53,42 @@ extern UInt32(*ReadRecord32)();
 extern void (*ReadRecord64)(void* outData);
 extern void (*SkipNBytes)(UInt32 byteNum);
 
+struct ArrayData
+{
+	UInt32			size;
+	ArrayElementR* vals;
+	ArrayElementR* keys;
+
+	ArrayData(NVSEArrayVar* srcArr, bool isPacked)
+	{
+		size = GetArraySize(srcArr);
+		if (size)
+		{
+			UInt32 alloc = size * sizeof(ArrayElementR);
+			if (!isPacked) alloc *= 2;
+			vals = (ArrayElementR*)AuxBuffer::Get(2, alloc);
+			keys = isPacked ? nullptr : (vals + size);
+			MemZero(vals, alloc);
+			if (!GetArrayElements(srcArr, vals, keys))
+				size = 0;
+		}
+	}
+
+	~ArrayData()
+	{
+		if (size)
+		{
+			UInt32 count = keys ? (size * 2) : size;
+			ArrayElementR* elems = vals;
+			do
+			{
+				elems->~ElementR();
+				elems++;
+			} while (--count);
+		}
+	}
+};
+
 struct InventoryRef
 {
 	TESForm*			type;			// 00
