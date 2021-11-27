@@ -1354,6 +1354,47 @@ public:
 		void			(*onSelection)(UserOption*);	// 2C
 	};
 
+	static StartMenu* GetSingleton() {
+		return 	*(StartMenu**)0x11DAAC0;
+	}
+	
+	static bool Create(bool useMainMenu, bool bWholeMenuIfFalse_OrLoadManu)
+	{
+		return CdeclCall<bool>(0x7CB7D0, useMainMenu, bWholeMenuIfFalse_OrLoadManu);
+	}
+
+	// Taken from Stewie's PDB
+	enum StartMenuFlags : UInt32
+	{
+		 kHasChangedSettings = 0x2,
+		 kLoad = 0x4,	//force-load?
+		 kIsSaveMenuNotLoad = 0x8,
+		 kAreOptionsInitialised = 0x20,
+		 kShowDLCPopup = 0x400,
+		 kIsActionMapping = 0x1000,
+		 kDeleteSave = 0x2000,
+		 kIsSaving = 0x4000,
+		 kShowCredits = 0x10000,
+		 kControllerDisconnected = 0x20000,
+		 kShouldInitSavesList = 0x100000,
+		 kShowMustRestartToSaveSettings = 0x400000,
+		 kSomething_credits = 0x2000000,
+		 kControllerInputDebounce = 0x4000000,
+		 kSomethingSave = 0x40000000,
+	};
+
+	void SetFlag(StartMenuFlags flag, bool setIfTrue_OrRemove)
+	{
+		if (setIfTrue_OrRemove)
+			this->flags |= flag;
+		else
+			this->flags &= ~flag;
+	}
+	[[nodiscard]] bool GetFlag(StartMenuFlags flag) const
+	{
+		return flags & flag;
+	}
+
 	TileImage						*tile028;		// 028
 	TileImage						*tile02C;		// 02C
 	TileImage						*tile030;		// 030

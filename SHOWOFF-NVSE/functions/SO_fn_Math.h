@@ -2,49 +2,12 @@
 #include <armadillo>
 #include <cfloat>
 #include <optional>
-#include "jip_nvse.h"
+
+
+
 
 
 #if _DEBUG
-
-/*
-std::optional<arma::Mat<double>> GetMatrixFromArray(ArrayData_JIP &arrData)
-{
-	if (arrData.size <= 0)
-		return {};
-	std::vector<double*> values;
-	size_t n_cols = 0, n_rows = 0;
-	bool is2D = false;
-	for (int i = arrData.size - 1; i >= 0; i--)
-	{
-		if (arrData.vals[i].GetType() == NVSEArrayVarInterface::kType_Array)
-		{
-			is2D = true;
-			for (int i = arrData.size - 1; i >= 0; i--)
-			{
-				
-			}
-		}
-		else
-			values.emplace_front(&arrData.vals[i].num);
-	}
-
-	if (is2D)
-		n_rows = arrData.size;
-	else
-	{
-		n_rows = 1;
-		n_cols = arrData.size;
-	}
-
-	if (n_cols > 0 && n_rows > 0)
-	{
-		arma::mat matrix(*values.data(), n_rows, n_cols, false, true);
-		return matrix;
-	}
-	return {};
-}
-*/
 
 //Assumes array is packed
 std::optional<arma::Mat<double>> GetMatrixFromArray(NVSEArrayVar* arr)

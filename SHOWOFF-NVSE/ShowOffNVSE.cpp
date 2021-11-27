@@ -540,6 +540,8 @@ extern "C"
 		/*3D0C*/ REG_CMD(GetZoneRespawns)
 		/*3D0D*/ REG_CMD(ClearCinematicTextQueue)
 		/*3D0E*/ REG_CMD_FORM(GetCellEncounterZone)
+		/*3D0F*/ REG_CMD(ShowPauseMenu)
+
 		
 		//***Current Max OpCode: 0x3D10 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		

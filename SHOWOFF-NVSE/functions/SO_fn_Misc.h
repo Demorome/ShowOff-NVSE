@@ -784,7 +784,39 @@ bool Cmd_GetCellEncounterZone_Execute(COMMAND_ARGS)
 	return true;
 }
 
+DEFINE_COMMAND_PLUGIN(ShowPauseMenu, "", false, kParams_OneInt);
+bool Cmd_ShowPauseMenu_Execute(COMMAND_ARGS)
+{
+	enum PauseMode : UInt32
+	{
+		kJustPause = 0,
+		kLoad, kSave, kSettings, kHelp
+	};
+	PauseMode pauseMode;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pauseMode))
+		return true;
 
+	if (!StartMenu::GetSingleton()) {
+		StartMenu::Create(true, false);
+	}
+
+	switch (pauseMode)
+	{
+	case kLoad:
+		CdeclCall(0x7D0680);	//MenuButton_Load
+		break;
+	case kSave:
+		CdeclCall(0x7D06C0);	//MenuButton_Save
+		break;
+	case kSettings:
+		CdeclCall(0x7D0700);	//MenuButton_Settings
+		break;
+	case kHelp:
+		CdeclCall(0x7D0770);	//MenuButton_Help
+		break;
+	}
+	return true;
+}
 
 
 
@@ -811,7 +843,6 @@ bool Cmd_GetCellEncounterZone_Execute(COMMAND_ARGS)
 
 
 #if _DEBUG
-
 
 
 
