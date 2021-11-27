@@ -795,25 +795,51 @@ bool Cmd_ShowPauseMenu_Execute(COMMAND_ARGS)
 	PauseMode pauseMode;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pauseMode))
 		return true;
-
-	if (!StartMenu::GetSingleton()) {
+	auto menu = StartMenu::GetSingleton();
+	if (!menu) {
 		StartMenu::Create(true, false);
+		menu = StartMenu::GetSingleton();
 	}
 
-	switch (pauseMode)
+	if (pauseMode != kJustPause)
 	{
-	case kLoad:
-		CdeclCall(0x7D0680);	//MenuButton_Load
-		break;
-	case kSave:
-		CdeclCall(0x7D06C0);	//MenuButton_Save
-		break;
-	case kSettings:
-		CdeclCall(0x7D0700);	//MenuButton_Settings
-		break;
-	case kHelp:
-		CdeclCall(0x7D0770);	//MenuButton_Help
-		break;
+		//Make every main option disabled.
+		menu->main_options084.SetParentEnabled(false);		
+		UInt32 callback_addr;
+		switch (pauseMode)
+		{
+		case kLoad:
+			callback_addr = StartMenu::kLoadAddr;
+			CdeclCall(callback_addr);
+			break;
+		case kSave:
+			callback_addr = StartMenu::kSaveAddr;
+			CdeclCall(callback_addr);
+			break;
+		case kSettings:
+			ThisStdCall(0x7D5F80, menu);	//StartMenu::HideSubSettings
+			callback_addr = StartMenu::kSettingsAddr;
+			CdeclCall(callback_addr);
+			break;
+		case kHelp:
+			callback_addr = StartMenu::kHelpAddr;
+			CdeclCall(callback_addr);
+			break;
+		}
+		
+		// Make the appropriate tile "selected", to make it have its opacity back.
+		auto iter = menu->main_options084.list.Head();
+		do {
+			if (auto item = iter->data)
+			{
+				if ((UInt32)item->object->followupOption_callback == callback_addr)
+				{
+					Console_Print("Selected %s", item->object->optionName);
+					item->tile->SetFloat(TraitNameToID("_selected"), 1, true);
+					break;
+				}
+			}
+		} while (iter = iter->next);
 	}
 	return true;
 }

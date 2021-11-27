@@ -759,6 +759,20 @@ public:
 		selected = NULL;
 		itemCount = 0;
 	}
+
+	//taken from Stewie's Tweaks
+	void SetParentEnabled(bool isEnabled)
+	{
+		static UInt32 enabledTrait = TraitNameToID("_enabled");
+		parentTile->SetFloat(enabledTrait, isEnabled);
+	}
+	
+	//taken from Stewie's Tweaks
+	[[nodiscard]] bool IsEnabled() const
+	{
+		static UInt32 enabledTrait = TraitNameToID("_enabled");
+		return parentTile && parentTile->GetValueFloat(enabledTrait);
+	}
 };
 
 // 94
@@ -1336,8 +1350,21 @@ public:
 		virtual void	Destructor(bool doFree);
 
 		const char		*optionName;				// 04
-		void			(*followupOption)(void);	// 08
-		UInt32			unk0C;						// 0C
+		void			(*followupOption_callback)(void);	// 08
+		UInt32			flags;						// 0C
+	};
+
+	enum CallbackAddresses : UInt32
+	{
+		kNewAddr = 0x7D0490,
+		kContinueAddr = 0x7D0440,
+		kCreditsAddr = 0x7D04D0,
+		kLoadAddr = 0x7D0680,
+		kSaveAddr = 0x7D06C0,
+		kSettingsAddr = 0x7D0700,
+		kHelpAddr = 0x7D0770,
+		kQuitAddr = 0x7D0A10,
+		kBackAddr = 0x7D0E40,
 	};
 
 	// 30
@@ -1394,6 +1421,12 @@ public:
 	{
 		return flags & flag;
 	}
+	// Contains most (if not all?) options and sub-options for the start menu.
+	[[nodiscard]] static auto GetStartMenuOptionsArray()
+	{
+		return (BSSimpleArray<StartMenu::Option*>*)0x11DAB88;
+	}
+
 
 	TileImage						*tile028;		// 028
 	TileImage						*tile02C;		// 02C
@@ -1418,7 +1451,7 @@ public:
 	TileText						*tile078;		// 078
 	TileImage						*tile07C;		// 07C
 	TileText						*tile080;		// 080
-	ListBox<Option>					options084;		// 084
+	ListBox<Option>					main_options084;// 084, includes "Continue", "Settings", etc.
 	ListBox<Option>					options0B4;		// 0B4
 	ListBox<Option>					options0E4;		// 0E4
 	ListBox<Option>					options114;		// 114
