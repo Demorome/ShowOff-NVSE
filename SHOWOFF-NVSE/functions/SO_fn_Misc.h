@@ -834,7 +834,6 @@ bool Cmd_ShowPauseMenu_Execute(COMMAND_ARGS)
 			{
 				if ((UInt32)item->object->followupOption_callback == callback_addr)
 				{
-					Console_Print("Selected %s", item->object->optionName);
 					item->tile->SetFloat(TraitNameToID("_selected"), 1, true);
 					break;
 				}
