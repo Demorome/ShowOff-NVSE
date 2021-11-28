@@ -125,6 +125,23 @@ bool Cmd_Matrix_AddMatrix_Execute(COMMAND_ARGS)
 	return true;
 }
 
+DEFINE_COMMAND_ALT_PLUGIN(Matrix_MultiplyByScalar, Mat_MultByScal, "Returns the matrix multiplied by a scalar.", false, kParams_OneArrayID_OneDouble);
+bool Cmd_Matrix_MultiplyByScalar_Execute(COMMAND_ARGS)
+{
+	*result = 0;	// resulting matrix
+	UInt32 arrID;
+	double scalar;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID, &scalar))
+		return true;
+	if (auto matrix = GetMatrixFromArray(g_arrInterface->LookupArrayByID(arrID)))
+	{
+		arma::Mat<double> resMatrix = matrix.value() * scalar;
+		if (auto const matrixAsArray = GetMatrixAsArray(resMatrix, scriptObj))
+			g_arrInterface->AssignCommandResult(matrixAsArray, result);
+	}
+	return true;
+}
+
 DEFINE_COMMAND_PLUGIN(Matrix_Transpose, "Returns the transpose of the array matrix.", false, kParams_OneArrayID);
 bool Cmd_Matrix_Transpose_Execute(COMMAND_ARGS)
 {
