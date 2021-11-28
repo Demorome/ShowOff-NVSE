@@ -532,10 +532,10 @@ extern "C"
 
 		//========v1.35
 		/*3D06*/ REG_CMD(GetItemCanHaveHealth)
-		/*3D07*/ REG_CMD_FORM(SayTo_GetSpeakingActor)
+		/*3D07*/ REG_CMD_FORM(SayTo_GetSpeakingActor)	//doesn't seem to work...
 		/*3D08*/ REG_CMD_FORM(SayTo_GetTopic)
 		/*3D09*/ REG_CMD_FORM(SayTo_GetTopicInfo)
-		/*3D0A*/ REG_CMD_FORM(SayTo_GetQuest)
+		/*3D0A*/ REG_CMD_FORM(SayTo_GetQuest)		//doesn't seem to work...
 		/*3D0B*/ REG_CMD(FormListRemoveForm)	// known as RemoveFormFromFormList, since that's more consistent for naming.
 		/*3D0C*/ REG_CMD(GetZoneRespawns)
 		/*3D0D*/ REG_CMD(ClearCinematicTextQueue)

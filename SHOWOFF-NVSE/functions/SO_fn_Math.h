@@ -80,8 +80,8 @@ NVSEArrayVar* GetMatrixAsArray(arma::Mat<double>& matrix, Script* callingScript)
 	return resArr;
 }
 
-DEFINE_COMMAND_ALT_PLUGIN(Matrix_Multiply, Matrix_Mult, "Returns the matrix multiplication result of two matrix arrays.", false, kParams_TwoArrayIDs);
-bool Cmd_Matrix_Multiply_Execute(COMMAND_ARGS)
+DEFINE_COMMAND_ALT_PLUGIN(Matrix_MultiplyByMatrix, Mat_MultByMat, "Returns the matrix multiplication result of two matrix arrays.", false, kParams_TwoArrayIDs);
+bool Cmd_Matrix_MultiplyByMatrix_Execute(COMMAND_ARGS)
 {
 	*result = 0;	// resulting matrix
 	UInt32 arrA_ID, arrB_ID;

@@ -143,10 +143,8 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 
 ===New Functions:
 *GetItemCanHaveHealth
-*SayTo_GetSpeakingActor
 *SayTo_GetTopic
 *SayTo_GetTopicInfo
-*SayTo_GetQuest
 *RemoveFormFromFormList
 *GetZoneRespawns
 *ClearCinematicTextQueue
