@@ -536,11 +536,13 @@ extern "C"
 		/*3D08*/ REG_CMD_FORM(SayTo_GetTopic)
 		/*3D09*/ REG_CMD_FORM(SayTo_GetTopicInfo)
 		/*3D0A*/ REG_CMD_FORM(SayTo_GetQuest)
-		/*3D0B*/ REG_CMD(FormListRemoveForm)
+		/*3D0B*/ REG_CMD(FormListRemoveForm)	// known as RemoveFormFromFormList, since that's more consistent for naming.
 		/*3D0C*/ REG_CMD(GetZoneRespawns)
 		/*3D0D*/ REG_CMD(ClearCinematicTextQueue)
 		/*3D0E*/ REG_CMD_FORM(GetCellEncounterZone)
 		/*3D0F*/ REG_CMD(ShowPauseMenu)
+		/*3D10*/ REG_CMD(RemoveFormFromLeveledList)
+
 
 		
 		//***Current Max OpCode: 0x3D10 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)

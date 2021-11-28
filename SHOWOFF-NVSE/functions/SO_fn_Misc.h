@@ -42,12 +42,11 @@ DEFINE_CMD_ALT_COND_PLUGIN(IsReferenceCloned, IsRefrCloned, "Checks if the refer
 DEFINE_CMD_ALT_COND_PLUGIN(IsTemporaryReference, IsTempRefr, "Checks if the reference does not persist in the savegame.", false, NULL); //todo: Set equivalents?
 DEFINE_COMMAND_PLUGIN(ToggleQuestMessages, "", false, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetPipboyRadioVoiceEntryData, "", false, kParams_OneInt_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN(FormListRemoveForm, "", false, kParams_OneFormList_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(FormListRemoveForm, RemoveFormFromFormList, "", false, kParams_OneFormList_OneForm);
 DEFINE_COMMAND_PLUGIN(GetZoneRespawns, "Returns if an Encounter Zone has the NoRespawn flag set or not.", false, kParams_OneForm);
 DEFINE_COMMAND_ALT_PLUGIN(ClearCinematicTextQueue, ClearQuestMessageQueue, "", false, NULL);
 DEFINE_COMMAND_ALT_PLUGIN(GetCellEncounterZone, GetCellZone, "", false, kParams_OneForm);
-
-
+DEFINE_COMMAND_PLUGIN(RemoveFormFromLeveledList, "", false, kParams_TwoForms);
 
 
 bool(__cdecl* Cmd_Disable)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5C45E0;
@@ -843,7 +842,22 @@ bool Cmd_ShowPauseMenu_Execute(COMMAND_ARGS)
 	return true;
 }
 
-
+//Credits to JIP's LeveledListRemoveForm for most of the code.
+bool Cmd_RemoveFormFromLeveledList_Execute(COMMAND_ARGS)
+{
+	TESForm* list, * form;
+	TESLeveledList* lvlList;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &list, &form) && (lvlList = list->GetLvlList()))
+	{
+		if (*result = (int)lvlList->RemoveItem(form))
+		{
+			//todo: modify lvList->extraDatas (?)
+			list->MarkAsModified(0x80000000);
+		}
+	}
+	else *result = 0;
+	return true;
+}
 
 
 
@@ -868,8 +882,6 @@ bool Cmd_ShowPauseMenu_Execute(COMMAND_ARGS)
 
 
 #if _DEBUG
-
-
 
 
 

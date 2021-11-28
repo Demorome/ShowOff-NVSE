@@ -51,6 +51,14 @@ double TESForm::GetModifiedWeight(bool isHardcore)
 	return ThisStdCall<double>(0x48EBC0, this, isHardcore);
 }
 
+//taken from JIP LN NVSE.
+TESLeveledList* TESForm::GetLvlList()
+{
+	if (IS_ID(this, TESLevCreature) || IS_ID(this, TESLevCharacter) || IS_ID(this, TESLevItem))
+		return &((TESLevCreature*)this)->list;
+	return NULL;
+}
+
 UInt8 TESForm::GetModIndex() const
 {
 	return modIndex;
@@ -903,4 +911,29 @@ const char* EffectItemList::GetNthEIName(UInt32 whichEffect) const
 BGSDefaultObjectManager* BGSDefaultObjectManager::GetSingleton()
 {
 	return *g_defaultObjectManager;
+}
+
+//Copied from JIP LN NVSE.
+UInt32 TESLeveledList::RemoveItem(TESForm* form)
+{
+	UInt32 numRemoved = 0;
+	ListNode<ListData>* iter = list.Head(), * prev = NULL;
+	ListData* data;
+	do
+	{
+		data = iter->data;
+		if (data && (data->form == form))
+		{
+			GameHeapFree(data);
+			if (prev) iter = prev->RemoveNext();
+			else iter->RemoveMe();
+			numRemoved++;
+		}
+		else
+		{
+			prev = iter;
+			iter = iter->next;
+		}
+	} while (iter);
+	return numRemoved;
 }

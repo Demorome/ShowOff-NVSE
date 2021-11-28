@@ -429,6 +429,12 @@ static ParamInfo kParams_OneForm[1] =
 	{	"form",	kParamType_AnyForm,	0	},
 };
 
+static ParamInfo kParams_TwoForms[2] =
+{
+	{	"form",	kParamType_AnyForm,	0	},
+	{	"form",	kParamType_AnyForm,	0	},
+};
+
 static ParamInfo kParams_OneForm_OneArray[2] =
 {
 	{	"form",	kParamType_AnyForm,	0	},
