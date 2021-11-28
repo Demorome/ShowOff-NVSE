@@ -61,9 +61,7 @@ This plugin wouldn't be possible without everyone who contributed to (x)NVSE, an
 * xNVSE and the example plugin are available here: https://github.com/xNVSE/NVSE
 * The original NVSE is available here: http://www.nvse.silverlock.org/
 
-Brofield for SimpleINI: https://github.com/brofield/simpleini.
-
-AVeryUncreativeUsername / Trooper - for showing off his abilities,  coming up with the name, banner, and various functions.
+AVeryUncreativeUsername / Trooper - for showing off his abilities,  coming up with the name, banner, and various functions. Also for documenting some of the functions.
 
 anhatthezoo - For contributing the CreateFolder function.
 
@@ -72,6 +70,11 @@ CivisRomanus - For coming up with the the phrases which inspired this mod's name
 Anro - motivating me to push this thing out.
 
 Kormakur (again) - The single best thing to happen to New Vegas scripting.
+
+External libraries used:
+* [Armadillo](http://arma.sourceforge.net/docs.html)
+* [SimpleINI](https://github.com/brofield/simpleini)
+* [JSON for Modern C++](https://github.com/nlohmann/json)
 
 # See Also
 [Crash Logger](https://www.nexusmods.com/newvegas/mods/72317) - if you're getting crashes with a DLL, this is the best thing to report issues to the author.
