@@ -783,7 +783,7 @@ bool Cmd_GetCellEncounterZone_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(ShowPauseMenu, "", false, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(ShowPauseMenu, "", false, kParams_OneOptionalInt);
 bool Cmd_ShowPauseMenu_Execute(COMMAND_ARGS)
 {
 	enum PauseMode : UInt32
@@ -791,7 +791,7 @@ bool Cmd_ShowPauseMenu_Execute(COMMAND_ARGS)
 		kJustPause = 0,
 		kLoad, kSave, kSettings, kHelp
 	};
-	PauseMode pauseMode;
+	PauseMode pauseMode = kJustPause;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pauseMode))
 		return true;
 	auto menu = StartMenu::GetSingleton();
