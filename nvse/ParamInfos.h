@@ -139,20 +139,27 @@ static ParamInfo kParams_OneOptionalObjectID[1] =
 
 static ParamInfo kParams_OneInt_OneOptionalObjectID[2] =
 {
-	{	"path type",	kParamType_Integer,			0	},
-	{	"item",			kParamType_ObjectID,	1	},
+	{	"int",	kParamType_Integer,			0	},
+	{	"object",			kParamType_ObjectID,	1	},
+};
+
+static ParamInfo kParams_TwoInts_OneOptionalObjectID[3] =
+{
+	{	"int",	kParamType_Integer,			0	},
+	{	"int",	kParamType_Integer,			0	},
+	{	"object",			kParamType_ObjectID,	1	},
 };
 
 static ParamInfo kParams_OneObjectID_OneInt[2] =
 {
-	{	"item",		kParamType_ObjectID,	0	},
+	{	"object",		kParamType_ObjectID,	0	},
 	{	"integer",	kParamType_Integer,			0	},
 };
 
 static ParamInfo kParams_OneFloat_OneOptionalObjectID[2] =
 {
 	{	"float",		kParamType_Float,			0	},
-	{	"item",			kParamType_ObjectID,	1	},
+	{	"object",			kParamType_ObjectID,	1	},
 };
 
 static ParamInfo kParams_OneMagicItem_OneOptionalObjectID[2] =

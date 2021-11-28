@@ -17,6 +17,7 @@ DEFINE_CMD_COND_PLUGIN(GetChallengeProgress, "Returns the progress made on a cha
 DEFINE_CMD_COND_PLUGIN(GetPCHasScriptedFastTravelOverride, "Returns whether or not the player is restricted by EnableFastTravel", false, NULL);
 DEFINE_CMD_COND_PLUGIN(GetPCCanFastTravel, "", false, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetWeaponHasFlag, WeaponHasFlag, "", false, kParams_OneInt_OneOptionalObjectID);
+DEFINE_COMMAND_PLUGIN(SetWeaponFlag, "", false, kParams_TwoInts_OneOptionalObjectID);
 DEFINE_CMD_ALT_COND_PLUGIN(GetActorHasBaseFlag, ActorHasBaseFlag, "", false, kParams_OneInt_OneOptionalActorBase);
 DEFINE_COMMAND_ALT_PLUGIN(ForceWeaponJamAnim, ForceJamAnim, "", true, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedSkillPoints, GetCalculatedSkillPointsEarnedPerLevel, "Gets the amount of skill points the player would get for their current level.", false, kParams_OneOptionalInt);
@@ -271,6 +272,29 @@ bool Cmd_GetWeaponHasFlag_Execute(COMMAND_ARGS)
 	TESObjectWEAP* weapon = NULL;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &flagToCheck, &weapon)) return true;
 	return Cmd_GetWeaponHasFlag_Eval(thisObj, (void*)flagToCheck, weapon, result);
+}
+
+bool Cmd_SetWeaponFlag_Execute(COMMAND_ARGS)
+{
+	*result = false; //bSuccess
+	UInt32 flag, bOn;
+	TESObjectWEAP* weapon = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &flag, &bOn, &weapon) || flag > 21)
+		return true;
+	if (weapon = DYNAMIC_CAST(TryExtractBaseForm(weapon, thisObj), TESForm, TESObjectWEAP))
+	{
+		if (flag < 8)  //change Flags1 (0-7)
+		{
+			weapon->weaponFlags1.Write(flag, bOn);
+		}
+		else  //change Flags2 (0-13)
+		{
+			flag -= 8;  //set the base to 0. At flagToCheck == 8, this equals 0.
+			weapon->weaponFlags2.Write(flag, bOn);
+		}
+		*result = true;
+	}
+	return true;
 }
 
 bool Cmd_GetActorHasBaseFlag_Eval(COMMAND_ARGS_EVAL)
@@ -880,6 +904,14 @@ bool Cmd_GetNoEquipShowOff_Execute(COMMAND_ARGS)
 	}
 	return true;
 }
+
+
+
+
+
+
+
+
 
 
 
