@@ -1,4 +1,5 @@
 #pragma once
+#include <intrin.h>
 #include <string>
 
 #include "PluginAPI.h"
@@ -32,21 +33,11 @@ kDblTanPId12,
 kDblPId180;
 
 // From JIP
-extern const float
-kFltZero,
-kFltHalf,
-kFltOne,
-kFltTwo,
-kFltFour,
-kFltSix,
-kFlt10,
-kFlt100,
-kFlt2048,
-kFlt4096,
-kFlt10000,
-kFlt12288,
-kFlt40000,
-kFltMax;
+extern const float kFlt1d100K, kFlt1d1K, kFlt1d200, kFlt1d100, kFltPId180, kFlt1d10, kFltHalf, kFltOne, kFltPId2, kFltPI, kFltPIx2, kFlt10, kFlt180dPI, kFlt100, kFlt200, kFlt1000, kFltMax;
+
+//From JIP
+extern const UInt32 kSSERemoveSignMaskPS[], kSSEChangeSignMaskPS[], kSSEChangeSignMaskPS0[], kSSEDiscard4thPS[];
+extern const UInt64 kSSERemoveSignMaskPD[], kSSEChangeSignMaskPD[];
 
 // JIP assembly definitions.
 #define CALL_EAX(addr) __asm mov eax, addr __asm call eax
@@ -133,6 +124,9 @@ union Coordinate
 	}
 };
 
+// From JG
+bool fCompare(float lval, float rval);
+
 //===Begin JIP math stuff 
 template <typename T1, typename T2> inline T1 GetMin(T1 value1, T2 value2)
 {
@@ -149,26 +143,34 @@ template <typename T> inline T sqr(T value)
 	return value * value;
 }
 
-bool fCompare(float lval, float rval); 
+UInt32 __vectorcall cvtd2ui(double value);
 
-int __stdcall lfloor(float value);
-int __stdcall lceil(float value);
+double __vectorcall cvtui2d(UInt32 value);
+void __fastcall cvtui2d(UInt32 value, double* result);
 
-float __stdcall fSqrt(float value);
-double __stdcall dSqrt(double value);
+int __vectorcall ifloor(float value);
 
-double dCos(double angle);
-double dSin(double angle);
-double dTan(double angle);
+int __vectorcall iceil(float value);
 
-double dAtan(double value);
-double dAsin(double value);
-double dAcos(double value);
-double dAtan2(double y, double x);
+__forceinline int iround(float value)
+{
+	return _mm_cvt_ss2si(_mm_load_ss(&value));
+}
+
+float __vectorcall fMod(float numer, float denom);
+
+float __vectorcall Cos(float angle);
+float __vectorcall Sin(float angle);
+
+__m128 __vectorcall GetSinCos(float angle);
+
+float __vectorcall ATan(float x);
+float __vectorcall ASin(float x);
+float __vectorcall ACos(float x);
+
+float __vectorcall ATan2(float y, float x);
 
 //===End JIP math stuff 
-
-UInt32 __fastcall GetNextPrime(UInt32 num);
 
 UInt32 __fastcall RGBHexToDec(UInt32 rgb);
 

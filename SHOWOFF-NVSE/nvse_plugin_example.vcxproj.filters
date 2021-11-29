@@ -78,6 +78,9 @@
       <Filter>Hooks</Filter>
     </ClCompile>
     <ClCompile Include="settings.cpp" />
+    <ClCompile Include="..\nvse\NiTypes.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="functions\SO_fn_Misc.h">
@@ -2018,6 +2021,9 @@
     </ClInclude>
     <ClInclude Include="functions\SO_fn_Math.h">
       <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nvse\NiTypes.h">
+      <Filter>nvse</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

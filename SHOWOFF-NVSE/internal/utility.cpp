@@ -30,20 +30,35 @@ kDblPId180 = 0.017453292519943295;
 
 // From JIP
 const float
-kFltZero = 0.0F,
+kFlt1d100K = 1.0e-05F,
+kFlt1d1K = 0.001F,
+kFlt1d200 = 0.005F,
+kFlt1d100 = 0.01F,
+kFltPId180 = 0.01745329238F,
+kFlt1d10 = 0.1F,
 kFltHalf = 0.5F,
 kFltOne = 1.0F,
-kFltTwo = 2.0F,
-kFltFour = 4.0F,
-kFltSix = 6.0F,
+kFltPId2 = 1.570796371F,
+kFltPI = 3.141592741F,
+kFltPIx2 = 6.283185482F,
 kFlt10 = 10.0F,
+kFlt180dPI = 57.29578018F,
 kFlt100 = 100.0F,
-kFlt2048 = 2048.0F,
-kFlt4096 = 4096.0F,
-kFlt10000 = 10000.0F,
-kFlt12288 = 12288.0F,
-kFlt40000 = 40000.0F,
+kFlt200 = 200.0F,
+kFlt1000 = 1000.0F,
 kFltMax = FLT_MAX;
+
+// From JIP
+alignas(16) const UInt32
+kSSERemoveSignMaskPS[] = { 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF },
+kSSEChangeSignMaskPS[] = { 0x80000000, 0x80000000, 0x80000000, 0x80000000 },
+kSSEChangeSignMaskPS0[] = { 0x80000000, 0, 0, 0 },
+kSSEDiscard4thPS[] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000 };
+
+// From JIP
+alignas(16) const UInt64
+kSSERemoveSignMaskPD[] = { 0x7FFFFFFFFFFFFFFF, 0x7FFFFFFFFFFFFFFF },
+kSSEChangeSignMaskPD[] = { 0x8000000000000000, 0x8000000000000000 };
 
 // From JG
 void LightCS::Enter()
@@ -93,207 +108,310 @@ bool fCompare(float lval, float rval)
 	return fabs(lval - rval) < FLT_EPSILON;
 }
 
-__declspec(naked) int __stdcall lfloor(float value)
+__declspec(naked) UInt32 __vectorcall cvtd2ui(double value)
 {
 	__asm
 	{
-		fld		dword ptr [esp+4]
-		fstcw	[esp+4]
-		mov		dx, [esp+4]
-		or		word ptr [esp+4], 0x400
-		fldcw	[esp+4]
-		fistp	dword ptr [esp+4]
-		mov		eax, [esp+4]
-		mov		[esp+4], dx
-		fldcw	[esp+4]
-		retn	4
+		lea		eax, [esp - 8]
+		movq	qword ptr[eax], xmm0
+		fld		qword ptr[eax]
+		fisttp	qword ptr[eax]
+		mov		eax, [eax]
+		retn
 	}
 }
 
-__declspec(naked) int __stdcall lceil(float value)
+__declspec(naked) double __vectorcall cvtui2d(UInt32 value)
 {
 	__asm
 	{
-		fld		dword ptr [esp+4]
-		fstcw	[esp+4]
-		mov		dx, [esp+4]
-		or		word ptr [esp+4], 0x800
-		fldcw	[esp+4]
-		fistp	dword ptr [esp+4]
-		mov		eax, [esp+4]
-		mov		[esp+4], dx
-		fldcw	[esp+4]
-		retn	4
+		push	0
+		push	ecx
+		fild	qword ptr[esp]
+		fstp	qword ptr[esp]
+		movq	xmm0, qword ptr[esp]
+		add		esp, 8
+		retn
 	}
 }
 
-__declspec(naked) float __stdcall fSqrt(float value)
+__declspec(naked) void __fastcall cvtui2d(UInt32 value, double* result)
 {
 	__asm
 	{
-		fld		dword ptr [esp+4]
-		fsqrt
-		retn	4
+		mov[edx], ecx
+		mov		dword ptr[edx + 4], 0
+		fild	qword ptr[edx]
+		fstp	qword ptr[edx]
+		retn
 	}
 }
 
-__declspec(naked) double __stdcall dSqrt(double value)
+__declspec(naked) int __vectorcall ifloor(float value)
 {
 	__asm
 	{
-		fld		qword ptr [esp+4]
-		fsqrt
-		retn	8
+		movd	eax, xmm0
+		test	eax, eax
+		jns		isPos
+		push	0x3FA0
+		ldmxcsr[esp]
+		cvtss2si	eax, xmm0
+		mov		byte ptr[esp + 1], 0x1F
+		ldmxcsr[esp]
+		pop		ecx
+		retn
+		isPos :
+		cvttss2si	eax, xmm0
+			retn
 	}
 }
 
-double cos_p(double angle)
-{
-	angle *= angle;
-	return 0.999999953464 + angle * (angle * (0.0416635846769 + angle * (0.00002315393167 * angle - 0.0013853704264)) - 0.499999053455);
-}
-
-double dCos(double angle)
-{
-	if (angle < 0) angle = -angle;
-	while (angle > kDblPIx2)
-		angle -= kDblPIx2;
-
-	int quad = int(angle * kDbl2dPI);
-	switch (quad)
-	{
-		case 0:
-			return cos_p(angle);
-		case 1:
-			return -cos_p(kDblPI - angle);
-		case 2:
-			return -cos_p(angle - kDblPI);
-		default:
-			return cos_p(kDblPIx2 - angle);
-	}
-}
-
-double dSin(double angle)
-{
-	return dCos(kDblPId2 - angle);
-}
-
-
-double tan_p(double angle)
-{
-	angle *= kDbl4dPI;
-	double ang2 = angle * angle;
-	return angle * (211.849369664121 - 12.5288887278448 * ang2) / (269.7350131214121 + ang2 * (ang2 - 71.4145309347748));
-}
-
-double dTan(double angle)
-{
-	while (angle > kDblPIx2)
-		angle -= kDblPIx2;
-
-	int octant = int(angle * kDbl4dPI);
-	switch (octant)
-	{
-		case 0:
-			return tan_p(angle);
-		case 1:
-			return 1.0 / tan_p(kDblPId2 - angle);
-		case 2:
-			return -1.0 / tan_p(angle - kDblPId2);
-		case 3:
-			return -tan_p(kDblPI - angle);
-		case 4:
-			return tan_p(angle - kDblPI);
-		case 5:
-			return 1.0 / tan_p(kDblPIx3d2 - angle);
-		case 6:
-			return -1.0 / tan_p(angle - kDblPIx3d2);
-		default:
-			return -tan_p(kDblPIx2 - angle);
-	}
-}
-
-double dAtan(double value)
-{
-	bool sign = (value < 0);
-	if (sign) value = -value;
-
-	bool complement = (value > 1.0);
-	if (complement) value = 1.0 / value;
-
-	bool region = (value > kDblTanPId12);
-	if (region)
-		value = (value - kDblTanPId6) / (1.0 + kDblTanPId6 * value);
-
-	double res = value;
-	value *= value;
-	res *= (1.6867629106 + value * 0.4378497304) / (1.6867633134 + value);
-
-	if (region) res += kDblPId6;
-	if (complement) res = kDblPId2 - res;
-
-	return sign ? -res : res;
-}
-
-double dAsin(double value)
+__declspec(naked) int __vectorcall iceil(float value)
 {
 	__asm
 	{
-		fld		value
-		fld		st
-		fmul	st, st
-		fld1
-		fsubrp	st(1), st
-		fsqrt
-		fdivp	st(1), st
-		fstp	value
+		movd	eax, xmm0
+		test	eax, eax
+		js		isNeg
+		push	0x5FA0
+		ldmxcsr[esp]
+		cvtss2si	eax, xmm0
+		mov		byte ptr[esp + 1], 0x1F
+		ldmxcsr[esp]
+		pop		ecx
+		retn
+		isNeg :
+		cvttss2si	eax, xmm0
+			retn
 	}
-	return dAtan(value);
 }
 
-double dAcos(double value)
+__declspec(naked) float __vectorcall fMod(float numer, float denom)
 {
-	return kDblPId2 - dAsin(value);
-}
-
-double dAtan2(double y, double x)
-{
-	if (x != 0)
+	__asm
 	{
-		double z = y / x;
-		if (x > 0)
-			return dAtan(z);
-		else if (y < 0)
-			return dAtan(z) - kDblPI;
-		else
-			return dAtan(z) + kDblPI;
+		movss	xmm2, xmm0
+		divss	xmm2, xmm1
+		cvttps2dq	xmm2, xmm2
+		cvtdq2ps	xmm2, xmm2
+		mulss	xmm2, xmm1
+		subss	xmm0, xmm2
+		retn
 	}
-	else if (y > 0)
-		return kDblPId2;
-	else if (y < 0)
-		return -kDblPId2;
-	return 0;
 }
 
-UInt32 __fastcall GetNextPrime(UInt32 num)
+__declspec(naked) float __vectorcall Cos(float angle)
 {
-	if (num <= 2) return 2;
-	else if (num == 3) return 3;
-	UInt32 a = num / 6, b = num - (6 * a), c = (b < 2) ? 1 : 5, d;
-	num = (6 * a) + c;
-	a = (3 + c) / 2;
-	do {
-		b = 4;
-		c = 5;
-		do {
-			d = num / c;
-			if (c > d) return num;
-			if (num == (c * d)) break;
-			c += b ^= 6;
-		} while (true);
-		num += a ^= 6;
-	} while (true);
-	return num;
+	static const float
+		kFlt2dPI = 0.6366197467F, kCosCalc1 = 0.00002315393249F, kCosCalc2 = 0.001385370386F,
+		kCosCalc3 = 0.04166358337F, kCosCalc4 = 0.4999990463F, kCosCalc5 = 0.9999999404F;
+	__asm
+	{
+		andps	xmm0, kSSERemoveSignMaskPS
+		movss	xmm2, kFltPIx2
+		comiss	xmm0, xmm2
+		jb		perdOK
+		movss	xmm1, xmm0
+		divss	xmm1, xmm2
+		cvttps2dq	xmm1, xmm1
+		cvtdq2ps	xmm1, xmm1
+		mulss	xmm1, xmm2
+		subss	xmm0, xmm1
+		perdOK :
+		movss	xmm1, kFlt2dPI
+			mulss	xmm1, xmm0
+			cvttps2dq	xmm1, xmm1
+			movd	eax, xmm1
+			pxor	xmm3, xmm3
+			test	al, al
+			jz		doCalc
+			jp		fourthQ
+			movss	xmm2, kFltPI
+			movss	xmm3, kSSEChangeSignMaskPS0
+			fourthQ :
+		subss	xmm0, xmm2
+			doCalc :
+		mulss	xmm0, xmm0
+			movss	xmm1, kCosCalc1
+			mulss	xmm1, xmm0
+			subss	xmm1, kCosCalc2
+			mulss	xmm1, xmm0
+			addss	xmm1, kCosCalc3
+			mulss	xmm1, xmm0
+			subss	xmm1, kCosCalc4
+			mulss	xmm0, xmm1
+			addss	xmm0, kCosCalc5
+			xorps	xmm0, xmm3
+			retn
+	}
+}
+
+__declspec(naked) float __vectorcall Sin(float angle)
+{
+	__asm
+	{
+		movss	xmm1, xmm0
+		movss	xmm0, kFltPId2
+		subss	xmm0, xmm1
+		jmp		Cos
+	}
+}
+
+__declspec(naked) __m128 __vectorcall GetSinCos(float angle)
+{
+	__asm
+	{
+		movss	xmm4, xmm0
+		call	Cos
+		unpcklps	xmm0, xmm0
+		mulss	xmm0, xmm0
+		movss	xmm2, kFltOne
+		subss	xmm2, xmm0
+		pxor	xmm3, xmm3
+		movss	xmm0, xmm3
+		comiss	xmm2, kFlt1d100K
+		jb		done
+		sqrtss	xmm0, xmm2
+		lea		edx, [eax - 3]
+		neg		edx
+		comiss	xmm4, xmm3
+		cmovb	eax, edx
+		cmp		al, 2
+		jb		done
+		xorps	xmm0, kSSEChangeSignMaskPS0
+		done :
+		retn
+	}
+}
+
+__declspec(naked) float __vectorcall ATan(float x)
+{
+	static const float
+		kFltTanPId12 = 0.2679491937F, kFltTanPId6 = 0.5773502588F, kFltPId6 = 0.5235987902F,
+		kFltTerm1 = 1.686762929F, kFltTerm2 = 0.4378497303F;
+	__asm
+	{
+		xorps	xmm5, xmm5
+		movss	xmm6, xmm0
+		andps	xmm6, kSSEChangeSignMaskPS0
+		xorps	xmm0, xmm6
+		movss	xmm3, kFltOne
+		comiss	xmm0, xmm3
+		seta	al
+		jbe		skipRecpr
+		divss	xmm3, xmm0
+		movss	xmm0, xmm3
+		skipRecpr :
+		comiss	xmm0, kFltTanPId12
+			jbe		noRegion
+			movss	xmm4, kFltTanPId6
+			movss	xmm3, xmm0
+			mulss	xmm3, xmm4
+			addss	xmm3, kFltOne
+			subss	xmm0, xmm4
+			divss	xmm0, xmm3
+			movss	xmm5, kFltPId6
+			noRegion :
+		movss	xmm3, xmm0
+			mulss	xmm3, xmm0
+			movss	xmm4, kFltTerm2
+			mulss	xmm4, xmm3
+			addss	xmm3, kFltTerm1
+			addss	xmm4, kFltTerm1
+			mulss	xmm0, xmm4
+			divss	xmm0, xmm3
+			addss	xmm0, xmm5
+			test	al, al
+			jz		done
+			subss	xmm0, kFltPId2
+			xorps	xmm0, kSSEChangeSignMaskPS0
+			done :
+		xorps	xmm0, xmm6
+			retn
+	}
+}
+
+__declspec(naked) float __vectorcall ASin(float x)
+{
+	__asm
+	{
+		movss	xmm3, xmm0
+		mulss	xmm3, xmm0
+		movss	xmm4, kFltOne
+		subss	xmm4, xmm3
+		comiss	xmm4, kFlt1d100K
+		jb		retnPId2
+		sqrtss	xmm3, xmm4
+		divss	xmm0, xmm3
+		jmp		ATan
+		retnPId2 :
+		movss	xmm3, xmm0
+			andps	xmm3, kSSEChangeSignMaskPS0
+			movss	xmm0, kFltPId2
+			xorps	xmm0, xmm3
+			retn
+	}
+}
+
+__declspec(naked) float __vectorcall ACos(float x)
+{
+	_asm
+	{
+		movss	xmm3, xmm0
+		mulss	xmm3, xmm0
+		movss	xmm4, kFltOne
+		subss	xmm4, xmm3
+		comiss	xmm4, kFlt1d100K
+		jb		retnPI0
+		sqrtss	xmm3, xmm4
+		divss	xmm0, xmm3
+		call	ATan
+		movss	xmm3, xmm0
+		movss	xmm0, kFltPId2
+		subss	xmm0, xmm3
+		retn
+		retnPI0 :
+		movss	xmm3, xmm0
+			pxor	xmm0, xmm0
+			comiss	xmm3, xmm0
+			jnb		done
+			movss	xmm0, kFltPI
+			done :
+		retn
+	}
+}
+
+__declspec(naked) float __vectorcall ATan2(float y, float x)
+{
+	__asm
+	{
+		movss	xmm2, xmm0
+		pxor	xmm5, xmm5
+		comiss	xmm1, xmm5
+		jz		xZero
+		divss	xmm0, xmm1
+		call	ATan
+		pxor	xmm5, xmm5
+		comiss	xmm1, xmm5
+		ja		done
+		andps	xmm2, kSSEChangeSignMaskPS0
+		movss	xmm4, kFltPI
+		xorps	xmm4, xmm2
+		addss	xmm0, xmm4
+		retn
+		xZero :
+		comiss	xmm2, xmm5
+			jz		retn0
+			movss	xmm0, kFltPId2
+			ja		done
+			xorps	xmm0, kSSEChangeSignMaskPS0
+			retn
+			retn0 :
+		movss	xmm0, xmm5
+			done :
+		retn
+	}
 }
 
 __declspec(naked) UInt32 __fastcall RGBHexToDec(UInt32 rgb)
