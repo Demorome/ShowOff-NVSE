@@ -285,12 +285,12 @@ bool Cmd_SetWeaponFlag_Execute(COMMAND_ARGS)
 	{
 		if (flag < 8)  //change Flags1 (0-7)
 		{
-			weapon->weaponFlags1.Write(flag, bOn);
+			weapon->weaponFlags1.WriteBit(flag, bOn);
 		}
 		else  //change Flags2 (0-13)
 		{
 			flag -= 8;  //set the base to 0. At flagToCheck == 8, this equals 0.
-			weapon->weaponFlags2.Write(flag, bOn);
+			weapon->weaponFlags2.WriteBit(flag, bOn);
 		}
 		*result = true;
 	}

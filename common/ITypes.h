@@ -139,6 +139,7 @@ class Bitfield
 		void	Toggle(UInt32 data)			{ field ^= data; }					//!< Toggles individual bits
 		void	Write(UInt32 data, bool state)
 											{ if(state) Set(data); else Clear(data); }
+		void	WriteBit(UInt32 bit, bool state)	{ Write(1 << bit, state); }		//!< May not work for non-UInt8 bitfields.
 		
 		T		Get(void) const				{ return field; }					//!< Gets all bits
 		T		Get(UInt32 data) const		{ return field & data; }			//!< Gets individual bits
