@@ -809,22 +809,19 @@ bool Cmd_ShowPauseMenu_Execute(COMMAND_ARGS)
 		{
 		case kLoad:
 			callback_addr = StartMenu::kLoadAddr;
-			CdeclCall(callback_addr);
 			break;
 		case kSave:
 			callback_addr = StartMenu::kSaveAddr;
-			CdeclCall(callback_addr);
 			break;
 		case kSettings:
 			ThisStdCall(0x7D5F80, menu);	//StartMenu::HideSubSettings
 			callback_addr = StartMenu::kSettingsAddr;
-			CdeclCall(callback_addr);
 			break;
 		case kHelp:
 			callback_addr = StartMenu::kHelpAddr;
-			CdeclCall(callback_addr);
 			break;
 		}
+		CdeclCall(callback_addr);
 		
 		// Make the appropriate tile "selected", to make it have its opacity back.
 		auto iter = menu->main_options084.list.Head();

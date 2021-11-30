@@ -323,16 +323,16 @@ extern "C"
 
 		if (!nvse->isEditor) 
 		{
-			PluginHandle nvsePluginHandle = nvse->GetPluginHandle();  //from JiPLN
+			PluginHandle const nvsePluginHandle = nvse->GetPluginHandle();  //from JiPLN
 			
-			NVSEDataInterface* nvseData = (NVSEDataInterface*)nvse->QueryInterface(kInterface_Data);
+			auto const nvseData = (NVSEDataInterface*)nvse->QueryInterface(kInterface_Data);
 			InventoryRefGetForID = (InventoryRef * (*)(UInt32 refID))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID);
 			InventoryRefCreate = (TESObjectREFR * (__stdcall*)(TESObjectREFR* container, TESForm *itemForm, SInt32 countDelta, ExtraDataList *xData))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceCreateEntry);
 			CaptureLambdaVars = (_CaptureLambdaVars)nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaSaveVariableList);
 			UncaptureLambdaVars = (_UncaptureLambdaVars)nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaUnsaveVariableList);
 
 			// From JiPLN (jip_nvse.cpp) 
-			NVSESerializationInterface* serialization = (NVSESerializationInterface*)nvse->QueryInterface(kInterface_Serialization);
+			auto const serialization = (NVSESerializationInterface*)nvse->QueryInterface(kInterface_Serialization);
 			WriteRecord = serialization->WriteRecord;
 			WriteRecordData = serialization->WriteRecordData;
 			GetNextRecordInfo = serialization->GetNextRecordInfo;

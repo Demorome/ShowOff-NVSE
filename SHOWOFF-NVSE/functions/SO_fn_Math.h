@@ -2,6 +2,7 @@
 #include <armadillo>
 #include <cfloat>
 #include <optional>
+#include "NiTypes.h"
 
 
 
@@ -9,7 +10,81 @@
 
 #if _DEBUG
 
-//Assumes array is packed
+
+NVSEArrayVar* QuatToArray(NiQuaternion const& quat, Script* callingScript)
+{
+	ArrayElementR elems[] = { { quat.w }, { quat.x }, { quat.y }, { quat.z } };
+	return g_arrInterface->CreateArray(elems, 4, callingScript);
+}
+
+template <typename T>
+struct MatrixData
+{
+	size_t num_cols = 0, num_rows = 0;
+	std::vector<T> numbers;
+
+	// Ignores maxCol/Rows = 0
+	// Assumes array is packed
+	MatrixData(NVSEArrayVar* arr, size_t const maxCols = 0, size_t const maxRows = 0)
+	{
+		if (!arr) return;
+		ArrayData const arrData(arr, true);	//assume isPacked
+		if (arrData.size <= 0)
+			return;
+
+		if (bool const is2D = arrData.vals[0].GetType() == NVSEArrayVarInterface::kType_Array)
+		{
+			if (maxRows != 0 && arrData.size > maxRows)
+				return;
+			num_rows = arrData.size;
+			for (int i = 0; i < arrData.size; i++)	//assume each elem is an array.
+			{
+				ArrayData const innerArrData(arrData.vals[i].Array(), true);
+				if (innerArrData.size <= 0 || (maxCols != 0 && innerArrData.size > maxCols))
+					return;
+
+				if (!num_cols)
+					num_cols = innerArrData.size;
+				else if (num_cols != innerArrData.size)	// inner arrays must have matching sizes.
+					return;
+
+				//Get row data from internal array.
+				for (int k = 0; k < innerArrData.size; k++)	//assume each elem is a number.
+				{
+					numbers.emplace_back(innerArrData.vals[k].Number());
+				}
+			}
+		}
+		else //1D array, only a single row (each element is a column).
+		{
+			num_rows = 1;
+			if (maxCols != 0 && arrData.size > maxCols)
+				return;
+			num_cols = arrData.size;
+			for (int i = 0; i < arrData.size; i++)
+			{
+				numbers.emplace_back(arrData.vals[i].Number());
+			}
+		}
+	}
+
+	explicit operator bool() const
+	{
+		return !numbers.empty();
+	}
+};
+
+std::optional<NiMatrix33> Get3x3MatrixFromArray(NVSEArrayVar* arr)
+{
+	if (MatrixData<float> matData = { arr, 3, 3 })
+	{
+		NiMatrix33 mat3x3(matData.numbers.data());
+		return mat3x3;
+	}
+	return {};
+}
+
+//TODO: use MatrixData instead of having copied code
 std::optional<arma::Mat<double>> GetMatrixFromArray(NVSEArrayVar* arr)
 {
 	if (!arr) return {};
@@ -169,10 +244,25 @@ bool Cmd_Matrix_IsMatrix_Execute(COMMAND_ARGS)
 	{
 		if (auto const matrix = GetMatrixFromArray(arrA))
 			*result = true;
-		
 	}
 	return true;
 }
+
+DEFINE_COMMAND_ALT_PLUGIN(Matrix3x3_GetQuaternion, Mat_GetQuat, "Returns a quaternion from a 3x3 matrix.", false, kParams_OneArrayID);
+bool Cmd_Matrix3x3_GetQuaternion_Execute(COMMAND_ARGS)
+{
+	*result = 0;	// resulting matrix
+	UInt32 arrID;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID))
+		return true;
+	if (auto matrix = Get3x3MatrixFromArray(g_arrInterface->LookupArrayByID(arrID)))
+	{
+		const NiQuaternion quat { *matrix };
+		g_arrInterface->AssignCommandResult(QuatToArray(quat, scriptObj), result);
+	}
+	return true;
+}
+
 
 DEFINE_COMMAND_PLUGIN(Matrix_Dump, "Dumps the matrix array in console, in matrix notation.", false, kParams_OneArrayID);
 bool Cmd_Matrix_Dump_Execute(COMMAND_ARGS)
