@@ -81,6 +81,9 @@
     <ClCompile Include="..\nvse\NiTypes.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
+    <ClCompile Include="SO_fn_Math.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="functions\SO_fn_Misc.h">

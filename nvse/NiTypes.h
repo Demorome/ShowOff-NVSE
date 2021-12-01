@@ -252,6 +252,20 @@ struct NiMatrix33
 		cr[2][1] = arrData[7];
 		cr[2][2] = arrData[8];
 	}
+	NiMatrix33(float* row1, float* row2, float* row3)
+	{
+		cr[0][0] = row1[0];
+		cr[0][1] = row1[1];
+		cr[0][2] = row1[2];
+
+		cr[1][0] = row2[0];
+		cr[1][1] = row2[1];
+		cr[1][2] = row2[2];
+
+		cr[2][0] = row3[0];
+		cr[2][1] = row3[1];
+		cr[2][2] = row3[2];
+	}
 	NiMatrix33(const NiMatrix33& from) { *this = from; }
 	NiMatrix33(const NiVector3& rot) { *this = rot; }
 	NiMatrix33(const NiQuaternion& qt) { *this = qt; }

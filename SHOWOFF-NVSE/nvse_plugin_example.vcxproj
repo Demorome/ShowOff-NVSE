@@ -324,6 +324,7 @@
     <ClCompile Include="internal\utility.cpp" />
     <ClCompile Include="settings.cpp" />
     <ClCompile Include="ShowOffNVSE.cpp" />
+    <ClCompile Include="SO_fn_Math.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\nvse\CommandTable.h" />
