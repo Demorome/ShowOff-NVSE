@@ -17,74 +17,121 @@ NVSEArrayVar* QuatToArray(NiQuaternion const& quat, Script* callingScript)
 	return g_arrInterface->CreateArray(elems, 4, callingScript);
 }
 
+// Extracted 2D numbers, for use as matrices, quaternions, etc.
 template <typename T>
-struct MatrixData
+struct array_2d
 {
-	size_t num_cols = 0, num_rows = 0;
-	std::vector<T> numbers;
+	std::vector<std::vector<T>> numbers;
 
-	// Ignores maxCol/Rows = 0
-	// Assumes array is packed
-	MatrixData(NVSEArrayVar* arr, size_t const maxCols = 0, size_t const maxRows = 0)
+	//Returns num_rows (first), then num_cols
+	[[nodiscard]] std::pair<size_t, size_t> GetDimensions() const
 	{
-		if (!arr) return;
-		ArrayData const arrData(arr, true);	//assume isPacked
-		if (arrData.size <= 0)
-			return;
-
-		if (bool const is2D = arrData.vals[0].GetType() == NVSEArrayVarInterface::kType_Array)
+		auto const num_rows = numbers.size();
+		size_t const num_cols = 0;
+		if (num_rows > 0)
 		{
-			if (maxRows != 0 && arrData.size > maxRows)
-				return;
-			num_rows = arrData.size;
-			for (int i = 0; i < arrData.size; i++)	//assume each elem is an array.
-			{
-				ArrayData const innerArrData(arrData.vals[i].Array(), true);
-				if (innerArrData.size <= 0 || (maxCols != 0 && innerArrData.size > maxCols))
-					return;
-
-				if (!num_cols)
-					num_cols = innerArrData.size;
-				else if (num_cols != innerArrData.size)	// inner arrays must have matching sizes.
-					return;
-
-				//Get row data from internal array.
-				for (int k = 0; k < innerArrData.size; k++)	//assume each elem is a number.
-				{
-					numbers.emplace_back(innerArrData.vals[k].Number());
-				}
-			}
+			num_cols = numbers[0].size();
 		}
-		else //1D array, only a single row (each element is a column).
-		{
-			num_rows = 1;
-			if (maxCols != 0 && arrData.size > maxCols)
-				return;
-			num_cols = arrData.size;
-			for (int i = 0; i < arrData.size; i++)
-			{
-				numbers.emplace_back(arrData.vals[i].Number());
-			}
-		}
+		return { num_rows, num_cols };
 	}
 
-	explicit operator bool() const
+	[[nodiscard]] bool IsEmpty() const { return numbers.empty(); }
+
+	NVSEArrayVar* CreateArray(Script* callingScript)
 	{
-		return !numbers.empty();
+		if (IsEmpty())
+			return nullptr;
+		
+		std::vector<ArrayElementR> elems;
+
+		//Make a sub-array for each row.
+		//Inspired by https://thispointer.com/how-to-print-two-dimensional-2d-vector-in-c/
+		std::for_each(numbers.begin(),numbers.end(),[&](const auto& row) {
+			std::vector<ArrayElementR> rowElems;
+			std::for_each(row.begin(), row.end(),[&rowElems](const auto& elem) {
+				rowElems.emplace_back(elem);
+			});
+			elems.emplace_back(g_arrInterface->CreateArray(rowElems.data(), rowElems.size(), callingScript));
+		});
+		return g_arrInterface->CreateArray(elems.data(), elems.size(), callingScript);
 	}
 };
 
+
+
+
+// Ignores maxCol/Rows check if == 0
+// Assumes array is packed
+template <typename T>
+std::optional<array_2d<T>> TryGetArrayNumbers(NVSEArrayVar *arr, size_t const maxCols = 0, size_t const minCols = 0, size_t const maxRows = 0, size_t const minRows = 0)
+{
+	if (!arr) return {};
+	ArrayData const arrData(arr, true);	//assume isPacked
+	if (arrData.size <= 0)
+		return {};
+
+	array_2d<T> matData;
+	if (arrData.vals[0].GetType() == NVSEArrayVarInterface::kType_Array)	//is2D array
+	{
+		if (maxRows != 0 && arrData.size > maxRows)
+			return {};
+		matData.num_rows = arrData.size;
+		for (int i = 0; i < arrData.size; i++)	//assume each elem is an array.
+		{
+			ArrayData const innerArrData(arrData.vals[i].Array(), true);
+			if (innerArrData.size <= 0 || (maxCols != 0 && innerArrData.size > maxCols))
+				return {};
+
+			if (!matData.num_cols)
+				matData.num_cols = innerArrData.size;
+			else if (matData.num_cols != innerArrData.size)	// inner arrays must have matching sizes.
+				return {};
+
+			//Get row data from internal array.
+			for (int k = 0; k < innerArrData.size; k++)	//assume each elem is a number.
+			{
+				matData.numbers.emplace_back(innerArrData.vals[k].Number());
+			}
+		}
+	}
+	else //1D array, only a single row (each element is a column).
+	{
+		matData.num_rows = 1;
+		if (maxCols != 0 && arrData.size > maxCols)
+			return {};
+		matData.num_cols = arrData.size;
+		for (int i = 0; i < arrData.size; i++)
+		{
+			matData.numbers.emplace_back(arrData.vals[i].Number());
+		}
+	}
+
+	if (matData.num_rows > minRows || matData.num_clos > minCols)
+		return {};
+	return matData;
+}
+
 std::optional<NiMatrix33> Get3x3MatrixFromArray(NVSEArrayVar* arr)
 {
-	if (MatrixData<float> matData = { arr, 3, 3 })
+	if (auto matData = TryGetArrayNumbers<float>(arr, 3, 3, 3, 3))
 	{
-		NiMatrix33 mat3x3(matData.numbers.data());
+		NiMatrix33 mat3x3(matData.value().numbers.data());
 		return mat3x3;
 	}
 	return {};
 }
 
-//TODO: use MatrixData instead of having copied code
+std::optional<NiQuaternion> GetQuatFromArray(NVSEArrayVar* arr)
+{
+	if (auto quatData = TryGetArrayNumbers<float>(arr, 4, 4, 1, 1))
+	{
+		NiQuaternion quat(quatData.value().numbers.data());
+		return quat;
+	}
+	return {};
+}
+
+//TODO: use array_2d instead of having copied code
 std::optional<arma::Mat<double>> GetMatrixFromArray(NVSEArrayVar* arr)
 {
 	if (!arr) return {};
@@ -129,6 +176,7 @@ std::optional<arma::Mat<double>> GetMatrixFromArray(NVSEArrayVar* arr)
 	return matrix;
 }
 
+//todo: swap for generic version (CreateArrayFromNumbers)
 NVSEArrayVar* GetMatrixAsArray(arma::Mat<double>& matrix, Script* callingScript)
 {
 	if (matrix.empty())
@@ -262,6 +310,22 @@ bool Cmd_Matrix3x3_GetQuaternion_Execute(COMMAND_ARGS)
 	}
 	return true;
 }
+
+DEFINE_COMMAND_ALT_PLUGIN(Quaternion_GetMatrix, Quat_GetMat, "Returns a 3x3 rotation matrix from a quaternion array.", false, kParams_OneArrayID);
+bool Cmd_Quaternion_GetMatrix_Execute(COMMAND_ARGS)
+{
+	*result = 0;	// resulting matrix
+	UInt32 arrID;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID))
+		return true;
+	if (auto quat = GetQuatFromArray(g_arrInterface->LookupArrayByID(arrID)))
+	{
+		const NiMatrix33 mat{ *quat };
+		g_arrInterface->AssignCommandResult(Matrix3x3ToArray(mat, scriptObj), result);
+	}
+	return true;
+}
+
 
 
 DEFINE_COMMAND_PLUGIN(Matrix_Dump, "Dumps the matrix array in console, in matrix notation.", false, kParams_OneArrayID);

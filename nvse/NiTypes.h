@@ -291,6 +291,8 @@ struct NiQuaternion
 
 	NiQuaternion() {}
 	NiQuaternion(float _w, float _x, float _y, float _z) : w(_w), x(_x), y(_y), z(_z) {}
+	NiQuaternion(float *arr) : w(arr[0]), x(arr[1]), y(arr[2]), z(arr[3]) {}
+
 	NiQuaternion(const NiQuaternion& from) { *this = from; }
 	NiQuaternion(const NiMatrix33& rotMat) { *this = rotMat; }
 	NiQuaternion(const NiVector3& ypr) { *this = ypr; }
