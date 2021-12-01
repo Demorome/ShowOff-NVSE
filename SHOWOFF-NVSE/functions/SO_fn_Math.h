@@ -48,12 +48,12 @@ NVSEArrayVar* QuatToArray(NiQuaternion const& quat, Script* callingScript);
 
 DEFINE_COMMAND_ALT_PLUGIN(Matrix_MultiplyByMatrix, Mat_MultByMat,
                           "Returns the matrix multiplication result of two matrix arrays.", false, kParams_TwoArrayIDs);
-DEFINE_COMMAND_PLUGIN(Matrix_AddMatrix, "Returns the addition of two matrices with equal # of rows and columns.", false, kParams_TwoArrayIDs);
+DEFINE_COMMAND_ALT_PLUGIN(Matrix_AddMatrix, Mat_AddMat, "Returns the addition of two matrices with equal # of rows and columns.", false, kParams_TwoArrayIDs);
 DEFINE_COMMAND_ALT_PLUGIN(Matrix_MultiplyByScalar, Mat_MultByScal, "Returns the matrix multiplied by a scalar.", false, kParams_OneArrayID_OneDouble);
-DEFINE_COMMAND_PLUGIN(Matrix_Transpose, "Returns the transpose of the array matrix.", false, kParams_OneArrayID);
-DEFINE_COMMAND_PLUGIN(Matrix_IsMatrix, "Checks if an array is convertible to a matrix.", false, kParams_OneArrayID);
+DEFINE_COMMAND_ALT_PLUGIN(Matrix_Transpose, Mat_T, "Returns the transpose of the array matrix.", false, kParams_OneArrayID);
+DEFINE_COMMAND_ALT_PLUGIN(Matrix_IsMatrix, Mat_IsMat, "Checks if an array is convertible to a matrix.", false, kParams_OneArrayID);
 DEFINE_COMMAND_ALT_PLUGIN(Matrix3x3_GetQuaternion, Mat_GetQuat, "Returns a quaternion from a 3x3 matrix.", false, kParams_OneArrayID);
-DEFINE_COMMAND_PLUGIN(Matrix_Dump, "Dumps the matrix array in console, in matrix notation.", false, kParams_OneArrayID);
+DEFINE_COMMAND_ALT_PLUGIN(Matrix_Dump, Mat_Dump, "Dumps the matrix array in console, in matrix notation.", false, kParams_OneArrayID);
 DEFINE_COMMAND_PLUGIN(TestMatrix, "debug matrix function", false, NULL);
 
 DEFINE_COMMAND_ALT_PLUGIN(Quaternion_GetMatrix, Quat_GetMat, "Returns a 3x3 rotation matrix from a quaternion array.", false, kParams_OneArrayID);
