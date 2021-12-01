@@ -336,3 +336,6 @@ ASALocalRun/
 *.lib
 *.idb
 *.lib
+*.lastbuildstate
+*.tlog
+*.idb

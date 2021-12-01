@@ -1883,6 +1883,17 @@ TESObjectREFR* TryGetREFR(TESForm* optionalForm, TESObjectREFR* thisObj)
 	return result;
 }
 
+// Prefer base form if provided.
+TESForm* TryGetBaseFormOrREFR(TESForm* form, TESObjectREFR* thisObj)
+{
+	if (form) {
+		form = form->TryGetREFRParent();
+	}
+	if (!form)
+		return thisObj;
+	return form;
+}
+
 __declspec(noinline) UInt8* AuxBuffer::Get(UInt32 bufIdx, UInt32 reqSize)
 {
 	thread_local AuxBuffer s_auxBuffers[3];

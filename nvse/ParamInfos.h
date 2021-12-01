@@ -360,6 +360,12 @@ static ParamInfo kParams_OneForm_OneOptionalInt[2] =
 	{	"int",	kParamType_Integer,	1	},
 };
 
+static ParamInfo kParams_TwoOptionalForms[2] =
+{
+	{	"form",	kParamType_AnyForm,	1	},
+	{	"form",	kParamType_AnyForm,	1	},
+};
+
 static ParamInfo kParams_SetEquippedFloat[2] =
 {
 	{	"val", kParamType_Float, 0 },

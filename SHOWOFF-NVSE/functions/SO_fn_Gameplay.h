@@ -36,7 +36,7 @@ DEFINE_COMMAND_PLUGIN(GetExplosionRefRadius, "Accounts for AdjustExplosionRadius
 DEFINE_COMMAND_PLUGIN(SetExplosionRefRadius, "", true, kParams_OneFloat);
 DEFINE_COMMAND_ALT_PLUGIN(SetNoEquipShowOff, SetNoEquipSO, "Sets whether or not there's a prevention for an item baseform from being activated from an actor's inventory.", false, kParams_OneForm_OneInt_OneOptionalScript);
 DEFINE_COMMAND_ALT_PLUGIN(GetNoEquipShowOff, GetNoEquipSO, "Returns whether or not there's a prevention for an item baseform from being activated from an actor's inventory.", false, kParams_OneForm_OneInt);
-
+DEFINE_COMMAND_PLUGIN(SetOwnershipTemp, "A mix of SetOwnership and SetCellOwnership, but non-savebaked.", false, kParams_TwoOptionalForms);
 
 bool Cmd_SetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
 {
@@ -905,8 +905,31 @@ bool Cmd_GetNoEquipShowOff_Execute(COMMAND_ARGS)
 	return true;
 }
 
-
-
+bool Cmd_SetOwnershipTemp_Execute(COMMAND_ARGS)
+{
+	*result = false; //bSuccess
+	TESForm* newOwner = g_thePlayer->baseForm;
+	TESForm* baseForm = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &newOwner, &baseForm))
+		return true;
+	if (!newOwner || (!IS_ACTOR(newOwner) && !IS_ID(newOwner, TESFaction)))
+		return true;
+	ExtraDataList* xData = nullptr;
+	if (auto const cell = DYNAMIC_CAST(baseForm, TESForm, TESObjectCELL))
+	{
+		xData = &cell->extraDataList;
+	}
+	else if (thisObj)
+	{
+		xData = &thisObj->extraDataList;
+	}
+	if (xData)
+	{
+		ThisStdCall(0x419700, xData, newOwner); //ExtraDataList::UpdateExtraOwnership
+		*result = true;
+	}
+	return true;
+}
 
 
 

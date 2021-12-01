@@ -545,6 +545,7 @@ extern "C"
 
 		//========v1.40
 		/*3D11*/ REG_CMD(SetWeaponFlag)
+		/*3D12*/ REG_CMD(SetOwnershipTemp)
 		
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
