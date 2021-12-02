@@ -36,7 +36,7 @@ DEFINE_COMMAND_PLUGIN(GetExplosionRefRadius, "Accounts for AdjustExplosionRadius
 DEFINE_COMMAND_PLUGIN(SetExplosionRefRadius, "", true, kParams_OneFloat);
 DEFINE_COMMAND_ALT_PLUGIN(SetNoEquipShowOff, SetNoEquipSO, "Sets whether or not there's a prevention for an item baseform from being activated from an actor's inventory.", false, kParams_OneForm_OneInt_OneOptionalScript);
 DEFINE_COMMAND_ALT_PLUGIN(GetNoEquipShowOff, GetNoEquipSO, "Returns whether or not there's a prevention for an item baseform from being activated from an actor's inventory.", false, kParams_OneForm_OneInt);
-DEFINE_COMMAND_PLUGIN(SetOwnershipTemp, "A mix of SetOwnership and SetCellOwnership, but non-savebaked.", false, kParams_TwoOptionalForms);
+DEFINE_COMMAND_ALT_PLUGIN(SetOwnershipTemp, ImGoingToBorrowThis, "A mix of SetOwnership and SetCellOwnership, but non-savebaked.", false, kParams_TwoOptionalForms);
 
 bool Cmd_SetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
 {
