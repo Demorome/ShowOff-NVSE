@@ -13,7 +13,6 @@ DEFINE_CMD_ALT_COND_PLUGIN(GetActorValueDamage, GetAVDamage, "Returns the damage
 
 
 
-
 //Code ripped from both JIP (GetActorsByProcessingLevel) and SUP (FindClosestActorFromRef).
 UInt32 __fastcall GetNumActorsInRangeFromRef_Call(TESObjectREFR* const thisObj, float const range, UInt32 const flags)
 {
@@ -482,7 +481,19 @@ bool Cmd_SayTo_GetQuest_Execute(COMMAND_ARGS)
 	return SayTo::GetExtraData_Call(PASS_COMMAND_ARGS, SayTo::kData_Quest);
 }
 
-
+DEFINE_COMMAND_PLUGIN(IsActorAlt, "Same as IsActor but accepts an optional baseform.", false, kParams_OneOptionalActorBase);
+bool Cmd_IsActorAlt_Execute(COMMAND_ARGS)
+{
+	*result = false;
+	TESForm* baseForm = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &baseForm)) 
+		return true;
+	if (auto const form = TryGetBaseFormOrREFR(baseForm, thisObj))
+	{
+		*result = form->IsActorAlt();
+	}
+	return true;
+}
 
 
 
