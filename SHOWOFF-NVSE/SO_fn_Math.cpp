@@ -1,6 +1,7 @@
 #include "SO_fn_Math.h"
 #include <cfloat>
 
+#if _DEBUG
 template <typename T>
 std::pair<size_t, size_t> array_2d<T>::GetDimensions() const
 {
@@ -218,7 +219,7 @@ bool Cmd_Matrix_MultiplyByMatrix_Execute(COMMAND_ARGS)
 			if (auto const matrixAsArray = GetMatrixAsArray(resMatrix, scriptObj))
 				g_arrInterface->AssignCommandResult(matrixAsArray, result);
 		}
-		catch (std::logic_error& err) {	//invalid matrix sizes for multiplication
+		catch (std::logic_error&) {	//invalid matrix sizes for multiplication
 			return true;
 		}
 	}
@@ -279,6 +280,9 @@ bool Cmd_Matrix3x3_GetQuaternion_Execute(COMMAND_ARGS)
 		return true;
 	if (auto matrix = Get3x3MatrixFromArray(g_arrInterface->LookupArrayByID(arrID)))
 	{
+#if _DEBUG
+		matrix->Dump();
+#endif
 		const NiQuaternion quat{ *matrix };
 		g_arrInterface->AssignCommandResult(QuatToArray(quat, scriptObj), result);
 	}
@@ -294,6 +298,9 @@ bool Cmd_Quaternion_GetMatrix_Execute(COMMAND_ARGS)
 	if (auto quat = GetQuatFromArray(g_arrInterface->LookupArrayByID(arrID)))
 	{
 		const NiMatrix33 mat{ *quat };
+#if _DEBUG
+		mat.Dump();
+#endif
 		auto arr = process_2d_array<float, 3, 3>(mat.cr);
 		g_arrInterface->AssignCommandResult(arr.CreateArray(scriptObj), result);
 	}
@@ -314,7 +321,7 @@ bool Cmd_Matrix_AddMatrix_Execute(COMMAND_ARGS)
 			if (auto const matrixAsArray = GetMatrixAsArray(resMatrix, scriptObj))
 				g_arrInterface->AssignCommandResult(matrixAsArray, result);
 		}
-		catch (std::logic_error& err) {	//invalid matrix sizes for addition
+		catch (std::logic_error&) {	//invalid matrix sizes for addition
 			return true;
 		}
 	}
@@ -343,6 +350,30 @@ bool Cmd_Matrix_Dump_Execute(COMMAND_ARGS)
 
 bool Cmd_TestMatrix_Execute(COMMAND_ARGS)
 {
+	NiMatrix33 mat = 
+	{	1, 2, 3,
+		1, 2, 3,
+		1, 2, 3 };
+	mat.Dump();
+
+	NiQuaternion quat = { mat };
+	quat.Dump();
+
+	// should be the same as the old Mat...
+	NiMatrix33 newMat = { quat };
+	newMat.Dump();
+
+	//should be the same as the old Quat...
+	NiQuaternion newQuat = { newMat };
+	newQuat.Dump();
+
+	newMat = { newQuat };
+	newMat.Dump();
+
+	newQuat = { newMat };
+	newQuat.Dump();
+	
+	/*
 	// Initialize the random generator
 	arma::arma_rng::set_seed_random();
 
@@ -370,6 +401,7 @@ bool Cmd_TestMatrix_Execute(COMMAND_ARGS)
 	// Save matrices A and B:
 	A.save("A_mat.txt", arma::arma_ascii);
 	B.save("B_mat.txt", arma::arma_ascii);
+	*/
 
 	return true;
 }
@@ -384,3 +416,5 @@ bool Cmd_Flt_Equals_Execute(COMMAND_ARGS)
 		*result = true;
 	return true;
 }
+
+#endif _DEBUG

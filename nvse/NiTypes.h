@@ -416,6 +416,10 @@ struct NiQuaternion
 
 	void __vectorcall lerp(const NiQuaternion& qb, float t);
 	void __vectorcall slerp(const NiQuaternion& qb, float t);
+
+	void Dump() const{
+		_MESSAGE("w: %f, x: %f, y: %f, z: %f\n", w, x, y, z);
+	}
 };
 
 // 34

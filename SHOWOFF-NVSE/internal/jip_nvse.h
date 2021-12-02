@@ -33,8 +33,8 @@ enum  //Memory Addresses
 
 #define IS_REFERENCE(form) ((*(UInt32**)form)[0x3C] == kAddr_ReturnTrue)
 #define NOT_REFERENCE(form) ((*(UInt32**)form)[0x3C] != kAddr_ReturnTrue)
-#define IS_ACTOR(form) ((*(UInt32**)form)[0x40] == kAddr_ReturnTrue)
-#define NOT_ACTOR(form) ((*(UInt32**)form)[0x40] != kAddr_ReturnTrue)
+#define IS_ACTOR(form) ((*(UInt32**)form)[0x40] == kAddr_ReturnTrue)	//only works on references
+#define NOT_ACTOR(form) ((*(UInt32**)form)[0x40] != kAddr_ReturnTrue)	//only works on references
 #define IS_NODE(object) ((*(UInt32**)object)[3] == kAddr_ReturnThis)
 
 extern bool (*WriteRecord)(UInt32 type, UInt32 version, const void* buffer, UInt32 length);

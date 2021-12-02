@@ -562,6 +562,8 @@ extern "C"
 		REG_CMD(Matrix_Dump)
 		REG_CMD(Matrix_IsMatrix)
 		REG_CMD_ARR(Matrix_MultiplyByMatrix)
+		REG_CMD_ARR(Matrix3x3_GetQuaternion)	//todo: fix
+		REG_CMD_ARR(Quaternion_GetMatrix)	//todo: fix
 		REG_CMD(Flt_Equals)	// not needed; xNVSE's eval already uses this for "==" operator.
 
 		REG_CMD_FORM(SayTo_GetUnk)

@@ -510,7 +510,7 @@ public:
 	virtual bool		IsArmorAddon();
 	virtual bool		Unk_3E(void);
 	virtual bool		Unk_3F(void);	// returnTrue for refr whose baseForm is a TESActorBase
-	virtual bool		IsActor(void);
+	virtual bool		IsActor(void);	//seems to only work for references.
 	virtual UInt32		Unk_41(void);
 	virtual void		CopyFrom(const TESForm * form);
 	virtual bool		Compare(TESForm * form);
@@ -615,6 +615,11 @@ public:
 	bool IsDeleted() { return flags & kFormFlags_Deleted; }
 	bool GetDontSave() { return flags & kFormFlags_DontSaveForm; }
 	bool IsItem();
+	[[nodiscard]] bool IsActorAlt()	//works for baseforms as well as refrs
+	{
+		auto const base = this->TryGetREFRParent();
+		return IS_ID(base, TESNPC) || IS_ID(base, TESCreature);
+	}
 	
 	MEMBER_FN_PREFIX(TESForm);
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525

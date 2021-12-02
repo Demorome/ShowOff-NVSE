@@ -20,7 +20,6 @@ BGSDefaultObjectManager ** g_defaultObjectManager = (BGSDefaultObjectManager**)0
 
 TESForm *TESForm::TryGetREFRParent()
 {
-	if (!this) return NULL;
 	if (GetIsReference())
 	{
 		TESObjectREFR *refr = (TESObjectREFR*)this;

@@ -139,7 +139,7 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 
 //===v1.35
 ===Bug Fixes:
-*Nada
+*Prevent OnCornerMessage event from firing for messages that have empty description strings.
 
 ===New Functions:
 *GetItemCanHaveHealth

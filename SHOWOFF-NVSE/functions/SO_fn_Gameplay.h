@@ -910,9 +910,10 @@ bool Cmd_SetOwnershipTemp_Execute(COMMAND_ARGS)
 	*result = false; //bSuccess
 	TESForm* newOwner = g_thePlayer->baseForm;
 	TESForm* baseForm = nullptr;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &newOwner, &baseForm))
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &newOwner, &baseForm) || !newOwner)
 		return true;
-	if (!newOwner || (!IS_ACTOR(newOwner) && !IS_ID(newOwner, TESFaction)))
+	newOwner = newOwner->TryGetREFRParent();
+	if (!newOwner->IsActorAlt() && !IS_ID(newOwner, TESFaction))
 		return true;
 	ExtraDataList* xData = nullptr;
 	if (auto const cell = DYNAMIC_CAST(baseForm, TESForm, TESObjectCELL))
