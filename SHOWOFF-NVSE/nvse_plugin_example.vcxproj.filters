@@ -2028,6 +2028,9 @@
     <ClInclude Include="..\nvse\NiTypes.h">
       <Filter>nvse</Filter>
     </ClInclude>
+    <ClInclude Include="easing.h">
+      <Filter>internal</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

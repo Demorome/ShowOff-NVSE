@@ -5,6 +5,10 @@
 #include "NiTypes.h"
 
 
+DEFINE_COMMAND_ALT_PLUGIN(ApplyEasing, Ease, "Applies the chosen easing function to a progress value (situtated between 0 and 1).", false, kParams_OneDouble_OneString_OneInt);
+
+
+
 #if _DEBUG
 
 
@@ -57,14 +61,6 @@ DEFINE_COMMAND_ALT_PLUGIN(Matrix_Dump, Mat_Dump, "Dumps the matrix array in cons
 DEFINE_COMMAND_PLUGIN(TestMatrix, "debug matrix function", false, NULL);
 
 DEFINE_COMMAND_ALT_PLUGIN(Quaternion_GetMatrix, Quat_GetMat, "Returns a 3x3 rotation matrix from a quaternion array.", false, kParams_OneArrayID);
-
-
-//Begin Easing stuff
-
-DEFINE_COMMAND_ALT_PLUGIN(ApplyEasing, Ease, "Applies the chosen easing function to a progress value (situtated between 0 and 1).", false, kParams_OneDouble_OneString_OneInt);
-
-//End Easing stuff
-
 
 /*When comparing two float values for equality, due to internal conversions between singleand double precision,
  *it's better to check if the absolute difference is less than epsilon (0.0001)

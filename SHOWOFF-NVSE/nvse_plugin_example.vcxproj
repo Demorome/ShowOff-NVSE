@@ -943,6 +943,7 @@
     <ClInclude Include="Armadillo Library\armadillo_bits\xvec_htrans_bones.hpp" />
     <ClInclude Include="Armadillo Library\armadillo_bits\xvec_htrans_meat.hpp" />
     <ClInclude Include="Changelog.txt" />
+    <ClInclude Include="easing.h" />
     <ClInclude Include="Events\CustomEventFilters.h" />
     <ClInclude Include="Events\JohnnyEventPredefinitions.h" />
     <ClInclude Include="Events\LambdaVarContext.h" />

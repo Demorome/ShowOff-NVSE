@@ -547,6 +547,8 @@ extern "C"
 		/*3D11*/ REG_CMD(SetWeaponFlag)
 		/*3D12*/ REG_CMD(SetOwnershipTemp)
 		/*3D13*/ REG_CMD(IsActorAlt)
+		/*3D14*/ REG_CMD(ApplyEasing)
+
 		
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
@@ -566,7 +568,6 @@ extern "C"
 		REG_CMD_ARR(Matrix3x3_GetQuaternion)	//todo: fix
 		REG_CMD_ARR(Quaternion_GetMatrix)	//todo: fix
 		REG_CMD(Flt_Equals)	// not needed; xNVSE's eval already uses this for "==" operator.
-		REG_CMD(ApplyEasing)
 
 		REG_CMD_FORM(SayTo_GetUnk)
 		REG_CMD(ApplyAddictionEffect)
