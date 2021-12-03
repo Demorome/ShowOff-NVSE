@@ -498,7 +498,8 @@ void SetSeedForMod(UInt32 seed, Script* scriptObj)
 	UInt8 const modIdx = scriptObj->GetOverridingModIdx();
 	ScopedLock lock(g_Lock);
 	// Change the engine's seed by just deleting the old engine and creating a new one.
-	auto const oldGen = g_ModsAndSeedsMap.GetErase(modIdx);
+	auto const oldGen = g_ModsAndSeedsMap.Get(modIdx);
+	g_ModsAndSeedsMap.Erase(modIdx);
 	delete oldGen;  //safe to do even if the pointer is null
 	auto newGen = new Random_Engine(seed);
 	g_ModsAndSeedsMap.Emplace(modIdx, newGen);

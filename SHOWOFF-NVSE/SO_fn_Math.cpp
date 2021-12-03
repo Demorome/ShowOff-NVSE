@@ -458,8 +458,8 @@ struct Sine_Ease : EasingFunction_Base<T>
 	}
 };
 
-
-std::array<std::function<double(double)>, kNumEasingModes> GetEasingFuncFromStr(std::string &str)
+template <typename T>
+std::array<std::function<T(T)>, kNumEasingModes> GetEasingFuncFromStr(std::string &str)
 {
 	if (str.starts_with("sine"))
 	{
@@ -501,6 +501,8 @@ std::array<std::function<double(double)>, kNumEasingModes> GetEasingFuncFromStr(
 	{
 
 	}
+
+	return Sine_Ease<T>::GetModes();
 }
 
 

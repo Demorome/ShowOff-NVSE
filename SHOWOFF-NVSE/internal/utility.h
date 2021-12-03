@@ -192,6 +192,8 @@ char* __fastcall StrCat(char *dest, const char *src);
 
 UInt32 __fastcall StrHash(const char *inKey);
 
+UInt32 __fastcall StrHashCI(const char* inKey);	//from xNVSE
+
 bool __fastcall CmprLetters(const char *lstr, const char *rstr);
 
 bool __fastcall StrEqualCS(const char *lstr, const char *rstr);
@@ -242,7 +244,7 @@ UInt32 __fastcall HexToUInt(const char *str);
 
 //===Begin JIP string / char stuff
 
-extern const UInt8 kLwrCaseConverter[], kUprCaseConverter[];
+extern const UInt8 kCaseConverter[];
 extern char* GetStrArgBuffer();
 
 //===End JIP string / char stuff

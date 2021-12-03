@@ -5,11 +5,6 @@
 #include "utility.h"
 #include "memory_pool.h"
 
-#define MAP_DEFAULT_ALLOC			8
-#define MAP_DEFAULT_BUCKET_COUNT	8
-#define MAP_MAX_BUCKET_COUNT		0x40000
-#define VECTOR_DEFAULT_ALLOC		8
-
 template <typename T_Data> class Stack
 {
 	using Data_Arg = std::conditional_t<std::is_scalar_v<T_Data>, T_Data, T_Data&>;

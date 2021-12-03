@@ -1,9 +1,15 @@
 ﻿#pragma once
 
-// Ripped from JIP LN.
+// Mostly ripped from JIP LN.
 
 #define MAX_CACHED_BLOCK_SIZE 0x400
 #define MEMORY_POOL_SIZE 0x1000
+
+//These defines were taken from xNVSE
+#define MAP_DEFAULT_ALLOC			8
+#define MAP_DEFAULT_BUCKET_COUNT	8
+#define MAP_MAX_BUCKET_COUNT		0x40000
+#define VECTOR_DEFAULT_ALLOC		8
 
 void* __fastcall Pool_Alloc(UInt32 size);
 void __fastcall Pool_Free(void* pBlock, UInt32 size);
