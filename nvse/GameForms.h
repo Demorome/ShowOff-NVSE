@@ -932,7 +932,7 @@ public:
 	//void ModDuration(float modBy);
 	//void SetRange(UInt32 range);
 	//bool IsHostile() const;
-	signed int EffectItem::GetSkillCode();
+	signed int GetSkillCode();
 };
 
 // 10

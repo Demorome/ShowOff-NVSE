@@ -334,11 +334,6 @@ public:
 		return curIt;
 	}
 
-	const Node *FindString(char *str, Iterator prev) const
-	{
-		return Find(StringFinder_CI(str), prev);
-	}
-
 	template <class Op>
 	UInt32 CountIf(Op &op) const
 	{
@@ -934,10 +929,12 @@ public:
 		return Find(AcceptEqual(toMatch));
 	}
 
+	/*
 	const Node* FindString(char* str, const Node* prev = NULL) const
 	{
 		return Find(StringFinder_CI(str), prev);
 	}
+	*/
 
 	template <class Op>
 	UInt32 CountIf(Op& op) const

@@ -355,7 +355,8 @@ public:
 
 SInt32 BGSListForm::GetIndexOf(TESForm* pForm)
 {
-	return list.GetIndexOf(FindByForm(pForm));
+	FindByForm tmp(pForm);
+	return list.GetIndexOf(tmp);
 }
 
 SInt32 BGSListForm::RemoveForm(TESForm* pForm)

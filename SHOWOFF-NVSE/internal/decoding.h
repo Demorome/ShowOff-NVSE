@@ -730,7 +730,7 @@ public:
 
 	Item *GetSelected()
 	{
-		ListNode<ListBoxItem<Item>> *iter = list.Head();
+		ListNode<ListBoxItem<Item>> *iter = BSSimpleList<Item>::list.Head();
 		ListBoxItem<Item> *item;
 		do
 		{
@@ -744,7 +744,7 @@ public:
 
 	void Clear()
 	{
-		ListNode<ListBoxItem<Item>> *iter = list.Head();
+		ListNode<ListBoxItem<Item>> *iter = BSSimpleList<Item>::list.Head();
 		ListBoxItem<Item> *item;
 		do
 		{
@@ -755,7 +755,7 @@ public:
 			GameHeapFree(item);
 		}
 		while (iter = iter->next);
-		list.RemoveAll();
+		BSSimpleList<Item>::list.RemoveAll();
 		selected = NULL;
 		itemCount = 0;
 	}

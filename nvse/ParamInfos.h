@@ -106,12 +106,29 @@ static ParamInfo kParams_TwoFloats[2] =
 	{	"float",	kParamType_Float,	0 },
 };
 
+static ParamInfo kParams_OneDouble[1] =
+{
+	{	"double",	kParamType_Double,	0 },
+};
+
 static ParamInfo kParams_TwoDoubles[2] =
 {
 	{	"double",	kParamType_Double,	0 },
 	{	"double",	kParamType_Double,	0 },
 };
 
+static ParamInfo kParams_OneDouble_OneInt[2] =
+{
+	{	"double",	kParamType_Double,	0 },
+	{	"int",		kParamType_Integer,	0 },
+};
+
+static ParamInfo kParams_OneDouble_OneString_OneInt[3] =
+{
+	{	"double",	kParamType_Double,	0 },
+	{"string", kParamType_String, 0},
+	{	"int",		kParamType_Integer,	0 },
+};
 // static ParamInfo kParams_OneSpellItem[1] =
 // {
 // 	{	"spell", kParamType_SpellItem, 0 }, 

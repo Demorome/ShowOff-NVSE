@@ -21,7 +21,8 @@ public:
 
 const ModInfo * DataHandler::LookupModByName(const char * modName)
 {
-	return modList.modInfoList.Find(LoadedModFinder(modName));
+	LoadedModFinder tmp(modName);
+	return modList.modInfoList.Find(tmp);
 }
 
 const ModInfo ** DataHandler::GetActiveModList()

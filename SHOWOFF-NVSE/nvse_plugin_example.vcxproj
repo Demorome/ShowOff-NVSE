@@ -141,7 +141,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <ForcedIncludeFiles>nvse/prefix.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
@@ -170,7 +170,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <ForcedIncludeFiles>nvse/prefix.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
@@ -195,7 +195,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ForcedIncludeFiles>nvse/prefix.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
@@ -222,7 +222,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ForcedIncludeFiles>nvse/prefix.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>exports.def</ModuleDefinitionFile>
@@ -252,7 +252,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <ForcedIncludeFiles>nvse/prefix.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <OutputFile>$(OutDir)$(ProjectName)_ng.dll</OutputFile>
@@ -277,7 +277,7 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ForcedIncludeFiles>nvse/prefix.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
     </ClCompile>
     <Link>
       <OutputFile>$(OutDir)$(ProjectName)_ng.dll</OutputFile>

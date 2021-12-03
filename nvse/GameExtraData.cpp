@@ -463,7 +463,7 @@ const char *GetExtraDataName(UInt8 extraDataType)
 	return (extraDataType < kExtraData_Max) ? kExtraDataNames[extraDataType] : "INVALID";
 }
 
-char * GetExtraDataValue(BSExtraData* traverse)
+const char* GetExtraDataValue(BSExtraData* traverse)
 {
 	static char buffer[32767];
 	ExtraOwnership * pXOwner;

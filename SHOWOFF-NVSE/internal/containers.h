@@ -1,29 +1,487 @@
 #pragma once
 
+#include <type_traits>
+#include <initializer_list>
 #include "utility.h"
 #include "memory_pool.h"
 
-// Some container code was ripped from JIP.
-
-// Below definitions are used by JIP
 #define MAP_DEFAULT_ALLOC			8
 #define MAP_DEFAULT_BUCKET_COUNT	8
 #define MAP_MAX_BUCKET_COUNT		0x40000
 #define VECTOR_DEFAULT_ALLOC		8
 
-void* __fastcall Pool_Alloc_Buckets(UInt32 numBuckets);
-UInt32 __fastcall AlignBucketCount(UInt32 count);
-UInt32 __fastcall StrHashCS(const char* inKey);
-UInt32 __fastcall StrHashCI(const char* inKey);
-
-enum
+template <typename T_Data> class Stack
 {
-	kMapDefaultAlloc =		8,
+	using Data_Arg = std::conditional_t<std::is_scalar_v<T_Data>, T_Data, T_Data&>;
 
-	kMapDefaultBucketNum =	11,
-	kMapBucketSizeInc =		2,
+	struct Node
+	{
+		Node* next;
+		T_Data		data;
 
-	kVectorDefaultAlloc =	2,
+		void Clear() { data.~T_Data(); }
+	};
+
+	Node* head;
+
+public:
+	Stack() : head(nullptr) {}
+	~Stack() { Clear(); }
+
+	bool Empty() const { return !head; }
+
+	UInt32 Size() const
+	{
+		if (!head) return 0;
+		UInt32 size = 1;
+		Node* pNode = head;
+		while (pNode = pNode->next)
+			size++;
+		return size;
+	}
+
+	T_Data& Top()
+	{
+		return head->data;
+	}
+
+	T_Data* Push(Data_Arg item)
+	{
+		Node* newNode = ALLOC_NODE(Node);
+		T_Data* data = &newNode->data;
+		RawAssign<T_Data>(*data, item);
+		newNode->next = head;
+		head = newNode;
+		return data;
+	}
+
+	template <typename ...Args>
+	T_Data* Push(Args && ...args)
+	{
+		Node* newNode = ALLOC_NODE(Node);
+		T_Data* data = &newNode->data;
+		new (data) T_Data(std::forward<Args>(args)...);
+		newNode->next = head;
+		head = newNode;
+		return data;
+	}
+
+	T_Data* Pop()
+	{
+		if (!head) return nullptr;
+		T_Data* frontItem = &head->data;
+		Node* toRemove = head;
+		head = head->next;
+		toRemove->Clear();
+		Pool_Free(toRemove, sizeof(Node));
+		return frontItem;
+	}
+
+	void Clear()
+	{
+		if (!head) return;
+		Node* pNode;
+		do
+		{
+			pNode = head;
+			head = head->next;
+			pNode->Clear();
+			Pool_Free(pNode, sizeof(Node));
+		} while (head);
+	}
+};
+
+template <typename T_Data> class LinkedList
+{
+	using Data_Arg = std::conditional_t<std::is_scalar_v<T_Data>, T_Data, T_Data&>;
+
+	struct Node
+	{
+		Node* next;
+		Node* prev;
+		T_Data		data;
+
+		void Clear() { data.~T_Data(); }
+	};
+
+	Node* head;
+	Node* tail;
+
+	Node* GetNthNode(UInt32 index) const
+	{
+		Node* pNode = head;
+		while (pNode)
+		{
+			if (!index) break;
+			index--;
+			pNode = pNode->next;
+		}
+		return pNode;
+	}
+
+	Node* PrependNew()
+	{
+		Node* newNode = ALLOC_NODE(Node);
+		newNode->next = head;
+		newNode->prev = nullptr;
+		if (head) head->prev = newNode;
+		else tail = newNode;
+		head = newNode;
+		return newNode;
+	}
+
+	Node* AppendNew()
+	{
+		Node* newNode = ALLOC_NODE(Node);
+		newNode->next = nullptr;
+		newNode->prev = tail;
+		if (tail) tail->next = newNode;
+		else head = newNode;
+		tail = newNode;
+		return newNode;
+	}
+
+	Node* InsertNew(UInt32 index)
+	{
+		Node* pNode = GetNthNode(index);
+		if (!pNode) return AppendNew();
+		Node* prev = pNode->prev, * newNode = ALLOC_NODE(Node);
+		newNode->next = pNode;
+		newNode->prev = prev;
+		pNode->prev = newNode;
+		if (prev) prev->next = newNode;
+		else head = newNode;
+		return newNode;
+	}
+
+	Node* FindNode(Data_Arg item) const
+	{
+		if (head)
+		{
+			Node* pNode = head;
+			do
+			{
+				if (pNode->data == item)
+					return pNode;
+			} while (pNode = pNode->next);
+		}
+		return nullptr;
+	}
+
+	template <class Matcher>
+	Node* FindNode(Matcher& matcher) const
+	{
+		if (head)
+		{
+			Node* pNode = head;
+			do
+			{
+				if (matcher(pNode->data))
+					return pNode;
+			} while (pNode = pNode->next);
+		}
+		return nullptr;
+	}
+
+	void RemoveNode(Node* toRemove)
+	{
+		Node* next = toRemove->next, * prev = toRemove->prev;
+		if (prev) prev->next = next;
+		else head = next;
+		if (next) next->prev = prev;
+		else tail = prev;
+		toRemove->Clear();
+		Pool_Free(toRemove, sizeof(Node));
+	}
+
+public:
+	LinkedList() : head(nullptr), tail(nullptr) {}
+	LinkedList(std::initializer_list<T_Data> inList) : head(nullptr), tail(nullptr) { AppendList(inList); }
+	~LinkedList() { Clear(); }
+
+	bool Empty() const { return !head; }
+
+	UInt32 Size() const
+	{
+		if (!head) return 0;
+		UInt32 size = 1;
+		Node* pNode = head;
+		while (pNode = pNode->next)
+			size++;
+		return size;
+	}
+
+	LinkedList& operator=(const LinkedList& from)
+	{
+		Clear();
+		Node* pNode = from.head, * newNode;
+		while (pNode)
+		{
+			newNode = AppendNew();
+			RawAssign<T_Data>(newNode->data, pNode->data);
+			pNode = pNode->next;
+		}
+		return *this;
+	}
+
+	T_Data* Prepend(Data_Arg item)
+	{
+		Node* newNode = PrependNew();
+		T_Data* data = &newNode->data;
+		RawAssign<T_Data>(*data, item);
+		return data;
+	}
+
+	template <typename ...Args>
+	T_Data* Prepend(Args && ...args)
+	{
+		Node* newNode = PrependNew();
+		T_Data* data = &newNode->data;
+		new (data) T_Data(std::forward<Args>(args)...);
+		return data;
+	}
+
+	T_Data* Append(Data_Arg item)
+	{
+		Node* newNode = AppendNew();
+		T_Data* data = &newNode->data;
+		RawAssign<T_Data>(*data, item);
+		return data;
+	}
+
+	template <typename ...Args>
+	T_Data* Append(Args && ...args)
+	{
+		Node* newNode = AppendNew();
+		T_Data* data = &newNode->data;
+		new (data) T_Data(std::forward<Args>(args)...);
+		return data;
+	}
+
+	void AppendList(std::initializer_list<T_Data> inList)
+	{
+		for (auto iter = inList.begin(); iter != inList.end(); ++iter)
+			Append(*iter);
+	}
+
+	T_Data* Insert(UInt32 index, Data_Arg item)
+	{
+		Node* newNode = InsertNew(index);
+		T_Data* data = &newNode->data;
+		RawAssign<T_Data>(*data, item);
+		return data;
+	}
+
+	template <typename ...Args>
+	T_Data* Insert(UInt32 index, Args && ...args)
+	{
+		Node* newNode = InsertNew(index);
+		T_Data* data = &newNode->data;
+		new (data) T_Data(std::forward<Args>(args)...);
+		return data;
+	}
+
+	T_Data* GetNth(UInt32 index) const
+	{
+		Node* pNode = GetNthNode(index);
+		return pNode ? &pNode->data : nullptr;
+	}
+
+	T_Data* Front() const
+	{
+		return head ? &head->data : nullptr;
+	}
+
+	T_Data* Back() const
+	{
+		return tail ? &tail->data : nullptr;
+	}
+
+	SInt32 GetIndexOf(Data_Arg item) const
+	{
+		if (head)
+		{
+			Node* pNode = head;
+			SInt32 index = 0;
+			do
+			{
+				if (pNode->data == item)
+					return index;
+				index++;
+			} while (pNode = pNode->next);
+		}
+		return -1;
+	}
+
+	template <class Matcher>
+	SInt32 GetIndexOf(Matcher& matcher) const
+	{
+		if (head)
+		{
+			Node* pNode = head;
+			SInt32 index = 0;
+			do
+			{
+				if (matcher(pNode->data))
+					return index;
+				index++;
+			} while (pNode = pNode->next);
+		}
+		return -1;
+	}
+
+	bool IsInList(Data_Arg item) const
+	{
+		if (head)
+		{
+			Node* pNode = head;
+			do
+			{
+				if (pNode->data == item)
+					return true;
+			} while (pNode = pNode->next);
+		}
+		return false;
+	}
+
+	template <class Matcher>
+	bool IsInList(Matcher& matcher) const
+	{
+		if (head)
+		{
+			Node* pNode = head;
+			do
+			{
+				if (matcher(pNode->data))
+					return true;
+			} while (pNode = pNode->next);
+		}
+		return false;
+	}
+
+	T_Data* Remove(Data_Arg item)
+	{
+		Node* pNode = FindNode(item);
+		if (pNode)
+		{
+			RemoveNode(pNode);
+			return &pNode->data;
+		}
+		return nullptr;
+	}
+
+	template <class Matcher>
+	T_Data* Remove(Matcher& matcher)
+	{
+		Node* pNode = FindNode(matcher);
+		if (pNode)
+		{
+			RemoveNode(pNode);
+			return &pNode->data;
+		}
+		return nullptr;
+	}
+
+	T_Data* RemoveNth(UInt32 index)
+	{
+		Node* pNode = GetNthNode(index);
+		if (pNode)
+		{
+			RemoveNode(pNode);
+			return &pNode->data;
+		}
+		return nullptr;
+	}
+
+	T_Data* PopFront()
+	{
+		if (!head) return nullptr;
+		T_Data* frontItem = &head->data;
+		RemoveNode(head);
+		return frontItem;
+	}
+
+	T_Data* PopBack()
+	{
+		if (!tail) return nullptr;
+		T_Data* backItem = &tail->data;
+		RemoveNode(tail);
+		return backItem;
+	}
+
+	void Clear()
+	{
+		if (!head) return;
+		Node* pNode;
+		do
+		{
+			pNode = head;
+			head = head->next;
+			pNode->Clear();
+			Pool_Free(pNode, sizeof(Node));
+		} while (head);
+		tail = nullptr;
+	}
+
+	class Iterator
+	{
+		friend LinkedList;
+
+		Node* pNode;
+
+	public:
+		bool End() const { return !pNode; }
+		explicit operator bool() const { return pNode != nullptr; }
+		void operator++() { pNode = pNode->next; }
+		void operator--() { pNode = pNode->prev; }
+
+		Data_Arg operator*() const { return pNode->data; }
+		Data_Arg operator->() const { return pNode->data; }
+		Data_Arg operator()() const { return pNode->data; }
+		Data_Arg Get() const { return pNode->data; }
+
+		Iterator() : pNode(nullptr) {}
+		Iterator(Node* _node) : pNode(_node) {}
+
+		Iterator& operator=(const Iterator& other)
+		{
+			pNode = other.pNode;
+			return *this;
+		}
+
+		void Remove(LinkedList& theList, bool frwrd = true)
+		{
+			Node* toRemove = pNode;
+			pNode = frwrd ? pNode->next : pNode->prev;
+			theList.RemoveNode(toRemove);
+		}
+	};
+
+	T_Data* Remove(Iterator& iter)
+	{
+		Node* pNode = iter.pNode;
+		if (pNode)
+		{
+			RemoveNode(pNode);
+			return &pNode->data;
+		}
+		return nullptr;
+	}
+
+	Iterator Begin() { return Iterator(head); }
+
+	Iterator RBegin() { return Iterator(tail); }
+
+	Iterator Find(Data_Arg item)
+	{
+		return Iterator(FindNode(item));
+	}
+
+	template <class Matcher>
+	Iterator Find(Matcher& matcher)
+	{
+		return Iterator(FindNode(matcher));
+	}
 };
 
 template <typename T_Data> __forceinline UInt32 AlignNumAlloc(UInt32 numAlloc)
@@ -70,327 +528,381 @@ template <typename T_Key, typename T_Data> struct MappedPair
 	T_Data		value;
 };
 
-template <typename T_Key> class MappedKey
+template <typename T_Key> class MapKey
 {
+	using Key_Arg = std::conditional_t<std::is_scalar_v<T_Key>, T_Key, const T_Key&>;
+
 	T_Key		key;
 
 public:
-	T_Key Get() const {return key;}
-	void Set(T_Key inKey) {key = inKey;}
-	char Compare(T_Key inKey) const
+	__forceinline Key_Arg Get() const { return key; }
+	__forceinline void Set(Key_Arg inKey)
 	{
-		if (inKey == key) return 0;
-		return (inKey < key) ? -1 : 1;
+		if (std::is_same_v<T_Key, char*>)
+			*(char**)&key = CopyString(*(const char**)&inKey);
+		else key = inKey;
 	}
-	void Clear() {}
+	__forceinline char Compare(Key_Arg inKey) const
+	{
+		if (std::is_same_v<T_Key, char*> || std::is_same_v<T_Key, const char*>)
+			return StrCompare(*(const char**)&inKey, *(const char**)&key);
+		if (inKey < key) return -1;
+		return (key < inKey) ? 1 : 0;
+	}
+	__forceinline void Clear()
+	{
+		if (std::is_same_v<T_Key, char*>)
+			free(*(char**)&key);
+		else key.~T_Key();
+	}
 };
 
-template <> class MappedKey<const char*>
+template <typename T_Data> class MapValue
 {
-	const char	*key;
+	T_Data		value;
 
 public:
-	const char *Get() const {return key;}
-	void Set(const char *inKey) {key = inKey;}
-	char Compare(const char *inKey) const {return StrCompare(inKey, key);}
-	void Clear() {}
+	__forceinline T_Data* Init() { return &value; }
+	__forceinline T_Data& Get() { return value; }
+	__forceinline T_Data* Ptr() { return &value; }
+	__forceinline void Clear() { value.~T_Data(); }
 };
 
-template <> class MappedKey<char*>
+template <typename T_Data> class MapValue_p
 {
-	char		*key;
+	T_Data* value;
 
 public:
-	char *Get() const {return key;}
-	void Set(char *inKey) {key = CopyString(inKey);}
-	char Compare(char *inKey) const {return StrCompare(inKey, key);}
-	void Clear() {free(key);}
+	__forceinline T_Data* Init()
+	{
+		value = ALLOC_NODE(T_Data);
+		return value;
+	}
+	__forceinline T_Data& Get() { return *value; }
+	__forceinline T_Data* Ptr() { return value; }
+	__forceinline void Clear()
+	{
+		value->~T_Data();
+		Pool_Free(value, sizeof(T_Data));
+	}
 };
 
-#if 0
 template <typename T_Key, typename T_Data> class Map
 {
-protected:
-	typedef MappedKey<T_Key> M_Key;
+	using M_Key = MapKey<T_Key>;
+	using M_Value = std::conditional_t<(sizeof(T_Data) <= 8) || (sizeof(T_Data) <= alignof(T_Key)), MapValue<T_Data>, MapValue_p<T_Data>>;
+	using Key_Arg = std::conditional_t<std::is_scalar_v<T_Key>, T_Key, const T_Key&>;
+	using Data_Arg = std::conditional_t<std::is_scalar_v<T_Data>, T_Data, T_Data&>;
 
 	struct Entry
 	{
 		M_Key		key;
-		T_Data		value;
+		M_Value		value;
 
 		void Clear()
 		{
 			key.Clear();
-			value.~T_Data();
+			value.Clear();
 		}
 	};
 
-	Entry		*entries;		// 00
+	Entry* entries;		// 00
 	UInt32		numEntries;		// 04
-	UInt32		alloc;			// 08
+	UInt32		numAlloc;		// 08
 
-	__declspec(noinline) bool GetIndex(T_Key key, UInt32 &outIdx) const
+	bool GetIndex(Key_Arg key, UInt32* outIdx) const
 	{
 		UInt32 lBound = 0, uBound = numEntries, index;
 		char cmpr;
 		while (lBound != uBound)
 		{
-			index = (lBound + uBound) / 2;
+			index = (lBound + uBound) >> 1;
 			cmpr = entries[index].key.Compare(key);
 			if (!cmpr)
 			{
-				outIdx = index;
+				*outIdx = index;
 				return true;
 			}
 			if (cmpr < 0) uBound = index;
 			else lBound = index + 1;
 		}
-		outIdx = lBound;
+		*outIdx = lBound;
 		return false;
 	}
 
-	__declspec(noinline) bool InsertKey(T_Key key, T_Data *&outData)
+	bool InsertKey(Key_Arg key, T_Data** outData)
 	{
 		UInt32 index;
-		if (GetIndex(key, index))
+		if (GetIndex(key, &index))
 		{
-			outData = &entries[index].value;
+			*outData = entries[index].value.Ptr();
 			return false;
 		}
-		if (!entries) entries = (Entry*)malloc(sizeof(Entry) * alloc);
-		else if (numEntries == alloc)
+		if (!entries)
 		{
-			alloc *= 2;
-			entries = (Entry*)realloc(entries, sizeof(Entry) * alloc);
+			numAlloc = AlignNumAlloc<Entry>(numAlloc);
+			entries = POOL_ALLOC(numAlloc, Entry);
 		}
-		Entry *entry = entries + index;
+		else if (numAlloc <= numEntries)
+		{
+			UInt32 newAlloc = numAlloc << 1;
+			POOL_REALLOC(entries, numAlloc, newAlloc, Entry);
+			numAlloc = newAlloc;
+		}
+		Entry* pEntry = entries + index;
 		index = numEntries - index;
-		if (index) memmove(entry + 1, entry, sizeof(Entry) * index);
+		if (index) memmove(pEntry + 1, pEntry, sizeof(Entry) * index);
 		numEntries++;
-		entry->key.Set(key);
-		outData = &entry->value;
+		pEntry->key.Set(key);
+		*outData = pEntry->value.Init();
 		return true;
 	}
 
+	Entry* End() const { return entries + numEntries; }
+
 public:
-	Map(UInt32 _alloc = kMapDefaultAlloc) : entries(NULL), numEntries(0), alloc(_alloc) {}
+	Map(UInt32 _alloc = MAP_DEFAULT_ALLOC) : entries(nullptr), numEntries(0), numAlloc(_alloc) {}
+	Map(std::initializer_list<MappedPair<T_Key, T_Data>> inList) : entries(nullptr), numEntries(0), numAlloc(inList.size()) { InsertList(inList); }
 	~Map()
 	{
 		if (!entries) return;
-		while (numEntries)
-			entries[--numEntries].Clear();
-		free(entries);
-		entries = NULL;
+		Clear();
+		POOL_FREE(entries, numAlloc, Entry);
+		entries = nullptr;
 	}
 
-	UInt32 Size() const {return numEntries;}
-	bool Empty() const {return !numEntries;}
+	UInt32 Size() const { return numEntries; }
+	bool Empty() const { return !numEntries; }
+	Entry* Data() const { return entries; }
 
-	bool Insert(T_Key key, T_Data *&outData)
+	bool Insert(Key_Arg key, T_Data** outData)
 	{
 		if (!InsertKey(key, outData)) return false;
-		new (outData) T_Data();
+		new (*outData) T_Data();
 		return true;
 	}
 
-	T_Data& operator[](T_Key key)
+	T_Data& operator[](Key_Arg key)
 	{
-		T_Data *outData;
-		if (InsertKey(key, outData))
+		T_Data* outData;
+		if (InsertKey(key, &outData))
 			new (outData) T_Data();
 		return *outData;
 	}
 
 	template <typename ...Args>
-	T_Data* Emplace(T_Key key, Args&& ...args)
+	T_Data* Emplace(Key_Arg key, Args&& ...args)
 	{
-		T_Data *outData;
-		if (InsertKey(key, outData))
+		T_Data* outData;
+		if (InsertKey(key, &outData))
 			new (outData) T_Data(std::forward<Args>(args)...);
 		return outData;
 	}
 
-	bool HasKey(T_Key key) const
+	void InsertList(std::initializer_list<MappedPair<T_Key, T_Data>> inList)
 	{
-		UInt32 index;
-		return GetIndex(key, index);
+		T_Data* outData;
+		for (auto iter = inList.begin(); iter != inList.end(); ++iter)
+		{
+			InsertKey(iter->key, &outData);
+			*outData = iter->value;
+		}
 	}
 
-	T_Data Get(T_Key key) const
+	bool HasKey(Key_Arg key) const
 	{
 		UInt32 index;
-		return GetIndex(key, index) ? entries[index].value : NULL;
+		return GetIndex(key, &index);
 	}
 
-	T_Data* GetPtr(T_Key key) const
+	T_Data Get(Key_Arg key)
 	{
 		UInt32 index;
-		return GetIndex(key, index) ? &entries[index].value : NULL;
+		return GetIndex(key, &index) ? entries[index].value.Get() : static_cast<T_Data>(NULL);
 	}
 
-	bool Erase(T_Key key)
+	T_Data* GetPtr(Key_Arg key)
 	{
 		UInt32 index;
-		if (!GetIndex(key, index)) return false;
-		Entry *entry = entries + index;
-		entry->Clear();
+		return GetIndex(key, &index) ? entries[index].value.Ptr() : nullptr;
+	}
+
+	bool Erase(Key_Arg key)
+	{
+		UInt32 index;
+		if (!GetIndex(key, &index)) return false;
+		Entry* pEntry = entries + index;
+		pEntry->Clear();
 		numEntries--;
 		index = numEntries - index;
-		if (index) memmove(entry, entry + 1, sizeof(Entry) * index);
+		if (index) memmove(pEntry, pEntry + 1, sizeof(Entry) * index);
 		return true;
 	}
 
 	void Clear()
 	{
-		for (Entry *entry = entries; numEntries; numEntries--, entry++)
-			entry->Clear();
+		if (numEntries)
+		{
+			Entry* pEntry = entries, * pEnd = End();
+			do
+			{
+				pEntry->Clear();
+				pEntry++;
+			} while (pEntry != pEnd);
+		}
+		numEntries = 0;
 	}
 
 	class Iterator
 	{
-	protected:
 		friend Map;
 
-		Entry		*entry;		// 00
-		UInt32		count;		// 04
+		Map* table;
+		Entry* pEntry;
+		UInt32		index;
 
 	public:
-		T_Key Key() const {return entry->key.Get();}
-		T_Data& Get() const {return entry->value;}
-		T_Data& operator*() const {return entry->value;}
-		T_Data operator->() const {return entry->value;}
-		bool End() const {return !count;}
+		Key_Arg Key() const { return pEntry->key.Get(); }
+		Data_Arg Get() const { return pEntry->value.Get(); }
+		Data_Arg operator*() const { return pEntry->value.Get(); }
+		Data_Arg operator->() const { return pEntry->value.Get(); }
+		Data_Arg operator()() const { return pEntry->value.Get(); }
+		bool End() const { return index >= table->numEntries; }
+		explicit operator bool() const { return index < table->numEntries; }
+		Map* Table() const { return table; }
+
+		Iterator() : table(nullptr), pEntry(nullptr), index(0)
+		{
+		}
+
+		void Init(Map& source)
+		{
+			table = &source;
+			pEntry = table->entries;
+			index = 0;
+		}
+
+		void Last(Map& source)
+		{
+			table = &source;
+			index = table->numEntries;
+			if (index)
+			{
+				index--;
+				pEntry = table->entries + index;
+			}
+		}
 
 		void operator++()
 		{
-			entry++;
-			count--;
+			pEntry++;
+			index++;
 		}
 		void operator--()
 		{
-			entry--;
-			count--;
+			pEntry--;
+			index--;
 		}
 
-		Iterator() {}
-		Iterator(Map &source) : entry(source.entries), count(source.numEntries) {}
-	};
-
-	class OpIterator : public Iterator
-	{
-		Map			*table;		// 08
-
-	public:
-		Map* Table() const {return table;}
+		void Find(Map& source, Key_Arg key)
+		{
+			table = &source;
+			pEntry = table->entries;
+			if (table->GetIndex(key, &index))
+				pEntry += index;
+			else index = -1;
+		}
 
 		void Remove(bool frwrd = true)
 		{
-			entry->Clear();
-			Entry *pEntry = entry;
-			UInt32 index;
+			table->numEntries--;
+			pEntry->Clear();
+			UInt32 size = (UInt32)table->End() - (UInt32)pEntry;
+			if (size) memmove(pEntry, pEntry + 1, size);
 			if (frwrd)
 			{
-				index = count - 1;
-				entry--;
+				pEntry--;
+				index--;
 			}
-			else index = table->numEntries - count;
-			if (index) memmove(pEntry, pEntry + 1, sizeof(Entry) * index);
-			table->numEntries--;
 		}
 
-		OpIterator(Map &source) : table(&source)
+		UInt32 Index() const
 		{
-			entry = source.entries;
-			count = source.numEntries;
+			return index;
 		}
-		OpIterator(Map &source, T_Key key) : table(&source)
-		{
-			UInt32 index;
-			if (source.GetIndex(key, index))
-			{
-				entry = source.entries + index;
-				count = source.numEntries - index;
-			}
-			else count = 0;
-		}
-		OpIterator(Map &source, T_Key key, bool frwrd) : table(&source)
-		{
-			if (!source.numEntries)
-			{
-				count = 0;
-				return;
-			}
-			UInt32 index;
-			bool match = source.GetIndex(key, index);
-			if (frwrd)
-			{
-				entry = source.entries + index;
-				count = source.numEntries - index;
-			}
-			else
-			{
-				entry = source.entries + (index - !match);
-				count = index + match;
-			}
-		}
+
+		Iterator(Map& source) : table(&source), pEntry(source.entries), index(0) {}
+		Iterator(Map& source, Key_Arg key) { Find(source, key); }
 	};
+
+	Iterator Begin() { return Iterator(*this); }
+
+	Iterator Find(Key_Arg key) { return Iterator(*this, key); }
 };
-#endif
 
 template <typename T_Key> class Set
 {
 protected:
-	typedef MappedKey<T_Key> M_Key;
+	using M_Key = MapKey<T_Key>;
+	using Key_Arg = std::conditional_t<std::is_scalar_v<T_Key>, T_Key, const T_Key&>;
 
-	M_Key		*keys;		// 00
+	M_Key* keys;		// 00
 	UInt32		numKeys;	// 04
-	UInt32		alloc;		// 08
+	UInt32		numAlloc;	// 08
 
-	__declspec(noinline) bool GetIndex(T_Key key, UInt32 &outIdx) const
+	bool GetIndex(Key_Arg key, UInt32* outIdx) const
 	{
 		UInt32 lBound = 0, uBound = numKeys, index;
 		char cmpr;
 		while (lBound != uBound)
 		{
-			index = (lBound + uBound) / 2;
+			index = (lBound + uBound) >> 1;
 			cmpr = keys[index].Compare(key);
 			if (!cmpr)
 			{
-				outIdx = index;
+				*outIdx = index;
 				return true;
 			}
 			if (cmpr < 0) uBound = index;
 			else lBound = index + 1;
 		}
-		outIdx = lBound;
+		*outIdx = lBound;
 		return false;
 	}
 
+	M_Key* End() const { return keys + numKeys; }
+
 public:
-	Set(UInt32 _alloc = kVectorDefaultAlloc) : keys(NULL), numKeys(0), alloc(_alloc) {}
+	Set(UInt32 _alloc = MAP_DEFAULT_ALLOC) : keys(nullptr), numKeys(0), numAlloc(_alloc) {}
+	Set(std::initializer_list<T_Key> inList) : keys(nullptr), numKeys(0), numAlloc(inList.size()) { InsertList(inList); }
 	~Set()
 	{
 		if (!keys) return;
-		while (numKeys)
-			keys[--numKeys].Clear();
-		free(keys);
-		keys = NULL;
+		Clear();
+		POOL_FREE(keys, numAlloc, M_Key);
+		keys = nullptr;
 	}
 
-	UInt32 Size() const {return numKeys;}
-	bool Empty() const {return !numKeys;}
+	UInt32 Size() const { return numKeys; }
+	bool Empty() const { return !numKeys; }
+	T_Key* Keys() { return reinterpret_cast<T_Key*>(keys); }
 
-	__declspec(noinline) bool Insert(T_Key key)
+	bool Insert(Key_Arg key)
 	{
 		UInt32 index;
-		if (GetIndex(key, index)) return false;
-		if (!keys) keys = (M_Key*)malloc(sizeof(M_Key) * alloc);
-		else if (numKeys == alloc)
+		if (GetIndex(key, &index)) return false;
+		if (!keys)
 		{
-			alloc *= 2;
-			keys = (M_Key*)realloc(keys, sizeof(M_Key) * alloc);
+			numAlloc = AlignNumAlloc<M_Key>(numAlloc);
+			keys = POOL_ALLOC(numAlloc, M_Key);
 		}
-		M_Key *pKey = keys + index;
+		else if (numAlloc <= numKeys)
+		{
+			UInt32 newAlloc = numAlloc << 1;
+			POOL_REALLOC(keys, numAlloc, newAlloc, M_Key);
+			numAlloc = newAlloc;
+		}
+		M_Key* pKey = keys + index;
 		index = numKeys - index;
 		if (index) memmove(pKey + 1, pKey, sizeof(M_Key) * index);
 		numKeys++;
@@ -398,17 +910,23 @@ public:
 		return true;
 	}
 
-	bool HasKey(T_Key key) const
+	void InsertList(std::initializer_list<T_Key> inList)
 	{
-		UInt32 index;
-		return GetIndex(key, index);
+		for (auto iter = inList.begin(); iter != inList.end(); ++iter)
+			Insert(*iter);
 	}
 
-	bool Erase(T_Key key)
+	bool HasKey(Key_Arg key) const
 	{
 		UInt32 index;
-		if (!GetIndex(key, index)) return false;
-		M_Key *pKey = keys + index;
+		return GetIndex(key, &index);
+	}
+
+	bool Erase(Key_Arg key)
+	{
+		UInt32 index;
+		if (!GetIndex(key, &index)) return false;
+		M_Key* pKey = keys + index;
 		pKey->Clear();
 		numKeys--;
 		index = numKeys - index;
@@ -416,95 +934,75 @@ public:
 		return true;
 	}
 
-	void Clear(bool clrKeys = false)
+	void Clear()
 	{
-		if (clrKeys)
+		if (numKeys)
 		{
-			for (M_Key *pKey = keys; numKeys; numKeys--, pKey++)
+			M_Key* pKey = keys, * pEnd = End();
+			do
+			{
 				pKey->Clear();
+				pKey++;
+			} while (pKey != pEnd);
 		}
-		else numKeys = 0;
-	}
-
-	__declspec(noinline) void CopyFrom(const Set &source)
-	{
-		numKeys = source.numKeys;
-		if (!numKeys) return;
-		if (!keys)
-		{
-			alloc = numKeys;
-			keys = (M_Key*)malloc(sizeof(M_Key) * alloc);
-		}
-		else if (numKeys > alloc)
-		{
-			alloc = numKeys;
-			free(keys);
-			keys = (M_Key*)malloc(sizeof(M_Key) * alloc);
-		}
-		memcpy(keys, source.keys, sizeof(M_Key) * numKeys);
-	}
-
-	bool CompareTo(const Set &source) const
-	{
-		if (numKeys != source.numKeys) return false;
-		return !numKeys || MemCmp(keys, source.keys, sizeof(M_Key) * numKeys);
+		numKeys = 0;
 	}
 
 	class Iterator
 	{
 		friend Set;
 
-		M_Key		*pKey;		// 00
-		UInt32		count;		// 04
+		Set* table;
+		M_Key* pKey;
+		UInt32		index;
 
 	public:
-		T_Key operator*() const {return pKey->Get();}
-		T_Key operator->() const {return pKey->Get();}
-		bool End() const {return !count;}
+		Key_Arg operator*() const { return pKey->Get(); }
+		Key_Arg operator->() const { return pKey->Get(); }
+		Key_Arg operator()() const { return pKey->Get(); }
+		Key_Arg Key() const { return pKey->Get(); }
+		bool End() const { return index >= table->numKeys; }
+		explicit operator bool() const { return index < table->numKeys; }
+		Set* Table() const { return table; }
 
 		void operator++()
 		{
 			pKey++;
-			count--;
+			index++;
 		}
-
-		Iterator() {}
-		Iterator(Set &source) : pKey(source.keys), count(source.numKeys) {}
-		Iterator(Set &source, T_Key key)
+		void operator--()
 		{
-			UInt32 index;
-			if (source.GetIndex(key, index))
-			{
-				pKey = source.keys + index;
-				count = source.numKeys - index;
-			}
-			else count = 0;
-		}
-	};
-
-	class OpIterator : public Iterator
-	{
-		Set			*table;		// 08
-
-	public:
-		Set* Table() const {return table;}
-
-		void Remove()
-		{
-			pKey->Clear();
-			M_Key *_key = pKey;
-			UInt32 index = count - 1;
 			pKey--;
-			if (index) memmove(_key, _key + 1, sizeof(M_Key) * index);
-			table->numKeys--;
+			index--;
 		}
 
-		OpIterator(Set &source) : table(&source)
+		void Find(Key_Arg key)
 		{
-			pKey = source.keys;
-			count = source.numKeys;
+			pKey = table->keys;
+			if (table->GetIndex(key, &index))
+				pKey += index;
+			else index = -1;
 		}
+
+		void Remove(bool frwrd = true)
+		{
+			table->numKeys--;
+			pKey->Clear();
+			UInt32 size = (UInt32)table->End() - (UInt32)pKey;
+			if (size) memmove(pKey, pKey + 1, size);
+			if (frwrd)
+			{
+				pKey--;
+				index--;
+			}
+		}
+
+		Iterator(Set& source) : table(&source), pKey(source.keys), index(0) {}
+		Iterator(Set& source, Key_Arg key) : table(&source) { Find(key); }
 	};
+
+	Iterator Begin() { return Iterator(*this); }
+	Iterator Find(Key_Arg key) { return Iterator(*this, key); }
 };
 
 template <typename T_Key> __forceinline UInt32 HashKey(T_Key inKey)
@@ -568,7 +1066,7 @@ public:
 	__forceinline void Clear() { free(key); }
 };
 
-template <typename T_Key, typename T_Data> class UnorderedMap  // Made by JIP
+template <typename T_Key, typename T_Data> class UnorderedMap
 {
 	using H_Key = HashedKey<T_Key>;
 	using Key_Arg = std::conditional_t<std::is_scalar_v<T_Key>, T_Key, const T_Key&>;
@@ -576,7 +1074,7 @@ template <typename T_Key, typename T_Data> class UnorderedMap  // Made by JIP
 
 	struct Entry
 	{
-		Entry		*next;
+		Entry* next;
 		H_Key		key;
 		T_Data		value;
 
@@ -615,8 +1113,7 @@ template <typename T_Key, typename T_Data> class UnorderedMap  // Made by JIP
 				entries = entries->next;
 				pEntry->Clear();
 				Pool_Free(pEntry, sizeof(Entry));
-			}
-			while (entries);
+			} while (entries);
 		}
 
 		UInt32 Size() const
@@ -630,7 +1127,7 @@ template <typename T_Key, typename T_Data> class UnorderedMap  // Made by JIP
 		}
 	};
 
-	Bucket		*buckets;		// 00
+	Bucket* buckets;		// 00
 	UInt32		numBuckets;		// 04
 	UInt32		numEntries;		// 08
 
@@ -638,7 +1135,7 @@ template <typename T_Key, typename T_Data> class UnorderedMap  // Made by JIP
 
 	__declspec(noinline) void ResizeTable(UInt32 newCount)
 	{
-		Bucket* pBucket = buckets, * pEnd = End(), *newBuckets = (Bucket*)Pool_Alloc_Buckets(newCount);
+		Bucket* pBucket = buckets, * pEnd = End(), * newBuckets = (Bucket*)Pool_Alloc_Buckets(newCount);
 		Entry* pEntry, * pTemp;
 		newCount--;
 		do
@@ -651,7 +1148,7 @@ template <typename T_Key, typename T_Data> class UnorderedMap  // Made by JIP
 				newBuckets[pTemp->key.GetHash() & newCount].Insert(pTemp);
 			}
 			pBucket++;
-		} 		while (pBucket != pEnd);
+		} while (pBucket != pEnd);
 		Pool_Free(buckets, numBuckets * sizeof(Bucket));
 		buckets = newBuckets;
 		numBuckets = newCount + 1;
@@ -746,14 +1243,6 @@ public:
 		return outData;
 	}
 
-	Data_Arg InsertNotIn(Key_Arg key, Data_Arg value)
-	{
-		T_Data* outData;
-		if (InsertKey(key, &outData))
-			RawAssign<T_Data>(*outData, value);
-		return value;
-	}
-
 	void InsertList(std::initializer_list<MappedPair<T_Key, T_Data>> inList)
 	{
 		T_Data* outData;
@@ -769,7 +1258,7 @@ public:
 	T_Data Get(Key_Arg key)
 	{
 		Entry* pEntry = FindEntry(key);
-		return pEntry ? pEntry->value : NULL;
+		return pEntry ? pEntry->value : static_cast<T_Data>(NULL);
 	}
 
 	T_Data* GetPtr(Key_Arg key)
@@ -784,7 +1273,7 @@ public:
 		{
 			UInt32 hashVal = HashKey<T_Key>(key);
 			Bucket* pBucket = &buckets[hashVal & (numBuckets - 1)];
-			Entry* pEntry = pBucket->entries, *prev = nullptr;
+			Entry* pEntry = pBucket->entries, * prev = nullptr;
 			while (pEntry)
 			{
 				if (pEntry->key.Match(key, hashVal))
@@ -800,59 +1289,47 @@ public:
 		return false;
 	}
 
-	T_Data GetErase(Key_Arg key)
+	template <typename F>
+	std::size_t EraseIf(F&& f)
 	{
+		auto numErased = 0u;
 		if (numEntries)
 		{
-			UInt32 hashVal = HashKey<T_Key>(key);
-			Bucket* pBucket = &buckets[hashVal & (numBuckets - 1)];
-			Entry* pEntry = pBucket->entries, * prev = nullptr;
-			while (pEntry)
+			for (auto* bucket = buckets; bucket != End(); ++bucket)
 			{
-				if (pEntry->key.Match(key, hashVal))
+				Entry* entry = bucket->entries, * prev = nullptr;
+				while (entry)
 				{
-					T_Data outVal = pEntry->value;
-					numEntries--;
-					pBucket->Remove(pEntry, prev);
-					return outVal;
+					if (f(*entry))
+					{
+						auto* nextEntry = entry->next;
+						--numEntries;
+						++numErased;
+						bucket->Remove(entry, prev);
+						entry = nextEntry;
+					}
+					else
+					{
+						prev = entry;
+						entry = entry->next;
+					}
 				}
-				prev = pEntry;
-				pEntry = pEntry->next;
 			}
 		}
-		return NULL;
+		return numErased;
 	}
 
-	bool Clear()
+	void Clear()
 	{
-		if (!numEntries) return false;
+		if (!numEntries) return;
 		Bucket* pBucket = buckets, * pEnd = End();
 		do
 		{
 			pBucket->Clear();
-			pBucket++;
-		} 		while (pBucket != pEnd);
+			++pBucket;
+		} while (pBucket != pEnd);
 		numEntries = 0;
-		return true;
 	}
-
-	void DumpLoads()
-	{
-		UInt32 loadsArray[0x40];
-		MemZero(loadsArray, sizeof(loadsArray));
-		Bucket* pBucket = buckets;
-		UInt32 maxLoad = 0, entryCount;
-		for (Bucket* pEnd = End(); pBucket != pEnd; pBucket++)
-		{
-			entryCount = pBucket->Size();
-			loadsArray[entryCount]++;
-			if (maxLoad < entryCount)
-				maxLoad = entryCount;
-		}
-		_MESSAGE("Size = %d\nBuckets = %d\n----------------\n", numEntries, numBuckets);
-		for (UInt32 iter = 0; iter <= maxLoad; iter++)
-			_MESSAGE("%d:\t%05d (%.4f%%)", iter, loadsArray[iter], 100.0 * (double)loadsArray[iter] / numEntries);
-}
 
 	class Iterator
 	{
@@ -900,12 +1377,13 @@ public:
 
 		UnorderedMap* Table() const { return table; }
 		Key_Arg Key() const { return entry->key.Get(); }
-		Data_Arg operator()() const { return entry->value; }
-		T_Data& Ref() { return entry->value; }
+		Data_Arg Get() const { return entry->value; }
 		Data_Arg operator*() const { return entry->value; }
 		Data_Arg operator->() const { return entry->value; }
-
+		Data_Arg operator()() const { return entry->value; }
+		bool End() const { return !entry; }
 		explicit operator bool() const { return entry != nullptr; }
+
 		void operator++()
 		{
 			if (entry)
@@ -936,13 +1414,13 @@ public:
 			{
 				if (curr == entry) break;
 				prev = curr;
-			} 			while (curr = curr->next);
+			} while (curr = curr->next);
 			table->numEntries--;
 			bucket->Remove(entry, prev);
 			entry = prev;
 		}
 
-		Iterator(UnorderedMap* _table = nullptr) : table(_table), entry(nullptr) {}
+		Iterator() : table(nullptr), entry(nullptr) {}
 		Iterator(UnorderedMap& _table) { Init(_table); }
 		Iterator(UnorderedMap& _table, Key_Arg key) : table(&_table) { Find(key); }
 	};
@@ -951,8 +1429,7 @@ public:
 	Iterator Find(Key_Arg key) { return Iterator(*this, key); }
 };
 
-// Made by JIP
-template <typename T_Key> class UnorderedSet  
+template <typename T_Key> class UnorderedSet
 {
 	using H_Key = HashedKey<T_Key>;
 	using Key_Arg = std::conditional_t<std::is_scalar_v<T_Key>, T_Key, const T_Key&>;
@@ -993,7 +1470,7 @@ template <typename T_Key> class UnorderedSet
 				entries = entries->next;
 				pEntry->Clear();
 				Pool_Free(pEntry, sizeof(Entry));
-			} 			while (entries);
+			} while (entries);
 		}
 
 		UInt32 Size() const
@@ -1028,7 +1505,7 @@ template <typename T_Key> class UnorderedSet
 				newBuckets[pTemp->key.GetHash() & newCount].Insert(pTemp);
 			}
 			pBucket++;
-		} 		while (pBucket != pEnd);
+		} while (pBucket != pEnd);
 		Pool_Free(buckets, numBuckets * sizeof(Bucket));
 		buckets = newBuckets;
 		numBuckets = newCount + 1;
@@ -1122,35 +1599,16 @@ public:
 		return false;
 	}
 
-	bool Clear()
+	void Clear()
 	{
-		if (!numEntries) return false;
+		if (!numEntries) return;
 		Bucket* pBucket = buckets, * pEnd = End();
 		do
 		{
 			pBucket->Clear();
 			pBucket++;
-		} 		while (pBucket != pEnd);
+		} while (pBucket != pEnd);
 		numEntries = 0;
-		return true;
-	}
-
-	void DumpLoads()
-	{
-		UInt32 loadsArray[0x40];
-		MemZero(loadsArray, sizeof(loadsArray));
-		Bucket* pBucket = buckets;
-		UInt32 maxLoad = 0, entryCount;
-		for (Bucket* pEnd = End(); pBucket != pEnd; pBucket++)
-		{
-			entryCount = pBucket->Size();
-			loadsArray[entryCount]++;
-			if (maxLoad < entryCount)
-				maxLoad = entryCount;
-		}
-		PrintDebug("Size = %d\nBuckets = %d\n----------------\n", numEntries, numBuckets);
-		for (UInt32 iter = 0; iter <= maxLoad; iter++)
-			PrintDebug("%d:\t%05d (%.4f%%)", iter, loadsArray[iter], 100.0 * (double)loadsArray[iter] / numEntries);
 	}
 
 	class Iterator
@@ -1181,8 +1639,11 @@ public:
 
 		Key_Arg operator*() const { return entry->key.Get(); }
 		Key_Arg operator->() const { return entry->key.Get(); }
-
+		Key_Arg operator()() const { return entry->key.Get(); }
+		Key_Arg Key() const { return entry->key.Get(); }
+		bool End() const { return !entry; }
 		explicit operator bool() const { return entry != nullptr; }
+
 		void operator++()
 		{
 			if ((entry = entry->next) || !table->numEntries)
@@ -1198,20 +1659,20 @@ public:
 	Iterator Begin() { return Iterator(*this); }
 };
 
-template <typename T_Data> class Vector  // made by JIP.
+template <typename T_Data> class Vector
 {
 	using Data_Arg = std::conditional_t<std::is_scalar_v<T_Data>, T_Data, T_Data&>;
 
-	T_Data		*data;		// 00
+	T_Data* data;		// 00
 	UInt32		numItems;	// 04
 	UInt32		numAlloc;	// 08
 
-	__declspec(noinline) T_Data* AllocateData()
+	T_Data* AllocateData()
 	{
 		if (!data)
 		{
 			numAlloc = AlignNumAlloc<T_Data>(numAlloc);
-			data = POOL_ALLOC(numAlloc, T_Data); 
+			data = POOL_ALLOC(numAlloc, T_Data);
 		}
 		else if (numAlloc <= numItems)
 		{
@@ -1257,7 +1718,7 @@ public:
 	T_Data* Append(Args&& ...args)
 	{
 		T_Data* pData = AllocateData();
-		new (pData) T_Data(std::forward<Args>(args)...);
+		::new (pData) T_Data(std::forward<Args>(args)...);
 		return pData;
 	}
 
@@ -1270,7 +1731,7 @@ public:
 	T_Data* Insert(UInt32 index, Data_Arg item)
 	{
 		if (index > numItems)
-			index = numItems;
+			return nullptr;
 		UInt32 size = numItems - index;
 		T_Data* pData = AllocateData();
 		if (size)
@@ -1286,7 +1747,7 @@ public:
 	T_Data* Insert(UInt32 index, Args&& ...args)
 	{
 		if (index > numItems)
-			index = numItems;
+			return nullptr;
 		UInt32 size = numItems - index;
 		T_Data* pData = AllocateData();
 		if (size)
@@ -1298,24 +1759,30 @@ public:
 		return pData;
 	}
 
-	void Concatenate(const Vector& source)
+	void InsertSize(UInt32 index, UInt32 count)
 	{
-		if (!source.numItems) return;
-		UInt32 newCount = numItems + source.numItems;
+		if ((index > numItems) || !count) return;
+		UInt32 newSize = numItems + count;
 		if (!data)
 		{
-			if (numAlloc < newCount) numAlloc = newCount;
-			numAlloc = AlignNumAlloc<T_Data>(numAlloc);
+			numAlloc = AlignNumAlloc<T_Data>(newSize);
 			data = POOL_ALLOC(numAlloc, T_Data);
 		}
-		else if (numAlloc < newCount)
+		else if (numAlloc < newSize)
 		{
-			newCount = AlignNumAlloc<T_Data>(newCount);
-			POOL_REALLOC(data, numAlloc, newCount, T_Data);
-			numAlloc = newCount;
+			newSize = AlignNumAlloc<T_Data>(newSize);
+			POOL_REALLOC(data, numAlloc, newSize, T_Data);
+			numAlloc = newSize;
 		}
-		memcpy(data + numItems, source.data, sizeof(T_Data) * source.numItems);
-		numItems = newCount;
+		T_Data* pData = data + index;
+		if (index < numItems)
+			memmove(pData + count, pData, sizeof(T_Data) * (numItems - index));
+		numItems = newSize;
+		do
+		{
+			new (pData) T_Data();
+			pData++;
+		} while (--count);
 	}
 
 	UInt32 InsertSorted(Data_Arg item, bool descending = false)
@@ -1341,8 +1808,30 @@ public:
 		return lBound;
 	}
 
-	typedef bool (*SortComperator)(const T_Data& lhs, const T_Data& rhs);
-	UInt32 InsertSorted(Data_Arg item, SortComperator comperator)
+	typedef bool (*CompareFunc)(const T_Data& lhs, const T_Data& rhs);
+	UInt32 InsertSorted(Data_Arg item, CompareFunc compareFunc)
+	{
+		UInt32 lBound = 0, uBound = numItems, index;
+		while (lBound != uBound)
+		{
+			index = (lBound + uBound) >> 1;
+			if (compareFunc(item, data[index]))
+				uBound = index;
+			else lBound = index + 1;
+		}
+		uBound = numItems - lBound;
+		T_Data* pData = AllocateData();
+		if (uBound)
+		{
+			pData = data + lBound;
+			memmove(pData + 1, pData, sizeof(T_Data) * uBound);
+		}
+		RawAssign<T_Data>(*pData, item);
+		return lBound;
+	}
+
+	template <class SortComperator>
+	UInt32 InsertSorted(Data_Arg item, SortComperator& comperator)
 	{
 		UInt32 lBound = 0, uBound = numItems, index;
 		while (lBound != uBound)
@@ -1363,22 +1852,44 @@ public:
 		return lBound;
 	}
 
-	void MoveToEnd(Data_Arg item)
+	void Concatenate(const Vector& source)
 	{
-		if (numItems > 1)
+		if (!source.numItems) return;
+		UInt32 newCount = numItems + source.numItems;
+		if (!data)
 		{
-			T_Data* pData = data, * pEnd = End() - 1;
-			do
-			{
-				if (*pData == item)
-				{
-					memcpy(pData, pData + 1, (UInt32)pEnd - (UInt32)pData);
-					RawAssign<T_Data>(*pEnd, item);
-					return;
-				}
-				pData++;
-			} 			while (pData != pEnd);
+			if (numAlloc < newCount) numAlloc = newCount;
+			numAlloc = AlignNumAlloc<T_Data>(numAlloc);
+			data = POOL_ALLOC(numAlloc, T_Data);
 		}
+		else if (numAlloc < newCount)
+		{
+			newCount = AlignNumAlloc<T_Data>(newCount);
+			POOL_REALLOC(data, numAlloc, newCount, T_Data);
+			numAlloc = newCount;
+		}
+		memmove(data + numItems, source.data, sizeof(T_Data) * source.numItems);
+		numItems = newCount;
+	}
+
+	void Concatenate(const T_Data* srcData, UInt32 srcSize)
+	{
+		if (!srcSize) return;
+		UInt32 newCount = numItems + srcSize;
+		if (!data)
+		{
+			if (numAlloc < newCount) numAlloc = newCount;
+			numAlloc = AlignNumAlloc<T_Data>(numAlloc);
+			data = POOL_ALLOC(numAlloc, T_Data);
+		}
+		else if (numAlloc < newCount)
+		{
+			newCount = AlignNumAlloc<T_Data>(newCount);
+			POOL_REALLOC(data, numAlloc, newCount, T_Data);
+			numAlloc = newCount;
+		}
+		memcpy(data + numItems, srcData, sizeof(T_Data) * srcSize);
+		numItems = newCount;
 	}
 
 	SInt32 GetIndexOf(Data_Arg item) const
@@ -1391,41 +1902,25 @@ public:
 				if (*pData == item)
 					return pData - data;
 				pData++;
-			} 			while (pData != pEnd);
+			} while (pData != pEnd);
 		}
 		return -1;
 	}
 
-	template <class Matcher>
-	SInt32 GetIndexOf(Matcher& matcher) const
+	template <class Finder>
+	SInt32 GetIndexOf(Finder& finder) const
 	{
 		if (numItems)
 		{
 			T_Data* pData = data, * pEnd = End();
 			do
 			{
-				if (matcher(*pData))
+				if (finder(*pData))
 					return pData - data;
 				pData++;
-			} 			while (pData != pEnd);
+			} while (pData != pEnd);
 		}
 		return -1;
-	}
-
-	template <class Matcher>
-	T_Data* Find(Matcher& matcher) const
-	{
-		if (numItems)
-		{
-			T_Data* pData = data, * pEnd = End();
-			do
-			{
-				if (matcher(*pData))
-					return pData;
-				pData++;
-			} 			while (pData != pEnd);
-		}
-		return nullptr;
 	}
 
 	bool RemoveNth(UInt32 index)
@@ -1435,7 +1930,7 @@ public:
 		pData->~T_Data();
 		numItems--;
 		index = numItems - index;
-		if (index) memcpy(pData, pData + 1, sizeof(T_Data) * index);
+		if (index) memmove(pData, pData + 1, sizeof(T_Data) * index);
 		return true;
 	}
 
@@ -1451,15 +1946,15 @@ public:
 				numItems--;
 				pData->~T_Data();
 				UInt32 size = (UInt32)End() - (UInt32)pData;
-				if (size) memcpy(pData, pData + 1, size);
+				if (size) memmove(pData, pData + 1, size);
 				return true;
-			} 			while (pData != pEnd);
+			} while (pData != pEnd);
 		}
 		return false;
 	}
 
-	template <class Matcher>
-	UInt32 Remove(Matcher& matcher)
+	template <class Finder>
+	UInt32 Remove(Finder& finder)
 	{
 		if (numItems)
 		{
@@ -1468,13 +1963,13 @@ public:
 			do
 			{
 				pData--;
-				if (!matcher(*pData)) continue;
+				if (!finder(*pData)) continue;
 				numItems--;
 				pData->~T_Data();
 				size = (UInt32)End() - (UInt32)pData;
-				if (size) memcpy(pData, pData + 1, size);
+				if (size) memmove(pData, pData + 1, size);
 				removed++;
-			} 			while (pData != pEnd);
+			} while (pData != pEnd);
 			return removed;
 		}
 		return 0;
@@ -1490,9 +1985,9 @@ public:
 		{
 			pData->~T_Data();
 			pData++;
-		} 		while (pData != pEnd);
+		} while (pData != pEnd);
 		UInt32 size = (UInt32)End() - (UInt32)pData;
-		if (size) memcpy(pBgn, pData, size);
+		if (size) memmove(pBgn, pData, size);
 		numItems -= count;
 	}
 
@@ -1520,7 +2015,7 @@ public:
 			{
 				new (pData) T_Data();
 				pData++;
-			} 			while (pData != pEnd);
+			} while (pData != pEnd);
 		}
 		else
 		{
@@ -1530,18 +2025,17 @@ public:
 			{
 				pData->~T_Data();
 				pData++;
-			} 			while (pData != pEnd);
+			} while (pData != pEnd);
 		}
 		numItems = newSize;
 	}
 
-	T_Data Pop()
+	void Pop()
 	{
-		if (!numItems) return NULL;
+		if (!numItems) return;
 		numItems--;
 		T_Data* pEnd = End();
 		pEnd->~T_Data();
-		return *pEnd;
 	}
 
 	void Clear()
@@ -1553,7 +2047,7 @@ public:
 			{
 				pData->~T_Data();
 				pData++;
-			} 			while (pData != pEnd);
+			} while (pData != pEnd);
 		}
 		numItems = 0;
 	}
@@ -1591,7 +2085,24 @@ private:
 		QuickSortDescending(i + 1, q);
 	}
 
-	void QuickSortCustom(UInt32 p, UInt32 q, SortComperator comperator)
+	void QuickSortCustom(UInt32 p, UInt32 q, CompareFunc compareFunc)
+	{
+		if (p >= q) return;
+		UInt32 i = p;
+		for (UInt32 j = p + 1; j < q; j++)
+		{
+			if (compareFunc(data[p], data[j]))
+				continue;
+			i++;
+			RawSwap<T_Data>(data[j], data[i]);
+		}
+		RawSwap<T_Data>(data[p], data[i]);
+		QuickSortCustom(p, i, compareFunc);
+		QuickSortCustom(i + 1, q, compareFunc);
+	}
+
+	template <class SortComperator>
+	void QuickSortCustom(UInt32 p, UInt32 q, SortComperator& comperator)
 	{
 		if (p >= q) return;
 		UInt32 i = p;
@@ -1615,7 +2126,13 @@ public:
 		else QuickSortAscending(0, numItems);
 	}
 
-	void Sort(SortComperator comperator)
+	void Sort(CompareFunc compareFunc)
+	{
+		QuickSortCustom(0, numItems, compareFunc);
+	}
+
+	template <class SortComperator>
+	void Sort(SortComperator& comperator)
 	{
 		QuickSortCustom(0, numItems, comperator);
 	}
@@ -1625,7 +2142,7 @@ public:
 		UInt32 idx = numItems, rand;
 		while (idx > 1)
 		{
-			rand = GetRandomInt(idx);
+			rand = GetRandomUInt(idx);
 			idx--;
 			if (rand != idx)
 				RawSwap<T_Data>(data[rand], data[idx]);
@@ -1636,143 +2153,132 @@ public:
 	{
 		friend Vector;
 
-		T_Data		*pData;
-		UInt32		count;
-
-		Iterator() {}
+		Vector* contObj;
+		T_Data* pData;
+		UInt32		index;
 
 	public:
-		explicit operator bool() const { return count != 0; }
-		void operator++()
-		{
-			pData++;
-			count--;
-		}
-		void operator+=(UInt32 _count)
-		{
-			if (_count >= count)
-				count = 0;
-			else
-			{
-				pData += _count;
-				count -= _count;
-			}
-		}
-
+		Data_Arg Get() const { return *pData; }
 		Data_Arg operator*() const { return *pData; }
 		Data_Arg operator->() const { return *pData; }
 		Data_Arg operator()() const { return *pData; }
-		T_Data& Ref() { return *pData; }
+		bool End() const { return index >= contObj->numItems; }
+		bool LastElement() const { return index + 1 >= contObj->numItems; }
+		explicit operator bool() const { return index < contObj->numItems; }
+		UInt32 Index() const { return index; }
 
-		Iterator(Vector& source) : pData(source.data), count(source.numItems) {}
-		Iterator(Vector& source, UInt32 index) : count(source.numItems)
+		void Init(Vector& source)
 		{
-			if (count <= index)
-				count = 0;
-			else
-			{
-				pData = source.data + index;
-				count -= index;
-			}
+			contObj = &source;
+			pData = contObj->data;
+			index = 0;
 		}
-	};
 
-	class RvIterator : public Iterator
-	{
-	public:
+		void Find(Vector& source, UInt32 _index)
+		{
+			contObj = &source;
+			index = _index;
+			pData = contObj->data + index;
+		}
+
+		void operator++()
+		{
+			pData++;
+			index++;
+		}
 		void operator--()
 		{
 			pData--;
-			count--;
-		}
-		void operator-=(UInt32 _count)
-		{
-			if (_count >= count)
-				count = 0;
-			else
-			{
-				pData -= _count;
-				count -= _count;
-			}
+			index--;
 		}
 
-		void Remove(Vector& source)
+		void operator+=(UInt32 count)
 		{
+			pData += count;
+			index += count;
+		}
+
+		void operator-=(UInt32 count)
+		{
+			pData -= count;
+			index -= count;
+		}
+
+		Iterator operator+(const UInt32 first) const
+		{
+			return Iterator(*contObj, index + first);
+		}
+
+		void Remove(bool frwrd = true)
+		{
+			contObj->numItems--;
 			pData->~T_Data();
-			UInt32 size = source.numItems - count;
-			source.numItems--;
-			if (size) memcpy(pData, pData + 1, size * sizeof(T_Data));
-		}
-
-		RvIterator(Vector& source)
-		{
-			if (count = source.numItems)
-				pData = source.data + (count - 1);
-		}
-	};
-
-	class CpIterator : public Iterator
-	{
-	public:
-		CpIterator(Vector& source)
-		{
-			if (count = source.numItems)
+			UInt32 size = (UInt32)contObj->End() - (UInt32)pData;
+			if (size) memmove(pData, pData + 1, size);
+			if (frwrd)
 			{
-				UInt32 size = count * sizeof(T_Data);
-				pData = (T_Data*)memcpy(GetAuxBuffer(s_auxBuffers[2], size), source.data, size);
+				pData--;
+				index--;
 			}
+		}
+
+		Iterator(Vector& source) : contObj(&source), pData(source.data), index(0) {}
+		Iterator(Vector& source, UInt32 _index) : contObj(&source), index(_index)
+		{
+			pData = source.data + index;
 		}
 	};
 
 	Iterator Begin() { return Iterator(*this); }
 	Iterator BeginAt(UInt32 index) { return Iterator(*this, index); }
-
-	RvIterator BeginRv() { return RvIterator(*this); }
-
-	CpIterator BeginCp() { return CpIterator(*this); }
 };
 
-template <typename T_Data, size_t N> class FixedTypeArray
+template <typename T_Data, UInt32 size> class FixedTypeArray
 {
-protected:
-	size_t		size;
-	T_Data		data[N];
+	using Data_Arg = std::conditional_t<std::is_scalar_v<T_Data>, T_Data, T_Data&>;
+
+	UInt32		numItems;
+	T_Data		data[size];
 
 public:
-	FixedTypeArray() : size(0) {}
+	FixedTypeArray() : numItems(0) {}
 
-	bool Empty() const {return size == 0;}
-	size_t Size() const {return size;}
-	T_Data *Data() {return data;}
+	UInt32 Size() const { return numItems; }
+	bool Empty() const { return !numItems; }
+	T_Data* Data() { return data; }
 
-	bool Append(T_Data item)
+	bool Append(Data_Arg item)
 	{
-		if (size >= N) return false;
-		data[size++] = item;
-		return true;
+		if (numItems < size)
+		{
+			RawAssign<T_Data>(data[numItems++], item);
+			return true;
+		}
+		return false;
+	}
+
+	T_Data* PopBack()
+	{
+		return numItems ? &data[--numItems] : nullptr;
 	}
 
 	class Iterator
 	{
-	protected:
 		friend FixedTypeArray;
 
-		T_Data		*pData;
-		UInt32		count;
+		T_Data* pData;
+		T_Data* pEnd;
 
 	public:
-		bool End() const {return !count;}
-		void operator++()
-		{
-			count--;
-			pData++;
-		}
+		bool End() const { return pData >= pEnd; }
+		explicit operator bool() const { return pData < pEnd; }
+		void operator++() { pData++; }
 
-		T_Data& operator*() const {return *pData;}
-		T_Data& operator->() const {return *pData;}
-		T_Data& Get() const {return *pData;}
+		Data_Arg operator*() const { return *pData; }
+		Data_Arg operator->() const { return *pData; }
+		Data_Arg operator()() const { return *pData; }
+		Data_Arg Get() const { return *pData; }
 
-		Iterator(FixedTypeArray &source) : pData(source.data), count(source.size) {}
+		Iterator(FixedTypeArray& source) : pData(source.data), pEnd(source.data + source.numItems) {}
 	};
 };
-

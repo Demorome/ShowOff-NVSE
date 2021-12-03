@@ -1157,10 +1157,10 @@ public:
     /** @} */
 
 	/* get an option and creates it if it doesn't exist */
-	int GetOrCreate(char* sectionName, char* keyName, int defaultValue, char* comment);
+	int GetOrCreate(const char* sectionName, const char* keyName, int defaultValue, const char* comment);
 	long GetOrCreateHex(char* sectionName, char* keyName, long defaultValue, char* comment);
-	float GetOrCreate(char* sectionName, char* keyName, double defaultValue, char* comment);
-	const char* GetOrCreate(char* sectionName, char* keyName, char* defaultValue, char* comment);
+	float GetOrCreate(const char* sectionName, const char* keyName, double defaultValue, const char* comment);
+	const char* GetOrCreate(const char* sectionName, const char* keyName, const char* defaultValue, const char* comment);
 
 private:
     // copying is not permitted
@@ -1554,7 +1554,7 @@ CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::LoadData(
 #endif // SI_SUPPORT_IOSTREAMS
 
 template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
-_declspec(noinline) int CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetOrCreate(char* sectionName, char* keyName, int defaultValue, char* comment)
+_declspec(noinline) int CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetOrCreate(const char* sectionName, const char* keyName, int defaultValue, const char* comment)
 {
 	int settingValue = this->GetLongValue(sectionName, keyName, -1);
 	if (settingValue == -1) {
@@ -1577,7 +1577,7 @@ _declspec(noinline) long CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::Get
 }
 
 template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
-_declspec(noinline) float CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetOrCreate(char* sectionName, char* keyName, double defaultValue, char* comment)
+_declspec(noinline) float CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetOrCreate(const char* sectionName, const char* keyName, double defaultValue, const char* comment)
 {
 	double settingValue = this->GetDoubleValue(sectionName, keyName, -1);
 	if (settingValue == -1) {
@@ -1588,7 +1588,7 @@ _declspec(noinline) float CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::Ge
 }
 
 template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
-_declspec(noinline) const char* CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetOrCreate(char* sectionName, char* keyName, char* defaultValue, char* comment)
+_declspec(noinline) const char* CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetOrCreate(const char* sectionName, const char* keyName, const char* defaultValue, const char* comment)
 {
 	const char* settingValue = this->GetValue(sectionName, keyName, NULL);
 	if (settingValue == NULL) {

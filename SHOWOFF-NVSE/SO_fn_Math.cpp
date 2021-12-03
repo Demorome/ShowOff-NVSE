@@ -1,5 +1,9 @@
 #include "SO_fn_Math.h"
+
+#include <array>
 #include <cfloat>
+
+const double PI = kDblPI;
 
 #if _DEBUG
 template <typename T>
@@ -405,6 +409,120 @@ bool Cmd_TestMatrix_Execute(COMMAND_ARGS)
 
 	return true;
 }
+
+
+//Begin Easing stuff
+
+enum EasingMode : UInt32
+{
+	kMode_EaseIn = 0, kMode_EaseOut, kMode_EaseInOut,
+	kModeMax = kMode_EaseInOut, kNumEasingModes
+};
+
+template <typename T>	//numeric template
+struct EasingFunction_Base
+{
+protected:
+	~EasingFunction_Base() = default;
+
+public:
+	//Returns Ease In/Out/InOut functions in an array.
+	virtual std::array<std::function<T(T)>, kNumEasingModes> GetModes() = 0;
+	
+	virtual T EaseIn(T x) = 0;
+	virtual T EaseOut(T x) = 0;
+	virtual T EaseInOut(T x) = 0;
+};
+
+//Copied easing function code from http://robertpenner.com/easing/
+
+template <typename T>
+struct Sine_Ease : EasingFunction_Base<T>
+{
+	static std::array<std::function<T(T)>, kNumEasingModes> GetModes()
+	{
+		return { EaseIn, EaseOut, EaseInOut };
+	}
+
+	static T EaseIn(T x) 
+	{
+		return 1 - cos((x * PI) / 2);
+	}
+	static T EaseOut(T x)
+	{
+		return sin((x * PI) / 2);
+	}
+	static T EaseInOut(T x)
+	{
+		return -(cos(PI * x) - 1) / 2;
+	}
+};
+
+
+std::array<std::function<double(double)>, kNumEasingModes> GetEasingFuncFromStr(std::string &str)
+{
+	if (str.starts_with("sine"))
+	{
+
+	}
+	else if (str.starts_with("cub"))	//match cube/cubic
+	{
+
+	}
+	else if (str.starts_with("quint"))
+	{
+
+	}
+	else if (str.starts_with("circ"))
+	{
+
+	}
+	else if (str.starts_with("elastic"))
+	{
+
+	}
+	else if (str.starts_with("quad"))
+	{
+
+	}
+	else if (str.starts_with("quart"))
+	{
+
+	}
+	else if (str.starts_with("expo"))
+	{
+
+	}
+	else if (str.starts_with("back"))
+	{
+
+	}
+	else if (str.starts_with("bounce"))
+	{
+
+	}
+}
+
+
+bool Cmd_ApplyEasing_Execute(COMMAND_ARGS)
+{
+
+	*result = 0;
+	double progress;	//assumed to be between 0-1
+	char funcName[0x25];	//choose easing function, ex: "sine", "Quad". Non-case sensitive.
+	EasingMode mode;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &progress, &funcName, &mode) || mode > kModeMax)
+		return true;
+	std::string funcNameStr{ funcName };
+	std::ranges::for_each(funcNameStr, [](char& c) { c = tolower(c); });
+	
+	
+	return true;
+}
+
+//End Easing stuff
+
+
 
 bool Cmd_Flt_Equals_Execute(COMMAND_ARGS)
 {

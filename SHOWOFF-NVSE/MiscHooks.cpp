@@ -68,8 +68,8 @@ namespace PickpocketInCombat
 			}
 		}
 
-		cost = min(cost, g_fForcePickpocketMaxAPCost); //yes, the choice of global setting is intentional.
-		cost = max(cost, g_fForcePickpocketMinAPCost);
+		cost = std::min<float>(cost, g_fForcePickpocketMaxAPCost); //yes, the choice of global setting is intentional.
+		cost = std::max<float>(cost, g_fForcePickpocketMinAPCost);
 
 		return cost;
 	}

@@ -299,7 +299,7 @@ enum
 #define GetExtraType(xDataList, Type) (Extra ## Type*)xDataList.GetByType(kExtraData_ ## Type)
 #define GetExtraTypeJIP(xDataList, Type) (Extra ## Type*)GetExtraData(xDataList, kExtraData_ ## Type)
 
-extern char *GetExtraDataValue(BSExtraData *traverse);
+extern const char* GetExtraDataValue(BSExtraData* traverse);
 extern const char *GetExtraDataName(UInt8 extraDataType);
 
 // 014
@@ -480,7 +480,7 @@ class ExtraDataListInExtendDataListMatcher
 public:
 	ExtraDataListInExtendDataListMatcher(ExtraDataList* match) : m_toMatch(match) { }
 
-	bool Accept(ExtraDataList* match)
+	bool Accept(ExtraDataList* match) const
 	{
 		return (m_toMatch == match);
 	}
@@ -493,12 +493,14 @@ class ExtraDataListInEntryDataListMatcher
 public:
 	ExtraDataListInEntryDataListMatcher(ExtraDataList* match) : m_toMatch(match) { }
 
-	bool Accept(ExtraContainerChanges::EntryData* match)
+	bool Accept(ExtraContainerChanges::EntryData* match) const
 	{
 		if (match && match->extendData)
-			return match->extendData->GetIndexOf(ExtraDataListInExtendDataListMatcher(m_toMatch))>=0;
-		else
-			return false;
+		{
+			ExtraDataListInExtendDataListMatcher matcher(m_toMatch);
+			return match->extendData->GetIndexOf(matcher) >= 0;
+		}
+		return false;
 	}
 };
 
@@ -509,7 +511,7 @@ class ExtendDataListInEntryDataListMatcher
 public:
 	ExtendDataListInEntryDataListMatcher(ExtraContainerChanges::ExtendDataList* match) : m_toMatch(match) { }
 
-	bool Accept(ExtraContainerChanges::EntryData* match)
+	bool Accept(ExtraContainerChanges::EntryData* match) const
 	{
 		if (match && match->extendData)
 			return (match->extendData == m_toMatch);
@@ -525,7 +527,7 @@ class EntryDataInEntryDataListMatcher
 public:
 	EntryDataInEntryDataListMatcher(ExtraContainerChanges::EntryData* match) : m_toMatch(match) { }
 
-	bool Accept(ExtraContainerChanges::EntryData* match)
+	bool Accept(ExtraContainerChanges::EntryData* match) const
 	{
 		return (m_toMatch == match);
 	}
@@ -538,7 +540,7 @@ class ItemInEntryDataListMatcher
 public:
 	ItemInEntryDataListMatcher(TESForm* match) : m_toMatch(match) { }
 
-	bool Accept(ExtraContainerChanges::EntryData* match)
+	bool Accept(ExtraContainerChanges::EntryData* match) const
 	{
 		return (match && m_toMatch == match->type);
 	}
@@ -551,7 +553,7 @@ class BaseInEntryDataLastMatcher
 public:
 	BaseInEntryDataLastMatcher(TESForm* match) : m_toMatch(match) { }
 
-	bool Accept(ExtraContainerChanges::EntryData* match)
+	bool Accept(ExtraContainerChanges::EntryData* match) const
 	{
 		return (match && match->type && m_toMatch == match->type->TryGetREFRParent());
 	}
@@ -564,7 +566,7 @@ class RefIDInEntryDataListMatcher
 public:
 	RefIDInEntryDataListMatcher(UInt32 match) : m_toMatch(match) { }
 
-	bool Accept(ExtraContainerChanges::EntryData* match)
+	bool Accept(ExtraContainerChanges::EntryData* match) const
 	{
 		return (match && match->type && m_toMatch == match->type->refID);
 	}
@@ -577,7 +579,7 @@ class BaseIDInEntryDataListMatcher
 public:
 	BaseIDInEntryDataListMatcher(UInt32 match) : m_toMatch(match) { }
 
-	bool Accept(ExtraContainerChanges::EntryData* match)
+	bool Accept(ExtraContainerChanges::EntryData* match) const
 	{
 		return (match && match->type && match->type->TryGetREFRParent() && m_toMatch == match->type->TryGetREFRParent()->refID);
 	}

@@ -156,3 +156,48 @@ __declspec(naked) void* __fastcall Pool_Realloc(void* pBlock, UInt32 curSize, UI
 		retn	4
 	}
 }
+
+__declspec(naked) void* __fastcall Pool_Alloc_Buckets(UInt32 numBuckets)
+{
+	__asm
+	{
+		push	ecx
+		shl		ecx, 2
+		call	Pool_Alloc
+		pop		ecx
+		push	eax
+		push	edi
+		mov		edi, eax
+		xor eax, eax
+		rep		stosd
+		pop		edi
+		pop		eax
+		retn
+	}
+}
+
+__declspec(naked) UInt32 __fastcall AlignBucketCount(UInt32 count)
+{
+	__asm
+	{
+		cmp		ecx, MAP_DEFAULT_BUCKET_COUNT
+		ja		gtMin
+		mov		eax, MAP_DEFAULT_BUCKET_COUNT
+		retn
+		gtMin :
+		cmp		ecx, MAP_MAX_BUCKET_COUNT
+			jb		ltMax
+			mov		eax, MAP_MAX_BUCKET_COUNT
+			retn
+			ltMax :
+		mov		eax, ecx
+			bsr		ecx, eax
+			bsf		edx, eax
+			cmp		cl, dl
+			jz		done
+			mov		eax, 2
+			shl		eax, cl
+			done :
+		retn
+	}
+}
