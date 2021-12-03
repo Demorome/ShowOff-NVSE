@@ -3,6 +3,9 @@
 #include <functional>
 #include <string>
 #include <cmath>
+#include <numbers>
+
+constexpr auto PI = std::numbers::pi;
 
 enum EasingMode : UInt32
 {
