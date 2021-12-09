@@ -414,6 +414,18 @@ ExtraOwnership *ExtraOwnership::Create(TESForm *_owner)
 	return (ExtraOwnership*)dataPtr;
 }
 
+ExtraSecuritronFace* ExtraSecuritronFace::Create()
+{
+	UInt32* dataPtr = (UInt32*)GameHeapAlloc(sizeof(ExtraSecuritronFace));
+	dataPtr[0] = kVtbl_ExtraSecuritronFace;
+	dataPtr[1] = kExtraData_SecuritronFace;
+	dataPtr[2] = 0;	//unknown what this is for... padding?
+	auto xFace = (ExtraSecuritronFace*)dataPtr;
+	xFace->expression.Init(0);
+	xFace->face.Init(0);
+	return xFace;
+}
+
 ExtraRank *ExtraRank::Create(UInt32 _rank)
 {
 	UInt32 *dataPtr = (UInt32*)GameHeapAlloc(sizeof(ExtraRank));

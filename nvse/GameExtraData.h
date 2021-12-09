@@ -746,6 +746,16 @@ public:
 	static ExtraOwnership* __stdcall Create(TESForm *_owner);
 };
 
+class ExtraSecuritronFace : public BSExtraData
+{
+public:
+	ExtraSecuritronFace();
+	virtual ~ExtraSecuritronFace();
+	String face, expression;
+
+	static ExtraSecuritronFace* __stdcall Create();
+};
+
 // 010
 class ExtraRank : public BSExtraData
 {

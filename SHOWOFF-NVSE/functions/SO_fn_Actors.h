@@ -495,6 +495,32 @@ bool Cmd_IsActorAlt_Execute(COMMAND_ARGS)
 	return true;
 }
 
+DEFINE_COMMAND_PLUGIN(SetSecuritronExpressionTemp, "", true, kParams_OneReference_TwoStrings);
+bool Cmd_SetSecuritronExpressionTemp_Execute(COMMAND_ARGS)
+{
+	*result = false;	//bSuccess
+	Actor* actor;
+	char faceStr[516];
+	char expressionStr[516];
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &actor, faceStr, expressionStr)
+		|| !thisObj || NOT_ACTOR(thisObj))
+	{
+		return true;
+	}
+	auto const niNode = actor->GetNiNode();
+	if (!niNode) return true;
+	ExtraSecuritronFace* xFace = GetExtraTypeJIP(&thisObj->extraDataList, SecuritronFace);
+	if (!xFace)
+	{
+		xFace = ExtraSecuritronFace::Create();
+		thisObj->extraDataList.Add(xFace);
+	}
+	xFace->face.Set(faceStr);
+	xFace->expression.Set(expressionStr);
+	ThisStdCall(0x437F90, xFace, niNode);	//ExtraSecuritronFace_ApplyChangesToNiObject
+	*result = true;
+	return true;
+}
 
 
 
@@ -509,7 +535,6 @@ bool Cmd_IsActorAlt_Execute(COMMAND_ARGS)
 
 
 #ifdef _DEBUG
-
 
 
 

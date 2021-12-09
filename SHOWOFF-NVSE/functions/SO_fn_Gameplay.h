@@ -342,9 +342,12 @@ bool Cmd_RemoveAllItemsShowOff_Execute(COMMAND_ARGS)
 		kFlag_AllowRemovalOfUnplayableBipedItems =	1 << 3,
 		kFlag_Unk1 =								1 << 4,  // todo: figure out what these two bools do for the vanilla function.
 		kFlag_Unk2 =								1 << 5,
-		kFlag_IgnoreAllUnplayableItems =			1 << 6  // Overrides kFlag_AllowRemovalOfUnplayableBipedItems. TODO: not yet implemented.
+		kFlag_RunOnUnequipEvent =					1 << 6,
+		kFlag_IgnoreAllUnplayableItems =			1 << 7,  // Overrides kFlag_AllowRemovalOfUnplayableBipedItems. TODO: not yet implemented.
+
+		kFlag_Default = kFlag_RunOnUnequipEvent
 	};
-	UInt32 flags = kFlag_None;  // Default
+	UInt32 flags = kFlag_Default;
 	SInt32 typeCode = -1;  //-1 = all
 	TESObjectREFR* targetContainer = nullptr;
 	BGSListForm* exceptionFormList = nullptr;
@@ -362,6 +365,7 @@ bool Cmd_RemoveAllItemsShowOff_Execute(COMMAND_ARGS)
 	bool const removeUnplayableBipedItems = flags & kFlag_AllowRemovalOfUnplayableBipedItems;
 	bool const unk1 = flags & kFlag_Unk1;
 	bool const unk2 = flags & kFlag_Unk2;
+	bool const runOnUnequipEvent = flags & kFlag_RunOnUnequipEvent;
 	bool const ignoreAllUnplayableItems = flags & kFlag_IgnoreAllUnplayableItems;
 
 	// Modify the code for RemoveAllItems
@@ -386,6 +390,10 @@ bool Cmd_RemoveAllItemsShowOff_Execute(COMMAND_ARGS)
 		// Check the form via IsItemPlayable. If it passes, jmp back to removal, otherwise jmp to go to the next form.
 	}
 
+	if (runOnUnequipEvent)
+	{
+		//TODO
+	}
 
 	// Call RemoveAllItems with the new modifications
 	ThisStdCall<void>(0x4CE340, xChanges, thisObj, targetContainer, unk1, retainOwnership, unk2, suppressMessages, typeCode, exceptionFormList);

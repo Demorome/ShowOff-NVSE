@@ -548,6 +548,7 @@ extern "C"
 		/*3D12*/ REG_CMD(SetOwnershipTemp)
 		/*3D13*/ REG_CMD(IsActorAlt)
 		/*3D14*/ REG_CMD(ApplyEasing)
+		/*3D15*/ REG_CMD(SetSecuritronExpressionTemp)
 
 		
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)

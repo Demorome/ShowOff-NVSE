@@ -297,6 +297,7 @@ enum ObjectVtbl
 	kVtbl_ExtraFactionChanges =						0x1015F30,
 	kVtbl_ExtraScript =								0x1015914,
 	kVtbl_ExtraObjectHealth =						0x1015184,
+	kVtbl_ExtraSecuritronFace =						0x10159B0,
 
 	kVtbl_SeenData =								0x1083FC4,
 	kVtbl_IntSeenData =								0x1083FE4,
