@@ -298,7 +298,7 @@ struct Bounce_Ease : EasingFunction_Base<T>
 template <typename T>
 std::array<std::function<T(T)>, kNumEasingModes> GetEasingFuncsFromStr(std::string& str)
 {
-	if (str.starts_with("sine"))
+	if (str.starts_with("sin"))
 	{
 		return Sine_Ease<T>::GetModes();
 	}

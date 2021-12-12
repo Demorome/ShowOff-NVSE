@@ -8,7 +8,7 @@
 
 bool Cmd_ApplyEasing_Execute(COMMAND_ARGS)
 {
-	*result = 0;
+	*result = -1;
 	double input;	//assumed to be between 0-1
 	char funcName[0x25];	//choose easing function, ex: "sine", "Quad". Non-case sensitive.
 	EasingMode mode;

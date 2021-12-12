@@ -17,7 +17,7 @@ DEFINE_CMD_COND_PLUGIN(GetChallengeProgress, "Returns the progress made on a cha
 DEFINE_CMD_COND_PLUGIN(GetPCHasScriptedFastTravelOverride, "Returns whether or not the player is restricted by EnableFastTravel", false, NULL);
 DEFINE_CMD_COND_PLUGIN(GetPCCanFastTravel, "", false, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetWeaponHasFlag, WeaponHasFlag, "", false, kParams_OneInt_OneOptionalObjectID);
-DEFINE_COMMAND_PLUGIN(SetWeaponFlag, "", false, kParams_TwoInts_OneOptionalObjectID);
+DEFINE_COMMAND_ALT_PLUGIN(SetWeaponFlag, SetWeaponHasFlag, "", false, kParams_TwoInts_OneOptionalObjectID);
 DEFINE_CMD_ALT_COND_PLUGIN(GetActorHasBaseFlag, ActorHasBaseFlag, "", false, kParams_OneInt_OneOptionalActorBase);
 DEFINE_COMMAND_ALT_PLUGIN(ForceWeaponJamAnim, ForceJamAnim, "", true, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedSkillPoints, GetCalculatedSkillPointsEarnedPerLevel, "Gets the amount of skill points the player would get for their current level.", false, kParams_OneOptionalInt);
