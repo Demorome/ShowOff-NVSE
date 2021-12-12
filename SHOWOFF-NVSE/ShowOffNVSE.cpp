@@ -548,7 +548,7 @@ extern "C"
 		/*3D12*/ REG_CMD(SetOwnershipTemp)
 		/*3D13*/ REG_CMD(IsActorAlt)
 		/*3D14*/ REG_CMD(ApplyEasing)
-		/*3D15*/ REG_CMD(SetSecuritronExpressionTemp)
+		
 
 		
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
@@ -560,6 +560,7 @@ extern "C"
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 
+		
 		REG_CMD_ARR(Matrix_MultiplyByScalar)
 		REG_CMD_ARR(Matrix_AddMatrix)
 		REG_CMD_ARR(Matrix_Transpose)
@@ -595,6 +596,7 @@ extern "C"
 		// IsBipedForm
 		REG_CMD_FORM(GetActorPreferredWeapon)
 		REG_CMD(TryDropWeapon)
+		REG_CMD(SetSecuritronExpressionTemp)
 
 		REG_CMD_ARR(ReadArrayFromJSON)
 		//more JSON functions...

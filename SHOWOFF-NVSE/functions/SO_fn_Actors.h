@@ -495,7 +495,8 @@ bool Cmd_IsActorAlt_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(SetSecuritronExpressionTemp, "", true, kParams_OneReference_TwoStrings);
+//bug: despite not calling the savebake function, this is how being savebaked still.
+DEFINE_COMMAND_ALT_PLUGIN(SetSecuritronExpressionTemp, SetSecExpTemp, "", true, kParams_OneReference_TwoStrings);
 bool Cmd_SetSecuritronExpressionTemp_Execute(COMMAND_ARGS)
 {
 	*result = false;	//bSuccess
