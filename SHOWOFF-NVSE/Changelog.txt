@@ -171,11 +171,19 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 *Matrix_ApplyOperationWithMatrix (alias: Mat_ApplyOpWithMat)
 
 
+//===v1.45
+===Bug Fixes:
+*Refactored functions with array arguments to work with inline (used to only work with array variables).
+
+===New Functions:
+*
+
+
 ====== (Template:)
 
 //===v???
 ===Bug Fixes:
-*Refactored functions with array arguments to work with inline (used to only work with array variables).
+*
 
 ===New Functions:
 *
