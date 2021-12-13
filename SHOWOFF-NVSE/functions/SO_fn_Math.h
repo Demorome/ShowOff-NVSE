@@ -7,12 +7,6 @@
 
 DEFINE_COMMAND_ALT_PLUGIN(ApplyEasing, Ease, "Applies the chosen easing function to a progress value (situtated between 0 and 1).", false, kParams_OneDouble_OneString_OneInt);
 
-
-
-#if _DEBUG
-
-
-
 // Extracted 2D numbers, for use as matrices, quaternions, etc.
 template <typename T>
 struct array_2d
@@ -28,14 +22,13 @@ struct array_2d
 
 //Based off of https://stackoverflow.com/a/17569578
 template <typename T, size_t rows, size_t cols>
-array_2d<T> process_2d_array(const T (&array)[rows][cols]);
-
+array_2d<T> process_2d_array(const T(&array)[rows][cols]);
 
 // Ignores min/maxCol/Rows checks if == 0
 // Assumes array is packed
 template <typename T>
 std::optional<array_2d<T>> TryGetArrayNumbers(NVSEArrayVar* arr, size_t const maxCols = 0, size_t const minCols = 0,
-                                              size_t const maxRows = 0, size_t const minRows = 0);
+	size_t const maxRows = 0, size_t const minRows = 0);
 
 std::optional<NiMatrix33> Get3x3MatrixFromArray(NVSEArrayVar* arr);
 
@@ -51,16 +44,22 @@ NVSEArrayVar* QuatToArray(NiQuaternion const& quat, Script* callingScript);
 
 
 DEFINE_COMMAND_ALT_PLUGIN(Matrix_ApplyOperationWithMatrix, Mat_ApplyOpWithMat,
-                          "Returns the matrix operation result between two matrix arrays.", false, kParams_OneArrayID_OneString_OneArrayID);
-DEFINE_COMMAND_ALT_PLUGIN(Matrix_ApplyOperationWithScalar, Mat_ApplyOpWithScal, 
-						  "Returns the matrix affected by an operation by a scalar.", false, kParams_OneArrayID_OneString_OneDouble);
+	"Returns the matrix operation result between two matrix arrays.", false, kParams_OneArrayID_OneString_OneArrayID);
+DEFINE_COMMAND_ALT_PLUGIN(Matrix_ApplyOperationWithScalar, Mat_ApplyOpWithScal,
+	"Returns the matrix affected by an operation by a scalar.", false, kParams_OneArrayID_OneString_OneDouble);
 DEFINE_COMMAND_ALT_PLUGIN(Matrix_Transpose, Mat_T, "Returns the transpose of the array matrix.", false, kParams_OneArrayID);
 DEFINE_COMMAND_ALT_PLUGIN(Matrix_IsMatrix, Mat_IsMat, "Checks if an array is convertible to a matrix.", false, kParams_OneArrayID);
 DEFINE_COMMAND_ALT_PLUGIN(Matrix3x3_GetQuaternion, Mat_GetQuat, "Returns a quaternion from a 3x3 matrix.", false, kParams_OneArrayID);
 DEFINE_COMMAND_ALT_PLUGIN(Matrix_Dump, Mat_Dump, "Dumps the matrix array in console, in matrix notation.", false, kParams_OneArrayID);
-DEFINE_COMMAND_PLUGIN(TestMatrix, "debug matrix function", false, NULL);
 
 DEFINE_COMMAND_ALT_PLUGIN(Quaternion_GetMatrix, Quat_GetMat, "Returns a 3x3 rotation matrix from a quaternion array.", false, kParams_OneArrayID);
+
+
+
+#if _DEBUG
+
+DEFINE_COMMAND_PLUGIN(TestMatrix, "debug matrix function", false, NULL);
+
 
 /*When comparing two float values for equality, due to internal conversions between singleand double precision,
  *it's better to check if the absolute difference is less than epsilon (0.0001)

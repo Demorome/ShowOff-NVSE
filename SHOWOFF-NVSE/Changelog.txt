@@ -162,6 +162,13 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 *SetOwnershipTemp
 *IsActorAlt
 *ApplyEasing (alias: Ease)
+*Matrix_IsMatrix (alias: Mat_IsMat)
+*Matrix3x3_GetQuaternion (alias: Mat_GetQuat)
+*Quaternion_GetMatrix (alias: Quat_GetMat)
+*Matrix_Transpose (alias: Mat_T)
+*Matrix_Dump (alias: Mat_Dump)
+*Matrix_ApplyOperationWithScalar (alias: Mat_ApplyOpWithScal)
+*Matrix_ApplyOperationWithMatrix (alias: Mat_ApplyOpWithMat)
 
 
 ====== (Template:)

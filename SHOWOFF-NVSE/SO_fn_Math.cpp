@@ -26,7 +26,8 @@ bool Cmd_ApplyEasing_Execute(COMMAND_ARGS)
 
 
 
-#if _DEBUG
+
+
 template <typename T>
 std::pair<size_t, size_t> array_2d<T>::GetDimensions() const
 {
@@ -60,7 +61,7 @@ NVSEArrayVar* array_2d<T>::CreateArray(Script* callingScript)
 }
 
 template <typename T, size_t rows, size_t cols>
-array_2d<T> process_2d_array(const T (& array)[rows][cols])
+array_2d<T> process_2d_array(const T(&array)[rows][cols])
 {
 	array_2d<T> ret;
 	ret.numbers.resize(rows);
@@ -76,7 +77,7 @@ array_2d<T> process_2d_array(const T (& array)[rows][cols])
 
 template <typename T>
 std::optional<array_2d<T>> TryGetArrayNumbers(NVSEArrayVar* arr, size_t const maxCols, size_t const minCols,
-                                              size_t const maxRows, size_t const minRows)
+	size_t const maxRows, size_t const minRows)
 {
 	if (!arr) return {};
 	ArrayData const arrData(arr, true); //assume isPacked
@@ -155,7 +156,7 @@ bool ArrayIsMatrix(NVSEArrayVar* arr)
 	ArrayData const arrData(arr, true);	//assume isPacked
 	if (arrData.size <= 0)
 		return false;
-	
+
 	//check if each element in the (potentially 2D) array is number-type.
 	if (bool const is2D = arrData.vals[0].GetType() == NVSEArrayVarInterface::kType_Array;
 		is2D == true)
@@ -265,7 +266,7 @@ NVSEArrayVar* GetMatrixAsArray(arma::Mat<double>& matrix, Script* callingScript)
 
 NVSEArrayVar* QuatToArray(NiQuaternion const& quat, Script* callingScript)
 {
-	ArrayElementR elems[] = {{quat.w}, {quat.x}, {quat.y}, {quat.z}};
+	ArrayElementR elems[] = { {quat.w}, {quat.x}, {quat.y}, {quat.z} };
 	return g_arrInterface->CreateArray(elems, 4, callingScript);
 }
 
@@ -383,9 +384,6 @@ bool Cmd_Matrix3x3_GetQuaternion_Execute(COMMAND_ARGS)
 		return true;
 	if (auto matrix = Get3x3MatrixFromArray(g_arrInterface->LookupArrayByID(arrID)))
 	{
-#if _DEBUG
-		matrix->Dump();
-#endif
 		const NiQuaternion quat{ *matrix };
 		g_arrInterface->AssignCommandResult(QuatToArray(quat, scriptObj), result);
 	}
@@ -401,9 +399,6 @@ bool Cmd_Quaternion_GetMatrix_Execute(COMMAND_ARGS)
 	if (auto quat = GetQuatFromArray(g_arrInterface->LookupArrayByID(arrID)))
 	{
 		const NiMatrix33 mat{ *quat };
-#if _DEBUG
-		mat.Dump();
-#endif
 		auto arr = process_2d_array<float, 3, 3>(mat.cr);
 		g_arrInterface->AssignCommandResult(arr.CreateArray(scriptObj), result);
 	}
@@ -429,6 +424,20 @@ bool Cmd_Matrix_Dump_Execute(COMMAND_ARGS)
 	}
 	return true;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+#if _DEBUG
+
 
 bool Cmd_TestMatrix_Execute(COMMAND_ARGS)
 {
