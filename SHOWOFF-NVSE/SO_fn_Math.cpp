@@ -248,15 +248,15 @@ bool Cmd_Matrix_ApplyOperationWithMatrix_Execute(COMMAND_ARGS)
 {
 	*result = 0;	// resulting matrix
 	UInt32 arrA_ID, arrB_ID;
-	char op;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrA_ID, &op, &arrB_ID))
+	char op[3];
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrA_ID, op, &arrB_ID))
 		return true;
 	auto matrixA = GetMatrixFromArray(g_arrInterface->LookupArrayByID(arrA_ID));
 	auto matrixB = GetMatrixFromArray(g_arrInterface->LookupArrayByID(arrB_ID));
 	if (matrixA && matrixB)
 	{
 		try {
-			auto resMatrix = Mat_ApplyOpWithMat(matrixA.value(), op, matrixB.value());
+			auto resMatrix = Mat_ApplyOpWithMat(matrixA.value(), op[0], matrixB.value());
 			if (auto const matrixAsArray = GetMatrixAsArray(resMatrix, scriptObj))
 				g_arrInterface->AssignCommandResult(matrixAsArray, result);
 		}
@@ -287,13 +287,13 @@ bool Cmd_Matrix_ApplyOperationWithScalar_Execute(COMMAND_ARGS)
 {
 	*result = 0;	// resulting matrix
 	UInt32 arrID;
-	char op;
+	char op[3];
 	double scalar;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID, &op, &scalar))
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID, op, &scalar))
 		return true;
 	if (auto matrix = GetMatrixFromArray(g_arrInterface->LookupArrayByID(arrID)))
 	{
-		auto resMatrix = Mat_ApplyOpWithScal(matrix.value(), op, scalar);
+		auto resMatrix = Mat_ApplyOpWithScal(matrix.value(), op[0], scalar);
 		if (auto const matrixAsArray = GetMatrixAsArray(resMatrix, scriptObj))
 			g_arrInterface->AssignCommandResult(matrixAsArray, result);
 	}
