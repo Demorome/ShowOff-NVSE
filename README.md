@@ -76,6 +76,9 @@ External libraries used:
 * [SimpleINI](https://github.com/brofield/simpleini)
 * [JSON for Modern C++](https://github.com/nlohmann/json)
 
+Code taken from:
+* [Robert Penner's Easing Functions](http://robertpenner.com/easing/)
+
 # See Also
 [Crash Logger](https://www.nexusmods.com/newvegas/mods/72317) - if you're getting crashes with a DLL, this is the best thing to report issues to the author.
 
