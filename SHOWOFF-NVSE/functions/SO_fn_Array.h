@@ -60,9 +60,12 @@ bool Cmd_ListAddArray_Execute(COMMAND_ARGS)
 #ifdef _DEBUG
 
 
+static ParamInfo kNVSEParams_OneArray[1] =
+{
+	{	"array",	kNVSEParamType_Array,	0	},
+};
 
-
-DEFINE_COMMAND_PLUGIN_EXP(ar_Test, "debug array func", false, kParams_OneArray);
+DEFINE_COMMAND_PLUGIN_EXP(ar_Test, "debug array func", false, kNVSEParams_OneArray /*Params_OneArray*/);
 
 bool Cmd_ar_Test_Execute(COMMAND_ARGS)
 {
