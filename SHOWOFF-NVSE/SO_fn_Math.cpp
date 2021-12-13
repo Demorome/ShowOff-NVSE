@@ -294,21 +294,22 @@ arma::Mat<double> Mat_ApplyOpWithMat(arma::Mat<double>& matA, const char op, arm
 bool Cmd_Matrix_ApplyOperationWithMatrix_Execute(COMMAND_ARGS)
 {
 	*result = 0;	// resulting matrix
-	UInt32 arrA_ID, arrB_ID;
-	char op[3];
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrA_ID, op, &arrB_ID))
-		return true;
-	auto matrixA = GetMatrixFromArray(g_arrInterface->LookupArrayByID(arrA_ID));
-	auto matrixB = GetMatrixFromArray(g_arrInterface->LookupArrayByID(arrB_ID));
-	if (matrixA && matrixB)
+	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
+		eval.ExtractArgs())
 	{
-		try {
-			auto resMatrix = Mat_ApplyOpWithMat(matrixA.value(), op[0], matrixB.value());
-			if (auto const matrixAsArray = GetMatrixAsArray(resMatrix, scriptObj))
-				g_arrInterface->AssignCommandResult(matrixAsArray, result);
-		}
-		catch (std::logic_error&) {	//invalid matrix sizes for multiplication
-			return true;
+		auto matrixA = GetMatrixFromArray(eval.GetNthArg(0)->GetArrayVar());
+		std::string const sOp{ eval.GetNthArg(1)->GetString() };
+		auto matrixB = GetMatrixFromArray(eval.GetNthArg(2)->GetArrayVar());
+		if (matrixA && matrixB)
+		{
+			try {
+				auto resMatrix = Mat_ApplyOpWithMat(matrixA.value(), sOp[0], matrixB.value());
+				if (auto const matrixAsArray = GetMatrixAsArray(resMatrix, scriptObj))
+					g_arrInterface->AssignCommandResult(matrixAsArray, result);
+			}
+			catch (std::logic_error&) {	//invalid matrix sizes for multiplication
+				return true;
+			}
 		}
 	}
 	return true;
@@ -333,16 +334,18 @@ arma::Mat<double> Mat_ApplyOpWithScal(arma::Mat<double>& mat, const char op, dou
 bool Cmd_Matrix_ApplyOperationWithScalar_Execute(COMMAND_ARGS)
 {
 	*result = 0;	// resulting matrix
-	UInt32 arrID;
-	char op[3];
-	double scalar;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID, op, &scalar))
-		return true;
-	if (auto matrix = GetMatrixFromArray(g_arrInterface->LookupArrayByID(arrID)))
+	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
+		eval.ExtractArgs())
 	{
-		auto resMatrix = Mat_ApplyOpWithScal(matrix.value(), op[0], scalar);
-		if (auto const matrixAsArray = GetMatrixAsArray(resMatrix, scriptObj))
-			g_arrInterface->AssignCommandResult(matrixAsArray, result);
+		if (auto matrix = GetMatrixFromArray(eval.GetNthArg(0)->GetArrayVar()))
+		{
+			std::string const sOp{ eval.GetNthArg(1)->GetString() };
+			auto const scalar = eval.GetNthArg(2)->GetFloat();
+
+			auto resMatrix = Mat_ApplyOpWithScal(matrix.value(), sOp[0], scalar);
+			if (auto const matrixAsArray = GetMatrixAsArray(resMatrix, scriptObj))
+				g_arrInterface->AssignCommandResult(matrixAsArray, result);
+		}
 	}
 	return true;
 }
@@ -350,13 +353,14 @@ bool Cmd_Matrix_ApplyOperationWithScalar_Execute(COMMAND_ARGS)
 bool Cmd_Matrix_Transpose_Execute(COMMAND_ARGS)
 {
 	*result = 0;	// transposeArr
-	UInt32 arrID;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID))
-		return true;
-	if (auto const matrix = GetMatrixFromArray(g_arrInterface->LookupArrayByID(arrID)))
+	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
+		eval.ExtractArgs())
 	{
-		arma::Mat<double> transpose = matrix.value().t();
-		g_arrInterface->AssignCommandResult(GetMatrixAsArray(transpose, scriptObj), result);
+		if (auto const matrix = GetMatrixFromArray(eval.GetNthArg(0)->GetArrayVar()))
+		{
+			arma::Mat<double> transpose = matrix.value().t();
+			g_arrInterface->AssignCommandResult(GetMatrixAsArray(transpose, scriptObj), result);
+		}
 	}
 	return true;
 }
@@ -365,13 +369,13 @@ bool Cmd_Matrix_Transpose_Execute(COMMAND_ARGS)
 bool Cmd_Matrix_IsMatrix_Execute(COMMAND_ARGS)
 {
 	*result = false;	// isMatrix (bool)
-	UInt32 arrID;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID))
-		return true;
-	if (auto const arr = g_arrInterface->LookupArrayByID(arrID))
+	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
+		eval.ExtractArgs())
 	{
-		if (ArrayIsMatrix(arr))
-			*result = true;
+		if (auto const arr = eval.GetNthArg(0)->GetArrayVar())
+		{
+			*result = ArrayIsMatrix(arr);
+		}
 	}
 	return true;
 }
@@ -379,13 +383,14 @@ bool Cmd_Matrix_IsMatrix_Execute(COMMAND_ARGS)
 bool Cmd_Matrix3x3_GetQuaternion_Execute(COMMAND_ARGS)
 {
 	*result = 0;	// resulting matrix
-	UInt32 arrID;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID))
-		return true;
-	if (auto matrix = Get3x3MatrixFromArray(g_arrInterface->LookupArrayByID(arrID)))
+	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
+		eval.ExtractArgs())
 	{
-		const NiQuaternion quat{ *matrix };
-		g_arrInterface->AssignCommandResult(QuatToArray(quat, scriptObj), result);
+		if (auto matrix = Get3x3MatrixFromArray(eval.GetNthArg(0)->GetArrayVar()))
+		{
+			const NiQuaternion quat{ *matrix };
+			g_arrInterface->AssignCommandResult(QuatToArray(quat, scriptObj), result);
+		}
 	}
 	return true;
 }
@@ -393,34 +398,40 @@ bool Cmd_Matrix3x3_GetQuaternion_Execute(COMMAND_ARGS)
 bool Cmd_Quaternion_GetMatrix_Execute(COMMAND_ARGS)
 {
 	*result = 0;	// resulting matrix
-	UInt32 arrID;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID))
-		return true;
-	if (auto quat = GetQuatFromArray(g_arrInterface->LookupArrayByID(arrID)))
+	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
+		eval.ExtractArgs())
 	{
-		const NiMatrix33 mat{ *quat };
-		auto arr = process_2d_array<float, 3, 3>(mat.cr);
-		g_arrInterface->AssignCommandResult(arr.CreateArray(scriptObj), result);
+		if (auto quat = GetQuatFromArray(eval.GetNthArg(0)->GetArrayVar()))
+		{
+			const NiMatrix33 mat{ *quat };
+			auto arr = process_2d_array<float, 3, 3>(mat.cr);
+			g_arrInterface->AssignCommandResult(arr.CreateArray(scriptObj), result);
+		}
 	}
 	return true;
 }
 
 bool Cmd_Matrix_Dump_Execute(COMMAND_ARGS)
 {
-	UInt32 arrID;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID))
-		return true;
-	auto const arrA = g_arrInterface->LookupArrayByID(arrID);
-	if (auto const matrix = GetMatrixFromArray(arrA))
+	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
+		eval.ExtractArgs())
 	{
-		Console_Print("** Dumping Array %u as Matrix **", arrID);
-		std::stringstream stream;
-		stream << (*matrix);
-		Console_Print_Long(stream.str());
+		auto const arrA = eval.GetNthArg(0)->GetArrayVar();
+		if (auto const matrix = GetMatrixFromArray(arrA))
+		{
+			Console_Print("** Dumping Array %u as Matrix **", (UInt32)arrA);
+			std::stringstream stream;
+			stream << (*matrix);
+			Console_Print_Long(stream.str());
+		}
+		else
+		{
+			Console_Print("Matrix_Dump >> Array %u is not a valid Matrix.", (UInt32)arrA);
+		}
 	}
 	else
 	{
-		Console_Print("Matrix_Dump >> Array %u is not a valid Matrix.", arrID);
+		Console_Print("Matrix_Dump >> ERROR, unable to extract arguments");
 	}
 	return true;
 }

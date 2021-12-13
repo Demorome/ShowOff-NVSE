@@ -2,46 +2,49 @@
 
 
 //ripped code from FOSE's ListAddForm
-DEFINE_COMMAND_ALT_PLUGIN(ListAddArray, AddArrayToFormList, "", false, kParams_OneFormlist_OneArray_OneOptionalIndex);
+DEFINE_COMMAND_ALT_PLUGIN_EXP(ListAddArray, AddArrayToFormList, "", false, kNVSEParams_OneForm_OneArray_OneOptionalIndex);
 bool Cmd_ListAddArray_Execute(COMMAND_ARGS)
 {
-	*result = 1;
-	BGSListForm* pListForm = NULL;
-	UInt32 arrID;
-	UInt32 index = eListEnd;
-	ExtractArgsEx(EXTRACT_ARGS_EX, &pListForm, &arrID, &index);
-	NVSEArrayVar* inArr = g_arrInterface->LookupArrayByID(arrID);
-	if (!pListForm || !inArr) return true;
-	UInt32 size = g_arrInterface->GetArraySize(inArr);
-	NVSEArrayElement* elements = new NVSEArrayElement[size];
-	g_arrInterface->GetElements(inArr, elements, NULL);
-
-	auto Add_Array_Element_To_FormList = [&](int elemIndex)
+	*result = 1;	//bSuccess
+	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
+		eval.ExtractArgs())
 	{
-		if (elements[elemIndex].Form() == NULL) return true;  //acts as a continue.
-		UInt32 const addedAtIndex = pListForm->AddAt(elements[elemIndex].Form(), index);
-		if (addedAtIndex == eListInvalid)
+		auto const pListForm = DYNAMIC_CAST(eval.GetNthArg(0)->GetTESForm(), TESForm, BGSListForm);
+		NVSEArrayVar* inArr = eval.GetNthArg(1)->GetArrayVar();
+		SInt32 index = eListEnd;
+		if (eval.NumArgs() == 3)
+			index = eval.GetNthArg(2)->GetInt();
+		if (!pListForm || !inArr) return true;
+		
+		UInt32 size = g_arrInterface->GetArraySize(inArr);
+		auto elements = std::make_unique<NVSEArrayElement[]>(size);
+		g_arrInterface->GetElements(inArr, elements.get(), nullptr);
+
+		auto const Add_Array_Element_To_FormList = [&](int elemIndex)
 		{
-			*result = 0;
-			return false;
-		}
-		return true;
-	};
-	
-	if (index == eListEnd)
-	{
-		for (int i = 0; i < size; i++) {
-			if (!Add_Array_Element_To_FormList(i)) break;
-		}
-	}
-	else
-	{
-		for (int i = size - 1; i >= 0; i--) {
-			if (!Add_Array_Element_To_FormList(i)) break;
-		}
-	}
+			if (elements[elemIndex].Form() == nullptr) return true;  //acts as a continue.
+			UInt32 const addedAtIndex = pListForm->AddAt(elements[elemIndex].Form(), index);
+			if (addedAtIndex == eListInvalid)
+			{
+				*result = 0;
+				return false;
+			}
+			return true;
+		};
 
-	delete[] elements;
+		if (index == eListEnd)
+		{
+			for (int i = 0; i < size; i++) {
+				if (!Add_Array_Element_To_FormList(i)) break;
+			}
+		}
+		else
+		{
+			for (int i = size - 1; i >= 0; i--) {
+				if (!Add_Array_Element_To_FormList(i)) break;
+			}
+		}
+	}
 	return true;
 }
 
@@ -60,10 +63,7 @@ bool Cmd_ListAddArray_Execute(COMMAND_ARGS)
 #ifdef _DEBUG
 
 
-static ParamInfo kNVSEParams_OneArray[1] =
-{
-	{	"array",	kNVSEParamType_Array,	0	},
-};
+
 
 DEFINE_COMMAND_PLUGIN_EXP(ar_Test, "debug array func", false, kNVSEParams_OneArray /*Params_OneArray*/);
 

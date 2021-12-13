@@ -3,6 +3,7 @@
 #include <atomic>
 
 #include "ParamInfos.h"
+#include "NVSEParamInfos.h"
 #include "PluginAPI.h"
 #include "GameUI.h" 
 #include "common/ICriticalSection.h"

@@ -974,6 +974,7 @@
     <ClInclude Include="internal\StewieMagic.h" />
     <ClInclude Include="internal\utility.h" />
     <ClInclude Include="JSON_Library\json.h" />
+    <ClInclude Include="NVSEParamInfos.h" />
     <ClInclude Include="settings.h" />
     <ClInclude Include="ShowOffNVSE.h" />
     <ClInclude Include="SimpleINILibrary\SimpleIni.h" />
