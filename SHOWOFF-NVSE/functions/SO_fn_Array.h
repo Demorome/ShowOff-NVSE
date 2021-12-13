@@ -50,27 +50,32 @@ bool Cmd_ListAddArray_Execute(COMMAND_ARGS)
 
 
 
+
+
+
+
+
+
+
 #ifdef _DEBUG
 
 
 
-#if 0  //difficulties figuring out ambiguous-type extraction
-DEFINE_COMMAND_PLUGIN(Ar_Init, , "Initializes a numeric array with the specified value, repeated over X keys.", 0, 3, kParams_OneBasicType);
 
-bool Cmd_Ar_Init_Execute(COMMAND_ARGS)
+DEFINE_COMMAND_PLUGIN_EXP(ar_Test, "debug array func", false, kParams_OneArray);
+
+bool Cmd_ar_Test_Execute(COMMAND_ARGS)
 {
-	void* anyValue;
-	UINT32 numElements;
-
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &anyValue, &numElements)) return true;
-
-	NVSEArrayVar* outArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
-	for (int i = 0; i < numElements; i++)
-		g_arrInterface->AppendElement(outArr, NVSEArrayElement(anyValue));
-
+	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
+		eval.ExtractArgs())
+	{
+		auto const arrToken = eval.GetNthArg(0);
+		auto const arr = arrToken->GetArrayVar();
+		auto const size = g_arrInterface->GetArraySize(arr);
+		Console_Print("ar_Test >> size of array: %u", size);
+	}
 	return true;
 }
-#endif
 
 
 DEFINE_COMMAND_PLUGIN(Ar_GetInvalidRefs, "", false, kParams_OneArrayID);  //failed experiment

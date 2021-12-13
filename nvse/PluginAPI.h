@@ -4,7 +4,7 @@
 #include "Utilities.h"
 
 #if RUNTIME
-//#include "GameAPI.h"
+#include "GameAPI.h"
 #endif
 
 struct CommandInfo;
@@ -49,6 +49,8 @@ enum
 	kInterface_Max
 };
 
+struct ExpressionEvaluatorUtils;
+
 struct NVSEInterface
 {
 	UInt32	nvseVersion;
@@ -71,6 +73,8 @@ struct NVSEInterface
 
 	// Allows checking for nogore edition
 	UInt32	isNogore;
+
+	void		(*InitExpressionEvaluatorUtils)(ExpressionEvaluatorUtils* utils);
 };
 
 struct NVSEConsoleInterface
@@ -808,3 +812,152 @@ typedef bool (* _NVSEPlugin_Load)(const NVSEInterface * nvse);
  *	previous implementations.
  *	
  ******************************************************************************/
+
+
+struct PluginScriptToken;
+struct PluginTokenPair;
+struct PluginTokenSlice;
+
+struct ExpressionEvaluatorUtils
+{
+#if RUNTIME
+	void* (__stdcall* CreateExpressionEvaluator)(COMMAND_ARGS);
+	void(__fastcall* DestroyExpressionEvaluator)(void* expEval);
+	bool(__fastcall* ExtractArgsEval)(void* expEval);
+	UInt8(__fastcall* GetNumArgs)(void* expEval);
+	PluginScriptToken* (__fastcall* GetNthArg)(void* expEval, UInt32 argIdx);
+
+	UInt8(__fastcall* ScriptTokenGetType)(PluginScriptToken* scrToken);
+	double(__fastcall* ScriptTokenGetFloat)(PluginScriptToken* scrToken);
+	bool(__fastcall* ScriptTokenGetBool)(PluginScriptToken* scrToken);
+	UInt32(__fastcall* ScriptTokenGetFormID)(PluginScriptToken* scrToken);
+	TESForm* (__fastcall* ScriptTokenGetTESForm)(PluginScriptToken* scrToken);
+	const char* (__fastcall* ScriptTokenGetString)(PluginScriptToken* scrToken);
+	UInt32(__fastcall* ScriptTokenGetArrayID)(PluginScriptToken* scrToken);
+	UInt32(__fastcall* ScriptTokenGetActorValue)(PluginScriptToken* scrToken);
+	ScriptLocal* (__fastcall* ScriptTokenGetScriptLocal)(PluginScriptToken* scrToken);
+	const PluginTokenPair* (__fastcall* ScriptTokenGetPair)(PluginScriptToken* scrToken);
+	const PluginTokenSlice* (__fastcall* ScriptTokenGetSlice)(PluginScriptToken* scrToken);
+	UInt32(__fastcall* ScriptTokenGetAnimationGroup)(PluginScriptToken* scrToken);
+
+#endif
+};
+
+extern ExpressionEvaluatorUtils g_expEvalUtils;
+
+class PluginExpressionEvaluator
+{
+	void* expEval;
+
+public:
+#if RUNTIME
+	PluginExpressionEvaluator(COMMAND_ARGS)
+	{
+		expEval = g_expEvalUtils.CreateExpressionEvaluator(PASS_COMMAND_ARGS);
+	}
+	~PluginExpressionEvaluator()
+	{
+		if (expEval) g_expEvalUtils.DestroyExpressionEvaluator(expEval);
+	}
+
+	bool ExtractArgs()
+	{
+		return expEval && g_expEvalUtils.ExtractArgsEval(expEval);
+	}
+
+	UInt8 NumArgs()
+	{
+		return g_expEvalUtils.GetNumArgs(expEval);
+	}
+
+	PluginScriptToken* GetNthArg(UInt32 argIdx)
+	{
+		return g_expEvalUtils.GetNthArg(expEval, argIdx);
+	}
+#endif
+};
+
+struct PluginScriptToken
+{
+#if RUNTIME
+	UInt8 GetType()
+	{
+		return g_expEvalUtils.ScriptTokenGetType(this);
+	}
+
+	double GetFloat()
+	{
+		return g_expEvalUtils.ScriptTokenGetFloat(this);
+	}
+
+	int GetInt()
+	{
+		return int(g_expEvalUtils.ScriptTokenGetFloat(this));
+	}
+
+	bool GetBool()
+	{
+		return g_expEvalUtils.ScriptTokenGetBool(this);
+	}
+
+	UInt32 GetFormID()
+	{
+		return g_expEvalUtils.ScriptTokenGetFormID(this);
+	}
+
+	TESForm* GetTESForm()
+	{
+		return g_expEvalUtils.ScriptTokenGetTESForm(this);
+	}
+
+	const char* GetString()
+	{
+		return g_expEvalUtils.ScriptTokenGetString(this);
+	}
+
+	NVSEArrayVarInterface::Array* GetArrayVar()
+	{
+		return (NVSEArrayVarInterface::Array*)g_expEvalUtils.ScriptTokenGetArrayID(this);
+	}
+
+	UInt32 GetActorValue()
+	{
+		return g_expEvalUtils.ScriptTokenGetActorValue(this);
+	}
+
+	UInt32 GetAnimationGroup()
+	{
+		return g_expEvalUtils.ScriptTokenGetAnimationGroup(this);
+	}
+
+	ScriptLocal* GetScriptLocal()
+	{
+		return g_expEvalUtils.ScriptTokenGetScriptLocal(this);
+	}
+
+	const PluginTokenPair* GetPair()
+	{
+		return g_expEvalUtils.ScriptTokenGetPair(this);
+	}
+
+	const PluginTokenSlice* GetSlice()
+	{
+		return g_expEvalUtils.ScriptTokenGetSlice(this);
+	}
+#endif
+};
+
+struct PluginTokenPair
+{
+	PluginScriptToken* left;
+	PluginScriptToken* right;
+};
+
+struct PluginTokenSlice
+{
+	bool			bIsString;
+	double			m_upper;
+	double			m_lower;
+	std::string		m_lowerStr;
+	std::string		m_upperStr;
+};

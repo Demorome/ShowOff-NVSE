@@ -99,6 +99,7 @@ bool (*FunctionCallScriptAlt)(Script* funcScript, TESObjectREFR* callingObj, UIn
 TESObjectREFR* (__stdcall *InventoryRefCreate)(TESObjectREFR* container, TESForm* itemForm, SInt32 countDelta, ExtraDataList* xData);
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
+ExpressionEvaluatorUtils g_expEvalUtils;
 
 // Singletons
 HUDMainMenu* g_HUDMainMenu = nullptr;
@@ -378,6 +379,8 @@ extern "C"
 			GetElement = g_arrInterface->GetElement;
 			GetArrayElements = g_arrInterface->GetElements;
 
+			nvse->InitExpressionEvaluatorUtils(&g_expEvalUtils);
+
 #if 0
 			auto johnnyGuitar = GetModuleHandle("johnnyguitar.dll");
 			JGCreateEvent = (CreateScriptEvent)GetProcAddress(johnnyGuitar, "JGCreateEvent");
@@ -577,6 +580,7 @@ extern "C"
 		REG_CMD(GetCalculatedItemWeight)
 
 		REG_CMD(TestMatrix)
+		REG_CMD(ar_Test);
 			
 		REG_CMD(GetHealthExtraData)
 

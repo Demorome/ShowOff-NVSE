@@ -592,11 +592,45 @@ static ParamInfo kParams_OneArrayID_OneString_OneDouble[3] =
 	{	"double",	kParamType_Double, 0	},
 };
 
-
-static ParamInfo kParams_OneFormlist_OneArray_OneOptionalIndex[3] =
+static ParamInfo kParams_OneFormlist_OneArrayID_OneOptionalIndex[3] =
 {
 	{	"form list", kParamType_FormList,	0		},
 	{	"array",	 kParamType_Integer,	0		},
+	{	"index",	 kParamType_Integer,	1		},
+};
+
+
+
+static ParamInfo kParams_OneArray[1] =
+{
+	{	"array",	kParamType_Array, 0	},
+};
+static ParamInfo kParams_TwoArrays[2] =
+{
+	{	"array",	kParamType_Array, 0	},
+	{	"array",	kParamType_Array, 0	},
+};
+static ParamInfo kParams_OneArray_OneDouble[2] =
+{
+	{	"array",	kParamType_Array, 0	},
+	{	"double",	kParamType_Double, 0	},
+};
+static ParamInfo kParams_OneArray_OneString_OneArray[3] =
+{
+	{	"array",	kParamType_Array, 0	},
+	{	"string",	kParamType_String, 0	},
+	{	"array",	kParamType_Array, 0	},
+};
+static ParamInfo kParams_OneArray_OneString_OneDouble[3] =
+{
+	{	"array",	kParamType_Array, 0	},
+	{	"string",	kParamType_String, 0	},
+	{	"double",	kParamType_Double, 0	},
+};
+static ParamInfo kParams_OneFormlist_OneArray_OneOptionalIndex[3] =
+{
+	{	"form list", kParamType_FormList,	0		},
+	{	"array",	 kParamType_Array,	0		},
 	{	"index",	 kParamType_Integer,	1		},
 };
 
