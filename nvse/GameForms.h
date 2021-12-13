@@ -621,7 +621,7 @@ public:
 		auto const base = this->TryGetREFRParent();
 		return IS_ID(base, TESNPC) || IS_ID(base, TESCreature);
 	}
-	
+
 	MEMBER_FN_PREFIX(TESForm);
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 	DEFINE_MEMBER_FN(MarkAsTemporary, void, 0x00484490);	// probably a member of TESForm

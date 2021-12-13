@@ -30,4 +30,10 @@ static ParamInfo kNVSEParams_OneArray_OneString_OneDouble[3] =
 	{	"float",	kNVSEParamType_Number,0	},
 };
 
+static ParamInfo kNVSEParams_OneForm_OneArray[2] =
+{
+	{	"form",	kNVSEParamType_Form,	0	},
+	{	"array",	kNVSEParamType_Array,	0	},
+};
+
 

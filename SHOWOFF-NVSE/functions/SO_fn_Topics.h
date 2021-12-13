@@ -26,20 +26,20 @@ bool Cmd_TopicInfoGetResponseStrings_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(TopicInfoSetResponseStrings, "", false, kParams_OneForm_OneArray);
+DEFINE_COMMAND_PLUGIN_EXP(TopicInfoSetResponseStrings, "", false, kNVSEParams_OneForm_OneArray);
 bool Cmd_TopicInfoSetResponseStrings_Execute(COMMAND_ARGS)
 {
-	*result = 0;
-	TESTopicInfo* tInfo;
-	UInt32 arrID;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &tInfo, &arrID) && IS_ID(tInfo, TESTopicInfo))
+	*result = 0;	//bSuccess
+	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
+		eval.ExtractArgs())
 	{
-		auto inArr = g_arrInterface->LookupArrayByID(arrID);
-		if (g_arrInterface->GetContainerType(inArr) != NVSEArrayVarInterface::kArrType_Array)
-		{
+		auto const tInfo = DYNAMIC_CAST(eval.GetNthArg(0)->GetTESForm(), TESForm, TESTopicInfo);
+		auto const inArr = eval.GetNthArg(1)->GetArrayVar();
+		if (!tInfo || !inArr)
 			return true;
-		}
-		
+		if (g_arrInterface->GetContainerType(inArr) != NVSEArrayVarInterface::kArrType_Array)
+			return true;
+
 		auto const response = ThisStdCall<TESTopicInfoResponse**>(0x61E780, tInfo, nullptr);
 		uint32_t loopCounter = 0;
 		auto const arrSize = g_arrInterface->GetArraySize(inArr);
