@@ -818,6 +818,81 @@ struct PluginScriptToken;
 struct PluginTokenPair;
 struct PluginTokenSlice;
 
+#ifndef NVSE_CORE
+
+//Had to copy these outside of their main file, since those files had NVSE-exclusive data.
+enum Token_Type : UInt8
+{
+	kTokenType_Number = 0,
+	kTokenType_Boolean,
+	kTokenType_String,
+	kTokenType_Form,
+	kTokenType_Ref,
+	kTokenType_Global,
+	kTokenType_Array,
+	kTokenType_ArrayElement,
+	kTokenType_Slice,
+	kTokenType_Command,
+	kTokenType_Variable,
+	kTokenType_NumericVar,
+	kTokenType_RefVar,
+	kTokenType_StringVar,
+	kTokenType_ArrayVar,
+	kTokenType_Ambiguous,
+	kTokenType_Operator,
+	kTokenType_ForEachContext,
+
+	// numeric literals can optionally be encoded as one of the following
+	// all are converted to _Number on evaluation
+	kTokenType_Byte,
+	kTokenType_Short, // 2 bytes
+	kTokenType_Int,	  // 4 bytes
+
+	kTokenType_Pair,
+	kTokenType_AssignableString,
+	// xNVSE 6.1.0
+	kTokenType_Lambda,
+	kTokenType_LambdaScriptData,
+
+	kTokenType_Invalid,
+	kTokenType_Max = kTokenType_Invalid,
+
+	// sigil value, returned when an empty expression is parsed
+	kTokenType_Empty = kTokenType_Max + 1,
+};
+
+// these are used in ParamInfo to specify expected Token_Type of args to commands taking NVSE expressions as args
+enum {
+	kNVSEParamType_Number = (1 << kTokenType_Number) | (1 << kTokenType_Ambiguous),
+	kNVSEParamType_Boolean = (1 << kTokenType_Boolean) | (1 << kTokenType_Ambiguous),
+	kNVSEParamType_String = (1 << kTokenType_String) | (1 << kTokenType_Ambiguous),
+	kNVSEParamType_Form = (1 << kTokenType_Form) | (1 << kTokenType_Ambiguous),
+	kNVSEParamType_Array = (1 << kTokenType_Array) | (1 << kTokenType_Ambiguous),
+	kNVSEParamType_ArrayElement = 1 << (kTokenType_ArrayElement) | (1 << kTokenType_Ambiguous),
+	kNVSEParamType_Slice = 1 << kTokenType_Slice,
+	kNVSEParamType_Command = 1 << kTokenType_Command,
+	kNVSEParamType_Variable = 1 << kTokenType_Variable,
+	kNVSEParamType_NumericVar = 1 << kTokenType_NumericVar,
+	kNVSEParamType_RefVar = 1 << kTokenType_RefVar,
+	kNVSEParamType_StringVar = 1 << kTokenType_StringVar,
+	kNVSEParamType_ArrayVar = 1 << kTokenType_ArrayVar,
+	kNVSEParamType_ForEachContext = 1 << kTokenType_ForEachContext,
+
+	kNVSEParamType_Collection = kNVSEParamType_Array | kNVSEParamType_String,
+	kNVSEParamType_ArrayVarOrElement = kNVSEParamType_ArrayVar | kNVSEParamType_ArrayElement,
+	kNVSEParamType_ArrayIndex = kNVSEParamType_String | kNVSEParamType_Number,
+	kNVSEParamType_BasicType = kNVSEParamType_Array | kNVSEParamType_String | kNVSEParamType_Number | kNVSEParamType_Form,
+	kNVSEParamType_NoTypeCheck = 0,
+
+	kNVSEParamType_FormOrNumber = kNVSEParamType_Form | kNVSEParamType_Number,
+	kNVSEParamType_StringOrNumber = kNVSEParamType_String | kNVSEParamType_Number,
+	kNVSEParamType_Pair = 1 << kTokenType_Pair,
+};
+
+#define NVSE_EXPR_MAX_ARGS 20		// max # of args we'll accept to a commmand
+
+#endif
+
 struct ExpressionEvaluatorUtils
 {
 #if RUNTIME
@@ -827,7 +902,7 @@ struct ExpressionEvaluatorUtils
 	UInt8(__fastcall* GetNumArgs)(void* expEval);
 	PluginScriptToken* (__fastcall* GetNthArg)(void* expEval, UInt32 argIdx);
 
-	UInt8(__fastcall* ScriptTokenGetType)(PluginScriptToken* scrToken);
+	Token_Type(__fastcall* ScriptTokenGetType)(PluginScriptToken* scrToken);
 	double(__fastcall* ScriptTokenGetFloat)(PluginScriptToken* scrToken);
 	bool(__fastcall* ScriptTokenGetBool)(PluginScriptToken* scrToken);
 	UInt32(__fastcall* ScriptTokenGetFormID)(PluginScriptToken* scrToken);
@@ -880,7 +955,7 @@ public:
 struct PluginScriptToken
 {
 #if RUNTIME
-	UInt8 GetType()
+	Token_Type GetType()
 	{
 		return g_expEvalUtils.ScriptTokenGetType(this);
 	}
@@ -961,78 +1036,3 @@ struct PluginTokenSlice
 	std::string		m_lowerStr;
 	std::string		m_upperStr;
 };
-
-#ifndef NVSE_CORE
-
-//Had to copy these outside of their main file, since those files had NVSE-exclusive data.
-enum Token_Type : UInt8
-{
-	kTokenType_Number = 0,
-	kTokenType_Boolean,
-	kTokenType_String,
-	kTokenType_Form,
-	kTokenType_Ref,
-	kTokenType_Global,
-	kTokenType_Array,
-	kTokenType_ArrayElement,
-	kTokenType_Slice,
-	kTokenType_Command,
-	kTokenType_Variable,
-	kTokenType_NumericVar,
-	kTokenType_RefVar,
-	kTokenType_StringVar,
-	kTokenType_ArrayVar,
-	kTokenType_Ambiguous,
-	kTokenType_Operator,
-	kTokenType_ForEachContext,
-
-	// numeric literals can optionally be encoded as one of the following
-	// all are converted to _Number on evaluation
-	kTokenType_Byte,
-	kTokenType_Short, // 2 bytes
-	kTokenType_Int,	  // 4 bytes
-
-	kTokenType_Pair,
-	kTokenType_AssignableString,
-	// xNVSE 6.1.0
-	kTokenType_Lambda,
-	kTokenType_LambdaScriptData,
-
-	kTokenType_Invalid,
-	kTokenType_Max = kTokenType_Invalid,
-
-	// sigil value, returned when an empty expression is parsed
-	kTokenType_Empty = kTokenType_Max + 1,
-};
-
-// these are used in ParamInfo to specify expected Token_Type of args to commands taking NVSE expressions as args
-enum {
-	kNVSEParamType_Number = (1 << kTokenType_Number) | (1 << kTokenType_Ambiguous),
-	kNVSEParamType_Boolean = (1 << kTokenType_Boolean) | (1 << kTokenType_Ambiguous),
-	kNVSEParamType_String = (1 << kTokenType_String) | (1 << kTokenType_Ambiguous),
-	kNVSEParamType_Form = (1 << kTokenType_Form) | (1 << kTokenType_Ambiguous),
-	kNVSEParamType_Array = (1 << kTokenType_Array) | (1 << kTokenType_Ambiguous),
-	kNVSEParamType_ArrayElement = 1 << (kTokenType_ArrayElement) | (1 << kTokenType_Ambiguous),
-	kNVSEParamType_Slice = 1 << kTokenType_Slice,
-	kNVSEParamType_Command = 1 << kTokenType_Command,
-	kNVSEParamType_Variable = 1 << kTokenType_Variable,
-	kNVSEParamType_NumericVar = 1 << kTokenType_NumericVar,
-	kNVSEParamType_RefVar = 1 << kTokenType_RefVar,
-	kNVSEParamType_StringVar = 1 << kTokenType_StringVar,
-	kNVSEParamType_ArrayVar = 1 << kTokenType_ArrayVar,
-	kNVSEParamType_ForEachContext = 1 << kTokenType_ForEachContext,
-
-	kNVSEParamType_Collection = kNVSEParamType_Array | kNVSEParamType_String,
-	kNVSEParamType_ArrayVarOrElement = kNVSEParamType_ArrayVar | kNVSEParamType_ArrayElement,
-	kNVSEParamType_ArrayIndex = kNVSEParamType_String | kNVSEParamType_Number,
-	kNVSEParamType_BasicType = kNVSEParamType_Array | kNVSEParamType_String | kNVSEParamType_Number | kNVSEParamType_Form,
-	kNVSEParamType_NoTypeCheck = 0,
-
-	kNVSEParamType_FormOrNumber = kNVSEParamType_Form | kNVSEParamType_Number,
-	kNVSEParamType_StringOrNumber = kNVSEParamType_String | kNVSEParamType_Number,
-	kNVSEParamType_Pair = 1 << kTokenType_Pair,
-};
-
-#define NVSE_EXPR_MAX_ARGS 20		// max # of args we'll accept to a commmand
-
-#endif
