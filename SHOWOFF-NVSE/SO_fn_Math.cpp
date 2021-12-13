@@ -147,6 +147,52 @@ std::optional<NiQuaternion> GetQuatFromArray(NVSEArrayVar* arr)
 	return {};
 }
 
+//assume non-nullptr
+bool ArrayIsMatrix(NVSEArrayVar* arr)
+{
+	if (g_arrInterface->GetContainerType(arr) != NVSEArrayVarInterface::kArrType_Array)
+		return false;
+	ArrayData const arrData(arr, true);	//assume isPacked
+	if (arrData.size <= 0)
+		return false;
+	
+	//check if each element in the (potentially 2D) array is number-type.
+	if (bool const is2D = arrData.vals[0].GetType() == NVSEArrayVarInterface::kType_Array;
+		is2D == true)
+	{
+		size_t numElemsInRows = 0;
+		for (int iRow = 0; iRow < arrData.size; iRow++)
+		{
+			ArrayData const rowData(arrData.vals[iRow].Array(), true);
+			if (rowData.size <= 0)
+				return false;
+
+			//ensure each row has the same number of elements.
+			if (numElemsInRows) {
+				if (rowData.size != numElemsInRows)
+					return false;
+			}
+			else
+				numElemsInRows = rowData.size;
+
+			for (int iCol = 0; iCol < rowData.size; iCol++)
+			{
+				if (rowData.vals[iCol].GetType() != NVSEArrayVarInterface::kType_Numeric)
+					return false;
+			}
+		}
+	}
+	else //1D
+	{
+		for (int iCol = 0; iCol < arrData.size; iCol++)
+		{
+			if (arrData.vals[iCol].GetType() != NVSEArrayVarInterface::kType_Numeric)
+				return false;
+		}
+	}
+	return true;
+}
+
 std::optional<arma::Mat<double>> GetMatrixFromArray(NVSEArrayVar* arr)
 {
 	if (!arr) return {};
@@ -159,9 +205,9 @@ std::optional<arma::Mat<double>> GetMatrixFromArray(NVSEArrayVar* arr)
 		is2D == true)
 	{
 		int n_cols = -1;
-		for (int i = 0; i < arrData.size; i++)	//assume each elem is an array.
+		for (int iRow = 0; iRow < arrData.size; iRow++)	//assume each elem is an array.
 		{
-			ArrayData const innerArrData(arrData.vals[i].Array(), true);
+			ArrayData const innerArrData(arrData.vals[iRow].Array(), true);
 			if (innerArrData.size <= 0)
 				return {};
 
@@ -176,7 +222,7 @@ std::optional<arma::Mat<double>> GetMatrixFromArray(NVSEArrayVar* arr)
 			{
 				NthRow(k) = innerArrData.vals[k].Number();
 			}
-			matrix.insert_rows(i, NthRow);
+			matrix.insert_rows(iRow, NthRow);
 		}
 	}
 	else //1D array, which is only a single row (each element is a column).
@@ -314,21 +360,20 @@ bool Cmd_Matrix_Transpose_Execute(COMMAND_ARGS)
 	return true;
 }
 
+
 bool Cmd_Matrix_IsMatrix_Execute(COMMAND_ARGS)
 {
 	*result = false;	// isMatrix (bool)
 	UInt32 arrID;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID))
 		return true;
-	auto const arrA = g_arrInterface->LookupArrayByID(arrID);
-	if (g_arrInterface->GetContainerType(arrA) == NVSEArrayVarInterface::kArrType_Array)
+	if (auto const arr = g_arrInterface->LookupArrayByID(arrID))
 	{
-		if (auto const matrix = GetMatrixFromArray(arrA))
+		if (ArrayIsMatrix(arr))
 			*result = true;
 	}
 	return true;
 }
-
 
 bool Cmd_Matrix3x3_GetQuaternion_Execute(COMMAND_ARGS)
 {

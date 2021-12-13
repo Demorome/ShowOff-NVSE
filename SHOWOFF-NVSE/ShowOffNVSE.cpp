@@ -548,15 +548,13 @@ extern "C"
 		/*3D12*/ REG_CMD(SetOwnershipTemp)
 		/*3D13*/ REG_CMD(IsActorAlt)
 		/*3D14*/ REG_CMD(ApplyEasing)
-		
-		REG_CMD(Matrix_IsMatrix)
-		REG_CMD_ARR(Matrix3x3_GetQuaternion)
-		REG_CMD_ARR(Quaternion_GetMatrix)
-		REG_CMD_ARR(Matrix_Transpose)
-		REG_CMD(Matrix_Dump)
-		REG_CMD_ARR(Matrix_ApplyOperationWithScalar)
-		REG_CMD_ARR(Matrix_ApplyOperationWithMatrix)
-
+		/*3D15*/ REG_CMD(Matrix_IsMatrix)
+		/*3D16*/ REG_CMD_ARR(Matrix3x3_GetQuaternion)
+		/*3D17*/ REG_CMD_ARR(Quaternion_GetMatrix)
+		/*3D18*/ REG_CMD_ARR(Matrix_Transpose)
+		/*3D19*/ REG_CMD(Matrix_Dump)
+		/*3D1A*/ REG_CMD_ARR(Matrix_ApplyOperationWithScalar)
+		/*3D1B*/ REG_CMD_ARR(Matrix_ApplyOperationWithMatrix)
 	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
