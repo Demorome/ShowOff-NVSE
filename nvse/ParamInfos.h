@@ -578,7 +578,18 @@ static ParamInfo kParams_OneArrayID_OneDouble[2] =
 {
 	{	"array",	kParamType_Integer, 0	},
 	{	"double",	kParamType_Double, 0	},
-
+};
+static ParamInfo kParams_OneArrayID_OneString_OneArrayID[3] =
+{
+	{	"array",	kParamType_Integer, 0	},
+	{	"string",	kParamType_String, 0	},
+	{	"array",	kParamType_Integer, 0	},
+};
+static ParamInfo kParams_OneArrayID_OneString_OneDouble[3] =
+{
+	{	"array",	kParamType_Integer, 0	},
+	{	"string",	kParamType_String, 0	},
+	{	"double",	kParamType_Double, 0	},
 };
 
 

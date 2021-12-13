@@ -50,10 +50,10 @@ NVSEArrayVar* GetMatrixAsArray(arma::Mat<double>& matrix, Script* callingScript)
 NVSEArrayVar* QuatToArray(NiQuaternion const& quat, Script* callingScript);
 
 
-DEFINE_COMMAND_ALT_PLUGIN(Matrix_MultiplyByMatrix, Mat_MultByMat,
-                          "Returns the matrix multiplication result of two matrix arrays.", false, kParams_TwoArrayIDs);
-DEFINE_COMMAND_ALT_PLUGIN(Matrix_AddMatrix, Mat_AddMat, "Returns the addition of two matrices with equal # of rows and columns.", false, kParams_TwoArrayIDs);
-DEFINE_COMMAND_ALT_PLUGIN(Matrix_MultiplyByScalar, Mat_MultByScal, "Returns the matrix multiplied by a scalar.", false, kParams_OneArrayID_OneDouble);
+DEFINE_COMMAND_ALT_PLUGIN(Matrix_ApplyOperationWithMatrix, Mat_ApplyOpWithMat,
+                          "Returns the matrix operation result between two matrix arrays.", false, kParams_OneArrayID_OneString_OneArrayID);
+DEFINE_COMMAND_ALT_PLUGIN(Matrix_ApplyOperationWithScalar, Mat_ApplyOpWithScal, 
+						  "Returns the matrix affected by an operation by a scalar.", false, kParams_OneArrayID_OneString_OneDouble);
 DEFINE_COMMAND_ALT_PLUGIN(Matrix_Transpose, Mat_T, "Returns the transpose of the array matrix.", false, kParams_OneArrayID);
 DEFINE_COMMAND_ALT_PLUGIN(Matrix_IsMatrix, Mat_IsMat, "Checks if an array is convertible to a matrix.", false, kParams_OneArrayID);
 DEFINE_COMMAND_ALT_PLUGIN(Matrix3x3_GetQuaternion, Mat_GetQuat, "Returns a quaternion from a 3x3 matrix.", false, kParams_OneArrayID);

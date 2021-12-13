@@ -226,21 +226,37 @@ NVSEArrayVar* QuatToArray(NiQuaternion const& quat, Script* callingScript)
 
 
 
+arma::Mat<double> Mat_ApplyOpWithMat(arma::Mat<double>& matA, const char op, arma::Mat<double>& matB)
+{
+	switch (op)
+	{
+	case '+':
+		return matA + matB;
+	case '-':
+		return matA - matB;
+	case '%':
+		return matA % matB;
+	case '/':
+		return matA / matB;
+	case '*':
+		return matA * matB;
+	}
+	return {};
+}
 
-
-
-bool Cmd_Matrix_MultiplyByMatrix_Execute(COMMAND_ARGS)
+bool Cmd_Matrix_ApplyOperationWithMatrix_Execute(COMMAND_ARGS)
 {
 	*result = 0;	// resulting matrix
 	UInt32 arrA_ID, arrB_ID;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrA_ID, &arrB_ID))
+	char op;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrA_ID, &op, &arrB_ID))
 		return true;
 	auto matrixA = GetMatrixFromArray(g_arrInterface->LookupArrayByID(arrA_ID));
 	auto matrixB = GetMatrixFromArray(g_arrInterface->LookupArrayByID(arrB_ID));
 	if (matrixA && matrixB)
 	{
 		try {
-			arma::Mat<double> resMatrix = (*matrixA) * (*matrixB);
+			auto resMatrix = Mat_ApplyOpWithMat(matrixA.value(), op, matrixB.value());
 			if (auto const matrixAsArray = GetMatrixAsArray(resMatrix, scriptObj))
 				g_arrInterface->AssignCommandResult(matrixAsArray, result);
 		}
@@ -251,16 +267,33 @@ bool Cmd_Matrix_MultiplyByMatrix_Execute(COMMAND_ARGS)
 	return true;
 }
 
-bool Cmd_Matrix_MultiplyByScalar_Execute(COMMAND_ARGS)
+arma::Mat<double> Mat_ApplyOpWithScal(arma::Mat<double>& mat, const char op, double scalar)
+{
+	switch (op)
+	{
+	case '+':
+		return mat + scalar;
+	case '-':
+		return mat - scalar;
+	case '/':
+		return mat / scalar;
+	case '*':
+		return mat * scalar;
+	}
+	return {};
+}
+
+bool Cmd_Matrix_ApplyOperationWithScalar_Execute(COMMAND_ARGS)
 {
 	*result = 0;	// resulting matrix
 	UInt32 arrID;
+	char op;
 	double scalar;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID, &scalar))
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID, &op, &scalar))
 		return true;
 	if (auto matrix = GetMatrixFromArray(g_arrInterface->LookupArrayByID(arrID)))
 	{
-		arma::Mat<double> resMatrix = matrix.value() * scalar;
+		auto resMatrix = Mat_ApplyOpWithScal(matrix.value(), op, scalar);
 		if (auto const matrixAsArray = GetMatrixAsArray(resMatrix, scriptObj))
 			g_arrInterface->AssignCommandResult(matrixAsArray, result);
 	}
@@ -328,27 +361,6 @@ bool Cmd_Quaternion_GetMatrix_Execute(COMMAND_ARGS)
 #endif
 		auto arr = process_2d_array<float, 3, 3>(mat.cr);
 		g_arrInterface->AssignCommandResult(arr.CreateArray(scriptObj), result);
-	}
-	return true;
-}
-
-bool Cmd_Matrix_AddMatrix_Execute(COMMAND_ARGS)
-{
-	*result = 0;	// resulting matrix
-	UInt32 arrA_ID, arrB_ID;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrA_ID, &arrB_ID))
-		return true;
-	auto matrixA = GetMatrixFromArray(g_arrInterface->LookupArrayByID(arrA_ID));
-	auto matrixB = GetMatrixFromArray(g_arrInterface->LookupArrayByID(arrB_ID));
-	if (matrixA && matrixB) {
-		try {
-			arma::Mat<double> resMatrix = (*matrixA) + (*matrixB);
-			if (auto const matrixAsArray = GetMatrixAsArray(resMatrix, scriptObj))
-				g_arrInterface->AssignCommandResult(matrixAsArray, result);
-		}
-		catch (std::logic_error&) {	//invalid matrix sizes for addition
-			return true;
-		}
 	}
 	return true;
 }

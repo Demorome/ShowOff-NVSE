@@ -549,8 +549,15 @@ extern "C"
 		/*3D13*/ REG_CMD(IsActorAlt)
 		/*3D14*/ REG_CMD(ApplyEasing)
 		
+		REG_CMD(Matrix_IsMatrix)
+		REG_CMD_ARR(Matrix3x3_GetQuaternion)
+		REG_CMD_ARR(Quaternion_GetMatrix)
+		REG_CMD_ARR(Matrix_Transpose)
+		REG_CMD(Matrix_Dump)
+		REG_CMD_ARR(Matrix_ApplyOperationWithScalar)
+		REG_CMD_ARR(Matrix_ApplyOperationWithMatrix)
 
-		
+	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
 		//========v1.??
@@ -560,15 +567,6 @@ extern "C"
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 
-		
-		REG_CMD_ARR(Matrix_MultiplyByScalar)
-		REG_CMD_ARR(Matrix_AddMatrix)
-		REG_CMD_ARR(Matrix_Transpose)
-		REG_CMD(Matrix_Dump)
-		REG_CMD(Matrix_IsMatrix)
-		REG_CMD_ARR(Matrix_MultiplyByMatrix)
-		REG_CMD_ARR(Matrix3x3_GetQuaternion)	//todo: fix
-		REG_CMD_ARR(Quaternion_GetMatrix)	//todo: fix
 		REG_CMD(Flt_Equals)	// not needed; xNVSE's eval already uses this for "==" operator.
 
 		REG_CMD_FORM(SayTo_GetUnk)

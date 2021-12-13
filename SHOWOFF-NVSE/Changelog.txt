@@ -155,10 +155,13 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 
 //===v1.40
 ===Bug Fixes:
-* 
+*Nada
 
 ===New Functions:
-*
+*SetWeaponFlag (alias: SetWeaponHasFlag)
+*SetOwnershipTemp
+*IsActorAlt
+*ApplyEasing (alias: Ease)
 
 
 ====== (Template:)
