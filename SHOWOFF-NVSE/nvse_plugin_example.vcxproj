@@ -96,37 +96,37 @@
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)Armadillo Library;$(SolutionDir)Events;$(SolutionDir)internal;$(SolutionDir)functions;$(SolutionDir)JSON_Library;$(SolutionDir)SimpleINILibrary;$(IncludePath)</IncludePath>
+    <IncludePath>D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\art-of-cpp\taocpp-json\include;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\art-of-cpp\config;$(SolutionDir)Armadillo Library;$(SolutionDir)Events;$(SolutionDir)internal;$(SolutionDir)functions;$(SolutionDir)JSON_Library;$(SolutionDir)SimpleINILibrary;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug GECK|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)Armadillo Library;$(SolutionDir)Events;$(SolutionDir)internal;$(SolutionDir)functions;$(SolutionDir)JSON_Library;$(SolutionDir)SimpleINILibrary;$(IncludePath)</IncludePath>
+    <IncludePath>D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\art-of-cpp\taocpp-json\include;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\art-of-cpp\config;$(SolutionDir)Armadillo Library;$(SolutionDir)Events;$(SolutionDir)internal;$(SolutionDir)functions;$(SolutionDir)JSON_Library;$(SolutionDir)SimpleINILibrary;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)Armadillo Library;$(SolutionDir)Events;$(SolutionDir)internal;$(SolutionDir)functions;$(SolutionDir)JSON_Library;$(SolutionDir)SimpleINILibrary;$(IncludePath)</IncludePath>
+    <IncludePath>D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\art-of-cpp\taocpp-json\include;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\art-of-cpp\config;$(SolutionDir)Armadillo Library;$(SolutionDir)Events;$(SolutionDir)internal;$(SolutionDir)functions;$(SolutionDir)JSON_Library;$(SolutionDir)SimpleINILibrary;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release GECK|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)Armadillo Library;$(SolutionDir)Events;$(SolutionDir)internal;$(SolutionDir)functions;$(SolutionDir)JSON_Library;$(SolutionDir)SimpleINILibrary;$(IncludePath)</IncludePath>
+    <IncludePath>D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\art-of-cpp\taocpp-json\include;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\art-of-cpp\config;$(SolutionDir)Armadillo Library;$(SolutionDir)Events;$(SolutionDir)internal;$(SolutionDir)functions;$(SolutionDir)JSON_Library;$(SolutionDir)SimpleINILibrary;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug ng|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(SolutionDir)Armadillo Library;$(SolutionDir)Events;$(SolutionDir)internal;$(SolutionDir)functions;$(SolutionDir)JSON_Library;$(SolutionDir)SimpleINILibrary;$(IncludePath)</IncludePath>
+    <IncludePath>D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\art-of-cpp\taocpp-json\include;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\art-of-cpp\config;$(SolutionDir)Armadillo Library;$(SolutionDir)Events;$(SolutionDir)internal;$(SolutionDir)functions;$(SolutionDir)JSON_Library;$(SolutionDir)SimpleINILibrary;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release ng|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(SolutionDir)Armadillo Library;$(SolutionDir)Events;$(SolutionDir)internal;$(SolutionDir)functions;$(SolutionDir)JSON_Library;$(SolutionDir)SimpleINILibrary;$(IncludePath)</IncludePath>
+    <IncludePath>D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\art-of-cpp\taocpp-json\include;D:\New Vegas Notes\ShowOff NVSE\SHOWOFF-NVSE\art-of-cpp\config;$(SolutionDir)Armadillo Library;$(SolutionDir)Events;$(SolutionDir)internal;$(SolutionDir)functions;$(SolutionDir)JSON_Library;$(SolutionDir)SimpleINILibrary;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -942,21 +942,35 @@
     <ClInclude Include="Armadillo Library\armadillo_bits\xtrans_mat_meat.hpp" />
     <ClInclude Include="Armadillo Library\armadillo_bits\xvec_htrans_bones.hpp" />
     <ClInclude Include="Armadillo Library\armadillo_bits\xvec_htrans_meat.hpp" />
-    <ClInclude Include="art-of-cpp\config.hpp" />
-    <ClInclude Include="art-of-cpp\config\access.hpp" />
-    <ClInclude Include="art-of-cpp\config\annotation.hpp" />
-    <ClInclude Include="art-of-cpp\config\assign.hpp" />
-    <ClInclude Include="art-of-cpp\config\from_file.hpp" />
-    <ClInclude Include="art-of-cpp\config\from_files.hpp" />
-    <ClInclude Include="art-of-cpp\config\from_input.hpp" />
-    <ClInclude Include="art-of-cpp\config\from_string.hpp" />
-    <ClInclude Include="art-of-cpp\config\key.hpp" />
-    <ClInclude Include="art-of-cpp\config\key_kind.hpp" />
-    <ClInclude Include="art-of-cpp\config\key_part.hpp" />
-    <ClInclude Include="art-of-cpp\config\schema.hpp" />
-    <ClInclude Include="art-of-cpp\config\to_stream.hpp" />
-    <ClInclude Include="art-of-cpp\config\traits.hpp" />
-    <ClInclude Include="art-of-cpp\config\value.hpp" />
+    <ClInclude Include="art-of-cpp\config\config.hpp" />
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json.hpp" />
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\as.hpp" />
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\basic_value.hpp" />
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\binary.hpp" />
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\byte_view.hpp" />
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\cbor.hpp" />
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\events.hpp" />
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\forward.hpp" />
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\from_stream.hpp" />
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\from_string.hpp" />
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\jaxn.hpp" />
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\msgpack.hpp" />
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\operators.hpp" />
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\parse_file.hpp" />
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\patch.hpp" />
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\pointer.hpp" />
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\produce.hpp" />
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\reference.hpp" />
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\schema.hpp" />
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\self_contained.hpp" />
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\stream.hpp" />
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\to_stream.hpp" />
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\to_string.hpp" />
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\traits.hpp" />
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\type.hpp" />
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\ubjson.hpp" />
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\utf8.hpp" />
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\value.hpp" />
     <ClInclude Include="Changelog.txt" />
     <ClInclude Include="easing.h" />
     <ClInclude Include="Events\CustomEventFilters.h" />
@@ -997,7 +1011,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Armadillo Library\armadillo_bits\config.hpp.cmake" />
-    <None Include="art-of-cpp\LICENSE" />
     <None Include="exports.def" />
   </ItemGroup>
   <ItemGroup>

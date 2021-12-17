@@ -1,6 +1,8 @@
 ﻿#pragma once
 
 #include "json.h"
+#include "config.hpp"
+#include "tao/json.hpp"
 #include "ShowOffNVSE.h"
 
 
@@ -13,8 +15,16 @@ DEFINE_COMMAND_ALT_PLUGIN(CreateFolder, CreateDirectory, "", false, kParams_OneS
 // Refresher on JSON syntax: https://attacomsian.com/blog/what-is-json
 // JSON API docs: https://nlohmann.github.io/json/api/basic_json/
 
-DEFINE_COMMAND_PLUGIN(ReadArrayFromJSON, "Creates a folder relative to the main folder(\Fallout New Vegas\)", false, kParams_TwoStrings_OneOptionalInt);
 
+
+
+
+
+#if _DEBUG
+
+
+
+DEFINE_COMMAND_PLUGIN(ReadArrayFromJSON, "Creates a folder relative to the main folder(\Fallout New Vegas\)", false, kParams_TwoStrings_OneOptionalInt);
 
 using json = nlohmann::json;
 
@@ -22,3 +32,6 @@ using json = nlohmann::json;
 bool Get_JSON_Val_As_Basic_NVSE_Elem(json::const_reference json_ref, ArrayElementR& elem);
 
 ArrayElementR Read_JSON_As_NVSE_Elem(json::const_reference json_ref, bool forceArrayType, Script* scriptObj);
+
+
+#endif

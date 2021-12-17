@@ -17,6 +17,17 @@ bool Cmd_CreateFolder_Execute(COMMAND_ARGS)
 	return true;
 }
 
+
+
+
+
+
+
+
+
+
+#if _DEBUG
+
 bool Get_JSON_Val_As_Basic_NVSE_Elem(json::const_reference json_ref, ArrayElementR& elem)
 {
 	if (!json_ref.is_primitive()) return false;
@@ -142,3 +153,15 @@ bool Cmd_ReadArrayFromJSON_Execute(COMMAND_ARGS)
 	AssignArrayResult(resArr, result);  //todo: check what happens if empty array is passed!
 	return true;
 }
+
+
+
+bool Cmd_DemoTestFile_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+
+	= tao::config::from_file("ur mom");
+	
+	return true;
+}
+#endif

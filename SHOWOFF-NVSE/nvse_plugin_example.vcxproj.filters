@@ -2034,59 +2034,98 @@
     <ClInclude Include="NVSEParamInfos.h">
       <Filter>nvse</Filter>
     </ClInclude>
-    <ClInclude Include="art-of-cpp\config.hpp">
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json.hpp">
+      <Filter>External Libraries\taoJSON</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\as.hpp">
+      <Filter>External Libraries\taoJSON\json</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\basic_value.hpp">
+      <Filter>External Libraries\taoJSON\json</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\binary.hpp">
+      <Filter>External Libraries\taoJSON\json</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\byte_view.hpp">
+      <Filter>External Libraries\taoJSON\json</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\cbor.hpp">
+      <Filter>External Libraries\taoJSON\json</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\events.hpp">
+      <Filter>External Libraries\taoJSON\json</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\forward.hpp">
+      <Filter>External Libraries\taoJSON\json</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\from_stream.hpp">
+      <Filter>External Libraries\taoJSON\json</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\from_string.hpp">
+      <Filter>External Libraries\taoJSON\json</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\jaxn.hpp">
+      <Filter>External Libraries\taoJSON\json</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\msgpack.hpp">
+      <Filter>External Libraries\taoJSON\json</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\operators.hpp">
+      <Filter>External Libraries\taoJSON\json</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\parse_file.hpp">
+      <Filter>External Libraries\taoJSON\json</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\patch.hpp">
+      <Filter>External Libraries\taoJSON\json</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\pointer.hpp">
+      <Filter>External Libraries\taoJSON\json</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\produce.hpp">
+      <Filter>External Libraries\taoJSON\json</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\reference.hpp">
+      <Filter>External Libraries\taoJSON\json</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\schema.hpp">
+      <Filter>External Libraries\taoJSON\json</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\self_contained.hpp">
+      <Filter>External Libraries\taoJSON\json</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\stream.hpp">
+      <Filter>External Libraries\taoJSON\json</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\to_stream.hpp">
+      <Filter>External Libraries\taoJSON\json</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\to_string.hpp">
+      <Filter>External Libraries\taoJSON\json</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\traits.hpp">
+      <Filter>External Libraries\taoJSON\json</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\type.hpp">
+      <Filter>External Libraries\taoJSON\json</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\ubjson.hpp">
+      <Filter>External Libraries\taoJSON\json</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\utf8.hpp">
+      <Filter>External Libraries\taoJSON\json</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\value.hpp">
+      <Filter>External Libraries\taoJSON\json</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\config\config.hpp">
       <Filter>External Libraries\Config %28json-ish%29</Filter>
-    </ClInclude>
-    <ClInclude Include="art-of-cpp\config\access.hpp">
-      <Filter>External Libraries\Config %28json-ish%29\config</Filter>
-    </ClInclude>
-    <ClInclude Include="art-of-cpp\config\annotation.hpp">
-      <Filter>External Libraries\Config %28json-ish%29\config</Filter>
-    </ClInclude>
-    <ClInclude Include="art-of-cpp\config\assign.hpp">
-      <Filter>External Libraries\Config %28json-ish%29\config</Filter>
-    </ClInclude>
-    <ClInclude Include="art-of-cpp\config\from_file.hpp">
-      <Filter>External Libraries\Config %28json-ish%29\config</Filter>
-    </ClInclude>
-    <ClInclude Include="art-of-cpp\config\from_files.hpp">
-      <Filter>External Libraries\Config %28json-ish%29\config</Filter>
-    </ClInclude>
-    <ClInclude Include="art-of-cpp\config\from_input.hpp">
-      <Filter>External Libraries\Config %28json-ish%29\config</Filter>
-    </ClInclude>
-    <ClInclude Include="art-of-cpp\config\from_string.hpp">
-      <Filter>External Libraries\Config %28json-ish%29\config</Filter>
-    </ClInclude>
-    <ClInclude Include="art-of-cpp\config\key.hpp">
-      <Filter>External Libraries\Config %28json-ish%29\config</Filter>
-    </ClInclude>
-    <ClInclude Include="art-of-cpp\config\key_kind.hpp">
-      <Filter>External Libraries\Config %28json-ish%29\config</Filter>
-    </ClInclude>
-    <ClInclude Include="art-of-cpp\config\key_part.hpp">
-      <Filter>External Libraries\Config %28json-ish%29\config</Filter>
-    </ClInclude>
-    <ClInclude Include="art-of-cpp\config\schema.hpp">
-      <Filter>External Libraries\Config %28json-ish%29\config</Filter>
-    </ClInclude>
-    <ClInclude Include="art-of-cpp\config\to_stream.hpp">
-      <Filter>External Libraries\Config %28json-ish%29\config</Filter>
-    </ClInclude>
-    <ClInclude Include="art-of-cpp\config\traits.hpp">
-      <Filter>External Libraries\Config %28json-ish%29\config</Filter>
-    </ClInclude>
-    <ClInclude Include="art-of-cpp\config\value.hpp">
-      <Filter>External Libraries\Config %28json-ish%29\config</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
     <None Include="Armadillo Library\armadillo_bits\config.hpp.cmake">
       <Filter>External Libraries\Armadillo Library %28Matrices%29</Filter>
-    </None>
-    <None Include="art-of-cpp\LICENSE">
-      <Filter>External Libraries\Config %28json-ish%29</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -2120,8 +2159,11 @@
     <Filter Include="External Libraries\Config %28json-ish%29">
       <UniqueIdentifier>{d07124fa-712f-498d-bd81-3bc12a3321e5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="External Libraries\Config %28json-ish%29\config">
-      <UniqueIdentifier>{8927c106-f192-4de9-a414-0be2383a099f}</UniqueIdentifier>
+    <Filter Include="External Libraries\taoJSON">
+      <UniqueIdentifier>{1d2816a1-42b5-4483-9b60-e924f61c5a38}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Libraries\taoJSON\json">
+      <UniqueIdentifier>{ce12d09e-36a0-4235-81d0-4d1342dd98c9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
