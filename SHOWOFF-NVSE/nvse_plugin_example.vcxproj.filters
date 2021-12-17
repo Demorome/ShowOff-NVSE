@@ -2034,11 +2034,59 @@
     <ClInclude Include="NVSEParamInfos.h">
       <Filter>nvse</Filter>
     </ClInclude>
+    <ClInclude Include="art-of-cpp\config.hpp">
+      <Filter>External Libraries\Config %28json-ish%29</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\config\access.hpp">
+      <Filter>External Libraries\Config %28json-ish%29\config</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\config\annotation.hpp">
+      <Filter>External Libraries\Config %28json-ish%29\config</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\config\assign.hpp">
+      <Filter>External Libraries\Config %28json-ish%29\config</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\config\from_file.hpp">
+      <Filter>External Libraries\Config %28json-ish%29\config</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\config\from_files.hpp">
+      <Filter>External Libraries\Config %28json-ish%29\config</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\config\from_input.hpp">
+      <Filter>External Libraries\Config %28json-ish%29\config</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\config\from_string.hpp">
+      <Filter>External Libraries\Config %28json-ish%29\config</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\config\key.hpp">
+      <Filter>External Libraries\Config %28json-ish%29\config</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\config\key_kind.hpp">
+      <Filter>External Libraries\Config %28json-ish%29\config</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\config\key_part.hpp">
+      <Filter>External Libraries\Config %28json-ish%29\config</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\config\schema.hpp">
+      <Filter>External Libraries\Config %28json-ish%29\config</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\config\to_stream.hpp">
+      <Filter>External Libraries\Config %28json-ish%29\config</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\config\traits.hpp">
+      <Filter>External Libraries\Config %28json-ish%29\config</Filter>
+    </ClInclude>
+    <ClInclude Include="art-of-cpp\config\value.hpp">
+      <Filter>External Libraries\Config %28json-ish%29\config</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
     <None Include="Armadillo Library\armadillo_bits\config.hpp.cmake">
       <Filter>External Libraries\Armadillo Library %28Matrices%29</Filter>
+    </None>
+    <None Include="art-of-cpp\LICENSE">
+      <Filter>External Libraries\Config %28json-ish%29</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -2068,6 +2116,12 @@
     </Filter>
     <Filter Include="External Libraries\Armadillo Library %28Matrices%29">
       <UniqueIdentifier>{ecea24c5-7e97-4c73-b3d0-d70f746c38ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Libraries\Config %28json-ish%29">
+      <UniqueIdentifier>{d07124fa-712f-498d-bd81-3bc12a3321e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="External Libraries\Config %28json-ish%29\config">
+      <UniqueIdentifier>{8927c106-f192-4de9-a414-0be2383a099f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

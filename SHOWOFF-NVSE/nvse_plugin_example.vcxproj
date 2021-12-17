@@ -942,6 +942,21 @@
     <ClInclude Include="Armadillo Library\armadillo_bits\xtrans_mat_meat.hpp" />
     <ClInclude Include="Armadillo Library\armadillo_bits\xvec_htrans_bones.hpp" />
     <ClInclude Include="Armadillo Library\armadillo_bits\xvec_htrans_meat.hpp" />
+    <ClInclude Include="art-of-cpp\config.hpp" />
+    <ClInclude Include="art-of-cpp\config\access.hpp" />
+    <ClInclude Include="art-of-cpp\config\annotation.hpp" />
+    <ClInclude Include="art-of-cpp\config\assign.hpp" />
+    <ClInclude Include="art-of-cpp\config\from_file.hpp" />
+    <ClInclude Include="art-of-cpp\config\from_files.hpp" />
+    <ClInclude Include="art-of-cpp\config\from_input.hpp" />
+    <ClInclude Include="art-of-cpp\config\from_string.hpp" />
+    <ClInclude Include="art-of-cpp\config\key.hpp" />
+    <ClInclude Include="art-of-cpp\config\key_kind.hpp" />
+    <ClInclude Include="art-of-cpp\config\key_part.hpp" />
+    <ClInclude Include="art-of-cpp\config\schema.hpp" />
+    <ClInclude Include="art-of-cpp\config\to_stream.hpp" />
+    <ClInclude Include="art-of-cpp\config\traits.hpp" />
+    <ClInclude Include="art-of-cpp\config\value.hpp" />
     <ClInclude Include="Changelog.txt" />
     <ClInclude Include="easing.h" />
     <ClInclude Include="Events\CustomEventFilters.h" />
@@ -982,6 +997,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Armadillo Library\armadillo_bits\config.hpp.cmake" />
+    <None Include="art-of-cpp\LICENSE" />
     <None Include="exports.def" />
   </ItemGroup>
   <ItemGroup>

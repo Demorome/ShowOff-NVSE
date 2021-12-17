@@ -235,9 +235,10 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 DEFINE_COMMAND_PLUGIN(TestDemo, "", false, NULL);
 bool Cmd_TestDemo_Execute(COMMAND_ARGS)
 {
-	UInt32 bInt = 0;
+	UInt32 bInt = 5 || 1;
 	//if (!ExtractArgsEx(EXTRACT_ARGS_EX)) return true;
-	Console_Print("[%12X]", *(UInt32*)0x8B959B);
+	//Console_Print("[%12X]", *(UInt32*)0x8B959B);
+	Console_Print("%u", bInt);
 	return true;
 }
 
