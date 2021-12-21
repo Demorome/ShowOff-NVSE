@@ -1,34 +1,26 @@
-// Copyright (c) 2017-2018 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2017-2021 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/json/
 
 #ifndef TAO_JSON_EVENTS_BINARY_TO_HEX_HPP
 #define TAO_JSON_EVENTS_BINARY_TO_HEX_HPP
 
-#include "../byte_view.hpp"
+#include "../binary_view.hpp"
 #include "../internal/hexdump.hpp"
 
-namespace tao
+namespace tao::json::events
 {
-   namespace json
+   template< typename Consumer >
+   struct binary_to_hex
+      : Consumer
    {
-      namespace events
+      using Consumer::Consumer;
+
+      void binary( const tao::binary_view v )
       {
-         template< typename Consumer >
-         struct binary_to_hex
-            : public Consumer
-         {
-            using Consumer::Consumer;
+         Consumer::string( internal::hexdump( v ) );
+      }
+   };
 
-            void binary( const tao::byte_view v )
-            {
-               Consumer::string( internal::hexdump( v ) );
-            }
-         };
-
-      }  // namespace events
-
-   }  // namespace json
-
-}  // namespace tao
+}  // namespace tao::json::events
 
 #endif

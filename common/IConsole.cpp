@@ -1,3 +1,4 @@
+#define NOMINMAX
 #include "common/IConsole.h"
 #include <cstdarg>
 #include <cstring>

@@ -1,36 +1,23 @@
-// Copyright (c) 2017-2018 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2017-2021 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/json/
 
 #ifndef TAO_JSON_JAXN_IS_IDENTIFIER_HPP
 #define TAO_JSON_JAXN_IS_IDENTIFIER_HPP
 
+#include <algorithm>
 #include <cctype>
+#include <string_view>
 
-#include "../external/string_view.hpp"
-
-namespace tao
+namespace tao::json::jaxn
 {
-   namespace json
+   [[nodiscard]] inline bool is_identifier( const std::string_view v ) noexcept
    {
-      namespace jaxn
-      {
-         inline bool is_identifier( const tao::string_view v ) noexcept
-         {
-            if( v.empty() || std::isdigit( v[ 0 ] ) ) {  // NOLINT
-               return false;
-            }
-            for( const auto c : v ) {
-               if( !std::isalnum( c ) && c != '_' ) {  // NOLINT
-                  return false;
-               }
-            }
-            return true;
-         }
+      if( v.empty() || ( std::isdigit( v[ 0 ] ) != 0 ) ) {
+         return false;
+      }
+      return std::all_of( v.begin(), v.end(), []( const char c ) { return ( std::isalnum( c ) != 0 ) || ( c == '_' ); } );
+   }
 
-      }  // namespace jaxn
-
-   }  // namespace json
-
-}  // namespace tao
+}  // namespace tao::json::jaxn
 
 #endif

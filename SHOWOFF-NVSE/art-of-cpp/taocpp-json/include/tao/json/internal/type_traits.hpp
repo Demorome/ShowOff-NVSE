@@ -1,4 +1,4 @@
-// Copyright (c) 2018 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2018-2021 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/json/
 
 #ifndef TAO_JSON_INTERNAL_TYPE_TRAITS_HPP
@@ -7,78 +7,91 @@
 #include <type_traits>
 #include <typeinfo>
 
+#include <tao/pegtl/type_list.hpp>
+
 #include "../forward.hpp"
 
-namespace tao
+namespace tao::json::internal
 {
-   namespace json
+   using pegtl::type_list;           // NOLINT(misc-unused-using-decls)
+   using pegtl::empty_list;          // NOLINT(misc-unused-using-decls)
+   using pegtl::type_list_concat;    // NOLINT(misc-unused-using-decls)
+   using pegtl::type_list_concat_t;  // NOLINT(misc-unused-using-decls)
+
+   struct type_info_less
    {
-      namespace internal
+      [[nodiscard]] bool operator()( const std::type_info* l, const std::type_info* r ) const
       {
-         struct type_info_less
-         {
-            bool operator()( const std::type_info* l, const std::type_info* r ) const
-            {
-               return l->before( *r );
-            }
-         };
+         return l->before( *r );
+      }
+   };
 
-         template< typename T >
-         struct is_basic_value
-            : public std::false_type
-         {
-         };
+   template< typename... >
+   inline constexpr bool has_as_impl = false;
 
-         template< template< typename... > class Traits, typename Base >
-         struct is_basic_value< basic_value< Traits, Base > >
-            : public std::true_type
-         {
-         };
+   template< typename Trait, typename... Args >
+   inline constexpr bool has_as_impl< decltype( (void)Trait::as( std::declval< Args >()... ) ), Trait, Args... > = true;
 
-         template< typename, typename, typename = void >
-         struct has_as_one : std::false_type
-         {
-         };
+   template< typename Trait, typename Value, typename... With >
+   inline constexpr bool has_as = has_as_impl< void, Trait, const Value&, With&... >;
 
-         template< typename T, typename V >
-         struct has_as_one< T, V, decltype( T::as( std::declval< const V& >() ), void() ) > : std::true_type
-         {
-         };
+   template< typename, template< typename... > typename, typename, typename... >
+   inline constexpr bool has_as_type_impl = false;
 
-         template< typename, typename, typename, typename = void >
-         struct has_as_two : std::false_type
-         {
-         };
+   template< template< typename... > typename Traits, typename T, typename... Args >
+   inline constexpr bool has_as_type_impl< decltype( (void)Traits< T >::template as_type< Traits, T >( std::declval< Args >()... ) ), Traits, T, Args... > = true;
 
-         template< typename T, typename V, typename U >
-         struct has_as_two< T, V, U, decltype( T::as( std::declval< const V& >(), std::declval< U& >() ), void() ) > : std::true_type
-         {
-         };
+   template< template< typename... > typename Traits, typename T, typename Value, typename... With >
+   inline constexpr bool has_as_type = has_as_type_impl< void, Traits, T, const Value&, With&... >;
 
-         template< template< typename... > class, typename, typename, typename = void >
-         struct has_consume_one : std::false_type
-         {
-         };
+   template< typename... >
+   inline constexpr bool has_to_impl = false;
 
-         template< template< typename... > class Traits, typename P, typename U >
-         struct has_consume_one< Traits, P, U, decltype( Traits< U >::template consume< Traits >( std::declval< P& >() ), void() ) > : std::true_type
-         {
-         };
+   template< typename Trait, typename... Args >
+   inline constexpr bool has_to_impl< decltype( (void)Trait::to( std::declval< Args >()... ) ), Trait, Args... > = true;
 
-         template< template< typename... > class, typename, typename, typename = void >
-         struct has_consume_two : std::false_type
-         {
-         };
+   template< typename Trait, typename Value, typename... With >
+   inline constexpr bool has_to = has_to_impl< void, Trait, const Value&, With&... >;
 
-         template< template< typename... > class Traits, typename P, typename U >
-         struct has_consume_two< Traits, P, U, decltype( Traits< U >::template consume< Traits >( std::declval< P& >(), std::declval< U& >() ), void() ) > : std::true_type
-         {
-         };
+   template< template< typename... > class, typename, typename, typename = void >
+   inline constexpr bool has_consume_one = false;
 
-      }  // namespace internal
+   template< template< typename... > class Traits, typename P, typename U >
+   inline constexpr bool has_consume_one< Traits, P, U, decltype( (void)Traits< U >::template consume< Traits >( std::declval< P& >() ) ) > = true;
 
-   }  // namespace json
+   template< template< typename... > class, typename, typename, typename = void >
+   inline constexpr bool has_consume_two = false;
 
-}  // namespace tao
+   template< template< typename... > class Traits, typename P, typename U >
+   inline constexpr bool has_consume_two< Traits, P, U, decltype( (void)Traits< U >::template consume< Traits >( std::declval< P& >(), std::declval< U& >() ) ) > = true;
+
+   template< template< typename... > class Traits, typename T, typename = void >
+   inline constexpr bool has_is_nothing = false;
+
+   template< template< typename... > class Traits, typename T >
+   inline constexpr bool has_is_nothing< Traits, T, decltype( (void)Traits< T >::template is_nothing< Traits >( std::declval< const T& >() ) ) > = true;
+
+   template< template< typename... > class Traits, typename T >
+   [[nodiscard]] std::enable_if_t< has_is_nothing< Traits, T >, bool > is_nothing( const T& t ) noexcept( noexcept( Traits< T >::template is_nothing< Traits >( t ) ) )
+   {
+      return Traits< T >::template is_nothing< Traits >( t );
+   }
+
+   template< template< typename... > class Traits, typename T >
+   [[nodiscard]] std::enable_if_t< !has_is_nothing< Traits, T >, bool > is_nothing( const T& /*unused*/ ) noexcept
+   {
+      return false;
+   }
+
+   template< template< typename... > class Traits, typename T, typename = void >
+   inline constexpr bool has_enable_implicit_constructor = false;
+
+   template< template< typename... > class Traits, typename T >
+   inline constexpr bool has_enable_implicit_constructor< Traits, T, decltype( (void)Traits< T >::enable_implicit_constructor ) > = true;
+
+   template< template< typename... > class Traits, typename T >
+   inline constexpr bool enable_implicit_constructor = Traits< std::conditional_t< has_enable_implicit_constructor< Traits, T >, T, void > >::enable_implicit_constructor;
+
+}  // namespace tao::json::internal
 
 #endif

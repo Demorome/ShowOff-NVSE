@@ -1,124 +1,115 @@
-// Copyright (c) 2017-2018 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2017-2021 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/json/
 
 #ifndef TAO_JSON_JAXN_INTERNAL_BUNESCAPE_ACTION_HPP
 #define TAO_JSON_JAXN_INTERNAL_BUNESCAPE_ACTION_HPP
 
-#include "../../external/byte.hpp"
-#include "../../external/pegtl/contrib/unescape.hpp"
-#include "../../external/pegtl/nothing.hpp"
+#include <cstddef>
+#include <vector>
+
+#include <tao/pegtl/contrib/unescape.hpp>
+#include <tao/pegtl/nothing.hpp>
+#include <tao/pegtl/parse_error.hpp>
 
 #include "grammar.hpp"
 
-namespace tao
+namespace tao::json::jaxn::internal
 {
-   namespace json
+   template< typename Rule >
+   struct bunescape_action
+      : pegtl::nothing< Rule >
+   {};
+
+   template<>
+   struct bunescape_action< rules::bescaped_char >
    {
-      namespace jaxn
+      template< typename Input >
+      static void apply( const Input& in, std::vector< std::byte >& value )
       {
-         namespace internal
-         {
-            template< typename Rule >
-            struct bunescape_action : json_pegtl::nothing< Rule >
-            {
-            };
+         switch( *in.begin() ) {
+            case '"':
+               value.push_back( std::byte( '"' ) );
+               break;
 
-            template<>
-            struct bunescape_action< rules::bescaped_char >
-            {
-               template< typename Input, typename State >
-               static void apply( const Input& in, State& st )
-               {
-                  switch( *in.begin() ) {
-                     case '"':
-                        st.value.push_back( tao::byte( '"' ) );
-                        break;
+            case '\'':
+               value.push_back( std::byte( '\'' ) );
+               break;
 
-                     case '\'':
-                        st.value.push_back( tao::byte( '\'' ) );
-                        break;
+            case '\\':
+               value.push_back( std::byte( '\\' ) );
+               break;
 
-                     case '\\':
-                        st.value.push_back( tao::byte( '\\' ) );
-                        break;
+            case '/':
+               value.push_back( std::byte( '/' ) );
+               break;
 
-                     case '/':
-                        st.value.push_back( tao::byte( '/' ) );
-                        break;
+            case 'b':
+               value.push_back( std::byte( '\b' ) );
+               break;
 
-                     case 'b':
-                        st.value.push_back( tao::byte( '\b' ) );
-                        break;
+            case 'f':
+               value.push_back( std::byte( '\f' ) );
+               break;
 
-                     case 'f':
-                        st.value.push_back( tao::byte( '\f' ) );
-                        break;
+            case 'n':
+               value.push_back( std::byte( '\n' ) );
+               break;
 
-                     case 'n':
-                        st.value.push_back( tao::byte( '\n' ) );
-                        break;
+            case 'r':
+               value.push_back( std::byte( '\r' ) );
+               break;
 
-                     case 'r':
-                        st.value.push_back( tao::byte( '\r' ) );
-                        break;
+            case 't':
+               value.push_back( std::byte( '\t' ) );
+               break;
 
-                     case 't':
-                        st.value.push_back( tao::byte( '\t' ) );
-                        break;
+            case 'v':
+               value.push_back( std::byte( '\v' ) );
+               break;
 
-                     case 'v':
-                        st.value.push_back( tao::byte( '\v' ) );
-                        break;
+            case '0':
+               value.push_back( std::byte( '\0' ) );
+               break;
 
-                     case '0':
-                        st.value.push_back( tao::byte( '\0' ) );
-                        break;
+            default:
+               throw pegtl::parse_error( "invalid character in unescape", in );  // LCOV_EXCL_LINE
+         }
+      }
+   };
 
-                     default:
-                        throw std::runtime_error( "invalid character in unescape" );  // NOLINT, LCOV_EXCL_LINE
-                  }
-               }
-            };
+   template<>
+   struct bunescape_action< rules::bescaped_hexcode >
+   {
+      template< typename Input >
+      static void apply( const Input& in, std::vector< std::byte >& value )
+      {
+         assert( !in.empty() );  // First character MUST be present, usually 'x'.
+         value.push_back( static_cast< std::byte >( pegtl::unescape::unhex_string< char >( in.begin() + 1, in.end() ) ) );
+      }
+   };
 
-            template<>
-            struct bunescape_action< rules::bescaped_hexcode >
-            {
-               template< typename Input, typename State >
-               static void apply( const Input& in, State& st )
-               {
-                  assert( !in.empty() );  // First character MUST be present, usually 'x'.
-                  st.value.push_back( static_cast< tao::byte >( json_pegtl::unescape::unhex_string< char >( in.begin() + 1, in.end() ) ) );
-               }
-            };
+   template< char D >
+   struct bunescape_action< rules::bunescaped< D > >
+   {
+      template< typename Input >
+      static void apply( const Input& in, std::vector< std::byte >& value )
+      {
+         const auto* const begin = reinterpret_cast< const std::byte* >( in.begin() );
+         const auto* const end = begin + in.size();
+         value.insert( value.end(), begin, end );
+      }
+   };
 
-            template< char D >
-            struct bunescape_action< rules::bunescaped< D > >
-            {
-               template< typename Input, typename State >
-               static void apply( const Input& in, State& st )
-               {
-                  const auto begin = static_cast< const tao::byte* >( static_cast< const void* >( in.begin() ) );
-                  const auto end = begin + in.size();
-                  st.value.insert( st.value.end(), begin, end );
-               }
-            };
+   template<>
+   struct bunescape_action< rules::bbyte >
+   {
+      template< typename Input >
+      static void apply( const Input& in, std::vector< std::byte >& value )
+      {
+         value.push_back( static_cast< std::byte >( pegtl::unescape::unhex_string< char >( in.begin(), in.end() ) ) );
+      }
+   };
 
-            template<>
-            struct bunescape_action< rules::bbyte >
-            {
-               template< typename Input, typename State >
-               static void apply( const Input& in, State& st )
-               {
-                  st.value.push_back( static_cast< tao::byte >( json_pegtl::unescape::unhex_string< char >( in.begin(), in.end() ) ) );
-               }
-            };
-
-         }  // namespace internal
-
-      }  // namespace jaxn
-
-   }  // namespace json
-
-}  // namespace tao
+}  // namespace tao::json::jaxn::internal
 
 #endif

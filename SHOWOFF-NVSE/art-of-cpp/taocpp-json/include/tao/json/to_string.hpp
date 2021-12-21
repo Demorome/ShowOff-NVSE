@@ -1,27 +1,25 @@
-// Copyright (c) 2015-2018 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2015-2021 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/json/
 
 #ifndef TAO_JSON_TO_STRING_HPP
 #define TAO_JSON_TO_STRING_HPP
 
 #include <sstream>
+#include <string>
+#include <utility>
 
 #include "to_stream.hpp"
 
-namespace tao
+namespace tao::json
 {
-   namespace json
+   template< template< typename... > class... Transformers, typename... Ts >
+   [[nodiscard]] std::string to_string( Ts&&... ts )
    {
-      template< template< typename... > class... Transformers, typename... Ts >
-      std::string to_string( Ts&&... ts )
-      {
-         std::ostringstream o;
-         json::to_stream< Transformers... >( o, std::forward< Ts >( ts )... );
-         return o.str();
-      }
+      std::ostringstream oss;
+      json::to_stream< Transformers... >( oss, std::forward< Ts >( ts )... );
+      return std::move( oss ).str();
+   }
 
-   }  // namespace json
-
-}  // namespace tao
+}  // namespace tao::json
 
 #endif

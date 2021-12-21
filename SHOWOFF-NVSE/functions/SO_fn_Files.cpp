@@ -100,6 +100,42 @@ ArrayElementR Read_JSON_As_NVSE_Elem(json::const_reference json_ref, bool forceA
 	return json_as_elem;
 }
 
+NVSEArrayVar* GetArrayFromJSON(tao::json::value const &val, Script* scriptObj)
+{
+	NVSEArrayVar* resArr = nullptr;
+
+	using valType = tao::json::type;
+	if (auto const type = val.type(); 
+		valType::ARRAY == type)
+	{
+		auto const& arr = val.get_array();
+		
+	}
+	else if (valType::OBJECT == type)
+	{
+		auto const &obj = val.get_object();
+		
+	}
+	else if (valType::STRING == type)
+	{
+		ArrayElementR elem = val.get_string().c_str();
+		resArr = CreateArray(&elem, 1, scriptObj);
+	}
+	else if (valType::NULL_ == type)
+	{
+		resArr = CreateArray(nullptr, 0, scriptObj);
+	}
+	else if (valType::BOOLEAN == type)
+	{
+		ArrayElementR elem = val.get_boolean();
+		resArr = CreateArray(&elem, 1, scriptObj);
+	}
+	else
+		throw std::runtime_error("GetArrayFromJSON: Non-Exhausive if checks.");
+
+	return resArr;
+}
+
 
 bool Cmd_ReadArrayFromJSON_Execute(COMMAND_ARGS)
 {
@@ -110,11 +146,17 @@ bool Cmd_ReadArrayFromJSON_Execute(COMMAND_ARGS)
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &json_path, json_key_path, &forceArrayType)) return true;
 
 	ReplaceChr(json_path, '/', '\\');
-	std::string JSON_Path = GetCurPath() + "\\" + json_path;
+	std::string const JSON_Path = GetCurPath() + "\\" + json_path;
 	if (!std::filesystem::exists(JSON_Path)) return true;
+#if 0
 	std::string keyPathStr = json_key_path;
+#endif
 	
-	NVSEArrayVar* resArr = nullptr;  //assign this value as result.
+	NVSEArrayVar* resArr = nullptr;
+	auto const jsonVal = tao::json::from_file(JSON_Path);
+	GetArrayFromJSON(jsonVal, scriptObj);
+	
+#if 0
 	try
 	{
 		std::ifstream i(JSON_Path);
@@ -150,7 +192,10 @@ bool Cmd_ReadArrayFromJSON_Execute(COMMAND_ARGS)
 		Log("The JSON is incorrectly formatted! It will not be applied.");
 		Log(FormatString("JSON error: %s\n", e.what()));
 	}
-	AssignArrayResult(resArr, result);  //todo: check what happens if empty array is passed!
+#endif
+	
+	if (resArr)
+		AssignArrayResult(resArr, result);
 	return true;
 }
 
@@ -160,7 +205,12 @@ bool Cmd_DemoTestFile_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 
-	= tao::config::from_file("ur mom");
+	std::filesystem::path path = { "test" };
+	
+	auto i = tao::config::from_file(path);
+	_MESSAGE("%i", static_cast<int>(i.type()));
+
+	
 	
 	return true;
 }

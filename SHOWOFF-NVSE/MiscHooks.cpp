@@ -62,7 +62,7 @@ namespace PickpocketInCombat
 				int const targetStrength = target->avOwner.GetThresholdedActorValue(kAVCode_Strength);
 				int const playerStrength = g_playerAVOwner->GetThresholdedActorValue(kAVCode_Strength);
 
-				cost += max(0, (g_fForcePickpocketTargetStrengthMult * targetStrength
+				cost += std::max<float>(0, (g_fForcePickpocketTargetStrengthMult * targetStrength
 					- g_fForcePickpocketPlayerStrengthMult * playerStrength));
 				//0 or greater.
 			}

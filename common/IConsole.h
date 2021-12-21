@@ -1,5 +1,6 @@
 #pragma once
 
+#define NOMINMAX
 #include "common/ITypes.h"
 #include "common/ISingleton.h"
 #include <Windows.h>

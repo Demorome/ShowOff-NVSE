@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2018 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2017-2021 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/json/
 
 #ifndef TAO_JSON_INTERNAL_IDENTITY_HPP
@@ -6,21 +6,17 @@
 
 #include <type_traits>
 
-namespace tao
+namespace tao::internal
 {
-   namespace internal
+   template< typename T >
+   struct identity
    {
-      template< typename T >
-      struct identity
-      {
-         using type = T;
-      };
+      using type = T;
+   };
 
-      template< typename T >
-      using identity_t = typename identity< T >::type;
+   template< typename T >
+   using identity_t = typename identity< T >::type;
 
-   }  // namespace internal
-
-}  // namespace tao
+}  // namespace tao::internal
 
 #endif

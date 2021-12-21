@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2018 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2017-2021 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/json/
 
 #ifndef TAO_JSON_EVENTS_NON_FINITE_TO_NULL_HPP
@@ -6,35 +6,27 @@
 
 #include <cmath>
 
-namespace tao
+namespace tao::json::events
 {
-   namespace json
+   template< typename Consumer >
+   struct non_finite_to_null
+      : Consumer
    {
-      namespace events
+      using Consumer::Consumer;
+
+      using Consumer::number;
+
+      void number( const double v )
       {
-         template< typename Consumer >
-         struct non_finite_to_null
-            : public Consumer
-         {
-            using Consumer::Consumer;
+         if( !std::isfinite( v ) ) {
+            Consumer::null();
+         }
+         else {
+            Consumer::number( v );
+         }
+      }
+   };
 
-            using Consumer::number;
-
-            void number( const double v )
-            {
-               if( !std::isfinite( v ) ) {
-                  Consumer::null();
-               }
-               else {
-                  Consumer::number( v );
-               }
-            }
-         };
-
-      }  // namespace events
-
-   }  // namespace json
-
-}  // namespace tao
+}  // namespace tao::json::events
 
 #endif

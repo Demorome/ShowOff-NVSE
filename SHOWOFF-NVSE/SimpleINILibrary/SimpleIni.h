@@ -3355,6 +3355,7 @@ public:
 # endif
 #endif
 
+#define NOMINMAX
 #include <windows.h>
 #ifdef SI_NO_MBCS
 # define SI_NoCase   SI_GenericNoCase

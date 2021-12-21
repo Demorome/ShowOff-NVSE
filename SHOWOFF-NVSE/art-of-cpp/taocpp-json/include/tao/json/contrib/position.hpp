@@ -1,103 +1,166 @@
-// Copyright (c) 2018 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2018-2021 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/json/
 
 #ifndef TAO_JSON_CONTRIB_POSITION_HPP
 #define TAO_JSON_CONTRIB_POSITION_HPP
 
-#include <tao/json/events/to_value.hpp>
-#include <tao/json/events/transformer.hpp>
-#include <tao/json/parse_file.hpp>
-#include <tao/json/value.hpp>
+#include <ostream>
+#include <string>
+#include <type_traits>
+#include <utility>
 
-namespace tao
+#include "../events/to_value.hpp"
+#include "../events/transformer.hpp"
+#include "../internal/filesystem.hpp"
+
+#include "../from_file.hpp"
+#include "../message_extension.hpp"
+#include "../value.hpp"
+
+namespace tao::json
 {
-   namespace json
+   struct position
    {
-      struct position
+   private:
+      std::size_t m_line = 0;
+      std::size_t m_column = 0;
+      std::string m_source;
+
+   public:
+      position() = default;
+
+      position( std::string in_source, const std::size_t in_line, const std::size_t in_column )
+         : m_line( in_line ),
+           m_column( in_column ),
+           m_source( std::move( in_source ) )
+      {}
+
+      position( const position& ) = default;
+
+      position( position&& p ) noexcept
       {
-         std::size_t line = 0;
-         std::size_t byte_in_line = 0;
-         std::string source;
+         m_line = p.m_line;
+         m_column = p.m_column;
+         m_source = std::move( p.m_source );
+      }
 
-         position() noexcept  // NOLINT
+      ~position() = default;
+
+      position& operator=( const position& ) = default;
+
+      position& operator=( position&& p ) noexcept
+      {
+         m_line = p.m_line;
+         m_column = p.m_column;
+         m_source = std::move( p.m_source );
+         return *this;
+      }
+
+      [[nodiscard]] const std::string& source() const noexcept
+      {
+         return m_source;
+      }
+
+      [[nodiscard]] std::size_t line() const noexcept
+      {
+         return m_line;
+      }
+
+      [[nodiscard]] std::size_t column() const noexcept
+      {
+         return m_column;
+      }
+
+      void set_source( const std::string& s )
+      {
+         m_source = s;
+      }
+
+      template< typename T >
+      void set_position( const T& p )
+      {
+         m_line = p.line;
+         m_column = p.column;
+         m_source = p.source;
+      }
+
+      void append_message_extension( std::ostream& os ) const
+      {
+         os << '[' << m_source << ':' << m_line << ':' << m_column << ']';
+      }
+   };
+
+   namespace internal
+   {
+      template< typename Rule >
+      struct position_action
+         : action< Rule >
+      {};
+
+      template<>
+      struct position_action< rules::object::begin >
+      {
+         template< typename Input, typename Consumer >
+         static void apply( const Input& in, Consumer& consumer )
          {
-         }
-
-         position( const position& ) = default;
-
-         position( position&& p ) noexcept
-            : line( p.line ),
-              byte_in_line( p.byte_in_line ),
-              source( std::move( p.source ) )
-         {
-         }
-
-         ~position() = default;
-
-         position& operator=( const position& ) = default;
-
-         position& operator=( position&& p ) noexcept
-         {
-            line = p.line;
-            byte_in_line = p.byte_in_line;
-            source = std::move( p.source );
-            return *this;
+            action< rules::object::begin >::apply0( consumer );
+            consumer.stack_.back().set_position( in.position() );
          }
       };
 
-      inline std::ostream& operator<<( std::ostream& o, const position& p )
+      template<>
+      struct position_action< rules::array::begin >
       {
-         o << p.source << ':' << p.line << ':' << p.byte_in_line;
-         return o;
-      }
-
-      inline std::string to_string( const position& p )
-      {
-         std::ostringstream o;
-         o << p;
-         return o.str();
-      }
-
-      namespace internal
-      {
-         template< typename Rule >
-         struct position_action
-            : public action< Rule >
+         template< typename Input, typename Consumer >
+         static void apply( const Input& in, Consumer& consumer )
          {
-         };
+            action< rules::array::begin >::apply0( consumer );
+            consumer.stack_.back().set_position( in.position() );
+         }
+      };
 
-         template<>
-         struct position_action< rules::sor_value >
+      template<>
+      struct position_action< rules::sor_value >
+      {
+         template< typename Input, typename Consumer >
+         static void apply( const Input& in, Consumer& consumer )
          {
-            template< typename Input, typename Consumer >
-            static void apply( const Input& in, Consumer& consumer )
-            {
-               const auto p = in.position();
-               consumer.value.base().line = p.line;
-               consumer.value.base().byte_in_line = p.byte_in_line;
-               consumer.value.base().source = p.source;
-            }
-         };
+            consumer.value.set_position( in.position() );
+         }
+      };
 
-      }  // namespace internal
-
-      template< template< typename... > class Traits, template< typename... > class... Transformers >
-      basic_value< Traits, position > basic_parse_file_with_position( const std::string& filename )
+      template< template< typename... > class Traits >
+      struct position_traits
+         : Traits< void >
       {
-         events::transformer< events::to_basic_value< Traits, position >, Transformers... > consumer;
-         json_pegtl::file_input< json_pegtl::tracking_mode::IMMEDIATE > in( filename );
-         json_pegtl::parse< internal::grammar, internal::position_action, internal::control >( in, consumer );
-         return std::move( consumer.value );
-      }
+         template< typename >
+         using public_base = position;
+      };
 
-      template< template< typename... > class... Transformers >
-      basic_value< traits, position > parse_file_with_position( const std::string& filename )
-      {
-         return basic_parse_file_with_position< traits, Transformers... >( filename );
-      }
+   }  // namespace internal
 
-   }  // namespace json
+   template< template< typename... > class Traits >
+   struct make_position_traits
+   {
+      template< typename T >
+      using type = std::conditional_t< std::is_same_v< T, void >, internal::position_traits< Traits >, Traits< T > >;
+   };
 
-}  // namespace tao
+   template< template< typename... > class Traits, template< typename... > class... Transformers >
+   [[nodiscard]] auto basic_from_file_with_position( const internal::filesystem::path& path )
+   {
+      events::transformer< events::to_basic_value< Traits >, Transformers... > consumer;
+      pegtl::file_input< pegtl::tracking_mode::eager > in( path );
+      pegtl::parse< internal::grammar, internal::position_action, internal::errors >( in, consumer );
+      return std::move( consumer.value );
+   }
+
+   template< template< typename... > class... Transformers >
+   [[nodiscard]] auto from_file_with_position( const internal::filesystem::path& path )
+   {
+      return basic_from_file_with_position< make_position_traits< traits >::template type, Transformers... >( path );
+   }
+
+}  // namespace tao::json
 
 #endif

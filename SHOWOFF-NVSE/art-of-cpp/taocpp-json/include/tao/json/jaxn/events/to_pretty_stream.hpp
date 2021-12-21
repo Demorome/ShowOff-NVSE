@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2018 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2017-2021 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/json/
 
 #ifndef TAO_JSON_JAXN_EVENTS_TO_PRETTY_STREAM_HPP
@@ -6,73 +6,64 @@
 
 #include "../../internal/hexdump.hpp"
 
+#include "../../external/ryu.hpp"
+
 #include "../../events/to_pretty_stream.hpp"
 
 #include "../is_identifier.hpp"
 
-namespace tao
+namespace tao::json::jaxn::events
 {
-   namespace json
+   // Events consumer to build a JAXN string representation.
+
+   struct to_pretty_stream
+      : json::events::to_pretty_stream
    {
-      namespace jaxn
+      using json::events::to_pretty_stream::to_pretty_stream;
+
+      using json::events::to_pretty_stream::number;
+
+      void number( const double v )
       {
-         namespace events
-         {
-            // Events consumer to build a JAXN string representation.
+         next();
+         if( !std::isfinite( v ) ) {
+            if( std::isnan( v ) ) {
+               os.write( "NaN", 3 );
+            }
+            else if( v < 0 ) {
+               os.write( "-Infinity", 9 );
+            }
+            else {
+               os.write( "Infinity", 8 );
+            }
+         }
+         else {
+            ryu::d2s_stream( os, v );
+         }
+      }
 
-            struct to_pretty_stream
-               : public json::events::to_pretty_stream
-            {
-               using json::events::to_pretty_stream::number;
-               using json::events::to_pretty_stream::to_pretty_stream;
+      void binary( const tao::binary_view v )
+      {
+         next();
+         os.put( '$' );
+         json::internal::hexdump( os, v );
+      }
 
-               void number( const double v )
-               {
-                  next();
-                  if( !std::isfinite( v ) ) {
-                     if( std::isnan( v ) ) {  // NOLINT
-                        os.write( "NaN", 3 );
-                     }
-                     else if( v < 0 ) {
-                        os.write( "-Infinity", 9 );
-                     }
-                     else {
-                        os.write( "Infinity", 8 );
-                     }
-                  }
-                  else {
-                     json_double_conversion::Dtostr( os, v );
-                  }
-               }
+      void key( const std::string_view v )
+      {
+         if( jaxn::is_identifier( v ) ) {
+            next();
+            os.write( v.data(), v.size() );
+         }
+         else {
+            string( v );
+         }
+         os.write( ": ", 2 );
+         first = true;
+         after_key = true;
+      }
+   };
 
-               void key( const tao::string_view v )
-               {
-                  if( json::jaxn::is_identifier( v ) ) {
-                     next();
-                     os.write( v.data(), v.size() );
-                  }
-                  else {
-                     string( v );
-                  }
-                  os.write( ": ", 2 );
-                  first = true;
-                  after_key = true;
-               }
-
-               void binary( const tao::byte_view v )
-               {
-                  next();
-                  os.put( '$' );
-                  json::internal::hexdump( os, v );
-               }
-            };
-
-         }  // namespace events
-
-      }  // namespace jaxn
-
-   }  // namespace json
-
-}  // namespace tao
+}  // namespace tao::json::jaxn::events
 
 #endif

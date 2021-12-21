@@ -1,14 +1,15 @@
-// Copyright (c) 2018 Dr. Colin Hirsch and Daniel Frey
+// Copyright (c) 2018-2021 Dr. Colin Hirsch and Daniel Frey
 // Please see LICENSE for license or visit https://github.com/taocpp/json/
 
 #ifndef TAO_JSON_EVENTS_HPP
 #define TAO_JSON_EVENTS_HPP
 
 // Events producers
+#include "events/from_file.hpp"
+#include "events/from_input.hpp"
 #include "events/from_stream.hpp"
 #include "events/from_string.hpp"
 #include "events/from_value.hpp"
-#include "events/parse_file.hpp"
 #include "events/produce.hpp"
 
 // Events consumers
@@ -22,6 +23,9 @@
 #include "events/binary_to_base64url.hpp"
 #include "events/binary_to_exception.hpp"
 #include "events/binary_to_hex.hpp"
+#include "events/invalid_string_to_binary.hpp"
+#include "events/invalid_string_to_exception.hpp"
+#include "events/invalid_string_to_hex.hpp"
 #include "events/key_camel_case_to_snake_case.hpp"
 #include "events/key_snake_case_to_camel_case.hpp"
 #include "events/limit_nesting_depth.hpp"

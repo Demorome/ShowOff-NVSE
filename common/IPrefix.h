@@ -9,6 +9,7 @@
 // 4312 - pointer extension
 #pragma warning(disable: 4018 4244 4267 4305 4288 4312 4311)
 
+#define NOMINMAX
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>

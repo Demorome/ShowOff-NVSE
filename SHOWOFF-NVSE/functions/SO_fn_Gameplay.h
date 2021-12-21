@@ -461,7 +461,7 @@ bool Cmd_GetCalculatedSkillPoints_Eval(COMMAND_ARGS_EVAL)
 	auto level = levelOverride ? levelOverride : avOwner->GetLevel();
 	level += LevelUpMenu::GetSingleton() ? 0 : 1;  // Add +1 level to accurately predict the outcome for the next level up, if not in levelup menu.
 	auto intelligence = avOwner->GetNormalizedPermanentAV(kAVCode_Intelligence);
-	intelligence = min(intelligence, 10);
+	intelligence = std::min<decltype(intelligence)>(intelligence, 10);
 
 	auto const calculateSkillPointsAddr = GetRelJumpAddr(0x648BF0); // get the function address indirectly for compatibility with lStewieAl's tweaks (see patchCustomSkillPointFormula())
 	float skillPoints = CdeclCall<int>(calculateSkillPointsAddr, intelligence, level);
@@ -740,12 +740,12 @@ bool Cmd_SetLevelUpMenuPoints_Execute(COMMAND_ARGS)
 		{
 			if (currentPage == LevelUpMenu::kPerkSelection)
 			{
-				iNewPoints = min(menu->numPerksToAssign, iNewPoints);
+				iNewPoints = std::min(menu->numPerksToAssign, iNewPoints);
 				menu->numAssignedPerks = iNewPoints;
 			}
 			else if (currentPage == LevelUpMenu::kSkillSelection)
 			{
-				iNewPoints = min(menu->numSkillPointsToAssign, iNewPoints);
+				iNewPoints = std::min(menu->numSkillPointsToAssign, iNewPoints);
 				menu->numAssignedSkillPoints = iNewPoints;
 			}
 			else

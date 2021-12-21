@@ -1558,7 +1558,7 @@ public:
 	void SetNumPerksToAssign(int newCount)
 	{
 		auto const numAvailablePerks = availablePerks.Count();
-		numPerksToAssign = min(newCount, numAvailablePerks);
+		numPerksToAssign = std::min<UInt32>(newCount, numAvailablePerks);
 	}
 
 	static LevelUpMenu* GetSingleton() { return *(LevelUpMenu**)0x11D9FDC; }
