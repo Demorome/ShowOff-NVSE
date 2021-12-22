@@ -28,6 +28,7 @@ bool Cmd_CreateFolder_Execute(COMMAND_ARGS)
 
 #if _DEBUG
 
+#if 0
 bool Get_JSON_Val_As_Basic_NVSE_Elem(json::const_reference json_ref, ArrayElementR& elem)
 {
 	if (!json_ref.is_primitive()) return false;
@@ -99,49 +100,116 @@ ArrayElementR Read_JSON_As_NVSE_Elem(json::const_reference json_ref, bool forceA
 
 	return json_as_elem;
 }
+#endif
 
-NVSEArrayVar* GetArrayFromJSON(tao::json::value const &val, Script* scriptObj)
+namespace JsonToNVSE
 {
-	NVSEArrayVar* resArr = nullptr;
-
 	using valType = tao::json::type;
-	if (auto const type = val.type(); 
-		valType::ARRAY == type)
-	{
-		auto const& arr = val.get_array();
-		
-	}
-	else if (valType::OBJECT == type)
-	{
-		auto const &obj = val.get_object();
-		
-	}
-	else if (valType::STRING == type)
-	{
-		ArrayElementR elem = val.get_string().c_str();
-		resArr = CreateArray(&elem, 1, scriptObj);
-	}
-	else if (valType::NULL_ == type)
-	{
-		resArr = CreateArray(nullptr, 0, scriptObj);
-	}
-	else if (valType::BOOLEAN == type)
-	{
-		ArrayElementR elem = val.get_boolean();
-		resArr = CreateArray(&elem, 1, scriptObj);
-	}
-	else
-		throw std::runtime_error("GetArrayFromJSON: Non-Exhausive if checks.");
+	using JsonValue = tao::json::value;
 
-	return resArr;
+	ArrayElementR BasicJsonValueToArrayElem(JsonValue const& val)
+	{
+		ArrayElementR elem;
+		if (auto const type = val.type();
+			valType::STRING == type)
+		{
+			elem = val.get_string().c_str();
+		}
+		else if (valType::NULL_ == type)
+		{
+			//NULL isn't representable in Obscript, so it'll just be 0 instead.
+			elem = 0.0;
+		}
+		else if (valType::BOOLEAN == type || valType::SIGNED == type || valType::UNSIGNED == type
+			|| valType::DOUBLE == type)
+		{
+			elem = val.as<double>();
+		}
+		else {
+			throw std::runtime_error("GetArrayFromJSON: Non-Exhausive if checks.");
+		}
+		return elem;
+	}
+
+	//Case 1: json val is 1-dimensional -> create 1D array
+	//Case 2: json val is multidimensional -> create array with sub-arrays (use recursion)
+	NVSEArrayVar* SubElementsToNVSEArray(JsonValue const& val, Script* scriptObj)
+	{
+		NVSEArrayVar* resArr;
+		if (auto const type = val.type();
+			valType::ARRAY == type)
+		{
+			auto const& arr = val.get_array();
+			Vector<ArrayElementR> arrData(arr.size());
+			for (int i = 0; auto const &value : arr)
+			{
+				if (auto const type = value.type();
+					valType::ARRAY == type || valType::OBJECT == type)
+				{
+					arrData[i] = SubElementsToNVSEArray(value, scriptObj);
+				}
+				else
+				{
+					arrData[i] = BasicJsonValueToArrayElem(value);
+				}
+				i++;
+			}
+			resArr = g_arrInterface->CreateArray(arrData.Data(), arr.size(), scriptObj);
+		}
+		else if (valType::OBJECT == type)
+		{
+			auto const& obj = val.get_object();
+			Map<const char*, ArrayElementR> strMapData(obj.size());
+			for (auto const &[key, value] : obj)
+			{
+				if (auto const type = value.type();
+					valType::ARRAY == type || valType::OBJECT == type)
+				{
+					strMapData[key.c_str()] = SubElementsToNVSEArray(value, scriptObj);
+				}
+				else
+				{
+					strMapData[key.c_str()] = BasicJsonValueToArrayElem(value);
+				}
+			}
+			resArr = g_arrInterface->CreateStringMap(strMapData.Keys().Data(), strMapData.Values().Data(), obj.size(), scriptObj);
+		}
+		else
+		{
+			throw std::runtime_error("SubElementsToNVSEArray: Function called with invalid json object type.");
+		}
+		return resArr;
+	}
+
+	//Single-element JSON is valid
+	//Single array/object is also valid
+	//Otherwise, for multiple arrays/objects, you need to wrap in an array/object.
+	NVSEArrayVar* GetArrayFromJSON(JsonValue const& val, Script* scriptObj)
+	{
+		NVSEArrayVar* resArr = nullptr;
+
+		if (auto const type = val.type();
+			valType::ARRAY == type || valType::OBJECT == type)
+		{
+			resArr = SubElementsToNVSEArray(val, scriptObj);
+		}
+		else //create array with a single element.
+		{
+			auto const elem = BasicJsonValueToArrayElem(val);
+			if (elem.IsValid())
+				resArr = CreateArray(&elem, 1, scriptObj);
+		}
+		return resArr;
+	}
 }
+
 
 
 bool Cmd_ReadArrayFromJSON_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	char json_path[MAX_PATH];  // relative to "Fallout New Vegas" folder.
-	char* json_key_path = GetStrArgBuffer();  // the path in the JSON hierarchy
+	char* json_key_path = GetStrArgBuffer();  // the path in the JSON hierarchy	//todo: likely abandonned, too tricky... would have to learn more about JSON pointers.
 	UInt32 forceArrayType = false;  // Optional, forces the returned arrays to be "array" type (instead of sometimes appearing as "StringMap", such as in the case of a JSON Object).
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &json_path, json_key_path, &forceArrayType)) return true;
 
@@ -152,9 +220,8 @@ bool Cmd_ReadArrayFromJSON_Execute(COMMAND_ARGS)
 	std::string keyPathStr = json_key_path;
 #endif
 	
-	NVSEArrayVar* resArr = nullptr;
 	auto const jsonVal = tao::json::from_file(JSON_Path);
-	GetArrayFromJSON(jsonVal, scriptObj);
+	auto const resArr = JsonToNVSE::GetArrayFromJSON(jsonVal, scriptObj);
 	
 #if 0
 	try

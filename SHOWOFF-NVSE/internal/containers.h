@@ -582,6 +582,8 @@ public:
 	}
 };
 
+template <typename T_Type> class Vector;
+
 template <typename T_Key, typename T_Data> class Map
 {
 	using M_Key = MapKey<T_Key>;
@@ -746,6 +748,72 @@ public:
 			} while (pEntry != pEnd);
 		}
 		numEntries = 0;
+	}
+
+	/*
+	[[nodiscard]] Vector<std::reference_wrapper<M_Value>> ValueRefs() const
+	{
+		if (numEntries)
+		{
+			auto vals = Vector<std::reference_wrapper<M_Value>>(numEntries);
+			int i = 0;
+			for (Entry* pEntry = entries; pEntry != End(); pEntry++)
+			{
+				vals.Append(pEntry->value.Get());
+				i++;
+			}
+			return vals;
+		}
+		return {};
+	}*/
+
+	[[nodiscard]] Vector<T_Data> Values() const
+	{
+		if (numEntries)
+		{
+			auto vals = Vector<T_Data>(numEntries);
+			int i = 0;
+			for (Entry* pEntry = entries; pEntry != End(); pEntry++)
+			{
+				vals.Append(pEntry->value.Get());
+				i++;
+			}
+			return vals;
+		}
+		return {};
+	}
+
+	/*
+	[[nodiscard]] Vector<std::reference_wrapper<T_Key>> KeyRefs() const
+	{
+		if (numEntries)
+		{
+			auto keys = Vector<std::reference_wrapper<T_Key>>(numEntries);
+			int i = 0;
+			for (Entry* pEntry = entries; pEntry != End(); pEntry++)
+			{
+				keys.Append(pEntry->value.Get());
+				i++;
+			}
+			return keys;
+		}
+		return {};
+	}*/
+
+	[[nodiscard]] Vector<T_Key> Keys() const
+	{
+		if (numEntries)
+		{
+			auto keys = Vector<T_Key>(numEntries);
+			int i = 0;
+			for (Entry* pEntry = entries; pEntry != End(); pEntry++)
+			{
+				keys.Append(pEntry->value.Get());
+				i++;
+			}
+			return keys;
+		}
+		return {};
 	}
 
 	class Iterator
