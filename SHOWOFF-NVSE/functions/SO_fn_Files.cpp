@@ -107,7 +107,7 @@ namespace JsonToNVSE
 	using valType = tao::json::type;
 	using JsonValue = tao::json::value;
 
-	ArrayElementR BasicJsonValueToArrayElem(JsonValue const& val)
+	ArrayElementL BasicJsonValueToArrayElem(JsonValue const& val)
 	{
 		ArrayElementR elem;
 		if (auto const type = val.type();
@@ -120,13 +120,16 @@ namespace JsonToNVSE
 			//NULL isn't representable in Obscript, so it'll just be 0 instead.
 			elem = 0.0;
 		}
-		else if (valType::BOOLEAN == type || valType::SIGNED == type || valType::UNSIGNED == type
-			|| valType::DOUBLE == type)
+		else if (valType::SIGNED == type || valType::UNSIGNED == type || valType::DOUBLE == type)
 		{
 			elem = val.as<double>();
 		}
+		else if (valType::BOOLEAN == type)
+		{
+			elem = val.get_boolean();
+		}
 		else {
-			throw std::runtime_error("GetArrayFromJSON: Non-Exhausive if checks.");
+			throw std::runtime_error("SHOWOFF - GetArrayFromJSON: Non-Exhausive if checks.");
 		}
 		return elem;
 	}
@@ -140,25 +143,38 @@ namespace JsonToNVSE
 			valType::ARRAY == type)
 		{
 			auto const& arr = val.get_array();
-			Vector<ArrayElementR> arrData(arr.size());
-			for (int i = 0; auto const &value : arr)
+			Vector<ArrayElementL> arrData(arr.size());
+			for (auto const &value : arr)
 			{
 				if (auto const type = value.type();
 					valType::ARRAY == type || valType::OBJECT == type)
 				{
-					arrData[i] = SubElementsToNVSEArray(value, scriptObj);
+					arrData.Append(ArrayElementL{ SubElementsToNVSEArray(value, scriptObj) });
 				}
 				else
 				{
-					arrData[i] = BasicJsonValueToArrayElem(value);
+					arrData.Append(BasicJsonValueToArrayElem(value));
 				}
-				i++;
 			}
 			resArr = g_arrInterface->CreateArray(arrData.Data(), arr.size(), scriptObj);
 		}
 		else if (valType::OBJECT == type)
 		{
 			auto const& obj = val.get_object();
+			resArr = g_arrInterface->CreateStringMap(nullptr, nullptr, 0, scriptObj); 
+			for (auto const& [key, value] : obj)
+			{
+				if (auto const type = value.type();
+					valType::ARRAY == type || valType::OBJECT == type)
+				{
+					g_arrInterface->SetElement(resArr, ArrayElementL(key.c_str()), ArrayElementL(SubElementsToNVSEArray(value, scriptObj)));
+				}
+				else
+				{
+					g_arrInterface->SetElement(resArr, ArrayElementL(key.c_str()), BasicJsonValueToArrayElem(value));
+				}
+			}
+#if 0
 			Map<const char*, ArrayElementR> strMapData(obj.size());
 			for (auto const &[key, value] : obj)
 			{
@@ -172,11 +188,13 @@ namespace JsonToNVSE
 					strMapData[key.c_str()] = BasicJsonValueToArrayElem(value);
 				}
 			}
-			resArr = g_arrInterface->CreateStringMap(strMapData.Keys().Data(), strMapData.Values().Data(), obj.size(), scriptObj);
+			//resArr = g_arrInterface->CreateStringMap(strMapData.Keys().Data(), strMapData.Values().Data(), obj.size(), scriptObj);	//todo: find why .Keys() returns garbage, but not .stdKeys()
+			resArr = g_arrInterface->CreateStringMap(strMapData.stdKeys().data(), strMapData.Values().Data(), obj.size(), scriptObj);
+#endif
 		}
 		else
 		{
-			throw std::runtime_error("SubElementsToNVSEArray: Function called with invalid json object type.");
+			throw std::runtime_error("SHOWOFF - SubElementsToNVSEArray: Function called with invalid json object type.");
 		}
 		return resArr;
 	}
@@ -219,9 +237,19 @@ bool Cmd_ReadArrayFromJSON_Execute(COMMAND_ARGS)
 #if 0
 	std::string keyPathStr = json_key_path;
 #endif
-	
-	auto const jsonVal = tao::json::from_file(JSON_Path);
-	auto const resArr = JsonToNVSE::GetArrayFromJSON(jsonVal, scriptObj);
+
+	try
+	{
+		auto const jsonVal = tao::json::from_file(JSON_Path);
+		if (auto const resArr = JsonToNVSE::GetArrayFromJSON(jsonVal, scriptObj))
+			AssignArrayResult(resArr, result);
+	}
+	catch (tao::pegtl::parse_error &e)
+	{
+		if (IsConsoleMode())
+			Console_Print("ReadArrayFromJSON >> Could not parse JSON file, likely due to invalid formatting.");
+		_MESSAGE("ReadArrayFromJSON >> PARSE ERROR (%s)", e.what());
+	}
 	
 #if 0
 	try
@@ -261,8 +289,7 @@ bool Cmd_ReadArrayFromJSON_Execute(COMMAND_ARGS)
 	}
 #endif
 	
-	if (resArr)
-		AssignArrayResult(resArr, result);
+
 	return true;
 }
 

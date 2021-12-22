@@ -771,12 +771,10 @@ public:
 	{
 		if (numEntries)
 		{
-			auto vals = Vector<T_Data>(numEntries);
-			int i = 0;
+			auto vals = Vector<T_Data>();
 			for (Entry* pEntry = entries; pEntry != End(); pEntry++)
 			{
 				vals.Append(pEntry->value.Get());
-				i++;
 			}
 			return vals;
 		}
@@ -792,7 +790,7 @@ public:
 			int i = 0;
 			for (Entry* pEntry = entries; pEntry != End(); pEntry++)
 			{
-				keys.Append(pEntry->value.Get());
+				keys.Append(pEntry->key.Get());
 				i++;
 			}
 			return keys;
@@ -804,12 +802,24 @@ public:
 	{
 		if (numEntries)
 		{
-			auto keys = Vector<T_Key>(numEntries);
-			int i = 0;
+			auto keys = Vector<T_Key>();
 			for (Entry* pEntry = entries; pEntry != End(); pEntry++)
 			{
-				keys.Append(pEntry->value.Get());
-				i++;
+				keys.Append(pEntry->key.Get());
+			}	
+			return keys;
+		}
+		return {};
+	}
+
+	[[nodiscard]] std::vector<T_Key> stdKeys() const
+	{
+		if (numEntries)
+		{
+			auto keys = std::vector<T_Key>();
+			for (Entry* pEntry = entries; pEntry != End(); pEntry++)
+			{
+				keys.push_back(pEntry->key.Get());
 			}
 			return keys;
 		}
@@ -1776,7 +1786,7 @@ public:
 		RawAssign<T_Data>(*pData, item);
 		return pData;
 	}
-
+	
 	template <typename ...Args>
 	T_Data* Append(Args&& ...args)
 	{
