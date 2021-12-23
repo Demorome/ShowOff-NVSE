@@ -75,6 +75,7 @@ External libraries used:
 * [Armadillo](http://arma.sourceforge.net/docs.html)
 * [SimpleINI](https://github.com/brofield/simpleini)
 * [JSON for Modern C++](https://github.com/nlohmann/json)
+* [TaoConfig](https://github.com/taocpp/config)
 
 Code taken from:
 * [Robert Penner's Easing Functions](http://robertpenner.com/easing/)
