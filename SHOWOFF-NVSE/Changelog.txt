@@ -176,7 +176,7 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 *Refactored functions with array arguments to work with inline (used to only work with array variables).
 
 ===New Functions:
-*ReadArrayFromJSONFile
+*ReadFromJSONFile
 
 
 ====== (Template:)

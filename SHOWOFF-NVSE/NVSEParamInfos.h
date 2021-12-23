@@ -37,3 +37,17 @@ static ParamInfo kNVSEParams_OneForm_OneArray[2] =
 };
 
 
+static ParamInfo kNVSEParams_OneString_OneOptionalString_OneOptionalInt[3] =
+{
+	{	"string",	kNVSEParamType_String,0	},
+	{	"string",	kNVSEParamType_String,1	},
+	{	"int",	kNVSEParamType_Number,1	},
+};
+
+static ParamInfo kNVSEParams_OneElem_OneString_OneOptionalString_OneOptionalInt[4] =
+{
+	{	"elem",	kNVSEParamType_BasicType,0	},
+	{	"string",	kNVSEParamType_String,0	},
+	{	"string",	kNVSEParamType_String,1	},
+	{	"int",	kNVSEParamType_Number,1	},
+};

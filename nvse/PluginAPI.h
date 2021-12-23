@@ -915,6 +915,7 @@ struct ExpressionEvaluatorUtils
 	const PluginTokenSlice* (__fastcall* ScriptTokenGetSlice)(PluginScriptToken* scrToken);
 	UInt32(__fastcall* ScriptTokenGetAnimationGroup)(PluginScriptToken* scrToken);
 
+	void(__fastcall* SetExpectedReturnType)(void* expEval, UInt8 type);
 #endif
 };
 
@@ -948,6 +949,11 @@ public:
 	PluginScriptToken* GetNthArg(UInt32 argIdx)
 	{
 		return g_expEvalUtils.GetNthArg(expEval, argIdx);
+	}
+
+	void SetExpectedReturnType(CommandReturnType type)
+	{
+		g_expEvalUtils.SetExpectedReturnType(expEval, type);
 	}
 #endif
 };

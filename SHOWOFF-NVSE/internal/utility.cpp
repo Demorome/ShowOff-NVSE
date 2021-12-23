@@ -1903,6 +1903,36 @@ TESForm* TryGetBaseFormOrREFR(TESForm* form, TESObjectREFR* thisObj)
 	return form;
 }
 
+//assume val is non-null
+void AssignScriptValueResult(const NVSEArrayElement* val, PluginExpressionEvaluator& eval, COMMAND_ARGS)
+{
+	switch (val->GetType())
+	{
+	case NVSEArrayVarInterface::kType_Numeric:
+		*result = val->num;
+		eval.SetExpectedReturnType(kRetnType_Default);
+		break;
+	case NVSEArrayVarInterface::kType_Array:
+		g_arrInterface->AssignCommandResult(val->arr, result);
+		eval.SetExpectedReturnType(kRetnType_Array);
+		break;
+	case NVSEArrayVarInterface::kType_String:
+		g_strInterface->Assign(PASS_COMMAND_ARGS, val->str);
+		eval.SetExpectedReturnType(kRetnType_String);
+		break;
+	case NVSEArrayVarInterface::kType_Form:
+		REFR_RES = val->form->refID;
+		eval.SetExpectedReturnType(kRetnType_Form);
+		break;
+	case NVSEArrayVarInterface::kType_Invalid:
+		*result = 0;	//todo: consider a better error constant, like -999
+		eval.SetExpectedReturnType(kRetnType_Default);
+		break;
+	default:
+		throw std::logic_error("SHOWOFF - AssignScriptValueResult >> insufficient switch cases.");
+	}
+}
+
 __declspec(noinline) UInt8* AuxBuffer::Get(UInt32 bufIdx, UInt32 reqSize)
 {
 	thread_local AuxBuffer s_auxBuffers[3];

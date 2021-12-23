@@ -36,7 +36,7 @@
 // Plugin Stuff
 IDebugLog g_Log("ShowOffNVSE.log");
 HMODULE	g_ShowOffHandle;
-UInt32 g_PluginVersion = 145;
+constexpr UInt32 g_PluginVersion = 145;
 
 // Allows modmakers to toggle ShowOff's debug messages for some of its functions.
 #ifdef _DEBUG
@@ -561,7 +561,7 @@ extern "C"
 		/*3D1B*/ REG_CMD_ARR(Matrix_ApplyOperationWithMatrix)
 
 		//========v1.45
-		/*3D1C*/ REG_CMD_ARR(ReadArrayFromJSONFile)
+		/*3D1C*/ REG_CMD_AMB(ReadFromJSONFile)
 
 	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
@@ -573,7 +573,7 @@ extern "C"
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 
-		REG_CMD(WriteArrayToJSONFile)
+		REG_CMD(WriteToJSONFile)
 		
 		REG_CMD(Flt_Equals)	// not needed; xNVSE's eval already uses this for "==" operator.
 

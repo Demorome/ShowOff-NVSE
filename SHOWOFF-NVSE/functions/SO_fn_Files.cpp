@@ -36,8 +36,8 @@ namespace JsonToNVSE
 		}
 		else if (valType::NULL_ == type)
 		{
-			//NULL isn't representable in Obscript, so it'll just be 0 instead.
-			elem = 0.0;
+			//NULL isn't representable in Obscript, so it'll be an invalid array.
+			elem = static_cast<NVSEArrayVar*>(nullptr);
 		}
 		else if (valType::SIGNED == type || valType::UNSIGNED == type || valType::DOUBLE == type)
 		{
@@ -106,22 +106,16 @@ namespace JsonToNVSE
 	//Single array/object is also valid
 	//Otherwise, for multiple arrays/objects, you need to wrap in an array/object.
 	template< template< typename... > class Traits >
-	NVSEArrayVar* GetArrayFromJSON(tao::json::basic_value<Traits> const& val, Script* scriptObj)
+	ArrayElementL GetNVSEFromJSON(tao::json::basic_value<Traits> const& val, Script* scriptObj)
 	{
-		NVSEArrayVar* resArr = nullptr;
-
 		if (auto const type = val.type();
 			valType::ARRAY == type || valType::OBJECT == type)
 		{
-			resArr = SubElementsToNVSEArray(val, scriptObj);
+			return SubElementsToNVSEArray(val, scriptObj);
 		}
-		else //create array with a single element.
-		{
-			auto const elem = BasicJsonValueToArrayElem(val);
-			if (elem.IsValid())
-				resArr = CreateArray(&elem, 1, scriptObj);
-		}
-		return resArr;
+		
+		//return single element (NOT in an array).
+		return BasicJsonValueToArrayElem(val);
 	}
 
 	enum Parser : UInt32
@@ -133,74 +127,84 @@ namespace JsonToNVSE
 
 
 
-bool Cmd_ReadArrayFromJSONFile_Execute(COMMAND_ARGS)
+bool Cmd_ReadFromJSONFile_Execute(COMMAND_ARGS)
 {
 	using namespace JsonToNVSE;
 	*result = 0;
-	char json_path[MAX_PATH];  // relative to "Fallout New Vegas" folder.
-	char* json_key_path = GetStrArgBuffer();  // the path in the JSON hierarchy, pass "" to ignore this arg.
-	Parser parser = kParser_JSON;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &json_path, json_key_path, &parser) || parser >= kParser_Invalid)
-		return true;
-
-	ReplaceChr(json_path, '/', '\\');
-	std::string const JSON_Path = GetCurPath() + "\\" + json_path;
-	if (!std::filesystem::exists(JSON_Path)) 
-		return true;
-	
-	try
+	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
+		eval.ExtractArgs())
 	{
-		std::variant<DefaultJsonValue, ConfigJsonValue> jsonVal;
-		switch (parser)
+		std::string json_path = eval.GetNthArg(0)->GetString();
+		std::string jsonPointer = "";	// the path in the JSON hierarchy, pass "" to ignore this arg.
+		Parser parser = kParser_JSON;
+		if (auto const numArgs = eval.NumArgs();
+			numArgs >= 2)
 		{
-		case kParser_JSON:
-			jsonVal = tao::json::from_file(JSON_Path);
-			break;
-		case kParser_JAXN:
-			jsonVal = tao::json::jaxn::from_file(JSON_Path);
-			break;
-		case kParser_TaoConfig:
-			jsonVal = tao::config::from_file(JSON_Path);
-			break;
-		case kParser_Invalid:
-		default:
-			throw std::logic_error("SHOWOFF - ReadArrayFromJSONFile >> somehow reached invalid case in Switch statement.");
+			jsonPointer = eval.GetNthArg(1)->GetString();
+			if (numArgs >= 3)
+			{
+				parser = static_cast<Parser>(eval.GetNthArg(2)->GetInt());
+				if (parser >= kParser_Invalid)
+					return true;
+			}
 		}
-		std::string const jsonPointer(json_key_path);
-		std::visit([=](auto&& val) {
-			try
-			{
-				val = val.at(tao::json::pointer(jsonPointer));
-				if (auto const resArr = JsonToNVSE::GetArrayFromJSON(val, scriptObj))
-					AssignArrayResult(resArr, result);
-			}
-			catch (const std::runtime_error &e)
-			{
-				if (IsConsoleMode())
-					Console_Print("ReadArrayFromJSONFile >> Invalid JSON pointer arg.");
-				_MESSAGE("ReadArrayFromJSONFile >> JSON POINTER ERROR (%s)", e.what());
-			}
-			catch (const std::out_of_range &e)
-			{
-				if (IsConsoleMode())
-					Console_Print("ReadArrayFromJSONFile >> Invalid JSON pointer arg.");
-				_MESSAGE("ReadArrayFromJSONFile >> JSON POINTER ERROR (OUT OF RANGE) (%s)", e.what());
-			}
-			catch (const std::invalid_argument& e)
-			{
-				if (IsConsoleMode())
-					Console_Print("ReadArrayFromJSONFile >> Invalid JSON pointer arg.");
-				_MESSAGE("ReadArrayFromJSONFile >> JSON POINTER ERROR (Invalid Arg) (%s)", e.what());
-			}
-		}, jsonVal);
-	}
-	catch (tao::pegtl::parse_error& e)
-	{
-		if (IsConsoleMode())
-			Console_Print("ReadArrayFromJSONFile >> Could not parse JSON file, likely due to invalid formatting.");
-		_MESSAGE("ReadArrayFromJSONFile >> PARSE ERROR (%s)", e.what());
-	}
+		std::ranges::replace(json_path, '/', '\\');
+		std::string const JSON_Path = GetCurPath() + "\\" + std::move(json_path);
+		if (!std::filesystem::exists(JSON_Path))
+			return true;
 
+		try
+		{
+			std::variant<DefaultJsonValue, ConfigJsonValue> jsonVal;
+			switch (parser)
+			{
+			case kParser_JSON:
+				jsonVal = tao::json::from_file(JSON_Path);
+				break;
+			case kParser_JAXN:
+				jsonVal = tao::json::jaxn::from_file(JSON_Path);
+				break;
+			case kParser_TaoConfig:
+				jsonVal = tao::config::from_file(JSON_Path);
+				break;
+			case kParser_Invalid:
+			default:
+				throw std::logic_error("SHOWOFF - ReadArrayFromJSONFile >> somehow reached invalid case in Switch statement.");
+			}
+			std::visit([=, &eval](auto&& val) {
+				try
+				{
+					val = val.at(tao::json::pointer(jsonPointer));	//todo: verify this can't result in an invalid JSON value.
+					auto const res = JsonToNVSE::GetNVSEFromJSON(val, scriptObj);
+					AssignScriptValueResult(&res, eval, PASS_COMMAND_ARGS);
+				}
+				catch (const std::runtime_error& e)
+				{
+					if (IsConsoleMode())
+						Console_Print("ReadArrayFromJSONFile >> Invalid JSON pointer arg.");
+					_MESSAGE("ReadArrayFromJSONFile >> JSON POINTER ERROR (%s)", e.what());
+				}
+				catch (const std::out_of_range& e)
+				{
+					if (IsConsoleMode())
+						Console_Print("ReadArrayFromJSONFile >> Invalid JSON pointer arg.");
+					_MESSAGE("ReadArrayFromJSONFile >> JSON POINTER ERROR (OUT OF RANGE) (%s)", e.what());
+				}
+				catch (const std::invalid_argument& e)
+				{
+					if (IsConsoleMode())
+						Console_Print("ReadArrayFromJSONFile >> Invalid JSON pointer arg.");
+					_MESSAGE("ReadArrayFromJSONFile >> JSON POINTER ERROR (Invalid Arg) (%s)", e.what());
+				}
+				}, jsonVal);
+		}
+		catch (tao::pegtl::parse_error& e)
+		{
+			if (IsConsoleMode())
+				Console_Print("ReadArrayFromJSONFile >> Could not parse JSON file, likely due to invalid formatting.");
+			_MESSAGE("ReadArrayFromJSONFile >> PARSE ERROR (%s)", e.what());
+		}
+	}
 	return true;
 }
 
@@ -215,8 +219,10 @@ bool Cmd_ReadArrayFromJSONFile_Execute(COMMAND_ARGS)
 #if _DEBUG
 
 
-bool Cmd_WriteArrayToJSONFile_Execute(COMMAND_ARGS)
+bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 {
+
+	//TODO: redo extraction
 	using namespace JsonToNVSE;
 	*result = 0;
 	char json_path[MAX_PATH];  // relative to "Fallout New Vegas" folder.

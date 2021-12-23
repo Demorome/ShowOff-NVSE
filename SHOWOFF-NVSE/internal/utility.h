@@ -387,3 +387,5 @@ bool IsDllRunning(const char* dll);
 TESForm* TryExtractBaseForm(TESForm* form, TESObjectREFR* thisObj);
 TESObjectREFR* TryGetREFR(TESForm* optionalForm, TESObjectREFR* thisObj);
 TESForm* TryGetBaseFormOrREFR(TESForm* form, TESObjectREFR* thisObj);
+
+void AssignScriptValueResult(const NVSEArrayElement* val, PluginExpressionEvaluator& eval, COMMAND_ARGS);
