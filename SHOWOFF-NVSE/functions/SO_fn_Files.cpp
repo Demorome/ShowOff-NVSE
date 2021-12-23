@@ -138,8 +138,7 @@ bool Cmd_ReadArrayFromJSONFile_Execute(COMMAND_ARGS)
 	using namespace JsonToNVSE;
 	*result = 0;
 	char json_path[MAX_PATH];  // relative to "Fallout New Vegas" folder.
-	char* json_key_path = GetStrArgBuffer();  // the path in the JSON hierarchy	//todo: likely abandonned, too tricky... would have to learn more about JSON pointers.
-	//pass "ignore" or "" to ignore this arg.	todo
+	char* json_key_path = GetStrArgBuffer();  // the path in the JSON hierarchy, pass "" to ignore this arg.
 	Parser parser = kParser_JSON;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &json_path, json_key_path, &parser) || parser >= kParser_Invalid)
 		return true;
