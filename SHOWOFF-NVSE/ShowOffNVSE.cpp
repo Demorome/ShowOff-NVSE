@@ -599,7 +599,7 @@ extern "C"
 		REG_CMD(TryDropWeapon)
 		REG_CMD(SetSecuritronExpressionTemp)
 
-		REG_CMD_ARR(ReadArrayFromJSON)
+		REG_CMD_ARR(ReadArrayFromJSONFile)
 		//more JSON functions...
 		
 		REG_CMD(GetPCCanSleepInOwnedBeds)

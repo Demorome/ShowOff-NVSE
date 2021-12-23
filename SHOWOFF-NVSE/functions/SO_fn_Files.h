@@ -26,7 +26,7 @@ DEFINE_COMMAND_ALT_PLUGIN(CreateFolder, CreateDirectory, "", false, kParams_OneS
 
 
 
-DEFINE_COMMAND_PLUGIN(ReadArrayFromJSON, "Creates a folder relative to the main folder(\Fallout New Vegas\)", false, kParams_TwoStrings_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(ReadArrayFromJSONFile, "Creates a folder relative to the main folder(\Fallout New Vegas\)", false, kParams_TwoStrings_OneOptionalInt);
 
 using json = nlohmann::json;
 

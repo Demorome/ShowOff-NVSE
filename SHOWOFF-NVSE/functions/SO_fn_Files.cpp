@@ -105,9 +105,11 @@ ArrayElementR Read_JSON_As_NVSE_Elem(json::const_reference json_ref, bool forceA
 namespace JsonToNVSE
 {
 	using valType = tao::json::type;
-	using JsonValue = tao::json::value;
+	using DefaultJsonValue = tao::json::value;
+	using ConfigJsonValue = tao::config::value;
 
-	ArrayElementL BasicJsonValueToArrayElem(JsonValue const& val)
+	template< template< typename... > class Traits >
+	ArrayElementL BasicJsonValueToArrayElem(tao::json::basic_value<Traits> const& val)
 	{
 		ArrayElementR elem;
 		if (auto const type = val.type();
@@ -136,7 +138,8 @@ namespace JsonToNVSE
 
 	//Case 1: json val is 1-dimensional -> create 1D array
 	//Case 2: json val is multidimensional -> create array with sub-arrays (use recursion)
-	NVSEArrayVar* SubElementsToNVSEArray(JsonValue const& val, Script* scriptObj)
+	template< template< typename... > class Traits >
+	NVSEArrayVar* SubElementsToNVSEArray(tao::json::basic_value<Traits> const& val, Script* scriptObj)
 	{
 		NVSEArrayVar* resArr;
 		if (auto const type = val.type();
@@ -202,7 +205,8 @@ namespace JsonToNVSE
 	//Single-element JSON is valid
 	//Single array/object is also valid
 	//Otherwise, for multiple arrays/objects, you need to wrap in an array/object.
-	NVSEArrayVar* GetArrayFromJSON(JsonValue const& val, Script* scriptObj)
+	template< template< typename... > class Traits >
+	NVSEArrayVar* GetArrayFromJSON(tao::json::basic_value<Traits> const& val, Script* scriptObj)
 	{
 		NVSEArrayVar* resArr = nullptr;
 
@@ -223,16 +227,26 @@ namespace JsonToNVSE
 
 
 
-bool Cmd_ReadArrayFromJSON_Execute(COMMAND_ARGS)
+bool Cmd_ReadArrayFromJSONFile_Execute(COMMAND_ARGS)
 {
+	using namespace JsonToNVSE;
 	*result = 0;
 	char json_path[MAX_PATH];  // relative to "Fallout New Vegas" folder.
 	char* json_key_path = GetStrArgBuffer();  // the path in the JSON hierarchy	//todo: likely abandonned, too tricky... would have to learn more about JSON pointers.
-	UInt32 forceArrayType = false;  // Optional, forces the returned arrays to be "array" type (instead of sometimes appearing as "StringMap", such as in the case of a JSON Object).
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &json_path, json_key_path, &forceArrayType)) return true;
+	//pass "ignore" or "" to ignore this arg.
+	
+	enum Parser : UInt32
+	{
+		kParser_JSON = 0, kParser_JAXN, kParser_TaoConfig,
+		kParser_Invalid
+	} parser = kParser_JSON;
+	
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &json_path, json_key_path, &parser) || parser >= kParser_Invalid)
+		return true;
 
 	ReplaceChr(json_path, '/', '\\');
 	std::string const JSON_Path = GetCurPath() + "\\" + json_path;
+	
 	if (!std::filesystem::exists(JSON_Path)) return true;
 #if 0
 	std::string keyPathStr = json_key_path;
@@ -240,9 +254,26 @@ bool Cmd_ReadArrayFromJSON_Execute(COMMAND_ARGS)
 
 	try
 	{
-		auto const jsonVal = tao::json::from_file(JSON_Path);
-		if (auto const resArr = JsonToNVSE::GetArrayFromJSON(jsonVal, scriptObj))
-			AssignArrayResult(resArr, result);
+		std::variant<DefaultJsonValue, ConfigJsonValue> jsonVal;
+		switch (parser)
+		{
+		case kParser_JSON:
+			jsonVal = tao::json::from_file(JSON_Path);
+			break;
+		case kParser_JAXN:
+			jsonVal = tao::json::jaxn::from_file(JSON_Path);
+			break;
+		case kParser_TaoConfig:
+			jsonVal = tao::config::from_file(JSON_Path);
+			break;
+		case kParser_Invalid:
+		default:
+			throw std::runtime_error("SHOWOFF - ReadArrayFromJSONFile >> somehow reached invalid case in Switch statement.");
+		}
+		std::visit([=](auto&& val) {
+			if (auto const resArr = JsonToNVSE::GetArrayFromJSON(val, scriptObj))
+				AssignArrayResult(resArr, result);
+			}, jsonVal);
 	}
 	catch (tao::pegtl::parse_error &e)
 	{
