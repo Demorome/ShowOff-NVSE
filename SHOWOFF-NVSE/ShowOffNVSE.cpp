@@ -573,6 +573,8 @@ extern "C"
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 
+		REG_CMD(WriteArrayToJSONFile)
+		
 		REG_CMD(Flt_Equals)	// not needed; xNVSE's eval already uses this for "==" operator.
 
 		REG_CMD_FORM(SayTo_GetUnk)

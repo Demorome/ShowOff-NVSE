@@ -48,7 +48,7 @@ namespace JsonToNVSE
 			elem = val.get_boolean();
 		}
 		else {
-			throw std::runtime_error("SHOWOFF - GetArrayFromJSON: Non-Exhausive if checks.");
+			throw std::logic_error("SHOWOFF - GetArrayFromJSON: Non-Exhausive if checks.");
 		}
 		return elem;
 	}
@@ -94,27 +94,10 @@ namespace JsonToNVSE
 					g_arrInterface->SetElement(resArr, ArrayElementL(key.c_str()), BasicJsonValueToArrayElem(value));
 				}
 			}
-#if 0
-			Map<const char*, ArrayElementR> strMapData(obj.size());
-			for (auto const& [key, value] : obj)
-			{
-				if (auto const type = value.type();
-					valType::ARRAY == type || valType::OBJECT == type)
-				{
-					strMapData[key.c_str()] = SubElementsToNVSEArray(value, scriptObj);
-				}
-				else
-				{
-					strMapData[key.c_str()] = BasicJsonValueToArrayElem(value);
-				}
-			}
-			//resArr = g_arrInterface->CreateStringMap(strMapData.Keys().Data(), strMapData.Values().Data(), obj.size(), scriptObj);	//todo: find why .Keys() returns garbage, but not .stdKeys()
-			resArr = g_arrInterface->CreateStringMap(strMapData.stdKeys().data(), strMapData.Values().Data(), obj.size(), scriptObj);
-#endif
 		}
 		else
 		{
-			throw std::runtime_error("SHOWOFF - SubElementsToNVSEArray: Function called with invalid json object type.");
+			throw std::logic_error("SHOWOFF - SubElementsToNVSEArray: Function called with invalid json object type.");
 		}
 		return resArr;
 	}
@@ -140,6 +123,12 @@ namespace JsonToNVSE
 		}
 		return resArr;
 	}
+
+	enum Parser : UInt32
+	{
+		kParser_JSON = 0, kParser_JAXN, kParser_TaoConfig,
+		kParser_Invalid
+	};
 }
 
 
@@ -150,25 +139,16 @@ bool Cmd_ReadArrayFromJSONFile_Execute(COMMAND_ARGS)
 	*result = 0;
 	char json_path[MAX_PATH];  // relative to "Fallout New Vegas" folder.
 	char* json_key_path = GetStrArgBuffer();  // the path in the JSON hierarchy	//todo: likely abandonned, too tricky... would have to learn more about JSON pointers.
-	//pass "ignore" or "" to ignore this arg.
-
-	enum Parser : UInt32
-	{
-		kParser_JSON = 0, kParser_JAXN, kParser_TaoConfig,
-		kParser_Invalid
-	} parser = kParser_JSON;
-
+	//pass "ignore" or "" to ignore this arg.	todo
+	Parser parser = kParser_JSON;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &json_path, json_key_path, &parser) || parser >= kParser_Invalid)
 		return true;
 
 	ReplaceChr(json_path, '/', '\\');
 	std::string const JSON_Path = GetCurPath() + "\\" + json_path;
-
-	if (!std::filesystem::exists(JSON_Path)) return true;
-#if 0
-	std::string keyPathStr = json_key_path;
-#endif
-
+	if (!std::filesystem::exists(JSON_Path)) 
+		return true;
+	
 	try
 	{
 		std::variant<DefaultJsonValue, ConfigJsonValue> jsonVal;
@@ -185,18 +165,41 @@ bool Cmd_ReadArrayFromJSONFile_Execute(COMMAND_ARGS)
 			break;
 		case kParser_Invalid:
 		default:
-			throw std::runtime_error("SHOWOFF - ReadArrayFromJSONFile >> somehow reached invalid case in Switch statement.");
+			throw std::logic_error("SHOWOFF - ReadArrayFromJSONFile >> somehow reached invalid case in Switch statement.");
 		}
+		std::string const jsonPointer(json_key_path);
 		std::visit([=](auto&& val) {
-			if (auto const resArr = JsonToNVSE::GetArrayFromJSON(val, scriptObj))
-				AssignArrayResult(resArr, result);
-			}, jsonVal);
+			try
+			{
+				val = val.at(tao::json::pointer(jsonPointer));
+				if (auto const resArr = JsonToNVSE::GetArrayFromJSON(val, scriptObj))
+					AssignArrayResult(resArr, result);
+			}
+			catch (const std::runtime_error &e)
+			{
+				if (IsConsoleMode())
+					Console_Print("ReadArrayFromJSONFile >> Invalid JSON pointer arg.");
+				_MESSAGE("ReadArrayFromJSONFile >> JSON POINTER ERROR (%s)", e.what());
+			}
+			catch (const std::out_of_range &e)
+			{
+				if (IsConsoleMode())
+					Console_Print("ReadArrayFromJSONFile >> Invalid JSON pointer arg.");
+				_MESSAGE("ReadArrayFromJSONFile >> JSON POINTER ERROR (OUT OF RANGE) (%s)", e.what());
+			}
+			catch (const std::invalid_argument& e)
+			{
+				if (IsConsoleMode())
+					Console_Print("ReadArrayFromJSONFile >> Invalid JSON pointer arg.");
+				_MESSAGE("ReadArrayFromJSONFile >> JSON POINTER ERROR (Invalid Arg) (%s)", e.what());
+			}
+		}, jsonVal);
 	}
 	catch (tao::pegtl::parse_error& e)
 	{
 		if (IsConsoleMode())
-			Console_Print("ReadArrayFromJSON >> Could not parse JSON file, likely due to invalid formatting.");
-		_MESSAGE("ReadArrayFromJSON >> PARSE ERROR (%s)", e.what());
+			Console_Print("ReadArrayFromJSONFile >> Could not parse JSON file, likely due to invalid formatting.");
+		_MESSAGE("ReadArrayFromJSONFile >> PARSE ERROR (%s)", e.what());
 	}
 
 	return true;
@@ -210,12 +213,40 @@ bool Cmd_ReadArrayFromJSONFile_Execute(COMMAND_ARGS)
 
 
 
-
-
 #if _DEBUG
 
 
+bool Cmd_WriteArrayToJSONFile_Execute(COMMAND_ARGS)
+{
+	using namespace JsonToNVSE;
+	*result = 0;
+	char json_path[MAX_PATH];  // relative to "Fallout New Vegas" folder.
+	char* json_key_path = GetStrArgBuffer();  // the path in the JSON hierarchy, "" to ignore this arg.
+	Parser parser = kParser_JSON;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &json_path, json_key_path, &parser) || parser >= kParser_Invalid)
+		return true;
 
+	ReplaceChr(json_path, '/', '\\');
+	std::string const JSON_Path = GetCurPath() + "\\" + json_path;
+	if (!std::filesystem::exists(JSON_Path))
+		return true;
+	
+	ConfigJsonValue test;
+	//auto const str = tao::config::to_string(test);
+	switch (parser)
+	{
+	case kParser_JSON:
+		break;
+	case kParser_JAXN:
+		break;
+	case kParser_TaoConfig:
+		break;
+	case kParser_Invalid:
+	default:
+		throw std::runtime_error("SHOWOFF - ReadArrayFromJSONFile >> somehow reached invalid case in Switch statement.");
+	}
+	return true;
+}
 
 bool Cmd_DemoTestFile_Execute(COMMAND_ARGS)
 {
