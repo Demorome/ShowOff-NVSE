@@ -559,6 +559,10 @@ extern "C"
 		/*3D19*/ REG_CMD(Matrix_Dump)
 		/*3D1A*/ REG_CMD_ARR(Matrix_ApplyOperationWithScalar)
 		/*3D1B*/ REG_CMD_ARR(Matrix_ApplyOperationWithMatrix)
+
+		//========v1.45
+		/*3D1C*/ REG_CMD_ARR(ReadArrayFromJSONFile)
+
 	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
@@ -599,7 +603,6 @@ extern "C"
 		REG_CMD(TryDropWeapon)
 		REG_CMD(SetSecuritronExpressionTemp)
 
-		REG_CMD_ARR(ReadArrayFromJSONFile)
 		//more JSON functions...
 		
 		REG_CMD(GetPCCanSleepInOwnedBeds)
