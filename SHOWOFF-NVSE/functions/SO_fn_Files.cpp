@@ -29,21 +29,20 @@ namespace JsonToNVSE
 	ArrayElementL BasicJsonValueToArrayElem(tao::json::basic_value<Traits> const& val)
 	{
 		ArrayElementR elem;
-		if (auto const type = val.type();
-			valType::STRING == type)
+		if (val.is_string())
 		{
 			elem = val.get_string().c_str();
 		}
-		else if (valType::NULL_ == type)
+		else if (val.is_null())
 		{
 			//NULL isn't representable in Obscript, so it'll be an invalid array.
 			elem = static_cast<NVSEArrayVar*>(nullptr);
 		}
-		else if (valType::SIGNED == type || valType::UNSIGNED == type || valType::DOUBLE == type)
+		else if (val.is_number())
 		{
 			elem = val.as<double>();
 		}
-		else if (valType::BOOLEAN == type)
+		else if (val.is_boolean())
 		{
 			elem = val.get_boolean();
 		}
@@ -123,6 +122,76 @@ namespace JsonToNVSE
 		kParser_JSON = 0, kParser_JAXN, kParser_TaoConfig,
 		kParser_Invalid
 	};
+
+	using JsonValueVariant = std::variant<DefaultJsonValue, ConfigJsonValue>;
+	using JsonValueVariantRef = std::variant<std::reference_wrapper<DefaultJsonValue>, std::reference_wrapper<ConfigJsonValue>>;
+
+	//MUST be called with valid Parser type.
+	std::optional<JsonValueVariant> ReadJSONWithParser(Parser parser, const std::string &JSON_Path, const std::string_view& funcName)
+	{
+		try
+		{
+			JsonValueVariant retn;
+			switch (parser)
+			{
+			case kParser_JSON:
+				retn = tao::json::from_file(JSON_Path);
+				break;
+			case kParser_JAXN:
+				retn = tao::json::jaxn::from_file(JSON_Path);
+				break;
+			case kParser_TaoConfig:
+				retn = tao::config::from_file(JSON_Path);
+				break;
+			case kParser_Invalid:
+			default:
+				throw std::logic_error("SHOWOFF - ReadJSONWithParser >> somehow reached invalid case in Switch statement.");
+			}
+			return retn;
+		}
+		catch (tao::pegtl::parse_error& e)
+		{
+			if (IsConsoleMode())
+				Console_Print("%s >> Could not parse JSON file, likely due to invalid formatting.", funcName.data());
+			_MESSAGE("ReadArrayFromJSONFile >> PARSE ERROR (%s)", e.what());
+		}
+		return {};
+	}
+
+	std::optional<JsonValueVariantRef> GetJSONValueAtJSONPointer(const JsonValueVariant &value, const std::string& jsonPointer, const std::string_view& funcName)
+	{
+		try
+		{
+			return std::visit([&](auto&& val) -> JsonValueVariantRef {
+				return val.at(tao::json::pointer(jsonPointer));
+				//todo: ensure this always returns a valid value, or a caught exception!
+				//TODO: also ensure it isn't making a copy!
+				}, const_cast<JsonValueVariant&>(value));
+		}
+		catch (const std::runtime_error& e)
+		{
+			if (IsConsoleMode())
+				Console_Print("%s >> Invalid JSON pointer arg.", funcName.data());
+			_MESSAGE("%s >> JSON POINTER ERROR (%s)", funcName.data(), e.what());
+		}
+		catch (const std::out_of_range& e)
+		{
+			if (IsConsoleMode())
+				Console_Print("%s >> Invalid JSON pointer arg.", funcName.data());
+			_MESSAGE("%s >> JSON POINTER ERROR (OUT OF RANGE) (%s)", funcName.data(), e.what());
+		}
+		catch (const std::invalid_argument& e)
+		{
+			if (IsConsoleMode())
+				Console_Print("%s >> Invalid JSON pointer arg.", funcName.data());
+			_MESSAGE("%s >> JSON POINTER ERROR (Invalid Arg) (%s)", funcName.data(), e.what());
+		}
+		return {};
+	}
+	
+
+	
+
 }
 
 
@@ -153,56 +222,16 @@ bool Cmd_ReadFromJSONFile_Execute(COMMAND_ARGS)
 		if (!std::filesystem::exists(JSON_Path))
 			return true;
 
-		try
+		constexpr std::string_view funcName = { "ReadFromJSONFile" };
+		if (auto jsonVal = ReadJSONWithParser(parser, JSON_Path, funcName))
 		{
-			std::variant<DefaultJsonValue, ConfigJsonValue> jsonVal;
-			switch (parser)
+			if (auto const JsonRef = GetJSONValueAtJSONPointer(jsonVal.value(), jsonPointer, funcName))
 			{
-			case kParser_JSON:
-				jsonVal = tao::json::from_file(JSON_Path);
-				break;
-			case kParser_JAXN:
-				jsonVal = tao::json::jaxn::from_file(JSON_Path);
-				break;
-			case kParser_TaoConfig:
-				jsonVal = tao::config::from_file(JSON_Path);
-				break;
-			case kParser_Invalid:
-			default:
-				throw std::logic_error("SHOWOFF - ReadArrayFromJSONFile >> somehow reached invalid case in Switch statement.");
-			}
-			std::visit([=, &eval](auto&& val) {
-				try
-				{
-					val = val.at(tao::json::pointer(jsonPointer));	//todo: verify this can't result in an invalid JSON value.
-					auto const res = JsonToNVSE::GetNVSEFromJSON(val, scriptObj);
+				std::visit([=, &eval](auto&& val) {
+					auto const res = JsonToNVSE::GetNVSEFromJSON(val.get(), scriptObj);
 					AssignScriptValueResult(&res, eval, PASS_COMMAND_ARGS);
-				}
-				catch (const std::runtime_error& e)
-				{
-					if (IsConsoleMode())
-						Console_Print("ReadArrayFromJSONFile >> Invalid JSON pointer arg.");
-					_MESSAGE("ReadArrayFromJSONFile >> JSON POINTER ERROR (%s)", e.what());
-				}
-				catch (const std::out_of_range& e)
-				{
-					if (IsConsoleMode())
-						Console_Print("ReadArrayFromJSONFile >> Invalid JSON pointer arg.");
-					_MESSAGE("ReadArrayFromJSONFile >> JSON POINTER ERROR (OUT OF RANGE) (%s)", e.what());
-				}
-				catch (const std::invalid_argument& e)
-				{
-					if (IsConsoleMode())
-						Console_Print("ReadArrayFromJSONFile >> Invalid JSON pointer arg.");
-					_MESSAGE("ReadArrayFromJSONFile >> JSON POINTER ERROR (Invalid Arg) (%s)", e.what());
-				}
-				}, jsonVal);
-		}
-		catch (tao::pegtl::parse_error& e)
-		{
-			if (IsConsoleMode())
-				Console_Print("ReadArrayFromJSONFile >> Could not parse JSON file, likely due to invalid formatting.");
-			_MESSAGE("ReadArrayFromJSONFile >> PARSE ERROR (%s)", e.what());
+					}, JsonRef.value());
+			}
 		}
 	}
 	return true;
@@ -221,37 +250,51 @@ bool Cmd_ReadFromJSONFile_Execute(COMMAND_ARGS)
 
 bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 {
-
-	//TODO: redo extraction
 	using namespace JsonToNVSE;
-	*result = 0;
-	char json_path[MAX_PATH];  // relative to "Fallout New Vegas" folder.
-	char* json_key_path = GetStrArgBuffer();  // the path in the JSON hierarchy, "" to ignore this arg.
-	Parser parser = kParser_JSON;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &json_path, json_key_path, &parser) || parser >= kParser_Invalid)
-		return true;
-
-	ReplaceChr(json_path, '/', '\\');
-	std::string const JSON_Path = GetCurPath() + "\\" + json_path;
-	if (!std::filesystem::exists(JSON_Path))
-		return true;
-	
-	ConfigJsonValue test;
-	//auto const str = tao::config::to_string(test);
-	switch (parser)
+	*result = false;	//bSuccess
+	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
+		eval.ExtractArgs())
 	{
-	case kParser_JSON:
-		break;
-	case kParser_JAXN:
-		break;
-	case kParser_TaoConfig:
-		break;
-	case kParser_Invalid:
-	default:
-		throw std::runtime_error("SHOWOFF - ReadArrayFromJSONFile >> somehow reached invalid case in Switch statement.");
+		auto const elemToWrite = eval.GetNthArg(0)->GetScriptLocal();	//TODO
+		
+		std::string json_path = eval.GetNthArg(1)->GetString();
+		std::string jsonPointer = "";	// the path in the JSON hierarchy, pass "" to ignore this arg.
+		Parser parser = kParser_JSON;
+		if (auto const numArgs = eval.NumArgs();
+			numArgs >= 3)
+		{
+			jsonPointer = eval.GetNthArg(2)->GetString();
+			if (numArgs >= 4)
+			{
+				parser = static_cast<Parser>(eval.GetNthArg(3)->GetInt());
+				if (parser >= kParser_Invalid)
+					return true;
+			}
+		}
+		std::ranges::replace(json_path, '/', '\\');
+		std::string const JSON_Path = GetCurPath() + "\\" + std::move(json_path);
+		if (!std::filesystem::exists(JSON_Path))
+			return true;
+
+		constexpr std::string_view funcName = { "WriteToJSONFile" };
+		if (auto jsonVal = ReadJSONWithParser(parser, JSON_Path, funcName))
+		{
+			if (auto const JsonRef = GetJSONValueAtJSONPointer(jsonVal.value(), jsonPointer, funcName))
+			{
+				std::visit([](auto&& val) {
+					//val = JsonToNVSE::GetJSONFromNVSE(elemToWrite);
+					}, JsonRef.value());
+				//todo: somehow apply a merge patch with the change applied to the json value????
+				*result = true;
+			}
+		}
 	}
 	return true;
 }
+
+//TODO: ApplyJSONPatchToFile
+
+
 
 bool Cmd_DemoTestFile_Execute(COMMAND_ARGS)
 {
