@@ -303,7 +303,31 @@ namespace JsonToNVSE
 		}
 	}
 
+
+	bool InsertValueAtJSONPointer(JsonValueVariant &baseVariant, const JsonValueVariant &insertVariant, const std::string &jsonPointer, 
+		const std::string_view &funcName)
+	{
+		return std::visit([&]<typename T0, typename T1>(T0 &&base, T1 &&insert) -> bool {
+			if constexpr (decay_equiv<T0, T1>::value)
+			{
+				try
+				{
+					base.insert(tao::json::pointer(jsonPointer), insert);
+					return true;
+				}
+				catch(std::exception &e)
+				{
+					if (IsConsoleMode())
+						Console_Print("%s >> Invalid JSON pointer arg.", funcName.data());
+					_MESSAGE("%s >> JSON POINTER ERROR (%s)", funcName.data(), e.what());
+					return false;
+				}
+			}
+			throw std::logic_error("SHOWOFF - InsertValueAtJSONPointer >> both visitors should be of the same type.");
+		}, baseVariant, insertVariant);
+	}
 	
+
 
 }
 
@@ -370,7 +394,8 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 	{
 		ArrayElementR elem;
 		eval.GetNthArg(0)->GetElement(elem);
-		if (!elem.IsValid()) return true;
+		if (!elem.IsValid()) 
+			return true;
 		std::string json_path = eval.GetNthArg(1)->GetString();
 		std::string jsonPointer = "";	// the path in the JSON hierarchy, pass "" to get the root value.
 		Parser parser = kParser_JSON;
@@ -387,36 +412,22 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 		}
 		std::ranges::replace(json_path, '/', '\\');
 		std::string const JSON_Path = GetCurPath() + "\\" + std::move(json_path);
-
-		//TODO: if file exists, check if it has a valid structure. If so, get its json value at the json pointer.
-		//If still valid, set the value to the "elem" arg, then re-write the entire JSON (losing comments is necessary, not good for changing single values).
-		//Otherwise, ignore json pointer, and create new file with the "elem" converted to json.
-
 		auto const elemAsJSON = JsonToNVSE::GetJSONFromNVSE(elem, parser);
-
 		
 		constexpr std::string_view funcName = { "WriteToJSONFile" };
 		if (std::filesystem::exists(JSON_Path))
 		{
 			if (auto jsonVal = ReadJSONWithParser(parser, JSON_Path, funcName))
 			{
-				//todo: try just calling jsonVal.insert(jsonPointer, elemAsJSON), with exception handling.
-				/*
-				if (auto const JsonRef = GetJSONValueAtJSONPointer(jsonVal.value(), jsonPointer, funcName))
+				if (auto const success = InsertValueAtJSONPointer(jsonVal.value(), elemAsJSON, jsonPointer, funcName);
+					!success)
 				{
-					std::visit([](auto&& val) {
-						//val = JsonToNVSE::GetJSONFromNVSE(elemToWrite);
-						}, JsonRef.value());
-					//todo: somehow apply a merge patch with the change applied to the json value????
-					*result = true;
-				}*/
+					return true;
+				}	
 			}
 		}
-		else
-		{
-			
-		}
-
+		
+		//todo: print to file
 
 	}
 	return true;
