@@ -189,21 +189,38 @@ namespace JsonToNVSE
 		return {};
 	}
 
+	//assume numeric or string element (from a Map/StringMap's keys).
+	std::string ConvertKeyElemToStr(NVSEArrayElement& elem)
+	{
+		if (auto const type = elem.GetType();
+			type == NVSEArrayVarInterface::kType_Numeric)
+		{
+			return std::to_string(elem.num);
+		}
+		else if (type == NVSEArrayVarInterface::kType_String)
+		{
+			return elem.str;
+		}
+		throw std::logic_error("SHOWOFF - ConvertKeyElemToStr >> gave wrongly typed elem");
+	}
+
 	template< template< typename... > class Traits >
 	tao::json::basic_value<Traits> BasicArrayElemToJsonValue(NVSEArrayElement& elem)
 	{
 		if (auto const type = elem.GetType();
 			type == NVSEArrayVarInterface::kType_Numeric)
 		{
-			return elem.num;
+			return tao::json::basic_value<Traits>(elem.num);
 		}
 		else if (type == NVSEArrayVarInterface::kType_Form)
 		{
-			return elem.form ? elem.form->refID : 0u;
+			if (elem.form)
+				return tao::json::basic_value<Traits>(elem.form->refID);
+			return tao::json::basic_value<Traits>(0u);
 		}
 		else if (type == NVSEArrayVarInterface::kType_String)
 		{
-			return elem.str;
+			return tao::json::basic_value<Traits>(std::string(elem.str));
 		}
 		throw std::logic_error("SHOWOFF - BasicArrayElemToJsonValue >> Received wrongly typed elem.");
 	}
@@ -223,14 +240,39 @@ namespace JsonToNVSE
 				if (auto const arrType = g_arrInterface->GetContainerType(elem.arr);
 					arrType == NVSEArrayVarInterface::ContainerTypes::kArrType_Array)
 				{
+					value = tao::json::empty_array;
 					ArrayData const data = { elem.arr, true };
+					for (auto i = 0; i < data.size; i++)
+					{
+						if (auto const type = data.vals[i].GetType();
+							type == NVSEArrayVarInterface::kType_Array)
+						{
+							value.emplace_back(GetJSONFromNVSE_Helper<Traits>(data.vals[i]));	//recursion
+						}
+						else
+						{
+							value.emplace_back(BasicArrayElemToJsonValue<Traits>(data.vals[i]));
+						}
+					}
 
 				}
 				else if (arrType == NVSEArrayVarInterface::ContainerTypes::kArrType_StringMap
 					|| arrType == NVSEArrayVarInterface::ContainerTypes::kArrType_Map)		//if Map-type, convert numeric keys to string.
 				{
+					value = tao::json::empty_object;
 					ArrayData const data = { elem.arr, false };
-
+					for (auto i = 0; i < data.size; i++)
+					{
+						if (auto const type = data.vals[i].GetType();
+							type == NVSEArrayVarInterface::kType_Array)
+						{
+							value[ConvertKeyElemToStr(data.keys[i])] = GetJSONFromNVSE_Helper<Traits>(data.vals[i]);	//recursion
+						}
+						else
+						{
+							value[ConvertKeyElemToStr(data.keys[i])] = BasicArrayElemToJsonValue<Traits>(data.vals[i]);
+						}
+					}
 				}
 				else //invalid
 				{
@@ -350,7 +392,6 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 		//If still valid, set the value to the "elem" arg, then re-write the entire JSON (losing comments is necessary, not good for changing single values).
 		//Otherwise, ignore json pointer, and create new file with the "elem" converted to json.
 
-		//todo: convert elem to JSON value, with right Parser tag (use std::variant).
 		auto const elemAsJSON = JsonToNVSE::GetJSONFromNVSE(elem, parser);
 
 		
@@ -359,6 +400,8 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 		{
 			if (auto jsonVal = ReadJSONWithParser(parser, JSON_Path, funcName))
 			{
+				//todo: try just calling jsonVal.insert(jsonPointer, elemAsJSON), with exception handling.
+				/*
 				if (auto const JsonRef = GetJSONValueAtJSONPointer(jsonVal.value(), jsonPointer, funcName))
 				{
 					std::visit([](auto&& val) {
@@ -366,7 +409,7 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 						}, JsonRef.value());
 					//todo: somehow apply a merge patch with the change applied to the json value????
 					*result = true;
-				}
+				}*/
 			}
 		}
 		else
