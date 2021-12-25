@@ -102,6 +102,10 @@ struct ArrayData
 				size = 0;
 		}
 	}
+	ArrayData(NVSEArrayVar* srcArr, NVSEArrayVarInterface::ContainerTypes type) : ArrayData(
+		srcArr, type == NVSEArrayVarInterface::ContainerTypes::kArrType_Array)
+	{
+	}
 	~ArrayData() = default;
 };
 

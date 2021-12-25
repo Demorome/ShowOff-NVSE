@@ -188,7 +188,78 @@ namespace JsonToNVSE
 		}
 		return {};
 	}
+
+	template< template< typename... > class Traits >
+	tao::json::basic_value<Traits> BasicArrayElemToJsonValue(NVSEArrayElement& elem)
+	{
+		if (auto const type = elem.GetType();
+			type == NVSEArrayVarInterface::kType_Numeric)
+		{
+			return elem.num;
+		}
+		else if (type == NVSEArrayVarInterface::kType_Form)
+		{
+			return elem.form ? elem.form->refID : 0u;
+		}
+		else if (type == NVSEArrayVarInterface::kType_String)
+		{
+			return elem.str;
+		}
+		throw std::logic_error("SHOWOFF - BasicArrayElemToJsonValue >> Received wrongly typed elem.");
+	}
 	
+	template< template< typename... > class Traits >
+	tao::json::basic_value<Traits> GetJSONFromNVSE_Helper(NVSEArrayElement& elem)
+	{
+		tao::json::basic_value<Traits> value;
+		if (elem.GetType() == NVSEArrayVarInterface::kType_Array)
+		{
+			if (!elem.arr)
+			{
+				value = tao::json::null;	//invalid array = json null
+			}
+			else
+			{
+				if (auto const arrType = g_arrInterface->GetContainerType(elem.arr);
+					arrType == NVSEArrayVarInterface::ContainerTypes::kArrType_Array)
+				{
+					ArrayData const data = { elem.arr, true };
+
+				}
+				else if (arrType == NVSEArrayVarInterface::ContainerTypes::kArrType_StringMap
+					|| arrType == NVSEArrayVarInterface::ContainerTypes::kArrType_Map)		//if Map-type, convert numeric keys to string.
+				{
+					ArrayData const data = { elem.arr, false };
+
+				}
+				else //invalid
+				{
+					value = tao::json::null;
+				}
+			}
+		}
+		else
+		{
+			value = BasicArrayElemToJsonValue<Traits>(elem);
+		}
+		return value;
+	}
+	
+	//Parser arg determines the type of variant to return.
+	//Assume elem and parser are valid.
+	JsonValueVariant GetJSONFromNVSE(NVSEArrayElement &elem, Parser parser)
+	{
+		switch (parser)
+		{
+		case kParser_JSON:
+		case kParser_JAXN:
+			return GetJSONFromNVSE_Helper<tao::json::traits>(elem);
+		case kParser_TaoConfig:
+			return GetJSONFromNVSE_Helper<tao::config::traits>(elem);
+		default:
+			throw std::logic_error("SHOWOFF - GetJSONFromNVSE >> Reached invalid default case");
+		}
+	}
 
 	
 
@@ -228,8 +299,8 @@ bool Cmd_ReadFromJSONFile_Execute(COMMAND_ARGS)
 			if (auto const JsonRef = GetJSONValueAtJSONPointer(jsonVal.value(), jsonPointer, funcName))
 			{
 				std::visit([=, &eval](auto&& val) {
-					auto const res = JsonToNVSE::GetNVSEFromJSON(val.get(), scriptObj);
-					AssignScriptValueResult(&res, eval, PASS_COMMAND_ARGS);
+					auto res = JsonToNVSE::GetNVSEFromJSON(val.get(), scriptObj);
+					eval.AssignCommandResult(res);
 					}, JsonRef.value());
 			}
 		}
@@ -255,17 +326,9 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
 		eval.ExtractArgs())
 	{
-		if (auto arg = eval.GetNthArg(0))
-		{
-			ArrayElementR elem;
-			/*arg->GetString();*/
-			arg->GetElement(elem);	//TODO: TEST
-			eval.AssignCommandResult(elem);
-			//AssignScriptValueResult(&elem, eval, PASS_COMMAND_ARGS);
-		}
-
-		return true;
-		
+		ArrayElementR elem;
+		eval.GetNthArg(0)->GetElement(elem);
+		if (!elem.IsValid()) return true;
 		std::string json_path = eval.GetNthArg(1)->GetString();
 		std::string jsonPointer = "";	// the path in the JSON hierarchy, pass "" to get the root value.
 		Parser parser = kParser_JSON;
@@ -282,21 +345,36 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 		}
 		std::ranges::replace(json_path, '/', '\\');
 		std::string const JSON_Path = GetCurPath() + "\\" + std::move(json_path);
-		if (!std::filesystem::exists(JSON_Path))
-			return true;
 
+		//TODO: if file exists, check if it has a valid structure. If so, get its json value at the json pointer.
+		//If still valid, set the value to the "elem" arg, then re-write the entire JSON (losing comments is necessary, not good for changing single values).
+		//Otherwise, ignore json pointer, and create new file with the "elem" converted to json.
+
+		//todo: convert elem to JSON value, with right Parser tag (use std::variant).
+		auto const elemAsJSON = JsonToNVSE::GetJSONFromNVSE(elem, parser);
+
+		
 		constexpr std::string_view funcName = { "WriteToJSONFile" };
-		if (auto jsonVal = ReadJSONWithParser(parser, JSON_Path, funcName))
+		if (std::filesystem::exists(JSON_Path))
 		{
-			if (auto const JsonRef = GetJSONValueAtJSONPointer(jsonVal.value(), jsonPointer, funcName))
+			if (auto jsonVal = ReadJSONWithParser(parser, JSON_Path, funcName))
 			{
-				std::visit([](auto&& val) {
-					//val = JsonToNVSE::GetJSONFromNVSE(elemToWrite);
-					}, JsonRef.value());
-				//todo: somehow apply a merge patch with the change applied to the json value????
-				*result = true;
+				if (auto const JsonRef = GetJSONValueAtJSONPointer(jsonVal.value(), jsonPointer, funcName))
+				{
+					std::visit([](auto&& val) {
+						//val = JsonToNVSE::GetJSONFromNVSE(elemToWrite);
+						}, JsonRef.value());
+					//todo: somehow apply a merge patch with the change applied to the json value????
+					*result = true;
+				}
 			}
 		}
+		else
+		{
+			
+		}
+
+
 	}
 	return true;
 }
