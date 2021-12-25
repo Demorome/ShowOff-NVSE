@@ -338,7 +338,7 @@ struct NVSEArrayVarInterface
 	struct Element
 	{
 	protected:
-		Element();	//use this class directly; use ElementL or ElementR instead.
+		Element() {}	//Don't create this class; use ElementL or ElementR instead.
 	public:
 		
 		union
