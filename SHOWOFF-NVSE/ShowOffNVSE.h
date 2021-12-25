@@ -36,7 +36,6 @@ extern NVSEScriptInterface* g_scriptInterface;
 extern NVSECommandTableInterface* g_commandInterface;
 extern const CommandInfo* (*GetCmdByName)(const char* name);
 extern bool (*FunctionCallScript)(Script* funcScript, TESObjectREFR* callingObj, TESObjectREFR* container, NVSEArrayElement* result, UInt8 numArgs, ...);
-extern NVSEArrayElement EventResultPtr;
 extern bool (*FunctionCallScriptAlt)(Script* funcScript, TESObjectREFR* callingObj, UInt8 numArgs, ...);
 extern TESObjectREFR* (__stdcall *InventoryRefCreate)(TESObjectREFR* container, TESForm* itemForm, SInt32 countDelta, ExtraDataList* xData);
 
@@ -89,16 +88,16 @@ extern char* g_PBIR_FailMessage;
 struct ArrayData
 {
 	UInt32			size;
-	std::unique_ptr<NVSEArrayElement[]> vals;
-	std::unique_ptr<NVSEArrayElement[]> keys;
+	std::unique_ptr<ArrayElementR[]> vals;
+	std::unique_ptr<ArrayElementR[]> keys;
 
 	ArrayData(NVSEArrayVar* srcArr, bool isPacked)
 	{
 		size = GetArraySize(srcArr);
 		if (size)
 		{
-			vals = std::make_unique<NVSEArrayElement[]>(size);
-			keys = isPacked ? nullptr : std::make_unique<NVSEArrayElement[]>(size);
+			vals = std::make_unique<ArrayElementR[]>(size);
+			keys = isPacked ? nullptr : std::make_unique<ArrayElementR[]>(size);
 			if (!GetArrayElements(srcArr, vals.get(), keys.get()))
 				size = 0;
 		}

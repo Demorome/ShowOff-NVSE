@@ -331,9 +331,9 @@ bool Cmd_AuxStringMapArraySetFromArray_Execute(COMMAND_ARGS)
 	NVSEArrayVar* inArr = LookupArrayByID(arrID);
 	if (!inArr) return true;
 	UInt32 const size = GetArraySize(inArr);
-	auto elements = new NVSEArrayElement[size];
-	auto keys = new NVSEArrayElement[size];
-	GetArrayElements(inArr, elements, keys);
+	auto const elements = std::make_unique<ArrayElementR[]>(size);
+	auto const keys = std::make_unique<ArrayElementR[]>(size);
+	GetArrayElements(inArr, elements.get(), keys.get());
 	if (keys[0].GetType() == NVSEArrayVarInterface::kType_String)  //only works by passing StringMap arrays
 	{
 		for (int i = 0; i < size; i++)
@@ -346,8 +346,6 @@ bool Cmd_AuxStringMapArraySetFromArray_Execute(COMMAND_ARGS)
 	}
 	if (varInfo.isPerm)
 		s_dataChangedFlags |= kChangedFlag_AuxStringMaps;
-	delete[] elements;
-	delete[] keys;
 	return true;
 }
 

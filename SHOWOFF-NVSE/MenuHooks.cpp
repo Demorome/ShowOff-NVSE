@@ -83,7 +83,7 @@ namespace PreventInvItemActivation
 			{
 				// todo: try passing an inventory ref instead. Would require extracting extra data from the function args.
 				//InventoryRefCreate(actor, item, count, extraData);
-				NVSEArrayElement elem;
+				ArrayElementR elem;
 				FunctionCallScript(iter.second.Get(), actor, actor, &elem, 1, item);
 				if (!elem.Bool())	// todo: TEST
 				{

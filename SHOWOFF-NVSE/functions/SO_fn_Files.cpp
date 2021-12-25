@@ -257,7 +257,7 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 	{
 		if (auto arg = eval.GetNthArg(0))
 		{
-			NVSEArrayElement elem;
+			ArrayElementR elem;
 			/*arg->GetString();*/
 			arg->GetElement(elem);	//TODO: TEST
 			eval.AssignCommandResult(elem);

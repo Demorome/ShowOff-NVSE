@@ -16,8 +16,8 @@ bool Cmd_ListAddArray_Execute(COMMAND_ARGS)
 			index = eval.GetNthArg(2)->GetInt();
 		if (!pListForm || !inArr) return true;
 		
-		UInt32 size = g_arrInterface->GetArraySize(inArr);
-		auto elements = std::make_unique<NVSEArrayElement[]>(size);
+		UInt32 const size = g_arrInterface->GetArraySize(inArr);
+		auto elements = std::make_unique<ArrayElementR[]>(size);
 		g_arrInterface->GetElements(inArr, elements.get(), nullptr);
 
 		auto const Add_Array_Element_To_FormList = [&](int elemIndex)
