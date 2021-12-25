@@ -573,7 +573,7 @@ extern "C"
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 
-		REG_CMD(WriteToJSONFile)
+		REG_CMD_AMB(WriteToJSONFile)	//TODO: change back to regular retn type
 		
 		REG_CMD(Flt_Equals)	// not needed; xNVSE's eval already uses this for "==" operator.
 

@@ -204,7 +204,7 @@ bool Cmd_ReadFromJSONFile_Execute(COMMAND_ARGS)
 		eval.ExtractArgs())
 	{
 		std::string json_path = eval.GetNthArg(0)->GetString();
-		std::string jsonPointer = "";	// the path in the JSON hierarchy, pass "" to ignore this arg.
+		std::string jsonPointer = "";	// the path in the JSON hierarchy, pass "" to get the root value.
 		Parser parser = kParser_JSON;
 		if (auto const numArgs = eval.NumArgs();
 			numArgs >= 2)
@@ -255,10 +255,19 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
 		eval.ExtractArgs())
 	{
-		auto const elemToWrite = eval.GetNthArg(0)->GetScriptLocal();	//TODO
+		if (auto arg = eval.GetNthArg(0))
+		{
+			NVSEArrayElement elem;
+			/*arg->GetString();*/
+			arg->GetElement(elem);	//TODO: TEST
+			eval.AssignCommandResult(elem);
+			//AssignScriptValueResult(&elem, eval, PASS_COMMAND_ARGS);
+		}
+
+		return true;
 		
 		std::string json_path = eval.GetNthArg(1)->GetString();
-		std::string jsonPointer = "";	// the path in the JSON hierarchy, pass "" to ignore this arg.
+		std::string jsonPointer = "";	// the path in the JSON hierarchy, pass "" to get the root value.
 		Parser parser = kParser_JSON;
 		if (auto const numArgs = eval.NumArgs();
 			numArgs >= 3)

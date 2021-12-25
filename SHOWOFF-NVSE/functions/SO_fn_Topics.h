@@ -45,8 +45,8 @@ bool Cmd_TopicInfoSetResponseStrings_Execute(COMMAND_ARGS)
 		auto const arrSize = g_arrInterface->GetArraySize(inArr);
 		for (auto responseIter = *response; responseIter && loopCounter < arrSize; responseIter = responseIter->next)
 		{
-			ArrayElementL keyElem = loopCounter, iterElem;
-			g_arrInterface->GetElement(inArr, keyElem, iterElem);
+			ArrayElementR iterElem;
+			g_arrInterface->GetElement(inArr, ArrayElementL(iterElem), iterElem);
 			if (iterElem.IsValid())
 			{
 				responseIter->responseText.Set(iterElem.String());

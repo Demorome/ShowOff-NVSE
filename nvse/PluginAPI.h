@@ -337,6 +337,10 @@ struct NVSEArrayVarInterface
 
 	struct Element
 	{
+	protected:
+		Element();	//use this class directly; use ElementL or ElementR instead.
+	public:
+		
 		union
 		{
 			UInt32		raw;
@@ -349,8 +353,8 @@ struct NVSEArrayVarInterface
 
 		friend class PluginAPI::ArrayAPI;
 
-		bool IsValid() const { return type != kType_Invalid; }
-		UInt8 GetType() const { return type; }
+		[[nodiscard]] bool IsValid() const { return type != kType_Invalid; }
+		[[nodiscard]] UInt8 GetType() const { return type; }
 
 		[[nodiscard]] UInt32 Raw() const  { return raw; }
 		[[nodiscard]] double Number() const  { return type == kType_Numeric ? num : 0; }
@@ -375,7 +379,10 @@ struct NVSEArrayVarInterface
 		}
 	};
 
-	struct ElementL : Element  // Keys
+	// Only use this when you're constructing your own array element, instead of receiving it.
+	// Since that way you don't need to use the FormHeap at all to construct the string, and your char* will still get copied fine.
+	// Otherwise, use ElementR, since you'll need to destroy the char* passed by NVSE using FormHeapFree.
+	struct ElementL : Element
 	{
 		ElementL() { type = kType_Invalid; }
 		ElementL(double _num) { type = kType_Numeric; num = _num; }
@@ -403,8 +410,11 @@ struct NVSEArrayVarInterface
 		}
 	};
 
-	struct ElementR : Element  // Values
+	//Use this when receiving elements from NVSE, or generally need to (de)allocate the string on the FormHeap.
+	struct ElementR : Element
 	{
+		void Reset() { if (type == kType_String) { GameHeapFree(str); } type = kType_Invalid; str = NULL; }
+
 		ElementR() { type = kType_Invalid; }
 		ElementR(double _num) { type = kType_Numeric; num = _num; }
 		ElementR(TESForm* _form) { type = kType_Form; form = _form; }
@@ -916,6 +926,8 @@ struct ExpressionEvaluatorUtils
 	UInt32(__fastcall* ScriptTokenGetAnimationGroup)(PluginScriptToken* scrToken);
 
 	void(__fastcall* SetExpectedReturnType)(void* expEval, UInt8 type);
+	void(__fastcall* AssignCommandResultFromElement)(void* expEval, NVSEArrayVarInterface::Element& result);
+	void(__fastcall* ScriptTokenGetElement)(PluginScriptToken* scrToken, NVSEArrayVarInterface::Element& outElem);
 #endif
 };
 
@@ -954,6 +966,13 @@ public:
 	void SetExpectedReturnType(CommandReturnType type)
 	{
 		g_expEvalUtils.SetExpectedReturnType(expEval, type);
+	}
+
+	//Will set the expected return type on its own.
+	//If the Element is invalid, will throw an NVSE error in console about unexpected return type.
+	void AssignCommandResult(NVSEArrayVarInterface::Element& result)
+	{
+		g_expEvalUtils.AssignCommandResultFromElement(expEval, result);
 	}
 #endif
 };
@@ -1024,6 +1043,11 @@ struct PluginScriptToken
 	const PluginTokenSlice* GetSlice()
 	{
 		return g_expEvalUtils.ScriptTokenGetSlice(this);
+	}
+
+	void GetElement(NVSEArrayVarInterface::Element& outElem)
+	{
+		g_expEvalUtils.ScriptTokenGetElement(this, outElem);
 	}
 #endif
 };
