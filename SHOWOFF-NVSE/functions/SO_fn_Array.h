@@ -85,6 +85,7 @@ DEFINE_COMMAND_PLUGIN(Ar_GetInvalidRefs, "", false, kParams_OneArrayID);  //fail
 bool Cmd_Ar_GetInvalidRefs_Execute(COMMAND_ARGS)
 {
 	//scrapped the code, had some bad practices.
+	return true;
 }
 
 #endif
