@@ -323,7 +323,8 @@ namespace JsonToNVSE
 					return false;
 				}
 			}
-			throw std::logic_error("SHOWOFF - InsertValueAtJSONPointer >> both visitors should be of the same type.");
+			else
+				throw std::logic_error("SHOWOFF - InsertValueAtJSONPointer >> both visitors should be of the same type.");
 		}, baseVariant, insertVariant);
 	}
 	
@@ -415,7 +416,7 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 		auto elemAsJSON = JsonToNVSE::GetJSONFromNVSE(elem, parser);
 		
 		constexpr std::string_view funcName = { "WriteToJSONFile" };
-		if (std::filesystem::exists(JSON_Path))
+		if (jsonPointer != "" && std::filesystem::exists(JSON_Path))
 		{
 			if (auto jsonVal = ReadJSONWithParser(parser, JSON_Path, funcName))
 			{

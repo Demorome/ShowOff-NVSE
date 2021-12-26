@@ -172,6 +172,9 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 
 
 //===v1.45
+
+*AS OF THIS VERSION, xNVSE 6.2.5 or greater is required.*
+
 ===Bug Fixes:
 *Refactored functions with array arguments to work with inline (used to only work with array variables).
 *Fix TopicInfoSetResponseStrings string leak
