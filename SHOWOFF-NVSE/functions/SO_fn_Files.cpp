@@ -412,23 +412,32 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 		}
 		std::ranges::replace(json_path, '/', '\\');
 		std::string const JSON_Path = GetCurPath() + "\\" + std::move(json_path);
-		auto const elemAsJSON = JsonToNVSE::GetJSONFromNVSE(elem, parser);
+		auto elemAsJSON = JsonToNVSE::GetJSONFromNVSE(elem, parser);
 		
 		constexpr std::string_view funcName = { "WriteToJSONFile" };
 		if (std::filesystem::exists(JSON_Path))
 		{
 			if (auto jsonVal = ReadJSONWithParser(parser, JSON_Path, funcName))
 			{
-				if (auto const success = InsertValueAtJSONPointer(jsonVal.value(), elemAsJSON, jsonPointer, funcName);
-					!success)
+				if (auto const success = InsertValueAtJSONPointer(jsonVal.value(), elemAsJSON, jsonPointer, funcName))
+				{
+					elemAsJSON = std::move(*jsonVal);
+				}
+				else
 				{
 					return true;
-				}	
+				}
 			}
 		}
 		
-		//todo: print to file
-
+		if (std::ofstream output(JSON_Path);
+			output.is_open())
+		{
+			std::visit([&output](auto &&val){
+				tao::json::to_stream(output, val);
+			}, elemAsJSON);
+			*result = true;
+		}
 	}
 	return true;
 }
