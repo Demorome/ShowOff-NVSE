@@ -1,6 +1,9 @@
 ﻿#include "SO_fn_Files.h"
 #include "nvse/Utilities.h"
 
+#include "config.hpp"
+#include <tao/json.hpp>
+
 #include <filesystem>
 #include <fstream>
 
@@ -151,7 +154,7 @@ namespace JsonToNVSE
 		}
 		catch (tao::pegtl::parse_error& e)
 		{
-			if (IsConsoleMode())
+			if (IsConsoleMode() || g_ShowFuncDebug)
 				Console_Print("%s >> Could not parse JSON file, likely due to invalid formatting.", funcName.data());
 			_MESSAGE("ReadArrayFromJSONFile >> PARSE ERROR (%s)", e.what());
 		}
@@ -170,19 +173,19 @@ namespace JsonToNVSE
 		}
 		catch (const std::runtime_error& e)
 		{
-			if (IsConsoleMode())
+			if (IsConsoleMode() || g_ShowFuncDebug)
 				Console_Print("%s >> Invalid JSON pointer arg.", funcName.data());
 			_MESSAGE("%s >> JSON POINTER ERROR (%s)", funcName.data(), e.what());
 		}
 		catch (const std::out_of_range& e)
 		{
-			if (IsConsoleMode())
+			if (IsConsoleMode() || g_ShowFuncDebug)
 				Console_Print("%s >> Invalid JSON pointer arg.", funcName.data());
 			_MESSAGE("%s >> JSON POINTER ERROR (OUT OF RANGE) (%s)", funcName.data(), e.what());
 		}
 		catch (const std::invalid_argument& e)
 		{
-			if (IsConsoleMode())
+			if (IsConsoleMode() || g_ShowFuncDebug)
 				Console_Print("%s >> Invalid JSON pointer arg.", funcName.data());
 			_MESSAGE("%s >> JSON POINTER ERROR (Invalid Arg) (%s)", funcName.data(), e.what());
 		}
@@ -317,7 +320,7 @@ namespace JsonToNVSE
 				}
 				catch(std::exception &e)
 				{
-					if (IsConsoleMode())
+					if (IsConsoleMode() || g_ShowFuncDebug)
 						Console_Print("%s >> Invalid JSON pointer arg.", funcName.data());
 					_MESSAGE("%s >> JSON POINTER ERROR (%s)", funcName.data(), e.what());
 					return false;
@@ -329,17 +332,8 @@ namespace JsonToNVSE
 	}
 	
 
-
-}
-
-
-
-bool Cmd_ReadFromJSONFile_Execute(COMMAND_ARGS)
-{
-	using namespace JsonToNVSE;
-	*result = 0;
-	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
-		eval.ExtractArgs())
+	//return false in case of failure, for error reporting.
+	bool TryReadFromJSONFile(PluginExpressionEvaluator& eval, Script* scriptObj)
 	{
 		std::string json_path = eval.GetNthArg(0)->GetString();
 		std::string jsonPointer = "";	// the path in the JSON hierarchy, pass "" to get the root value.
@@ -352,26 +346,49 @@ bool Cmd_ReadFromJSONFile_Execute(COMMAND_ARGS)
 			{
 				parser = static_cast<Parser>(eval.GetNthArg(2)->GetInt());
 				if (parser >= kParser_Invalid)
-					return true;
+					return false;
 			}
 		}
 		std::ranges::replace(json_path, '/', '\\');
 		std::string const JSON_Path = GetCurPath() + "\\" + std::move(json_path);
 		if (!std::filesystem::exists(JSON_Path))
-			return true;
+			return false;
 
 		constexpr std::string_view funcName = { "ReadFromJSONFile" };
 		if (auto jsonVal = ReadJSONWithParser(parser, JSON_Path, funcName))
 		{
 			if (auto const JsonRef = GetJSONValueAtJSONPointer(jsonVal.value(), jsonPointer, funcName))
 			{
-				std::visit([=, &eval](auto&& val) {
+				std::visit([scriptObj, &eval](auto&& val) {
 					auto res = JsonToNVSE::GetNVSEFromJSON(val.get(), scriptObj);
 					eval.AssignCommandResult(res);
 					}, JsonRef.value());
+				return true;
 			}
 		}
+		return false;
 	}
+}
+
+
+
+
+
+bool Cmd_ReadFromJSONFile_Execute(COMMAND_ARGS)
+{
+	using namespace JsonToNVSE;
+	*result = 0;
+	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
+		eval.ExtractArgs())
+	{
+		if (!TryReadFromJSONFile(eval, scriptObj))
+		{
+			ArrayElementL invalidRetn;
+			eval.AssignCommandResult(invalidRetn);	//report error, since return value is too ambiguous.
+			//will inform line. If in console mode OR in ShowOff debug mode, will inform the nature of the error.
+		}
+	}
+	//eval is unlikely to fail extracting args, so don't bother error reporting.
 	return true;
 }
 
@@ -420,14 +437,12 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 		{
 			if (auto jsonVal = ReadJSONWithParser(parser, JSON_Path, funcName))
 			{
-				if (auto const success = InsertValueAtJSONPointer(jsonVal.value(), elemAsJSON, jsonPointer, funcName))
+				if (InsertValueAtJSONPointer(jsonVal.value(), elemAsJSON, jsonPointer, funcName))
 				{
 					elemAsJSON = std::move(*jsonVal);
 				}
 				else
-				{
 					return true;
-				}
 			}
 		}
 		
@@ -435,7 +450,7 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 			output.is_open())
 		{
 			std::visit([&output](auto &&val){
-				tao::json::to_stream(output, val);
+				output << std::setw(4) << val;	//pretty-printed with tab indents
 			}, elemAsJSON);
 			*result = true;
 		}

@@ -3,8 +3,6 @@
 //#define NOMINMAX 1
 
 //#include "json.h"
-#include "config.hpp"
-#include <tao/json.hpp>
 #include "ShowOffNVSE.h"
 
 
