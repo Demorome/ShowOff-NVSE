@@ -385,7 +385,7 @@ bool Cmd_ReadFromJSONFile_Execute(COMMAND_ARGS)
 		{
 			ArrayElementL invalidRetn;
 			eval.AssignCommandResult(invalidRetn);	//report error, since return value is too ambiguous.
-			//will inform line. If in console mode OR in ShowOff debug mode, will inform the nature of the error.
+			//will inform script. If in console mode OR in ShowOff debug mode, will inform the nature of the error.
 		}
 	}
 	//eval is unlikely to fail extracting args, so don't bother error reporting.
