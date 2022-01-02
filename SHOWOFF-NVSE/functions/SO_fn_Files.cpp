@@ -581,10 +581,22 @@ bool Cmd_SetINIValue_Execute(COMMAND_ARGS)
 			}
 			else return true;
 		}
-		if (ini.SaveFile(configPath) < SI_OK)
+		if (ini.SaveFile(configPath, false) < SI_OK)
 			return true;
 		*result = res;
 	}
+	return true;
+}
+
+bool Cmd_SetINIFloatAlt_Execute(COMMAND_ARGS)
+{
+	
+	return true;
+}
+
+bool Cmd_SetINIStringAlt_Execute(COMMAND_ARGS)
+{
+
 	return true;
 }
 
