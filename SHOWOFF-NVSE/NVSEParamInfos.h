@@ -51,3 +51,11 @@ static ParamInfo kNVSEParams_OneElem_OneString_OneOptionalString_OneOptionalInt[
 	{	"string",	kNVSEParamType_String,1	},
 	{	"int",	kNVSEParamType_Number,1	},
 };
+
+static ParamInfo kNVSEParams_OneString_OneElem_TwoOptionalStrings[4] =
+{
+	{	"string",	kNVSEParamType_String,0	},
+	{	"elem",	kNVSEParamType_BasicType,0	},
+	{	"string",	kNVSEParamType_String,1	},
+	{	"string",	kNVSEParamType_String,1	},
+};

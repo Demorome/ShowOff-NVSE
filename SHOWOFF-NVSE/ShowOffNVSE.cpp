@@ -561,7 +561,8 @@ extern "C"
 
 		//========v1.45
 		/*3D1C*/ REG_CMD_AMB(ReadFromJSONFile)
-
+		/*3D1D*/ REG_CMD(WriteToJSONFile)
+			
 	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
@@ -572,8 +573,15 @@ extern "C"
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 
-		REG_CMD_AMB(WriteToJSONFile)	//TODO: change back to regular retn type
-		
+		/*
+		REG_CMD(SetINIValue)
+		REG_CMD(GetINIFloatOrCreate)
+		REG_CMD_STR(GetINIStringOrCreate)
+		REG_CMD(GetINIFloatOrDefault)
+		REG_CMD_STR(GetINIStringOrDefault)
+		*/
+		REG_CMD(HasINISetting)
+
 		REG_CMD(Flt_Equals)	// not needed; xNVSE's eval already uses this for "==" operator.
 
 		REG_CMD_FORM(SayTo_GetUnk)

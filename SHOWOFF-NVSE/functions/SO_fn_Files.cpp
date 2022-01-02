@@ -7,6 +7,8 @@
 #include <filesystem>
 #include <fstream>
 
+#include "SimpleIni.h"
+
 //Made by anhatthezoo, requested by Trooper.
 bool Cmd_CreateFolder_Execute(COMMAND_ARGS)
 {
@@ -386,22 +388,12 @@ bool Cmd_ReadFromJSONFile_Execute(COMMAND_ARGS)
 			ArrayElementL invalidRetn;
 			eval.AssignCommandResult(invalidRetn);	//report error, since return value is too ambiguous.
 			//will inform script. If in console mode OR in ShowOff debug mode, will inform the nature of the error.
+			//todo: report better error instead!
 		}
 	}
 	//eval is unlikely to fail extracting args, so don't bother error reporting.
 	return true;
 }
-
-
-
-
-
-
-
-
-
-#if _DEBUG
-
 
 bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 {
@@ -412,7 +404,7 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 	{
 		ArrayElementR elem;
 		eval.GetNthArg(0)->GetElement(elem);
-		if (!elem.IsValid()) 
+		if (!elem.IsValid())
 			return true;
 		std::string json_path = eval.GetNthArg(1)->GetString();
 		std::string jsonPointer = "";	// the path in the JSON hierarchy, pass "" to get the root value.
@@ -431,7 +423,7 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 		std::ranges::replace(json_path, '/', '\\');
 		std::string const JSON_Path = GetCurPath() + "\\" + std::move(json_path);
 		auto elemAsJSON = JsonToNVSE::GetJSONFromNVSE(elem, parser);
-		
+
 		constexpr std::string_view funcName = { "WriteToJSONFile" };
 		if (jsonPointer != "" && std::filesystem::exists(JSON_Path))
 		{
@@ -445,20 +437,76 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 					return true;
 			}
 		}
-		
+
 		if (std::ofstream output(JSON_Path);
 			output.is_open())
 		{
-			std::visit([&output](auto &&val){
+			std::visit([&output](auto&& val) {
 				output << std::setw(4) << val;	//pretty-printed with tab indents
-			}, elemAsJSON);
+				}, elemAsJSON);
 			*result = true;
 		}
 	}
 	return true;
 }
 
-//TODO: ApplyJSONPatchToFile
+
+
+
+
+
+#if _DEBUG
+
+
+//dark magic copied from JIP
+bool __fastcall GetINIPath(char* iniPath, Script* scriptObj)
+{
+	if (!*iniPath)
+	{
+		UInt8 modIdx = scriptObj->GetOverridingModIdx();
+		if (modIdx == 0xFF) return false;
+		StrCopy(iniPath, g_dataHandler->GetNthModName(modIdx));
+	}
+	else ReplaceChr(iniPath, '/', '\\');
+	UInt32 length = StrLen(iniPath);
+	char* dotPos = FindChrR(iniPath, length, '.');
+	if (dotPos) *(UInt32*)(dotPos + 1) = 'ini';
+	else
+	{
+		*(UInt32*)(iniPath + length) = 'ini.';
+		iniPath[length + 4] = 0;
+	}
+	*(UInt32*)(iniPath - 12) = 'atad';
+	*(UInt32*)(iniPath - 8) = 'noc\\';
+	*(UInt32*)(iniPath - 4) = '\\gif';
+	return true;
+}
+
+
+//Most code copied from JIP LN NVSE's GetINIString
+bool Cmd_HasINISetting_Execute(COMMAND_ARGS)
+{
+	*result = false;
+	char configPath[0x80], sectiongName[0x80], *iniPath = configPath + 12;
+	*iniPath = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &sectiongName, iniPath) || !GetINIPath(iniPath, scriptObj))
+		return true;
+
+	char* keyName = GetNextToken(sectiongName, ":\\/");
+	CSimpleIniA ini(true);	
+	ini.LoadFile(iniPath);
+
+	if (auto const val = ini.GetValue(sectiongName, keyName, nullptr);
+		val && *val)
+	{
+		*result = true;
+	}
+	return true;
+}
+
+
+
+
 
 
 
