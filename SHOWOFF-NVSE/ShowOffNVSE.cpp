@@ -575,6 +575,8 @@ extern "C"
 
 		
 		REG_CMD(SetINIValue)
+		REG_CMD(SetINIFloatAlt)
+		REG_CMD(SetINIStringAlt)
 		/*
 		REG_CMD(GetINIFloatOrCreate)
 		REG_CMD_STR(GetINIStringOrCreate)

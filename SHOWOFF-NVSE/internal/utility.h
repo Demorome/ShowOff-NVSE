@@ -389,3 +389,7 @@ TESObjectREFR* TryGetREFR(TESForm* optionalForm, TESObjectREFR* thisObj);
 TESForm* TryGetBaseFormOrREFR(TESForm* form, TESObjectREFR* thisObj);
 
 void AssignScriptValueResult(const NVSEArrayElement* val, PluginExpressionEvaluator& eval, COMMAND_ARGS);
+
+// helper type for std::visit
+// taken from https://en.cppreference.com/w/cpp/utility/variant/visit
+template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };

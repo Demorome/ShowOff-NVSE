@@ -29,6 +29,9 @@ DEFINE_COMMAND_PLUGIN_EXP(WriteToJSONFile, "", false, kNVSEParams_OneElem_OneStr
 //caution for desyncs with other ini functions (should update JIP instead when done to avoid this issue).
 
 DEFINE_COMMAND_PLUGIN_EXP(SetINIValue, "", false, kNVSEParams_OneString_OneFloatOrString_TwoOptionalStrings);
+DEFINE_COMMAND_PLUGIN_EXP(SetINIFloatAlt, "", false, kNVSEParams_OneString_OneFloat_TwoOptionalStrings);
+DEFINE_COMMAND_PLUGIN_EXP(SetINIStringAlt, "", false, kNVSEParams_TwoStrings_TwoOptionalStrings);
+
 /*
 DEFINE_COMMAND_PLUGIN(GetINIFloatOrCreate, "", false, kParams_OneString_OneOptionalString_OneOptionalFloat_OneOptionalString);
 DEFINE_COMMAND_PLUGIN(GetINIStringOrCreate, "", false, kParams_OneString_ThreeOptionalStrings);

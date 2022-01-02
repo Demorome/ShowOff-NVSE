@@ -502,6 +502,94 @@ namespace IniToNVSE
 		return std::max(static_cast<CommandResult>(e), kResult_Error);
 	}
 
+	namespace SetINIValue
+	{
+		using StringOrFloat = std::variant<std::string, double>;
+		using Args = std::tuple<char*, StringOrFloat, char*, const char*>;
+
+		//Returns args in the order they are declared.
+		std::optional<Args> GetArgs(COMMAND_ARGS)
+		{
+			if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
+				eval.ExtractArgs())
+			{
+				char sectionAndKey[0x80];
+				strcpy(sectionAndKey, eval.GetNthArg(0)->GetString());
+
+				ArrayElementR newValElem;
+				StringOrFloat newVal;
+				eval.GetNthArg(1)->GetElement(newValElem);
+				if (newValElem.GetType() == NVSEArrayVarInterface::kType_String)
+				{
+					newVal = newValElem.str;	
+				}
+				else //assume number
+				{
+					newVal = newValElem.num;
+				}
+
+				char configPath[0x80], * iniPath = configPath + 12;
+				*iniPath = 0;
+				const char* comment = nullptr;
+				if (auto const numArgs = eval.NumArgs();
+					numArgs >= 3)
+				{
+					strcpy(iniPath, eval.GetNthArg(2)->GetString());
+
+					if (numArgs >= 4) {
+						comment = eval.GetNthArg(3)->GetString();
+					}
+				}
+				if (!GetINIPath(iniPath, scriptObj))
+					return {};
+
+				return std::make_tuple(sectionAndKey, newVal, configPath, comment);
+			}
+			return {};
+		}
+
+		void DoSet(const Args &args, double *result)
+		{
+			auto& [sectionAndKey, newVal, configPath, comment] = args;
+
+			auto const keyName = GetNextToken(sectionAndKey, ":\\/");		//sectionAndKey now only contains Section
+			if (!keyName) return;
+
+			CSimpleIniA ini(true);	//todo: read from cache
+			ini.LoadFile(configPath);	//ignore errors, file will be created if it did not exist.
+
+			CommandResult res;
+			if (!std::visit(overloaded{
+					[&](const std::string& str) -> bool
+					{
+						if (auto const e = ini.SetValue(sectionAndKey, keyName, str.c_str(), comment);
+							e >= SI_OK)	//if success
+						{
+							res = IniToNVSE::AsResult(e);
+							return true;
+						}
+						return false;
+					},
+					[&](const double num) -> bool
+					{
+						if (auto const e = ini.SetDoubleValue(sectionAndKey, keyName, num, comment);
+							e >= SI_OK)
+						{
+							res = IniToNVSE::AsResult(e);
+							return true;
+						}
+						return true;
+					},
+				}, newVal))
+			{
+				return;
+			}
+			
+			if (ini.SaveFile(configPath, false) < SI_OK)
+				return;
+			*result = res;
+		}
+	}
 }
 
 
@@ -532,72 +620,21 @@ bool Cmd_HasINISetting_Execute(COMMAND_ARGS)
 bool Cmd_SetINIValue_Execute(COMMAND_ARGS)
 {
 	*result = IniToNVSE::kResult_Error;
-	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
-		eval.ExtractArgs())
+	if (auto const args = IniToNVSE::SetINIValue::GetArgs(PASS_COMMAND_ARGS))
 	{
-		char sectionAndKey[0x80];
-		strcpy(sectionAndKey, eval.GetNthArg(0)->GetString());
-		auto const keyName = GetNextToken(sectionAndKey, ":\\/");
-		if (!keyName) return true;
-		
-		ArrayElementR newVal;
-		eval.GetNthArg(1)->GetElement(newVal);	//string or float
-
-		char configPath[0x80], * iniPath = configPath + 12;
-		*iniPath = 0;
-		const char* comment = nullptr;
-		if (auto const numArgs = eval.NumArgs();
-			numArgs >= 3) 
-		{
-			strcpy(iniPath, eval.GetNthArg(2)->GetString());
-
-			if (numArgs >= 4) {
-				comment = eval.GetNthArg(3)->GetString();
-			}
-		}
-		if (!IniToNVSE::GetINIPath(iniPath, scriptObj))
-			return true;
-		
-		CSimpleIniA ini(true);	//todo: read from cache
-		ini.LoadFile(configPath);	//ignore errors, file will be created if it did not exist.
-		
-		IniToNVSE::CommandResult res;
-		if (auto const type = newVal.GetType();
-			type == NVSEArrayVarInterface::kType_String)
-		{
-			if (auto const e = ini.SetValue(sectionAndKey, keyName, newVal.str, comment);
-				e >= SI_OK)	//if success
-			{
-				res = IniToNVSE::AsResult(e);
-			}
-			else return true;
-		}
-		else //assume number
-		{
-			if (auto const e = ini.SetDoubleValue(sectionAndKey, keyName, newVal.num, comment);
-				e >= SI_OK)
-			{
-				res = IniToNVSE::AsResult(e);
-			}
-			else return true;
-		}
-		if (ini.SaveFile(configPath, false) < SI_OK)
-			return true;
-		*result = res;
+		IniToNVSE::SetINIValue::DoSet(args.value(), result);
 	}
 	return true;
 }
 
 bool Cmd_SetINIFloatAlt_Execute(COMMAND_ARGS)
 {
-	
-	return true;
+	return Cmd_SetINIValue_Execute(PASS_COMMAND_ARGS);
 }
 
 bool Cmd_SetINIStringAlt_Execute(COMMAND_ARGS)
 {
-
-	return true;
+	return Cmd_SetINIValue_Execute(PASS_COMMAND_ARGS);
 }
 
 
