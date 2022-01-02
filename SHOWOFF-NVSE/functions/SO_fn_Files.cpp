@@ -491,16 +491,16 @@ bool __fastcall GetINIPath(char* iniPath, Script* scriptObj)
 bool Cmd_HasINISetting_Execute(COMMAND_ARGS)
 {
 	*result = false;
-	char configPath[0x80], sectiongName[0x80], *iniPath = configPath + 12;
+	char configPath[0x80], sectionName[0x80], *iniPath = configPath + 12;
 	*iniPath = 0;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &sectiongName, iniPath) || !GetINIPath(iniPath, scriptObj))
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &sectionName, iniPath) || !GetINIPath(iniPath, scriptObj))
 		return true;
 
-	char* keyName = GetNextToken(sectiongName, ":\\/");
+	char* keyName = GetNextToken(sectionName, ":\\/");
 	CSimpleIniA ini(true);	
 	ini.LoadFile(configPath);
 
-	if (auto const val = ini.GetValue(sectiongName, keyName, nullptr);
+	if (auto const val = ini.GetValue(sectionName, keyName, nullptr);
 		val && *val)
 	{
 		*result = true;
@@ -514,7 +514,7 @@ bool Cmd_SetINIValue_Execute(COMMAND_ARGS)
 	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
 		eval.ExtractArgs())
 	{
-		auto sectionAndKey = const_cast<char*>(eval.GetNthArg(0)->GetString());	//todo: ensure safety (is it alloc'd on FormHeap??)
+		const auto sectionAndKey = const_cast<char*>(eval.GetNthArg(0)->GetString());	//todo: ensure safety (is it alloc'd on FormHeap??)
 		ArrayElementR newVal;
 		eval.GetNthArg(1)->GetElement(newVal);	//string or float
 
