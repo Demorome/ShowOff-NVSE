@@ -1198,43 +1198,30 @@ __declspec(naked) char* __fastcall GetNextTokenJIP(char* str, char delim)
 	}
 }
 
-__declspec(naked) char* __fastcall GetNextToken(char *str, const char *delims)
+__declspec(noinline) char* __fastcall GetNextToken(char *str, const char *delims)
 {
-	__asm
+	if (!str) return NULL;
+	bool table[0x100];
+	MemZero(table, 0x100);
+	UInt8 curr;
+	while (curr = *delims)
 	{
-		push	ebx
-		push	esi
-		mov		eax, ecx
-		mov		esi, edx
-		xor		bl, bl
-	mainHead:
-		mov		cl, [eax]
-		test	cl, cl
-		jz		done
-	subHead:
-		cmp		[edx], 0
-		jz		wasFound
-		cmp		cl, [edx]
-		jz		chrEQ
-		inc		edx
-		jmp		subHead
-	chrEQ:
-		test	bl, bl
-		jnz		mainNext
-		mov		bl, 1
-		mov		[eax], 0
-	mainNext:
-		inc		eax
-		mov		edx, esi
-		jmp		mainHead
-	wasFound:
-		test	bl, bl
-		jz		mainNext
-	done:
-		pop		esi
-		pop		ebx
-		retn
+		table[curr] = true;
+		delims++;
 	}
+	bool found = false;
+	while (curr = *str)
+	{
+		if (table[curr])
+		{
+			*str = 0;
+			found = true;
+		}
+		else if (found)
+			break;
+		str++;
+	}
+	return str;
 }
 
 char* __fastcall CopyString(const char *key)

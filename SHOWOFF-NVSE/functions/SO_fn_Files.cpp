@@ -458,32 +458,50 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 #if _DEBUG
 
 
-//dark magic copied from JIP
-bool __fastcall GetINIPath(char* iniPath, Script* scriptObj)
+namespace IniToNVSE
 {
-	if (!*iniPath)
+	//dark magic copied from JIP
+	bool __fastcall GetINIPath(char* iniPath, Script* scriptObj)
 	{
-		UInt8 modIdx = scriptObj->GetOverridingModIdx();
-		if (modIdx == 0xFF) return false;
-		StrCopy(iniPath, g_dataHandler->GetNthModName(modIdx));
+		if (!*iniPath)
+		{
+			UInt8 modIdx = scriptObj->GetOverridingModIdx();
+			if (modIdx == 0xFF) return false;
+			StrCopy(iniPath, g_dataHandler->GetNthModName(modIdx));
+		}
+		else ReplaceChr(iniPath, '/', '\\');
+		UInt32 length = StrLen(iniPath);
+		char* dotPos = FindChrR(iniPath, length, '.');
+		if (dotPos)
+		{
+			*(UInt32*)(dotPos + 1) = 'ini';
+		}
+		else
+		{
+			*(UInt32*)(iniPath + length) = 'ini.';
+			iniPath[length + 4] = 0;
+		}
+		//append data/config to start of string
+		*(UInt32*)(iniPath - 12) = 'atad';
+		*(UInt32*)(iniPath - 8) = 'noc\\';
+		*(UInt32*)(iniPath - 4) = '\\gif';
+		return true;
 	}
-	else ReplaceChr(iniPath, '/', '\\');
-	UInt32 length = StrLen(iniPath);
-	char* dotPos = FindChrR(iniPath, length, '.');
-	if (dotPos)
+
+	enum CommandResult
 	{
-		*(UInt32*)(dotPos + 1) = 'ini';
-	}
-	else
+		kResult_Error = -1,
+		kResult_Ok = 0,   //!< No error
+		kResult_Updated = 1,   //!< An existing value was updated
+		kResult_Inserted = 2,   //!< A new value was inserted
+	};
+
+	CommandResult AsResult(SI_Error e)
 	{
-		*(UInt32*)(iniPath + length) = 'ini.';
-		iniPath[length + 4] = 0;
+		//don't care about types of errors, just that an error has occured.
+		return std::max(static_cast<CommandResult>(e), kResult_Error);
 	}
-	//append data/config to start of string
-	*(UInt32*)(iniPath - 12) = 'atad';
-	*(UInt32*)(iniPath - 8) = 'noc\\';
-	*(UInt32*)(iniPath - 4) = '\\gif';
-	return true;
+
 }
 
 
@@ -493,12 +511,13 @@ bool Cmd_HasINISetting_Execute(COMMAND_ARGS)
 	*result = false;
 	char configPath[0x80], sectionName[0x80], *iniPath = configPath + 12;
 	*iniPath = 0;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &sectionName, iniPath) || !GetINIPath(iniPath, scriptObj))
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &sectionName, iniPath) || !IniToNVSE::GetINIPath(iniPath, scriptObj))
 		return true;
 
 	char* keyName = GetNextToken(sectionName, ":\\/");
 	CSimpleIniA ini(true);	
-	ini.LoadFile(configPath);
+	if (ini.LoadFile(configPath) < SI_OK)
+		return true;
 
 	if (auto const val = ini.GetValue(sectionName, keyName, nullptr);
 		val && *val)
@@ -508,47 +527,63 @@ bool Cmd_HasINISetting_Execute(COMMAND_ARGS)
 	return true;
 }
 
+
+
 bool Cmd_SetINIValue_Execute(COMMAND_ARGS)
 {
-	*result = false;	//bSuccess
+	*result = IniToNVSE::kResult_Error;
 	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
 		eval.ExtractArgs())
 	{
-		const auto sectionAndKey = const_cast<char*>(eval.GetNthArg(0)->GetString());	//todo: ensure safety (is it alloc'd on FormHeap??)
+		char sectionAndKey[0x80];
+		strcpy(sectionAndKey, eval.GetNthArg(0)->GetString());
+		auto const keyName = GetNextToken(sectionAndKey, ":\\/");
+		if (!keyName) return true;
+		
 		ArrayElementR newVal;
 		eval.GetNthArg(1)->GetElement(newVal);	//string or float
 
 		char configPath[0x80], * iniPath = configPath + 12;
 		*iniPath = 0;
-		auto const numArgs = eval.NumArgs();
-		if (numArgs >= 3) {
-			iniPath = const_cast<char*>(eval.GetNthArg(2)->GetString());	//todo: TEST!
-		}
-		if (!GetINIPath(iniPath, scriptObj))
-			return true;
-
 		const char* comment = nullptr;
-		if (numArgs >= 4)
+		if (auto const numArgs = eval.NumArgs();
+			numArgs >= 3) 
 		{
-			comment = eval.GetNthArg(3)->GetString();
-		}
+			strcpy(iniPath, eval.GetNthArg(2)->GetString());
 
-		auto const keyName = GetNextToken(sectionAndKey, ":\\/");
-		if (!keyName) return true;
+			if (numArgs >= 4) {
+				comment = eval.GetNthArg(3)->GetString();
+			}
+		}
+		if (!IniToNVSE::GetINIPath(iniPath, scriptObj))
+			return true;
 		
-		CSimpleIniA ini(true);
-		ini.LoadFile(configPath);	//todo: check for errors
+		CSimpleIniA ini(true);	//todo: read from cache
+		ini.LoadFile(configPath);	//ignore errors, file will be created if it did not exist.
+		
+		IniToNVSE::CommandResult res;
 		if (auto const type = newVal.GetType();
 			type == NVSEArrayVarInterface::kType_String)
 		{
-			ini.SetValue(sectionAndKey, keyName, newVal.str, comment);
+			if (auto const e = ini.SetValue(sectionAndKey, keyName, newVal.str, comment);
+				e >= SI_OK)	//if success
+			{
+				res = IniToNVSE::AsResult(e);
+			}
+			else return true;
 		}
 		else //assume number
 		{
-			ini.SetDoubleValue(sectionAndKey, keyName, newVal.num, comment);
+			if (auto const e = ini.SetDoubleValue(sectionAndKey, keyName, newVal.num, comment);
+				e >= SI_OK)
+			{
+				res = IniToNVSE::AsResult(e);
+			}
+			else return true;
 		}
-		ini.SaveFile(configPath);
-		*result = true;
+		if (ini.SaveFile(configPath, false) < SI_OK)
+			return true;
+		*result = res;
 	}
 	return true;
 }

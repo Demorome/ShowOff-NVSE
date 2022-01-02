@@ -11,6 +11,8 @@
 #include "decoding.h"
 #include "SOTypes.h"
 
+using namespace std::literals;
+
 extern ICriticalSection g_Lock;
 extern std::atomic<bool> g_ShowFuncDebug;
 
