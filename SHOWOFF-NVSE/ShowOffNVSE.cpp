@@ -573,8 +573,9 @@ extern "C"
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 
-		/*
+		
 		REG_CMD(SetINIValue)
+		/*
 		REG_CMD(GetINIFloatOrCreate)
 		REG_CMD_STR(GetINIStringOrCreate)
 		REG_CMD(GetINIFloatOrDefault)

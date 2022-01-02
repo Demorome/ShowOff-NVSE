@@ -504,8 +504,50 @@ bool Cmd_HasINISetting_Execute(COMMAND_ARGS)
 	return true;
 }
 
+bool Cmd_SetINIValue_Execute(COMMAND_ARGS)
+{
+	*result = false;	//bSuccess
+	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
+		eval.ExtractArgs())
+	{
+		auto sectionAndKey = const_cast<char*>(eval.GetNthArg(0)->GetString());	//todo: ensure safety (is it alloc'd on FormHeap??)
+		ArrayElementR newVal;
+		eval.GetNthArg(1)->GetElement(newVal);	//string or float
 
+		char configPath[0x80], * iniPath = configPath + 12;
+		*iniPath = 0;
+		auto const numArgs = eval.NumArgs();
+		if (numArgs >= 3) {
+			iniPath = const_cast<char*>(eval.GetNthArg(2)->GetString());	//todo: TEST!
+		}
+		if (!GetINIPath(iniPath, scriptObj))
+			return true;
 
+		const char* comment = nullptr;
+		if (numArgs >= 4)
+		{
+			comment = eval.GetNthArg(3)->GetString();
+		}
+
+		auto const keyName = GetNextToken(sectionAndKey, ":\\/");
+		if (!keyName) return true;
+		
+		CSimpleIniA ini(true);
+		ini.LoadFile(iniPath);	//todo: check for errors
+		
+		if (auto const type = newVal.GetType();
+			type == NVSEArrayVarInterface::kType_String)
+		{
+			ini.SetValue(sectionAndKey, keyName, newVal.str, comment);
+		}
+		else //assume number
+		{
+			ini.SetDoubleValue(sectionAndKey, keyName, newVal.num, comment);
+		}
+		*result = true;
+	}
+	return true;
+}
 
 
 

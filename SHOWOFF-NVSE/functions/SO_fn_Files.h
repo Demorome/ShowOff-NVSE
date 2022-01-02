@@ -23,9 +23,13 @@ DEFINE_COMMAND_PLUGIN_EXP(WriteToJSONFile, "", false, kNVSEParams_OneElem_OneStr
 
 #if _DEBUG
 
-/*
-DEFINE_COMMAND_PLUGIN_EXP(SetINIValue, "", false, kNVSEParams_OneString_OneElem_TwoOptionalStrings);
 
+
+//TODO: cache all the INI files in config for fast lookup. SetINIValue will save any changes.
+//caution for desyncs with other ini functions (should update JIP instead when done to avoid this issue).
+
+DEFINE_COMMAND_PLUGIN_EXP(SetINIValue, "", false, kNVSEParams_OneString_OneFloatOrString_TwoOptionalStrings);
+/*
 DEFINE_COMMAND_PLUGIN(GetINIFloatOrCreate, "", false, kParams_OneString_OneOptionalString_OneOptionalFloat_OneOptionalString);
 DEFINE_COMMAND_PLUGIN(GetINIStringOrCreate, "", false, kParams_OneString_ThreeOptionalStrings);
 DEFINE_COMMAND_ALT_PLUGIN(GetINIFloatOrDefault, GetINIFloatAlt, "", false, kParams_OneString_OneOptionalString_OneOptionalFloat);
