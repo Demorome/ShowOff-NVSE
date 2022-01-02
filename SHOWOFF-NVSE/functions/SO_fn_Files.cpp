@@ -581,7 +581,7 @@ bool Cmd_SetINIValue_Execute(COMMAND_ARGS)
 			}
 			else return true;
 		}
-		if (ini.SaveFile(configPath, false) < SI_OK)
+		if (ini.SaveFile(configPath) < SI_OK)
 			return true;
 		*result = res;
 	}

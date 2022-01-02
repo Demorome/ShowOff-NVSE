@@ -1309,9 +1309,6 @@ private:
 
 	/** Should new keys be created above older keys */
 	bool m_bPrependNewKeys;
-
-	/** Has an edit been made */
-	bool m_bChangesMade;
 };
 
 // ---------------------------------------------------------------------------
@@ -1336,7 +1333,6 @@ CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::CSimpleIniTempl(
   , m_nOrder(0)
   , m_bSortAlphabetically(a_bSortAlphabetically)
   ,	m_bPrependNewKeys(a_bPrependNewKeys)
-  , m_bChangesMade(false)
 { }
 
 template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
@@ -2164,8 +2160,6 @@ CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::SetLongValue(
     // use SetValue to create sections
     if (!a_pSection || !a_pKey) return SI_FAIL;
 
-	m_bChangesMade = true;
-
     // convert to an ASCII string
     char szInput[64];
 #if __STDC_WANT_SECURE_LIB__ && !_WIN32_WCE
@@ -2443,9 +2437,6 @@ CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::SaveFile(
     bool            a_bAddSignature
     ) const
 {
-	// don't write to the output file if no changes were made
-	if (!m_bChangesMade) return SI_Error::SI_OK;
-
     FILE * fp = NULL;
 #if __STDC_WANT_SECURE_LIB__ && !_WIN32_WCE
     fopen_s(&fp, a_pszFile, "wb");
