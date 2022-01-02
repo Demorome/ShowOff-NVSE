@@ -470,12 +470,16 @@ bool __fastcall GetINIPath(char* iniPath, Script* scriptObj)
 	else ReplaceChr(iniPath, '/', '\\');
 	UInt32 length = StrLen(iniPath);
 	char* dotPos = FindChrR(iniPath, length, '.');
-	if (dotPos) *(UInt32*)(dotPos + 1) = 'ini';
+	if (dotPos)
+	{
+		*(UInt32*)(dotPos + 1) = 'ini';
+	}
 	else
 	{
 		*(UInt32*)(iniPath + length) = 'ini.';
 		iniPath[length + 4] = 0;
 	}
+	//append data/config to start of string
 	*(UInt32*)(iniPath - 12) = 'atad';
 	*(UInt32*)(iniPath - 8) = 'noc\\';
 	*(UInt32*)(iniPath - 4) = '\\gif';
@@ -494,7 +498,7 @@ bool Cmd_HasINISetting_Execute(COMMAND_ARGS)
 
 	char* keyName = GetNextToken(sectiongName, ":\\/");
 	CSimpleIniA ini(true);	
-	ini.LoadFile(iniPath);
+	ini.LoadFile(configPath);
 
 	if (auto const val = ini.GetValue(sectiongName, keyName, nullptr);
 		val && *val)
@@ -533,8 +537,7 @@ bool Cmd_SetINIValue_Execute(COMMAND_ARGS)
 		if (!keyName) return true;
 		
 		CSimpleIniA ini(true);
-		ini.LoadFile(iniPath);	//todo: check for errors
-		
+		ini.LoadFile(configPath);	//todo: check for errors
 		if (auto const type = newVal.GetType();
 			type == NVSEArrayVarInterface::kType_String)
 		{
@@ -544,6 +547,7 @@ bool Cmd_SetINIValue_Execute(COMMAND_ARGS)
 		{
 			ini.SetDoubleValue(sectionAndKey, keyName, newVal.num, comment);
 		}
+		ini.SaveFile(configPath);
 		*result = true;
 	}
 	return true;
