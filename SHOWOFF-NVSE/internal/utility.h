@@ -1,5 +1,6 @@
 #pragma once
 #include <intrin.h>
+#include <optional>
 #include <string>
 
 #include "PluginAPI.h"
@@ -393,3 +394,5 @@ void AssignScriptValueResult(const NVSEArrayElement* val, PluginExpressionEvalua
 // helper type for std::visit
 // taken from https://en.cppreference.com/w/cpp/utility/variant/visit
 template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+
+std::optional<PluginExpressionEvaluator> TryGetExpEval(COMMAND_ARGS);

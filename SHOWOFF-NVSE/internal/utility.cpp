@@ -1935,3 +1935,13 @@ __declspec(noinline) UInt8* AuxBuffer::Get(UInt32 bufIdx, UInt32 reqSize)
 		auxBuf->ptr = (UInt8*)_aligned_malloc(auxBuf->size, 0x10);
 	return auxBuf->ptr;
 }
+
+std::optional<PluginExpressionEvaluator> TryGetExpEval(COMMAND_ARGS)
+{
+	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
+		eval.ExtractArgs())
+	{
+		return eval;
+	}
+	return {};
+}

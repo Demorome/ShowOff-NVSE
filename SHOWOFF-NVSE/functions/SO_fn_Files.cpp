@@ -502,12 +502,24 @@ namespace IniToNVSE
 		return std::max(static_cast<CommandResult>(e), kResult_Error);
 	}
 
+	constexpr auto MaxStrArgLen = 0x80;
+	using CharArr = std::array<char, MaxStrArgLen>;
+
+	[[nodiscard]] std::optional<CharArr> GetINIConfigPath(const char* iniStr, Script* scriptObj)
+	{
+		CharArr configPath;
+		char* iniPath = configPath.data() + 12;
+		*iniPath = 0;
+		if (iniStr)
+			strcpy(iniPath, iniStr);
+		if (!GetINIPath(iniPath, scriptObj))
+			return {};
+		return configPath;
+	}
+	
 	namespace SetINIValue
 	{
-		constexpr auto MaxStrArgLen = 0x80;
-		using CharArr = std::array<char, MaxStrArgLen>;
-		using StringOrFloat = std::variant<std::string, double>;
-		using Args = std::tuple<CharArr, StringOrFloat, CharArr, const char*>;
+		using Args = std::tuple<CharArr, ArrayElementR, CharArr, const char*>;
 
 		//Returns args in the order they are declared.
 		std::optional<Args> GetArgs(COMMAND_ARGS)
@@ -518,35 +530,23 @@ namespace IniToNVSE
 				CharArr sectionAndKey;
 				strcpy(sectionAndKey.data(), eval.GetNthArg(0)->GetString());
 
-				ArrayElementR newValElem;
-				StringOrFloat newVal;
-				eval.GetNthArg(1)->GetElement(newValElem);
-				if (newValElem.GetType() == NVSEArrayVarInterface::kType_String)
-				{
-					newVal = newValElem.str;	//todo: ensure this performs an actual copy
-				}
-				else //assume number
-				{
-					newVal = newValElem.num;
-				}
-
-				CharArr configPath;
-				char *iniPath = configPath.data() + 12;
-				*iniPath = 0;
+				ArrayElementR newVal;
+				eval.GetNthArg(1)->GetElement(newVal);
+				const char* iniPath = nullptr;
 				const char* comment = nullptr;
 				if (auto const numArgs = eval.NumArgs();
 					numArgs >= 3)
 				{
-					strcpy(iniPath, eval.GetNthArg(2)->GetString());
-
+					iniPath = eval.GetNthArg(2)->GetString();
 					if (numArgs >= 4) {
 						comment = eval.GetNthArg(3)->GetString();
 					}
 				}
-				if (!GetINIPath(iniPath, scriptObj))
+				auto const configPath = GetINIConfigPath(iniPath, scriptObj);
+				if (!configPath)
 					return {};
 				
-				return std::make_tuple(sectionAndKey, newVal, configPath, comment);
+				return std::make_tuple(sectionAndKey, newVal, configPath.value(), comment);
 			}
 			return {};
 		}
@@ -563,30 +563,23 @@ namespace IniToNVSE
 			ini.LoadFile(configPath.data());	//ignore errors, file will be created if it did not exist.
 
 			CommandResult res;
-			if (!std::visit(overloaded{
-					[&](const std::string& str) -> bool
-					{
-						if (auto const e = ini.SetValue(sectionAndKey.data(), keyName, str.c_str(), comment);
-							e >= SI_OK)	//if success
-						{
-							res = IniToNVSE::AsResult(e);
-							return true;
-						}
-						return false;
-					},
-					[&](const double num) -> bool
-					{
-						if (auto const e = ini.SetDoubleValue(sectionAndKey.data(), keyName, num, comment);
-							e >= SI_OK)
-						{
-							res = IniToNVSE::AsResult(e);
-							return true;
-						}
-						return true;
-					},
-				}, newVal))
+			if (newVal.GetType() == NVSEArrayVarInterface::kType_String)
 			{
-				return;
+				if (auto const e = ini.SetValue(sectionAndKey.data(), keyName, newVal.str, comment);
+					e >= SI_OK)	//if success
+				{
+					res = IniToNVSE::AsResult(e);
+				}
+				else return;
+			}
+			else //assume number
+			{
+				if (auto const e = ini.SetDoubleValue(sectionAndKey.data(), keyName, newVal.num, comment);
+					e >= SI_OK)
+				{
+					res = IniToNVSE::AsResult(e);
+				}
+				else return;
 			}
 			
 			if (ini.SaveFile(configPath.data(), false) < SI_OK)
@@ -594,6 +587,89 @@ namespace IniToNVSE
 			*result = res;
 		}
 	}
+	
+	namespace GetINIValue
+	{
+		//sectionAndKey, configPath(opt), defaultOrCreate(opt)
+		using BaseArgs = std::tuple<CharArr, CharArr, ArrayElementR>;	//for regular Get
+		using GetOrCreateArgs = std::tuple <CharArr, CharArr, ArrayElementR, std::string>;	//extra comment arg
+
+		std::optional<BaseArgs> GetBaseArgs_Helper(PluginExpressionEvaluator& eval, Script* scriptObj)
+		{
+			CharArr sectionAndKey;
+			strcpy(sectionAndKey.data(), eval.GetNthArg(0)->GetString());
+
+			const char* iniPath = nullptr;
+			ArrayElementR defaultVal_OrCreate = {};
+			if (auto const numArgs = eval.NumArgs();
+				numArgs >= 2)
+			{
+				iniPath = eval.GetNthArg(1)->GetString();
+
+				if (numArgs >= 3)
+				{
+					eval.GetNthArg(2)->GetElement(defaultVal_OrCreate);
+				}
+			}
+			auto const configPath = GetINIConfigPath(iniPath, scriptObj);
+			if (!configPath)
+				return {};
+
+			return std::make_tuple(sectionAndKey, configPath.value(), defaultVal_OrCreate);
+		}
+		
+		std::optional<BaseArgs> GetBaseArgs(COMMAND_ARGS)
+		{
+			if (auto eval = TryGetExpEval(PASS_COMMAND_ARGS))
+			{
+				return GetBaseArgs_Helper(eval.value(), scriptObj);
+			}
+			return {};
+		}
+		
+		std::optional<GetOrCreateArgs> Get_GetOrCreate_Args(COMMAND_ARGS)
+		{
+			if (auto eval = TryGetExpEval(PASS_COMMAND_ARGS))
+			{
+				if (auto const baseArgs = GetBaseArgs_Helper(eval.value(), scriptObj))
+				{
+					std::string comment = {};
+					if (eval.value().NumArgs() >= 4) {
+						comment = eval.value().GetNthArg(3)->GetString();
+					}
+					return std::tuple_cat(baseArgs.value(), std::tie(comment));
+				}
+			}
+			return {};
+		}
+
+
+		void Call(const BaseArgs& args, double* result)
+		{
+			auto& [sectionAndKey, configPath, defaultVal] = args;
+
+			/*
+			if constexpr (std::is_same_v<T, double>)
+			{
+
+			}
+			else if constexpr (std::is_same_v<T, std::string>)
+			{
+
+			}
+			else
+			{
+				static_assert(false, "GetArgs >> invalid type param given");
+			}*/
+		}
+
+		void Call(const GetOrCreateArgs& args, double* result)
+		{
+			auto& [sectionAndKey, configPath, defaultVal, comment] = args;
+
+		}
+	};
+	
 }
 
 
@@ -641,6 +717,25 @@ bool Cmd_SetINIStringAlt_Execute(COMMAND_ARGS)
 	return Cmd_SetINIValue_Execute(PASS_COMMAND_ARGS);
 }
 
+bool Cmd_GetINIFloatOrDefault_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	if (auto const args = IniToNVSE::GetINIValue::GetBaseArgs(PASS_COMMAND_ARGS))
+	{
+		//IniToNVSE::GetINIValue::Call<double>(args.value(), result);
+	}
+	return true;
+}
+
+bool Cmd_GetINIStringOrDefault_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	if (auto const args = IniToNVSE::GetINIValue::GetBaseArgs(PASS_COMMAND_ARGS))
+	{
+		//IniToNVSE::GetINIValue::Call<std::string>(args.value(), result);
+	}
+	return true;
+}
 
 
 

@@ -32,12 +32,14 @@ DEFINE_COMMAND_PLUGIN_EXP(SetINIValue, "", false, kNVSEParams_OneString_OneFloat
 DEFINE_COMMAND_PLUGIN_EXP(SetINIFloatAlt, "", false, kNVSEParams_OneString_OneFloat_TwoOptionalStrings);
 DEFINE_COMMAND_PLUGIN_EXP(SetINIStringAlt, "", false, kNVSEParams_TwoStrings_TwoOptionalStrings);
 
+//These don't need to be _EXP, but it reduces code copying.
 /*
-DEFINE_COMMAND_PLUGIN(GetINIFloatOrCreate, "", false, kParams_OneString_OneOptionalString_OneOptionalFloat_OneOptionalString);
-DEFINE_COMMAND_PLUGIN(GetINIStringOrCreate, "", false, kParams_OneString_ThreeOptionalStrings);
-DEFINE_COMMAND_ALT_PLUGIN(GetINIFloatOrDefault, GetINIFloatAlt, "", false, kParams_OneString_OneOptionalString_OneOptionalFloat);
-DEFINE_COMMAND_ALT_PLUGIN(GetINIStringOrDefault, GetINIStringAlt, "", false, kParams_OneString_TwoOptionalStrings);
+DEFINE_COMMAND_PLUGIN_EXP(GetINIFloatOrCreate, "", false, kParams_OneString_OneOptionalString_OneOptionalFloat_OneOptionalString);
+DEFINE_COMMAND_PLUGIN_EXP(GetINIStringOrCreate, "", false, kParams_OneString_ThreeOptionalStrings);
 */
+DEFINE_COMMAND_ALT_PLUGIN_EXP(GetINIFloatOrDefault, GetINIFloatAlt, "", false, kParams_OneString_OneOptionalString_OneOptionalFloat);
+DEFINE_COMMAND_ALT_PLUGIN_EXP(GetINIStringOrDefault, GetINIStringAlt, "", false, kParams_OneString_TwoOptionalStrings);
+
 DEFINE_COMMAND_PLUGIN(HasINISetting, "", false, kParams_OneString_OneOptionalString);
 
 

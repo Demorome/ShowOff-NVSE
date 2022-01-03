@@ -4,6 +4,7 @@
 #include <variant>
 
 #include "LambdaVarContext.h"
+#include "PluginAPI.h"
 
 typedef UInt32 RefID;
 typedef RefID ActorRefID;
