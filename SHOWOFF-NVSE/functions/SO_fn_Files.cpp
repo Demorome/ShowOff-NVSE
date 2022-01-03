@@ -504,8 +504,10 @@ namespace IniToNVSE
 
 	namespace SetINIValue
 	{
+		constexpr auto MaxStrArgLen = 0x80;
+		using CharArr = std::array<char, MaxStrArgLen>;
 		using StringOrFloat = std::variant<std::string, double>;
-		using Args = std::tuple<char*, StringOrFloat, char*, const char*>;
+		using Args = std::tuple<CharArr, StringOrFloat, CharArr, const char*>;
 
 		//Returns args in the order they are declared.
 		std::optional<Args> GetArgs(COMMAND_ARGS)
@@ -513,22 +515,23 @@ namespace IniToNVSE
 			if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
 				eval.ExtractArgs())
 			{
-				char sectionAndKey[0x80];
-				strcpy(sectionAndKey, eval.GetNthArg(0)->GetString());
+				CharArr sectionAndKey;
+				strcpy(sectionAndKey.data(), eval.GetNthArg(0)->GetString());
 
 				ArrayElementR newValElem;
 				StringOrFloat newVal;
 				eval.GetNthArg(1)->GetElement(newValElem);
 				if (newValElem.GetType() == NVSEArrayVarInterface::kType_String)
 				{
-					newVal = newValElem.str;	
+					newVal = newValElem.str;	//todo: ensure this performs an actual copy
 				}
 				else //assume number
 				{
 					newVal = newValElem.num;
 				}
 
-				char configPath[0x80], * iniPath = configPath + 12;
+				CharArr configPath;
+				char *iniPath = configPath.data() + 12;
 				*iniPath = 0;
 				const char* comment = nullptr;
 				if (auto const numArgs = eval.NumArgs();
@@ -542,27 +545,28 @@ namespace IniToNVSE
 				}
 				if (!GetINIPath(iniPath, scriptObj))
 					return {};
-
+				
 				return std::make_tuple(sectionAndKey, newVal, configPath, comment);
 			}
 			return {};
 		}
 
-		void DoSet(const Args &args, double *result)
+		void Call(const Args &args, double *result)
 		{
 			auto& [sectionAndKey, newVal, configPath, comment] = args;
 
-			auto const keyName = GetNextToken(sectionAndKey, ":\\/");		//sectionAndKey now only contains Section
+			auto const keyName = GetNextToken(const_cast<std::array<char, MaxStrArgLen>&>(sectionAndKey).data(), ":\\/");
+			//sectionAndKey now only contains Section
 			if (!keyName) return;
 
 			CSimpleIniA ini(true);	//todo: read from cache
-			ini.LoadFile(configPath);	//ignore errors, file will be created if it did not exist.
+			ini.LoadFile(configPath.data());	//ignore errors, file will be created if it did not exist.
 
 			CommandResult res;
 			if (!std::visit(overloaded{
 					[&](const std::string& str) -> bool
 					{
-						if (auto const e = ini.SetValue(sectionAndKey, keyName, str.c_str(), comment);
+						if (auto const e = ini.SetValue(sectionAndKey.data(), keyName, str.c_str(), comment);
 							e >= SI_OK)	//if success
 						{
 							res = IniToNVSE::AsResult(e);
@@ -572,7 +576,7 @@ namespace IniToNVSE
 					},
 					[&](const double num) -> bool
 					{
-						if (auto const e = ini.SetDoubleValue(sectionAndKey, keyName, num, comment);
+						if (auto const e = ini.SetDoubleValue(sectionAndKey.data(), keyName, num, comment);
 							e >= SI_OK)
 						{
 							res = IniToNVSE::AsResult(e);
@@ -585,7 +589,7 @@ namespace IniToNVSE
 				return;
 			}
 			
-			if (ini.SaveFile(configPath, false) < SI_OK)
+			if (ini.SaveFile(configPath.data(), false) < SI_OK)
 				return;
 			*result = res;
 		}
@@ -622,7 +626,7 @@ bool Cmd_SetINIValue_Execute(COMMAND_ARGS)
 	*result = IniToNVSE::kResult_Error;
 	if (auto const args = IniToNVSE::SetINIValue::GetArgs(PASS_COMMAND_ARGS))
 	{
-		IniToNVSE::SetINIValue::DoSet(args.value(), result);
+		IniToNVSE::SetINIValue::Call(args.value(), result);
 	}
 	return true;
 }
