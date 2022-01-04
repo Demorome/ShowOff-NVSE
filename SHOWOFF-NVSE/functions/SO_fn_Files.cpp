@@ -516,7 +516,7 @@ namespace IniToNVSE
 			return {};
 		return configPath;
 	}
-	
+		
 	namespace SetINIValue
 	{
 		using Args = std::tuple<CharArr, ArrayElementR, CharArr, const char*>;
@@ -643,30 +643,123 @@ namespace IniToNVSE
 			return {};
 		}
 
+		using StringOrFloat = std::variant <std::string, double>;
+		
+		// Section, key, ini.
+		using UsefulBaseArgs = std::tuple <const CharArr&, char*, CSimpleIniA&>;
+		
+		// Section, key, ini, comment.
+		using UsefulGetOrCreateArgs = std::tuple <const CharArr&, char*, CSimpleIniA&, const std::string&>;
 
-		void Call(const BaseArgs& args, double* result)
+		namespace CallHelpers
 		{
-			auto& [sectionAndKey, configPath, defaultVal] = args;
-
-			/*
-			if constexpr (std::is_same_v<T, double>)
+			void TryChangeDefaultResult(const ArrayElementR& newRes, StringOrFloat& result)
 			{
-
+				if (newRes.IsValid())
+				{
+					std::visit([&]<typename T0>(T0 & res) {
+						using T = std::decay_t<T0>;
+						if constexpr (std::is_same_v<T, double>)
+						{
+							result = newRes.num;
+						}
+						else if constexpr (std::is_same_v<T, std::string>)
+						{
+							result = newRes.str;
+						}
+						else
+						{
+							static_assert(false, "GetINIValue - TryChangeDefaultResult >> non-exhaustive visitor");
+						}
+					}, result);
+				}
 			}
-			else if constexpr (std::is_same_v<T, std::string>)
+			
+			std::optional<UsefulBaseArgs> GetUsefulArgs(const BaseArgs& args, StringOrFloat& result)
 			{
+				auto& [sectionAndKey, configPath, defaultValElem] = args;
 
+				TryChangeDefaultResult(defaultValElem, result);
+
+				//sectionAndKey is made to only contain section name.
+				auto const keyName = GetNextToken(const_cast<CharArr&>(sectionAndKey).data(), ":\\/");
+				if (!keyName)
+					return {};
+
+				//todo: add read from cache code (pass scriptObj, etc.)
+				CSimpleIniA ini(true);
+				if (ini.LoadFile(configPath.data()) < SI_OK)
+					return {};
+
+				return std::tie(sectionAndKey, keyName, ini);
 			}
-			else
+
+			std::optional<UsefulGetOrCreateArgs> GetUsefulArgs(const GetOrCreateArgs& args, StringOrFloat& result)
 			{
-				static_assert(false, "GetArgs >> invalid type param given");
-			}*/
+				auto& [sectionAndKey, configPath, defaultValElem, comment] = args;
+
+				TryChangeDefaultResult(defaultValElem, result);
+
+				//sectionAndKey is made to only contain section name.
+				auto const keyName = GetNextToken(const_cast<CharArr&>(sectionAndKey).data(), ":\\/");
+				if (!keyName)
+					return {};
+
+				//todo: add read from cache code (pass scriptObj, etc.)
+				CSimpleIniA ini(true);
+				if (ini.LoadFile(configPath.data()) < SI_OK)
+					return {};
+
+				return std::tie(sectionAndKey, keyName, ini, comment);
+			}
 		}
 
-		void Call(const GetOrCreateArgs& args, double* result)
+		void Call(const BaseArgs& args, StringOrFloat &result)
 		{
-			auto& [sectionAndKey, configPath, defaultVal, comment] = args;
+			if (auto const usefulArgs = CallHelpers::GetUsefulArgs(args, result))
+			{
+				auto& [section, keyName, ini] = usefulArgs.value();
+				
+				std::visit([&]<typename T0>(T0 &res) {
+					using T = std::decay_t<T0>;
+					if constexpr (std::is_same_v<T, double>)
+					{
+						result = ini.GetDoubleValue(section.data(), keyName, res);
+					}
+					else if constexpr (std::is_same_v<T, std::string>)
+					{
+						result = ini.GetValue(section.data(), keyName, res.c_str());
+					}
+					else
+					{
+						static_assert(false, "GetINIValue - Call_BaseArgs >> non-exhaustive visitor");
+					}
+				}, result);
+			}
+		}
 
+		void Call(const GetOrCreateArgs& args, StringOrFloat &result)
+		{
+			if (auto const usefulArgs = CallHelpers::GetUsefulArgs(args, result))
+			{
+				auto& [section, keyName, ini, comment] = usefulArgs.value();
+
+				std::visit([&]<typename T0>(T0 & res) {
+					using T = std::decay_t<T0>;
+					if constexpr (std::is_same_v<T, double>)
+					{
+						result = ini.GetOrCreate(section.data(), keyName, res, comment.c_str());
+					}
+					else if constexpr (std::is_same_v<T, std::string>)
+					{
+						result = ini.GetOrCreate(section.data(), keyName, res.c_str(), comment.c_str());
+					}
+					else
+					{
+						static_assert(false, "GetINIValue - Call_GetOrCreateArgs >> non-exhaustive visitor");
+					}
+				}, result);
+			}
 		}
 	};
 	
@@ -719,21 +812,23 @@ bool Cmd_SetINIStringAlt_Execute(COMMAND_ARGS)
 
 bool Cmd_GetINIFloatOrDefault_Execute(COMMAND_ARGS)
 {
-	*result = 0;
+	IniToNVSE::GetINIValue::StringOrFloat res = 0.0;
 	if (auto const args = IniToNVSE::GetINIValue::GetBaseArgs(PASS_COMMAND_ARGS))
 	{
-		//IniToNVSE::GetINIValue::Call<double>(args.value(), result);
+		IniToNVSE::GetINIValue::Call(args.value(), res);
 	}
+	//IniToNVSE::GetINIValue::AssignResult(res);
 	return true;
 }
 
 bool Cmd_GetINIStringOrDefault_Execute(COMMAND_ARGS)
 {
-	*result = 0;
+	IniToNVSE::GetINIValue::StringOrFloat res = "";
 	if (auto const args = IniToNVSE::GetINIValue::GetBaseArgs(PASS_COMMAND_ARGS))
 	{
-		//IniToNVSE::GetINIValue::Call<std::string>(args.value(), result);
+		IniToNVSE::GetINIValue::Call(args.value(), res);
 	}
+	//IniToNVSE::GetINIValue::AssignResult(res);
 	return true;
 }
 
