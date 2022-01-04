@@ -895,6 +895,32 @@ public:
         const SI_CHAR * a_pDefault     = NULL,
         bool *          a_pHasMultiple = NULL
         ) const;
+	
+    /** Retrieve the value for a specific key. If multiple keys are enabled
+        (see SetMultiKey) then only the first value associated with that key
+        will be returned, see GetAllValues for getting all values with multikey.
+
+        NOTE! The returned value is a pointer to string data stored in memory
+        owned by CSimpleIni. Ensure that the CSimpleIni object is not destroyed
+        or Reset while you are using this pointer!
+
+        @param a_pSection               Section to search
+        @param a_pKey                   Key to search for
+        @param a_pDefault               Value to return if the key is not found
+        @param a_ignoreQuotedValues     Remove begin and end quote (") characters from string, if both are present.
+        @param a_pHasMultiple           Optionally receive notification of if there are
+										multiple entries for this key.
+
+        @return a_pDefault      Key was not found in the section
+        @return other           Value of the key
+     */
+    std::string GetStringValue(
+        const SI_CHAR* a_pSection,
+        const SI_CHAR* a_pKey,
+        const SI_CHAR* a_pDefault = "",
+        bool a_ignoreQuotedValues = false,
+        bool* a_pHasMultiple = NULL
+    ) const;
 
     /** Retrieve a numeric value for a specific key. If multiple keys are enabled
         (see SetMultiKey) then only the first value associated with that key
@@ -2144,6 +2170,30 @@ CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::GetLongValue(
     }
 
     return nValue;
+}
+
+template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
+std::string
+CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetStringValue(
+    const SI_CHAR* a_pSection,
+    const SI_CHAR* a_pKey,
+    const SI_CHAR* a_pDefault,
+    bool a_ignoreQuotedValues,
+    bool* a_pHasMultiple
+) const
+{
+    if (a_pDefault == nullptr)
+        throw "SimpleINI - GetStringValue - Cannot initialize string with nullptr default in error case (UB).";
+	
+    std::string value = GetValue(a_pSection, a_pKey, a_pDefault, a_pHasMultiple);
+    if (a_ignoreQuotedValues && 
+        value.front() == '"' && '"' == value.back() && value.size() > 1)
+    {
+	    //Remove extra quote characters
+        value.erase(std::begin(value));
+        value.pop_back();
+    }
+    return value;
 }
 
 template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
