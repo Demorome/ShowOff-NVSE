@@ -33,10 +33,8 @@ DEFINE_COMMAND_PLUGIN_EXP(SetINIFloatAlt, "", false, kNVSEParams_OneString_OneFl
 DEFINE_COMMAND_PLUGIN_EXP(SetINIStringAlt, "", false, kNVSEParams_TwoStrings_TwoOptionalStrings);
 
 //These don't need to be _EXP, but it reduces code copying.
-/*
 DEFINE_COMMAND_PLUGIN_EXP(GetINIFloatOrCreate, "", false, kParams_OneString_OneOptionalString_OneOptionalFloat_OneOptionalString);
 DEFINE_COMMAND_PLUGIN_EXP(GetINIStringOrCreate, "", false, kParams_OneString_ThreeOptionalStrings);
-*/
 DEFINE_COMMAND_ALT_PLUGIN_EXP(GetINIFloatOrDefault, GetINIFloatAlt, "", false, kParams_OneString_OneOptionalString_OneOptionalFloat);
 DEFINE_COMMAND_ALT_PLUGIN_EXP(GetINIStringOrDefault, GetINIStringAlt, "", false, kParams_OneString_TwoOptionalStrings);
 

@@ -754,12 +754,29 @@ namespace IniToNVSE
 					{
 						result = ini.GetOrCreate(section.data(), keyName, res.c_str(), comment.c_str());
 					}
-					else
-					{
+					else {
 						static_assert(false, "GetINIValue - Call_GetOrCreateArgs >> non-exhaustive visitor");
 					}
 				}, result);
 			}
+		}
+
+		void AssignResult(const StringOrFloat& res, COMMAND_ARGS)
+		{
+			std::visit([&]<typename T0>(T0 & resVisitor) {
+				using T = std::decay_t<T0>;
+				if constexpr (std::is_same_v<T, double>)
+				{
+					*result = resVisitor;
+				}
+				else if constexpr (std::is_same_v<T, std::string>)
+				{
+					g_strInterface->Assign(PASS_COMMAND_ARGS, resVisitor.c_str());
+				}
+				else {
+					static_assert(false, "GetINIValue - AssignResult >> non-exhaustive visitor");
+				}
+			}, res);
 		}
 	};
 	
@@ -810,6 +827,28 @@ bool Cmd_SetINIStringAlt_Execute(COMMAND_ARGS)
 	return Cmd_SetINIValue_Execute(PASS_COMMAND_ARGS);
 }
 
+
+bool Cmd_GetINIFloatOrCreate_Execute(COMMAND_ARGS)
+{
+	IniToNVSE::GetINIValue::StringOrFloat res = 0.0;
+	if (auto const args = IniToNVSE::GetINIValue::Get_GetOrCreate_Args(PASS_COMMAND_ARGS))
+	{
+		IniToNVSE::GetINIValue::Call(args.value(), res);
+	}
+	IniToNVSE::GetINIValue::AssignResult(res, PASS_COMMAND_ARGS);
+	return true;
+}
+bool Cmd_GetINIStringOrCreate_Execute(COMMAND_ARGS)
+{
+	IniToNVSE::GetINIValue::StringOrFloat res = "";
+	if (auto const args = IniToNVSE::GetINIValue::Get_GetOrCreate_Args(PASS_COMMAND_ARGS))
+	{
+		IniToNVSE::GetINIValue::Call(args.value(), res);
+	}
+	IniToNVSE::GetINIValue::AssignResult(res, PASS_COMMAND_ARGS);
+	return true;
+}
+
 bool Cmd_GetINIFloatOrDefault_Execute(COMMAND_ARGS)
 {
 	IniToNVSE::GetINIValue::StringOrFloat res = 0.0;
@@ -817,10 +856,9 @@ bool Cmd_GetINIFloatOrDefault_Execute(COMMAND_ARGS)
 	{
 		IniToNVSE::GetINIValue::Call(args.value(), res);
 	}
-	//IniToNVSE::GetINIValue::AssignResult(res);
+	IniToNVSE::GetINIValue::AssignResult(res, PASS_COMMAND_ARGS);
 	return true;
 }
-
 bool Cmd_GetINIStringOrDefault_Execute(COMMAND_ARGS)
 {
 	IniToNVSE::GetINIValue::StringOrFloat res = "";
@@ -828,7 +866,7 @@ bool Cmd_GetINIStringOrDefault_Execute(COMMAND_ARGS)
 	{
 		IniToNVSE::GetINIValue::Call(args.value(), res);
 	}
-	//IniToNVSE::GetINIValue::AssignResult(res);
+	IniToNVSE::GetINIValue::AssignResult(res, PASS_COMMAND_ARGS);
 	return true;
 }
 
