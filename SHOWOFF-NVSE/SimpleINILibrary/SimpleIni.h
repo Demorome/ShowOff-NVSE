@@ -1,3 +1,5 @@
+#pragma once
+
 /** @mainpage
 
     <table>
@@ -895,32 +897,6 @@ public:
         const SI_CHAR * a_pDefault     = NULL,
         bool *          a_pHasMultiple = NULL
         ) const;
-	
-    /** Retrieve the value for a specific key. If multiple keys are enabled
-        (see SetMultiKey) then only the first value associated with that key
-        will be returned, see GetAllValues for getting all values with multikey.
-
-        NOTE! The returned value is a pointer to string data stored in memory
-        owned by CSimpleIni. Ensure that the CSimpleIni object is not destroyed
-        or Reset while you are using this pointer!
-
-        @param a_pSection               Section to search
-        @param a_pKey                   Key to search for
-        @param a_pDefault               Value to return if the key is not found
-        @param a_ignoreQuotedValues     Remove begin and end quote (") characters from string, if both are present.
-        @param a_pHasMultiple           Optionally receive notification of if there are
-										multiple entries for this key.
-
-        @return a_pDefault      Key was not found in the section
-        @return other           Value of the key
-     */
-    std::string GetStringValue(
-        const SI_CHAR* a_pSection,
-        const SI_CHAR* a_pKey,
-        const SI_CHAR* a_pDefault = "",
-        bool a_ignoreQuotedValues = false,
-        bool* a_pHasMultiple = NULL
-    ) const;
 
     /** Retrieve a numeric value for a specific key. If multiple keys are enabled
         (see SetMultiKey) then only the first value associated with that key
@@ -946,21 +922,23 @@ public:
         (see SetMultiKey) then only the first value associated with that key
         will be returned, see GetAllValues for getting all values with multikey.
 
-        @param a_pSection       Section to search
-        @param a_pKey           Key to search for
-        @param a_nDefault       Value to return if the key is not found
-        @param a_pHasMultiple   Optionally receive notification of if there are
-                                multiple entries for this key.
+        @param a_pSection          Section to search
+        @param a_pKey                   Key to search for
+        @param a_nDefault           Value to return if the key is not found
+        @param a_pHasMultiple          Optionally receive notification of if there are
+										multiple entries for this key.
+        @param a_bIgnoreInvalidEnd  Ignore invalid characters at end of string when converting str to number.
 
         @return a_nDefault      Key was not found in the section
         @return other           Value of the key
      */
     double GetDoubleValue(
-        const SI_CHAR * a_pSection,
-        const SI_CHAR * a_pKey,
-        double          a_nDefault     = 0,
-        bool *          a_pHasMultiple = NULL
-        ) const;
+	    const SI_CHAR * a_pSection,
+	    const SI_CHAR * a_pKey,
+	    double          a_nDefault     = 0,
+	    bool *          a_pHasMultiple = NULL, 
+        bool            a_bIgnoreInvalidEnd = true
+		) const;
 
     /** Retrieve a boolean value for a specific key. If multiple keys are enabled
         (see SetMultiKey) then only the first value associated with that key
@@ -1185,8 +1163,8 @@ public:
 	/* get an option and creates it if it doesn't exist */
 	int GetOrCreate(const char* sectionName, const char* keyName, int defaultValue, const char* comment);
 	long GetOrCreateHex(char* sectionName, char* keyName, long defaultValue, char* comment);
-	float GetOrCreate(const char* sectionName, const char* keyName, double defaultValue, const char* comment);
-	const char* GetOrCreate(const char* sectionName, const char* keyName, const char* defaultValue, const char* comment);
+    double GetOrCreate(const char* sectionName, const char* keyName, double defaultValue, const char* comment);
+    const SI_CHAR* GetOrCreate(const SI_CHAR* sectionName, const SI_CHAR* keyName, const SI_CHAR* defaultValue, const SI_CHAR* comment);
 
 private:
     // copying is not permitted
@@ -1205,12 +1183,12 @@ private:
         updated to the current location in the block of text.
     */
     bool FindEntry(
-        SI_CHAR *&  a_pData,
-        const SI_CHAR *&  a_pSection,
-        const SI_CHAR *&  a_pKey,
-        const SI_CHAR *&  a_pVal,
-        const SI_CHAR *&  a_pComment
-        ) const;
+	    SI_CHAR *&  a_pData,
+	    const SI_CHAR *&  a_pSection,
+	    const SI_CHAR *&  a_pKey,
+	    SI_CHAR*& a_pVal,
+	    const SI_CHAR *&  a_pComment
+    ) const;
 
     /** Add the section/key/value to our data.
 
@@ -1330,11 +1308,15 @@ private:
      */
     int m_nOrder;
 
-	/** Should keys and sections be sorted alphabetically */
+	/** Should keys and sections be sorted alphabetically? */
 	bool m_bSortAlphabetically;
 
-	/** Should new keys be created above older keys */
+	/** Should new keys be created above older keys? */
 	bool m_bPrependNewKeys;
+
+    /** Should quotes around a value be ignored when retrieving the value?
+     */
+    bool m_bIgnoreQuotesAroundValues = true;
 };
 
 // ---------------------------------------------------------------------------
@@ -1527,7 +1509,7 @@ CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::LoadData(
     SI_CHAR * pWork = pData;
     const SI_CHAR * pSection = &empty;
     const SI_CHAR * pItem = NULL;
-    const SI_CHAR * pVal = NULL;
+    SI_CHAR * pVal = NULL;
     const SI_CHAR * pComment = NULL;
 
     // We copy the strings if we are loading data into this class when we
@@ -1599,9 +1581,10 @@ _declspec(noinline) long CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::Get
 }
 
 template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
-_declspec(noinline) float CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetOrCreate(const char* sectionName, const char* keyName, double defaultValue, const char* comment)
+_declspec(noinline) double CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetOrCreate(
+	const char* sectionName, const char* keyName, double defaultValue, const char* comment)
 {
-	double settingValue = this->GetDoubleValue(sectionName, keyName, -1);
+	double settingValue = this->GetDoubleValue(sectionName, keyName, -1,);
 	if (settingValue == -1) {
 		this->SetDoubleValue(sectionName, keyName, defaultValue, comment, m_bPrependNewKeys);
 		return defaultValue;
@@ -1610,14 +1593,19 @@ _declspec(noinline) float CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::Ge
 }
 
 template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
-_declspec(noinline) const char* CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetOrCreate(const char* sectionName, const char* keyName, const char* defaultValue, const char* comment)
+template <typename T>
+_declspec(noinline) T CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetOrCreate(const SI_CHAR* sectionName, const SI_CHAR* keyName, const T defaultValue, const SI_CHAR* comment)
 {
-	const char* settingValue = this->GetValue(sectionName, keyName, NULL);
-	if (settingValue == NULL) {
+	const SI_CHAR* settingValue = this->GetValue(sectionName, keyName, nullptr);
+	if (settingValue == nullptr) {
 		this->SetValue(sectionName, keyName, defaultValue, comment, m_bPrependNewKeys);
 		return defaultValue;
 	}
-	return settingValue;
+	if constexpr (std::is_arithmetic_v<T>)
+	{
+        return this->GetNumericValue<T>(settingValue);
+	}
+    return settingValue;
 }
 
 template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
@@ -1650,12 +1638,12 @@ CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::FindFileComment(
 template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
 bool
 CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::FindEntry(
-    SI_CHAR *&        a_pData,
-    const SI_CHAR *&  a_pSection,
-    const SI_CHAR *&  a_pKey,
-    const SI_CHAR *&  a_pVal,
-    const SI_CHAR *&  a_pComment
-    ) const
+	SI_CHAR *&        a_pData,
+	const SI_CHAR *&  a_pSection,
+	const SI_CHAR *&  a_pKey,
+	SI_CHAR *&        a_pVal,
+	const SI_CHAR *&  a_pComment
+) const
 {
     a_pComment = NULL;
 
@@ -1766,11 +1754,32 @@ CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::FindEntry(
         ++pTrail;
         *pTrail = 0;
 
+    	if (m_bIgnoreQuotesAroundValues)
+    	{
+            //If the value begins and ends with '"'
+            if (SI_CHAR* pVal_Back = pTrail - 1; 
+                *a_pVal == '"' && *pVal_Back == '"')
+            {
+                if (*a_pVal + 1 != 0) //if size > 1
+                {
+                    //shift 1st element to before the last '"' character (last two characters will be '"', '"').
+                    for (SI_CHAR* i = a_pVal + 1; *i != '"'; ++i)
+                    {
+                        std::swap(*(i - 1), *i);
+                    }
+                    //null-terminate last two characters
+                    *pVal_Back = 0;
+                    *(pVal_Back - 1) = 0;
+                }
+            }
+    	}
+
         // check for multi-line entries
         if (m_bAllowMultiLine && IsMultiLineTag(a_pVal)) {
             // skip the "<<<" to get the tag that will end the multiline
             const SI_CHAR * pTagName = a_pVal + 3;
-            return LoadMultiLineText(a_pData, a_pVal, pTagName);
+            return LoadMultiLineText(a_pData, const_cast<const SI_CHAR*&>(a_pVal), pTagName);
+        	//promise we won't touch a_pVal after this.
         }
 
         // return the standard entry
@@ -2172,29 +2181,6 @@ CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::GetLongValue(
     return nValue;
 }
 
-template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
-std::string
-CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetStringValue(
-    const SI_CHAR* a_pSection,
-    const SI_CHAR* a_pKey,
-    const SI_CHAR* a_pDefault,
-    bool a_ignoreQuotedValues,
-    bool* a_pHasMultiple
-) const
-{
-    if (a_pDefault == nullptr)
-        throw "SimpleINI - GetStringValue - Cannot initialize string with nullptr default in error case (UB).";
-	
-    std::string value = GetValue(a_pSection, a_pKey, a_pDefault, a_pHasMultiple);
-    if (a_ignoreQuotedValues && 
-        value.front() == '"' && '"' == value.back() && value.size() > 1)
-    {
-	    //Remove extra quote characters
-        value.erase(std::begin(value));
-        value.pop_back();
-    }
-    return value;
-}
 
 template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
 SI_Error 
@@ -2231,11 +2217,12 @@ CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::SetLongValue(
 template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
 double
 CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::GetDoubleValue(
-    const SI_CHAR * a_pSection,
-    const SI_CHAR * a_pKey,
-    double          a_nDefault,
-    bool *          a_pHasMultiple
-    ) const
+	const SI_CHAR * a_pSection,
+	const SI_CHAR * a_pKey,
+	double          a_nDefault,
+	bool *          a_pHasMultiple, 
+    bool            a_bIgnoreInvalidEnd
+) const
 {
     // return the default if we don't have a value
     const SI_CHAR * pszValue = GetValue(a_pSection, a_pKey, NULL, a_pHasMultiple);
@@ -2249,10 +2236,10 @@ CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::GetDoubleValue(
     }
 
     char * pszSuffix = NULL;
-    double nValue = strtod(szValue, &pszSuffix);
+    double const nValue = strtod(szValue, &pszSuffix);
 
     // any invalid strings will return the default value
-    if (!pszSuffix || *pszSuffix) { 
+    if (!pszSuffix || (!a_bIgnoreInvalidEnd  && *pszSuffix)) {
         return a_nDefault; 
     }
 

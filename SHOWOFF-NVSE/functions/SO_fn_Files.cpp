@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <fstream>
 
+#define SI_SUPPORT_IOSTREAMS
 #include "SimpleIni.h"
 
 //Made by anhatthezoo, requested by Trooper.
@@ -698,11 +699,11 @@ namespace IniToNVSE
 				using T = std::decay_t<T0>;
 				if constexpr (std::is_same_v<T, double>)
 				{
-					result = ini.GetDoubleValue(sectionAndKey.data(), keyName, res);
+					result = ini.GetDoubleValue(sectionAndKey.data(), keyName, res,);
 				}
 				else if constexpr (std::is_same_v<T, std::string>)
 				{
-					result = ini.GetStringValue(sectionAndKey.data(), keyName, res.c_str(), true);
+					result = ini.GetValue(sectionAndKey.data(), keyName, res.c_str());
 				}
 				else
 				{
