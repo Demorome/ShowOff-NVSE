@@ -427,7 +427,7 @@ extern "C"
 		/*3CA9*/ REG_CMD(SetCreatureReach)
 		/*3CAA*/ REG_CMD(SetCreatureBaseScale) //JG's GetBaseScale should return the creature's base scale, so no need for a GetCreatureBaseScale.
 		/*3CAB*/ REG_CMD(DumpFormList)
-		/*3CAC*/ REG_CMD(ListAddArray)
+		/*3CAC*/ REG_CMD(ListAddArray_OLD)
 		/*3CAD*/ REG_CMD(ListAddList)
 		/*3CAE*/ REG_CMD(IsAnimPlayingExCond)
 		/*3CAF*/ REG_CMD(GetNumCompassHostiles)
@@ -528,7 +528,7 @@ extern "C"
 		/*3D01*/ REG_CMD(SetAllyTemp)
 		/*3D02*/ REG_CMD(SetEnemyTemp)
 		/*3D03*/ REG_CMD_ARR(TopicInfoGetResponseStrings)
-		/*3D04*/ REG_CMD(TopicInfoSetResponseStrings)
+		/*3D04*/ REG_CMD(TopicInfoSetResponseStrings_OLD)
 
 		//========v1.31
 		/*3D05*/ REG_CMD(TopicInfoSetNthResponseString)
@@ -551,18 +551,30 @@ extern "C"
 		/*3D12*/ REG_CMD(SetOwnershipTemp)
 		/*3D13*/ REG_CMD(IsActorAlt)
 		/*3D14*/ REG_CMD(ApplyEasing)
-		/*3D15*/ REG_CMD(Matrix_IsMatrix)
-		/*3D16*/ REG_CMD_ARR(Matrix3x3_GetQuaternion)
-		/*3D17*/ REG_CMD_ARR(Quaternion_GetMatrix)
-		/*3D18*/ REG_CMD_ARR(Matrix_Transpose)
-		/*3D19*/ REG_CMD(Matrix_Dump)
-		/*3D1A*/ REG_CMD_ARR(Matrix_ApplyOperationWithScalar)
-		/*3D1B*/ REG_CMD_ARR(Matrix_ApplyOperationWithMatrix)
+		/*3D15*/ REG_CMD(Matrix_IsMatrix_OLD)
+		/*3D16*/ REG_CMD_ARR(Matrix3x3_GetQuaternion_OLD)
+		/*3D17*/ REG_CMD_ARR(Quaternion_GetMatrix_OLD)
+		/*3D18*/ REG_CMD_ARR(Matrix_Transpose_OLD)
+		/*3D19*/ REG_CMD(Matrix_Dump_OLD)
+		/*3D1A*/ REG_CMD_ARR(Matrix_ApplyOperationWithScalar_OLD)
+		/*3D1B*/ REG_CMD_ARR(Matrix_ApplyOperationWithMatrix_OLD)
 
 		//========v1.45
 		/*3D1C*/ REG_CMD_AMB(ReadFromJSONFile)
 		/*3D1D*/ REG_CMD(WriteToJSONFile)
-			
+		
+		//== Functions that used old array extraction method, improved vers. had to be redeclared for backwards compat.
+		/*3D1E*/ REG_CMD(ListAddArray)	//todo: add bCheckForDupes arg (optional)
+		/*3D1F*/ REG_CMD(Matrix_IsMatrix)
+		/*3D20*/ REG_CMD_ARR(Matrix3x3_GetQuaternion)
+		/*3D21*/ REG_CMD_ARR(Quaternion_GetMatrix)
+		/*3D22*/ REG_CMD_ARR(Matrix_Transpose)
+		/*3D23*/ REG_CMD(Matrix_Dump)
+		/*3D24*/ REG_CMD_ARR(Matrix_ApplyOperationWithScalar)
+		/*3D25*/ REG_CMD_ARR(Matrix_ApplyOperationWithMatrix)
+		/*3D26*/ REG_CMD(TopicInfoSetResponseStrings)
+		//==
+		
 	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		

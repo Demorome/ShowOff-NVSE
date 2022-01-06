@@ -26,7 +26,42 @@ bool Cmd_TopicInfoGetResponseStrings_Execute(COMMAND_ARGS)
 	return true;
 }
 
+DEFINE_COMMAND_PLUGIN(TopicInfoSetResponseStrings_OLD, "", false, kParams_OneForm_OneArray);
 DEFINE_COMMAND_PLUGIN_EXP(TopicInfoSetResponseStrings, "", false, kNVSEParams_OneForm_OneArray);
+
+void TopicInfoSetResponseStrings_Call(NVSEArrayVar *arr, TESTopicInfo* tInfo, double *result)
+{
+	if (g_arrInterface->GetContainerType(arr) != NVSEArrayVarInterface::kArrType_Array)
+		return;
+	auto const response = ThisStdCall<TESTopicInfoResponse**>(0x61E780, tInfo, nullptr);
+	uint32_t loopCounter = 0;
+	auto const arrSize = g_arrInterface->GetArraySize(arr);
+	for (auto responseIter = *response; responseIter && loopCounter < arrSize; responseIter = responseIter->next)
+	{
+		ArrayElementR iterElem;
+		g_arrInterface->GetElement(arr, ArrayElementL(iterElem), iterElem);
+		if (iterElem.IsValid())
+		{
+			responseIter->responseText.Set(iterElem.String());
+		}
+		loopCounter++;
+	}
+	*result = 1;
+}
+
+bool Cmd_TopicInfoSetResponseStrings_OLD_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	TESTopicInfo* tInfo;
+	UInt32 arrID;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &tInfo, &arrID) && IS_ID(tInfo, TESTopicInfo))
+	{
+		if (const auto inArr = g_arrInterface->LookupArrayByID(arrID))
+			TopicInfoSetResponseStrings_Call(inArr, tInfo, result);
+	}
+	return true;
+}
+
 bool Cmd_TopicInfoSetResponseStrings_Execute(COMMAND_ARGS)
 {
 	*result = 0;	//bSuccess
@@ -37,23 +72,7 @@ bool Cmd_TopicInfoSetResponseStrings_Execute(COMMAND_ARGS)
 		auto const inArr = eval.GetNthArg(1)->GetArrayVar();
 		if (!tInfo || !inArr)
 			return true;
-		if (g_arrInterface->GetContainerType(inArr) != NVSEArrayVarInterface::kArrType_Array)
-			return true;
-
-		auto const response = ThisStdCall<TESTopicInfoResponse**>(0x61E780, tInfo, nullptr);
-		uint32_t loopCounter = 0;
-		auto const arrSize = g_arrInterface->GetArraySize(inArr);
-		for (auto responseIter = *response; responseIter && loopCounter < arrSize; responseIter = responseIter->next)
-		{
-			ArrayElementR iterElem;
-			g_arrInterface->GetElement(inArr, ArrayElementL(iterElem), iterElem);
-			if (iterElem.IsValid())
-			{
-				responseIter->responseText.Set(iterElem.String());
-			}
-			loopCounter++;
-		}
-		*result = 1;
+		TopicInfoSetResponseStrings_Call(inArr, tInfo, result);
 	}
 	return true;
 }

@@ -43,15 +43,31 @@ NVSEArrayVar* GetMatrixAsArray(arma::Mat<double>& matrix, Script* callingScript)
 NVSEArrayVar* QuatToArray(NiQuaternion const& quat, Script* callingScript);
 
 
+
+
+DEFINE_COMMAND_ALT_PLUGIN(Matrix_ApplyOperationWithMatrix_OLD, Mat_ApplyOpWithMat_OLD,
+	"Returns the matrix operation result between two matrix arrays.", false, kParams_OneArrayID_OneString_OneArrayID);
 DEFINE_COMMAND_ALT_PLUGIN_EXP(Matrix_ApplyOperationWithMatrix, Mat_ApplyOpWithMat,
 	"Returns the matrix operation result between two matrix arrays.", false, kNVSEParams_OneArray_OneString_OneArray);
+
+DEFINE_COMMAND_ALT_PLUGIN(Matrix_ApplyOperationWithScalar_OLD, Mat_ApplyOpWithScal_OLD,
+	"Returns the matrix affected by an operation by a scalar.", false, kParams_OneArrayID_OneString_OneDouble);
 DEFINE_COMMAND_ALT_PLUGIN_EXP(Matrix_ApplyOperationWithScalar, Mat_ApplyOpWithScal,
 	"Returns the matrix affected by an operation by a scalar.", false, kNVSEParams_OneArray_OneString_OneDouble);
+
+DEFINE_COMMAND_ALT_PLUGIN(Matrix_Transpose_OLD, Mat_T_OLD, "Returns the transpose of the array matrix.", false, kParams_OneArrayID);
 DEFINE_COMMAND_ALT_PLUGIN_EXP(Matrix_Transpose, Mat_T, "Returns the transpose of the array matrix.", false, kNVSEParams_OneArray);
+
+DEFINE_COMMAND_ALT_PLUGIN(Matrix_IsMatrix_OLD, Mat_IsMat_OLD, "Checks if an array is convertible to a matrix.", false, kParams_OneArrayID);
 DEFINE_COMMAND_ALT_PLUGIN_EXP(Matrix_IsMatrix, Mat_IsMat, "Checks if an array is convertible to a matrix.", false, kNVSEParams_OneArray);
+
+DEFINE_COMMAND_ALT_PLUGIN(Matrix3x3_GetQuaternion_OLD, Mat_GetQuat_OLD, "Returns a quaternion from a 3x3 matrix.", false, kParams_OneArrayID);
 DEFINE_COMMAND_ALT_PLUGIN_EXP(Matrix3x3_GetQuaternion, Mat_GetQuat, "Returns a quaternion from a 3x3 matrix.", false, kNVSEParams_OneArray);
+
+DEFINE_COMMAND_ALT_PLUGIN(Matrix_Dump_OLD, Mat_Dump_OLD, "Dumps the matrix array in console, in matrix notation.", false, kParams_OneArrayID);
 DEFINE_COMMAND_ALT_PLUGIN_EXP(Matrix_Dump, Mat_Dump, "Dumps the matrix array in console, in matrix notation.", false, kNVSEParams_OneArray);
 
+DEFINE_COMMAND_ALT_PLUGIN(Quaternion_GetMatrix_OLD, Quat_GetMat_OLD, "Returns a 3x3 rotation matrix from a quaternion array.", false, kParams_OneArrayID);
 DEFINE_COMMAND_ALT_PLUGIN_EXP(Quaternion_GetMatrix, Quat_GetMat, "Returns a 3x3 rotation matrix from a quaternion array.", false, kNVSEParams_OneArray);
 
 
