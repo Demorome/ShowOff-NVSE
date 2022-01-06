@@ -695,15 +695,15 @@ namespace IniToNVSE
 			if (ini.LoadFile(configPath.data()) < SI_OK)
 				return;
 					
-			std::visit([&]<typename T0>(T0 &res) {
+			std::visit([&]<typename T0>(T0 &defaultVal) {
 				using T = std::decay_t<T0>;
 				if constexpr (std::is_same_v<T, double>)
 				{
-					result = ini.GetDoubleValue(sectionAndKey.data(), keyName, res,);
+					result = ini.GetDoubleValue(sectionAndKey.data(), keyName, defaultVal);
 				}
 				else if constexpr (std::is_same_v<T, std::string>)
 				{
-					result = ini.GetValue(sectionAndKey.data(), keyName, res.c_str());
+					result = ini.GetValue(sectionAndKey.data(), keyName, defaultVal.c_str());
 				}
 				else
 				{
@@ -732,11 +732,11 @@ namespace IniToNVSE
 				using T = std::decay_t<T0>;
 				if constexpr (std::is_same_v<T, double>)
 				{
-					result = ini.GetOrCreate(sectionAndKey.data(), keyName, res, comment.c_str());
+					result = ini.GetOrCreate(sectionAndKey.data(), keyName, res, comment.c_str(), true);
 				}
 				else if constexpr (std::is_same_v<T, std::string>)
 				{
-					result = ini.GetOrCreate(sectionAndKey.data(), keyName, res.c_str(), comment.c_str());
+					result = ini.GetOrCreate(sectionAndKey.data(), keyName, res.c_str(), comment.c_str(), true);
 				}
 				else {
 					static_assert(false, "GetINIValue - Call_GetOrCreateArgs >> non-exhaustive visitor");

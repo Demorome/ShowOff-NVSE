@@ -436,7 +436,7 @@ public:
             }
             return SI_CONVERTER::ConvertToStore(
                 a_pszString,
-                const_cast<char*>(m_scratch.data()),
+                m_scratch.data(),
                 m_scratch.size());
         }
         const char * Data() { return m_scratch.data(); }
@@ -1161,10 +1161,14 @@ public:
     /** @} */
 
 	/* get an option and creates it if it doesn't exist */
-	int GetOrCreate(const char* sectionName, const char* keyName, int defaultValue, const char* comment);
-	long GetOrCreateHex(char* sectionName, char* keyName, long defaultValue, char* comment);
-    double GetOrCreate(const char* sectionName, const char* keyName, double defaultValue, const char* comment);
-    const SI_CHAR* GetOrCreate(const SI_CHAR* sectionName, const SI_CHAR* keyName, const SI_CHAR* defaultValue, const SI_CHAR* comment);
+    template <typename T>
+    T GetNumericValue(const SI_CHAR* strValue, const T a_nDefault, const bool ignoreInvalidEnd);
+
+	template <typename T>
+    T GetOrCreate(const SI_CHAR* sectionName, const SI_CHAR* keyName, const T defaultValue, const SI_CHAR* comment, 
+        const bool ignoreInvalidEnd = true);
+
+    long GetOrCreateHex(SI_CHAR* sectionName, SI_CHAR* keyName, long defaultValue, SI_CHAR* comment);
 
 private:
     // copying is not permitted
@@ -1557,20 +1561,8 @@ CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::LoadData(
 }
 #endif // SI_SUPPORT_IOSTREAMS
 
-template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
-_declspec(noinline) int CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetOrCreate(const char* sectionName, const char* keyName, int defaultValue, const char* comment)
-{
-	int settingValue = this->GetLongValue(sectionName, keyName, -1);
-	if (settingValue == -1) {
-		this->SetLongValue(sectionName, keyName, defaultValue, comment, false, m_bPrependNewKeys);
-		return defaultValue;
-	}
-	return settingValue;
-}
-
-
-template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
-_declspec(noinline) long CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetOrCreateHex(char* sectionName, char* keyName, long defaultValue, char* comment)
+template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER> 
+_declspec(noinline) long CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetOrCreateHex(SI_CHAR* sectionName, SI_CHAR* keyName, long defaultValue, SI_CHAR* comment)
 {
 	long settingValue = this->GetLongValue(sectionName, keyName, -1);
 	if (settingValue == -1) {
@@ -1581,31 +1573,83 @@ _declspec(noinline) long CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::Get
 }
 
 template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
-_declspec(noinline) double CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetOrCreate(
-	const char* sectionName, const char* keyName, double defaultValue, const char* comment)
+template <typename T>
+_declspec(noinline) T CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetNumericValue(const SI_CHAR* strValue, const T a_nDefault, const bool ignoreInvalidEnd)
 {
-	double settingValue = this->GetDoubleValue(sectionName, keyName, -1,);
-	if (settingValue == -1) {
-		this->SetDoubleValue(sectionName, keyName, defaultValue, comment, m_bPrependNewKeys);
-		return defaultValue;
+    // convert to UTF-8/MBCS which for a numeric value will be the same as ASCII
+    char szValue[64] = { 0 };
+    SI_CONVERTER c(m_bStoreIsUtf8);
+    if (!c.ConvertToStore(strValue, szValue, sizeof(szValue))) {
+        return a_nDefault;
+    }
+
+    // handle the value as hex if prefaced with "0x"
+    T nValue = a_nDefault;
+    char* pszSuffix = szValue;
+
+	if constexpr (std::is_floating_point<T>::value)
+	{
+        nValue = strtod(szValue, &pszSuffix);
 	}
-	return settingValue;
+    else if constexpr (decay_equiv<T, long>::value || decay_equiv<T, int>::value)
+    {
+        if (szValue[0] == '0' && (szValue[1] == 'x' || szValue[1] == 'X')) {
+            if (!szValue[2]) return a_nDefault;
+            nValue = strtol(&szValue[2], &pszSuffix, 16);
+        }
+        else {
+            nValue = strtol(szValue, &pszSuffix, 10);
+        }
+    }
+    else
+    {
+        static_assert(false, "GetNumericValue >> Undefined type for conversion!");
+    }
+
+    // any invalid strings will return the default value
+    if (!ignoreInvalidEnd && *pszSuffix) {
+        return a_nDefault;
+    }
+    return nValue;
 }
 
 template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
 template <typename T>
-_declspec(noinline) T CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetOrCreate(const SI_CHAR* sectionName, const SI_CHAR* keyName, const T defaultValue, const SI_CHAR* comment)
+_declspec(noinline) T CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetOrCreate(
+    const SI_CHAR* sectionName, 
+    const SI_CHAR* keyName, 
+    const T defaultValue, 
+    const SI_CHAR* comment, 
+    const bool ignoreInvalidEnd)
 {
 	const SI_CHAR* settingValue = this->GetValue(sectionName, keyName, nullptr);
-	if (settingValue == nullptr) {
-		this->SetValue(sectionName, keyName, defaultValue, comment, m_bPrependNewKeys);
+	if (!settingValue || !*settingValue) {
+		//hack to set the correctly typed value, should make templated handler func instead.
+		if constexpr (std::is_same_v<T, const char*>)
+		{
+            this->SetValue(sectionName, keyName, defaultValue, comment, m_bPrependNewKeys);
+		}
+        else if constexpr (std::is_same_v<T, double> || std::is_same_v<T, float>)
+        {
+            this->SetDoubleValue(sectionName, keyName, defaultValue, comment, m_bPrependNewKeys);
+        }
+        else if constexpr (std::is_same_v<T, long> || std::is_same_v<T, int>)
+        {
+            this->SetLongValue(sectionName, keyName, defaultValue, comment, false, m_bPrependNewKeys);
+        }
+        else {
+            static_assert(false, "SimpleINI - GetOrCreate - No code for chosen template type.");
+        }
 		return defaultValue;
 	}
 	if constexpr (std::is_arithmetic_v<T>)
 	{
-        return this->GetNumericValue<T>(settingValue);
+        return this->GetNumericValue(settingValue, defaultValue, ignoreInvalidEnd);
 	}
-    return settingValue;
+    else
+    {
+        return settingValue;
+    }
 }
 
 template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
