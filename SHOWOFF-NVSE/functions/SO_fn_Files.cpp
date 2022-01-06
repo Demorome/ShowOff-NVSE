@@ -745,7 +745,7 @@ namespace IniToNVSE
 			}, result);
 			
 			if (hasCreatedValue)
-				ini.SaveFile(configPath.data());
+				ini.SaveFile(configPath.data(), false);
 		}
 
 		void AssignResult(const StringOrFloat& res, COMMAND_ARGS)
