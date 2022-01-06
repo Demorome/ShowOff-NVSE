@@ -1162,7 +1162,8 @@ public:
 
 	/* get an option and creates it if it doesn't exist */
     template <typename T>
-    T GetNumericValue(const SI_CHAR* strValue, const T a_nDefault, const bool ignoreInvalidEnd);
+    T GetNumericValue(const SI_CHAR* strValue, const T a_nDefault, const bool ignoreInvalidEnd, 
+        const bool ignoreStartingSpaces = false) const;
 
 	template <typename T>
     T GetOrCreate(const SI_CHAR* sectionName, const SI_CHAR* keyName, const T defaultValue, const SI_CHAR* comment, 
@@ -1574,8 +1575,16 @@ _declspec(noinline) long CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::Get
 
 template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
 template <typename T>
-_declspec(noinline) T CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetNumericValue(const SI_CHAR* strValue, const T a_nDefault, const bool ignoreInvalidEnd)
+_declspec(noinline) T CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetNumericValue(
+    const SI_CHAR* strValue, 
+    const T a_nDefault, 
+    const bool ignoreInvalidEnd, 
+    const bool ignoreStartingSpaces) const
 {
+	//For consistency with old Windows INI functions, which did not ignore whitespace.
+    if (!ignoreStartingSpaces && IsSpace(*strValue))
+        return a_nDefault;
+	
     // convert to UTF-8/MBCS which for a numeric value will be the same as ASCII
     char szValue[64] = { 0 };
     SI_CONVERTER c(m_bStoreIsUtf8);
@@ -1583,9 +1592,8 @@ _declspec(noinline) T CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetNum
         return a_nDefault;
     }
 
-    // handle the value as hex if prefaced with "0x"
     T nValue = a_nDefault;
-    char* pszSuffix = szValue;
+    char* pszSuffix = nullptr;
 
 	if constexpr (std::is_floating_point<T>::value)
 	{
@@ -1593,6 +1601,7 @@ _declspec(noinline) T CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetNum
 	}
     else if constexpr (decay_equiv<T, long>::value || decay_equiv<T, int>::value)
     {
+        // handle the value as hex if prefaced with "0x"
         if (szValue[0] == '0' && (szValue[1] == 'x' || szValue[1] == 'X')) {
             if (!szValue[2]) return a_nDefault;
             nValue = strtol(&szValue[2], &pszSuffix, 16);
@@ -1607,7 +1616,7 @@ _declspec(noinline) T CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetNum
     }
 
     // any invalid strings will return the default value
-    if (!ignoreInvalidEnd && *pszSuffix) {
+    if (!ignoreInvalidEnd && (!pszSuffix || *pszSuffix)) {
         return a_nDefault;
     }
     return nValue;
@@ -2197,32 +2206,10 @@ CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::GetLongValue(
 {
     // return the default if we don't have a value
     const SI_CHAR * pszValue = GetValue(a_pSection, a_pKey, NULL, a_pHasMultiple);
-    if (!pszValue || !*pszValue) return a_nDefault;
-
-    // convert to UTF-8/MBCS which for a numeric value will be the same as ASCII
-    char szValue[64] = { 0 };
-    SI_CONVERTER c(m_bStoreIsUtf8);
-    if (!c.ConvertToStore(pszValue, szValue, sizeof(szValue))) {
+    if (!pszValue || !*pszValue) 
         return a_nDefault;
-    }
 
-    // handle the value as hex if prefaced with "0x"
-    long nValue = a_nDefault;
-    char * pszSuffix = szValue;
-    if (szValue[0] == '0' && (szValue[1] == 'x' || szValue[1] == 'X')) {
-    	if (!szValue[2]) return a_nDefault;
-        nValue = strtol(&szValue[2], &pszSuffix, 16);
-    }
-    else {
-        nValue = strtol(szValue, &pszSuffix, 10);
-    }
-
-    // any invalid strings will return the default value
-    if (*pszSuffix) { 
-        return a_nDefault; 
-    }
-
-    return nValue;
+    return this->GetNumericValue(pszValue, a_nDefault, true);
 }
 
 
@@ -2270,24 +2257,10 @@ CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::GetDoubleValue(
 {
     // return the default if we don't have a value
     const SI_CHAR * pszValue = GetValue(a_pSection, a_pKey, NULL, a_pHasMultiple);
-    if (!pszValue || !*pszValue) return a_nDefault;
-
-    // convert to UTF-8/MBCS which for a numeric value will be the same as ASCII
-    char szValue[64] = { 0 };
-    SI_CONVERTER c(m_bStoreIsUtf8);
-    if (!c.ConvertToStore(pszValue, szValue, sizeof(szValue))) {
+    if (!pszValue || !*pszValue) 
         return a_nDefault;
-    }
 
-    char * pszSuffix = NULL;
-    double const nValue = strtod(szValue, &pszSuffix);
-
-    // any invalid strings will return the default value
-    if (!pszSuffix || (!a_bIgnoreInvalidEnd  && *pszSuffix)) {
-        return a_nDefault; 
-    }
-
-    return nValue;
+    return this->GetNumericValue(pszValue, a_nDefault, a_bIgnoreInvalidEnd);
 }
 
 template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
