@@ -456,7 +456,6 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 
 
 
-#if _DEBUG
 
 
 namespace IniToNVSE
@@ -814,7 +813,6 @@ bool Cmd_SetINIStringAlt_Execute(COMMAND_ARGS)
 	return Cmd_SetINIValue_Execute(PASS_COMMAND_ARGS);
 }
 
-
 bool Cmd_GetINIFloatOrCreate_Execute(COMMAND_ARGS)
 {
 	IniToNVSE::GetINIValue::StringOrFloat res = 0.0;
@@ -857,6 +855,18 @@ bool Cmd_GetINIStringOrDefault_Execute(COMMAND_ARGS)
 	return true;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+#if _DEBUG
 
 
 bool Cmd_DemoTestFile_Execute(COMMAND_ARGS)

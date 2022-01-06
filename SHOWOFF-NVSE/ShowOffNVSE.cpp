@@ -71,6 +71,7 @@ void Func()
 std::atomic<char*> doesn't really work.
 */
 ICriticalSection g_Lock;
+std::map<std::string, CSimpleIniA> g_CachedINIFiles;
 
 // NVSE Globals
 bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
@@ -574,7 +575,18 @@ extern "C"
 		/*3D25*/ REG_CMD_ARR(Matrix_ApplyOperationWithMatrix)
 		/*3D26*/ REG_CMD(TopicInfoSetResponseStrings)
 		//==
-		
+
+		if constexpr (true)	//to test in release mode for performance
+		{
+			REG_CMD(SetINIValue)
+			REG_CMD(SetINIFloatAlt)
+			REG_CMD(SetINIStringAlt)
+			REG_CMD(GetINIFloatOrCreate)
+			REG_CMD_STR(GetINIStringOrCreate)
+			REG_CMD(GetINIFloatOrDefault)
+			REG_CMD_STR(GetINIStringOrDefault)
+			REG_CMD(HasINISetting)
+		}
 	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
@@ -586,16 +598,7 @@ extern "C"
 #if _DEBUG  //for functions being tested (or just abandoned).
 
 		
-		REG_CMD(SetINIValue)
-		REG_CMD(SetINIFloatAlt)
-		REG_CMD(SetINIStringAlt)
-			
-		REG_CMD(GetINIFloatOrCreate)
-		REG_CMD_STR(GetINIStringOrCreate)
-		REG_CMD(GetINIFloatOrDefault)
-		REG_CMD_STR(GetINIStringOrDefault)
-		
-		REG_CMD(HasINISetting)
+
 
 		REG_CMD(Flt_Equals)	// not needed; xNVSE's eval already uses this for "==" operator.
 
