@@ -1166,8 +1166,9 @@ public:
         const bool ignoreStartingSpaces = false) const;
 
 	template <typename T>
-    T GetOrCreate(const SI_CHAR* sectionName, const SI_CHAR* keyName, const T defaultValue, const SI_CHAR* comment, 
-        const bool ignoreInvalidEnd = true);
+    T GetOrCreate(const SI_CHAR* sectionName, const SI_CHAR* keyName, const T defaultValue, const SI_CHAR* comment,
+                  const bool ignoreInvalidEnd = true,
+                  bool* hasCreatedValue = nullptr);
 
     long GetOrCreateHex(SI_CHAR* sectionName, SI_CHAR* keyName, long defaultValue, SI_CHAR* comment);
 
@@ -1625,15 +1626,18 @@ _declspec(noinline) T CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetNum
 template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
 template <typename T>
 _declspec(noinline) T CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetOrCreate(
-    const SI_CHAR* sectionName, 
-    const SI_CHAR* keyName, 
-    const T defaultValue, 
-    const SI_CHAR* comment, 
-    const bool ignoreInvalidEnd)
+	const SI_CHAR* sectionName,
+	const SI_CHAR* keyName,
+	const T defaultValue,
+	const SI_CHAR* comment,
+	const bool ignoreInvalidEnd,
+	bool* hasCreatedValue)
 {
+    if (hasCreatedValue) *hasCreatedValue = false;
 	const SI_CHAR* settingValue = this->GetValue(sectionName, keyName, nullptr);
 	if (!settingValue || !*settingValue) {
-		//hack to set the correctly typed value, should make templated handler func instead.
+        if (hasCreatedValue) *hasCreatedValue = true;
+		//hack to create the correctly typed value, should make templated handler func instead.
 		if constexpr (std::is_same_v<T, const char*>)
 		{
             this->SetValue(sectionName, keyName, defaultValue, comment, m_bPrependNewKeys);

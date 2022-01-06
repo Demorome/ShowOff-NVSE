@@ -728,21 +728,24 @@ namespace IniToNVSE
 			if (ini.LoadFile(configPath.data()) < SI_OK)
 				return;
 
+			bool hasCreatedValue;
 			std::visit([&]<typename T0>(T0 & res) {
 				using T = std::decay_t<T0>;
 				if constexpr (std::is_same_v<T, double>)
 				{
-					result = ini.GetOrCreate(sectionAndKey.data(), keyName, res, comment.c_str(), true);
+					result = ini.GetOrCreate(sectionAndKey.data(), keyName, res, comment.c_str(), true, &hasCreatedValue);
 				}
 				else if constexpr (std::is_same_v<T, std::string>)
 				{
-					result = ini.GetOrCreate(sectionAndKey.data(), keyName, res.c_str(), comment.c_str(), true);
+					result = ini.GetOrCreate(sectionAndKey.data(), keyName, res.c_str(), comment.c_str(), true, &hasCreatedValue);
 				}
 				else {
 					static_assert(false, "GetINIValue - Call_GetOrCreateArgs >> non-exhaustive visitor");
 				}
 			}, result);
 			
+			if (hasCreatedValue)
+				ini.SaveFile(configPath.data());
 		}
 
 		void AssignResult(const StringOrFloat& res, COMMAND_ARGS)
