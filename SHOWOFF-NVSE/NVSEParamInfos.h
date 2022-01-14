@@ -59,7 +59,6 @@ static ParamInfo kNVSEParams_OneString_OneElem_TwoOptionalStrings[4] =
 	{	"string",	kNVSEParamType_String,1	},
 	{	"string",	kNVSEParamType_String,1	},
 };
-
 static ParamInfo kNVSEParams_OneString_OneFloatOrString_TwoOptionalStrings[4] =
 {
 	{	"string",	kNVSEParamType_String,0	},
@@ -67,7 +66,6 @@ static ParamInfo kNVSEParams_OneString_OneFloatOrString_TwoOptionalStrings[4] =
 	{	"string",	kNVSEParamType_String,1	},
 	{	"string",	kNVSEParamType_String,1	},
 };
-
 static ParamInfo kNVSEParams_OneString_OneFloat_TwoOptionalStrings[4] =
 {
 	{	"string",	kNVSEParamType_String,0	},
@@ -75,7 +73,32 @@ static ParamInfo kNVSEParams_OneString_OneFloat_TwoOptionalStrings[4] =
 	{	"string",	kNVSEParamType_String,1	},
 	{	"string",	kNVSEParamType_String,1	},
 };
-
+static ParamInfo kNVSEParams_OneString_TwoOptionalStrings[3] =
+{
+	{	"string",	kNVSEParamType_String,0	},
+	{	"string",	kNVSEParamType_String,1	},
+	{	"string",	kNVSEParamType_String,1	},
+};
+static ParamInfo kNVSEParams_OneString_OneOptionalString_OneOptionalFloat[3] =
+{
+	{	"string",	kNVSEParamType_String,0	},
+	{	"string",	kNVSEParamType_String,1	},
+	{	"float",	kNVSEParamType_Number,1	},
+};
+static ParamInfo kNVSEParams_OneString_OneOptionalString_OneOptionalFloat_OneOptionalString[4] =
+{
+	{	"string",	kNVSEParamType_String,0	},
+	{	"string",	kNVSEParamType_String,1	},
+	{	"float",	kNVSEParamType_Number,1	},
+	{	"string",	kNVSEParamType_String,1	},
+};
+static ParamInfo kNVSEParams_OneString_ThreeOptionalStrings[4] =
+{
+	{	"string",	kNVSEParamType_String,0	},
+	{	"string",	kNVSEParamType_String,1	},
+	{	"string",	kNVSEParamType_String,1	},
+	{	"string",	kNVSEParamType_String,1	},
+};
 static ParamInfo kNVSEParams_TwoStrings_TwoOptionalStrings[4] =
 {
 	{	"string",	kNVSEParamType_String,0	},
