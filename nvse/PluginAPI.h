@@ -872,7 +872,7 @@ enum Token_Type : UInt8
 };
 
 // these are used in ParamInfo to specify expected Token_Type of args to commands taking NVSE expressions as args
-enum {
+enum kNVSEParamType {
 	kNVSEParamType_Number = (1 << kTokenType_Number) | (1 << kTokenType_Ambiguous),
 	kNVSEParamType_Boolean = (1 << kTokenType_Boolean) | (1 << kTokenType_Ambiguous),
 	kNVSEParamType_String = (1 << kTokenType_String) | (1 << kTokenType_Ambiguous),

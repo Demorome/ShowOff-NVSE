@@ -1,5 +1,9 @@
 ﻿#pragma once
 
+#if _DEBUG
+#include "ExtractArgs_TypeSafe.h"
+#endif
+
 
 DEFINE_COMMAND_PLUGIN(TopicInfoGetResponseStrings, "", false, kParams_OneForm);
 
@@ -68,6 +72,11 @@ bool Cmd_TopicInfoSetResponseStrings_Execute(COMMAND_ARGS)
 	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
 		eval.ExtractArgs())
 	{
+#if _DEBUG
+		auto args = std::get<NVSEArrayVar*>(ExtractArgsTuple(eval, kNVSEParams_OneArray));
+		static_assert(std::is_same_v<decltype(args), NVSEArrayVar*>, "lolol");
+#endif
+		
 		auto const tInfo = DYNAMIC_CAST(eval.GetNthArg(0)->GetTESForm(), TESForm, TESTopicInfo);
 		auto const inArr = eval.GetNthArg(1)->GetArrayVar();
 		if (!tInfo || !inArr)

@@ -990,6 +990,7 @@
     <ClInclude Include="functions\SO_fn_Misc.h" />
     <ClInclude Include="functions\SO_fn_Settings.h" />
     <ClInclude Include="functions\SO_fn_Topics.h" />
+    <ClInclude Include="internal\ExtractArgs_TypeSafe.h" />
     <ClInclude Include="MenuHooks.h" />
     <ClInclude Include="MiscHooks.h" />
     <ClInclude Include="internal\containers.h" />

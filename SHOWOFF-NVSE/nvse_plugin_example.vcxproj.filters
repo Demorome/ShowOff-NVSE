@@ -2121,6 +2121,9 @@
     <ClInclude Include="art-of-cpp\config\config.hpp">
       <Filter>External Libraries\Config %28json-ish%29</Filter>
     </ClInclude>
+    <ClInclude Include="internal\ExtractArgs_TypeSafe.h">
+      <Filter>internal</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
