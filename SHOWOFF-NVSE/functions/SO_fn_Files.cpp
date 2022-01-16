@@ -34,7 +34,7 @@ namespace JsonToNVSE
 	template< template< typename... > class Traits >
 	ArrayElementL BasicJsonValueToArrayElem(tao::json::basic_value<Traits> const& val)
 	{
-		ArrayElementR elem;
+		ArrayElementL elem;
 		if (val.is_string())
 		{
 			elem = val.get_string().c_str();
