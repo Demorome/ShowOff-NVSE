@@ -376,9 +376,14 @@ namespace JsonToNVSE
 
 
 
-
 bool Cmd_ReadFromJSONFile_Execute(COMMAND_ARGS)
 {
+#define TEST_PERFORMANCE 1
+
+#if TEST_PERFORMANCE
+	auto const start = std::chrono::high_resolution_clock::now();
+#endif
+	
 	using namespace JsonToNVSE;
 	*result = 0;
 	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
@@ -393,6 +398,14 @@ bool Cmd_ReadFromJSONFile_Execute(COMMAND_ARGS)
 		}
 	}
 	//eval is unlikely to fail extracting args, so don't bother error reporting.
+
+#if TEST_PERFORMANCE
+	auto const end = std::chrono::high_resolution_clock::now();
+	auto const duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+	std::ofstream out("ReadFromJSONFile_Performance.txt", std::ios::app);
+	out << duration << " (ms)\n";
+#endif
+	
 	return true;
 }
 
