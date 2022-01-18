@@ -2,9 +2,9 @@
 
 #include "PluginAPI.h"
 
+#define Test_TypeSafeExtract false
 
-
-#if _DEBUG 
+#if Test_TypeSafeExtract 
 
 template <typename T>
 [[nodiscard]] constexpr std::tuple<T> GetNthArg(const kNVSEParamType param,

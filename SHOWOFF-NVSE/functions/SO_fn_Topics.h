@@ -72,7 +72,7 @@ bool Cmd_TopicInfoSetResponseStrings_Execute(COMMAND_ARGS)
 	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
 		eval.ExtractArgs())
 	{
-#if _DEBUG
+#if Test_TypeSafeExtract
 		auto args = std::get<NVSEArrayVar*>(ExtractArgsTuple(eval, kNVSEParams_OneArray));
 		static_assert(std::is_same_v<decltype(args), NVSEArrayVar*>, "lolol");
 #endif
