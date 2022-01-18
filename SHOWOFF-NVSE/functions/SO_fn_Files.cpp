@@ -10,7 +10,7 @@
 #define SI_SUPPORT_IOSTREAMS
 #include "SimpleIni.h"
 
-#define TEST_JSON_READ_PERFORMANCE true
+#define TEST_JSON_READ_PERFORMANCE false
 
 
 //Made by anhatthezoo, requested by Trooper.
@@ -162,7 +162,7 @@ namespace JsonToNVSE
 	}
 
 	//MUST be called with valid Parser type.
-	std::optional<NewJsonValueVariant_OrRef> ReadJSONWithParser(const Parser parser, const std::string &JSON_Path, const std::string_view& funcName, const bool cache = true)
+	std::optional<NewJsonValueVariant_OrRef> ReadJSONWithParser(const Parser parser, const std::string &JSON_Path, const std::string_view& funcName, const bool cache)
 	{
 		if (auto const cachedRefIter = g_CachedJSONFiles.find(JSON_Path); 
 			cachedRefIter != g_CachedJSONFiles.end())
@@ -368,6 +368,7 @@ namespace JsonToNVSE
 		std::string json_path = eval.GetNthArg(0)->GetString();
 		std::string jsonPointer = "";	// the path in the JSON hierarchy, pass "" to get the root value.
 		Parser parser = kParser_JSON;
+		bool cache = false;
 		if (auto const numArgs = eval.NumArgs();
 			numArgs >= 2)
 		{
@@ -377,6 +378,10 @@ namespace JsonToNVSE
 				parser = static_cast<Parser>(eval.GetNthArg(2)->GetInt());
 				if (parser >= kParser_Invalid)
 					return false;
+				if (numArgs >= 4)
+				{
+					cache = eval.GetNthArg(3)->GetBool();
+				}
 			}
 		}
 
@@ -385,7 +390,7 @@ namespace JsonToNVSE
 
 		constexpr std::string_view funcName = { "ReadFromJSONFile" };
 		bool success = false;
-		if (auto jsonValOpt = ReadJSONWithParser(parser, JSON_Path, funcName))
+		if (auto jsonValOpt = ReadJSONWithParser(parser, JSON_Path, funcName, cache))
 		{
 			JsonValueVariant* jsonVal = std::get_if<JsonValueVariant>(&jsonValOpt.value());
 			if (!jsonVal)
@@ -448,18 +453,30 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 		if (!elem.IsValid())
 			return true;
 		std::string json_path = eval.GetNthArg(1)->GetString();
+		
 		std::string jsonPointer = "";	// the path in the JSON hierarchy, pass "" to get the root value.
 		Parser parser = kParser_JSON;
-		if (auto const numArgs = eval.NumArgs();
-			numArgs >= 3)
+		bool cache = false;
+		bool saveAfterChange = true;
+		switch (auto const numArgs = eval.NumArgs();
+			numArgs)
 		{
+		case 6:
+			saveAfterChange = eval.GetNthArg(5)->GetBool();
+			[[fallthrough]];
+		case 5:
+			cache = eval.GetNthArg(4)->GetBool();
+			[[fallthrough]];
+		case 4:
+			parser = static_cast<Parser>(eval.GetNthArg(3)->GetInt());
+			if (parser >= kParser_Invalid)
+				return true;
+			[[fallthrough]];
+		case 3:
 			jsonPointer = eval.GetNthArg(2)->GetString();
-			if (numArgs >= 4)
-			{
-				parser = static_cast<Parser>(eval.GetNthArg(3)->GetInt());
-				if (parser >= kParser_Invalid)
-					return true;
-			}
+			break;
+		default:
+			throw std::logic_error("Invalid case for switch!");
 		}
 		std::ranges::replace(json_path, '/', '\\');
 		std::string const JSON_Path = GetCurPath() + "\\" + std::move(json_path);
@@ -468,7 +485,7 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 		constexpr std::string_view funcName = { "WriteToJSONFile" };
 		if (jsonPointer != "")
 		{
-			if (auto jsonValOpt = ReadJSONWithParser(parser, JSON_Path, funcName))
+			if (auto jsonValOpt = ReadJSONWithParser(parser, JSON_Path, funcName, cache))
 			{
 				JsonValueVariant* jsonVal = std::get_if<JsonValueVariant>(&jsonValOpt.value());
 				if (!jsonVal)
@@ -482,14 +499,19 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 			}
 		}
 
-		if (std::ofstream output(JSON_Path);
-			output.is_open())
+		if (saveAfterChange)
 		{
-			std::visit([&output](auto&& val) {
-				output << std::setw(4) << val;	//pretty-printed with tab indents
-				}, elemAsJSON);
-			*result = true;
+			if (std::ofstream output(JSON_Path);
+				output.is_open())
+			{
+				std::visit([&output](auto&& val) {
+					output << std::setw(4) << val;	//pretty-printed with tab indents
+					}, elemAsJSON);
+				*result = true;
+			}
 		}
+		else
+			*result = true;
 	}
 	return true;
 }

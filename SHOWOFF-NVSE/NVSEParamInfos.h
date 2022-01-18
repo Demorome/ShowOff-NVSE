@@ -43,6 +43,20 @@ static ParamInfo kNVSEParams_OneString_OneOptionalString_OneOptionalInt[3] =
 	{	"string",	kNVSEParamType_String,1	},
 	{	"int",	kNVSEParamType_Number,1	},
 };
+static ParamInfo kNVSEParams_OneString_OneOptionalString_TwoOptionalInts[4] =
+{
+	{	"string",	kNVSEParamType_String,0	},
+	{	"string",	kNVSEParamType_String,1	},
+	{	"int",	kNVSEParamType_Number,1	},
+	{	"int",	kNVSEParamType_Number,1	},
+};
+static ParamInfo kNVSEParams_OneString_OneOptionalString_OneOptionalInt_OneOptionalBool[4] =
+{
+	{	"string",	kNVSEParamType_String,0	},
+	{	"string",	kNVSEParamType_String,1	},
+	{	"int",	kNVSEParamType_Number,1	},
+	{	"bool",	kNVSEParamType_Boolean,1	},
+};
 
 static ParamInfo kNVSEParams_OneElem_OneString_OneOptionalString_OneOptionalInt[4] =
 {
@@ -50,6 +64,15 @@ static ParamInfo kNVSEParams_OneElem_OneString_OneOptionalString_OneOptionalInt[
 	{	"string",	kNVSEParamType_String,0	},
 	{	"string",	kNVSEParamType_String,1	},
 	{	"int",	kNVSEParamType_Number,1	},
+};
+static ParamInfo kNVSEParams_OneElem_OneString_OneOptionalString_OneOptionalInt_TwoOptionalBools[6] =
+{
+	{	"elem",	kNVSEParamType_BasicType,0	},
+	{	"string",	kNVSEParamType_String,0	},
+	{	"string",	kNVSEParamType_String,1	},
+	{	"int",	kNVSEParamType_Number,1	},
+	{	"bool",	kNVSEParamType_Boolean,1	},
+	{	"bool",	kNVSEParamType_Boolean,1	},
 };
 
 static ParamInfo kNVSEParams_OneString_OneElem_TwoOptionalStrings[4] =
