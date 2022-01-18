@@ -10,7 +10,7 @@
 #define SI_SUPPORT_IOSTREAMS
 #include "SimpleIni.h"
 
-#define TEST_JSON_READ_PERFORMANCE false
+#define TEST_JSON_READ_PERFORMANCE true
 
 
 //Made by anhatthezoo, requested by Trooper.
@@ -137,7 +137,7 @@ namespace JsonToNVSE
 	using JsonValueVariantRef = std::reference_wrapper<JsonValueVariant>;
 	using NewJsonValueVariant_OrRef = std::variant < JsonValueVariant, JsonValueVariantRef >;
 
-	Map<std::string, JsonValueVariant> g_CachedJSONFiles;
+	std::map<std::string, JsonValueVariant> g_CachedJSONFiles;
 
 
 	JsonValueVariant ReadJson_Unsafe(const Parser parser, const std::string& JSON_Path)
@@ -164,9 +164,10 @@ namespace JsonToNVSE
 	//MUST be called with valid Parser type.
 	std::optional<NewJsonValueVariant_OrRef> ReadJSONWithParser(const Parser parser, const std::string &JSON_Path, const std::string_view& funcName, const bool cache = true)
 	{
-		if (auto const cachedRef = g_CachedJSONFiles.GetPtr(JSON_Path))
+		if (auto const cachedRefIter = g_CachedJSONFiles.find(JSON_Path); 
+			cachedRefIter != g_CachedJSONFiles.end())
 		{
-			return std::reference_wrapper(*cachedRef);	//todo: ensure right overload is chosen
+			return std::reference_wrapper(cachedRefIter->second);	//todo: ensure right overload is chosen
 		}
 		
 		try
@@ -382,10 +383,6 @@ namespace JsonToNVSE
 		std::ranges::replace(json_path, '/', '\\');
 		std::string const JSON_Path = GetCurPath() + "\\" + std::move(json_path); 
 
-#if TEST_JSON_READ_PERFORMANCE
-		auto const start = std::chrono::high_resolution_clock::now();
-#endif
-
 		constexpr std::string_view funcName = { "ReadFromJSONFile" };
 		bool success = false;
 		if (auto jsonValOpt = ReadJSONWithParser(parser, JSON_Path, funcName))
@@ -402,13 +399,6 @@ namespace JsonToNVSE
 				success = true;
 			}
 		}
-
-#if TEST_JSON_READ_PERFORMANCE
-		auto const end = std::chrono::high_resolution_clock::now();
-		auto const duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-		std::ofstream out("ReadFromJSONFile_Performance.txt", std::ios::app);
-		out << duration.count() << " (ms)\n";
-#endif
 		
 		return success;
 	}
@@ -419,6 +409,10 @@ namespace JsonToNVSE
 
 bool Cmd_ReadFromJSONFile_Execute(COMMAND_ARGS)
 {
+#if TEST_JSON_READ_PERFORMANCE
+	auto const start = std::chrono::high_resolution_clock::now();
+#endif
+	
 	using namespace JsonToNVSE;
 	*result = 0;
 	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
@@ -432,8 +426,13 @@ bool Cmd_ReadFromJSONFile_Execute(COMMAND_ARGS)
 			//todo: report better error instead!
 		}
 	}
-	//eval is unlikely to fail extracting args, so don't bother error reporting.
-	
+#if TEST_JSON_READ_PERFORMANCE
+	auto const end = std::chrono::high_resolution_clock::now();
+	auto const duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+	std::ofstream out("ReadFromJSONFile_Performance.txt", std::ios::app);
+	out << duration.count() << " (ms)\n";
+#endif
+
 	return true;
 }
 

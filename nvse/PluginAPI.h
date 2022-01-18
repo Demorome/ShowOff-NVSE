@@ -948,7 +948,7 @@ public:
 		if (expEval) g_expEvalUtils.DestroyExpressionEvaluator(expEval);
 	}
 
-	bool ExtractArgs()
+	bool ExtractArgs()	//todo: add automatic error reporting upon failure (?)
 	{
 		return expEval && g_expEvalUtils.ExtractArgsEval(expEval);
 	}
