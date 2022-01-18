@@ -10,6 +10,9 @@
 #define SI_SUPPORT_IOSTREAMS
 #include "SimpleIni.h"
 
+#define TEST_JSON_READ_PERFORMANCE false
+
+
 //Made by anhatthezoo, requested by Trooper.
 bool Cmd_CreateFolder_Execute(COMMAND_ARGS)
 {
@@ -130,30 +133,47 @@ namespace JsonToNVSE
 	};
 
 	using JsonValueVariant = std::variant<DefaultJsonValue, ConfigJsonValue>;
-	using JsonValueVariantRef = std::variant<std::reference_wrapper<DefaultJsonValue>, std::reference_wrapper<ConfigJsonValue>>;
+	using JsonValueVariant_ContainsRef = std::variant<std::reference_wrapper<DefaultJsonValue>, std::reference_wrapper<ConfigJsonValue>>;
+	using JsonValueVariantRef = std::reference_wrapper<JsonValueVariant>;
+	using NewJsonValueVariant_OrRef = std::variant < JsonValueVariant, JsonValueVariantRef >;
+
+	Map<std::string, JsonValueVariant> g_CachedJSONFiles;
+
+
+	JsonValueVariant ReadJson_Unsafe(const Parser parser, const std::string& JSON_Path)
+	{
+		JsonValueVariant retn;
+		switch (parser)
+		{
+		case kParser_JSON:
+			retn = tao::json::from_file(JSON_Path);
+			break;
+		case kParser_JAXN:
+			retn = tao::json::jaxn::from_file(JSON_Path);
+			break;
+		case kParser_TaoConfig:
+			retn = tao::config::from_file(JSON_Path);
+			break;
+		case kParser_Invalid:
+		default:
+			throw std::logic_error("SHOWOFF - ReadJSONWithParser >> somehow reached invalid case in Switch statement.");
+		}
+		return retn;
+	}
 
 	//MUST be called with valid Parser type.
-	std::optional<JsonValueVariant> ReadJSONWithParser(Parser parser, const std::string &JSON_Path, const std::string_view& funcName)
+	std::optional<NewJsonValueVariant_OrRef> ReadJSONWithParser(const Parser parser, const std::string &JSON_Path, const std::string_view& funcName, const bool cache = true)
 	{
+		if (auto const cachedRef = g_CachedJSONFiles.GetPtr(JSON_Path))
+		{
+			return std::reference_wrapper(*cachedRef);	//todo: ensure right overload is chosen
+		}
+		
 		try
 		{
-			JsonValueVariant retn;
-			switch (parser)
-			{
-			case kParser_JSON:
-				retn = tao::json::from_file(JSON_Path);
-				break;
-			case kParser_JAXN:
-				retn = tao::json::jaxn::from_file(JSON_Path);
-				break;
-			case kParser_TaoConfig:
-				retn = tao::config::from_file(JSON_Path);
-				break;
-			case kParser_Invalid:
-			default:
-				throw std::logic_error("SHOWOFF - ReadJSONWithParser >> somehow reached invalid case in Switch statement.");
-			}
-			return retn;
+			if (!cache)
+				return ReadJson_Unsafe(parser, JSON_Path);
+			return std::reference_wrapper{g_CachedJSONFiles[JSON_Path] = ReadJson_Unsafe(parser, JSON_Path)};
 		}
 		catch (tao::pegtl::parse_error& e)
 		{
@@ -161,14 +181,20 @@ namespace JsonToNVSE
 				Console_Print("%s >> Could not parse JSON file, likely due to invalid formatting.", funcName.data());
 			_MESSAGE("ReadArrayFromJSONFile >> PARSE ERROR (%s)", e.what());
 		}
+		catch (std::filesystem::filesystem_error& e)
+		{
+			if (IsConsoleMode() || g_ShowFuncDebug)
+				Console_Print("%s >> Could not find JSON file.", funcName.data());
+			_MESSAGE("ReadArrayFromJSONFile >> FILE NOT FOUND (%s)", e.what());
+		}
 		return {};
 	}
 
-	std::optional<JsonValueVariantRef> GetJSONValueAtJSONPointer(const JsonValueVariant &value, const std::string& jsonPointer, const std::string_view& funcName)
+	std::optional<JsonValueVariant_ContainsRef> GetJSONValueAtJSONPointer(const JsonValueVariant &value, const std::string& jsonPointer, const std::string_view& funcName)
 	{
 		try
 		{
-			return std::visit([&](auto&& val) -> JsonValueVariantRef {
+			return std::visit([&](auto&& val) -> JsonValueVariant_ContainsRef {
 				return val.at(tao::json::pointer(jsonPointer));
 				//todo: ensure this always returns a valid value, or a caught exception!
 				//TODO: also ensure it isn't making a copy!
@@ -352,24 +378,39 @@ namespace JsonToNVSE
 					return false;
 			}
 		}
+
 		std::ranges::replace(json_path, '/', '\\');
-		std::string const JSON_Path = GetCurPath() + "\\" + std::move(json_path);
-		if (!std::filesystem::exists(JSON_Path))
-			return false;
+		std::string const JSON_Path = GetCurPath() + "\\" + std::move(json_path); 
+
+#if TEST_JSON_READ_PERFORMANCE
+		auto const start = std::chrono::high_resolution_clock::now();
+#endif
 
 		constexpr std::string_view funcName = { "ReadFromJSONFile" };
-		if (auto jsonVal = ReadJSONWithParser(parser, JSON_Path, funcName))
+		bool success = false;
+		if (auto jsonValOpt = ReadJSONWithParser(parser, JSON_Path, funcName))
 		{
-			if (auto const JsonRef = GetJSONValueAtJSONPointer(jsonVal.value(), jsonPointer, funcName))
+			JsonValueVariant* jsonVal = std::get_if<JsonValueVariant>(&jsonValOpt.value());
+			if (!jsonVal)
+				jsonVal = &std::get_if<JsonValueVariantRef>(&jsonValOpt.value())->get();	//I hate myself
+			if (auto const JsonRef = GetJSONValueAtJSONPointer(*jsonVal, jsonPointer, funcName))
 			{
 				std::visit([scriptObj, &eval](auto&& val) {
 					auto res = JsonToNVSE::GetNVSEFromJSON(val.get(), scriptObj);
 					eval.AssignCommandResult(res);
 					}, JsonRef.value());
-				return true;
+				success = true;
 			}
 		}
-		return false;
+
+#if TEST_JSON_READ_PERFORMANCE
+		auto const end = std::chrono::high_resolution_clock::now();
+		auto const duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+		std::ofstream out("ReadFromJSONFile_Performance.txt", std::ios::app);
+		out << duration.count() << " (ms)\n";
+#endif
+		
+		return success;
 	}
 }
 
@@ -378,12 +419,6 @@ namespace JsonToNVSE
 
 bool Cmd_ReadFromJSONFile_Execute(COMMAND_ARGS)
 {
-#define TEST_PERFORMANCE 1
-
-#if TEST_PERFORMANCE
-	auto const start = std::chrono::high_resolution_clock::now();
-#endif
-	
 	using namespace JsonToNVSE;
 	*result = 0;
 	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
@@ -398,13 +433,6 @@ bool Cmd_ReadFromJSONFile_Execute(COMMAND_ARGS)
 		}
 	}
 	//eval is unlikely to fail extracting args, so don't bother error reporting.
-
-#if TEST_PERFORMANCE
-	auto const end = std::chrono::high_resolution_clock::now();
-	auto const duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
-	std::ofstream out("ReadFromJSONFile_Performance.txt", std::ios::app);
-	out << duration << " (ms)\n";
-#endif
 	
 	return true;
 }
@@ -439,11 +467,14 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 		auto elemAsJSON = JsonToNVSE::GetJSONFromNVSE(elem, parser);
 
 		constexpr std::string_view funcName = { "WriteToJSONFile" };
-		if (jsonPointer != "" && std::filesystem::exists(JSON_Path))
+		if (jsonPointer != "")
 		{
-			if (auto jsonVal = ReadJSONWithParser(parser, JSON_Path, funcName))
+			if (auto jsonValOpt = ReadJSONWithParser(parser, JSON_Path, funcName))
 			{
-				if (InsertValueAtJSONPointer(jsonVal.value(), elemAsJSON, jsonPointer, funcName))
+				JsonValueVariant* jsonVal = std::get_if<JsonValueVariant>(&jsonValOpt.value());
+				if (!jsonVal)
+					jsonVal = &std::get_if<JsonValueVariantRef>(&jsonValOpt.value())->get();	//I hate myself
+				if (InsertValueAtJSONPointer(*jsonVal, elemAsJSON, jsonPointer, funcName))
 				{
 					elemAsJSON = std::move(*jsonVal);
 				}
