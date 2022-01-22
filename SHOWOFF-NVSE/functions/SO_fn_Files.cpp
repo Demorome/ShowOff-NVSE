@@ -137,8 +137,8 @@ namespace JsonToNVSE
 	using JsonValueVariantRef = std::reference_wrapper<JsonValueVariant>;
 	using NewJsonValueVariant_OrRef = std::variant < JsonValueVariant, JsonValueVariantRef >;
 
-	std::map<std::string, JsonValueVariant> g_CachedJSONFiles;
-
+	Map<const char*, JsonValueVariant> g_CachedJSONFiles;
+	ICriticalSection g_JsonMapLock;
 
 	JsonValueVariant ReadJson_Unsafe(const Parser parser, const std::string& JSON_Path)
 	{
@@ -162,19 +162,26 @@ namespace JsonToNVSE
 	}
 
 	//MUST be called with valid Parser type.
-	std::optional<NewJsonValueVariant_OrRef> ReadJSONWithParser(const Parser parser, const std::string &JSON_Path, const std::string_view& funcName, const bool cache)
+	//TODO: modify json path arg here, to reduce key size for g_Cached map
+	std::optional<NewJsonValueVariant_OrRef> ReadJSONWithParser(
+		const Parser parser, 
+		const std::string &JSON_FullPath, 
+		const std::string_view relativePath, 
+		const std::string_view& funcName, 
+		const bool cache)
 	{
-		if (auto const cachedRefIter = g_CachedJSONFiles.find(JSON_Path); 
-			cachedRefIter != g_CachedJSONFiles.end())
+		if (auto const cachedRef = g_CachedJSONFiles.GetPtr(relativePath.data()))
 		{
-			return std::reference_wrapper(cachedRefIter->second);	//todo: ensure right overload is chosen
+			return std::ref(*cachedRef);
 		}
 		
 		try
 		{
+			auto parsedJson = ReadJson_Unsafe(parser, JSON_FullPath);
 			if (!cache)
-				return ReadJson_Unsafe(parser, JSON_Path);
-			return std::reference_wrapper{g_CachedJSONFiles[JSON_Path] = ReadJson_Unsafe(parser, JSON_Path)};
+				return parsedJson;
+			ScopedLock lock(g_JsonMapLock);
+			return std::ref(g_CachedJSONFiles[relativePath.data()] = std::move(parsedJson) );
 		}
 		catch (tao::pegtl::parse_error& e)
 		{
@@ -345,6 +352,7 @@ namespace JsonToNVSE
 			{
 				try
 				{
+					ScopedLock lock(g_JsonMapLock);	//in case the baseJson was retrieved from the map.
 					base.insert(tao::json::pointer(jsonPointer), insert);
 					return true;
 				}
@@ -365,7 +373,9 @@ namespace JsonToNVSE
 	//return false in case of failure, for error reporting.
 	bool TryReadFromJSONFile(PluginExpressionEvaluator& eval, Script* scriptObj)
 	{
-		std::string json_path = eval.GetNthArg(0)->GetString();
+		std::string json_path_relative = eval.GetNthArg(0)->GetString();
+		if (json_path_relative.empty())
+			return false;
 		std::string jsonPointer = "";	// the path in the JSON hierarchy, pass "" to get the root value.
 		Parser parser = kParser_JSON;
 		bool cache = false;
@@ -385,12 +395,11 @@ namespace JsonToNVSE
 			}
 		}
 
-		std::ranges::replace(json_path, '/', '\\');
-		std::string const JSON_Path = GetCurPath() + "\\" + std::move(json_path); 
+		auto [JSON_FullPath, relPath] = GetFullPath(std::move(json_path_relative));
 
 		constexpr std::string_view funcName = { "ReadFromJSONFile" };
 		bool success = false;
-		if (auto jsonValOpt = ReadJSONWithParser(parser, JSON_Path, funcName, cache))
+		if (auto jsonValOpt = ReadJSONWithParser(parser, JSON_FullPath, relPath, funcName, cache))
 		{
 			JsonValueVariant* jsonVal = std::get_if<JsonValueVariant>(&jsonValOpt.value());
 			if (!jsonVal)
@@ -448,12 +457,13 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
 		eval.ExtractArgs())
 	{
-		ArrayElementR elem;
+		ArrayElementR elem; 
 		eval.GetNthArg(0)->GetElement(elem);
 		if (!elem.IsValid())
 			return true;
-		std::string json_path = eval.GetNthArg(1)->GetString();
-		
+		std::string json_path_rel = eval.GetNthArg(1)->GetString();
+		if (json_path_rel.empty())
+			return true;
 		std::string jsonPointer = "";	// the path in the JSON hierarchy, pass "" to get the root value.
 		Parser parser = kParser_JSON;
 		bool cache = false;
@@ -478,14 +488,15 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 		default:
 			throw std::logic_error("Invalid case for switch!");
 		}
-		std::ranges::replace(json_path, '/', '\\');
-		std::string const JSON_Path = GetCurPath() + "\\" + std::move(json_path);
+
+		auto [JSON_FullPath, relPath] = GetFullPath(std::move(json_path_rel));
+		auto const fileExisted = std::filesystem::exists(JSON_FullPath);
 		auto elemAsJSON = JsonToNVSE::GetJSONFromNVSE(elem, parser);
 
-		constexpr std::string_view funcName = { "WriteToJSONFile" };
-		if (jsonPointer != "")
+		if (!jsonPointer.empty() && fileExisted)
 		{
-			if (auto jsonValOpt = ReadJSONWithParser(parser, JSON_Path, funcName, cache))
+			constexpr std::string_view funcName = { "WriteToJSONFile" };
+			if (auto jsonValOpt = ReadJSONWithParser(parser, JSON_FullPath, relPath, funcName, cache))
 			{
 				JsonValueVariant* jsonVal = std::get_if<JsonValueVariant>(&jsonValOpt.value());
 				if (!jsonVal)
@@ -501,7 +512,7 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 
 		if (saveAfterChange)
 		{
-			if (std::ofstream output(JSON_Path);
+			if (std::ofstream output(JSON_FullPath);	//erase previous contents, potentially create new file.
 				output.is_open())
 			{
 				std::visit([&output](auto&& val) {
@@ -512,6 +523,13 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 		}
 		else
 			*result = true;
+
+		if ((!fileExisted || jsonPointer.empty()) && cache)
+		{
+			//file was either created, or was completely replaced; cache that new data.
+			ScopedLock lock(g_JsonMapLock);
+			g_CachedJSONFiles[relPath.data()] = std::move(elemAsJSON);
+		}
 	}
 	return true;
 }
@@ -569,6 +587,8 @@ namespace IniToNVSE
 
 	constexpr auto MaxStrArgLen = 0x80;
 	using CharArr = std::array<char, MaxStrArgLen>;
+	
+	std::map<std::string, CSimpleIniA> g_CachedIniFiles;
 
 	[[nodiscard]] std::optional<CharArr> GetINIConfigPath(const char* iniStr, Script* scriptObj)
 	{

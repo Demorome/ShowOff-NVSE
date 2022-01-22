@@ -1945,3 +1945,14 @@ std::optional<PluginExpressionEvaluator> TryGetExpEval(COMMAND_ARGS)
 	}
 	return {};
 }
+
+std::pair<std::string, std::string_view> GetFullPath(std::string &&relativePath)
+{
+	std::ranges::replace(relativePath, '/', '\\');
+	auto curPath = GetCurPath();
+	auto const curPathSize = curPath.size();
+	auto const rel_path_size = relativePath.size();
+	std::string JSON_FullPath = std::move(curPath) + "\\" + std::move(relativePath);
+	std::string_view json_rel_path_view = { &JSON_FullPath[curPathSize + 1], rel_path_size };
+	return std::make_pair(std::move(JSON_FullPath), std::move(json_rel_path_view));
+}

@@ -396,3 +396,6 @@ void AssignScriptValueResult(const NVSEArrayElement* val, PluginExpressionEvalua
 template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 
 std::optional<PluginExpressionEvaluator> TryGetExpEval(COMMAND_ARGS);
+
+//Returns the full path, then a string_view on the moved relative path.
+std::pair<std::string, std::string_view> GetFullPath(std::string&& relativePath);

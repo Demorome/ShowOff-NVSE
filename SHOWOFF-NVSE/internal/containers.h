@@ -533,20 +533,20 @@ public:
 	__forceinline Key_Arg Get() const { return key; }
 	__forceinline void Set(Key_Arg inKey)
 	{
-		if (std::is_same_v<T_Key, char*>)
+		if constexpr (std::is_same_v<T_Key, char*> || std::is_same_v<T_Key, const char*>)
 			*(char**)&key = CopyString(*(const char**)&inKey);
 		else key = inKey;
 	}
 	__forceinline char Compare(Key_Arg inKey) const
 	{
-		if (std::is_same_v<T_Key, char*> || std::is_same_v<T_Key, const char*>)
+		if constexpr (std::is_same_v<T_Key, char*> || std::is_same_v<T_Key, const char*>)
 			return StrCompare(*(const char**)&inKey, *(const char**)&key);
 		if (inKey < key) return -1;
 		return (key < inKey) ? 1 : 0;
 	}
 	__forceinline void Clear()
 	{
-		if (std::is_same_v<T_Key, char*>)
+		if constexpr (std::is_same_v<T_Key, char*> || std::is_same_v<T_Key, const char*>)
 			free(*(char**)&key);
 		else key.~T_Key();
 	}
