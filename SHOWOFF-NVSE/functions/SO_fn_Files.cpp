@@ -521,12 +521,13 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 				*result = true;
 			}
 		}
-		else
+		else if (fileExisted)
 			*result = true;
 
 		if ((!fileExisted || jsonPointer.empty()) && cache)
 		{
-			//file was either created, or was completely replaced; cache that new data.
+			// File was either created, or was completely replaced; cache that new data.
+			// Also possible that file didn't exist and wasn't created, but we can still cache that data.
 			ScopedLock lock(g_JsonMapLock);
 			g_CachedJSONFiles[relPath.data()] = std::move(elemAsJSON);
 		}
