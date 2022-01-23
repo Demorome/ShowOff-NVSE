@@ -412,10 +412,8 @@ namespace JsonToNVSE
 		bool success = false;
 		if (auto jsonValOpt = ReadJSONWithParser(parser, JSON_FullPath, relPath, funcName, cache))
 		{
-			JsonValueVariant* jsonVal = std::get_if<JsonValueVariant>(&jsonValOpt.value());
-			if (!jsonVal)
-				jsonVal = &std::get_if<JsonValueVariantRef>(&jsonValOpt.value())->get();	//I hate myself
-			if (auto const JsonRef = GetJSONValueAtJSONPointer(*jsonVal, jsonPointer, funcName))
+			auto const jsonVal = GetRef(*jsonValOpt);
+			if (auto const JsonRef = GetJSONValueAtJSONPointer(jsonVal, jsonPointer, funcName))
 			{
 				std::visit([scriptObj, &eval](auto&& val) {
 					auto res = JsonToNVSE::GetNVSEFromJSON(val.get(), scriptObj);
