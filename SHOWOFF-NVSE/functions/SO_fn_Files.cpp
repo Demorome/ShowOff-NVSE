@@ -135,7 +135,19 @@ namespace JsonToNVSE
 	using JsonValueVariant = std::variant<DefaultJsonValue, ConfigJsonValue>;
 	using JsonValueVariant_ContainsRef = std::variant<std::reference_wrapper<DefaultJsonValue>, std::reference_wrapper<ConfigJsonValue>>;
 	using JsonValueVariantRef = std::reference_wrapper<JsonValueVariant>;
-	using NewJsonValueVariant_OrRef = std::variant < JsonValueVariant, JsonValueVariantRef >;
+
+	using NewJsonValueVariant_OrRef = std::variant <JsonValueVariantRef, JsonValueVariant>;
+	constexpr JsonValueVariant& GetRef(NewJsonValueVariant_OrRef &jsonArg)
+	{
+		return *std::visit(overloaded{
+			[](JsonValueVariantRef& json) -> JsonValueVariant* {
+				return &json.get();
+			},
+			[](JsonValueVariant& json) -> JsonValueVariant* {
+				return &json;
+			} 
+		}, jsonArg);
+	}
 
 	Map<const char*, JsonValueVariant> g_CachedJSONFiles;
 	ICriticalSection g_JsonMapLock;
@@ -162,7 +174,6 @@ namespace JsonToNVSE
 	}
 
 	//MUST be called with valid Parser type.
-	//TODO: modify json path arg here, to reduce key size for g_Cached map
 	std::optional<NewJsonValueVariant_OrRef> ReadJSONWithParser(
 		const Parser parser, 
 		const std::string &JSON_FullPath, 
@@ -467,12 +478,12 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 		std::string jsonPointer = "";	// the path in the JSON hierarchy, pass "" to get the root value.
 		Parser parser = kParser_JSON;
 		bool cache = false;
-		bool saveAfterChange = true;
+		bool saveFile = true;
 		switch (auto const numArgs = eval.NumArgs();
 			numArgs)
 		{
 		case 6:
-			saveAfterChange = eval.GetNthArg(5)->GetBool();
+			saveFile = eval.GetNthArg(5)->GetBool();
 			[[fallthrough]];
 		case 5:
 			cache = eval.GetNthArg(4)->GetBool();
@@ -491,45 +502,68 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 
 		auto [JSON_FullPath, relPath] = GetFullPath(std::move(json_path_rel));
 		auto const fileExisted = std::filesystem::exists(JSON_FullPath);
-		auto elemAsJSON = JsonToNVSE::GetJSONFromNVSE(elem, parser);
+		NewJsonValueVariant_OrRef elemAsJSON = JsonToNVSE::GetJSONFromNVSE(elem, parser);
 
-		if (!jsonPointer.empty() && fileExisted)
+		//if jsonPointer is empty, then the entire file will be replaced; no point in reading it.
+		bool const readFileAtJPointer = !jsonPointer.empty() && fileExisted;
+		if (readFileAtJPointer)
 		{
 			constexpr std::string_view funcName = { "WriteToJSONFile" };
 			if (auto jsonValOpt = ReadJSONWithParser(parser, JSON_FullPath, relPath, funcName, cache))
 			{
 				JsonValueVariant* jsonVal = std::get_if<JsonValueVariant>(&jsonValOpt.value());
-				if (!jsonVal)
-					jsonVal = &std::get_if<JsonValueVariantRef>(&jsonValOpt.value())->get();	//I hate myself
-				if (InsertValueAtJSONPointer(*jsonVal, elemAsJSON, jsonPointer, funcName))
+				bool jsonCached = false; // assume new value was created (uncached)
+				if (jsonVal)	//true only if no caching is involved.
 				{
-					elemAsJSON = std::move(*jsonVal);
+					if (!saveFile)	//it's all for nothing if changes aren't being cached and won't be saved to file.
+						return true;
+					//The reason this isn't checked earlier, with "cached" and "savefile", 
+					// is because the user might've cached the file earlier (which will be retrieved even if "cached" = false).
+				}
+				else
+				{
+					jsonVal = &std::get_if<JsonValueVariantRef>(&jsonValOpt.value())->get();	//I hate myself
+					jsonCached = true;
+				}
+
+				if (InsertValueAtJSONPointer(*jsonVal, GetRef(elemAsJSON), jsonPointer, funcName))
+				{
+					if (!jsonCached)
+						elemAsJSON = std::move(*jsonVal);	//Move jsonVal if it's not owned by Map global
+					else
+					{
+						elemAsJSON = std::ref(*jsonVal); //elemAsJSON points to global map value
+						*result = true;	//success if cached data was modified
+					}
 				}
 				else
 					return true;
 			}
+			else //catch parsing errors
+			{
+				return true;
+			}
 		}
 
-		if (saveAfterChange)
+		if (saveFile)
 		{
 			if (std::ofstream output(JSON_FullPath);	//erase previous contents, potentially create new file.
 				output.is_open())
 			{
 				std::visit([&output](auto&& val) {
 					output << std::setw(4) << val;	//pretty-printed with tab indents
-					}, elemAsJSON);
-				*result = true;
+					}, GetRef(elemAsJSON));
+				*result = true;	//success if data was written to file
 			}
-		}
-		else if (fileExisted)
-			*result = true;
+		}			
 
-		if ((!fileExisted || jsonPointer.empty()) && cache)
+		if (!readFileAtJPointer && cache)
 		{
 			// File was either created, or was completely replaced; cache that new data.
 			// Also possible that file didn't exist and wasn't created, but we can still cache that data.
 			ScopedLock lock(g_JsonMapLock);
-			g_CachedJSONFiles[relPath.data()] = std::move(elemAsJSON);
+			g_CachedJSONFiles[relPath.data()] = std::move(GetRef(elemAsJSON));
+			*result = true;	//success if cached data is changed
 		}
 	}
 	return true;
