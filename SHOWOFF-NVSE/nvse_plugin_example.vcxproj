@@ -314,6 +314,7 @@
     <ClCompile Include="..\nvse\Utilities.cpp" />
     <ClCompile Include="Events\LambdaVarContext.cpp" />
     <ClCompile Include="functions\SO_fn_Files.cpp" />
+    <ClCompile Include="GameUI.cpp" />
     <ClCompile Include="MenuHooks.cpp" />
     <ClCompile Include="MiscHooks.cpp" />
     <ClCompile Include="internal\containers.cpp" />
@@ -991,6 +992,7 @@
     <ClInclude Include="functions\SO_fn_Settings.h" />
     <ClInclude Include="functions\SO_fn_Topics.h" />
     <ClInclude Include="internal\ExtractArgs_TypeSafe.h" />
+    <ClInclude Include="InventoryRef.h" />
     <ClInclude Include="MenuHooks.h" />
     <ClInclude Include="MiscHooks.h" />
     <ClInclude Include="internal\containers.h" />

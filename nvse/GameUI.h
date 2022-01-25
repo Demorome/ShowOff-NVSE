@@ -16,7 +16,7 @@ class NiSourceTexture;
 
 typedef Menu* (*_TempMenuByType)(UInt32 menuType);
 extern const _TempMenuByType TempMenuByType;
-
+#define MENU_VISIBILITY ((bool*)0x11F308F)	//by JIP
 
 // 584
 class InterfaceManager

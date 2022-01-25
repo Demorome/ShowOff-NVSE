@@ -214,3 +214,10 @@ bool Actor::Detects(Actor* target)
 	SInt32 const detectionLevel = this->GetDetectionLevelAlt(target, false);
 	return detectionLevel > 0;
 }
+
+//from JIP
+TESObjectREFR* TESObjectREFR::GetMerchantContainer()
+{
+	ExtraMerchantContainer* xMerchCont = GetExtraTypeJIP(&extraDataList, MerchantContainer);
+	return xMerchCont ? xMerchCont->containerRef : NULL;
+}

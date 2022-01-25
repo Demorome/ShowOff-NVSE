@@ -142,7 +142,7 @@ bool Cmd_GetEquippedItemRefs_Execute(COMMAND_ARGS)
 	auto eqItems = GetEquippedItems(thisObj, flags);
 	for (auto const& [baseItem, xData] : eqItems)
 	{
-		auto const itemRef = InventoryRefCreate((Actor*)thisObj, baseItem, 1, xData);
+		auto const itemRef = InventoryRefCreateEntry((Actor*)thisObj, baseItem, 1, xData);
 		ArrayElementR elem = itemRef;
 		elems.Append(elem);
 	}
@@ -383,7 +383,7 @@ TESObjectREFR* __fastcall GetEquippedItemRefForItem_Call(Actor* actor, TESForm* 
 			{
 				if (xDataIter->HasType(kExtraData_Worn))
 				{
-					return InventoryRefCreate(actor, itemIter->type, itemIter->countDelta, xDataIter.Get());
+					return InventoryRefCreateEntry(actor, itemIter->type, itemIter->countDelta, xDataIter.Get());
 				}
 			}
 		}
@@ -507,6 +507,92 @@ bool Cmd_GetItemCanBeRepairedByTarget_Execute(COMMAND_ARGS)
 	return Cmd_GetItemCanBeRepairedByTarget_Eval(thisObj, itemToRepair, itemTarget, result);
 }
 
+// Will be able to get the inventory reference's original extendDataList.
+TESObjectREFR* __fastcall CreateRefForStackWithoutCopy(TESObjectREFR* container, ContChangesEntry* menuEntry)
+{
+	if (container && menuEntry)
+	{
+		InventoryRef::Data data{ menuEntry->type, menuEntry, menuEntry->extendData ? menuEntry->extendData->GetFirstItem() : nullptr };
+		return InventoryRefCreate(container, data, false);
+	}
+	return nullptr;
+}
+
+
+DEFINE_COMMAND_PLUGIN(GetSelectedItemRefSO, "", false, kParams_OneOptionalInt);
+//code copied from JIP LN and tweaked to avoid copying the ExtendDataList* (needed for some functions).
+bool Cmd_GetSelectedItemRefSO_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	UInt32 menuID = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &menuID))
+		return true;
+	TESForm* itemRef = nullptr;
+	if (!menuID) 
+		menuID = g_interfaceManager->GetTopVisibleMenuID();
+	switch (menuID)
+	{
+	case kMenuType_Inventory:
+	{
+		if (auto const invMenu = InventoryMenu::Get())
+		{
+			if (invMenu->itemList.selected)
+				itemRef = CreateRefForStackWithoutCopy(g_thePlayer, InventoryMenu::Selection());
+		}
+		break;
+	}
+	case kMenuType_Container:
+	{
+		if (auto const cntMenu = ContainerMenu::GetSingleton())
+		{
+			if (cntMenu->leftItems.selected || cntMenu->rightItems.selected)
+				itemRef = CreateRefForStackWithoutCopy(cntMenu->leftItems.selected ? g_thePlayer : cntMenu->containerRef, ContainerMenu::GetSelection());
+		}
+		break;
+	}
+	case kMenuType_Repair:
+	{
+		if (auto const rprMenu = RepairMenu::Get())
+		{
+			if (rprMenu->repairItems.selected)
+				itemRef = CreateRefForStackWithoutCopy(g_thePlayer, rprMenu->repairItems.GetSelected());
+		}
+		break;
+	}
+	case kMenuType_Barter:
+	{
+		if (auto const brtMenu = BarterMenu::Get())
+		{
+			if (brtMenu->leftItems.selected || brtMenu->rightItems.selected)
+				itemRef = CreateRefForStackWithoutCopy(brtMenu->leftItems.selected ? g_thePlayer : brtMenu->merchantRef->GetMerchantContainer(), BarterMenu::Selection());
+		}
+		break;
+	}
+	case kMenuType_RepairServices:
+	{
+		if (auto const rpsMenu = RepairServicesMenu::Get())
+		{
+			if (rpsMenu->itemList.selected)
+				itemRef = CreateRefForStackWithoutCopy(g_thePlayer, rpsMenu->itemList.GetSelected());
+		}
+		break;
+	}
+	case kMenuType_ItemMod:
+	{
+		if (auto const modMenu = ItemModMenu::Get())
+		{
+			if (modMenu->itemModList.selected)
+				itemRef = CreateRefForStackWithoutCopy(g_thePlayer, modMenu->itemModList.GetSelected());
+		}
+		break;
+	}
+	default:
+		return true;
+	}
+	if (itemRef)
+		REFR_RES = itemRef->refID;
+	return true;
+}
 
 DEFINE_CMD_COND_PLUGIN(GetCalculatedItemValue, "Returns the item's value, affected by condition and any attached weapon mods (and extra).", false, kParams_OneOptionalObject_OneOptionalInt);
 bool Cmd_GetCalculatedItemValue_Eval(COMMAND_ARGS_EVAL)
@@ -524,7 +610,7 @@ bool Cmd_GetCalculatedItemValue_Eval(COMMAND_ARGS_EVAL)
 		//copied after GetCalculatedWeaponDamage from JIP, thx for the pointer c6.
 		ContChangesEntry tempEntry(NULL, 1, baseItem);
 		if (invRef)
-			tempEntry = *invRef->entry;
+			tempEntry = *invRef->data.entry;
 
 		if (!invRef && itemRef)
 		{
@@ -589,7 +675,7 @@ bool Cmd_GetCalculatedItemWeight_Eval(COMMAND_ARGS_EVAL)
 		{
 			if (auto contChangesData = ExtraContainerChanges::Data::Create(invRef->containerRef))
 			{
-				contChangesData->objList->Append(invRef->entry);
+				contChangesData->objList->Append(invRef->data.entry);
 
 				// feeble attempt to fix potential multithreading issues, since code is being overwritten here.
 				ScopedLock lockCodeOverwrites(g_Lock);

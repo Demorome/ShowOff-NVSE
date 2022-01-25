@@ -84,6 +84,9 @@
     <ClCompile Include="SO_fn_Math.cpp">
       <Filter>functions</Filter>
     </ClCompile>
+    <ClCompile Include="GameUI.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="functions\SO_fn_Misc.h">
@@ -2123,6 +2126,9 @@
     </ClInclude>
     <ClInclude Include="internal\ExtractArgs_TypeSafe.h">
       <Filter>internal</Filter>
+    </ClInclude>
+    <ClInclude Include="InventoryRef.h">
+      <Filter>nvse</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

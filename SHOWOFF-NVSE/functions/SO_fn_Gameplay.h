@@ -1296,7 +1296,7 @@ bool Cmd_SetNoEquip_Execute(COMMAND_ARGS)
 	{
 		InventoryRef* invRef = InventoryRefGetForID(thisObj->refID);
 		if (!invRef) return true;
-		ExtraDataList* xData = invRef ? invRef->xData : NULL;
+		ExtraDataList* xData = invRef ? invRef->data.xData : NULL;
 		if (xData)
 		{
 			if (!noEquip)

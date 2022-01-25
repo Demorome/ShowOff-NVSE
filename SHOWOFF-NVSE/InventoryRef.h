@@ -1,0 +1,22 @@
+#pragma once
+//#include "GameBSExtraData.h"
+#include "GameObjects.h"
+
+struct InventoryRef
+{
+	struct Data
+	{
+		TESForm* type;	// 00
+		ExtraContainerChanges::EntryData* entry;	// 04
+		ExtraDataList* xData;	// 08
+	} data;
+	TESObjectREFR* containerRef;	// 0C
+	TESObjectREFR* tempRef;		// 10
+	UInt8				pad14[24];		// 14
+	bool				doValidation;	// 2C
+	bool				removed;		// 2D
+	UInt8				pad2E[2];		// 2E
+
+	SInt32 GetCount();
+	ExtraDataList* CreateExtraData();
+};

@@ -10,6 +10,7 @@
 #include "GameData.h"
 #include "decoding.h"
 #include "SOTypes.h"
+#include "InventoryRef.h"
 
 #define SI_SUPPORT_IOSTREAMS
 #include "SimpleIni.h"
@@ -43,7 +44,10 @@ extern NVSECommandTableInterface* g_commandInterface;
 extern const CommandInfo* (*GetCmdByName)(const char* name);
 extern bool (*FunctionCallScript)(Script* funcScript, TESObjectREFR* callingObj, TESObjectREFR* container, NVSEArrayElement* result, UInt8 numArgs, ...);
 extern bool (*FunctionCallScriptAlt)(Script* funcScript, TESObjectREFR* callingObj, UInt8 numArgs, ...);
-extern TESObjectREFR* (__stdcall *InventoryRefCreate)(TESObjectREFR* container, TESForm* itemForm, SInt32 countDelta, ExtraDataList* xData);
+extern InventoryRef* (*InventoryRefGetForID)(UInt32 refID);
+extern TESObjectREFR* (__stdcall *InventoryRefCreateEntry)(TESObjectREFR* container, TESForm* itemForm, SInt32 countDelta, ExtraDataList* xData);
+typedef TESObjectREFR* (__stdcall* _InventoryRefCreate)(TESObjectREFR* container, const InventoryRef::Data& data, bool bValidate);
+extern _InventoryRefCreate InventoryRefCreate;
 
 //Singletons
 extern HUDMainMenu* g_HUDMainMenu;

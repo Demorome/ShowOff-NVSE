@@ -90,24 +90,6 @@ struct ArrayData_JIP
 	}
 };
 
-struct InventoryRef
-{
-	TESForm*			type;			// 00
-	ContChangesEntry*	entry;			// 04
-	ExtraDataList*		xData;			// 08
-	TESObjectREFR*		containerRef;	// 0C
-	TESObjectREFR*		tempRef;		// 10
-	UInt8				pad14[24];		// 14
-	bool				doValidation;	// 2C
-	bool				removed;		// 2D
-	UInt8				pad2E[2];		// 2E
-
-	SInt32 GetCount();
-	ExtraDataList* CreateExtraData();
-};
-
-extern InventoryRef* (*InventoryRefGetForID)(UInt32 refID);
-
 
 float __fastcall GetAxisDistance(TESObjectREFR* ref1, TESObjectREFR* ref2, UInt8 axis);
 

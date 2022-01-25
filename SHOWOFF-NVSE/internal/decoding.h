@@ -730,7 +730,7 @@ public:
 
 	Item *GetSelected()
 	{
-		ListNode<ListBoxItem<Item>> *iter = BSSimpleList<Item>::list.Head();
+		ListNode<ListBoxItem<Item>> *iter = this->list.Head();
 		ListBoxItem<Item> *item;
 		do
 		{
@@ -744,7 +744,7 @@ public:
 
 	void Clear()
 	{
-		ListNode<ListBoxItem<Item>> *iter = BSSimpleList<Item>::list.Head();
+		ListNode<ListBoxItem<Item>> *iter = this->list.Head();
 		ListBoxItem<Item> *item;
 		do
 		{
@@ -845,6 +845,10 @@ public:
 	TileRect			*tile104;		// 104
 	TileRect			*tile108;		// 108
 	UInt32				unk10C[6];		// 10C
+
+	//Both copied from JIP
+	__forceinline static InventoryMenu* Get() { return *(InventoryMenu**)0x11D9EA4; }
+	__forceinline static ContChangesEntry* Selection() { return *(ContChangesEntry**)0x11D9EA8; }
 };
 
 // 2A4
@@ -1700,6 +1704,10 @@ public:
 	TileImage				*tile54;		// 54
 	TileImage				*tile58;		// 58
 	MenuItemEntryList		repairItems;	// 5C
+
+	//Both copied from JIP
+	__forceinline static RepairMenu* Get() { return *(RepairMenu**)0x11DA75C; }
+	__forceinline static ContChangesEntry* Target() { return *(ContChangesEntry**)0x11DA760; }
 };
 
 // 5C
@@ -1942,6 +1950,9 @@ public:
 	UInt32				unk98;			// 98
 	UInt8				skill;			// 9C
 	UInt8				pad9D[3];		// 9D
+
+	//Both copied from JIP
+	__forceinline static RepairServicesMenu* Get() { return *(RepairServicesMenu**)0x11DA7F0; }
 };
 
 // 90
@@ -1966,6 +1977,10 @@ public:
 	TileImage			*tile58;		// 58
 	TileText			*tile5C;		// 5C
 	MenuItemEntryList	itemModList;	// 60
+
+	//Both copied from JIP
+	__forceinline static ItemModMenu* Get() { return *(ItemModMenu**)0x11D9F54; }
+	__forceinline static ContChangesEntry* Target() { return *(ContChangesEntry**)0x11D9F58; }
 };
 
 // 88
