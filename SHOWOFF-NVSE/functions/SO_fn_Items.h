@@ -512,8 +512,9 @@ TESObjectREFR* __fastcall CreateRefForStackWithoutCopy(TESObjectREFR* container,
 {
 	if (container && menuEntry)
 	{
-		InventoryRef::Data data{ menuEntry->type, menuEntry, menuEntry->extendData ? menuEntry->extendData->GetFirstItem() : nullptr };
-		return InventoryRefCreate(container, data, false);
+		InventoryRef::Data const data{ menuEntry->type, menuEntry, menuEntry->extendData ? menuEntry->extendData->GetFirstItem() : nullptr };
+		auto const invRef = InventoryRefCreate(container, data, false);
+		return invRef->tempRef;
 	}
 	return nullptr;
 }

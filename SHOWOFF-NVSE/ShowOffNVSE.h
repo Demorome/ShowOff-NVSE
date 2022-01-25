@@ -46,7 +46,7 @@ extern bool (*FunctionCallScript)(Script* funcScript, TESObjectREFR* callingObj,
 extern bool (*FunctionCallScriptAlt)(Script* funcScript, TESObjectREFR* callingObj, UInt8 numArgs, ...);
 extern InventoryRef* (*InventoryRefGetForID)(UInt32 refID);
 extern TESObjectREFR* (__stdcall *InventoryRefCreateEntry)(TESObjectREFR* container, TESForm* itemForm, SInt32 countDelta, ExtraDataList* xData);
-typedef TESObjectREFR* (__stdcall* _InventoryRefCreate)(TESObjectREFR* container, const InventoryRef::Data& data, bool bValidate);
+typedef InventoryRef* (*_InventoryRefCreate)(TESObjectREFR* container, const InventoryRef::Data& data, bool bValidate);
 extern _InventoryRefCreate InventoryRefCreate;
 
 //Singletons
