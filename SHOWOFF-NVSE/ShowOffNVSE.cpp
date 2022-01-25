@@ -576,6 +576,8 @@ extern "C"
 		/*3D24*/ REG_CMD_ARR(Matrix_ApplyOperationWithScalar)
 		/*3D25*/ REG_CMD_ARR(Matrix_ApplyOperationWithMatrix)
 		/*3D26*/ REG_CMD(TopicInfoSetResponseStrings)
+		/*3D27*/ REG_CMD(GetCalculatedItemValue)
+
 		//==
 
 		if constexpr (true)	//to test in release mode for performance
@@ -610,7 +612,6 @@ extern "C"
 		
 		REG_CMD(GetItemCanRepairTarget)
 		REG_CMD(GetItemCanBeRepairedByTarget)
-		REG_CMD(GetCalculatedItemValue)
 		REG_CMD(GetCalculatedItemWeight)
 
 		REG_CMD(TestMatrix)

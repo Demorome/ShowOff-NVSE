@@ -739,7 +739,23 @@ public:
 				return item->object;
 		}
 		while (iter = iter->next);
-		return NULL;
+		return nullptr;
+	}
+
+	Tile* GetTileForItem(const Item* item)
+	{
+		if (!item)
+			return nullptr;
+		ListNode<ListBoxItem<Item>>* iter = this->list.Head();
+		do
+		{
+			if (auto const i = iter->data;
+				i && i->object == item)
+			{
+				return i->tile;
+			}
+		} while (iter = iter->next);
+		return nullptr;
 	}
 
 	void Clear()
@@ -1795,29 +1811,31 @@ public:
 	UInt32				unk0A4;			// 0A4
 	MenuItemEntryList	leftItems;		// 0A8
 	MenuItemEntryList	rightItems;		// 0D8
-	MenuItemEntryList	*currentItems;	// 108
+	MenuItemEntryList	*currentItems;	// 108, points to either left/rightItems
 	BarterItemList		leftBarter;		// 10C
 	BarterItemList		rightBarter;	// 114
 	UInt32				unk11C;			// 11C
 
 	// Taken from JIP
-	__forceinline static BarterMenu* Get() { return *(BarterMenu**)0x11D8FA4; }
-	__forceinline static ContChangesEntry* Selection() { return *(ContChangesEntry**)0x11D8FA8; }
+	__forceinline static BarterMenu* Get() { return *reinterpret_cast<BarterMenu**>(0x11D8FA4); }
+	__forceinline static ContChangesEntry* Selection() { return *reinterpret_cast<ContChangesEntry**>(0x11D8FA8); }
 
 	Tile* GetTileForItem(ContChangesEntry* itemEntry) const
 	{
-		// Call MenuItemsList::TileFromItem
-		// TODO: remove this, doesn't work how I expected
-		return ThisStdCall<Tile*>(0x7A22D0, this->currentItems, itemEntry);
+		if (currentItems)
+		{
+			return currentItems->GetTileForItem(this->currentItems->GetSelected() /*itemEntry*/);
+		}
+		return nullptr;
 	}
 
 	// Accounts for "CalculateBuyPrice" perk effect, and Buy/Sell mults.
 	// Also accounts for item condition and attached weapon mods.
 	double CalculateItemPrice(ContChangesEntry* itemEntry) const
 	{
-		double value = 0.0;
+		double value = -1.0;
 		if (auto const tile = GetTileForItem(itemEntry))
-			value = ThisStdCall<double>(0x72ED00, tile, itemEntry);
+			value = CdeclCall<double>(0x72ED00, tile, itemEntry);
 		
 		return value;
 	}

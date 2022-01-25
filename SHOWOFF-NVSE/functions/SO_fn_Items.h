@@ -436,6 +436,74 @@ bool Cmd_GetItemCanHaveHealth_Execute(COMMAND_ARGS)
 }
 
 
+DEFINE_CMD_COND_PLUGIN(GetCalculatedItemValue, "Returns the item's value, affected by condition and any attached weapon mods (and extra).", false, kParams_OneOptionalObject_OneOptionalInt);
+bool Cmd_GetCalculatedItemValue_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = -1;
+	auto baseItem = (TESForm*)arg2;	// optional arg
+	auto const itemRef = thisObj;	// trust it is an item ref...
+
+	if (baseItem = TryExtractBaseForm(baseItem, thisObj);
+		baseItem && baseItem->IsItem())
+	{
+		auto const invRef = InventoryRefGetForID(thisObj->refID);
+
+		auto itemVal = -1.0;
+		if (auto const bAccountForBarterChanges = (UInt32)arg1;
+			bAccountForBarterChanges && BarterMenu::Get() && invRef)
+		{
+			auto const brtMenu = BarterMenu::Get();
+
+			// BUG: above may not work reliably when used as a condition (function may be evaluated before barter mult perk effect is applied).
+			itemVal = brtMenu->CalculateItemPrice(invRef->data.entry);
+		}
+		else
+		{
+			// Count = 1, so this doesn't account for stacked item references.
+			//copied after GetCalculatedWeaponDamage from JIP, thx for the pointer c6.
+			ContChangesEntry tempEntry(NULL, 1, baseItem);
+			if (invRef)
+				tempEntry = *invRef->data.entry;
+
+			if (!invRef && itemRef)
+			{
+				ExtraContainerChanges::ExtendDataList extendData;
+				extendData.Init(&itemRef->extraDataList);
+				tempEntry.extendData = &extendData;
+			}
+
+			// Calculate Item Price, without barter mults. 
+			// Accounts for item mods and conditions as well.
+			itemVal = ThisStdCall<double>(0x4BD400, &tempEntry);
+		}
+
+		*result = itemVal;
+	}
+
+	return true;
+}
+bool Cmd_GetCalculatedItemValue_Execute(COMMAND_ARGS)
+{
+	*result = -1;
+	UInt32 bAccountForBarterChanges = 0;
+	TESForm* item = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bAccountForBarterChanges, &item))
+		return true;
+
+	return Cmd_GetCalculatedItemValue_Eval(thisObj, (void*)bAccountForBarterChanges, item, result);
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -519,9 +587,9 @@ TESObjectREFR* __fastcall CreateRefForStackWithoutCopy(TESObjectREFR* container,
 	return nullptr;
 }
 
-
 DEFINE_COMMAND_PLUGIN(GetSelectedItemRefSO, "", false, kParams_OneOptionalInt);
 //code copied from JIP LN and tweaked to avoid copying the ExtendDataList* (needed for some functions).
+//actually doesn't even seem to make a difference? idk
 bool Cmd_GetSelectedItemRefSO_Execute(COMMAND_ARGS)
 {
 	*result = 0;
@@ -595,63 +663,6 @@ bool Cmd_GetSelectedItemRefSO_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_CMD_COND_PLUGIN(GetCalculatedItemValue, "Returns the item's value, affected by condition and any attached weapon mods (and extra).", false, kParams_OneOptionalObject_OneOptionalInt);
-bool Cmd_GetCalculatedItemValue_Eval(COMMAND_ARGS_EVAL)
-{
-	*result = -1;
-	auto baseItem = (TESForm*)arg2;	// optional arg
-	auto const itemRef = thisObj;	// trust it is an item ref...
-		
-	if (baseItem = TryExtractBaseForm(baseItem, thisObj); 
-		baseItem && baseItem->IsItem())
-	{
-		auto const invRef = InventoryRefGetForID(thisObj->refID);
-		
-		// Count = 1, so this doesn't account for stacked item references.
-		//copied after GetCalculatedWeaponDamage from JIP, thx for the pointer c6.
-		ContChangesEntry tempEntry(NULL, 1, baseItem);
-		if (invRef)
-			tempEntry = *invRef->data.entry;
-
-		if (!invRef && itemRef)
-		{
-			ExtraContainerChanges::ExtendDataList extendData;
-			extendData.Init(&itemRef->extraDataList);
-			tempEntry.extendData = &extendData;
-		}
-
-		auto itemVal = 0.0;
-		if (auto const bAccountForBarterChanges = (UInt32)arg1;
-			bAccountForBarterChanges && BarterMenu::Get())
-		{
-			auto const brtMenu = BarterMenu::Get();
-
-			//todo: check if it accounts for Barter skill effects
-			// BUG: above may not work reliably when used as a condition (function may be evaluated before barter mult perk effect is applied).
-			itemVal = brtMenu->CalculateItemPrice(&tempEntry);
-		}
-		else
-		{
-			// Calculate Item Price, without barter mults. 
-			// Accounts for item mods and conditions as well.
-			itemVal = ThisStdCall<double>(0x4BD400, &tempEntry);
-		}
-
-		*result = itemVal;
-	}
-
-	return true;
-}
-bool Cmd_GetCalculatedItemValue_Execute(COMMAND_ARGS)
-{
-	*result = -1;
-	UInt32 bAccountForBarterChanges = 0;
-	TESForm* item = nullptr;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bAccountForBarterChanges, &item))
-		return true;
-
-	return Cmd_GetCalculatedItemValue_Eval(thisObj, (void*)bAccountForBarterChanges, item, result);
-}
 
 
 
