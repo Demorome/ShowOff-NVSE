@@ -576,6 +576,7 @@ extern "C"
 		/*3D24*/ REG_CMD_ARR(Matrix_ApplyOperationWithScalar)
 		/*3D25*/ REG_CMD_ARR(Matrix_ApplyOperationWithMatrix)
 		/*3D26*/ REG_CMD(TopicInfoSetResponseStrings)
+		
 		/*3D27*/ REG_CMD(GetCalculatedItemValue)
 
 		//==

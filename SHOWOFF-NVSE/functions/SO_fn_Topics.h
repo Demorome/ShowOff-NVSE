@@ -73,8 +73,8 @@ bool Cmd_TopicInfoSetResponseStrings_Execute(COMMAND_ARGS)
 		eval.ExtractArgs())
 	{
 #if Test_TypeSafeExtract
-		auto args = std::get<NVSEArrayVar*>(ExtractArgsTuple(eval, kNVSEParams_OneArray));
-		static_assert(std::is_same_v<decltype(args), NVSEArrayVar*>, "lolol");
+		auto args = (ExtractArgsTuple(eval, kNVSEParams_OneArray));
+		//static_assert(std::is_same_v<decltype(args), NVSEArrayVar*>, "lolol");
 #endif
 		
 		auto const tInfo = DYNAMIC_CAST(eval.GetNthArg(0)->GetTESForm(), TESForm, TESTopicInfo);
