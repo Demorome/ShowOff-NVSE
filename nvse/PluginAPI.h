@@ -928,6 +928,7 @@ struct ExpressionEvaluatorUtils
 	void(__fastcall* SetExpectedReturnType)(void* expEval, UInt8 type);
 	void(__fastcall* AssignCommandResultFromElement)(void* expEval, NVSEArrayVarInterface::Element& result);
 	void(__fastcall* ScriptTokenGetElement)(PluginScriptToken* scrToken, NVSEArrayVarInterface::Element& outElem);
+	bool(__fastcall* ScriptTokenCanConvertTo)(PluginScriptToken* scrToken, UInt8 toType);
 #endif
 };
 
@@ -983,6 +984,11 @@ struct PluginScriptToken
 	Token_Type GetType()
 	{
 		return g_expEvalUtils.ScriptTokenGetType(this);
+	}
+
+	bool CanConvertTo(Token_Type toType)
+	{
+		return g_expEvalUtils.ScriptTokenCanConvertTo(this, toType);
 	}
 
 	double GetFloat()

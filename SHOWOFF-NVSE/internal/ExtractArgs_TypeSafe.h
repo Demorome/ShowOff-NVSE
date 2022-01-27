@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <array>
+
 #include "PluginAPI.h"
 
 #define Test_TypeSafeExtract true && _DEBUG
@@ -96,8 +98,8 @@ template <typename T>
 [[nodiscard]] constexpr T GetNthArg(
 	PluginExpressionEvaluator& eval, const size_t nthArg)
 {
-	auto const arg = eval.GetNthArg(nthArg);
-	if constexpr (std::is_same_v<T, ArgTypes::NumberType>)
+	if constexpr (auto const arg = eval.GetNthArg(nthArg); 
+		std::is_same_v<T, ArgTypes::NumberType>)
 	{
 		return arg->GetFloat();
 	}
@@ -119,8 +121,11 @@ template <typename T>
 	}
 	else if constexpr (std::is_same_v<T, ArgTypes::StringOrNumber>)
 	{
-		//TODO
-		//return;
+		if (arg->CanConvertTo(kTokenType_Array))
+		{
+			return arg->GetArrayVar();
+		}
+		return arg->GetString();	//assume string
 	}
 	else if constexpr (std::is_same_v<T, ArgTypes::FormOrNumber>)
 	{
@@ -132,17 +137,19 @@ template <typename T>
 	}
 	else if constexpr (std::is_same_v<T, ArgTypes::BasicType>)
 	{
-		//todo: needs missing GetBasicArgType() to handle string case
-		/*
-		ArrayElementR elem;
-		arg->GetElement(elem);
-		switch (elem.GetType())
+		if (arg->CanConvertTo(kTokenType_Array))
 		{
-			case NVSEArrayVarInterface::kType_String
+			return arg->GetArrayVar();
 		}
-		if (auto const form = elem.Form())
-			return form;
-		return elem.num;*/
+		if (arg->CanConvertTo(kTokenType_String))
+		{
+			return arg->GetString();
+		}
+		if (arg->CanConvertTo(kTokenType_Form))
+		{
+			return arg->GetTESForm();
+		}
+		return arg->GetFloat();	//assume number
 	}
 	else if constexpr (std::is_same_v<T, ArgTypes::Slice>)
 	{
@@ -189,16 +196,33 @@ constexpr size_t GetNumMandatoryArgs(const ParamInfo(&params)[size])
 
 //todo: struct to extract arg type from param type enum
 
+struct NVSEParamInfo
+{
+	const char* typeStr;
+	const kNVSEParamType	typeID;		// ParamType
+	const UInt32	isOptional;	// do other bits do things?
+};
+
+static constexpr NVSEParamInfo kNVSETestParams_OneArray_Test3[1] =
+{
+	{	"array",	kNVSEParamType_Array,	0	},
+};
+
+template <typename T, size_t n>
+constexpr size_t array_size(const T(&)[n]) { return n; }
+
+
 //Extracts the non-optional args of a function as a tuple, for compile-time type safety.
 //Assumes .ExtractArgs returned true before being called, and that NumArgs is >= number of non-optional args in params.
-template <size_t size>
-constexpr auto ExtractArgsTuple(
-	PluginExpressionEvaluator& eval,
-	const ParamInfo(&params)[size])
+template <size_t size, const NVSEParamInfo (&params)[size]>
+constexpr auto ExtractArgsTuple(PluginExpressionEvaluator& eval)
 {
-	size_t nthArg = 0;
-	using t = ParamTypeToReturnType::Get_t<kNVSEParamType_Number/*static_cast<kNVSEParamType>(params[nthArg].typeID)*/>;
-	return GetNthArg<t>(eval, nthArg++);
+	constexpr kNVSEParamType type = params[0].typeID;
+	using t = ParamTypeToReturnType::Get_t<type>;
+	
+	//using t = ParamTypeToReturnType::Get_t<kNVSEParamType_Array>;
+
+	return GetNthArg<t>(eval, 0);
 	/*
 	return tuple_generator<GetNumMandatoryArgs(params)>(
 		[&](auto) { return GetNthArg(params[nthArg], eval, nthArg++); }	//bug: func retn type is not constant.
@@ -206,5 +230,82 @@ constexpr auto ExtractArgsTuple(
 }
 
 
+
+
+#if _DEBUG
+//=====Testing zone
+
+
+#include "CommandTable.h"
+
+struct NVSECommandInfo
+{
+	const char* longName;		// 00
+	const char* shortName;		// 04
+	UInt32		opcode;			// 08
+	const char* helpText;		// 0C
+	UInt16		needsParent;	// 10
+	UInt16		numParams;		// 12
+	const NVSEParamInfo* params;	// 14
+
+	// handlers
+	Cmd_Execute	execute;		// 18
+	Cmd_Parse	parse;			// 1C
+	Cmd_Eval	eval;			// 20
+
+	UInt32		flags;			// 24		might be more than one field (reference to 25 as a byte)
+};
+
+
+#define DEFINE_COMMAND_PLUGIN_EXP_TEST(name, altName, description, refRequired, paramInfo) \
+	extern bool Cmd_ ## name ## _Execute(COMMAND_ARGS); \
+	static NVSECommandInfo (kCommandInfo_ ## name) = { \
+		#name, \
+		#altName, \
+		0, \
+		#description, \
+		refRequired, \
+		(sizeof(paramInfo) / sizeof(ParamInfo)), \
+		paramInfo, \
+		HANDLER(Cmd_ ## name ## _Execute), \
+		Cmd_Expression_Plugin_Parse, \
+		NULL, \
+		0 \
+	};
+
+#define ExtractArgsSafe(params, eval) \
+	ExtractArgsTuple<array_size(params), params>(eval)
+
+static constexpr NVSEParamInfo kNVSETestParams_OneArray[1] =
+{
+	{	"array",	kNVSEParamType_Array,	0	},
+};
+
+static constexpr NVSEParamInfo kNVSETestParams_OneArray_OneForm[2] =
+{
+	{	"array",	kNVSEParamType_Array,	0	},
+	{	"form",	kNVSEParamType_Form,	0	},
+};
+
+DEFINE_COMMAND_PLUGIN_EXP_TEST(TestSafeExtract, , "", false, kNVSETestParams_OneArray);
+bool Cmd_TestSafeExtract_Execute(COMMAND_ARGS)
+{
+	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
+		eval.ExtractArgs())
+	{
+		//auto args = ExtractArgsTuple<array_size(kNVSETestParams_OneArray), kNVSETestParams_OneArray>(eval);
+		auto args = ExtractArgsSafe(kNVSETestParams_OneArray_OneForm, eval);
+		
+		//static_assert(std::is_same_v<decltype(args), NVSEArrayVar*>, "lolol");
+
+		
+	}
+	return true;
+}
+
+
+
+
+#endif
 
 #endif

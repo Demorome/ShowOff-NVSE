@@ -5,7 +5,7 @@
 #include "CommandTable.h"
 #include "PluginAPI.h"
 
-static ParamInfo kNVSEParams_OneArray[1] =
+static constexpr /*static*/ ParamInfo kNVSEParams_OneArray[1] =
 {
 	{	"array",	kNVSEParamType_Array,	0	},
 };

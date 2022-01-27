@@ -72,11 +72,6 @@ bool Cmd_TopicInfoSetResponseStrings_Execute(COMMAND_ARGS)
 	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
 		eval.ExtractArgs())
 	{
-#if Test_TypeSafeExtract
-		auto args = (ExtractArgsTuple(eval, kNVSEParams_OneArray));
-		//static_assert(std::is_same_v<decltype(args), NVSEArrayVar*>, "lolol");
-#endif
-		
 		auto const tInfo = DYNAMIC_CAST(eval.GetNthArg(0)->GetTESForm(), TESForm, TESTopicInfo);
 		auto const inArr = eval.GetNthArg(1)->GetArrayVar();
 		if (!tInfo || !inArr)

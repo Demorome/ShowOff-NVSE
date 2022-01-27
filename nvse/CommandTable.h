@@ -201,7 +201,7 @@ bool Cmd_Default_Execute(COMMAND_ARGS);
 
 typedef bool (* Cmd_Parse)(UInt32 numParams, ParamInfo * paramInfo, ScriptLineBuffer * lineBuf, ScriptBuffer * scriptBuf);
 bool Cmd_Default_Parse(UInt32 numParams, ParamInfo * paramInfo, ScriptLineBuffer * lineBuf, ScriptBuffer * scriptBuf);
-const Cmd_Parse Cmd_Expression_Plugin_Parse = (Cmd_Parse)0x08000000;
+const Cmd_Parse Cmd_Expression_Plugin_Parse = reinterpret_cast<Cmd_Parse>(0x08000000);
 
 typedef bool (* Cmd_Eval)(COMMAND_ARGS_EVAL);
 bool Cmd_Default_Eval(COMMAND_ARGS_EVAL);
@@ -223,7 +223,7 @@ struct CommandInfo
 	const char	* helpText;		// 0C
 	UInt16		needsParent;	// 10
 	UInt16		numParams;		// 12
-	ParamInfo	* params;		// 14
+	const ParamInfo	* params;	// 14
 
 	// handlers
 	Cmd_Execute	execute;		// 18
