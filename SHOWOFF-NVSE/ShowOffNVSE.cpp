@@ -605,6 +605,7 @@ extern "C"
 		REG_CMD_FORM(GetSelectedItemRefSO)
 
 		REG_CMD(TestSafeExtract_OneArray)
+		REG_CMD(TestSafeExtract_OneNumber_OneOptionalString)
 
 		REG_CMD(Flt_Equals)	// not needed; xNVSE's eval already uses this for "==" operator.
 
