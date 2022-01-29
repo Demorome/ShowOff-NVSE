@@ -178,7 +178,7 @@ struct NVSEParamInfo
 };
 
 template <size_t size>
-consteval size_t GetNumMandatoryArgs(const NVSEParamInfo(&params)[size])
+[[nodiscard]] consteval size_t GetNumMandatoryArgs(const NVSEParamInfo(&params)[size])
 {
 	size_t i = 0;
 	for (; i < size; i++)
@@ -190,23 +190,24 @@ consteval size_t GetNumMandatoryArgs(const NVSEParamInfo(&params)[size])
 }
 
 template <size_t size>
-consteval size_t GetNumOptionalArgs(const NVSEParamInfo(&params)[size])
+[[nodiscard]] consteval size_t GetNumOptionalArgs(const NVSEParamInfo(&params)[size])
 {
 	return size - GetNumMandatoryArgs(params);
 }
 
 //found at https://stackoverflow.com/questions/3368883/how-does-this-size-of-array-template-function-work#comment12975718_3368894
 template <typename T, size_t n>
-consteval size_t array_size(const T(&)[n]) { return n; }
+[[nodiscard]] consteval size_t array_size(const T(&)[n]) { return n; }
 
 
 template <size_t size, const NVSEParamInfo(&params)[size], size_t ... Is>
-constexpr auto args_extract_tuple_seq(PluginExpressionEvaluator &eval, std::index_sequence<Is...>)
+[[nodiscard]] constexpr auto args_extract_tuple_seq(PluginExpressionEvaluator &eval, std::index_sequence<Is...>)
 {
 	return std::make_tuple(GetNthArg<ParamTypeToReturnType::Get_t<params[Is].typeID>>(eval, Is)...);
 }
+
 template <size_t numMandatoryArgs, size_t size, const NVSEParamInfo(&params)[size]>
-constexpr auto args_extract_tuple(PluginExpressionEvaluator& eval)
+[[nodiscard]] constexpr auto args_extract_tuple(PluginExpressionEvaluator& eval)
 {
 	return args_extract_tuple_seq<size, params>(eval, std::make_index_sequence<numMandatoryArgs>());
 }
@@ -214,14 +215,18 @@ constexpr auto args_extract_tuple(PluginExpressionEvaluator& eval)
 //Extracts the non-optional args of a function as a tuple, for compile-time type safety.
 //Assumes .ExtractArgs returned true before being called, and that NumArgs is >= number of non-optional args in params.
 template <size_t size, const NVSEParamInfo (&params)[size]>
-constexpr auto ExtractMandatoryArgsAsTuple(PluginExpressionEvaluator& eval)
+[[nodiscard]] constexpr auto ExtractMandatoryArgsAsTuple(PluginExpressionEvaluator& eval)
 {
 	auto constexpr numArgs = GetNumMandatoryArgs(params);
+	if constexpr (!numArgs)
+	{
+		static_assert(false, "ExtractMandatoryArgsAsTuple >> Attempting to extract mandatory args when there are none.");
+	}
 	return args_extract_tuple<numArgs, size, params>(eval);
 }
 
 template<size_t size, const NVSEParamInfo(&params)[size], class ArgsTuple, size_t ... Is>
-consteval bool ValidateOptionalArgs_Seq(std::index_sequence<Is...>)
+[[nodiscard]] consteval bool ValidateOptionalArgs_Seq(std::index_sequence<Is...>)
 {
 	auto constexpr numMandatoryArgs = GetNumMandatoryArgs(params);	//used to offset to where optional args begin in params array.
 	return (std::is_same_v< std::tuple_element_t<Is, ArgsTuple>, 
@@ -230,7 +235,7 @@ consteval bool ValidateOptionalArgs_Seq(std::index_sequence<Is...>)
 }
 //Checks if each arg in param pack == declared optional arg types
 template<size_t size, const NVSEParamInfo(&params)[size], size_t numOptArgs, class ArgsTuple>
-consteval bool ValidateOptionalArgs()
+[[nodiscard]] consteval bool ValidateOptionalArgs()
 {
 	//index sequence for numOptArgs = 2: {0, 1}
 	return ValidateOptionalArgs_Seq<size, params, ArgsTuple>(std::make_index_sequence<numOptArgs>());
@@ -307,19 +312,23 @@ constexpr void ExtractOptionalArgsFromPack(PluginExpressionEvaluator& eval, std:
 		0 \
 	};
 
-//Extracts mandatory args from params
+//Extracts mandatory args from params, for _EXP-defined functions (which use PluginExpressionEvaluator).
+//Args are returned as a tuple; use structured binding to extract each arg.
 #define EXTRACT_MAND_ARGS_SAFE(params, eval) \
 	ExtractMandatoryArgsAsTuple<array_size(params), params>(eval)
 
-//Extracts mandatory args from a function's params.
+//Extracts mandatory args from a function's params, for _EXP-defined functions (which use PluginExpressionEvaluator).
+//Args are returned as a tuple; use structured binding to extract each arg.
 #define EXTRACT_MAND_ARGS_SAFER(functionName, eval) \
 	ExtractMandatoryArgsAsTuple<array_size(kCommandParams_ ## functionName), (kCommandParams_ ## functionName)>(eval)
 
-//Extracts optional args from params (types are checked compile-time).
+//Extracts optional args from params (types are checked compile-time), for _EXP-defined functions (which use PluginExpressionEvaluator).
+//Args must be packed inside a tuple, via std::tie().
 #define EXTRACT_OPT_ARGS_SAFE(params, eval, args) \
 	ExtractOptionalArgsFromPack<array_size(params), params>(eval, args)
 
-//Extracts optional args from a function's params (types are checked compile-time).
+//Extracts optional args from a function's params (types are checked compile-time), for _EXP-defined functions (which use PluginExpressionEvaluator).
+//Args must be packed inside a tuple, via std::tie().
 #define EXTRACT_OPT_ARGS_SAFER(functionName, eval, args) \
 	ExtractOptionalArgsFromPack<array_size(kCommandParams_ ## functionName), (kCommandParams_ ## functionName)>(eval, args)
 
@@ -362,6 +371,13 @@ static constexpr NVSEParamInfo kNVSETestParams_OneNumber_OneOptionalString[2] =
 	{	"string",	kNVSEParamType_String,	1	},
 };
 
+static constexpr NVSEParamInfo kNVSETestParams_OneOptionalString_TwoOptionalNumbers[3] =
+{
+	{	"string",	kNVSEParamType_String,	1	},
+	{	"num",	kNVSEParamType_Number,	1	},
+	{	"num",	kNVSEParamType_Number,	1	},
+};
+
 consteval void TestSafeExtract_CompileTime(COMMAND_ARGS)
 {
 	PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
@@ -393,6 +409,19 @@ consteval void TestSafeExtract_CompileTime(COMMAND_ARGS)
 	EXTRACT_OPT_ARGS_SAFE(kNVSETestParams_OneBasicType_OneOptionalBoolean, eval, std::tie(optArg1_0));
 	//int optArg1_1;	//wrong type, will fail to compile call below
 	//EXTRACT_OPT_ARGS_SAFE<array_size(kNVSETestParams_OneBasicType_OneOptionalBoolean), kNVSETestParams_OneBasicType_OneOptionalBoolean>(eval, optArg1_1);
+
+	// Below fails to compile; there are no mandatory args to extract.
+	//auto fail = EXTRACT_MAND_ARGS_SAFE(kNVSETestParams_OneOptionalString_TwoOptionalNumbers, eval);
+	ArgTypes::StringType optString1_0 = "test";
+	// Below fails to compile; Provided number of optional args to extract does not match established count
+	//EXTRACT_OPT_ARGS_SAFE(kNVSETestParams_OneOptionalString_TwoOptionalNumbers, eval, std::tie(optString1_0));
+	float optNum1_0 = 0, optNum2_0 = 0;
+	// Below fails to compile; number types don't match (always expects double for number param type).
+	//EXTRACT_OPT_ARGS_SAFE(kNVSETestParams_OneOptionalString_TwoOptionalNumbers, eval, std::tie(optString1_0, optNum1_0, optNum2_0));
+	double optNum1_1 = 0, optNum2_1 = 0;
+	EXTRACT_OPT_ARGS_SAFE(kNVSETestParams_OneOptionalString_TwoOptionalNumbers, eval, std::tie(optString1_0, optNum1_1, optNum2_1));
+
+
 }
 
 DEFINE_COMMAND_PLUGIN_EXP_TEST(TestSafeExtract_OneArray, , "", false, kNVSETestParams_OneArray);
