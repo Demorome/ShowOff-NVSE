@@ -599,13 +599,17 @@ extern "C"
 		//todo: always check to update/increase your opcode range when adding new functions
 
 
+#if EnableSafeExtractArgsTests
+		REG_CMD(TestSafeExtract_OneArray)
+		REG_CMD(TestSafeExtract_OneNumber_OneOptionalString)
+		REG_CMD(TestSafeExtract_OneOptionalStringOrNumber)
+#endif
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 
 		REG_CMD_FORM(GetSelectedItemRefSO)
 
-		REG_CMD(TestSafeExtract_OneArray)
-		REG_CMD(TestSafeExtract_OneNumber_OneOptionalString)
+
 
 		REG_CMD(Flt_Equals)	// not needed; xNVSE's eval already uses this for "==" operator.
 
