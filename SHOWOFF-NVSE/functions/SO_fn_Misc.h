@@ -891,7 +891,7 @@ bool Cmd_GetPipboyRadioSounds_Execute(COMMAND_ARGS)
 	*result = 0;
 	if (auto const radio = Radio::RadioEntry::GetSingleton())
 	{
-		Sound* test;
+		//Sound* test;
 		auto const outArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 		for (auto iter = radio->unk04.sounds.Begin(); !iter.End(); iter.Next())
 		{

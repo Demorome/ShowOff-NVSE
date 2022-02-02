@@ -5,6 +5,21 @@
 #define EnableSafeExtractArgsTests true
 
 
+namespace Utilities 
+{
+	template<typename T> struct is_variant : std::false_type {};
+
+	template<typename ...Args>
+	struct is_variant<std::variant<Args...>> : std::true_type {};
+
+	//Credits: https://stackoverflow.com/questions/57134521/how-to-check-if-template-argument-is-stdvariant
+	template<typename T>
+	inline constexpr bool is_variant_v = is_variant<T>::value;
+
+	template<typename T, typename ... U>
+	bool constexpr is_any_of_v = (std::is_same_v<T, U> || ...);
+
+}
 
 namespace ArgTypes
 {
@@ -23,43 +38,159 @@ namespace ArgTypes
 
 namespace ParamTypeToReturnType
 {
+	using namespace Utilities;
+	
 	template<kNVSEParamType param>
 	struct Get
 	{
-		typedef void type;	//invalid void type by default
+		// indicates the default return type for a given param. 
+		using type = void;	//invalid void type by default
+
+		//When extracting optional args, allows alternate types to be used as references to be modified.
+		template <typename T>
+		static consteval bool CanExtractAs()
+		{
+			return false;
+		}
 	};
-	template <> struct Get<kNVSEParamType_Boolean>
+
+	//Retrieves the default return type for a given arg parameter.
+	template <kNVSEParamType param>
+	using Get_t = typename Get<param>::type;
+
+	template <kNVSEParamType param, typename T>
+	consteval bool CanExtractParamAs()
 	{
-		typedef bool type;
+		return Get<param>::template CanExtractAs<T>();
+	}
+
+	template <class Variant, kNVSEParamType param, size_t ...Is>
+	consteval bool VariantContains1OfType_Seq(std::index_sequence<Is...> seq)
+	{
+		constexpr int numOfType = (CanExtractParamAs<param, std::variant_alternative_t<Is, Variant>>() + ...);
+		return numOfType == 1;
+	}
+	
+	//Checks if the variant has exactly 1 alternative which can be extracted from the param type.
+	template <class Variant, kNVSEParamType param, size_t N, typename Is = std::make_index_sequence<N>>
+	constexpr bool VariantContains1OfType = VariantContains1OfType_Seq<Variant, param>(Is{});
+
+	//Create explicit template class instantions to define the default arg to extract them as,
+	//plus define possible conversions.
+	template <> struct Get<kNVSEParamType_Boolean>		//Note that boolean param type covers more cases than just Number param type casted to bool!
+	{
+		using type = bool;
+
+		template <typename T>
+		static consteval bool CanExtractAs()
+		{
+			return std::is_same_v<type, T>;
+		}
+	};
+	template <> struct Get<kNVSEParamType_Number>
+	{
+		using type = ArgTypes::NumberType;
+
+		template <typename T>
+		static consteval bool CanExtractAs()
+		{
+			return std::is_arithmetic_v<T>;
+		}
 	};
 	template <> struct Get<kNVSEParamType_Form>
 	{
-		typedef ArgTypes::FormType type;
-	};
-	template <> struct Get<kNVSEParamType_BasicType>
-	{
-		typedef ArgTypes::BasicType type;
-	};
-	template <> struct Get<kNVSEParamType_Array>
-	{
-		typedef ArgTypes::ArrayType type;
-	};
-	template <> struct Get<kNVSEParamType_ArrayElement>
-	{
-		typedef ArgTypes::BasicType type;
+		using type = ArgTypes::FormType;
+
+		template <typename T>
+		static consteval bool CanExtractAs()
+		{
+			return std::is_same_v<type, T>;
+		}
 	};
 	template <> struct Get<kNVSEParamType_String>
 	{
-		typedef ArgTypes::StringType type;
+		using type = ArgTypes::StringType;
+
+		template <typename T>
+		static consteval bool CanExtractAs()
+		{
+			return is_any_of_v<T, type, std::string, const char*>;
+		}
 	};
+	template <> struct Get<kNVSEParamType_Array>
+	{
+		using type = ArgTypes::ArrayType;
+
+		template <typename T>
+		static consteval bool CanExtractAs()
+		{
+			return std::is_same_v<type, T>;
+		}
+	};
+	template <> struct Get<kNVSEParamType_BasicType>
+	{
+		using type = ArgTypes::BasicType;
+
+		template <typename T>
+		static consteval bool CanExtractAs()
+		{
+			if constexpr (is_variant_v<T> && (std::variant_size_v<T> == 4))
+			{
+				auto constexpr variant_size = 4;
+
+				//Check if variant contains all 4 basic types (could be at either index for the variant).
+				if constexpr (!VariantContains1OfType<T, kNVSEParamType_Number, variant_size>) {
+					return false;
+				}
+				if constexpr (!VariantContains1OfType<T, kNVSEParamType_String, variant_size>){
+					return false;
+				}
+				if constexpr (!VariantContains1OfType<T, kNVSEParamType_Array, variant_size>) {
+					return false;
+				}
+				if constexpr (!VariantContains1OfType<T, kNVSEParamType_Form, variant_size>) {
+					return false;
+				}
+				return true;
+			}
+			return false;
+		}
+	};
+	template <> struct Get<kNVSEParamType_ArrayElement> : Get<kNVSEParamType_BasicType>
+	{};
+
 	/*
 	template <> struct TestGetReturnType<kNVSEParamType_ArrayVarOrElement>
 	{
 		typedef BasicType type;	//todo: maybe make this std::variant < ArrayType, BasicType > ?
 	};*/
+
 	template <> struct Get<kNVSEParamType_StringOrNumber>
 	{
-		typedef ArgTypes::StringOrNumber type;
+		using type = ArgTypes::StringOrNumber;
+		
+		//TODO: allow std::variant<std::string, anyNum> with CanConvertTo()
+		// will require static_cast for the number
+		template <typename T>
+		static consteval bool CanExtractAs()
+		{
+			if constexpr (is_variant_v<T> && (std::variant_size_v<T> == 2))
+			{
+				auto constexpr variant_size = 2;
+
+				//Check if variant contains 1 valid string type, 1 numeric type (could be at either index for the variant).
+				if constexpr (!VariantContains1OfType<T, kNVSEParamType_Number, variant_size>)
+				{
+					return false;
+				}
+				if constexpr (!VariantContains1OfType<T, kNVSEParamType_String, variant_size>)
+				{
+					return false;
+				}
+				return true;
+			}
+			return false;
+		}
 	};
 	/*
 	template <> struct TestGetReturnType<kNVSEParamType_Command>
@@ -69,28 +200,58 @@ namespace ParamTypeToReturnType
 	*/
 	template <> struct Get<kNVSEParamType_FormOrNumber>
 	{
-		typedef ArgTypes::FormOrNumber type;
+		using type = ArgTypes::FormOrNumber;
+
+		template <typename T>
+		static consteval bool CanExtractAs()
+		{
+			if constexpr (is_variant_v<T> && (std::variant_size_v<T> == 2))
+			{
+				auto constexpr variant_size = 2;
+
+				//Check if variant contains 1 form type, 1 numeric type (could be at either index for the variant).
+				if constexpr (!VariantContains1OfType<T, kNVSEParamType_Number, variant_size>) {
+					return false;
+				}
+				if constexpr (!VariantContains1OfType<T, kNVSEParamType_Form, variant_size>) {
+					return false;
+				}
+				return true;
+			}
+			return false;
+		}
 	};
-	template <> struct Get<kNVSEParamType_NoTypeCheck>	//?????
+	template <> struct Get<kNVSEParamType_NoTypeCheck>	//????? not sure what this even does
 	{
-		typedef void* type;
-	};
-	template <> struct Get<kNVSEParamType_Number>
-	{
-		typedef ArgTypes::NumberType type;
+		using type = void*;
+
+		template <typename T>
+		static consteval bool CanExtractAs()	//can't extract this from plugins yet
+		{
+			return false;
+		}
 	};
 	template <> struct Get<kNVSEParamType_Pair>
 	{
-		typedef ArgTypes::Pair type;
+		using type = ArgTypes::Pair;
+
+		template <typename T>
+		static consteval bool CanExtractAs()
+		{
+			return std::is_same_v<type, T>;
+		}
 	};
 	template <> struct Get<kNVSEParamType_Slice>
 	{
-		typedef ArgTypes::Slice type;
+		using type = ArgTypes::Slice;
+
+		template <typename T>
+		static consteval bool CanExtractAs()
+		{
+			return std::is_same_v<type, T>;
+		}
 	};
 	//todo: missing Var types (not needed atm)
-
-	template <kNVSEParamType param>
-	using Get_t = typename Get<param>::type;
 }
 
 
@@ -100,28 +261,29 @@ template <typename T>
 [[nodiscard]] T GetNthArg(
 	PluginExpressionEvaluator& eval, const size_t nthArg)
 {
+	using ParamTypeToReturnType::CanExtractParamAs;
 	if constexpr (auto const arg = eval.GetNthArg(nthArg); 
-		std::is_same_v<T, ArgTypes::NumberType>)
-	{
-		return arg->GetFloat();
-	}
-	else if constexpr (std::is_same_v<T, ArgTypes::FormType>)
-	{
-		return arg->GetTESForm();
-	}
-	else if constexpr (std::is_same_v<T, ArgTypes::StringType>)
-	{
-		return arg->GetString();
-	}
-	else if constexpr (std::is_same_v<T, bool>)
+		CanExtractParamAs<kNVSEParamType_Boolean, T>())	//handle bool case before Number case, since the latter would convert to bool but handles less cases.
 	{
 		return arg->GetBool();
 	}
-	else if constexpr (std::is_same_v<T, ArgTypes::ArrayType>)
+	else if constexpr (CanExtractParamAs<kNVSEParamType_Number, T>())
+	{
+		return arg->GetFloat();
+	}
+	else if constexpr (CanExtractParamAs<kNVSEParamType_Form, T>())
+	{
+		return arg->GetTESForm();
+	}
+	else if constexpr (CanExtractParamAs<kNVSEParamType_String, T>())
+	{
+		return arg->GetString();
+	}
+	else if constexpr (CanExtractParamAs<kNVSEParamType_Array, T>())
 	{
 		return arg->GetArrayVar();
 	}
-	else if constexpr (std::is_same_v<T, ArgTypes::StringOrNumber>)
+	else if constexpr (CanExtractParamAs<kNVSEParamType_StringOrNumber, T>())
 	{
 		if (arg->CanConvertTo(kTokenType_String))
 		{
@@ -129,7 +291,7 @@ template <typename T>
 		}
 		return arg->GetFloat();	//assume bumber
 	}
-	else if constexpr (std::is_same_v<T, ArgTypes::FormOrNumber>)
+	else if constexpr (CanExtractParamAs<kNVSEParamType_FormOrNumber, T>())
 	{
 		ArrayElementR elem;
 		arg->GetElement(elem);
@@ -137,7 +299,7 @@ template <typename T>
 			return form;
 		return elem.num;
 	}
-	else if constexpr (std::is_same_v<T, ArgTypes::BasicType>)
+	else if constexpr (CanExtractParamAs<kNVSEParamType_BasicType, T>())
 	{
 		if (arg->CanConvertTo(kTokenType_Array))
 		{
@@ -153,22 +315,23 @@ template <typename T>
 		}
 		return arg->GetFloat();	//assume number
 	}
-	else if constexpr (std::is_same_v<T, ArgTypes::Slice>)
+	else if constexpr (CanExtractParamAs<kNVSEParamType_Slice, T>())
 	{
 		return arg->GetSlice();
 	}
-	else if constexpr (std::is_same_v<T, ArgTypes::Pair>)
+	else if constexpr (CanExtractParamAs<kNVSEParamType_Pair, T>())
 	{
 		return arg->GetPair();
 	}
-	else if constexpr (std::is_same_v<T, void*>)
+
+	else if constexpr (CanExtractParamAs<kNVSEParamType_NoTypeCheck, T>())
 	{
 		//return ;
-		static_assert(false, "No plugin code to extract void* arg");
+		static_assert(false, "No plugin code to extract NoTypeCheck arg");
 	}
 	else
 	{
-		static_assert(false, "Missing type case for GetNthArg");
+		static_assert(false, "Failure to match a return type for GetNthArg");
 	}
 }
 
@@ -232,9 +395,8 @@ template<size_t size, const NVSEParamInfo(&params)[size], class ArgsTuple, size_
 [[nodiscard]] consteval bool ValidateOptionalArgs_Seq(std::index_sequence<Is...>)
 {
 	auto constexpr numMandatoryArgs = GetNumMandatoryArgs(params);	//used to offset to where optional args begin in params array.
-	return (std::is_same_v< std::tuple_element_t<Is, ArgsTuple>, 
-		ParamTypeToReturnType::Get_t<params[Is + numMandatoryArgs].typeID> > 
-		&& ...);
+	using ParamTypeToReturnType::CanExtractParamAs;
+	return (CanExtractParamAs<params[Is + numMandatoryArgs].typeID, std::tuple_element_t<Is, ArgsTuple>>() && ...);
 }
 //Checks if each arg in param pack == declared optional arg types
 template<size_t size, const NVSEParamInfo(&params)[size], size_t numOptArgs, class ArgsTuple>
@@ -390,7 +552,7 @@ void TestSafeExtract_CompileTime(COMMAND_ARGS)
 	static_assert(std::is_same_v<decltype(arg2), ArgTypes::FormType>);
 
 	
-	//auto [arg1, arg2] = EXTRACT_ARGS_SAFE(kNVSETestParams_OneArray, eval);
+	//auto [arg1, arg2] = EXTRACT_MAND_ARGS_EXP_MANUAL(kNVSETestParams_OneArray, eval);
 	// -> throws compiler error, trying to extract more args than the params allow
 
 	auto [arg1_1] = EXTRACT_MAND_ARGS_EXP_MANUAL(kNVSETestParams_OneString, eval);
@@ -404,23 +566,25 @@ void TestSafeExtract_CompileTime(COMMAND_ARGS)
 	static_assert(std::is_same_v<decltype(arg1_3), ArgTypes::BasicType>);
 	static_assert(std::is_same_v<decltype(arg2_3), bool>);
 
-	//auto [arg1_4, arg2_4] = EXTRACT_ARGS_SAFE(kNVSETestParams_OneBasicType_OneOptionalBoolean, eval);
+	//auto [arg1_4, arg2_4] = EXTRACT_MAND_ARGS_EXP_MANUAL(kNVSETestParams_OneBasicType_OneOptionalBoolean, eval);
 	// -> throws compiler error, trying to extract more non-optional args than there are.
 	auto [arg1_5] = EXTRACT_MAND_ARGS_EXP_MANUAL(kNVSETestParams_OneBasicType_OneOptionalBoolean, eval);
 	static_assert(std::is_same_v<decltype(arg1_5), ArgTypes::BasicType>);
 	bool optArg1_0;
 	EXTRACT_OPT_ARGS_EXP_MANUAL(kNVSETestParams_OneBasicType_OneOptionalBoolean, eval, std::tie(optArg1_0));
 	//int optArg1_1;	//wrong type, will fail to compile call below
-	//EXTRACT_OPT_ARGS_SAFE<array_size(kNVSETestParams_OneBasicType_OneOptionalBoolean), kNVSETestParams_OneBasicType_OneOptionalBoolean>(eval, optArg1_1);
+	//EXTRACT_OPT_ARGS_EXP_MANUAL(kNVSETestParams_OneBasicType_OneOptionalBoolean, eval, std::tie(optArg1_1));
 
 	// Below fails to compile; there are no mandatory args to extract.
-	//auto fail = EXTRACT_MAND_ARGS_SAFE(kNVSETestParams_OneOptionalString_TwoOptionalNumbers, eval);
+	//auto fail = EXTRACT_MAND_ARGS_EXP_MANUAL(kNVSETestParams_OneOptionalString_TwoOptionalNumbers, eval);
 	ArgTypes::StringType optString1_0 = "test";
 	// Below fails to compile; Provided number of optional args to extract does not match established count
-	//EXTRACT_OPT_ARGS_SAFE(kNVSETestParams_OneOptionalString_TwoOptionalNumbers, eval, std::tie(optString1_0));
+	//EXTRACT_OPT_ARGS_EXP_MANUAL(kNVSETestParams_OneOptionalString_TwoOptionalNumbers, eval, std::tie(optString1_0));
+
+	//Below works because all arethmatic values are accepted (besides bool); data will be extracted as double, then cast down.
 	float optNum1_0 = 0, optNum2_0 = 0;
-	// Below fails to compile; number types don't match (always expects double for number param type).
-	//EXTRACT_OPT_ARGS_SAFE(kNVSETestParams_OneOptionalString_TwoOptionalNumbers, eval, std::tie(optString1_0, optNum1_0, optNum2_0));
+	EXTRACT_OPT_ARGS_EXP_MANUAL(kNVSETestParams_OneOptionalString_TwoOptionalNumbers, eval, std::tie(optString1_0, optNum1_0, optNum2_0));
+	
 	double optNum1_1 = 0, optNum2_1 = 0;
 	EXTRACT_OPT_ARGS_EXP_MANUAL(kNVSETestParams_OneOptionalString_TwoOptionalNumbers, eval, std::tie(optString1_0, optNum1_1, optNum2_1));
 
