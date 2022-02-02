@@ -808,6 +808,22 @@ bool Cmd_TestSafeExtract_OneNumber_OneOptionalString_Execute(COMMAND_ARGS)
 	return true;
 }
 
+//Uses Extract_ALL
+DEFINE_COMMAND_PLUGIN_EXP_SAFE(TestSafeExtract_OneNumber_OneOptionalString_Alt, "", false, kNVSETestParams_OneNumber_OneOptionalString);
+bool Cmd_TestSafeExtract_OneNumber_OneOptionalString_Alt_Execute(COMMAND_ARGS)
+{
+	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
+		eval.ExtractArgs())
+	{
+		int num;
+		ArgTypes::StringType opt_string = "[My Optional String]";
+		EXTRACT_ALL_ARGS_EXP(TestSafeExtract_OneNumber_OneOptionalString_Alt, eval, std::tie(num), std::tie(opt_string));
+
+		Console_Print("TestSafeExtract_OneNumber_OneOptionalString >> Number: %i, optional string: %s", num, opt_string.data());
+	}
+	return true;
+}
+
 DEFINE_COMMAND_PLUGIN_EXP_SAFE(TestSafeExtract_OneOptionalStringOrNumber, "", false, kNVSETestParams_OneOptionalStringOrNumber);
 bool Cmd_TestSafeExtract_OneOptionalStringOrNumber_Execute(COMMAND_ARGS)
 {

@@ -602,6 +602,7 @@ extern "C"
 #if EnableSafeExtractArgsTests
 		REG_CMD(TestSafeExtract_OneArray)
 		REG_CMD(TestSafeExtract_OneNumber_OneOptionalString)
+		REG_CMD(TestSafeExtract_OneNumber_OneOptionalString_Alt)
 		REG_CMD(TestSafeExtract_OneOptionalStringOrNumber)
 #endif
 		
