@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "PluginAPI.h"
+#include "CommandTable.h"
 
 #define EnableSafeExtractArgsTests true
 
@@ -262,7 +263,8 @@ namespace ParamTypeToReturnType
 
 
 
-//Return type depends on param type
+//Return type depends on param type.
+//Unless extracting mandatory args via their default type, type should be checked as valid for its paramType before calling this.
 template <typename T>
 [[nodiscard]] T GetNthArg(PluginExpressionEvaluator& eval, const size_t nthArg)
 {
@@ -370,73 +372,153 @@ template <size_t size>
 template <typename T, size_t n>
 [[nodiscard]] consteval size_t array_size(const T(&)[n]) { return n; }
 
-
-template <size_t size, const NVSEParamInfo(&params)[size], size_t ... Is>
-[[nodiscard]] auto args_extract_tuple_seq(PluginExpressionEvaluator &eval, std::index_sequence<Is...>)
+namespace ExtractMandatoryArgsAsTuple_Impl
 {
-	return std::make_tuple(GetNthArg<ParamTypeToReturnType::Get_t<params[Is].typeID>>(eval, Is)...);
-}
+	template <size_t size, const NVSEParamInfo(&params)[size], size_t ... Is>
+	[[nodiscard]] auto ExtractFromSequence(PluginExpressionEvaluator& eval, std::index_sequence<Is...>)
+	{
+		return std::make_tuple(GetNthArg<ParamTypeToReturnType::Get_t<params[Is].typeID>>(eval, Is)...);
+	}
 
-template <size_t numMandatoryArgs, size_t size, const NVSEParamInfo(&params)[size]>
-[[nodiscard]] auto args_extract_tuple(PluginExpressionEvaluator& eval)
-{
-	return args_extract_tuple_seq<size, params>(eval, std::make_index_sequence<numMandatoryArgs>());
+	template <size_t numMandatoryArgs, size_t size, const NVSEParamInfo(&params)[size]>
+	[[nodiscard]] auto Handler(PluginExpressionEvaluator& eval)
+	{
+		return ExtractFromSequence<size, params>(eval, std::make_index_sequence<numMandatoryArgs>());
+	}
 }
 
 //Extracts the non-optional args of a function as a tuple, for compile-time type safety.
 //Assumes .ExtractArgs returned true before being called, and that NumArgs is >= number of non-optional args in params.
 template <size_t size, const NVSEParamInfo (&params)[size]>
-[[nodiscard]] auto ExtractMandatoryArgsAsTuple(PluginExpressionEvaluator& eval)
+[[nodiscard]] auto ExtractMandatoryArgs_AsTuple(PluginExpressionEvaluator& eval)
 {
 	auto constexpr numArgs = GetNumMandatoryArgs(params);
 	if constexpr (!numArgs)
 	{
-		static_assert(false, "ExtractMandatoryArgsAsTuple >> Attempting to extract mandatory args when there are none.");
+		static_assert(false, "Attempting to extract mandatory args when there are none.");
 	}
-	return args_extract_tuple<numArgs, size, params>(eval);
+	using ExtractMandatoryArgsAsTuple_Impl::Handler;
+	return Handler<numArgs, size, params>(eval);
 }
 
-template<size_t size, const NVSEParamInfo(&params)[size], class ArgsTuple, size_t ... Is>
-[[nodiscard]] consteval bool ValidateOptionalArgs_Seq(std::index_sequence<Is...>)
+namespace ValidateArgs_Impl
 {
-	auto constexpr numMandatoryArgs = GetNumMandatoryArgs(params);	//used to offset to where optional args begin in params array.
-	using ParamTypeToReturnType::CanExtractParamAs;
-	return (CanExtractParamAs<params[Is + numMandatoryArgs].typeID, std::tuple_element_t<Is, ArgsTuple>>() && ...);
+	template<size_t size, const NVSEParamInfo(&params)[size], class ArgsTuple, size_t paramArgOffset, size_t ... Is>
+	[[nodiscard]] consteval bool ValidateFromSeq(std::index_sequence<Is...>)
+	{
+		using ParamTypeToReturnType::CanExtractParamAs;
+		return (CanExtractParamAs<params[Is + paramArgOffset].typeID, std::tuple_element_t<Is, ArgsTuple>>() && ...);
+	}
 }
+
 //Checks if each arg in param pack == declared optional arg types
 template<size_t size, const NVSEParamInfo(&params)[size], size_t numOptArgs, class ArgsTuple>
 [[nodiscard]] consteval bool ValidateOptionalArgs()
 {
-	//index sequence for numOptArgs = 2: {0, 1}
-	return ValidateOptionalArgs_Seq<size, params, ArgsTuple>(std::make_index_sequence<numOptArgs>());
+	//used to offset to where optional args begin in params array.
+	auto constexpr numMandatoryArgs = GetNumMandatoryArgs(params);	
+
+	//example index sequence for numOptArgs = 2: {0, 1}
+	using ValidateArgs_Impl::ValidateFromSeq;
+	return ValidateFromSeq<size, params, ArgsTuple, numMandatoryArgs>(std::make_index_sequence<numOptArgs>());
 }
 
-//inspired by https://artificial-mind.net/blog/2020/10/31/constexpr-for
-// -10000 points for griffyndor for this mess
-template<size_t size, const NVSEParamInfo(&params)[size], size_t nthArg, size_t argEnd, size_t numMandatoryArgs, class ArgsTuple>
-void ExtractOptionalArgs_Recursive(PluginExpressionEvaluator& eval, ArgsTuple &&args, UInt8 &numOptArgsToExtract)
+template<size_t size, const NVSEParamInfo(&params)[size], size_t numMandatoryArgs, class ArgsTuple>
+[[nodiscard]] consteval bool ValidateMandatoryArgs()
 {
-	if constexpr (nthArg < argEnd)
+	using ValidateArgs_Impl::ValidateFromSeq;
+	return ValidateFromSeq<size, params, ArgsTuple, 0>(std::make_index_sequence<numMandatoryArgs>());
+}
+
+namespace ExtractMandatoryArgs_IntoTuple_Impl
+{
+	//inspired by https://artificial-mind.net/blog/2020/10/31/constexpr-for
+	template<size_t size, const NVSEParamInfo(&params)[size], size_t nthArg, size_t argEnd, class ArgsTuple>
+	void Extract_Recursive(PluginExpressionEvaluator& eval, ArgsTuple&& args)
 	{
-		if (numOptArgsToExtract--)
+		if constexpr (nthArg < argEnd)
 		{
-			auto constexpr nthTupleIndex = nthArg - numMandatoryArgs;
-			
 			//Trust tuple arg types; assume we validated those earlier.
-			using nthTupElem = std::remove_reference_t< std::tuple_element_t<nthTupleIndex, ArgsTuple> >;
-			std::get<nthTupleIndex>(args) = GetNthArg<nthTupElem>(eval, nthArg);
-			
-			ExtractOptionalArgs_Recursive<size, params, nthArg + 1, argEnd, numMandatoryArgs>(eval, std::forward<ArgsTuple>(args), numOptArgsToExtract);
+			using nthTupElem_t = std::remove_reference_t< std::tuple_element_t<nthArg, ArgsTuple> >;
+			std::get<nthArg>(args) = GetNthArg<nthTupElem_t>(eval, nthArg);
+
+			Extract_Recursive<size, params, nthArg + 1, argEnd>(eval, std::forward<ArgsTuple>(args));
 		}
+	}
+
+	template<size_t size, const NVSEParamInfo(&params)[size], size_t numMandatoryArgs, class ArgsTuple>
+	void Handler(PluginExpressionEvaluator& eval, ArgsTuple&& args)
+	{
+		//Go from arg 0 -> last mandatory arg
+		Extract_Recursive<size, params, 0, numMandatoryArgs>(eval, std::forward<ArgsTuple>(args));
 	}
 }
 
-template<size_t size, const NVSEParamInfo(&params)[size], class ArgsTuple>
-void ExtractOptionalArgs_Helper(PluginExpressionEvaluator& eval, ArgsTuple &&args)
+template <size_t size, const NVSEParamInfo(&params)[size]>
+consteval void ExtractMandatoryArgs_IntoTuple(PluginExpressionEvaluator& eval, const std::tuple<> &noArgs)
 {
+	return;
+}
+
+template <size_t size, const NVSEParamInfo(&params)[size], typename ... ArgTypes>
+void ExtractMandatoryArgs_IntoTuple(PluginExpressionEvaluator& eval, std::tuple<ArgTypes&...>&& args)
+{
+	using ArgsTupleBasic = std::tuple<ArgTypes...>;
 	auto constexpr numMandatoryArgs = GetNumMandatoryArgs(params);
-	UInt8 numOptArgsToExtract = eval.NumArgs() - numMandatoryArgs;
-	ExtractOptionalArgs_Recursive<size, params, numMandatoryArgs, size, numMandatoryArgs>(eval, std::forward<ArgsTuple>(args), numOptArgsToExtract);
+	if constexpr (!numMandatoryArgs)
+	{
+		static_assert(false, "Attempting to extract mandatory args when there are none.");
+	}
+	else if constexpr (numMandatoryArgs != std::tuple_size_v<ArgsTupleBasic>)
+	{
+		static_assert(false, "Provided number of optional args to extract does not match established count");
+	}
+
+	if constexpr (!ValidateMandatoryArgs<size, params, numMandatoryArgs, ArgsTupleBasic>())
+	{
+		static_assert(false, "ExtractMandatoryArgs_IntoTuple >> Invalid types for mandatory args provided.");
+	}
+
+	using ArgsTupleWithRefs = std::tuple<ArgTypes&...>;
+	using ExtractMandatoryArgs_IntoTuple_Impl::Handler;
+	Handler<size, params, numMandatoryArgs>(eval, std::forward<ArgsTupleWithRefs>(args));
+}
+
+namespace ExtractOptionalArgsFromPack_Impl
+{
+	//inspired by https://artificial-mind.net/blog/2020/10/31/constexpr-for
+	template<size_t size, const NVSEParamInfo(&params)[size], size_t nthArg, size_t argEnd, size_t numMandatoryArgs, class ArgsTuple>
+	void Extract_Recursive(PluginExpressionEvaluator& eval, ArgsTuple&& args, UInt8& numOptArgsToExtract)
+	{
+		if constexpr (nthArg < argEnd)
+		{
+			if (numOptArgsToExtract--)
+			{
+				auto constexpr nthTupleIndex = nthArg - numMandatoryArgs;
+
+				//Trust tuple arg types; assume we validated those earlier.
+				using nthTupElem_t = std::remove_reference_t< std::tuple_element_t<nthTupleIndex, ArgsTuple> >;
+				std::get<nthTupleIndex>(args) = GetNthArg<nthTupElem_t>(eval, nthArg);
+
+				Extract_Recursive<size, params, nthArg + 1, argEnd, numMandatoryArgs>(eval, std::forward<ArgsTuple>(args), numOptArgsToExtract);
+			}
+		}
+	}
+
+	template<size_t size, const NVSEParamInfo(&params)[size], class ArgsTuple>
+	void Handler(PluginExpressionEvaluator& eval, ArgsTuple&& args)
+	{
+		auto constexpr numMandatoryArgs = GetNumMandatoryArgs(params);
+		UInt8 numOptArgsToExtract = eval.NumArgs() - numMandatoryArgs;
+		Extract_Recursive<size, params, numMandatoryArgs, size, numMandatoryArgs>(eval, std::forward<ArgsTuple>(args), numOptArgsToExtract);
+	}
+}
+
+
+template <size_t size, const NVSEParamInfo(&params)[size]>
+consteval void ExtractOptionalArgsFromPack(PluginExpressionEvaluator& eval, const std::tuple<> &noArgs)
+{
+	return;
 }
 
 template <size_t size, const NVSEParamInfo(&params)[size], typename... ArgTypes>
@@ -460,32 +542,32 @@ void ExtractOptionalArgsFromPack(PluginExpressionEvaluator& eval, std::tuple<Arg
 	}
 
 	using ArgsTupleWithRefs = std::tuple<ArgTypes&...>;
-	ExtractOptionalArgs_Helper<size, params>(eval, std::forward<ArgsTupleWithRefs>(args));
+	using ExtractOptionalArgsFromPack_Impl::Handler;
+	Handler<size, params>(eval, std::forward<ArgsTupleWithRefs>(args));
 }
 
 
-#include "CommandTable.h"
 
 //Required to use safe non-MANUAL PluginExpressionEvaluator arg extraction functions (EXTRACT_MAND/OPT_ARGS_EXP).
 //Params must be NVSEParamInfo array.
-#define DEFINE_COMMAND_PLUGIN_EXP_SAFE_ALT(name, altName, description, refRequired, paramInfo) \
+#define DEFINE_COMMAND_ALT_PLUGIN_EXP_SAFE(name, altName, description, refRequired, paramInfo) \
 	static constexpr const NVSEParamInfo(&(kCommandParams_ ## name))[array_size(paramInfo)] = paramInfo; \
 	DEFINE_CMD_FULL(name, altName, description, refRequired, array_size(paramInfo), reinterpret_cast<const ParamInfo*>(paramInfo), Cmd_Expression_Plugin_Parse)
 
 //Required to use safe non-MANUAL PluginExpressionEvaluator arg extraction functions (EXTRACT_MAND/OPT_ARGS_EXP).
 //Params must be NVSEParamInfo array.
 #define DEFINE_COMMAND_PLUGIN_EXP_SAFE(name, description, refRequired, paramInfo) \
-	DEFINE_COMMAND_PLUGIN_EXP_SAFE_ALT(name, , description, refRequired, paramInfo)
+	DEFINE_COMMAND_ALT_PLUGIN_EXP_SAFE(name, , description, refRequired, paramInfo)
 
 //Extracts mandatory args from params, for _EXP-defined functions (which use PluginExpressionEvaluator).
 //Args are returned as a tuple; use structured binding to extract each arg.
 #define EXTRACT_MAND_ARGS_EXP_MANUAL(params, eval) \
-	ExtractMandatoryArgsAsTuple<array_size(params), params>(eval)
+	ExtractMandatoryArgs_AsTuple<array_size(params), params>(eval)
 
 //Extracts mandatory args from a function's params, for _EXP-defined functions (which use PluginExpressionEvaluator).
 //Args are returned as a tuple; use structured binding to extract each arg.
 #define EXTRACT_MAND_ARGS_EXP(functionName, eval) \
-	ExtractMandatoryArgsAsTuple<array_size(kCommandParams_ ## functionName), (kCommandParams_ ## functionName)>(eval)
+	EXTRACT_MAND_ARGS_EXP_MANUAL(kCommandParams_ ## functionName ##, eval)
 
 //Extracts optional args from params (types are checked compile-time), for _EXP-defined functions (which use PluginExpressionEvaluator).
 //Args must be packed inside a tuple, via std::tie().
@@ -495,8 +577,53 @@ void ExtractOptionalArgsFromPack(PluginExpressionEvaluator& eval, std::tuple<Arg
 //Extracts optional args from a function's params (types are checked compile-time), for _EXP-defined functions (which use PluginExpressionEvaluator).
 //Args must be packed inside a tuple, via std::tie().
 #define EXTRACT_OPT_ARGS_EXP(functionName, eval, args) \
-	ExtractOptionalArgsFromPack<array_size(kCommandParams_ ## functionName), (kCommandParams_ ## functionName)>(eval, args)
+	EXTRACT_OPT_ARGS_EXP_MANUAL(kCommandParams_ ## functionName ##, eval, args)
 
+auto constexpr g_NoArgs = std::make_tuple<>();
+
+template <size_t size, const NVSEParamInfo(&params)[size], class ArgsTuple, bool isCheckingMandatoryArgs>
+bool consteval ExtractAllArgs_ShouldExtract()
+{
+	if constexpr (!std::is_same_v<decltype(g_NoArgs), ArgsTuple>)
+	{
+		return true;
+	}
+	else
+	{
+		if constexpr (isCheckingMandatoryArgs)
+		{
+			if constexpr (GetNumMandatoryArgs(params) > 0)
+				static_assert(false, "Cannot assign g_NoArgs to MandatoryArgs; there are args to extract.");
+		}
+		else if constexpr (GetNumOptionalArgs(params) > 0) //checking optional args
+		{
+			static_assert(false, "Cannot assign g_NoArgs to OptionalArgs; there are args to extract.");
+		}
+		return false;
+	}
+}
+
+//Extracts ALL args from params (types are checked compile-time), for _EXP-defined functions (which use PluginExpressionEvaluator).
+//Args to extract must be packed inside tuples, via std::tie().
+//If there are no mandatory or optional args, pass g_NoArgs instead.
+#define EXTRACT_ALL_ARGS_EXP_MANUAL(params, eval, mandatoryArgs, optionalArgs) \
+	{ \
+		auto constexpr size = array_size(params); \
+		if constexpr (ExtractAllArgs_ShouldExtract<size, params, decltype(mandatoryArgs), true>()) { \
+			ExtractMandatoryArgs_IntoTuple<size, params>(eval, mandatoryArgs); \
+		} \
+		if constexpr (ExtractAllArgs_ShouldExtract<size, params, decltype(optionalArgs), false>()) { \
+			ExtractOptionalArgsFromPack<size, params>(eval, optionalArgs); \
+		} \
+	} \
+
+
+//Extracts ALL args from a function's params (types are checked compile-time), for _EXP-defined functions (which use PluginExpressionEvaluator).
+//Args to extract must be packed inside tuples, via std::tie().
+//If there are no mandatory or optional args, pass g_NoArgs instead.
+#define EXTRACT_ALL_ARGS_EXP(functionName, eval, mandatoryArgs, optionalArgs) \
+	EXTRACT_ALL_ARGS_EXP_MANUAL(kCommandParams_ ## functionName ##, eval, mandatoryArgs, optionalArgs)
+	
 
 
 #if EnableSafeExtractArgsTests
@@ -585,14 +712,33 @@ void TestSafeExtract_CompileTime(COMMAND_ARGS)
 	static_assert(std::is_same_v<decltype(arg1_3), ArgTypes::BasicType>);
 	static_assert(std::is_same_v<decltype(arg2_3), bool>);
 
+	EXTRACT_ALL_ARGS_EXP_MANUAL(kNVSETestParams_OneBasicType_OneBoolean, eval, std::tie(arg1_3, arg2_3), g_NoArgs);
+
+	
+	std::tie(arg1_3, arg2_3) = EXTRACT_MAND_ARGS_EXP_MANUAL(kNVSETestParams_OneBasicType_OneBoolean, eval);
+	int intArg1_0;
+	std::tie(arg1_3, intArg1_0) = EXTRACT_MAND_ARGS_EXP_MANUAL(kNVSETestParams_OneBasicType_OneBoolean, eval);
+
+
 	//auto [arg1_4, arg2_4] = EXTRACT_MAND_ARGS_EXP_MANUAL(kNVSETestParams_OneBasicType_OneOptionalBoolean, eval);
 	// -> throws compiler error, trying to extract more non-optional args than there are.
 	auto [arg1_5] = EXTRACT_MAND_ARGS_EXP_MANUAL(kNVSETestParams_OneBasicType_OneOptionalBoolean, eval);
 	static_assert(std::is_same_v<decltype(arg1_5), ArgTypes::BasicType>);
 	bool optArg1_0;
 	EXTRACT_OPT_ARGS_EXP_MANUAL(kNVSETestParams_OneBasicType_OneOptionalBoolean, eval, std::tie(optArg1_0));
+	
 	//int optArg1_1;	//wrong type, will fail to compile call below
 	//EXTRACT_OPT_ARGS_EXP_MANUAL(kNVSETestParams_OneBasicType_OneOptionalBoolean, eval, std::tie(optArg1_1));
+
+	// Below fails to compile; there are mandatory args to extract, yet we passed g_NoArgs for them.
+	//EXTRACT_ALL_ARGS_EXP_MANUAL(kNVSETestParams_OneBasicType_OneOptionalBoolean, eval, g_NoArgs, std::tie(optArg1_0));
+
+	EXTRACT_ALL_ARGS_EXP_MANUAL(kNVSETestParams_OneBasicType_OneOptionalBoolean, eval, std::tie(arg1_5), std::tie(optArg1_0));
+
+	// Below fails to compile; there are optional args to extract, yet we passed g_NoArgs for them.
+	//EXTRACT_ALL_ARGS_EXP_MANUAL(kNVSETestParams_OneBasicType_OneOptionalBoolean, eval, std::tie(arg1_5), g_NoArgs);
+
+
 
 	// Below fails to compile; there are no mandatory args to extract.
 	//auto fail = EXTRACT_MAND_ARGS_EXP_MANUAL(kNVSETestParams_OneOptionalString_TwoOptionalNumbers, eval);
@@ -606,6 +752,9 @@ void TestSafeExtract_CompileTime(COMMAND_ARGS)
 	
 	double optNum1_1 = 0, optNum2_1 = 0;
 	EXTRACT_OPT_ARGS_EXP_MANUAL(kNVSETestParams_OneOptionalString_TwoOptionalNumbers, eval, std::tie(optString1_0, optNum1_1, optNum2_1));
+
+	EXTRACT_ALL_ARGS_EXP_MANUAL(kNVSETestParams_OneOptionalString_TwoOptionalNumbers, eval, g_NoArgs, std::tie(optString1_0, optNum1_1, optNum2_1));
+
 
 	const char* optStr_1_0;
 	EXTRACT_OPT_ARGS_EXP_MANUAL(kNVSETestParams_OneOptionalString, eval, std::tie(optStr_1_0));
@@ -622,6 +771,8 @@ void TestSafeExtract_CompileTime(COMMAND_ARGS)
 	// Below fails to compile, since bool-to-number conversions are disallowed. Just use Number param type instead :P
 	//int optNum1_2;
 	//EXTRACT_OPT_ARGS_EXP_MANUAL(kNVSETestParams_OneOptionalBoolean, eval, std::tie(optNum1_2));
+
+	
 }
 
 DEFINE_COMMAND_PLUGIN_EXP_SAFE(TestSafeExtract_OneArray, "", false, kNVSETestParams_OneArray);
