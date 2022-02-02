@@ -134,9 +134,11 @@ namespace ParamTypeToReturnType
 		template <typename T>
 		static consteval bool CanExtractAs()
 		{
-			if constexpr (is_variant_v<T> && (std::variant_size_v<T> == 4))
+			if constexpr (is_variant_v<T>)
 			{
 				auto constexpr variant_size = 4;
+				if constexpr (std::variant_size_v<T> != variant_size)
+					return false;
 
 				//Check if variant contains all 4 basic types (could be at either index for the variant).
 				if constexpr (!VariantContains1OfType<T, kNVSEParamType_Number, variant_size>) {
@@ -174,9 +176,11 @@ namespace ParamTypeToReturnType
 		template <typename T>
 		static consteval bool CanExtractAs()
 		{
-			if constexpr (is_variant_v<T> && (std::variant_size_v<T> == 2))
+			if constexpr (is_variant_v<T>)
 			{
 				auto constexpr variant_size = 2;
+				if constexpr (std::variant_size_v<T> != variant_size)
+					return false;
 
 				//Check if variant contains 1 valid string type, 1 numeric type (could be at either index for the variant).
 				if constexpr (!VariantContains1OfType<T, kNVSEParamType_Number, variant_size>)
@@ -205,9 +209,11 @@ namespace ParamTypeToReturnType
 		template <typename T>
 		static consteval bool CanExtractAs()
 		{
-			if constexpr (is_variant_v<T> && (std::variant_size_v<T> == 2))
+			if constexpr (is_variant_v<T>)
 			{
 				auto constexpr variant_size = 2;
+				if constexpr (std::variant_size_v<T> != variant_size)
+					return false;
 
 				//Check if variant contains 1 form type, 1 numeric type (could be at either index for the variant).
 				if constexpr (!VariantContains1OfType<T, kNVSEParamType_Number, variant_size>) {
@@ -258,8 +264,7 @@ namespace ParamTypeToReturnType
 
 //Return type depends on param type
 template <typename T>
-[[nodiscard]] T GetNthArg(
-	PluginExpressionEvaluator& eval, const size_t nthArg)
+[[nodiscard]] T GetNthArg(PluginExpressionEvaluator& eval, const size_t nthArg)
 {
 	using ParamTypeToReturnType::CanExtractParamAs;
 	if constexpr (auto const arg = eval.GetNthArg(nthArg); 
@@ -415,14 +420,19 @@ void ExtractOptionalArgs_Recursive(PluginExpressionEvaluator& eval, ArgsTuple &&
 	{
 		if (numOptArgsToExtract--)
 		{
-			std::get<nthArg - numMandatoryArgs>(args) = GetNthArg<ParamTypeToReturnType::Get_t<params[nthArg].typeID>>(eval, nthArg);
+			auto constexpr nthTupleIndex = nthArg - numMandatoryArgs;
+			
+			//Trust tuple arg types; assume we validated those earlier.
+			using nthTupElem = std::remove_reference_t< std::tuple_element_t<nthTupleIndex, ArgsTuple> >;
+			std::get<nthTupleIndex>(args) = GetNthArg<nthTupElem>(eval, nthArg);
+			
 			ExtractOptionalArgs_Recursive<size, params, nthArg + 1, argEnd, numMandatoryArgs>(eval, std::forward<ArgsTuple>(args), numOptArgsToExtract);
 		}
 	}
 }
 
 template<size_t size, const NVSEParamInfo(&params)[size], class ArgsTuple>
-void ExtractOptionalArgs_Helper(PluginExpressionEvaluator& eval, ArgsTuple&&args)
+void ExtractOptionalArgs_Helper(PluginExpressionEvaluator& eval, ArgsTuple &&args)
 {
 	auto constexpr numMandatoryArgs = GetNumMandatoryArgs(params);
 	UInt8 numOptArgsToExtract = eval.NumArgs() - numMandatoryArgs;
@@ -432,30 +442,26 @@ void ExtractOptionalArgs_Helper(PluginExpressionEvaluator& eval, ArgsTuple&&args
 template <size_t size, const NVSEParamInfo(&params)[size], typename... ArgTypes>
 void ExtractOptionalArgsFromPack(PluginExpressionEvaluator& eval, std::tuple<ArgTypes&...> &&args)
 {
-	using ArgsTuple = std::tuple<ArgTypes...>;
+	using ArgsTupleBasic = std::tuple<ArgTypes...>;
 
 	auto constexpr numOptArgs = GetNumOptionalArgs(params);
 	if constexpr (numOptArgs <= 0)
 	{
 		static_assert(false, "Cannot extract any optional args; all are mandatory.");
 	}
-	else if constexpr (numOptArgs != std::tuple_size_v<ArgsTuple>)
+	else if constexpr (numOptArgs != std::tuple_size_v<ArgsTupleBasic>)
 	{
 		static_assert(false, "Provided number of optional args to extract does not match established count");
 	}
 	
-	if constexpr (!ValidateOptionalArgs<size, params, numOptArgs, ArgsTuple>())
+	if constexpr (!ValidateOptionalArgs<size, params, numOptArgs, ArgsTupleBasic>())
 	{
 		static_assert(false, "ExtractOptionalArgsFromPack >> Invalid types for optional args provided.");
 	}
 
-	ExtractOptionalArgs_Helper<size, params>(eval, std::forward< std::tuple<ArgTypes&...> >(args));
+	using ArgsTupleWithRefs = std::tuple<ArgTypes&...>;
+	ExtractOptionalArgs_Helper<size, params>(eval, std::forward<ArgsTupleWithRefs>(args));
 }
-
-
-
-#if EnableSafeExtractArgsTests
-//=====Testing zone
 
 
 #include "CommandTable.h"
@@ -490,6 +496,11 @@ void ExtractOptionalArgsFromPack(PluginExpressionEvaluator& eval, std::tuple<Arg
 //Args must be packed inside a tuple, via std::tie().
 #define EXTRACT_OPT_ARGS_EXP(functionName, eval, args) \
 	ExtractOptionalArgsFromPack<array_size(kCommandParams_ ## functionName), (kCommandParams_ ## functionName)>(eval, args)
+
+
+
+#if EnableSafeExtractArgsTests
+//=====Testing zone
 
 
 static constexpr NVSEParamInfo kNVSETestParams_OneArray[1] =
@@ -542,6 +553,10 @@ static constexpr NVSEParamInfo kNVSETestParams_OneOptionalStringOrNumber[1] =
 {
 	{	"string or number",	kNVSEParamType_StringOrNumber,	1	},
 };
+static constexpr NVSEParamInfo kNVSETestParams_OneOptionalString[1] =
+{
+	{	"string",	kNVSEParamType_String,	1	},
+};
 
 void TestSafeExtract_CompileTime(COMMAND_ARGS)
 {
@@ -588,6 +603,10 @@ void TestSafeExtract_CompileTime(COMMAND_ARGS)
 	double optNum1_1 = 0, optNum2_1 = 0;
 	EXTRACT_OPT_ARGS_EXP_MANUAL(kNVSETestParams_OneOptionalString_TwoOptionalNumbers, eval, std::tie(optString1_0, optNum1_1, optNum2_1));
 
+	const char* optStr_1_0;
+	EXTRACT_OPT_ARGS_EXP_MANUAL(kNVSETestParams_OneOptionalString, eval, std::tie(optStr_1_0));
+	std::string optStr_1_1;
+	EXTRACT_OPT_ARGS_EXP_MANUAL(kNVSETestParams_OneOptionalString, eval, std::tie(optStr_1_1));
 
 }
 
@@ -612,9 +631,10 @@ bool Cmd_TestSafeExtract_OneNumber_OneOptionalString_Execute(COMMAND_ARGS)
 	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
 		eval.ExtractArgs())
 	{
+		
 		auto [num] = EXTRACT_MAND_ARGS_EXP(TestSafeExtract_OneNumber_OneOptionalString, eval);
 		static_assert(std::is_same_v<decltype(num), ArgTypes::NumberType>);
-
+		
 		ArgTypes::StringType opt_string = "[My Optional String]";
 		EXTRACT_OPT_ARGS_EXP(TestSafeExtract_OneNumber_OneOptionalString, eval, std::tie(opt_string));
 
@@ -629,6 +649,7 @@ bool Cmd_TestSafeExtract_OneOptionalStringOrNumber_Execute(COMMAND_ARGS)
 	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
 		eval.ExtractArgs())
 	{
+
 		ArgTypes::StringOrNumber opt_stringOrNum = "[My Optional String]";
 		EXTRACT_OPT_ARGS_EXP(TestSafeExtract_OneOptionalStringOrNumber, eval, std::tie(opt_stringOrNum));
 
