@@ -161,10 +161,10 @@ struct ParamInfo
 	DEFINE_CMD_FULL(name, altName, description, refRequired, (sizeof(paramInfo) / sizeof(ParamInfo)), paramInfo, NULL)
 
 #define DEFINE_COMMAND_PLUGIN_EXP(name, description, refRequired, paramInfo) \
-	DEFINE_CMD_FULL(name, , description, refRequired, (sizeof(paramInfo) / sizeof(ParamInfo)), paramInfo, Cmd_Expression_Plugin_Parse)
+	DEFINE_CMD_FULL(name, , description, refRequired, (sizeof(paramInfo) / sizeof(ParamInfo)), reinterpret_cast<const ParamInfo*>(paramInfo), Cmd_Expression_Plugin_Parse)
 
 #define DEFINE_COMMAND_ALT_PLUGIN_EXP(name, altName, description, refRequired, paramInfo) \
-	DEFINE_CMD_FULL(name, altName, description, refRequired, (sizeof(paramInfo) / sizeof(ParamInfo)), paramInfo, Cmd_Expression_Plugin_Parse)
+	DEFINE_CMD_FULL(name, altName, description, refRequired, (sizeof(paramInfo) / sizeof(ParamInfo)), reinterpret_cast<const ParamInfo*>(paramInfo), Cmd_Expression_Plugin_Parse)
 
 // for commands which can be used as conditionals
 #define DEFINE_CMD_ALT_COND_ANY(name, altName, description, refRequired, paramInfo, parser) \

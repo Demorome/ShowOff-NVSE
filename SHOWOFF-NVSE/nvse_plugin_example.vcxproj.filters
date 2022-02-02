@@ -2034,7 +2034,7 @@
     <ClInclude Include="easing.h">
       <Filter>internal</Filter>
     </ClInclude>
-    <ClInclude Include="NVSEParamInfos.h">
+    <ClInclude Include="NVSEParamInfoList.h">
       <Filter>nvse</Filter>
     </ClInclude>
     <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json.hpp">
@@ -2128,6 +2128,9 @@
       <Filter>internal</Filter>
     </ClInclude>
     <ClInclude Include="InventoryRef.h">
+      <Filter>nvse</Filter>
+    </ClInclude>
+    <ClInclude Include="..\nvse\NVSEParamInfo.h">
       <Filter>nvse</Filter>
     </ClInclude>
   </ItemGroup>

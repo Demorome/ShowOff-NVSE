@@ -10,7 +10,10 @@
 #include "containers.h"
 #include "internal/serialization.h"
 #include "jip_nvse.h"
-#include "StewieMagic.h" 
+#include "StewieMagic.h"
+
+
+#include "ExtractArgs_TypeSafe.h"
 
 // Functions (SO = ShowOff).
 #include "functions/SO_fn_Misc.h"

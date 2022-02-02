@@ -345,6 +345,7 @@
     <ClInclude Include="..\nvse\GameTypes.h" />
     <ClInclude Include="..\nvse\GameUI.h" />
     <ClInclude Include="..\nvse\NiTypes.h" />
+    <ClInclude Include="..\nvse\NVSEParamInfo.h" />
     <ClInclude Include="..\nvse\ParamInfos.h" />
     <ClInclude Include="..\nvse\PluginAPI.h" />
     <ClInclude Include="..\nvse\SafeWrite.h" />
@@ -1006,7 +1007,7 @@
     <ClInclude Include="internal\StewieMagic.h" />
     <ClInclude Include="internal\utility.h" />
     <ClInclude Include="JSON_Library\json.h" />
-    <ClInclude Include="NVSEParamInfos.h" />
+    <ClInclude Include="NVSEParamInfoList.h" />
     <ClInclude Include="settings.h" />
     <ClInclude Include="ShowOffNVSE.h" />
     <ClInclude Include="SimpleINILibrary\SimpleIni.h" />

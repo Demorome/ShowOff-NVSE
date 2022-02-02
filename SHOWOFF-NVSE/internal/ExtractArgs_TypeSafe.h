@@ -1,7 +1,9 @@
 ﻿#pragma once
 
-#include "PluginAPI.h"
 #include "CommandTable.h"
+#include "NVSEParamInfo.h"
+#include <variant>
+#include <string>
 
 #define EnableSafeExtractArgsTests true
 
@@ -342,14 +344,6 @@ template <typename T>
 	}
 }
 
-//additional type safety
-struct NVSEParamInfo
-{
-	const char* typeStr;
-	kNVSEParamType	typeID;		// ParamType
-	UInt32	isOptional;	// do other bits do things?
-};
-
 template <size_t size>
 [[nodiscard]] consteval size_t GetNumMandatoryArgs(const NVSEParamInfo(&params)[size])
 {
@@ -629,6 +623,7 @@ bool consteval ExtractAllArgs_ShouldExtract()
 #if EnableSafeExtractArgsTests
 //=====Testing zone
 
+#include "GameAPI.h"
 
 static constexpr NVSEParamInfo kNVSETestParams_OneArray[1] =
 {

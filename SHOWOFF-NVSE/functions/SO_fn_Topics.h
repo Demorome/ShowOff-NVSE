@@ -1,9 +1,5 @@
 ﻿#pragma once
 
-#if _DEBUG
-#include "ExtractArgs_TypeSafe.h"
-#endif
-
 
 DEFINE_COMMAND_PLUGIN(TopicInfoGetResponseStrings, "", false, kParams_OneForm);
 
