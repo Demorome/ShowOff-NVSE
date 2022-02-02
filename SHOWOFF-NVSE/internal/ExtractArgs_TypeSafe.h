@@ -557,6 +557,10 @@ static constexpr NVSEParamInfo kNVSETestParams_OneOptionalString[1] =
 {
 	{	"string",	kNVSEParamType_String,	1	},
 };
+static constexpr NVSEParamInfo kNVSETestParams_OneOptionalBoolean[1] =
+{
+	{	"bool",	kNVSEParamType_Boolean,	1	},
+};
 
 void TestSafeExtract_CompileTime(COMMAND_ARGS)
 {
@@ -607,7 +611,17 @@ void TestSafeExtract_CompileTime(COMMAND_ARGS)
 	EXTRACT_OPT_ARGS_EXP_MANUAL(kNVSETestParams_OneOptionalString, eval, std::tie(optStr_1_0));
 	std::string optStr_1_1;
 	EXTRACT_OPT_ARGS_EXP_MANUAL(kNVSETestParams_OneOptionalString, eval, std::tie(optStr_1_1));
+	
+	//char* optStr_1_2;
+	// Below fails to compile, since char* is not supported for optional string extraction. To make a copied string, use std::string instead.
+	//EXTRACT_OPT_ARGS_EXP_MANUAL(kNVSETestParams_OneOptionalString, eval, std::tie(optStr_1_2));
 
+	bool optBool1_0;
+	EXTRACT_OPT_ARGS_EXP_MANUAL(kNVSETestParams_OneOptionalBoolean, eval, std::tie(optBool1_0));
+
+	// Below fails to compile, since bool-to-number conversions are disallowed. Just use Number param type instead :P
+	//int optNum1_2;
+	//EXTRACT_OPT_ARGS_EXP_MANUAL(kNVSETestParams_OneOptionalBoolean, eval, std::tie(optNum1_2));
 }
 
 DEFINE_COMMAND_PLUGIN_EXP_SAFE(TestSafeExtract_OneArray, "", false, kNVSETestParams_OneArray);
