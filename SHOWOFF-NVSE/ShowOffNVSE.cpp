@@ -13,8 +13,6 @@
 #include "StewieMagic.h"
 
 
-#include "ExtractArgs_TypeSafe.h"
-
 // Functions (SO = ShowOff).
 #include "functions/SO_fn_Misc.h"
 #include "functions/SO_fn_Settings.h"

@@ -4,6 +4,7 @@
 
 #include "ParamInfos.h"
 #include "NVSEParamInfoList.h"
+#include "ExtractArgs_TypeSafe.h"
 
 #include "PluginAPI.h"
 #include "GameUI.h" 

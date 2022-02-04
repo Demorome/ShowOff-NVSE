@@ -576,32 +576,38 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 
 namespace IniToNVSE
 {
-	//dark magic copied from JIP
-	bool __fastcall GetINIPath(char* iniPath, Script* scriptObj)
+	//Convert passed partialPath to a fullPath.
+	void GetFullINIPath(std::string &partialPath)
+	{		
+		//Make string end with ".ini" if it didn't have a file extension.
+		if (partialPath.find( '.') == std::string::npos)
+		{
+			partialPath += ".ini";
+		}
+		//otherwise, unlike in JIP's GetINIPath, we accept extensions other than ".ini"
+
+		partialPath.insert(0, "data\\config\\");
+	}
+
+	//If iniRelPath is empty, will point it to the mod's name.
+	//Returns an empty string if an error occured.
+	//Copied from JIP's GetINIPath(), converted to use the STL.
+	std::string GetINIPath(const char* &iniRelPath, Script* const scriptObj, const bool cache)
 	{
-		if (!*iniPath)
+		std::string fullIniPath;
+		
+		if (!iniRelPath[0])
 		{
-			UInt8 modIdx = scriptObj->GetOverridingModIdx();
-			if (modIdx == 0xFF) return false;
-			StrCopy(iniPath, g_dataHandler->GetNthModName(modIdx));
+			UInt8 const modIdx = scriptObj->GetOverridingModIdx();
+			if (modIdx == 0xFF)
+				return fullIniPath;	//empty str
+			iniRelPath = g_dataHandler->GetNthModName(modIdx);
+			fullIniPath = iniRelPath;
+			std::ranges::replace(fullIniPath, '/', '\\');
 		}
-		else ReplaceChr(iniPath, '/', '\\');
-		UInt32 length = StrLen(iniPath);
-		char* dotPos = FindChrR(iniPath, length, '.');
-		if (dotPos)
-		{
-			*(UInt32*)(dotPos + 1) = 'ini';
-		}
-		else
-		{
-			*(UInt32*)(iniPath + length) = 'ini.';
-			iniPath[length + 4] = 0;
-		}
-		//append data/config to start of string
-		*(UInt32*)(iniPath - 12) = 'atad';
-		*(UInt32*)(iniPath - 8) = 'noc\\';
-		*(UInt32*)(iniPath - 4) = '\\gif';
-		return true;
+		
+		GetFullINIPath(fullIniPath);
+		return fullIniPath;
 	}
 
 	enum CommandResult
@@ -618,57 +624,11 @@ namespace IniToNVSE
 		return std::max(static_cast<CommandResult>(e), kResult_Error);
 	}
 
-	constexpr auto MaxStrArgLen = 0x80;
-	using CharArr = std::array<char, MaxStrArgLen>;
-	
-	std::map<std::string, CSimpleIniA> g_CachedIniFiles;
-
-	[[nodiscard]] std::optional<CharArr> GetINIConfigPath(const char* iniStr, Script* scriptObj)
-	{
-		CharArr configPath;
-		char* iniPath = configPath.data() + 12;
-		*iniPath = 0;
-		if (iniStr)
-			strcpy(iniPath, iniStr);
-		if (!GetINIPath(iniPath, scriptObj))
-			return {};
-		return configPath;
-	}
+	//TODO: use INI chaching
+	Map<const char*, CSimpleIniA> g_CachedIniFiles;
 		
 	namespace SetINIValue
 	{
-		using Args = std::tuple<CharArr, ArrayElementR, CharArr, const char*>;
-
-		//Returns args in the order they are declared.
-		std::optional<Args> GetArgs(COMMAND_ARGS)
-		{
-			if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
-				eval.ExtractArgs())
-			{
-				CharArr sectionAndKey;
-				strcpy(sectionAndKey.data(), eval.GetNthArg(0)->GetString());
-
-				ArrayElementR newVal;
-				eval.GetNthArg(1)->GetElement(newVal);
-				const char* iniPath = nullptr;
-				const char* comment = nullptr;
-				if (auto const numArgs = eval.NumArgs();
-					numArgs >= 3)
-				{
-					iniPath = eval.GetNthArg(2)->GetString();
-					if (numArgs >= 4) {
-						comment = eval.GetNthArg(3)->GetString();
-					}
-				}
-				auto const configPath = GetINIConfigPath(iniPath, scriptObj);
-				if (!configPath)
-					return {};
-				
-				return std::make_tuple(sectionAndKey, newVal, configPath.value(), comment);
-			}
-			return {};
-		}
-
 		void Call(const Args &args, double *result)
 		{
 			auto& [sectionAndKey, newVal, configPath, comment] = args;
@@ -708,179 +668,62 @@ namespace IniToNVSE
 	
 	namespace GetINIValue
 	{
-		//sectionAndKey, configPath(opt), defaultOrCreate(opt)
-		using BaseArgs = std::tuple<CharArr, CharArr, ArrayElementR>;	//for regular Get
-		using GetOrCreateArgs = std::tuple <CharArr, CharArr, ArrayElementR, std::string>;	//extra comment arg
-
-		std::optional<BaseArgs> GetBaseArgs_Helper(PluginExpressionEvaluator& eval, Script* scriptObj)
+		void Call_GetOrDefault(std::string& sectionAndKey, const char* iniPath, auto &result)
 		{
-			CharArr sectionAndKey;
-			strcpy(sectionAndKey.data(), eval.GetNthArg(0)->GetString());
-
-			const char* iniPath = nullptr;
-			ArrayElementR defaultVal_OrCreate = {};
-			if (auto const numArgs = eval.NumArgs();
-				numArgs >= 2)
-			{
-				iniPath = eval.GetNthArg(1)->GetString();
-
-				if (numArgs >= 3)
-				{
-					eval.GetNthArg(2)->GetElement(defaultVal_OrCreate);
-				}
-			}
-			auto const configPath = GetINIConfigPath(iniPath, scriptObj);
-			if (!configPath)
-				return {};
-
-			return std::make_tuple(sectionAndKey, configPath.value(), defaultVal_OrCreate);
-		}
-		
-		std::optional<BaseArgs> GetBaseArgs(COMMAND_ARGS)
-		{
-			if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
-				eval.ExtractArgs())
-			{
-				return GetBaseArgs_Helper(eval, scriptObj);
-			}
-			return {};
-		}
-		
-		std::optional<GetOrCreateArgs> Get_GetOrCreate_Args(COMMAND_ARGS)
-		{
-			if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
-				eval.ExtractArgs())
-			{
-				if (auto const baseArgs = GetBaseArgs_Helper(eval, scriptObj))
-				{
-					std::string comment = {};
-					if (eval.NumArgs() >= 4) {
-						comment = eval.GetNthArg(3)->GetString();
-					}
-					return std::tuple_cat(baseArgs.value(), std::tie(comment));
-				}
-			}
-			return {};
-		}
-
-		using StringOrFloat = std::variant <std::string, double>;
-		
-		// Section, key, ini.
-		using UsefulBaseArgs = std::tuple <const CharArr&, char*, CSimpleIniA&>;
-		
-		// Section, key, ini, comment.
-		using UsefulGetOrCreateArgs = std::tuple <const CharArr&, char*, CSimpleIniA, const std::string&>;
-
-		namespace CallHelpers
-		{
-			void TryChangeDefaultResult(const ArrayElementR& newRes, StringOrFloat& result)
-			{
-				if (newRes.IsValid())
-				{
-					std::visit([&]<typename T0>(T0 & res) {
-						using T = std::decay_t<T0>;
-						if constexpr (std::is_same_v<T, double>)
-						{
-							result = newRes.num;
-						}
-						else if constexpr (std::is_same_v<T, std::string>)
-						{
-							result = newRes.str;
-						}
-						else
-						{
-							static_assert(false, "GetINIValue - TryChangeDefaultResult >> non-exhaustive visitor");
-						}
-					}, result);
-				}
-			}
-		}
-
-		void Call(const BaseArgs& args, StringOrFloat &result)
-		{
-			auto& [sectionAndKey, configPath, defaultValElem] = args;
-
-			CallHelpers::TryChangeDefaultResult(defaultValElem, result);
-			
-			//sectionAndKey is made to only contain section name.
-			auto const keyName = GetNextToken(const_cast<CharArr&>(sectionAndKey).data(), ":\\/");
-			if (!keyName)
+			auto [section, key] = SplitStringBySingleDelimiter(std::move(sectionAndKey), ":/\\");
+			if (!section || !key)
 				return;
-
+			
 			//todo: add read from cache code (pass scriptObj, etc.)
 			CSimpleIniA ini(true);
 			if (ini.LoadFile(configPath.data()) < SI_OK)
 				return;
-					
-			std::visit([&]<typename T0>(T0 &defaultVal) {
-				using T = std::decay_t<T0>;
-				if constexpr (std::is_same_v<T, double>)
-				{
-					result = ini.GetDoubleValue(sectionAndKey.data(), keyName, defaultVal);
-				}
-				else if constexpr (std::is_same_v<T, std::string>)
-				{
-					result = ini.GetValue(sectionAndKey.data(), keyName, defaultVal.c_str());
-				}
-				else
-				{
-					static_assert(false, "GetINIValue - Call_BaseArgs >> non-exhaustive visitor");
-				}
-			}, result);
+
+			using T = decltype(result);
+			if constexpr (std::is_same_v<T, double&>)
+			{
+				result = ini.GetDoubleValue(section, key, result);
+			}
+			else if constexpr (std::is_same_v<T, const char* &>)
+			{
+				result = ini.GetValue(section, key, result);
+			}
+			else
+			{
+				static_assert(false, "GetINIValue - Call_GetOrDefault >> invalid type for result arg.");
+			}
 		}
 
-		void Call(const GetOrCreateArgs& args, StringOrFloat &result)
+		void Call_GetOrCreate(std::string& sectionAndKey, const char* iniPath, const char* comment, auto& result)
 		{
-			auto& [sectionAndKey, configPath, defaultValElem, comment] = args;
-
-			CallHelpers::TryChangeDefaultResult(defaultValElem, result);
-
-			//sectionAndKey is made to only contain section name.
-			auto const keyName = GetNextToken(const_cast<CharArr&>(sectionAndKey).data(), ":\\/");
-			if (!keyName)
+			//sectionAndKey is split into section & key variables using null character.
+			auto [section, key] = SplitStringBySingleDelimiter(std::move(sectionAndKey), ":/\\");
+			if (!section || !key)
 				return;
-
+			
 			//todo: add read from cache code (pass scriptObj, etc.)
 			CSimpleIniA ini(true);
 			if (ini.LoadFile(configPath.data()) < SI_OK)
 				return;
 
 			bool hasCreatedValue;
-			std::visit([&]<typename T0>(T0 & res) {
-				using T = std::decay_t<T0>;
-				if constexpr (std::is_same_v<T, double>)
-				{
-					result = ini.GetOrCreate(sectionAndKey.data(), keyName, res, comment.c_str(), true, &hasCreatedValue);
-				}
-				else if constexpr (std::is_same_v<T, std::string>)
-				{
-					result = ini.GetOrCreate(sectionAndKey.data(), keyName, res.c_str(), comment.c_str(), true, &hasCreatedValue);
-				}
-				else {
-					static_assert(false, "GetINIValue - Call_GetOrCreateArgs >> non-exhaustive visitor");
-				}
-			}, result);
+
+			using T = decltype(result);
+			if constexpr (std::is_same_v<T, double&>)
+			{
+				result = ini.GetOrCreate(section, key, result, comment, true, &hasCreatedValue);
+			}
+			else if constexpr (std::is_same_v<T, const char* &>)
+			{
+				result = ini.GetOrCreate(section, key, result, comment, true, &hasCreatedValue);
+			}
+			else
+			{
+				static_assert(false, "GetINIValue - Call_GetOrCreate >> invalid type for result arg.");
+			}
 			
 			if (hasCreatedValue)
 				ini.SaveFile(configPath.data(), false);
-		}
-
-		void AssignResult(const StringOrFloat& res, COMMAND_ARGS)
-		{
-			std::visit([&]<typename T0>(T0 & resVisitor) {
-				using T = std::decay_t<T0>;
-				if constexpr (std::is_same_v<T, double>)
-				{
-					*result = resVisitor;
-				}
-				else if constexpr (std::is_same_v<T, std::string>)
-				{
-					g_strInterface->Assign(PASS_COMMAND_ARGS, resVisitor.c_str());
-				}
-				else {
-					static_assert(false, "GetINIValue - AssignResult >> non-exhaustive visitor");
-				}
-			}, res);
 		}
 	};
 	
@@ -933,22 +776,31 @@ bool Cmd_SetINIStringAlt_Execute(COMMAND_ARGS)
 
 bool Cmd_GetINIFloatOrCreate_Execute(COMMAND_ARGS)
 {
-	IniToNVSE::GetINIValue::StringOrFloat res = 0.0;
-	if (auto const args = IniToNVSE::GetINIValue::Get_GetOrCreate_Args(PASS_COMMAND_ARGS))
+	*result = 0.0;	//used as the default creation value.
+	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
+		eval.ExtractArgs())
 	{
-		IniToNVSE::GetINIValue::Call(args.value(), res);
+		std::string sectionAndKey;
+		const char* comment = nullptr, * iniPath = nullptr;
+		EXTRACT_ALL_ARGS_EXP(GetINIFloatOrCreate, eval, std::tie(sectionAndKey), std::tie(iniPath, *result, comment));
+		
+		IniToNVSE::GetINIValue::Call_GetOrCreate(sectionAndKey, iniPath, comment, *result);
 	}
-	IniToNVSE::GetINIValue::AssignResult(res, PASS_COMMAND_ARGS);
 	return true;
 }
 bool Cmd_GetINIStringOrCreate_Execute(COMMAND_ARGS)
 {
-	IniToNVSE::GetINIValue::StringOrFloat res = "";
-	if (auto const args = IniToNVSE::GetINIValue::Get_GetOrCreate_Args(PASS_COMMAND_ARGS))
+	const char* res = ""; //used as the default creation value.
+	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
+		eval.ExtractArgs())
 	{
-		IniToNVSE::GetINIValue::Call(args.value(), res);
+		std::string sectionAndKey;
+		const char* comment = nullptr, * iniPath = nullptr;
+		EXTRACT_ALL_ARGS_EXP(GetINIFloatOrCreate, eval, std::tie(sectionAndKey), std::tie(iniPath, res, comment));
+
+		IniToNVSE::GetINIValue::Call_GetOrCreate(sectionAndKey, iniPath, comment, res);
 	}
-	IniToNVSE::GetINIValue::AssignResult(res, PASS_COMMAND_ARGS);
+	g_strInterface->Assign(PASS_COMMAND_ARGS, res);
 	return true;
 }
 
@@ -964,7 +816,7 @@ bool Cmd_GetINIFloatOrDefault_Execute(COMMAND_ARGS)
 }
 bool Cmd_GetINIStringOrDefault_Execute(COMMAND_ARGS)
 {
-	IniToNVSE::GetINIValue::StringOrFloat res = "";
+	std::string_view res = "";
 	if (auto const args = IniToNVSE::GetINIValue::GetBaseArgs(PASS_COMMAND_ARGS))
 	{
 		IniToNVSE::GetINIValue::Call(args.value(), res);

@@ -1936,16 +1936,6 @@ __declspec(noinline) UInt8* AuxBuffer::Get(UInt32 bufIdx, UInt32 reqSize)
 	return auxBuf->ptr;
 }
 
-std::optional<PluginExpressionEvaluator> TryGetExpEval(COMMAND_ARGS)
-{
-	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
-		eval.ExtractArgs())
-	{
-		return eval;
-	}
-	return {};
-}
-
 std::pair<std::string, std::string_view> GetFullPath(std::string &&relativePath)
 {
 	std::ranges::replace(relativePath, '/', '\\');
@@ -1954,5 +1944,29 @@ std::pair<std::string, std::string_view> GetFullPath(std::string &&relativePath)
 	auto const rel_path_size = relativePath.size();
 	std::string JSON_FullPath = std::move(curPath) + "\\" + std::move(relativePath);
 	std::string_view json_rel_path_view = { &JSON_FullPath[curPathSize + 1], rel_path_size };
-	return std::make_pair(std::move(JSON_FullPath), std::move(json_rel_path_view));
+	return std::make_pair(std::move(JSON_FullPath), json_rel_path_view);
+}
+
+//Mutates the entry string by inserting a null character where the first delimiter is found.
+std::pair<const char*, const char*> SplitStringBySingleDelimiter(std::string&& toSplit, const char* delims)
+{
+	const char* lh, * rh;
+
+	if (auto const i = toSplit.find_first_of(delims);
+		i != std::string::npos)
+	{
+		toSplit[i] = 0;
+		lh = toSplit.c_str();
+		if (i != toSplit.size() - 1)	//if not splitting at the end
+		{
+			rh = &toSplit[i+1];
+		}
+		else rh = nullptr;
+	}
+	else
+	{
+		lh = rh = nullptr;
+	}
+
+	return { lh, rh };
 }

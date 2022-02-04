@@ -395,7 +395,11 @@ void AssignScriptValueResult(const NVSEArrayElement* val, PluginExpressionEvalua
 // taken from https://en.cppreference.com/w/cpp/utility/variant/visit
 template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 
-std::optional<PluginExpressionEvaluator> TryGetExpEval(COMMAND_ARGS);
-
 //Returns the full path, then a string_view on the moved relative path.
 std::pair<std::string, std::string_view> GetFullPath(std::string&& relativePath);
+
+//Returns views to the split string: first value in pair is left value, etc.
+//Splits based on when any of the single-char delimiters are matched.
+//Returns nullptrs if no matches were found.
+//If a char is matched at the end, then the right-hand view will be nullptr.
+std::pair<const char*, const char*> SplitStringBySingleDelimiter(std::string&& toSplit, const char* delims);
