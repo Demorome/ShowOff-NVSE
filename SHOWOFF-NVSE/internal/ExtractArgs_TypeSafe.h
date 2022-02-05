@@ -5,7 +5,7 @@
 #include <variant>
 #include <string>
 
-#define EnableSafeExtractArgsTests true
+#define EnableSafeExtractArgsTests true && _DEBUG
 
 
 namespace Utilities 
@@ -97,7 +97,7 @@ namespace ParamTypeToReturnType
 		template <typename T>
 		static consteval bool CanExtractAs()
 		{
-			return std::is_arithmetic_v<T>;
+			return std::is_arithmetic_v<T> || std::is_enum_v<T>;
 		}
 	};
 	template <> struct Get<kNVSEParamType_Form>
@@ -278,7 +278,7 @@ template <typename T>
 	}
 	else if constexpr (CanExtractParamAs<kNVSEParamType_Number, T>())
 	{
-		return arg->GetFloat();
+		return static_cast<T>(arg->GetFloat());
 	}
 	else if constexpr (CanExtractParamAs<kNVSEParamType_Form, T>())
 	{

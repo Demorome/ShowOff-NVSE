@@ -935,7 +935,37 @@ bool Cmd_GetINIStringOrDefault_Execute(COMMAND_ARGS)
 
 
 
+bool Cmd_ClearFileCacheShowOff_Execute(COMMAND_ARGS)
+{
+	enum CacheToClear : UInt8
+	{
+		kCache_Ini = 0,
+		kCache_Json
+	};
+	
+	*result = false; //hasCleared
+	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
+		eval.ExtractArgs())
+	{
+		const char* relPath = nullptr;	//relative to different folders, depending on toClearMode.
+		//This is due to json/ini/etc funcs reading at different base folders, for consistency.
+		CacheToClear toClearMode;
+		EXTRACT_ALL_ARGS_EXP(ClearFileCacheShowOff, eval, std::tie(relPath, toClearMode), g_NoArgs);
 
+		if (!relPath || !relPath[0])
+			return true;
+		
+		if (toClearMode == kCache_Ini)
+		{
+			*result = IniToNVSE::g_CachedIniFiles.Erase(relPath);
+		}
+		else if (toClearMode == kCache_Json)
+		{
+			*result = JsonToNVSE::g_CachedJSONFiles.Erase(relPath);
+		}
+	}
+	return true;
+}
 
 
 

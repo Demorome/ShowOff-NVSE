@@ -591,6 +591,7 @@ extern "C"
 			REG_CMD(GetINIFloatOrDefault)
 			REG_CMD_STR(GetINIStringOrDefault)
 			REG_CMD(HasINISetting)
+			REG_CMD(ClearFileCacheShowOff)
 		}
 	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)

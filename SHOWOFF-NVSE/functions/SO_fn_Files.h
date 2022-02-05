@@ -32,6 +32,7 @@ DEFINE_COMMAND_ALT_PLUGIN_EXP_SAFE(GetINIStringOrDefault, GetINIStringAlt, "", f
 
 DEFINE_COMMAND_PLUGIN_EXP_SAFE(HasINISetting, "", false, kNVSEParams_OneString_OneOptionalString_OneOptionalBool);
 
+DEFINE_COMMAND_ALT_PLUGIN_EXP_SAFE(ClearFileCacheShowOff, CloseFileSO, "", false, kNVSEParams_OneString_OneNumber);
 
 
 #if _DEBUG
