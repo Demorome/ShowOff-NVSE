@@ -315,6 +315,7 @@
     <ClCompile Include="Events\LambdaVarContext.cpp" />
     <ClCompile Include="functions\SO_fn_Files.cpp" />
     <ClCompile Include="GameUI.cpp" />
+    <ClCompile Include="internal\ExtractArgs_TypeSafe.cpp" />
     <ClCompile Include="MenuHooks.cpp" />
     <ClCompile Include="MiscHooks.cpp" />
     <ClCompile Include="internal\containers.cpp" />

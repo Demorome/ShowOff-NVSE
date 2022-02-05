@@ -21,9 +21,9 @@ DEFINE_COMMAND_PLUGIN_EXP(WriteToJSONFile, "", false, kNVSEParams_OneElem_OneStr
 //TODO: cache all the INI files in config for fast lookup. SetINIValue will save any changes.
 //caution for desyncs with other ini functions (todo: should update JIP instead when done to avoid this issue).
 
-DEFINE_COMMAND_PLUGIN_EXP_SAFE(SetINIValue, "", false, kNVSEParams_OneString_OneFloatOrString_TwoOptionalStrings);
-DEFINE_COMMAND_PLUGIN_EXP_SAFE(SetINIFloatAlt, "", false, kNVSEParams_OneString_OneFloat_TwoOptionalStrings);
-DEFINE_COMMAND_PLUGIN_EXP_SAFE(SetINIStringAlt, "", false, kNVSEParams_TwoStrings_TwoOptionalStrings);
+DEFINE_COMMAND_PLUGIN_EXP_SAFE(SetINIValue, "", false, kNVSEParams_OneString_OneFloatOrString_TwoOptionalStrings_TwoOptionalBools);
+DEFINE_COMMAND_PLUGIN_EXP_SAFE(SetINIFloatAlt, "", false, kNVSEParams_OneString_OneFloat_TwoOptionalStrings_TwoOptionalBools);
+DEFINE_COMMAND_PLUGIN_EXP_SAFE(SetINIStringAlt, "", false, kNVSEParams_TwoStrings_TwoOptionalStrings_TwoOptionalBools);
 
 DEFINE_COMMAND_PLUGIN_EXP_SAFE(GetINIFloatOrCreate, "", false, kNVSEParams_OneString_OneOptionalString_OneOptionalFloat_OneOptionalString_TwoOptionalBools);
 DEFINE_COMMAND_PLUGIN_EXP_SAFE(GetINIStringOrCreate, "", false, kNVSEParams_OneString_ThreeOptionalStrings_TwoOptionalBools);

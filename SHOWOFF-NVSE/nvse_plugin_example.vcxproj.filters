@@ -87,6 +87,9 @@
     <ClCompile Include="GameUI.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
+    <ClCompile Include="internal\ExtractArgs_TypeSafe.cpp">
+      <Filter>internal</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="functions\SO_fn_Misc.h">

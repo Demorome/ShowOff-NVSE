@@ -464,6 +464,14 @@ public:
 		bool a_bPrependNewKeys = false
         );
 
+    // copying is not permitted
+    CSimpleIniTempl(const CSimpleIniTempl&) = delete;
+    CSimpleIniTempl& operator=(const CSimpleIniTempl&) = delete;
+
+	// moving is permitted
+    CSimpleIniTempl& operator=(CSimpleIniTempl&& source) noexcept;
+	CSimpleIniTempl(CSimpleIniTempl&& source) noexcept;
+	
     /** Destructor */
     ~CSimpleIniTempl();
 
@@ -1173,56 +1181,9 @@ public:
     long GetOrCreateHex(SI_CHAR* sectionName, SI_CHAR* keyName, long defaultValue, SI_CHAR* comment);
 
 private:
-    // copying is not permitted
-    CSimpleIniTempl(const CSimpleIniTempl &) = delete;
-    CSimpleIniTempl & operator=(const CSimpleIniTempl &) = delete;
 
-	void CopyBasicData(const CSimpleIniTempl& source) noexcept
-	{
-        m_nOrder = source.m_nOrder;
-        m_bAllowMultiKey = source.m_bAllowMultiKey;
-        m_bAllowMultiLine = source.m_bAllowMultiLine;
-        m_bIgnoreQuotesAroundValues = source.m_bIgnoreQuotesAroundValues;
-        m_bPrependNewKeys = source.m_bPrependNewKeys;
-        m_bSortAlphabetically = source.m_bSortAlphabetically;
-        m_bSpaces = source.m_bSpaces;
-        m_bStoreIsUtf8 = source.m_bStoreIsUtf8;
-	}
-
-    // Moving is permitted
-    CSimpleIniTempl(CSimpleIniTempl&& source) noexcept
-    {
-		// Retrieve the original pointers/objects, then set the source to be empty/null to prevent double free.
-        m_pData = std::exchange(source.m_pData, nullptr);
-        m_data = std::move(source.m_data);
-        m_pFileComment = std::exchange(source.m_pFileComment, nullptr);
-        m_strings = std::move(source.m_strings);
-        m_uDataLen = std::exchange(source.m_uDataLen, 0);
-
-        //Rest of data can be copied.
-        this->CopyBasicData(source);
-    }
+    void CopyBasicData(const CSimpleIniTempl& source) noexcept;
 	
-    CSimpleIniTempl& operator=(CSimpleIniTempl&& source) noexcept
-    {
-        if (&source == this)
-            return *this;
-
-        this->Reset();
-
-        // Transfer ownership of data pointers.
-        std::swap(m_pData, source.m_pData);
-        std::swap(m_data, source.m_data);
-        std::swap(m_pFileComment, source.m_pFileComment);
-        std::swap(m_strings, source.m_strings);
-        std::swap(m_uDataLen, source.m_uDataLen);
-
-    	//Rest of data can be copied.
-        this->CopyBasicData(source);
-
-        return *this;
-    }
-
     /** Parse the data looking for a file comment and store it if found.
     */
     SI_Error FindFileComment(
@@ -1376,6 +1337,7 @@ private:
 //                                  IMPLEMENTATION
 // ---------------------------------------------------------------------------
 
+
 template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
 CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::CSimpleIniTempl(
     bool a_bIsUtf8,
@@ -1395,6 +1357,56 @@ CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::CSimpleIniTempl(
   , m_bSortAlphabetically(a_bSortAlphabetically)
   ,	m_bPrependNewKeys(a_bPrependNewKeys)
 { }
+
+template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
+void
+CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::CopyBasicData(const CSimpleIniTempl& source) noexcept
+{
+    m_nOrder = source.m_nOrder;
+    m_bAllowMultiKey = source.m_bAllowMultiKey;
+    m_bAllowMultiLine = source.m_bAllowMultiLine;
+    m_bIgnoreQuotesAroundValues = source.m_bIgnoreQuotesAroundValues;
+    m_bPrependNewKeys = source.m_bPrependNewKeys;
+    m_bSortAlphabetically = source.m_bSortAlphabetically;
+    m_bSpaces = source.m_bSpaces;
+    m_bStoreIsUtf8 = source.m_bStoreIsUtf8;
+}
+
+template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
+CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::CSimpleIniTempl(CSimpleIniTempl&& source) noexcept
+{
+    // Retrieve the original pointers/objects, then set the source to be empty/null to prevent double free.
+    m_pData = std::exchange(source.m_pData, nullptr);
+    m_data = std::move(source.m_data);
+    m_pFileComment = std::exchange(source.m_pFileComment, nullptr);
+    m_strings = std::move(source.m_strings);
+    m_uDataLen = std::exchange(source.m_uDataLen, 0);
+
+    //Rest of data can be copied.
+    this->CopyBasicData(source);
+}
+
+template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
+CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>&
+CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::operator=(CSimpleIniTempl&& source) noexcept
+{
+    if (&source == this)
+        return *this;
+
+    this->Reset();
+
+    // Transfer ownership of data pointers.
+    std::swap(m_pData, source.m_pData);
+    std::swap(m_data, source.m_data);
+    std::swap(m_pFileComment, source.m_pFileComment);
+    std::swap(m_strings, source.m_strings);
+    std::swap(m_uDataLen, source.m_uDataLen);
+
+    //Rest of data can be copied.
+    this->CopyBasicData(source);
+
+    return *this;
+}
 
 template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
 CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::~CSimpleIniTempl()

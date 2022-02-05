@@ -89,12 +89,30 @@ static constexpr NVSEParamInfo kNVSEParams_OneString_OneFloatOrString_TwoOptiona
 	{	"string",	kNVSEParamType_String,1	},
 	{	"string",	kNVSEParamType_String,1	},
 };
+static constexpr NVSEParamInfo kNVSEParams_OneString_OneFloatOrString_TwoOptionalStrings_TwoOptionalBools[6] =
+{
+	{	"string",	kNVSEParamType_String,0	},
+	{	"float or string",	kNVSEParamType_StringOrNumber,0	},
+	{	"string",	kNVSEParamType_String,1	},
+	{	"string",	kNVSEParamType_String,1	},
+	{	"bool",	kNVSEParamType_Boolean,1	},
+	{	"bool",	kNVSEParamType_Boolean,1	},
+};
 static constexpr NVSEParamInfo kNVSEParams_OneString_OneFloat_TwoOptionalStrings[4] =
 {
 	{	"string",	kNVSEParamType_String,0	},
 	{	"float",	kNVSEParamType_Number,0	},
 	{	"string",	kNVSEParamType_String,1	},
 	{	"string",	kNVSEParamType_String,1	},
+};
+static constexpr NVSEParamInfo kNVSEParams_OneString_OneFloat_TwoOptionalStrings_TwoOptionalBools[6] =
+{
+	{	"string",	kNVSEParamType_String,0	},
+	{	"float",	kNVSEParamType_Number,0	},
+	{	"string",	kNVSEParamType_String,1	},
+	{	"string",	kNVSEParamType_String,1	},
+	{	"bool",	kNVSEParamType_Boolean,1	},
+	{	"bool",	kNVSEParamType_Boolean,1	},
 };
 static constexpr NVSEParamInfo kNVSEParams_OneString_OneOptionalString[2] =
 {
@@ -172,4 +190,13 @@ static constexpr NVSEParamInfo kNVSEParams_TwoStrings_TwoOptionalStrings[4] =
 	{	"string",	kNVSEParamType_String,0	},
 	{	"string",	kNVSEParamType_String,1	},
 	{	"string",	kNVSEParamType_String,1	},
+};
+static constexpr NVSEParamInfo kNVSEParams_TwoStrings_TwoOptionalStrings_TwoOptionalBools[6] =
+{
+	{	"string",	kNVSEParamType_String,0	},
+	{	"string",	kNVSEParamType_String,0	},
+	{	"string",	kNVSEParamType_String,1	},
+	{	"string",	kNVSEParamType_String,1	},
+	{	"bool",	kNVSEParamType_Boolean,1	},
+	{	"bool",	kNVSEParamType_Boolean,1	},
 };
