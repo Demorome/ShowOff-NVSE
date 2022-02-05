@@ -610,21 +610,6 @@ namespace IniToNVSE
 		return fullIniPath;
 	}
 
-	enum CommandResult
-	{
-		kResult_Error = -1,
-		kResult_Ok = 0,   //!< No error
-		kResult_Updated = 1,   //!< An existing value was updated
-		kResult_Inserted = 2,   //!< A new value was inserted
-	};
-
-	CommandResult AsResult(SI_Error e)
-	{
-		//don't care about types of errors, just that an error has occured.
-		return std::max(static_cast<CommandResult>(e), kResult_Error);
-	}
-
-	//TODO: use INI chaching
 	Map<const char*, CSimpleIniA> g_CachedIniFiles;
 
 	using StringOrNumber = std::variant<const char*, double>;
@@ -856,7 +841,7 @@ bool Cmd_HasINISetting_Execute(COMMAND_ARGS)
 
 bool Cmd_SetINIValue_Execute(COMMAND_ARGS)
 {
-	*result = IniToNVSE::kResult_Error;
+	*result = SI_Error::SI_FAIL;
 	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
 		eval.ExtractArgs())
 	{
@@ -910,7 +895,7 @@ bool Cmd_GetINIStringOrCreate_Execute(COMMAND_ARGS)
 
 		IniToNVSE::GetINIValue::Call_GetOrCreate(sectionAndKey, iniPath, comment, scriptObj, cache, saveFile, res);
 	}
-	g_strInterface->Assign(PASS_COMMAND_ARGS, res);
+	g_strInterface->Assign(PASS_COMMAND_ARGS, res); 
 	return true;
 }
 

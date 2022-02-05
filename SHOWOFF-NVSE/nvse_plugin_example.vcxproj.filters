@@ -220,9 +220,6 @@
     <ClInclude Include="functions\SO_fn_Files.h">
       <Filter>functions</Filter>
     </ClInclude>
-    <ClInclude Include="JSON_Library\json.h">
-      <Filter>External Libraries\JSON Library</Filter>
-    </ClInclude>
     <ClInclude Include="Changelog.txt" />
     <ClInclude Include="..\nvse\ParamInfos.h">
       <Filter>nvse</Filter>
@@ -2161,9 +2158,6 @@
     </Filter>
     <Filter Include="External Libraries">
       <UniqueIdentifier>{6b78f136-a2b3-40ad-82c0-1d2793f65eca}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="External Libraries\JSON Library">
-      <UniqueIdentifier>{0729c7c5-ebc5-4d68-bab7-59bb7909b244}</UniqueIdentifier>
     </Filter>
     <Filter Include="External Libraries\SimpleINI Library">
       <UniqueIdentifier>{a5cf6dd2-1a87-4d23-a159-50e502279200}</UniqueIdentifier>

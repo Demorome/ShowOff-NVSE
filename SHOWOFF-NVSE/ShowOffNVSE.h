@@ -14,9 +14,6 @@
 #include "SOTypes.h"
 #include "InventoryRef.h"
 
-#define SI_SUPPORT_IOSTREAMS
-#include "SimpleIni.h"
-
 using namespace std::literals;
 
 extern ICriticalSection g_Lock;

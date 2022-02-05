@@ -1,7 +1,8 @@
 ﻿#include "ShowOffNVSE.h"
 #include "settings.h"
 #include "utility.h"
-#include <SimpleINILibrary\SimpleIni.h>
+
+#include <SimpleIni.h>
 
 
 int GetINIValFromPlugin(const char* iniName, const char* section, const char* key, int defaultVal)
