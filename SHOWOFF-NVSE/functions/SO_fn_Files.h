@@ -25,12 +25,12 @@ DEFINE_COMMAND_PLUGIN_EXP_SAFE(SetINIValue, "", false, kNVSEParams_OneString_One
 DEFINE_COMMAND_PLUGIN_EXP_SAFE(SetINIFloatAlt, "", false, kNVSEParams_OneString_OneFloat_TwoOptionalStrings);
 DEFINE_COMMAND_PLUGIN_EXP_SAFE(SetINIStringAlt, "", false, kNVSEParams_TwoStrings_TwoOptionalStrings);
 
-DEFINE_COMMAND_PLUGIN_EXP_SAFE(GetINIFloatOrCreate, "", false, kNVSEParams_OneString_OneOptionalString_OneOptionalFloat_OneOptionalString);
-DEFINE_COMMAND_PLUGIN_EXP_SAFE(GetINIStringOrCreate, "", false, kNVSEParams_OneString_ThreeOptionalStrings);
-DEFINE_COMMAND_ALT_PLUGIN_EXP_SAFE(GetINIFloatOrDefault, GetINIFloatAlt, "", false, kNVSEParams_OneString_OneOptionalString_OneOptionalFloat);
-DEFINE_COMMAND_ALT_PLUGIN_EXP_SAFE(GetINIStringOrDefault, GetINIStringAlt, "", false, kNVSEParams_OneString_TwoOptionalStrings);
+DEFINE_COMMAND_PLUGIN_EXP_SAFE(GetINIFloatOrCreate, "", false, kNVSEParams_OneString_OneOptionalString_OneOptionalFloat_OneOptionalString_TwoOptionalBools);
+DEFINE_COMMAND_PLUGIN_EXP_SAFE(GetINIStringOrCreate, "", false, kNVSEParams_OneString_ThreeOptionalStrings_TwoOptionalBools);
+DEFINE_COMMAND_ALT_PLUGIN_EXP_SAFE(GetINIFloatOrDefault, GetINIFloatAlt, "", false, kNVSEParams_OneString_OneOptionalString_OneOptionalFloat_OneOptionalBool);
+DEFINE_COMMAND_ALT_PLUGIN_EXP_SAFE(GetINIStringOrDefault, GetINIStringAlt, "", false, kNVSEParams_OneString_TwoOptionalStrings_OneOptionalBool);
 
-DEFINE_COMMAND_PLUGIN(HasINISetting, "", false, kParams_OneString_OneOptionalString);
+DEFINE_COMMAND_PLUGIN_EXP_SAFE(HasINISetting, "", false, kNVSEParams_OneString_OneOptionalString_OneOptionalBool);
 
 
 

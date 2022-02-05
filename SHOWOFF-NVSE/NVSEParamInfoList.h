@@ -96,17 +96,42 @@ static constexpr NVSEParamInfo kNVSEParams_OneString_OneFloat_TwoOptionalStrings
 	{	"string",	kNVSEParamType_String,1	},
 	{	"string",	kNVSEParamType_String,1	},
 };
+static constexpr NVSEParamInfo kNVSEParams_OneString_OneOptionalString[2] =
+{
+	{	"string",	kNVSEParamType_String,0	},
+	{	"string",	kNVSEParamType_String,1	},
+};
+static constexpr NVSEParamInfo kNVSEParams_OneString_OneOptionalString_OneOptionalBool[3] =
+{
+	{	"string",	kNVSEParamType_String,0	},
+	{	"string",	kNVSEParamType_String,1	},
+	{	"bool",	kNVSEParamType_Boolean,1	},
+};
 static constexpr NVSEParamInfo kNVSEParams_OneString_TwoOptionalStrings[3] =
 {
 	{	"string",	kNVSEParamType_String,0	},
 	{	"string",	kNVSEParamType_String,1	},
 	{	"string",	kNVSEParamType_String,1	},
 };
+static constexpr NVSEParamInfo kNVSEParams_OneString_TwoOptionalStrings_OneOptionalBool[4] =
+{
+	{	"string",	kNVSEParamType_String,0	},
+	{	"string",	kNVSEParamType_String,1	},
+	{	"string",	kNVSEParamType_String,1	},
+	{	"bool",	kNVSEParamType_Boolean,1	},
+};
 static constexpr NVSEParamInfo kNVSEParams_OneString_OneOptionalString_OneOptionalFloat[3] =
 {
 	{	"string",	kNVSEParamType_String,0	},
 	{	"string",	kNVSEParamType_String,1	},
 	{	"float",	kNVSEParamType_Number,1	},
+};
+static constexpr NVSEParamInfo kNVSEParams_OneString_OneOptionalString_OneOptionalFloat_OneOptionalBool[4] =
+{
+	{	"string",	kNVSEParamType_String,0	},
+	{	"string",	kNVSEParamType_String,1	},
+	{	"float",	kNVSEParamType_Number,1	},
+	{	"bool",	kNVSEParamType_Boolean,1	},
 };
 static constexpr NVSEParamInfo kNVSEParams_OneString_OneOptionalString_OneOptionalFloat_OneOptionalString[4] =
 {
@@ -115,12 +140,31 @@ static constexpr NVSEParamInfo kNVSEParams_OneString_OneOptionalString_OneOption
 	{	"float",	kNVSEParamType_Number,1	},
 	{	"string",	kNVSEParamType_String,1	},
 };
+static constexpr NVSEParamInfo kNVSEParams_OneString_OneOptionalString_OneOptionalFloat_OneOptionalString_TwoOptionalBools[6] =
+{
+	{	"string",	kNVSEParamType_String,0	},
+	{	"string",	kNVSEParamType_String,1	},
+	{	"float",	kNVSEParamType_Number,1	},
+	{	"string",	kNVSEParamType_String,1	},
+	{	"bool",	kNVSEParamType_Boolean,1	},
+	{	"bool",	kNVSEParamType_Boolean,1	},
+
+};
 static constexpr NVSEParamInfo kNVSEParams_OneString_ThreeOptionalStrings[4] =
 {
 	{	"string",	kNVSEParamType_String,0	},
 	{	"string",	kNVSEParamType_String,1	},
 	{	"string",	kNVSEParamType_String,1	},
 	{	"string",	kNVSEParamType_String,1	},
+};
+static constexpr NVSEParamInfo kNVSEParams_OneString_ThreeOptionalStrings_TwoOptionalBools[6] =
+{
+	{	"string",	kNVSEParamType_String,0	},
+	{	"string",	kNVSEParamType_String,1	},
+	{	"string",	kNVSEParamType_String,1	},
+	{	"string",	kNVSEParamType_String,1	},
+	{	"bool",	kNVSEParamType_Boolean,1	},
+	{	"bool",	kNVSEParamType_Boolean,1	},
 };
 static constexpr NVSEParamInfo kNVSEParams_TwoStrings_TwoOptionalStrings[4] =
 {

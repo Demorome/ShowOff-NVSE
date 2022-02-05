@@ -402,4 +402,4 @@ std::pair<std::string, std::string_view> GetFullPath(std::string&& relativePath)
 //Splits based on when any of the single-char delimiters are matched.
 //Returns nullptrs if no matches were found.
 //If a char is matched at the end, then the right-hand view will be nullptr.
-std::pair<const char*, const char*> SplitStringBySingleDelimiter(std::string&& toSplit, const char* delims);
+std::pair<const char*, const char*> SplitStringBySingleDelimiter(std::string& toSplit, const char* delims);

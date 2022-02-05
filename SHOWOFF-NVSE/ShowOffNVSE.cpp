@@ -72,7 +72,6 @@ void Func()
 std::atomic<char*> doesn't really work.
 */
 ICriticalSection g_Lock;
-std::map<std::string, CSimpleIniA> g_CachedINIFiles;
 
 // NVSE Globals
 bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);

@@ -21,7 +21,6 @@ using namespace std::literals;
 
 extern ICriticalSection g_Lock;
 extern std::atomic<bool> g_ShowFuncDebug;
-extern std::map<std::string, CSimpleIniA> g_CachedINIFiles;	//keys are the paths, relative to /config
 
 //NVSE Globals
 extern bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);

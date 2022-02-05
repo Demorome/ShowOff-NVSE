@@ -1174,8 +1174,54 @@ public:
 
 private:
     // copying is not permitted
-    CSimpleIniTempl(const CSimpleIniTempl &); // disabled
-    CSimpleIniTempl & operator=(const CSimpleIniTempl &); // disabled
+    CSimpleIniTempl(const CSimpleIniTempl &) = delete;
+    CSimpleIniTempl & operator=(const CSimpleIniTempl &) = delete;
+
+	void CopyBasicData(const CSimpleIniTempl& source) noexcept
+	{
+        m_nOrder = source.m_nOrder;
+        m_bAllowMultiKey = source.m_bAllowMultiKey;
+        m_bAllowMultiLine = source.m_bAllowMultiLine;
+        m_bIgnoreQuotesAroundValues = source.m_bIgnoreQuotesAroundValues;
+        m_bPrependNewKeys = source.m_bPrependNewKeys;
+        m_bSortAlphabetically = source.m_bSortAlphabetically;
+        m_bSpaces = source.m_bSpaces;
+        m_bStoreIsUtf8 = source.m_bStoreIsUtf8;
+	}
+
+    // Moving is permitted
+    CSimpleIniTempl(CSimpleIniTempl&& source) noexcept
+    {
+		// Retrieve the original pointers/objects, then set the source to be empty/null to prevent double free.
+        m_pData = std::exchange(source.m_pData, nullptr);
+        m_data = std::move(source.m_data);
+        m_pFileComment = std::exchange(source.m_pFileComment, nullptr);
+        m_strings = std::move(source.m_strings);
+        m_uDataLen = std::exchange(source.m_uDataLen, 0);
+
+        //Rest of data can be copied.
+        this->CopyBasicData(source);
+    }
+	
+    CSimpleIniTempl& operator=(CSimpleIniTempl&& source) noexcept
+    {
+        if (&source == this)
+            return *this;
+
+        this->Reset();
+
+        // Transfer ownership of data pointers.
+        std::swap(m_pData, source.m_pData);
+        std::swap(m_data, source.m_data);
+        std::swap(m_pFileComment, source.m_pFileComment);
+        std::swap(m_strings, source.m_strings);
+        std::swap(m_uDataLen, source.m_uDataLen);
+
+    	//Rest of data can be copied.
+        this->CopyBasicData(source);
+
+        return *this;
+    }
 
     /** Parse the data looking for a file comment and store it if found.
     */
@@ -1244,7 +1290,7 @@ private:
     }
 
     /** Make a copy of the supplied string, replacing the original pointer */
-    SI_Error CopyString(const SI_CHAR *& a_pString);
+    SI_Error CopyString(const SI_CHAR*& a_pString, const SI_CHAR* a_pPrepend = nullptr);
 
     /** Delete a string from the copied strings buffer if necessary */
     void DeleteString(const SI_CHAR * a_pString);
@@ -1263,6 +1309,7 @@ private:
         const SI_CHAR *     a_pTagName,
         bool                a_bAllowBlankLinesInComment = false
         ) const;
+    size_t GetStrLen(const SI_CHAR* a_pString);
     bool IsNewLineChar(SI_CHAR a_c) const;
 
     bool OutputMultiLineText(
@@ -1633,10 +1680,12 @@ _declspec(noinline) T CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetOrC
 	const bool ignoreInvalidEnd,
 	bool* hasCreatedValue)
 {
-    if (hasCreatedValue) *hasCreatedValue = false;
+    if (hasCreatedValue) 
+        *hasCreatedValue = false;
 	const SI_CHAR* settingValue = this->GetValue(sectionName, keyName, nullptr);
 	if (!settingValue || !*settingValue) {
-        if (hasCreatedValue) *hasCreatedValue = true;
+        if (hasCreatedValue) 
+            *hasCreatedValue = true;
 		//hack to create the correctly typed value, should make templated handler func instead.
 		if constexpr (std::is_same_v<T, const char*>)
 		{
@@ -2030,27 +2079,46 @@ CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::LoadMultiLineText(
 }
 
 template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
-SI_Error
-CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::CopyString(
-    const SI_CHAR *& a_pString
-    )
+size_t
+CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetStrLen(
+    const SI_CHAR* const a_pString)
 {
     size_t uLen = 0;
-    if (sizeof(SI_CHAR) == sizeof(char)) {
-        uLen = strlen((const char *)a_pString);
+    if constexpr (sizeof(SI_CHAR) == sizeof(char)) {
+        uLen = strlen((const char*)a_pString);
     }
-    else if (sizeof(SI_CHAR) == sizeof(wchar_t)) {
-        uLen = wcslen((const wchar_t *)a_pString);
+    else if constexpr (sizeof(SI_CHAR) == sizeof(wchar_t)) {
+        uLen = wcslen((const wchar_t*)a_pString);
     }
     else {
-        for ( ; a_pString[uLen]; ++uLen) /*loop*/ ;
+        for (; a_pString[uLen]; ++uLen) /*loop*/;
     }
     ++uLen; // NULL character
-    SI_CHAR * pCopy = new(std::nothrow) SI_CHAR[uLen];
+    return uLen;
+}
+
+template<class SI_CHAR, class SI_STRLESS, class SI_CONVERTER>
+SI_Error
+CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::CopyString(
+    const SI_CHAR *& a_pString, const SI_CHAR* a_pPrepend)
+{
+    auto uLen = GetStrLen(a_pString);
+    if (a_pPrepend)
+        uLen += GetStrLen(a_pPrepend) - 1;  //don't count NULL character twice
+	
+    auto pCopy = new(std::nothrow) SI_CHAR[uLen];
     if (!pCopy) {
         return SI_NOMEM;
     }
-    memcpy(pCopy, a_pString, sizeof(SI_CHAR)*uLen);
+	if (!a_pPrepend)
+	{
+        memcpy(pCopy, a_pString, sizeof(SI_CHAR) * uLen);
+	}
+    else
+    {
+        strcpy(pCopy, a_pPrepend);
+        strcat(pCopy, a_pString);
+    }
     m_strings.push_back(pCopy);
     a_pString = pCopy;
     return SI_OK;
@@ -2069,12 +2137,27 @@ CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::AddEntry(
 {
     SI_Error rc;
     bool bInserted = false;
-
-    SI_ASSERT(!a_pComment || IsComment(*a_pComment));
+    bool bCopiedComment = false;
+    if (a_pComment)
+    {
+        if (!a_pComment[0]) {
+            a_pComment = nullptr;
+        }
+    	// Add ";" in front of the string if it was missing.
+        else if (!IsComment(a_pComment[0]) && a_bCopyStrings) {
+            bCopiedComment = true;
+            rc = CopyString(a_pComment, ";");
+            if (rc < 0) return rc;
+        }
+        else
+        {
+            SI_ASSERT(false);
+        }
+    }
 
     // if we are copying strings then make a copy of the comment now
     // because we will need it when we add the entry.
-    if (a_bCopyStrings && a_pComment) {
+    if (a_bCopyStrings && a_pComment && !bCopiedComment) {
         rc = CopyString(a_pComment);
         if (rc < 0) return rc;
     }

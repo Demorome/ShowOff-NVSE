@@ -1948,7 +1948,7 @@ std::pair<std::string, std::string_view> GetFullPath(std::string &&relativePath)
 }
 
 //Mutates the entry string by inserting a null character where the first delimiter is found.
-std::pair<const char*, const char*> SplitStringBySingleDelimiter(std::string&& toSplit, const char* delims)
+std::pair<const char*, const char*> SplitStringBySingleDelimiter(std::string& toSplit, const char* delims)
 {
 	const char* lh, * rh;
 
