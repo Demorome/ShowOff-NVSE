@@ -192,7 +192,7 @@ namespace JsonToNVSE
 			if (!cache)
 				return parsedJson;
 			ScopedLock lock(g_JsonMapLock);
-			return std::ref(g_CachedJSONFiles[relativePath.data()] = std::move(parsedJson) );
+			return std::ref(*g_CachedJSONFiles.Emplace(relativePath.data(), std::move(parsedJson)));
 		}
 		catch (tao::pegtl::parse_error& e)
 		{
@@ -560,7 +560,7 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 			// File was either created, or was completely replaced; cache that new data.
 			// Also possible that file didn't exist and wasn't created, but we can still cache that data.
 			ScopedLock lock(g_JsonMapLock);
-			g_CachedJSONFiles[relPath.data()] = std::move(GetRef(elemAsJSON));
+			g_CachedJSONFiles.Emplace(relPath.data(), std::move(GetRef(elemAsJSON)));
 			*result = true;	//success if cached data is changed
 		}
 	}
