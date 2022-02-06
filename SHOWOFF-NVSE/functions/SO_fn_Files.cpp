@@ -610,6 +610,7 @@ namespace IniToNVSE
 		return fullIniPath;
 	}
 
+	ICriticalSection g_IniMapLock;
 	Map<const char*, CSimpleIniA> g_CachedIniFiles;
 
 	using StringOrNumber = std::variant<const char*, double>;
@@ -666,6 +667,7 @@ namespace IniToNVSE
 			if (auto const fullPathCStr = fullPath.c_str();
 				auto ini = g_CachedIniFiles.GetPtr(relIniPath))
 			{
+				ScopedLock lock(g_IniMapLock);
 				*result = SetIniValue(*ini, newValue, fullPathCStr, section, key, comment, saveFile);
 			}
 			else
@@ -678,6 +680,7 @@ namespace IniToNVSE
 
 				if (cache && (existed || created))
 				{
+					ScopedLock lock(g_IniMapLock);
 					g_CachedIniFiles.Emplace(relIniPath, std::move(iniLocal));
 				}
 			}
@@ -729,6 +732,7 @@ namespace IniToNVSE
 
 					if (cache)
 					{
+						ScopedLock lock(g_IniMapLock);
 						g_CachedIniFiles.Emplace(relIniPath, std::move(iniLocal));
 					}
 				}
@@ -770,6 +774,7 @@ namespace IniToNVSE
 			if (auto const fullPathCStr = fullPath.c_str(); 
 				auto ini = g_CachedIniFiles.GetPtr(relIniPath))
 			{
+				ScopedLock lock(g_IniMapLock);
 				GetOrCreateIniValue(*ini, comment, section, key, fullPathCStr, saveFile, result);
 			}
 			else
@@ -780,6 +785,7 @@ namespace IniToNVSE
 				
 				if (cache && (existed || created))
 				{
+					ScopedLock lock(g_IniMapLock);
 					g_CachedIniFiles.Emplace(relIniPath, std::move(iniLocal));
 				}
 			}
@@ -829,6 +835,7 @@ bool Cmd_HasINISetting_Execute(COMMAND_ARGS)
 				*result = HasIniValue(iniLocal);
 				if (cache)
 				{
+					ScopedLock lock(IniToNVSE::g_IniMapLock);
 					IniToNVSE::g_CachedIniFiles.Emplace(relIniPath, std::move(iniLocal));
 				}
 			}
@@ -957,10 +964,12 @@ bool Cmd_ClearFileCacheShowOff_Execute(COMMAND_ARGS)
 		
 		if (toClearMode == kCache_Ini)
 		{
+			ScopedLock lock(IniToNVSE::g_IniMapLock);
 			*result = IniToNVSE::g_CachedIniFiles.Erase(relPath);
 		}
 		else if (toClearMode == kCache_Json)
 		{
+			ScopedLock lock(JsonToNVSE::g_JsonMapLock);
 			*result = JsonToNVSE::g_CachedJSONFiles.Erase(relPath);
 		}
 	}
