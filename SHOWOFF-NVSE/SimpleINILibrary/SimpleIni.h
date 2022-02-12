@@ -2157,14 +2157,18 @@ CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::AddEntry(
             a_pComment = nullptr;
         }
     	// Add ";" in front of the string if it was missing.
-        else if (!IsComment(a_pComment[0]) && a_bCopyStrings) {
-            bCopiedComment = true;
-            rc = CopyString(a_pComment, ";");
-            if (rc < 0) return rc;
-        }
-        else
+        else if (!IsComment(a_pComment[0])) 
         {
-            SI_ASSERT(false);
+            if (a_bCopyStrings)
+            {
+                bCopiedComment = true;
+                rc = CopyString(a_pComment, ";");
+                if (rc < 0) return rc;
+            }
+            else
+            {
+                SI_ASSERT(false);
+            }
         }
     }
 
