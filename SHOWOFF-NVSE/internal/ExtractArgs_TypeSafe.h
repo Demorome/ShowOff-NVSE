@@ -519,7 +519,6 @@ template <size_t size, const NVSEParamInfo(&params)[size], typename... ArgTypes>
 void ExtractOptionalArgsFromPack(PluginExpressionEvaluator& eval, std::tuple<ArgTypes&...> &&args)
 {
 	using ArgsTupleBasic = std::tuple<ArgTypes...>;
-
 	auto constexpr numOptArgs = GetNumOptionalArgs(params);
 	if constexpr (numOptArgs <= 0)
 	{

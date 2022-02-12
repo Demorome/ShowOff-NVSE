@@ -591,6 +591,7 @@ extern "C"
 			REG_CMD(HasINISetting_Cached)
 			REG_CMD(ClearFileCacheShowOff)
 			REG_CMD(SaveCachedIniFile)
+			REG_CMD(ReloadIniCache)
 		}
 	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)

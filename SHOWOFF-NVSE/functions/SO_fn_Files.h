@@ -30,17 +30,12 @@ DEFINE_COMMAND_ALT_PLUGIN_EXP_SAFE(GetINIStringOrDefault_Cached, GetINIString_Ca
 
 DEFINE_COMMAND_PLUGIN_EXP_SAFE(HasINISetting_Cached, "", false, kNVSEParams_OneString_OneOptionalString);
 DEFINE_COMMAND_ALT_PLUGIN_EXP_SAFE(SaveCachedIniFile, SaveCachedIni, "", false, kNVSEParams_OneOptionalString);
+DEFINE_COMMAND_PLUGIN_EXP_SAFE(ReloadIniCache, "", false, kNVSEParams_OneOptionalString);
 
 DEFINE_COMMAND_ALT_PLUGIN_EXP_SAFE(ClearFileCacheShowOff, CloseFileSO, "", false, kNVSEParams_OneString_OneNumber);
 
 
 #if _DEBUG
-
-
-
-
-
-
 
 
 

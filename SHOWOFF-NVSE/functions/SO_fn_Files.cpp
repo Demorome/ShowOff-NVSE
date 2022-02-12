@@ -958,6 +958,27 @@ bool Cmd_SaveCachedIniFile_Execute(COMMAND_ARGS)
 	}
 	return true;
 }
+bool Cmd_ReloadIniCache_Execute(COMMAND_ARGS)
+{
+	*result = false;	//bReloaded
+	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
+		eval.ExtractArgs())
+	{
+		const char* relIniPath = nullptr;
+		EXTRACT_ALL_ARGS_EXP(SaveCachedIniFile, eval, g_NoArgs, std::tie(relIniPath));
+
+		std::string defaultModPath;
+		auto const fullPath = IniToNVSE::GetINIPath(relIniPath, scriptObj, defaultModPath);
+		if (fullPath.empty())
+			return false;
+
+		if (auto const ini = IniToNVSE::g_CachedIniFiles.GetPtr(relIniPath))
+		{
+			*result = ini->LoadFile(fullPath.c_str()) >= SI_OK;
+		}
+	}
+	return true;
+}
 bool Cmd_ClearFileCacheShowOff_Execute(COMMAND_ARGS)
 {
 	enum CacheToClear : UInt8
