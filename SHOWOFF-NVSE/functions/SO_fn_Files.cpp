@@ -974,6 +974,7 @@ bool Cmd_ReloadIniCache_Execute(COMMAND_ARGS)
 
 		if (auto const ini = IniToNVSE::g_CachedIniFiles.GetPtr(relIniPath))
 		{
+			ScopedLock lock(IniToNVSE::g_IniMapLock);
 			*result = ini->LoadFile(fullPath.c_str()) >= SI_OK;
 		}
 	}
