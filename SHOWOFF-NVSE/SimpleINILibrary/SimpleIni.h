@@ -2383,10 +2383,19 @@ CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::SetDoubleValue(
 	// convert to an ASCII string
 	char szInput[64];
 #if __STDC_WANT_SECURE_LIB__ && !_WIN32_WCE
-	sprintf_s(szInput, "%f", a_nValue);
+	auto const len = sprintf_s(szInput, "%f", a_nValue);
 #else // !__STDC_WANT_SECURE_LIB__
-	sprintf(szInput, "%f", a_nValue);
+    auto const len = sprintf(szInput, "%f", a_nValue);
 #endif // __STDC_WANT_SECURE_LIB__
+
+    //Remove trailing zeros.
+    for (int i = len - 1; i >= 0; i--)
+    {
+        if (szInput[i] == '0')
+            szInput[i] = 0;
+        else
+            break;
+    }
 
 	// convert to output text
 	SI_CHAR szOutput[64];
