@@ -19,6 +19,10 @@ static constexpr NVSEParamInfo kNVSEParams_OneString[1] =
 {
 	{	"string",	kNVSEParamType_String,	0	},
 };
+static constexpr NVSEParamInfo kNVSEParams_OneOptionalString[1] =
+{
+	{	"string",	kNVSEParamType_String,	1	},
+};
 static constexpr NVSEParamInfo kNVSEParams_OneString_OneNumber[2] =
 {
 	{	"string",	kNVSEParamType_String,	0	},
@@ -58,10 +62,6 @@ static constexpr NVSEParamInfo kNVSEParams_OneOptionalString_TwoOptionalNumbers[
 static constexpr NVSEParamInfo kNVSEParams_OneOptionalStringOrNumber[1] =
 {
 	{	"string or number",	kNVSEParamType_StringOrNumber,	1	},
-};
-static constexpr NVSEParamInfo kNVSEParams_OneOptionalString[1] =
-{
-	{	"string",	kNVSEParamType_String,	1	},
 };
 static constexpr NVSEParamInfo kNVSEParams_OneOptionalBoolean[1] =
 {

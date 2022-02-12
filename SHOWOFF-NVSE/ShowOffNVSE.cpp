@@ -583,15 +583,14 @@ extern "C"
 
 		if constexpr (true)	//to test in release mode for performance
 		{
-			REG_CMD(SetINIValue)
-			REG_CMD(SetINIFloatAlt)
-			REG_CMD(SetINIStringAlt)
-			REG_CMD(GetINIFloatOrCreate)
-			REG_CMD_STR(GetINIStringOrCreate)
-			REG_CMD(GetINIFloatOrDefault)
-			REG_CMD_STR(GetINIStringOrDefault)
-			REG_CMD(HasINISetting)
+			REG_CMD(SetINIValue_Cached)
+			REG_CMD(GetINIFloatOrCreate_Cached)
+			REG_CMD_STR(GetINIStringOrCreate_Cached)
+			REG_CMD(GetINIFloatOrDefault_Cached)
+			REG_CMD_STR(GetINIStringOrDefault_Cached)
+			REG_CMD(HasINISetting_Cached)
 			REG_CMD(ClearFileCacheShowOff)
+			REG_CMD(SaveCachedIniFile)
 		}
 	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)

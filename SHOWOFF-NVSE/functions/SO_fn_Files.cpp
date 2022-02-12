@@ -580,7 +580,7 @@ namespace IniToNVSE
 	void GetFullINIPath(std::string &partialPath)
 	{		
 		//Make string end with ".ini" if it didn't have a file extension.
-		if (partialPath.find( '.') == std::string::npos)
+		if (partialPath.find('.') == std::string::npos)
 		{
 			partialPath += ".ini";
 		}
@@ -589,19 +589,36 @@ namespace IniToNVSE
 		partialPath.insert(0, "data\\config\\");
 	}
 
-	//If iniRelPath is empty, will point it to the mod's name.
-	//Returns an empty string if an error occured.
-	//Copied from JIP's GetINIPath(), converted to use the STL.
-	std::string GetINIPath(const char* &iniRelPath, Script* const scriptObj)
+	bool GetModINIPath(std::string &outModPath, Script* const scriptObj)
+	{
+		UInt8 const modIdx = scriptObj->GetOverridingModIdx();
+		if (modIdx == 0xFF)
+		{
+			return false;
+		}
+		//replace .esm/p ending with .ini
+		outModPath = g_dataHandler->GetNthModName(modIdx);
+		outModPath.replace(outModPath.size() - 3, 3, "ini");
+		return true;
+	}
+
+	// If iniRelPath is empty, will point it to the mod's name (ending with .ini).
+	//Must not touch outModPath in that case, to preserve the pointer integrity.
+	// Returns an empty string if an error occured.
+	// Copied from JIP's GetINIPath(), converted to use the STL.
+	std::string GetINIPath(const char* &iniRelPath, Script* const scriptObj, std::string &outModPath)
 	{
 		std::string fullIniPath;
 		
-		if (!iniRelPath[0])
+		if (!iniRelPath || !iniRelPath[0])
 		{
-			UInt8 const modIdx = scriptObj->GetOverridingModIdx();
-			if (modIdx == 0xFF)
+			if (!GetModINIPath(outModPath, scriptObj))
 				return fullIniPath;	//empty str
-			iniRelPath = g_dataHandler->GetNthModName(modIdx);
+			fullIniPath = outModPath;
+			iniRelPath = outModPath.c_str();
+		}
+		else
+		{
 			fullIniPath = iniRelPath;
 			std::ranges::replace(fullIniPath, '/', '\\');
 		}
@@ -610,75 +627,90 @@ namespace IniToNVSE
 		return fullIniPath;
 	}
 
+	// like GetINIPath, but we don't care about getting the full path.
+	bool TryGetRelIniPath(const char* &iniRelPath, Script* const scriptObj, std::string& outModPath)
+	{
+		if (!iniRelPath || !iniRelPath[0])
+		{
+			if (!GetModINIPath(outModPath, scriptObj))
+				return false;
+			iniRelPath = outModPath.c_str();
+		}
+		return true;
+	}
+
 	ICriticalSection g_IniMapLock;
 	Map<const char*, CSimpleIniA> g_CachedIniFiles;
+
+	
+	using IniArgs = std::optional<std::tuple<const char*, const char*, std::string>>;
+	
+	//Returns section, key, fullPath.
+	//relIniPath may be adjusted to point to defaultModPath_Out; it must not modify/outlive defaultModPath_Out. 
+	[[nodiscard]] IniArgs ExtractIniArgs(std::string& sectionAndKey, std::string& defaultModPath_Out, const char*& relIniPath, Script* scriptObj)
+	{
+		auto [section, key] = SplitStringBySingleDelimiter(sectionAndKey, ":/\\");
+		if (!section || !key)
+			return {};
+
+		auto const fullPath = GetINIPath(relIniPath, scriptObj, defaultModPath_Out);
+		if (fullPath.empty())
+			return {};
+		return std::make_tuple(section, key, fullPath);
+	}
 
 	using StringOrNumber = std::variant<const char*, double>;
 		
 	namespace SetINIValue
 	{
-		SI_Error SetIniValue(CSimpleIniA &ini, StringOrNumber& newValue, 
-			const char* fullPath, const char* section, const char* key, 
-			const char* comment, bool saveFile)
+		SI_Error SetIniValue(CSimpleIniA &ini, StringOrNumber& newValue,
+			const char* section, const char* key, 
+			const char* comment)
 		{
-			SI_Error result;
 			if (auto const strVal = std::get_if<const char*>(&newValue))
 			{
 				if (auto const e = ini.SetValue(section, key, *strVal, comment);
 					e >= SI_OK)	//if success
 				{
-					result = e;
+					return e;
 				}
-				else return SI_FAIL;
+				return SI_FAIL;
 			}
 			else //assume number
 			{
 				if (auto const e = ini.SetDoubleValue(section, key, std::get<double>(newValue), comment);
 					e >= SI_OK)
 				{
-					result = e;
+					return e;
 				}
-				else return SI_FAIL;
+				return SI_FAIL;
 			}
-
-			if (saveFile)
-			{
-				if (auto const err = ini.SaveFile(fullPath, false);
-					err < SI_OK)
-				{
-					return err;
-				}
-			}
-			return result;
 		}
 
 		
 		void Call(std::string& sectionAndKey, StringOrNumber& newValue, const char* relIniPath,
-			const char* comment, Script* scriptObj, bool cache, bool saveFile, double* result)
+			const char* comment, Script* scriptObj, double* result)
 		{
-			auto [section, key] = SplitStringBySingleDelimiter(sectionAndKey, ":/\\");
-			if (!section || !key)
+			std::string defaultModPath;
+			auto maybe_Args = ExtractIniArgs(sectionAndKey, defaultModPath, relIniPath, scriptObj);
+			if (!maybe_Args)
 				return;
+			auto& [section, key, fullPath] = maybe_Args.value();
 
-			auto const fullPath = GetINIPath(relIniPath, scriptObj);
-			if (fullPath.empty())
-				return;
-
-			if (auto const fullPathCStr = fullPath.c_str();
-				auto ini = g_CachedIniFiles.GetPtr(relIniPath))
+			if (auto cachedIni = g_CachedIniFiles.GetPtr(relIniPath))
 			{
 				ScopedLock lock(g_IniMapLock);
-				*result = SetIniValue(*ini, newValue, fullPathCStr, section, key, comment, saveFile);
+				*result = SetIniValue(*cachedIni, newValue, section, key, comment);
 			}
 			else
 			{
 				CSimpleIniA iniLocal(true);
-				bool const existed = iniLocal.LoadFile(fullPathCStr) >= SI_OK;
+				bool const existed = iniLocal.LoadFile(fullPath.c_str()) >= SI_OK;
 				bool const created = 
-					SetIniValue(iniLocal, newValue, fullPathCStr, section, key, comment, saveFile)
+					SetIniValue(iniLocal, newValue, section, key, comment)
 					== SI_INSERTED;
 
-				if (cache && (existed || created))
+				if (existed || created)
 				{
 					ScopedLock lock(g_IniMapLock);
 					g_CachedIniFiles.Emplace(relIniPath, std::move(iniLocal));
@@ -699,6 +731,7 @@ namespace IniToNVSE
 			}
 			else if constexpr (std::is_same_v<T, const char*&>)
 			{
+				//BUG: using this pointer after local CSimpleINI is destroyed!
 				result = ini.GetValue(section, key, result);
 			}
 			else
@@ -708,20 +741,18 @@ namespace IniToNVSE
 		}
 		
 		void Call_GetOrDefault(std::string& sectionAndKey, const char* relIniPath,
-			Script* scriptObj, bool cache, auto &result)
+			Script* scriptObj, auto &result)
 		{
-			auto [section, key] = SplitStringBySingleDelimiter(sectionAndKey, ":/\\");
-			if (!section || !key)
+			std::string defaultModPath;
+			auto maybe_Args = ExtractIniArgs(sectionAndKey, defaultModPath, relIniPath, scriptObj);
+			if (!maybe_Args)
 				return;
-
-			auto const fullPath = GetINIPath(relIniPath, scriptObj);
-			if (fullPath.empty())
-				return;
+			auto& [section, key, fullPath] = maybe_Args.value();
 
 			//Always try to get a cached file first; so modders can be lazy and leave "cache" arg at default.
-			if (auto ini = g_CachedIniFiles.GetPtr(relIniPath))
+			if (auto const cachedIni = g_CachedIniFiles.GetPtr(relIniPath))
 			{
-				GetOrDefaultIniValue(*ini, section, key, result);
+				GetOrDefaultIniValue(*cachedIni, section, key, result);
 			}
 			else
 			{
@@ -730,20 +761,15 @@ namespace IniToNVSE
 				{
 					GetOrDefaultIniValue(iniLocal, section, key, result);
 
-					if (cache)
-					{
-						ScopedLock lock(g_IniMapLock);
-						g_CachedIniFiles.Emplace(relIniPath, std::move(iniLocal));
-					}
+					ScopedLock lock(g_IniMapLock);
+					g_CachedIniFiles.Emplace(relIniPath, std::move(iniLocal));
 				}
 			}
-
 		}
 
-		// Returns true if file has been saved without errors.
+		// Returns true if a value has been created.
 		bool GetOrCreateIniValue(CSimpleIniA &ini, const char* comment, 
-			const char* section, const char* key,
-			const char* fullPath, bool saveFile, auto &result)
+			const char* section, const char* key, auto &result)
 		{
 			using T = decltype(result);
 			static_assert(std::is_same_v<T, const char*&> || std::is_same_v<T, double&>, 
@@ -751,39 +777,31 @@ namespace IniToNVSE
 			
 			bool hasCreatedValue;
 			result = ini.GetOrCreate(section, key, result, comment, true, &hasCreatedValue);
-
-			if (hasCreatedValue && saveFile)
-			{
-				return ini.SaveFile(fullPath, false) >= SI_OK;
-			}
-			return false;
+			return hasCreatedValue;
 		}
 
 		void Call_GetOrCreate(std::string& sectionAndKey, const char* relIniPath, 
-			const char* comment, Script* scriptObj, bool cache, bool saveFile, auto& result)
+			const char* comment, Script* scriptObj, auto& result)
 		{
-			//sectionAndKey is split into section & key variables using null character.
-			auto [section, key] = SplitStringBySingleDelimiter(sectionAndKey, ":/\\");
-			if (!section || !key)
+			std::string defaultModPath;
+			auto maybe_Args = ExtractIniArgs(sectionAndKey, defaultModPath, relIniPath, scriptObj);
+			if (!maybe_Args)
 				return;
-
-			auto const fullPath = GetINIPath(relIniPath, scriptObj);
-			if (fullPath.empty())
-				return;
+			auto& [section, key, fullPath] = maybe_Args.value();
 
 			if (auto const fullPathCStr = fullPath.c_str(); 
-				auto ini = g_CachedIniFiles.GetPtr(relIniPath))
+				auto cachedIni = g_CachedIniFiles.GetPtr(relIniPath))
 			{
 				ScopedLock lock(g_IniMapLock);
-				GetOrCreateIniValue(*ini, comment, section, key, fullPathCStr, saveFile, result);
+				GetOrCreateIniValue(*cachedIni, comment, section, key, result);
 			}
 			else
 			{
 				CSimpleIniA iniLocal(true);
 				bool const existed = iniLocal.LoadFile(fullPathCStr) >= SI_OK;
-				auto const created = GetOrCreateIniValue(iniLocal, comment, section, key, fullPathCStr, saveFile, result);
+				auto const created = GetOrCreateIniValue(iniLocal, comment, section, key, result);
 				
-				if (cache && (existed || created))
+				if (existed || created)
 				{
 					ScopedLock lock(g_IniMapLock);
 					g_CachedIniFiles.Emplace(relIniPath, std::move(iniLocal));
@@ -794,9 +812,8 @@ namespace IniToNVSE
 	
 }
 
-
 //Most code copied from JIP LN NVSE's GetINIString
-bool Cmd_HasINISetting_Execute(COMMAND_ARGS)
+bool Cmd_HasINISetting_Cached_Execute(COMMAND_ARGS)
 {
 	*result = false;
 	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
@@ -804,17 +821,14 @@ bool Cmd_HasINISetting_Execute(COMMAND_ARGS)
 	{
 		std::string sectionAndKey;
 		const char* relIniPath = nullptr;
-		bool cache = false;
-		EXTRACT_ALL_ARGS_EXP(HasINISetting, eval, std::tie(sectionAndKey),
-			std::tie(relIniPath, cache));
+		EXTRACT_ALL_ARGS_EXP(HasINISetting_Cached, eval, std::tie(sectionAndKey),
+			std::tie(relIniPath));
 
-		auto [section, key] = SplitStringBySingleDelimiter(sectionAndKey, ":/\\");
-		if (!section || !key)
+		std::string defaultModPath;
+		auto maybe_Args = IniToNVSE::ExtractIniArgs(sectionAndKey, defaultModPath, relIniPath, scriptObj);
+		if (!maybe_Args)
 			return true;
-
-		auto const fullPath = IniToNVSE::GetINIPath(relIniPath, scriptObj);
-		if (fullPath.empty())
-			return true;
+		auto& [section, key, fullPath] = maybe_Args.value();
 
 		auto const HasIniValue = [section, key](const CSimpleIniA &ini) -> bool
 		{
@@ -833,11 +847,9 @@ bool Cmd_HasINISetting_Execute(COMMAND_ARGS)
 				iniLocal.LoadFile(fullPathCStr) >= SI_OK)
 			{
 				*result = HasIniValue(iniLocal);
-				if (cache)
-				{
-					ScopedLock lock(IniToNVSE::g_IniMapLock);
-					IniToNVSE::g_CachedIniFiles.Emplace(relIniPath, std::move(iniLocal));
-				}
+				
+				ScopedLock lock(IniToNVSE::g_IniMapLock);
+				IniToNVSE::g_CachedIniFiles.Emplace(relIniPath, std::move(iniLocal));
 			}
 		}
 	}
@@ -846,7 +858,7 @@ bool Cmd_HasINISetting_Execute(COMMAND_ARGS)
 
 
 
-bool Cmd_SetINIValue_Execute(COMMAND_ARGS)
+bool Cmd_SetINIValue_Cached_Execute(COMMAND_ARGS)
 {
 	*result = SI_Error::SI_FAIL;
 	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
@@ -854,27 +866,16 @@ bool Cmd_SetINIValue_Execute(COMMAND_ARGS)
 	{
 		std::string sectionAndKey;
 		IniToNVSE::StringOrNumber newVal;
-		const char* comment = nullptr, * iniPath = nullptr;
-		bool cache = false, saveFile = true;
-		EXTRACT_ALL_ARGS_EXP(SetINIValue, eval, std::tie(sectionAndKey, newVal),
-			std::tie(iniPath, comment, cache, saveFile));
+		const char* iniPath = nullptr, * comment = nullptr;
+		EXTRACT_ALL_ARGS_EXP(SetINIValue_Cached, eval, std::tie(sectionAndKey, newVal),
+			std::tie(iniPath, comment));
 
-		IniToNVSE::SetINIValue::Call(sectionAndKey, newVal, iniPath, comment, scriptObj, cache, saveFile, result);
+		IniToNVSE::SetINIValue::Call(sectionAndKey, newVal, iniPath, comment, scriptObj, result);
 	}
 	return true;
 }
 
-bool Cmd_SetINIFloatAlt_Execute(COMMAND_ARGS)
-{
-	return Cmd_SetINIValue_Execute(PASS_COMMAND_ARGS);
-}
-
-bool Cmd_SetINIStringAlt_Execute(COMMAND_ARGS)
-{
-	return Cmd_SetINIValue_Execute(PASS_COMMAND_ARGS);
-}
-
-bool Cmd_GetINIFloatOrCreate_Execute(COMMAND_ARGS)
+bool Cmd_GetINIFloatOrCreate_Cached_Execute(COMMAND_ARGS)
 {
 	*result = 0.0;	//also the default creation value.
 	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
@@ -882,14 +883,13 @@ bool Cmd_GetINIFloatOrCreate_Execute(COMMAND_ARGS)
 	{
 		std::string sectionAndKey;
 		const char* comment = nullptr, * iniPath = nullptr;
-		bool cache = false, saveFile = true;
-		EXTRACT_ALL_ARGS_EXP(GetINIFloatOrCreate, eval, std::tie(sectionAndKey), std::tie(iniPath, *result, comment, cache, saveFile));
+		EXTRACT_ALL_ARGS_EXP(GetINIFloatOrCreate_Cached, eval, std::tie(sectionAndKey), std::tie(iniPath, *result, comment));
 		
-		IniToNVSE::GetINIValue::Call_GetOrCreate(sectionAndKey, iniPath, comment, scriptObj, cache, saveFile, *result);
+		IniToNVSE::GetINIValue::Call_GetOrCreate(sectionAndKey, iniPath, comment, scriptObj, *result);
 	}
 	return true;
 }
-bool Cmd_GetINIStringOrCreate_Execute(COMMAND_ARGS)
+bool Cmd_GetINIStringOrCreate_Cached_Execute(COMMAND_ARGS)
 {
 	const char* res = ""; //also the default creation value.
 	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
@@ -897,16 +897,15 @@ bool Cmd_GetINIStringOrCreate_Execute(COMMAND_ARGS)
 	{
 		std::string sectionAndKey;
 		const char* comment = nullptr, * iniPath = nullptr;
-		bool cache = false, saveFile = true;
-		EXTRACT_ALL_ARGS_EXP(GetINIStringOrCreate, eval, std::tie(sectionAndKey), std::tie(iniPath, res, comment, cache, saveFile));
+		EXTRACT_ALL_ARGS_EXP(GetINIStringOrCreate_Cached, eval, std::tie(sectionAndKey), std::tie(iniPath, res, comment));
 
-		IniToNVSE::GetINIValue::Call_GetOrCreate(sectionAndKey, iniPath, comment, scriptObj, cache, saveFile, res);
+		IniToNVSE::GetINIValue::Call_GetOrCreate(sectionAndKey, iniPath, comment, scriptObj, res);
 	}
 	g_strInterface->Assign(PASS_COMMAND_ARGS, res); 
 	return true;
 }
 
-bool Cmd_GetINIFloatOrDefault_Execute(COMMAND_ARGS)
+bool Cmd_GetINIFloatOrDefault_Cached_Execute(COMMAND_ARGS)
 {
 	*result = 0.0;
 	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
@@ -914,15 +913,14 @@ bool Cmd_GetINIFloatOrDefault_Execute(COMMAND_ARGS)
 	{
 		std::string sectionAndKey;
 		const char* iniPath = nullptr;
-		bool cache = false;
-		EXTRACT_ALL_ARGS_EXP(GetINIFloatOrDefault, eval, std::tie(sectionAndKey), 
-			std::tie(iniPath, *result, cache));
+		EXTRACT_ALL_ARGS_EXP(GetINIFloatOrDefault_Cached, eval, std::tie(sectionAndKey),
+			std::tie(iniPath, *result));
 
-		IniToNVSE::GetINIValue::Call_GetOrDefault(sectionAndKey, iniPath, scriptObj, cache, *result);
+		IniToNVSE::GetINIValue::Call_GetOrDefault(sectionAndKey, iniPath, scriptObj, *result);
 	}
 	return true;
 }
-bool Cmd_GetINIStringOrDefault_Execute(COMMAND_ARGS)
+bool Cmd_GetINIStringOrDefault_Cached_Execute(COMMAND_ARGS)
 {
 	const char* res = "";
 	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
@@ -930,18 +928,36 @@ bool Cmd_GetINIStringOrDefault_Execute(COMMAND_ARGS)
 	{
 		std::string sectionAndKey;
 		const char* iniPath = nullptr;
-		bool cache = false;
-		EXTRACT_ALL_ARGS_EXP(GetINIStringOrDefault, eval, std::tie(sectionAndKey),
-			std::tie(iniPath, res, cache));
+		EXTRACT_ALL_ARGS_EXP(GetINIStringOrDefault_Cached, eval, std::tie(sectionAndKey),
+			std::tie(iniPath, res));
 
-		IniToNVSE::GetINIValue::Call_GetOrDefault(sectionAndKey, iniPath, scriptObj, cache, res);
+		IniToNVSE::GetINIValue::Call_GetOrDefault(sectionAndKey, iniPath, scriptObj, res);
 	}
 	g_strInterface->Assign(PASS_COMMAND_ARGS, res);
 	return true;
 }
 
+bool Cmd_SaveCachedIniFile_Execute(COMMAND_ARGS)
+{
+	*result = false;	//bSaved
+	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
+		eval.ExtractArgs())
+	{
+		const char* relIniPath = nullptr;
+		EXTRACT_ALL_ARGS_EXP(SaveCachedIniFile, eval, g_NoArgs, std::tie(relIniPath));
 
+		std::string defaultModPath;
+		auto const fullPath = IniToNVSE::GetINIPath(relIniPath, scriptObj, defaultModPath);
+		if (fullPath.empty())
+			return false;
 
+		if (auto const ini = IniToNVSE::g_CachedIniFiles.GetPtr(relIniPath))
+		{
+			*result = ini->SaveFile(fullPath.c_str(), false) >= SI_OK;
+		}
+	}
+	return true;
+}
 bool Cmd_ClearFileCacheShowOff_Execute(COMMAND_ARGS)
 {
 	enum CacheToClear : UInt8
@@ -958,17 +974,21 @@ bool Cmd_ClearFileCacheShowOff_Execute(COMMAND_ARGS)
 		//This is due to json/ini/etc funcs reading at different base folders, for consistency.
 		CacheToClear toClearMode;
 		EXTRACT_ALL_ARGS_EXP(ClearFileCacheShowOff, eval, std::tie(relPath, toClearMode), g_NoArgs);
-
-		if (!relPath || !relPath[0])
-			return true;
 		
 		if (toClearMode == kCache_Ini)
 		{
-			ScopedLock lock(IniToNVSE::g_IniMapLock);
-			*result = IniToNVSE::g_CachedIniFiles.Erase(relPath);
+			std::string modPath;
+			if (IniToNVSE::TryGetRelIniPath(relPath, scriptObj, modPath))
+			{
+				ScopedLock lock(IniToNVSE::g_IniMapLock);
+				*result = IniToNVSE::g_CachedIniFiles.Erase(relPath);
+			}
 		}
 		else if (toClearMode == kCache_Json)
 		{
+			if (!relPath || !relPath[0])
+				return true;
+
 			ScopedLock lock(JsonToNVSE::g_JsonMapLock);
 			*result = JsonToNVSE::g_CachedJSONFiles.Erase(relPath);
 		}
