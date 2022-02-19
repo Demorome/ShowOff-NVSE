@@ -97,7 +97,7 @@ namespace TAO_PEGTL_NAMESPACE
 
 #elif defined( _MSC_VER )
 
-#if( _MSC_VER < 1920 )
+#if( _MSC_VER < 1920 || _MSC_VER >= 1930 )
 
    template< typename T >
    [[nodiscard]] constexpr std::string_view demangle() noexcept
