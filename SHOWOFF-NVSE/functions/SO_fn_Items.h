@@ -436,7 +436,8 @@ bool Cmd_GetItemCanHaveHealth_Execute(COMMAND_ARGS)
 }
 
 
-DEFINE_CMD_COND_PLUGIN(GetCalculatedItemValue, "Returns the item's value, affected by condition and any attached weapon mods (and extra).", false, kParams_OneOptionalObject_OneOptionalInt);
+DEFINE_CMD_COND_PLUGIN(GetCalculatedItemValue, "Returns the item's value, affected by condition and any attached weapon mods (and extra).", \
+	false, kParams_OneOptionalInt_OneOptionalObject);
 bool Cmd_GetCalculatedItemValue_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = -1;

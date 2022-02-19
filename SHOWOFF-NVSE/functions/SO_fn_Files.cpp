@@ -56,7 +56,7 @@ namespace JsonToNVSE
 			elem = val.get_boolean();
 		}
 		else {
-			throw std::logic_error("SHOWOFF - GetArrayFromJSON: Non-Exhausive if checks.");
+			throw std::logic_error("SHOWOFF - GetArrayFromJSON: Non-Exhaustive if checks.");
 		}
 		return elem;
 	}
@@ -526,6 +526,7 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 
 				if (InsertValueAtJSONPointer(*jsonVal, GetRef(elemAsJSON), jsonPointer, funcName))
 				{
+					//Change elemAsJSON to point to the entire parsed file (which was modified).
 					if (!jsonCached)
 						elemAsJSON = std::move(*jsonVal);	//Move jsonVal if it's not owned by Map global
 					else

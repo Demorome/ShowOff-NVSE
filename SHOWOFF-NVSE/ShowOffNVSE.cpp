@@ -577,22 +577,18 @@ extern "C"
 		/*3D25*/ REG_CMD_ARR(Matrix_ApplyOperationWithMatrix)
 		/*3D26*/ REG_CMD(TopicInfoSetResponseStrings)
 		
-		/*3D27*/ REG_CMD(GetCalculatedItemValue)
+		/*3D27*/	REG_CMD(GetCalculatedItemValue)
 
-		//==
+		/*3D28*/	REG_CMD(SetINIValue_Cached)
+		/*3D29*/	REG_CMD(GetINIFloatOrCreate_Cached)
+		/*3D2A*/	REG_CMD_STR(GetINIStringOrCreate_Cached)
+		/*3D2B*/	REG_CMD(GetINIFloatOrDefault_Cached)
+		/*3D2C*/	REG_CMD_STR(GetINIStringOrDefault_Cached)
+		/*3D2D*/	REG_CMD(HasINISetting_Cached)
+		/*3D2E*/	REG_CMD(ClearFileCacheShowOff)
+		/*3D2F*/	REG_CMD(SaveCachedIniFile)
+		/*3D30*/	REG_CMD(ReloadIniCache)
 
-		if constexpr (true)	//to test in release mode for performance
-		{
-			REG_CMD(SetINIValue_Cached)
-			REG_CMD(GetINIFloatOrCreate_Cached)
-			REG_CMD_STR(GetINIStringOrCreate_Cached)
-			REG_CMD(GetINIFloatOrDefault_Cached)
-			REG_CMD_STR(GetINIStringOrDefault_Cached)
-			REG_CMD(HasINISetting_Cached)
-			REG_CMD(ClearFileCacheShowOff)
-			REG_CMD(SaveCachedIniFile)
-			REG_CMD(ReloadIniCache)
-		}
 	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
