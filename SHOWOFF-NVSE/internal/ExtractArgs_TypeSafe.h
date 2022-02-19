@@ -7,6 +7,8 @@
 
 #define EnableSafeExtractArgsTests true && _DEBUG
 
+// https://stackoverflow.com/a/53945555
+template<class> inline constexpr bool always_false_v = false;
 
 namespace Utilities 
 {
@@ -21,7 +23,6 @@ namespace Utilities
 
 	template<typename T, typename ... U>
 	bool constexpr is_any_of_v = (std::is_same_v<T, U> || ...);
-
 }
 
 namespace ArgTypes
@@ -336,11 +337,11 @@ template <typename T>
 	else if constexpr (CanExtractParamAs<kNVSEParamType_NoTypeCheck, T>())
 	{
 		//return ;
-		static_assert(false, "No plugin code to extract NoTypeCheck arg");
+		static_assert(always_false_v<T>, "No plugin code to extract NoTypeCheck arg");
 	}
 	else
 	{
-		static_assert(false, "Failure to match a return type for GetNthArg");
+		static_assert(always_false_v<T>, "Failure to match a return type for GetNthArg");
 	}
 }
 
@@ -387,10 +388,7 @@ template <size_t size, const NVSEParamInfo (&params)[size]>
 [[nodiscard]] auto ExtractMandatoryArgs_AsTuple(PluginExpressionEvaluator& eval)
 {
 	auto constexpr numArgs = GetNumMandatoryArgs(params);
-	if constexpr (!numArgs)
-	{
-		static_assert(false, "Attempting to extract mandatory args when there are none.");
-	}
+	static_assert(numArgs, "Attempting to extract mandatory args when there are none.");
 	using ExtractMandatoryArgsAsTuple_Impl::Handler;
 	return Handler<numArgs, size, params>(eval);
 }
@@ -461,16 +459,16 @@ void ExtractMandatoryArgs_IntoTuple(PluginExpressionEvaluator& eval, std::tuple<
 	auto constexpr numMandatoryArgs = GetNumMandatoryArgs(params);
 	if constexpr (!numMandatoryArgs)
 	{
-		static_assert(false, "Attempting to extract mandatory args when there are none.");
+		static_assert(always_false_v<ArgTypes>, "Attempting to extract mandatory args when there are none.");
 	}
 	else if constexpr (numMandatoryArgs != std::tuple_size_v<ArgsTupleBasic>)
 	{
-		static_assert(false, "Provided number of optional args to extract does not match established count");
+		static_assert(always_false_v<ArgTypes>, "Provided number of optional args to extract does not match established count");
 	}
 
 	if constexpr (!ValidateMandatoryArgs<size, params, numMandatoryArgs, ArgsTupleBasic>())
 	{
-		static_assert(false, "ExtractMandatoryArgs_IntoTuple >> Invalid types for mandatory args provided.");
+		static_assert(always_false_v<ArgTypes>, "ExtractMandatoryArgs_IntoTuple >> Invalid types for mandatory args provided.");
 	}
 
 	using ArgsTupleWithRefs = std::tuple<ArgTypes&...>;
@@ -522,16 +520,16 @@ void ExtractOptionalArgsFromPack(PluginExpressionEvaluator& eval, std::tuple<Arg
 	auto constexpr numOptArgs = GetNumOptionalArgs(params);
 	if constexpr (numOptArgs <= 0)
 	{
-		static_assert(false, "Cannot extract any optional args; all are mandatory.");
+		static_assert(always_false_v<ArgTypes>, "Cannot extract any optional args; all are mandatory.");
 	}
 	else if constexpr (numOptArgs != std::tuple_size_v<ArgsTupleBasic>)
 	{
-		static_assert(false, "Provided number of optional args to extract does not match established count");
+		static_assert(always_false_v<ArgTypes>, "Provided number of optional args to extract does not match established count");
 	}
 	
 	if constexpr (!ValidateOptionalArgs<size, params, numOptArgs, ArgsTupleBasic>())
 	{
-		static_assert(false, "ExtractOptionalArgsFromPack >> Invalid types for optional args provided.");
+		static_assert(always_false_v<ArgTypes>, "ExtractOptionalArgsFromPack >> Invalid types for optional args provided.");
 	}
 
 	using ArgsTupleWithRefs = std::tuple<ArgTypes&...>;
@@ -585,12 +583,11 @@ bool consteval ExtractAllArgs_ShouldExtract()
 	{
 		if constexpr (isCheckingMandatoryArgs)
 		{
-			if constexpr (GetNumMandatoryArgs(params) > 0)
-				static_assert(false, "Cannot assign g_NoArgs to MandatoryArgs; there are args to extract.");
+			static_assert(GetNumMandatoryArgs(params) <= 0, "Cannot assign g_NoArgs to MandatoryArgs; there are args to extract.");
 		}
-		else if constexpr (GetNumOptionalArgs(params) > 0) //checking optional args
+		else //checking optional args
 		{
-			static_assert(false, "Cannot assign g_NoArgs to OptionalArgs; there are args to extract.");
+			static_assert(GetNumOptionalArgs(params) <= 0, "Cannot assign g_NoArgs to OptionalArgs; there are args to extract.");
 		}
 		return false;
 	}

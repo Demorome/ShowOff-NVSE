@@ -1673,7 +1673,7 @@ _declspec(noinline) T CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetNum
     }
     else
     {
-        static_assert(false, "GetNumericValue >> Undefined type for conversion!");
+        static_assert(always_false_v<T>, "GetNumericValue >> Undefined type for conversion!");
     }
 
     // any invalid strings will return the default value
@@ -1713,7 +1713,7 @@ _declspec(noinline) T CSimpleIniTempl<SI_CHAR, SI_STRLESS, SI_CONVERTER>::GetOrC
             this->SetLongValue(sectionName, keyName, defaultValue, comment, false, m_bPrependNewKeys);
         }
         else {
-            static_assert(false, "SimpleINI - GetOrCreate - No code for chosen template type.");
+            static_assert(always_false_v<T>, "SimpleINI - GetOrCreate - No code for chosen template type.");
         }
 		return defaultValue;
 	}

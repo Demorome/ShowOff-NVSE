@@ -737,7 +737,7 @@ namespace IniToNVSE
 			}
 			else
 			{
-				static_assert(false, "Invalid type for result arg.");
+				static_assert(always_false_v<T>, "Invalid type for result arg.");
 			}
 		}
 		
