@@ -464,9 +464,10 @@ bool Cmd_GetCalculatedItemValue_Eval(COMMAND_ARGS_EVAL)
 			//copied after GetCalculatedWeaponDamage from JIP, thx for the pointer c6.
 			ContChangesEntry tempEntry(NULL, 1, baseItem);
 			if (invRef)
+			{
 				tempEntry = *invRef->data.entry;
-
-			if (!invRef && itemRef)
+			}
+			else if (itemRef)
 			{
 				ExtraContainerChanges::ExtendDataList extendData;
 				extendData.Init(&itemRef->extraDataList);
@@ -474,7 +475,7 @@ bool Cmd_GetCalculatedItemValue_Eval(COMMAND_ARGS_EVAL)
 			}
 
 			// Calculate Item Price, without barter mults. 
-			// Accounts for item mods and conditions as well.
+			// Accounts for item mods and condition as well.
 			itemVal = ThisStdCall<double>(0x4BD400, &tempEntry);
 		}
 

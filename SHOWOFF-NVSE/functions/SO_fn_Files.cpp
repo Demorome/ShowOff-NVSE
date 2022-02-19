@@ -732,7 +732,6 @@ namespace IniToNVSE
 			}
 			else if constexpr (std::is_same_v<T, const char*&>)
 			{
-				//BUG: using this pointer after local CSimpleINI is destroyed!
 				result = ini.GetValue(section, key, result);
 			}
 			else
