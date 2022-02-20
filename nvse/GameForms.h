@@ -608,7 +608,7 @@ public:
 	
 	UInt8 GetOverridingModIdx();
 	const char* GetDescriptionText();
-	const char* RefToString();
+	std::string RefToString();
 	TESLeveledList* GetLvlList();
 	void SetJIPFlag(UInt8 jipFlag, bool bSet);
 	bool IsQuestItem2() { return flags & kFormFlags_QuestItem; }

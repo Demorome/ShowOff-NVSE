@@ -34,13 +34,24 @@ namespace JsonToNVSE
 	using DefaultJsonValue = tao::json::value;
 	using ConfigJsonValue = tao::config::value;
 
+	
+
 	template< template< typename... > class Traits >
 	ArrayElementL BasicJsonValueToArrayElem(tao::json::basic_value<Traits> const& val)
 	{
 		ArrayElementL elem;
 		if (val.is_string())
 		{
-			elem = val.get_string().c_str();
+			if (auto string = val.get_string();
+				!string.empty() && string[0] == '@')
+			{
+				//Assume form contained in string
+				elem = LookupFormByID(StringToRef(string.data() + 1));
+			}
+			else //assume string
+			{
+				elem = string.c_str();
+			}
 		}
 		else if (val.is_null())
 		{
@@ -49,7 +60,7 @@ namespace JsonToNVSE
 		}
 		else if (val.is_number())
 		{
-			elem = val.as<double>();
+			elem = val.template as<double>();
 		}
 		else if (val.is_boolean())
 		{
@@ -265,9 +276,7 @@ namespace JsonToNVSE
 		}
 		else if (type == NVSEArrayVarInterface::kType_Form)
 		{
-			if (elem.form)
-				return tao::json::basic_value<Traits>(elem.form->refID);
-			return tao::json::basic_value<Traits>(0u);
+			return tao::json::basic_value<Traits>("@"s + elem.form->RefToString());
 		}
 		else if (type == NVSEArrayVarInterface::kType_String)
 		{

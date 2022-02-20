@@ -403,3 +403,6 @@ std::pair<std::string, std::string_view> GetFullPath(std::string&& relativePath)
 //Returns nullptrs if no matches were found.
 //If a char is matched at the end, then the right-hand view will be nullptr.
 std::pair<const char*, const char*> SplitStringBySingleDelimiter(std::string& toSplit, const char* delims);
+
+//Taken from JIP LN
+UInt32 __fastcall StringToRef(char* refStr);

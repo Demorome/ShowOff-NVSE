@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <ctime>
+#include <format>
 #include <stdexcept>
 
 #include "GameData.h"
@@ -1970,4 +1971,53 @@ std::pair<const char*, const char*> SplitStringBySingleDelimiter(std::string& to
 	}
 
 	return { lh, rh };
+}
+
+UnorderedMap<const char*, UInt32> s_strRefs;
+
+UInt32 __fastcall StringToRef(char* refStr)
+{
+	UInt32* findStr;
+	if (!s_strRefs.Insert(refStr, &findStr)) 
+		return *findStr;
+	*findStr = 0;
+	if (char* colon = FindChr(refStr, ':');
+		colon)
+	{
+		UInt8 modIdx;
+		if (colon != refStr)
+		{
+			*colon = 0;
+			modIdx = g_dataHandler->GetModIndex(refStr);
+			*colon = ':';
+			if (modIdx == 0xFF) 
+				return 0;
+		}
+		else
+		{
+			modIdx = 0xFF;
+		}
+		*findStr = (modIdx << 24) | HexToUInt(colon + 1);
+		return *findStr;
+	}
+	return ResolveRefID(HexToUInt(refStr), findStr) ? *findStr : 0;
+}
+
+UnorderedMap<UInt32, const char*> s_refStrings;
+
+//Code copied from JIP LN, adapted to use std::string
+std::string TESForm::RefToString()
+{
+	if (auto const cachedStr = s_refStrings.GetPtr(refID)) 
+		return *cachedStr;
+
+	std::string result = g_dataHandler->GetNthModName(modIndex);
+	result.reserve(result.size() + 8);
+	result += ':';
+	result += std::format("{:08X}", refID & 0xFFFFFF);
+
+	//Cache the string
+	s_refStrings.Emplace(refID, result.c_str());
+
+	return result;
 }

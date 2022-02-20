@@ -340,23 +340,6 @@ void BGSLevL::Dump()
 	} 	while (iter = iter->next);
 }
 
-
-UnorderedMap<UInt32, const char*> s_refStrings;
-
-const char* TESForm::RefToString()
-{
-	const char** findID;
-	if (!s_refStrings.Insert(refID, &findID)) return *findID;
-	const char* modName = g_dataHandler->GetNthModName(modIndex);
-	UInt32 length = StrLen(modName);
-	char* refStr = (char*)malloc(length + 8);
-	if (length) memcpy(refStr, modName, length);
-	refStr[length++] = ':';
-	UIntToHex(refStr + length, refID & 0xFFFFFF);
-	*findID = refStr;
-	return refStr;
-}
-
 UnorderedSet<ContChangesEntry*> s_tempContChangesEntries(0x40);
 void DoDeferredFreeEntries()
 {
