@@ -503,6 +503,8 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 		case 3:
 			jsonPointer = eval.GetNthArg(2)->GetString();
 			break;
+		case 2:
+			break;
 		default:
 			throw std::logic_error("Invalid case for switch!");
 		}
