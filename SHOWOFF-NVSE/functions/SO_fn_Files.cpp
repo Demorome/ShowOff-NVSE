@@ -276,7 +276,7 @@ namespace JsonToNVSE
 		}
 		else if (type == NVSEArrayVarInterface::kType_Form)
 		{
-			return tao::json::basic_value<Traits>("@"s + elem.form->RefToString());
+			return tao::json::basic_value<Traits>("@"s + RefToString(elem.form));
 		}
 		else if (type == NVSEArrayVarInterface::kType_String)
 		{
@@ -300,8 +300,8 @@ namespace JsonToNVSE
 				if (auto const arrType = g_arrInterface->GetContainerType(elem.arr);
 					arrType == NVSEArrayVarInterface::ContainerTypes::kArrType_Array)
 				{
-					value = tao::json::empty_array;
 					ArrayData const data = { elem.arr, true };
+					value.reserve_array(data.size);
 					for (auto i = 0; i < data.size; i++)
 					{
 						if (auto const type = data.vals[i].GetType();

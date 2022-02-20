@@ -406,3 +406,4 @@ std::pair<const char*, const char*> SplitStringBySingleDelimiter(std::string& to
 
 //Taken from JIP LN
 UInt32 __fastcall StringToRef(char* refStr);
+std::string RefToString(TESForm* form);

@@ -2006,18 +2006,30 @@ UInt32 __fastcall StringToRef(char* refStr)
 UnorderedMap<UInt32, const char*> s_refStrings;
 
 //Code copied from JIP LN, adapted to use std::string
-std::string TESForm::RefToString()
+std::string RefToString(TESForm* form)
 {
-	if (auto const cachedStr = s_refStrings.GetPtr(refID)) 
+	std::string_view constexpr invalidRef = ":00000000";
+	if (!form)
+		return std::string(invalidRef);
+
+	if (auto const cachedStr = s_refStrings.GetPtr(form->refID))
 		return *cachedStr;
 
-	std::string result = g_dataHandler->GetNthModName(modIndex);
-	result.reserve(result.size() + 8);
+	const char* modName = g_dataHandler->GetNthModName(form->modIndex);
+	std::string result;
+	if (!modName || !modName[0])
+	{
+		result = invalidRef;
+		return result;
+	}
+
+	result = modName;
+	result.reserve(result.size() + 9);
 	result += ':';
-	result += std::format("{:08X}", refID & 0xFFFFFF);
+	result += std::format("{:08X}", form->refID & 0xFFFFFF);
 
 	//Cache the string
-	s_refStrings.Emplace(refID, result.c_str());
+	s_refStrings.Emplace(form->refID, result.c_str());
 
 	return result;
 }

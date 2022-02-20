@@ -520,6 +520,12 @@ namespace tao::json
          return r;
       }
 
+      void reserve_array(size_t size)
+      {
+          auto& v = prepare_array();
+          v.reserve(size);
+      }
+
       auto insert( typename object_t::value_type&& t )
       {
          return prepare_object().emplace( std::move( t ) );
