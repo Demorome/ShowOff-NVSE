@@ -270,6 +270,37 @@ void PatchShowRaceMenu()
 	PatchMemoryNop(0x7ADDD2, 5);
 }
 
+namespace PatchResetCell	
+{
+	__declspec(naked) void GetShouldRespawnHook()
+	{
+		static const UInt32 retnAddr = 0x54E1CD,
+			getShouldRespawnAddr = 0x881C90;
+		
+		enum {
+			resetInteriorCalled_maybe = -0x15,
+		};
+		_asm
+		{
+			cmp [ebp + resetInteriorCalled_maybe], 0
+			jz doNormal
+			mov al, 1
+			jmp retnAddr
+
+			doNormal:
+			call getShouldRespawnAddr
+			jmp retnAddr
+		}
+	}
+
+	void WriteHook()
+	{
+		//Replace Actor::GetShouldRespawn call in Cell::HandleResets
+		//...Cuz it checks for time even though ResetInterior was called.
+		WriteRelJump(0x54E1C8, (UInt32)GetShouldRespawnHook);
+	}
+}
+
 
 namespace HandleHooks
 {
@@ -277,21 +308,11 @@ namespace HandleHooks
 	{
 		PreventInvItemActivation::WriteOnActivateItemHook();
 		GetLevelUpMenuUnspentPoints::WriteRetrievalHook();
-	}
-
-	void HandleGameFixes()
-	{
-		PatchShowRaceMenu();
-	}
-
-	void HandleGameHooks()
-	{
-		HandleFunctionHooks();
 
 #if _DEBUG
 #if 0
 		WriteRelCall(0x8B0FF0, UInt32(Actor_Spread_PerkModifier_Hook));
-#endif
+
 
 		// Modify a "IsInCombat" check to allow NPC activation even if they are in combat.
 		WriteRelCall(0x607E70, UINT32(PickpocketInCombat::PCCanPickpocketInCombatHOOK));
@@ -312,6 +333,23 @@ namespace HandleHooks
 			WriteRelCall(0x7818B7, UINT32(PreventRepairs::PreventRepairButton));
 		}
 #endif
+#endif
+	}
+
+	void HandleGameFixes()
+	{
+		PatchShowRaceMenu();
+
+		if constexpr (true)	//testing in Release
+		{
+			PatchResetCell::WriteHook();
+		}
+	}
+
+	void HandleGameHooks()
+	{
+		HandleFunctionHooks();
+		HandleGameFixes();
 	}
 
 	void HandleDelayedGameHooks()

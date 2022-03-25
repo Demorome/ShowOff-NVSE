@@ -178,6 +178,7 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 ===Bug Fixes:
 *Refactored functions with array arguments to work with inline (used to only work with array variables).
 *Fix TopicInfoSetResponseStrings string memory leak
+*Potentially fix the ShowRaceMenu fix not being applied (brain rot).
 
 ===New Functions:
 *ReadFromJSONFile
