@@ -122,6 +122,7 @@ std::atomic<bool> g_canPlayerPickpocketInCombat = false;
 
 
 //todo: remove INI globals and make a class for them (unordered map, access value via string key)
+bool g_bResetInteriorResetsActors;
 
 //-Force Pickpocketting INI globals (enabled via function)
 std::atomic<float> g_fForcePickpocketBaseAPCost;
@@ -391,7 +392,7 @@ extern "C"
 			//todo: if using these imports, add JG requirement check
 #endif
 			
-			//HandleINIOptions();  //todo: overhaul INI options + add more before introducing to public
+			HandleINIOptions();
 			HandleHooks::HandleGameHooks();
 			HandleHooks::HandleEventHooks();
 			RegisterEvents();
@@ -588,7 +589,7 @@ extern "C"
 		/*3D2E*/	REG_CMD(ClearFileCacheShowOff)
 		/*3D2F*/	REG_CMD(SaveCachedIniFile)
 		/*3D30*/	REG_CMD(ReloadIniCache)
-
+		/*3D31*/	REG_CMD(ResetInteriorAlt)
 	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		

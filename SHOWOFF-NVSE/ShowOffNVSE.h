@@ -83,6 +83,8 @@ extern char* g_fForcePickpocketFailureMessage;
 extern std::atomic<bool> g_PBIR_On;
 extern char* g_PBIR_FailMessage;
 
+extern bool g_bResetInteriorResetsActors;
+
 
 // Misc.
 #define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)  //Probably breaks Compiler Override!! - Credits to Stewie.

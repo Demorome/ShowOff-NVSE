@@ -5,34 +5,6 @@
 #include <SimpleIni.h>
 
 
-int GetINIValFromPlugin(const char* iniName, const char* section, const char* key, int defaultVal)
-{
-	char iniPath[MAX_PATH];
-	GetModuleFileNameA(g_ShowOffHandle, iniPath, MAX_PATH);
-	strcpy((strrchr(iniPath, '\\') + 1), iniName);
-
-	CSimpleIniA ini;
-	ini.SetUnicode();
-	ini.LoadFile(iniPath);
-
-	return ini.GetLongValue(section, key, defaultVal);
-}
-
-int GetINIValFromTweaks(const char* key, int defaultVal)
-{
-	if (!IsDllRunning(TWEAKS_DLL_NAME))
-		return defaultVal;
-	return GetINIValFromPlugin(TWEAKS_INI_NAME, "Tweaks", key, defaultVal);
-}
-
-int GetINIValFromTweaks(const char* key, const char* section, int defaultVal)
-{
-	if (!IsDllRunning(TWEAKS_DLL_NAME))
-		return defaultVal;
-	return GetINIValFromPlugin(TWEAKS_INI_NAME, section, key, defaultVal);
-}
-
-
 
 // INI usage copied from lStewieAl's Tweaks (settings.h)
 void HandleINIOptions()
@@ -59,7 +31,9 @@ void HandleINIOptions()
 	ini.SetPrependNewKeys(ini.GetOrCreate("INI", "bPrependNewSettings", 1, "; add new settings to the top of the ini"));
 
 	// Main
+	g_bResetInteriorResetsActors = ini.GetOrCreate("Main", "bResetInteriorResetsActors", 0, "; If 1 (true), ResetInterior will behave like ResetInteriorAlt.");
 
+#if 0
 	// Force Pickpocket (idk if it should be renamed to Combat Pickpocket)
 	g_fForcePickpocketBaseAPCost = ini.GetOrCreate("Force Pickpocket", "fForcePickpocketBaseAPCost", 15, nullptr);
 	g_fForcePickpocketMinAPCost = ini.GetOrCreate("Force Pickpocket", "fForcePickpocketMinAPCost", 10, nullptr);
@@ -72,10 +46,11 @@ void HandleINIOptions()
 	g_fForcePickpocketPlayerStrengthMult = ini.GetOrCreate("Force Pickpocket", "fForcePickpocketPlayerStrengthMult", 2, nullptr);
 	g_fForcePickpocketTargetStrengthMult = ini.GetOrCreate("Force Pickpocket", "fForcePickpocketTargetStrengthMult", 2.5, nullptr);
 	g_fForcePickpocketFailureMessage = _strdup(ini.GetOrCreate("Force Pickpocket", "fForcePickpocketFailureMessage", "You don't have enough Action Points to steal this item.", "; Sets the text that will be displayed when the player does not have enough AP to pickpocket."));
+#endif
 
+#if 0
 	//For PreventBrokenItemRepairing (PBIR)
 	g_PBIR_On = ini.GetOrCreate("Prevent Repairing Broken Items", "bOn", 0, nullptr);
-#if 0
 	g_PBIR_FailMessage = _strdup(ini.GetOrCreate("Prevent Repairing Broken Items", "sFailMessage", "You cannot repair broken items.", NULL));;
 #endif
 

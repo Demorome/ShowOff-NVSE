@@ -500,6 +500,11 @@ static ParamInfo kParams_OneForm[1] =
 	{	"form",	kParamType_AnyForm,	0	},
 };
 
+static ParamInfo kParams_OneCell[1] =
+{
+	{	"form",	kParamType_Cell,	0	},
+};
+
 static ParamInfo kParams_TwoForms[2] =
 {
 	{	"form",	kParamType_AnyForm,	0	},

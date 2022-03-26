@@ -524,7 +524,7 @@ bool Cmd_GetCalculatedPerkPoints_Eval(COMMAND_ARGS_EVAL)
 	if (level % gs_iLevelsPerPerk)  // no perks can be chosen
 		*result = 0;
 	else
-		*result = GetINIValFromTweaks("iPerksPerLevel", 1); // Compatibility with Tweaks. If the INI/setting is not present, will default to 1.
+		*result = 1;
 
 	return true;
 }

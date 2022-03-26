@@ -45,8 +45,9 @@ DEFINE_COMMAND_PLUGIN(GetPipboyRadioVoiceEntryData, "", false, kParams_OneInt_On
 DEFINE_COMMAND_ALT_PLUGIN(FormListRemoveForm, RemoveFormFromFormList, "", false, kParams_OneFormList_OneForm);
 DEFINE_COMMAND_PLUGIN(GetZoneRespawns, "Returns if an Encounter Zone has the NoRespawn flag set or not.", false, kParams_OneForm);
 DEFINE_COMMAND_ALT_PLUGIN(ClearCinematicTextQueue, ClearQuestMessageQueue, "", false, NULL);
-DEFINE_COMMAND_ALT_PLUGIN(GetCellEncounterZone, GetCellZone, "", false, kParams_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(GetCellEncounterZone, GetCellZone, "", false, kParams_OneCell);
 DEFINE_COMMAND_PLUGIN(RemoveFormFromLeveledList, "", false, kParams_TwoForms);
+DEFINE_COMMAND_ALT_PLUGIN(ResetInteriorAlt, , "", false, kParams_OneCell);
 
 
 bool(__cdecl* Cmd_Disable)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5C45E0;
@@ -857,9 +858,19 @@ bool Cmd_RemoveFormFromLeveledList_Execute(COMMAND_ARGS)
 	return true;
 }
 
-
-
-
+bool Cmd_ResetInteriorAlt_Execute(COMMAND_ARGS)
+{
+	*result = false;	//success
+	TESForm* form;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form))
+		return true;
+	if (auto const cell = DYNAMIC_CAST(form, TESForm, TESObjectCELL)) {
+		ThisStdCall_B(0x546B10, cell, -2, false);	//TESObjectCELL::updateDetachTime
+		//(hooks are in place to handle the -2 detachTime correctly)
+		*result = true;
+	}
+	return true;
+}
 
 
 

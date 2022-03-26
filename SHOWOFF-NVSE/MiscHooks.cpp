@@ -278,12 +278,16 @@ namespace PatchResetCell
 			getShouldRespawnAddr = 0x881C90;
 		
 		enum {
-			resetInteriorCalled_maybe = -0x15,
+			cellDetachTime = -0x4,
 		};
-		_asm
+		__asm
 		{
-			cmp [ebp + resetInteriorCalled_maybe], 0
+			cmp [ebp + cellDetachTime], -1
+			jg doNormal
+			jnz skipIniCheck //jump if -2, essentially
+			cmp g_bResetInteriorResetsActors, 0
 			jz doNormal
+			skipIniCheck:
 			mov al, 1
 			jmp retnAddr
 
@@ -295,6 +299,9 @@ namespace PatchResetCell
 
 	void WriteHook()
 	{
+		// replace jnz -> JG	(compares with -1, add support for -2)
+		SafeWrite8(0x54E09A, 0x7F);
+
 		//Replace Actor::GetShouldRespawn call in Cell::HandleResets
 		//...Cuz it checks for time even though ResetInterior was called.
 		WriteRelJump(0x54E1C8, (UInt32)GetShouldRespawnHook);
