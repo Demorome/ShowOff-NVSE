@@ -32,7 +32,10 @@ void HandleINIOptions()
 
 	// Main
 	g_bResetInteriorResetsActors = ini.GetOrCreate("Main", "bResetInteriorResetsActors", 0, "; If 1 (true), ResetInterior will behave like ResetInteriorAlt.");
-	g_bNoRepairingBrokenItems = ini.GetOrCreate("Main", "bNoRepairingBrokenItems", 0, "; If 1 (true), broken items (0% condition) cannot be repaired in the pipboy repair menu.");
+
+	// Repairing
+	g_bNoSelfRepairingBrokenItems = ini.GetOrCreate("Repair", "bNoSelfRepairingBrokenItems", 0, "; If 1 (true), broken items (0% condition) cannot be repaired in the pipboy repair menu.");
+	g_bNoVendorRepairingBrokenItems = ini.GetOrCreate("Repair", "bNoVendorRepairingBrokenItems", 0, "; If 1 (true), broken items (0% condition) cannot be repaired in the vendor repair menu.");
 
 #if 0
 	// Force Pickpocket (idk if it should be renamed to Combat Pickpocket)

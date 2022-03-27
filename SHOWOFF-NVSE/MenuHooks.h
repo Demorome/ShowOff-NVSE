@@ -4,7 +4,8 @@
 
 namespace PreventRepairs
 {
-	void PreventRepairingBrokenItems();
+	void PreventRepairingBrokenItemsInPipboy();
+	void PreventRepairingBrokenItemsByVendor();
 }
 
 namespace GetLevelUpMenuUnspentPoints

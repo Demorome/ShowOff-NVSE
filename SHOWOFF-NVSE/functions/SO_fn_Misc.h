@@ -45,9 +45,9 @@ DEFINE_COMMAND_PLUGIN(GetPipboyRadioVoiceEntryData, "", false, kParams_OneInt_On
 DEFINE_COMMAND_ALT_PLUGIN(FormListRemoveForm, RemoveFormFromFormList, "", false, kParams_OneFormList_OneForm);
 DEFINE_COMMAND_PLUGIN(GetZoneRespawns, "Returns if an Encounter Zone has the NoRespawn flag set or not.", false, kParams_OneForm);
 DEFINE_COMMAND_ALT_PLUGIN(ClearCinematicTextQueue, ClearQuestMessageQueue, "", false, NULL);
-DEFINE_COMMAND_ALT_PLUGIN(GetCellEncounterZone, GetCellZone, "", false, kParams_OneCell);
+DEFINE_COMMAND_ALT_PLUGIN(GetCellEncounterZone, GetCellZone, "", false, kParams_OneForm);
 DEFINE_COMMAND_PLUGIN(RemoveFormFromLeveledList, "", false, kParams_TwoForms);
-DEFINE_COMMAND_ALT_PLUGIN(ResetInteriorAlt, , "", false, kParams_OneCell);
+DEFINE_COMMAND_ALT_PLUGIN(ResetInteriorAlt, , "", false, kParams_OneInteriorCell);
 
 
 bool(__cdecl* Cmd_Disable)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5C45E0;

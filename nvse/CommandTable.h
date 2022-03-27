@@ -22,7 +22,7 @@ enum ParamType
 	kParamType_Actor =					0x06,	// ToggleAI					TESObjectREFR *, must pass IsActor (ACHR-ACRE)
 	kParamType_SpellItem =				0x07,	// AddSpell					TESForm *, must be either SpellItem or book
 	kParamType_Axis =					0x08,	// Rotate					char *, immediate char, X Y Z
-	kParamType_Cell =					0x09,	// GetInCell				TESObjectCELL *, must be cell
+	kParamType_Cell =					0x09,	// GetInCell				TESObjectCELL *, must be an INTERIOR cell
 	kParamType_AnimationGroup =			0x0A,	// PlayGroup				UInt32 *, immediate UInt16
 	kParamType_MagicItem =				0x0B,	// Cast						MagicItem *
 	kParamType_Sound =					0x0C,	// Sound					TESForm *, kFormType_Sound

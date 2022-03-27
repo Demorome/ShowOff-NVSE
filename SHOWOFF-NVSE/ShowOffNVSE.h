@@ -65,7 +65,8 @@ extern Sky** g_currentSky;
 extern std::atomic<bool> g_canPlayerPickpocketInCombat;
 extern ActorAndItemPairs g_noEquipMap;
 extern mod_and_function_map g_NoEquipFunctions;
-extern bool g_bNoRepairingBrokenItems;
+extern bool g_bNoSelfRepairingBrokenItems;
+extern bool g_bNoVendorRepairingBrokenItems;
 extern bool g_bResetInteriorResetsActors;
 
 //-Force Pickpocketting INI globals (enabled via function)

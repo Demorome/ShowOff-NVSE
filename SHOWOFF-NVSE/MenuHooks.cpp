@@ -6,7 +6,7 @@
 
 namespace PreventRepairs
 {
-	__declspec(naked) void PreventRepairingBrokenItems()
+	__declspec(naked) void PreventRepairingBrokenItemsInPipboy()
 	{
 		static UInt32 const fCeil = 0x476B20,
 			retnAddr = 0x7818C5,
@@ -14,16 +14,43 @@ namespace PreventRepairs
 		_asm
 		{
 			FLDZ
-			fcomp qword ptr ss : [esp]		//check if health == 0
-			test ah, 0x44	//is ST(0) == [esp]?
-			fnstsw ax	//idk
-			//if health == 0, return
+			fcomp dword ptr ss : [esp]		//check if health == 0
+			fnstsw ax	
+			test ah, 0x41	//is 0 <= [esp]? If so, jnp will jump.
 			jp doNormal
+			add esp, 4
 			jmp retnFalse
 
 			doNormal:
 			call fCeil
 			jmp	retnAddr
+		}
+	}
+
+	__declspec(naked) void PreventRepairingBrokenItemsByVendor()
+	{
+		static UInt32 const rtnAddr = 0x7B7BD9,
+			GameSettings_GetFloatValueAddr = 0x403E20,
+			rtnFalse = 0x7B7C3B;
+		enum
+		{
+			healthPerc = -0x14
+		};
+		_asm
+		{
+			FLDZ
+			fcomp qword ptr ss : [esp+healthPerc]		//check if health == 0
+			fnstsw ax	
+			test ah, 0x44	//is ST(0) == [esp]?
+			//if health == 0, return
+			jp doNormal
+			add esp, 4		//undo push at 0x7B7BC2, normally GameSettings_GetFloatValueAddr would clean it.
+			mov al, 0
+			jmp rtnFalse
+
+			doNormal:
+			call GameSettings_GetFloatValueAddr
+			jmp rtnAddr
 		}
 	}
 }

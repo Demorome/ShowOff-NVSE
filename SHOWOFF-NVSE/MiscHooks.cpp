@@ -340,9 +340,14 @@ namespace HandleHooks
 
 	void HandleGameTweaks()
 	{
-		if (g_bNoRepairingBrokenItems)
+		if (g_bNoSelfRepairingBrokenItems)
 		{
-			WriteRelJump(0x7818C0, (UINT32)PreventRepairs::PreventRepairingBrokenItems);
+			WriteRelJump(0x7818C0, (UINT32)PreventRepairs::PreventRepairingBrokenItemsInPipboy);
+		}
+
+		if (g_bNoVendorRepairingBrokenItems)
+		{
+			WriteRelJump(0x7B7BD4, (UINT32)PreventRepairs::PreventRepairingBrokenItemsByVendor);
 		}
 	}
 
