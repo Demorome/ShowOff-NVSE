@@ -4,7 +4,7 @@
 
 namespace PreventRepairs
 {
-	double __fastcall PreventRepairButton(ContChangesEntry* entry, int bPercent);
+	void PreventRepairingBrokenItems();
 }
 
 namespace GetLevelUpMenuUnspentPoints

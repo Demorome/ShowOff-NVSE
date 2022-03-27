@@ -6,17 +6,25 @@
 
 namespace PreventRepairs
 {
-	double __fastcall PreventRepairButton(ContChangesEntry* entry, int bPercent)
+	__declspec(naked) void PreventRepairingBrokenItems()
 	{
-		auto const result = ThisStdCall<double>(0x4BCDB0, entry, bPercent);
-		if (result == 0.0F)
+		static UInt32 const fCeil = 0x476B20,
+			retnAddr = 0x7818C5,
+			retnFalse = 0x7818D5;
+		_asm
 		{
-			//g_bRepairButtonPrevented_PBIR = true;
-			return 100.0F;  //since you can't repair items at 100% health, I use that bit of code to prevent repairing items at 0% health.
-			//super hacky
+			FLDZ
+			fcomp qword ptr ss : [esp]		//check if health == 0
+			test ah, 0x44	//is ST(0) == [esp]?
+			fnstsw ax	//idk
+			//if health == 0, return
+			jp doNormal
+			jmp retnFalse
+
+			doNormal:
+			call fCeil
+			jmp	retnAddr
 		}
-		//g_bRepairButtonPrevented_PBIR = false;
-		return result;
 	}
 }
 

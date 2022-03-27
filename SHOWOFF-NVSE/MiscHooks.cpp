@@ -317,7 +317,6 @@ namespace HandleHooks
 		PreventInvItemActivation::WriteOnActivateItemHook();
 		GetLevelUpMenuUnspentPoints::WriteRetrievalHook();
 
-#if _DEBUG
 #if 0
 		WriteRelCall(0x8B0FF0, UInt32(Actor_Spread_PerkModifier_Hook));
 
@@ -335,29 +334,29 @@ namespace HandleHooks
 		WriteRelCall(0x7772C9, UINT32(PickpocketInCombat::ShowPickpocketStringInCombat2));
 		//WriteRelCall(0x770C0D, UINT32(ShowPickpocketStringInCombat2)); //breaks health target UI
 		// Possible solution: open and hook the companion loot exchange menu instead?
+#endif
 
-		if (g_PBIR_On)
+	}
+
+	void HandleGameTweaks()
+	{
+		if (g_bNoRepairingBrokenItems)
 		{
-			WriteRelCall(0x7818B7, UINT32(PreventRepairs::PreventRepairButton));
+			WriteRelJump(0x7818C0, (UINT32)PreventRepairs::PreventRepairingBrokenItems);
 		}
-#endif
-#endif
 	}
 
 	void HandleGameFixes()
 	{
 		PatchShowRaceMenu();
-
-		if constexpr (true)	//testing in Release
-		{
-			PatchResetCell::WriteHook();
-		}
+		PatchResetCell::WriteHook();
 	}
 
 	void HandleGameHooks()
 	{
 		HandleFunctionHooks();
 		HandleGameFixes();
+		HandleGameTweaks();
 	}
 
 	void HandleDelayedGameHooks()

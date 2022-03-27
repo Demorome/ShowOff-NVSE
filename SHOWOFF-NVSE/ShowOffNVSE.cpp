@@ -123,6 +123,7 @@ std::atomic<bool> g_canPlayerPickpocketInCombat = false;
 
 //todo: remove INI globals and make a class for them (unordered map, access value via string key)
 bool g_bResetInteriorResetsActors;
+bool g_bNoRepairingBrokenItems;
 
 //-Force Pickpocketting INI globals (enabled via function)
 std::atomic<float> g_fForcePickpocketBaseAPCost;
@@ -136,10 +137,6 @@ std::atomic<float> g_fForcePickpocketItemValueMult;
 std::atomic<float> g_fForcePickpocketPlayerStrengthMult;
 std::atomic<float> g_fForcePickpocketTargetStrengthMult;
 char* g_fForcePickpocketFailureMessage = nullptr;
-
-//-PreventBrokenItemRepairing (PBIR) INI globals 
-std::atomic<bool> g_PBIR_On;
-char* g_PBIR_FailMessage = nullptr;
 
 
 // Function-defining Definitions

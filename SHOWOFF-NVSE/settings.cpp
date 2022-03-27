@@ -32,6 +32,7 @@ void HandleINIOptions()
 
 	// Main
 	g_bResetInteriorResetsActors = ini.GetOrCreate("Main", "bResetInteriorResetsActors", 0, "; If 1 (true), ResetInterior will behave like ResetInteriorAlt.");
+	g_bNoRepairingBrokenItems = ini.GetOrCreate("Main", "bNoRepairingBrokenItems", 0, "; If 1 (true), broken items (0% condition) cannot be repaired in the pipboy repair menu.");
 
 #if 0
 	// Force Pickpocket (idk if it should be renamed to Combat Pickpocket)
@@ -48,11 +49,6 @@ void HandleINIOptions()
 	g_fForcePickpocketFailureMessage = _strdup(ini.GetOrCreate("Force Pickpocket", "fForcePickpocketFailureMessage", "You don't have enough Action Points to steal this item.", "; Sets the text that will be displayed when the player does not have enough AP to pickpocket."));
 #endif
 
-#if 0
-	//For PreventBrokenItemRepairing (PBIR)
-	g_PBIR_On = ini.GetOrCreate("Prevent Repairing Broken Items", "bOn", 0, nullptr);
-	g_PBIR_FailMessage = _strdup(ini.GetOrCreate("Prevent Repairing Broken Items", "sFailMessage", "You cannot repair broken items.", NULL));;
-#endif
 
 	ini.SaveFile(iniPath, false);
 }
