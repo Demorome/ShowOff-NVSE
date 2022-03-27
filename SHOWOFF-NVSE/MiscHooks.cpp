@@ -278,11 +278,12 @@ namespace PatchResetCell
 			getShouldRespawnAddr = 0x881C90;
 		
 		enum {
-			cellDetachTime = -0x4,
+			cellDetachTime = -0x4 //-0x8
 		};
-		__asm
+		_asm
 		{
-			cmp [ebp + cellDetachTime], -1
+			//cmp [ebp + cellDetachTime], -1		//did not work!
+			cmp dword ptr ss : [ebp + cellDetachTime], -1
 			jg doNormal
 			jnz skipIniCheck //jump if -2, essentially
 			cmp g_bResetInteriorResetsActors, 0
