@@ -14,7 +14,7 @@ namespace PreventRepairs
 		_asm
 		{
 			FLDZ
-			fcomp dword ptr ss : [esp]		//check if health == 0
+			fcomp dword ptr ss : [esp]		//check if health <= 0
 			fnstsw ax	
 			test ah, 0x41	//is 0 <= [esp]? If so, jnp will jump.
 			jp doNormal
