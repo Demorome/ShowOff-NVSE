@@ -37,8 +37,8 @@ void HandleINIOptions()
 	g_bNoSelfRepairingBrokenItems = ini.GetOrCreate("Repair", "bNoSelfRepairingBrokenItems", 0, "; If 1 (true), broken items (0% condition) cannot be repaired in the pipboy repair menu.");
 	g_bNoVendorRepairingBrokenItems = ini.GetOrCreate("Repair", "bNoVendorRepairingBrokenItems", 0, "; If 1 (true), broken items (0% condition) cannot be repaired in the vendor repair menu.");
 
-	//Experimental
-	g_bAlwaysUpdateWeatherForInteriors = ini.GetOrCreate("Experimental", "bAlwaysUpdateWeatherForInteriors", 0, nullptr);
+	//Experimental (hidden)
+	g_bAlwaysUpdateWeatherForInteriors = ini.GetBoolValue("Experimental", "bAlwaysUpdateWeatherForInteriors");
 
 
 #if 0

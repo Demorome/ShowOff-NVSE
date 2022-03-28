@@ -309,6 +309,16 @@ namespace PatchResetCell
 	}
 }
 
+namespace AllowInteriorCellToUpdateWeathers
+{
+	//Normally, interior cells don't refresh the weather when Sky::Update is called (see 0x63AD5F)
+	//This should allow them to.
+
+	void WriteHook()
+	{
+		WriteRelJump(0x63AD5F, 0x63AD9D);
+	}
+}
 
 namespace HandleHooks
 {
@@ -350,9 +360,9 @@ namespace HandleHooks
 			WriteRelJump(0x7B7BD4, (UINT32)PreventRepairs::PreventRepairingBrokenItemsByVendor);
 		}
 
-		if (g_bAlwaysUpdateWeatherForInteriors)	//make "this->data.mode != SM_INTERIOR" always return true.
+		if (g_bAlwaysUpdateWeatherForInteriors)	
 		{
-			WriteRelJump(0x63AD5F, 0x63AD9D);
+			AllowInteriorCellToUpdateWeathers::WriteHook();
 		}
 	}
 
