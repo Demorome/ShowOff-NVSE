@@ -349,6 +349,11 @@ namespace HandleHooks
 		{
 			WriteRelJump(0x7B7BD4, (UINT32)PreventRepairs::PreventRepairingBrokenItemsByVendor);
 		}
+
+		if (g_bAlwaysUpdateWeatherForInteriors)	//make "this->data.mode != SM_INTERIOR" always return true.
+		{
+			WriteRelJump(0x63AD5F, 0x63AD9D);
+		}
 	}
 
 	void HandleGameFixes()

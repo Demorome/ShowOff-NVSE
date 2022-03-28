@@ -37,6 +37,10 @@ void HandleINIOptions()
 	g_bNoSelfRepairingBrokenItems = ini.GetOrCreate("Repair", "bNoSelfRepairingBrokenItems", 0, "; If 1 (true), broken items (0% condition) cannot be repaired in the pipboy repair menu.");
 	g_bNoVendorRepairingBrokenItems = ini.GetOrCreate("Repair", "bNoVendorRepairingBrokenItems", 0, "; If 1 (true), broken items (0% condition) cannot be repaired in the vendor repair menu.");
 
+	//Experimental
+	g_bAlwaysUpdateWeatherForInteriors = ini.GetOrCreate("Experimental", "bAlwaysUpdateWeatherForInteriors", 0, nullptr);
+
+
 #if 0
 	// Force Pickpocket (idk if it should be renamed to Combat Pickpocket)
 	g_fForcePickpocketBaseAPCost = ini.GetOrCreate("Force Pickpocket", "fForcePickpocketBaseAPCost", 15, nullptr);

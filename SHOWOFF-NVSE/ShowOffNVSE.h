@@ -68,6 +68,7 @@ extern mod_and_function_map g_NoEquipFunctions;
 extern bool g_bNoSelfRepairingBrokenItems;
 extern bool g_bNoVendorRepairingBrokenItems;
 extern bool g_bResetInteriorResetsActors;
+extern bool g_bAlwaysUpdateWeatherForInteriors;
 
 //-Force Pickpocketting INI globals (enabled via function)
 extern std::atomic<float> g_fForcePickpocketBaseAPCost;

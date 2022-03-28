@@ -125,6 +125,7 @@ std::atomic<bool> g_canPlayerPickpocketInCombat = false;
 bool g_bResetInteriorResetsActors;
 bool g_bNoSelfRepairingBrokenItems;
 bool g_bNoVendorRepairingBrokenItems;
+bool g_bAlwaysUpdateWeatherForInteriors;
 
 //-Force Pickpocketting INI globals (enabled via function)
 std::atomic<float> g_fForcePickpocketBaseAPCost;
