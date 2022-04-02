@@ -13,12 +13,11 @@ namespace PreventRepairs
 			retnFalse = 0x781AF1;
 		_asm
 		{
-			call GetHealthPerc
-			FLDZ	// st(0) = 0.0, st(1) = healthPerc
-			fcomp	// st(0) = healthPerc
+			call GetHealthPerc	//	st(0) = healthPerc
+			fcom kDblZero
 			fnstsw ax	
-			test ah, 1	//if (0 >= healthPerc) <-> (healthPerc <= 0)
-			jne doNormal	//jump if false (healthPerc > 0)
+			test ah, 0x41	//if (healthPerc <= 0)
+			jp doNormal	//jump if false (healthPerc > 0)
 
 			fstp st(0)	//pop st(0) off
 			mov al, 0	//result = false
@@ -33,21 +32,20 @@ namespace PreventRepairs
 	{
 		static UInt32 const rtnAddr = 0x7B7BD9,
 			GameSettings_GetFloatValueAddr = 0x403E20,
-			rtnFalse = 0x7B7C3B;
+			rtnFalse = 0x7B7C35;
 		enum
 		{
 			healthPerc = -0x14
 		};
 		_asm
 		{
-			FLDZ
-			fcomp qword ptr ss : [esp+healthPerc]		//check if health == 0
+			fld qword ptr ss : [ebp + healthPerc]
+			fcomp kDblZero
 			fnstsw ax	
-			test ah, 0x44	//is ST(0) == [esp]?
-			//if health == 0, return
-			jp doNormal
-			add esp, 4		//undo push at 0x7B7BC2, normally GameSettings_GetFloatValueAddr would clean it.
-			mov al, 0
+			test ah, 0x41	//if (healthPerc <= 0)
+			jp doNormal	//jump if false (healthPerc > 0)
+
+			mov al, 1	//shouldHide = true
 			jmp rtnFalse
 
 			doNormal:
