@@ -352,7 +352,7 @@ namespace HandleHooks
 	{
 		if (g_bNoSelfRepairingBrokenItems)
 		{
-			WriteRelJump(0x7818C0, (UINT32)PreventRepairs::PreventRepairingBrokenItemsInPipboy);
+			WriteRelJump(0x781914, (UINT32)PreventRepairs::PreventRepairingBrokenItemsInPipboy);
 		}
 
 		if (g_bNoVendorRepairingBrokenItems)

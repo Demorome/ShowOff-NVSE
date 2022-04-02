@@ -8,22 +8,24 @@ namespace PreventRepairs
 {
 	__declspec(naked) void PreventRepairingBrokenItemsInPipboy()
 	{
-		static UInt32 const fCeil = 0x476B20,
-			retnAddr = 0x7818C5,
-			retnFalse = 0x7818D5;
+		static UInt32 const GetHealthPerc = 0x4BCDB0,
+			retnAddr = 0x781919,
+			retnFalse = 0x781AF1;
 		_asm
 		{
-			FLDZ
-			fcomp dword ptr ss : [esp]		//check if health <= 0
+			call GetHealthPerc
+			FLDZ	// st(0) = 0.0, st(1) = healthPerc
+			fcomp	// st(0) = healthPerc
 			fnstsw ax	
-			test ah, 0x41	//is 0 <= [esp]? If so, jnp will jump.
-			jp doNormal
-			add esp, 4
+			test ah, 1	//if (0 >= healthPerc) <-> (healthPerc <= 0)
+			jne doNormal	//jump if false (healthPerc > 0)
+
+			fstp st(0)	//pop st(0) off
+			mov al, 0	//result = false
 			jmp retnFalse
 
 			doNormal:
-			call fCeil
-			jmp	retnAddr
+			jmp retnAddr	
 		}
 	}
 
