@@ -264,9 +264,15 @@ namespace PatchFullyUnarmedDamageMult
 	__declspec(naked) void fMulHook()
 	{
 		static const UInt32 retnAddr = 0x64634D;
+		enum
+		{
+			gs_fHandFatigueDamageMult = 0x11CE8D0,
+			gs_fHandFatigueDamageBase = 0x11CE9FC
+		};
 		_asm
 		{
-			fmul g_fFullyUnarmedFatigueDamageMult
+			fmul dword ptr ds : [gs_fHandFatigueDamageMult + 4]	//result in st(0)
+			fadd dword ptr ds : [gs_fHandFatigueDamageBase + 4]
 			jmp retnAddr
 		}
 	}
@@ -382,7 +388,10 @@ namespace HandleHooks
 			AllowInteriorCellToUpdateWeathers::WriteHook();
 		}
 
-		PatchFullyUnarmedDamageMult::WriteHook();
+		if (g_bUseGamesettingsForFistFatigueDamage)
+		{
+			PatchFullyUnarmedDamageMult::WriteHook();
+		}
 	}
 
 	void HandleGameFixes()

@@ -32,7 +32,10 @@ void HandleINIOptions()
 
 	// Main
 	g_bResetInteriorResetsActors = ini.GetOrCreate("Main", "bResetInteriorResetsActors", 0, "; If 1 (true), ResetInterior will behave like ResetInteriorAlt.");
-	g_fFullyUnarmedFatigueDamageMult = ini.GetOrCreate("Main", "fFullyUnarmedFatigueDamageMult", 0.5, "; The fatigue damage of a fully unarmed attack is this * the regular damage.");
+	g_bUseGamesettingsForFistFatigueDamage = ini.GetOrCreate("Main", \
+		"bUseGamesettingsForFistFatigueDamage", 0, \
+		"; Instead of multiplying the hit damage by 0.5 to get the fist fatigue damage, the formula is now:\n" \
+				"; fistFatigueDmg = fHandFatigueDamageBase + (fHandFatigueDamageMult * regularDmg)");
 
 	// Repairing
 	g_bNoSelfRepairingBrokenItems = ini.GetOrCreate("Repair", "bNoSelfRepairingBrokenItems", 0, "; If 1 (true), broken items (0% condition) cannot be repaired in the pipboy repair menu.");
