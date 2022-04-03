@@ -37,6 +37,11 @@ void HandleINIOptions()
 		"; Instead of multiplying the hit damage by 0.5 to get the fist fatigue damage, the formula is now:\n" \
 				"; fistFatigueDmg = fHandFatigueDamageBase + (fHandFatigueDamageMult * regularDmg)");
 
+	g_bCreaturesDealMeleeFatigueDmg = ini.GetOrCreate("Main",
+		"bCreaturesDealMeleeFatigueDmg", 0, \
+		"; Lets creatures deal fatigue damage from melee attacks. The formula is:\n" \
+		"; meleeFatigueDmg = fHandFatigueDamageBase + (fHandFatigueDamageMult * regularDmg)");
+
 	// Repairing
 	g_bNoSelfRepairingBrokenItems = ini.GetOrCreate("Repair", "bNoSelfRepairingBrokenItems", 0, "; If 1 (true), broken items (0% condition) cannot be repaired in the pipboy repair menu.");
 	g_bNoVendorRepairingBrokenItems = ini.GetOrCreate("Repair", "bNoVendorRepairingBrokenItems", 0, "; If 1 (true), broken items (0% condition) cannot be repaired in the vendor repair menu.");

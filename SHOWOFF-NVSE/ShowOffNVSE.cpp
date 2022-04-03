@@ -127,6 +127,7 @@ bool g_bNoSelfRepairingBrokenItems;
 bool g_bNoVendorRepairingBrokenItems;
 bool g_bAlwaysUpdateWeatherForInteriors;
 bool g_bUseGamesettingsForFistFatigueDamage;
+bool g_bCreaturesDealMeleeFatigueDmg;
 
 //-Force Pickpocketting INI globals (enabled via function)
 std::atomic<float> g_fForcePickpocketBaseAPCost;
