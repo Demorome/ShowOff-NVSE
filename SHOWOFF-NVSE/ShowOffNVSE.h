@@ -71,6 +71,8 @@ extern bool g_bResetInteriorResetsActors;
 extern bool g_bAlwaysUpdateWeatherForInteriors;
 extern bool g_bUseGamesettingsForFistFatigueDamage;
 extern bool g_bCreaturesDealMeleeFatigueDmg;
+extern bool g_bUnarmedWeaponsDealFatigueDmg;
+
 
 //-Force Pickpocketting INI globals (enabled via function)
 extern std::atomic<float> g_fForcePickpocketBaseAPCost;

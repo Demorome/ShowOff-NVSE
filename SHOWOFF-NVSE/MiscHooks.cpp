@@ -308,6 +308,50 @@ namespace AllowCreaturesToDealUnarmedFatigueDmg
 	}
 }
 
+namespace MakeUnarmedWeaponsDealFatigueDmg
+{
+	__declspec(naked) void Hook()
+	{
+		static const UInt32 retnAddr = 0x9B556C;
+		enum
+		{
+			gs_fFatigueAttackWeaponBase = 0x11CEE84,
+			gs_fFatigueAttackWeaponMult = 0x11CE540,
+
+			hitData = 0x8,
+			//hitData offsets
+			healthDmg = 0x14, fatigueDmg = 0x1C, weapon = 0x30,
+			//weapon offsets
+			attackAnim = 0x11D, weaponSkill = 0x15C
+		};
+		static auto const animType_Spin = TESObjectWEAP::eAttackAnim_AttackSpin;
+		_asm
+		{
+			mov eax, [ebp+hitData]
+			mov ecx, [eax + weapon]
+			mov edx, [ecx + attackAnim]
+			cmp edx, animType_Spin	//filter out weapons using "Spin" attack type
+			je done
+			mov edx, [ecx + weaponSkill]
+			cmp edx, kAVCode_Unarmed	//filter out non-unarmed weapon
+			jne done
+
+			fld dword ptr ds : [eax + healthDmg]
+			fmul dword ptr ds : [gs_fFatigueAttackWeaponMult + 4]	//result in st(0)
+			fadd dword ptr ds : [gs_fFatigueAttackWeaponBase + 4]
+			fstp dword ptr ds : [eax + fatigueDmg]	//change fatigueDmg, pop st(0)
+
+			done:
+			jmp retnAddr
+		}
+	}
+
+	void WriteHook()
+	{
+		WriteRelJump(0x9B5474, (UInt32)Hook);
+	}
+}
+
 void PatchShowRaceMenu()
 {
 	// Prevent ShowRaceMenu from resetting active temp effects.
@@ -411,6 +455,9 @@ namespace HandleHooks
 
 		if (g_bCreaturesDealMeleeFatigueDmg)
 			AllowCreaturesToDealUnarmedFatigueDmg::WriteHook();
+
+		if (g_bUnarmedWeaponsDealFatigueDmg)
+			MakeUnarmedWeaponsDealFatigueDmg::WriteHook();
 	}
 
 	void HandleGameFixes()

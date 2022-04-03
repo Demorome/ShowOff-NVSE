@@ -31,23 +31,38 @@ void HandleINIOptions()
 	ini.SetPrependNewKeys(ini.GetOrCreate("INI", "bPrependNewSettings", 1, "; add new settings to the top of the ini"));
 
 	// Main
-	g_bResetInteriorResetsActors = ini.GetOrCreate("Main", "bResetInteriorResetsActors", 0, "; If 1 (true), ResetInterior will behave like ResetInteriorAlt.");
-	g_bUseGamesettingsForFistFatigueDamage = ini.GetOrCreate("Main", \
-		"bUseGamesettingsForFistFatigueDamage", 0, \
-		"; Instead of multiplying the hit damage by 0.5 to get the fist fatigue damage, the formula is now:\n" \
+	const char* sectionName = "Main";
+	g_bResetInteriorResetsActors = ini.GetOrCreate(sectionName, "bResetInteriorResetsActors", 0, "; If 1 (true), ResetInterior will behave like ResetInteriorAlt.");
+
+
+	// Fatigue
+	sectionName = "Fatigue";
+	g_bUseGamesettingsForFistFatigueDamage = ini.GetOrCreate(sectionName,
+		"bUseGamesettingsForFistFatigueDamage", 0,
+		"; Instead of multiplying the hit damage by 0.5 to get the fist fatigue damage, the formula is now:\n"
 				"; fistFatigueDmg = fHandFatigueDamageBase + (fHandFatigueDamageMult * regularDmg)");
 
-	g_bCreaturesDealMeleeFatigueDmg = ini.GetOrCreate("Main",
-		"bCreaturesDealMeleeFatigueDmg", 0, \
-		"; Lets creatures deal fatigue damage from melee attacks. The formula is:\n" \
+	g_bCreaturesDealMeleeFatigueDmg = ini.GetOrCreate(sectionName,
+		"bCreaturesDealMeleeFatigueDmg", 0,
+		"; Lets creatures deal fatigue damage from melee attacks. The formula is:\n"
 		"; meleeFatigueDmg = fHandFatigueDamageBase + (fHandFatigueDamageMult * regularDmg)");
 
+	g_bUnarmedWeaponsDealFatigueDmg = ini.GetOrCreate(sectionName,
+	"bUnarmedWeaponsDealFatigueDmg", 0,
+		"; Lets unarmed weapons deal fatigue damage, except for those with the 'Spin' animation type. The formula is:\n"
+		"; fatigueDmg = fFatigueAttackWeaponBase + (fFatigueAttackWeaponMult * regularDmg)");
+
+
 	// Repairing
-	g_bNoSelfRepairingBrokenItems = ini.GetOrCreate("Repair", "bNoSelfRepairingBrokenItems", 0, "; If 1 (true), broken items (0% condition) cannot be repaired in the pipboy repair menu.");
-	g_bNoVendorRepairingBrokenItems = ini.GetOrCreate("Repair", "bNoVendorRepairingBrokenItems", 0, "; If 1 (true), broken items (0% condition) cannot be repaired in the vendor repair menu.");
+	sectionName = "Repair";
+	g_bNoSelfRepairingBrokenItems = ini.GetOrCreate(sectionName, "bNoSelfRepairingBrokenItems", 0, 
+		"; If 1 (true), broken items (0% condition) cannot be repaired in the pipboy repair menu.");
+	g_bNoVendorRepairingBrokenItems = ini.GetOrCreate(sectionName, "bNoVendorRepairingBrokenItems", 0, 
+		"; If 1 (true), broken items (0% condition) cannot be repaired in the vendor repair menu.");
 
 	//Experimental (hidden)
-	g_bAlwaysUpdateWeatherForInteriors = ini.GetBoolValue("Experimental", "bAlwaysUpdateWeatherForInteriors");
+	sectionName = "Experimental";
+	g_bAlwaysUpdateWeatherForInteriors = ini.GetBoolValue(sectionName, "bAlwaysUpdateWeatherForInteriors");
 
 
 #if 0
