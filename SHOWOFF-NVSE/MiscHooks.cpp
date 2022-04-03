@@ -259,7 +259,24 @@ namespace PickpocketInCombat
 
 
 
+namespace PatchFullyUnarmedDamageMult
+{
+	__declspec(naked) void fMulHook()
+	{
+		static const UInt32 retnAddr = 0x64634D;
+		_asm
+		{
+			fmul g_fFullyUnarmedFatigueDamageMult
+			jmp retnAddr
+		}
+	}
 
+	void WriteHook()
+	{
+		WriteRelJump(0x646347, (UInt32)fMulHook);
+		PatchMemoryNop(0x646347 + 5, 1);
+	}
+}
 
 void PatchShowRaceMenu()
 {
@@ -364,6 +381,8 @@ namespace HandleHooks
 		{
 			AllowInteriorCellToUpdateWeathers::WriteHook();
 		}
+
+		PatchFullyUnarmedDamageMult::WriteHook();
 	}
 
 	void HandleGameFixes()
