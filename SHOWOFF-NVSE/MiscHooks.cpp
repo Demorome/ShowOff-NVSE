@@ -327,12 +327,12 @@ namespace MakeUnarmedWeaponsDealFatigueDmg
 		static auto const animType_Spin = TESObjectWEAP::eAttackAnim_AttackSpin;
 		_asm
 		{
-			mov eax, [ebp+hitData]
-			mov ecx, [eax + weapon]
-			mov edx, [ecx + attackAnim]
-			cmp edx, animType_Spin	//filter out weapons using "Spin" attack type
+			mov eax, dword ptr ds : [ebp+hitData]
+			mov ecx, dword ptr ds : [eax + weapon]
+			mov dl, byte ptr ds : [ecx + attackAnim]
+			cmp dl, animType_Spin	//filter out weapons using "Spin" attack type
 			je done
-			mov edx, [ecx + weaponSkill]
+			mov edx, dword ptr ds : [ecx + weaponSkill]
 			cmp edx, kAVCode_Unarmed	//filter out non-unarmed weapon
 			jne done
 

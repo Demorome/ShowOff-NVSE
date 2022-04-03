@@ -3084,7 +3084,7 @@ public:
 		eHandGrip_Count		= 7,
 	};
 
-	enum EAttackAnimations {
+	enum EAttackAnimations : UInt8 {
 		eAttackAnim_Default =		255,
 		eAttackAnim_Attack3 =		38,
 		eAttackAnim_Attack4 =		44,
@@ -3108,7 +3108,7 @@ public:
 		eAttackAnim_AttackThrow8 =	162,
 		eAttackAnim_PlaceMine =		102,
 		eAttackAnim_PlaceMine2 =	108,
-		eAttackAnim_Count =			23,
+		eAttackAnim_Count =			23
 	};
 
 	enum ReloadAnim {
