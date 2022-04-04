@@ -2361,6 +2361,10 @@ public:
 	void RefreshMoon();
 	void RefreshClimate(TESClimate *climate, bool immediate = true);
 	bool GetIsRaining();
+	static Sky* GetSingleton()
+	{
+		return *reinterpret_cast<Sky**>(0x11CCB78);
+	}
 };
 STATIC_ASSERT(sizeof(Sky) == 0x138);
 

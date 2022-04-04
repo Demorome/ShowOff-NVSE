@@ -592,6 +592,7 @@ extern "C"
 		/*3D2F*/	REG_CMD(SaveCachedIniFile)
 		/*3D30*/	REG_CMD(ReloadIniCache)
 		/*3D31*/	REG_CMD(ResetInteriorAlt)
+		/*3D32*/	REG_CMD(Debug_UpdateWeather)
 	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		

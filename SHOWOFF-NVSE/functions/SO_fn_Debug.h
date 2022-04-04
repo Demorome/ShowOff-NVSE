@@ -73,6 +73,18 @@ bool Cmd_IsBaseForm_Execute(COMMAND_ARGS)
 	return true;
 }
 
+DEFINE_COMMAND_PLUGIN(Debug_UpdateWeather, "", false, NULL);
+bool Cmd_Debug_UpdateWeather_Execute(COMMAND_ARGS)
+{
+	*result = false;
+	if (auto const sky = Sky::GetSingleton())
+	{
+		ThisStdCall(0x63D1D0, sky);
+		*result = true;
+	}
+	return true;
+}
+
 
 #if _DEBUG
 
