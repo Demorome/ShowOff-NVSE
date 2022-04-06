@@ -101,6 +101,7 @@ _InventoryRefCreate InventoryRefCreate;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
 ExpressionEvaluatorUtils g_expEvalUtils;
+NVSEEventManagerInterface* g_eventInterface = nullptr;
 
 // Singletons
 HUDMainMenu* g_HUDMainMenu = nullptr;
@@ -386,6 +387,8 @@ extern "C"
 			GetArrayElements = g_arrInterface->GetElements;
 
 			nvse->InitExpressionEvaluatorUtils(&g_expEvalUtils);
+
+			g_eventInterface = (NVSEEventManagerInterface*)nvse->QueryInterface(kInterface_EventManager);
 
 #if 0
 			auto johnnyGuitar = GetModuleHandle("johnnyguitar.dll");

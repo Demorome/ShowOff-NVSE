@@ -45,6 +45,8 @@ enum
 
 	// Added v0005 - version bumped to 3
 	kInterface_Data,
+	// Added v0006
+	kInterface_EventManager,
 
 	kInterface_Max
 };
@@ -749,6 +751,101 @@ struct NVSESerializationInterface
 
 	void	(*SkipNBytes)(UInt32 byteNum);
 };
+
+#ifdef RUNTIME
+/**** Event API docs  *******************************************************************************************
+ *  This interface allows you to
+ *	- Register a new event type which can be dispatched with parameters
+ *	- Dispatch an event from code to scripts (and plugins with this interface) with parameters and calling ref.
+ *	   - SetEventHandler supports any number of filters in script calls in the syntax of 1::myFilter
+ *	   (1st argument will receive this filter for example)
+ *	- Set an event handler for any NVSE events registered with SetEventHandler which will be called back.
+ *
+ *	For RegisterEvent, paramTypes needs to be statically defined
+ *	(i.e. the pointer to it may never become invalid).
+ *  For example, a good way to define it is to make a global variable like this:
+ *
+ *	    static ParamType s_MyEventParams[] = { Script::eVarType_Ref, Script::eVarType_String };
+ *
+ *	Then you can pass it into PluginEventInfo like this:
+ *
+ *  Which can be registered like this:
+ *
+ *	    s_EventInterface->RegisterEvent("MyEvent", 2, s_MyEventParams);
+ *
+ *  Then, from your code, you can dispatch the event like this:
+ *
+ *	    s_EventInterface->DispatchEvent("MyEvent", callingRef, someForm, someString);
+ *
+ *	When passing numeric types to DispatchEvent you MUST pack them in a float, which then needs to be
+ *  cast as a void* pointer. This is due to the nature of variadic arguments in C/C++. Example
+ *      float number = 10;
+ *	    void* numberArg = *(void**) &number;
+ *	    s_EventInterface->DispatchEvent("MyEvent", callingRef, numberArg);
+ */
+struct NVSEEventManagerInterface
+{
+	typedef void (*EventHandler)(TESObjectREFR* thisObj, void* parameters);
+
+	//May be expanded later...
+	enum ParamType : int8_t
+	{
+		eParamType_Float = 0,			//ref is also zero
+		eParamType_Integer,
+
+		eParamType_String,
+		eParamType_Array,
+
+		eParamType_RefVar,
+		eParamType_AnyForm = eParamType_RefVar,
+		// With these, when attempting to set an event handler with the wrong kind of form (with SetEventHandler),
+		// will prevent that handler from being set.
+		eParamType_Reference,
+		eParamType_BaseForm,
+
+		eParamType_Invalid = -1
+	};
+	static bool IsFormParam(ParamType pType)
+	{
+		return pType == eParamType_RefVar || pType == eParamType_Reference || pType == eParamType_BaseForm;
+	}
+
+	enum EventFlags : UInt32
+	{
+		kFlags_None = 0,
+
+		//If on, will remove all set handlers for the event every game load.
+		kFlag_FlushOnLoad = 1 << 0,
+	};
+
+	// Registers a new event which can be dispatched to scripts and plugins. Returns false if event with name already exists.
+	bool (*RegisterEvent)(const char* name, UInt8 numParams, ParamType* paramTypes, EventFlags flags);
+
+	// Dispatch an event that has been registered with RegisterEvent.
+	// Variadic arguments are passed as parameters to script / function.
+	// Returns false if an error occurred.
+	bool (*DispatchEvent)(const char* eventName, TESObjectREFR* thisObj, ...);
+
+	enum DispatchReturn : int8_t
+	{
+		kRetn_Error = -1,
+		kRetn_Normal = 0,
+		kRetn_EarlyBreak,
+	};
+	typedef bool (*DispatchCallback)(NVSEArrayVarInterface::Element& result, void* anyData);
+
+	// If resultCallback is not null, then it is called for each event handler that is dispatched, which allows checking the result of each dispatch.
+	// If the callback returns false, then dispatching for the event will end prematurely, and this returns kRetn_EarlyBreak.
+	// anyData arg is passed to the callbacks.
+	DispatchReturn(*DispatchEventAlt)(const char* eventName, DispatchCallback resultCallback, void* anyData, TESObjectREFR* thisObj, ...);
+
+	// Similar to script function SetEventHandler, allows you to set a native function that gets called back on events
+	bool (*SetNativeEventHandler)(const char* eventName, EventHandler func);
+
+	// Same as script function RemoveEventHandler but for native functions
+	bool (*RemoveNativeEventHandler)(const char* eventName, EventHandler func);
+};
+#endif
 
 struct PluginInfo
 {

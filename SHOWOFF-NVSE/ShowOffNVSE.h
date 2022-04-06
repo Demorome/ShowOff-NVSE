@@ -46,6 +46,7 @@ extern InventoryRef* (*InventoryRefGetForID)(UInt32 refID);
 extern TESObjectREFR* (__stdcall *InventoryRefCreateEntry)(TESObjectREFR* container, TESForm* itemForm, SInt32 countDelta, ExtraDataList* xData);
 typedef InventoryRef* (*_InventoryRefCreate)(TESObjectREFR* container, const InventoryRef::Data& data, bool bValidate);
 extern _InventoryRefCreate InventoryRefCreate;
+extern NVSEEventManagerInterface* g_eventInterface;
 
 //Singletons
 extern HUDMainMenu* g_HUDMainMenu;

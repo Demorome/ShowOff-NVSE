@@ -174,10 +174,128 @@ namespace ActorValueChangeHooks
 	}
 }
 
+namespace OnActivate
+{
+	constexpr char eventName[] = "ShowOff:OnRegularActivate";
+
+	bool __fastcall EventHandler(TESObjectREFR* activated, Actor* activator)
+	{
+		auto constexpr resultCallback = [](NVSEArrayVarInterface::Element& result, void* shouldActivateAdrr) -> bool
+		{
+			if (UInt32 &shouldActivate = *static_cast<UInt32*>(shouldActivateAdrr))
+			{
+				shouldActivate = result.Bool();
+			}
+			return true;
+		};
+		UInt32 shouldActivate = true;
+		//g_eventInterface->DispatchEventAlt(eventName, resultCallback, &shouldActivate, activated, activator, shouldActivate);
+
+#if _DEBUG
+		Console_Print("OnActivate HOOK - Activated: [%08X], activator: [%08X]", activated ? activated->refID : 0, 
+			activator ? activator->refID : 0);
+#endif
+		return shouldActivate != 0;
+	}	//result in AL
+
+	__declspec(naked) void Hook()
+	{
+		static UInt32 const retnAddr = 0x57334C, getBaseForm = 0x7AF430,
+			retnFalse = 0x573396;
+		enum
+		{
+			activator = 8
+		};
+		_asm
+		{
+			//Check if this instance of TESObjectREFR::Activate was called by Activate func.
+			//(We don't want the event to run for that)
+			mov eax, dword ptr [ebp + 4]	//rtn addr
+			cmp eax, 0x5B5B1D
+			je doNormal
+			cmp eax, 0x5B5B4D
+			je doNormal
+
+			push ecx //saving it, not an arg
+			mov edx, dword ptr [ebp + activator]
+			call EventHandler
+			pop ecx
+			test al, al
+			jnz doNormal
+			jmp retnFalse
+
+			doNormal:
+			call getBaseForm	
+			jmp retnAddr
+		}
+	}
+
+	void WriteHook()
+	{
+		WriteRelJump(0x573347, (UInt32)Hook);
+	}
+}
+
+using EventParamType = NVSEEventManagerInterface::ParamType;
+
+static EventParamType kEventParams_GameEvent[2] =
+{
+	EventParamType::eParamType_AnyForm, EventParamType::eParamType_AnyForm
+};
+
+static EventParamType kEventParams_OneForm[1] =
+{
+	EventParamType::eParamType_AnyForm,
+};
+static EventParamType kEventParams_OneForm_OneInt[2] =
+{
+	EventParamType::eParamType_AnyForm,
+	EventParamType::eParamType_Integer
+};
+
+
+static EventParamType kEventParams_OneString[1] =
+{
+	EventParamType::eParamType_String
+};
+
+static EventParamType kEventParams_OneInteger[1] =
+{
+	EventParamType::eParamType_Integer
+};
+
+static EventParamType kEventParams_TwoIntegers[2] =
+{
+	EventParamType::eParamType_Integer, EventParamType::eParamType_Integer
+};
+
+static EventParamType kEventParams_OneFloat_OneRef[2] =
+{
+	 EventParamType::eParamType_Float, EventParamType::eParamType_AnyForm
+};
+
+static EventParamType kEventParams_OneRef_OneInt[2] =
+{
+	EventParamType::eParamType_AnyForm, EventParamType::eParamType_Integer
+};
+
+static EventParamType kEventParams_OneArray[1] =
+{
+	EventParamType::eParamType_Array
+};
+
 void RegisterEvents()
 {
+	using EventFlags = NVSEEventManagerInterface::EventFlags;
+
 	OnCornerMessage = JGCreateEvent("OnCornerMessage", 5, 0, NULL);
 	OnActorValueChange = JGCreateEvent("OnActorValueChange", 4, 0, NULL);
+
+	if (g_eventInterface)
+	{
+		//g_eventInterface->RegisterEvent(OnActivate::eventName, 2, kEventParams_OneForm_OneInt, EventFlags::kFlags_None);
+
+	}
 }
 
 namespace HandleHooks
@@ -185,6 +303,9 @@ namespace HandleHooks
 	void HandleEventHooks()
 	{
 		//ActorValueChangeHooks::WriteHook();
+#if _DEBUG
+		OnActivate::WriteHook();
+#endif
 	}
 
 	void HandleDelayedEventHooks()
