@@ -25,7 +25,7 @@ DEFINE_CMD_COND_PLUGIN(PlayerIsUsingTurbo, "", false, NULL);
 DEFINE_CMD_COND_PLUGIN(PlayerHasCateyeEnabled, "", false, NULL);
 DEFINE_CMD_COND_PLUGIN(PlayerHasImprovedSpottingActive, "", false, NULL);
 DEFINE_CMD_COND_PLUGIN(PlayerIsDrinkingPlacedWater, "", false, NULL);
-DEFINE_COMMAND_PLUGIN(SetIsPCAMurderer, "", false , kParams_OneInt);
+DEFINE_COMMAND_ALT_PLUGIN(SetIsPCAMurderer, YoureAMurderer, "", false , kParams_OneInt);
 DEFINE_CMD_ALT_COND_PLUGIN(IsNight, BloodyTears, "Returns true if it's night according to the current (or specified) climate.", false, kParams_OneOptionalForm);
 DEFINE_CMD_COND_PLUGIN(IsLimbCrippled, "If no args are passed / arg is -1, returns true if actor has any crippled limbs. Otherwise, checks if the specified limb is crippled.", true, kParams_TwoOptionalInts);
 DEFINE_CMD_COND_PLUGIN(GetNumCrippledLimbs, "", true, kParams_OneOptionalInt);
@@ -46,8 +46,8 @@ DEFINE_COMMAND_ALT_PLUGIN(FormListRemoveForm, RemoveFormFromFormList, "", false,
 DEFINE_COMMAND_PLUGIN(GetZoneRespawns, "Returns if an Encounter Zone has the NoRespawn flag set or not.", false, kParams_OneForm);
 DEFINE_COMMAND_ALT_PLUGIN(ClearCinematicTextQueue, ClearQuestMessageQueue, "", false, NULL);
 DEFINE_COMMAND_ALT_PLUGIN(GetCellEncounterZone, GetCellZone, "", false, kParams_OneForm);
-DEFINE_COMMAND_PLUGIN(RemoveFormFromLeveledList, "", false, kParams_TwoForms);
-DEFINE_COMMAND_ALT_PLUGIN(ResetInteriorAlt, , "", false, kParams_OneInteriorCell);
+DEFINE_COMMAND_ALT_PLUGIN(RemoveFormFromLeveledList, SorryYoureNotOnTheListAnymore, "", false, kParams_TwoForms);
+DEFINE_COMMAND_ALT_PLUGIN(ResetInteriorAlt, IWantThisRoomCleanRightNow, "", false, kParams_OneInteriorCell);
 
 
 bool(__cdecl* Cmd_Disable)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5C45E0;
