@@ -178,7 +178,7 @@ namespace OnActivate
 {
 	constexpr char eventName[] = "ShowOff:OnRegularActivate";
 
-	bool __fastcall EventHandler(TESObjectREFR* activated, Actor* activator)
+	bool __fastcall HandleEvent(TESObjectREFR* activated, Actor* activator)
 	{
 		auto constexpr resultCallback = [](NVSEArrayVarInterface::Element& result, void* shouldActivateAdrr) -> bool
 		{
@@ -189,7 +189,7 @@ namespace OnActivate
 			return true;
 		};
 		UInt32 shouldActivate = true;
-		//g_eventInterface->DispatchEventAlt(eventName, resultCallback, &shouldActivate, activated, activator, shouldActivate);
+		g_eventInterface->DispatchEventAlt(eventName, resultCallback, &shouldActivate, activated, activator, shouldActivate);
 
 #if _DEBUG
 		Console_Print("OnActivate HOOK - Activated: [%08X], activator: [%08X]", activated ? activated->refID : 0, 
@@ -211,15 +211,15 @@ namespace OnActivate
 			//Check if this instance of TESObjectREFR::Activate was called by Activate func.
 			//(We don't want the event to run for that)
 			mov eax, dword ptr [ebp + 4]	//rtn addr
-			cmp eax, 0x5B5B1D
+			cmp eax, 0x5B5B1D	//one of the return addresses to Activate_Execute
 			je doNormal
 			cmp eax, 0x5B5B4D
 			je doNormal
 
-			push ecx //saving it, not an arg
+			pushad	//unknown what the __fastcall function will preserve, so store everything.
 			mov edx, dword ptr [ebp + activator]
-			call EventHandler
-			pop ecx
+			call HandleEvent
+			popad
 			test al, al
 			jnz doNormal
 			jmp retnFalse
@@ -236,8 +236,27 @@ namespace OnActivate
 	}
 }
 
+
 using EventParamType = NVSEEventManagerInterface::ParamType;
 
+static EventParamType kEventParams_OneForm_OneInt[2] =
+{
+	EventParamType::eParamType_AnyForm,
+	EventParamType::eParamType_Int
+};
+
+static EventParamType kEventParams_OneInt_OneFloat_OneArray_OneString_OneForm_OneReference_OneBaseform[] =
+{
+	EventParamType::eParamType_Int,
+	EventParamType::eParamType_Float,
+	EventParamType::eParamType_Array,
+	EventParamType::eParamType_String,
+	EventParamType::eParamType_AnyForm,
+	EventParamType::eParamType_Reference,
+	EventParamType::eParamType_BaseForm,
+};
+
+/*
 static EventParamType kEventParams_GameEvent[2] =
 {
 	EventParamType::eParamType_AnyForm, EventParamType::eParamType_AnyForm
@@ -246,11 +265,6 @@ static EventParamType kEventParams_GameEvent[2] =
 static EventParamType kEventParams_OneForm[1] =
 {
 	EventParamType::eParamType_AnyForm,
-};
-static EventParamType kEventParams_OneForm_OneInt[2] =
-{
-	EventParamType::eParamType_AnyForm,
-	EventParamType::eParamType_Integer
 };
 
 
@@ -283,7 +297,7 @@ static EventParamType kEventParams_OneArray[1] =
 {
 	EventParamType::eParamType_Array
 };
-
+*/
 void RegisterEvents()
 {
 	using EventFlags = NVSEEventManagerInterface::EventFlags;
@@ -291,11 +305,15 @@ void RegisterEvents()
 	OnCornerMessage = JGCreateEvent("OnCornerMessage", 5, 0, NULL);
 	OnActorValueChange = JGCreateEvent("OnActorValueChange", 4, 0, NULL);
 
-	if (g_eventInterface)
-	{
-		//g_eventInterface->RegisterEvent(OnActivate::eventName, 2, kEventParams_OneForm_OneInt, EventFlags::kFlags_None);
+	g_eventInterface->RegisterEvent(OnActivate::eventName, std::size(kEventParams_OneForm_OneInt), 
+		kEventParams_OneForm_OneInt, EventFlags::kFlags_None);
 
-	}
+
+#if _DEBUG
+	constexpr char DebugEventName[] = "ShowOff:DebugEvent";
+	g_eventInterface->RegisterEvent(DebugEventName, std::size(kEventParams_OneInt_OneFloat_OneArray_OneString_OneForm_OneReference_OneBaseform),
+		kEventParams_OneInt_OneFloat_OneArray_OneString_OneForm_OneReference_OneBaseform, EventFlags::kFlags_None);
+#endif
 }
 
 namespace HandleHooks
@@ -303,8 +321,9 @@ namespace HandleHooks
 	void HandleEventHooks()
 	{
 		//ActorValueChangeHooks::WriteHook();
-#if _DEBUG
 		OnActivate::WriteHook();
+#if _DEBUG
+		
 #endif
 	}
 

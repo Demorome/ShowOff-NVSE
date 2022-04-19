@@ -790,20 +790,24 @@ struct NVSEEventManagerInterface
 	//May be expanded later...
 	enum ParamType : int8_t
 	{
-		eParamType_Float = 0,			//ref is also zero
-		eParamType_Integer,
-
+		eParamType_Float = 0,
+		eParamType_Int,
 		eParamType_String,
 		eParamType_Array,
 
+		// All the form-type ParamTypes support formlist filters, which will check if the dispatched form matches with any of the forms in the list.
 		eParamType_RefVar,
 		eParamType_AnyForm = eParamType_RefVar,
-		// With these, when attempting to set an event handler with the wrong kind of form (with SetEventHandler),
-		// will prevent that handler from being set.
-		eParamType_Reference,
-		eParamType_BaseForm,
 
-		eParamType_Invalid = -1
+		// Behaves normally if a reference filter is set up for a param of Reference Type.
+		// Otherwise, if a regular baseform is the filter, will match the dispatched reference arg's baseform to the filter.
+		// Else, if the filter is a formlist, will do the above but for each element in the list.
+		eParamType_Reference,
+
+		// When attempting to set an event handler, if the filter-to-set is a reference the paramType is BaseForm, will reject that filter.
+		// Otherwise, behaves the same as eParamType_RefVar.
+		eParamType_BaseForm,
+		eParamType_Invalid
 	};
 	static bool IsFormParam(ParamType pType)
 	{

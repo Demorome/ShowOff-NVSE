@@ -595,7 +595,6 @@ extern "C"
 		/*3D2F*/	REG_CMD(SaveCachedIniFile)
 		/*3D30*/	REG_CMD(ReloadIniCache)
 		/*3D31*/	REG_CMD(ResetInteriorAlt)
-		/*3D32*/	REG_CMD(Debug_UpdateWeather)
 	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
@@ -611,6 +610,8 @@ extern "C"
 #endif
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
+
+		REG_CMD(Debug_DispatchEvent)
 
 		REG_CMD_FORM(GetSelectedItemRefSO)
 
@@ -682,7 +683,6 @@ extern "C"
 		REG_CMD(SetEnableParent);
 		REG_CMD_ARR(GetQueuedCornerMessages);
 
-		REG_CMD(GetNVSEVersionFullAlt)
 		REG_CMD(TestDemo);
 
 		

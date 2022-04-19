@@ -88,18 +88,28 @@ bool Cmd_Debug_UpdateWeather_Execute(COMMAND_ARGS)
 
 #if _DEBUG
 
-DEFINE_CMD_ALT_COND_PLUGIN(GetNVSEVersionFullAlt, , , 0, NULL);
-bool Cmd_GetNVSEVersionFullAlt_Execute(COMMAND_ARGS)
+DEFINE_COMMAND_PLUGIN_EXP_SAFE(Debug_DispatchEvent, "", false, kNVSEParams_TwoNums_OneArray_OneStr_ThreeForms);
+bool Cmd_Debug_DispatchEvent_Execute(COMMAND_ARGS)
 {
-	*result = PACKED_NVSE_VERSION;
-	if (IsConsoleMode())
-		Console_Print("GetNVSEVersionFullAlt >> %f.", result);  //does not work how I'd hoped, lol.
+	*result = false;
+	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
+		eval.ExtractArgs())
+	{
+		int num1;
+		float num2;
+		NVSEArrayVar* arr;
+		const char* str;
+		TESForm* anyForm;
+		TESForm* reference;
+		TESForm* baseForm;
+		EXTRACT_ALL_ARGS_EXP(Debug_DispatchEvent, eval, std::tie(num1, num2, arr, str, anyForm, reference, baseForm),
+			g_NoArgs);
+		void* num2Formatted = *(void**)&num2;
+		g_eventInterface->DispatchEvent("ShowOff:DebugEvent", g_thePlayer, num1, num2Formatted, arr, str, anyForm, reference, baseForm);
+		*result = true;
+	}
 	return true;
 }
-bool Cmd_GetNVSEVersionFullAlt_Eval(COMMAND_ARGS_EVAL)
-{
-	//??
-	return true;
-}
+
 
 #endif
