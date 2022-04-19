@@ -858,8 +858,7 @@ bool Cmd_RemoveFormFromLeveledList_Execute(COMMAND_ARGS)
 	return true;
 }
 
-bool Cmd_
-_Execute(COMMAND_ARGS)
+bool Cmd_ResetInteriorAlt_Execute(COMMAND_ARGS)
 {
 	*result = false;	//success
 	TESForm* form;
