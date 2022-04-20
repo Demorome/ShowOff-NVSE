@@ -4,7 +4,7 @@ DEFINE_COMMAND_ALT_PLUGIN(DumpFormList, FListDump, "", false, kParams_OneFormLis
 DEFINE_CMD_COND_PLUGIN(ConditionPrint, "Returns 1, and prints a message to console. Meant for testing if previous conditions passed.", false, NULL);
 DEFINE_COMMAND_PLUGIN(GetShowOffDebugMode, "", false, NULL);
 DEFINE_COMMAND_PLUGIN(SetShowOffDebugMode, "Set to 1 to enable debug prints for certain ShowOff functions.", false, kParams_OneInt);
-DEFINE_COMMAND_PLUGIN(IsBaseForm, "", false, kParams_OneForm);
+DEFINE_COMMAND_ALT_PLUGIN(IsBaseForm, IsBasedForm, "", false, kParams_OneForm);
 
 
 bool Cmd_DumpFormList_Execute(COMMAND_ARGS)
