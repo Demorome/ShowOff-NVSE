@@ -173,11 +173,24 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 
 //===v1.45
 
-*AS OF THIS VERSION, xNVSE 6.2.5 or greater is required.*
+*AS OF THIS VERSION, xNVSE 6.2.6 or greater is required.*
 
 ===Misc:
+*INI configuration file has been added; a warning message will be issued if it could not be found.
 *GetCalculatedPerkPoints now only returns 1 or 0 (support for Tweaks' iPerksPerLevel is scrapped).
-*Added an ini for bResetInteriorResetsActors.
+
+===INI Options:
+= "General" section
+*Add: bResetInteriorResetsActors
+
+= "Fatigue" section
+*Add: bUseGamesettingsForFistFatigueDamage,
+	bCreaturesDealMeleeFatigueDmg,
+	bUnarmedWeaponsDealFatigueDmg
+
+= "Repair" section
+*Add: bNoSelfRepairingBrokenItems,
+	bNoVendorRepairingBrokenItems
 
 ===Bug Fixes:
 *Refactored functions with array arguments to work with inline (used to only work with array variables).
@@ -185,12 +198,24 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 *Potentially fix the ShowRaceMenu fix not being applied (brain rot).
 
 ===New Functions:
+= JSON Functions:
 *ReadFromJSONFile
 *WriteToJSONFile
+
+= Cached INI Functions:
+*SetINIValue_Cached
+*GetINIFloatOrCreate_Cached
+*GetINIStringOrCreate_Cached
+*GetINIFloatOrDefault_Cached
+*GetINIStringOrDefault_Cached
+*HasINISetting_Cached
+*ClearFileCacheShowOff
+*SaveCachedIniFile
+*ReloadIniCache
+
+= Misc Functions:
 *GetCalculatedItemValue
-
-*Ini??
-
+*ResetInteriorAlt
 
 ====== (Template:)
 
