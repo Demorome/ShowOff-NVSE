@@ -11,19 +11,52 @@ If you wish to leave a comment, I (Demorome) will occasionally check the comment
 You may also contact me directly on Discord. Username: `Demorome#2870`
 
 
-# Engine Tweaks
-
-    -Prevent ShowRaceMenu from resetting Ability and temporary Actor Effects.
-
-
 # Requirements
-Requires xNVSE v6.2.3 or greater: https://github.com/xNVSE/NVSE/releases.
+Requires xNVSE v6.2.6 or greater: https://github.com/xNVSE/NVSE/releases.
 
 
 # Installation
-`ShowOffNVSE.dll` must end up under `Fallout New Vegas/Data/nvse/plugins/..` (in the `plugins` folder).
+`ShowOffNVSE.dll` and `ShowOffNVSE.ini` must end up under `Fallout New Vegas/Data/nvse/plugins/..` (in the `plugins` folder).
 
-Installing the .zip file from a mod manager should also work.
+Installing the primary .zip file from a mod manager should also work.
+`ShowOffNVSE_INI.zip` need only be installed once; new INI options are automatically added to the file.
+
+
+# Bug Fixes
+
+    -Prevent ShowRaceMenu from resetting Ability and temporary Actor Effects.
+
+# INI Options
+
+## Subjective Bug Fixes
+* ResetInterior Resets Actors
+
+        The ResetInterior script function will now resurrect actors, as they would be if the cell was reset by waiting long enough.
+        This renders it functionally identical to the ResetInteriorAlt function.
+    
+## Gameplay Tweaks
+* Use Gamesettings For Fist Fatigue Damage
+
+        Instead of multiplying the hit damage by 0.5 to get the fist fatigue damage, the formula is now:
+		fistFatigueDmg = fHandFatigueDamageBase + (fHandFatigueDamageMult * regularDmg)
+        
+* Creatures Deal Melee Fatigue Damage
+
+        Lets creatures deal fatigue damage from melee attacks. The formula is:
+		meleeFatigueDmg = fHandFatigueDamageBase + (fHandFatigueDamageMult * regularDmg)
+        
+* Unarmed Weapons Deal Fatigue Damage
+
+        Lets unarmed weapons deal fatigue damage, except for those with the 'Spin' animation type. The formula is:
+		fatigueDmg = fFatigueAttackWeaponBase + (fFatigueAttackWeaponMult * regularDmg)
+        
+* No Self-Repairing Broken Items
+
+        If enabled, broken items (0% condition) cannot be repaired in the pipboy repair menu. This encourages more attentive maintenance.
+        
+* No Vendor Repairing Broken Items
+
+        If enabled, broken items (0% condition) cannot be repaired in the vendor repair menu. This encourages more attentive maintenance.
 
 
 # Questions-&-Answers
@@ -74,7 +107,7 @@ Kormakur (again) - The single best thing to happen to New Vegas scripting.
 External libraries used:
 * [Armadillo](http://arma.sourceforge.net/docs.html)
 * [SimpleINI](https://github.com/brofield/simpleini)
-* [JSON for Modern C++](https://github.com/nlohmann/json)
+* [TaoJSON](https://github.com/taocpp/json)
 * [TaoConfig](https://github.com/taocpp/config)
 
 Code taken from:
