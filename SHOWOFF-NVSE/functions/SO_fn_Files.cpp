@@ -42,11 +42,11 @@ namespace JsonToNVSE
 		ArrayElementL elem;
 		if (val.is_string())
 		{
-			if (auto string = val.get_string();
+			if (auto &string = val.get_string();
 				!string.empty() && string[0] == '@')
 			{
 				//Assume form contained in string
-				elem = LookupFormByID(StringToRef(string.data() + 1));
+				elem = LookupFormByID(StringToRef(const_cast<char*>(string.data()) + 1));	//don't care if the string is modified here, it won't be used.
 			}
 			else //assume string
 			{
@@ -88,7 +88,7 @@ namespace JsonToNVSE
 				if (auto const type = value.type();
 					valType::ARRAY == type || valType::OBJECT == type)
 				{
-					arrData.Append(ArrayElementL{ SubElementsToNVSEArray(value, scriptObj) });
+					arrData.Append(ArrayElementL{ SubElementsToNVSEArray(value, scriptObj) }); //recursion
 				}
 				else
 				{
