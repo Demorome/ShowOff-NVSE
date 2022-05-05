@@ -65,6 +65,29 @@ DebugText::DebugLine* DebugText::GetDebugInput()
 	return result;
 }
 
+ExtraEnableStateChildren* ExtraEnableStateChildren::Create()
+{
+	UInt32* dataPtr = (UInt32*)GameHeapAlloc(sizeof(ExtraEnableStateChildren));
+	dataPtr[0] = kVtbl_ExtraEnableStateChildren;
+	dataPtr[1] = kExtraData_EnableStateChildren;
+	dataPtr[2] = 0;
+	//copied after JIP's ExtraFactionChanges::Create()
+	auto* listData = (tList<TESObjectREFR>*)GameHeapAlloc(sizeof(tList<TESObjectREFR>));
+	listData->Init();
+	dataPtr[3] = (UInt32)listData;
+	return reinterpret_cast<ExtraEnableStateChildren*>(dataPtr);
+}
+
+ExtraEnableStateParent* ExtraEnableStateParent::Create(TESObjectREFR* parent)
+{
+	UInt32* dataPtr = (UInt32*)GameHeapAlloc(sizeof(ExtraEnableStateParent));
+	dataPtr[0] = kVtbl_ExtraEnableStateParent;
+	dataPtr[1] = kExtraData_EnableStateParent;
+	dataPtr[2] = 0;
+	dataPtr[3] = (UInt32)parent;
+	return reinterpret_cast<ExtraEnableStateParent*>(dataPtr);
+}
+
 __declspec(naked) void SystemColorManager::SystemColor::SetColorRGB(UInt32 r, UInt32 g, UInt32 b)
 {
 	__asm

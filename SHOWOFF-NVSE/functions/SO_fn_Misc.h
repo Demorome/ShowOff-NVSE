@@ -872,8 +872,58 @@ bool Cmd_ResetInteriorAlt_Execute(COMMAND_ARGS)
 	return true;
 }
 
+DEFINE_COMMAND_PLUGIN(SetEnableParent, "", true, kParams_OneOptionalForm);
+bool Cmd_SetEnableParent_Execute(COMMAND_ARGS)
+{
+	TESObjectREFR* newParent = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &newParent) || !thisObj)
+		return true;
 
+	auto xParentRef = GetExtraTypeJIP(&thisObj->extraDataList, EnableStateParent);
 
+	if (xParentRef)
+	{
+		if (auto const parent = xParentRef->parent;
+			parent != newParent)
+		{
+			// remove EnableChildren extraData
+			auto const xChildrenRef = GetExtraTypeJIP(&parent->extraDataList, EnableStateChildren);
+			xChildrenRef->children.Remove(thisObj);
+			if (xChildrenRef->children.Empty())
+				parent->extraDataList.Remove(xChildrenRef, true);
+		}
+	}
+
+	if (!newParent)
+	{
+		if (!xParentRef)
+			return true;
+
+		// remove EnableParent extraData
+		thisObj->extraDataList.Remove(xParentRef, true);
+	}
+	else
+	{
+		// add EnableChildren xData to newParent
+		auto xChildrenRef = GetExtraTypeJIP(&newParent->extraDataList, EnableStateChildren);
+		if (!xChildrenRef)
+		{
+			xChildrenRef = ExtraEnableStateChildren::Create();
+			newParent->extraDataList.Add(xChildrenRef);
+		}
+		xChildrenRef->children.Append(thisObj);
+
+		// add EnableParent xData to thisObj
+		if (!xParentRef)
+		{
+			xParentRef = ExtraEnableStateParent::Create();
+			thisObj->extraDataList.Add(xParentRef);
+		}
+		xParentRef->parent = newParent;
+	}
+
+	return true;
+}
 
 
 
@@ -977,67 +1027,6 @@ bool Cmd_SetBaseActorValue_Execute(COMMAND_ARGS)
 	}
 	UInt32 currentValue = *result = actorBase->avOwner.GetActorValue(actorVal);
 	actorBase->ModActorValue(actorVal, (valueToSet - currentValue));
-	return true;
-}
-
-DEFINE_COMMAND_PLUGIN(SetEnableParent, "", true, kParams_OneOptionalForm);
-
-//Stole some code from JIP (TESObjectREFR::SetLinkedRef)
-bool Cmd_SetEnableParent_Execute(COMMAND_ARGS)
-{
-	//TESObjectREFR* newParent = NULL;
-	//if (!ExtractArgsEx(EXTRACT_ARGS_EX, &newParent)) return true;
-
-#if 0
-	ExtraDataList xData = thisObj->extraDataList;
-	ExtraActivateRef* xActivateRef = GetExtraType(xData, ActivateRef);
-
-	RemoveExtraData(&xData, xActivateRef, true);
-	if (!newParent)
-	{
-		//xActivateRef->parentRefs.RemoveAll();  //DANGER! MUST TEST
-		auto findDefID = s_activateRefDefault.Find(thisObj->refID);
-		if (findDefID)
-		{
-			if (xActivateRef)
-			{
-				if (*findDefID)
-				{
-					TESForm* form = LookupFormByRefID(*findDefID);
-					if (form && form->GetIsReference()) xLinkedRef->linkedRef = (TESObjectREFR*)form;
-				}
-				else RemoveExtraData(xData, xLinkedRef, true);
-			}
-			findDefID.Remove();
-		}
-		s_activateRefModified.Erase(thisObj->refID);
-		return true;
-	}
-	else
-	{
-
-	}
-
-	if (!linkObj)
-	{
-		auto findDefID = s_activateRefDefault.Find(refID);
-		if (findDefID)
-		{
-			if (xLinkedRef)
-			{
-				if (*findDefID)
-				{
-					TESForm* form = LookupFormByRefID(*findDefID);
-					if (form && form->GetIsReference()) xLinkedRef->linkedRef = (TESObjectREFR*)form;
-				}
-				else RemoveExtraData(&extraDataList, xLinkedRef, true);
-			}
-			findDefID.Remove();
-		}
-		s_activateRefModified.Erase(refID);
-		return true;
-	}
-#endif
 	return true;
 }
 

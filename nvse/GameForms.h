@@ -299,6 +299,10 @@ enum ObjectVtbl
 	kVtbl_ExtraObjectHealth =						0x1015184,
 	kVtbl_ExtraSecuritronFace =						0x10159B0,
 
+	// From JIP
+	kVtbl_ExtraEnableStateParent =					0x1015C90,
+	kVtbl_ExtraEnableStateChildren =				0x1015C9C,
+
 	kVtbl_SeenData =								0x1083FC4,
 	kVtbl_IntSeenData =								0x1083FE4,
 

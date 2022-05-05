@@ -3320,6 +3320,19 @@ public:
 	virtual ~ExtraEnableStateChildren();
 
 	tList<TESObjectREFR>	children;	// 0C
+
+	static ExtraEnableStateChildren* Create();
+};
+
+// 10
+class ExtraEnableStateParent : public BSExtraData
+{
+public:
+	ExtraEnableStateParent();
+	virtual ~ExtraEnableStateParent();
+
+	TESObjectREFR	*parent;	// 0C
+	static ExtraEnableStateParent* Create(TESObjectREFR* parent = nullptr);
 };
 
 // 10

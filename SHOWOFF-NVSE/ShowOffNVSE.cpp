@@ -37,7 +37,7 @@
 // Plugin Stuff
 IDebugLog g_Log("ShowOffNVSE.log");
 HMODULE	g_ShowOffHandle;
-constexpr UInt32 g_PluginVersion = 146;
+constexpr UInt32 g_PluginVersion = 150;
 
 // Allows modmakers to toggle ShowOff's debug messages for some of its functions.
 #ifdef _DEBUG
@@ -595,6 +595,9 @@ extern "C"
 		/*3D2F*/	REG_CMD(SaveCachedIniFile)
 		/*3D30*/	REG_CMD(ReloadIniCache)
 		/*3D31*/	REG_CMD(ResetInteriorAlt)
+
+		//========v1.50
+		/*3D32*/	REG_CMD(SetEnableParent)
 	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
@@ -612,9 +615,7 @@ extern "C"
 #if _DEBUG  //for functions being tested (or just abandoned).
 
 		REG_CMD(Debug_DispatchEvent)
-
 		REG_CMD_FORM(GetSelectedItemRefSO)
-
 
 
 		REG_CMD(Flt_Equals)	// not needed; xNVSE's eval already uses this for "==" operator.
@@ -680,7 +681,6 @@ extern "C"
 
 		//REG_CMD(GetPCCanSleepWait)  //0x969FA0
 
-		REG_CMD(SetEnableParent);
 		REG_CMD_ARR(GetQueuedCornerMessages);
 
 		REG_CMD(TestDemo);
