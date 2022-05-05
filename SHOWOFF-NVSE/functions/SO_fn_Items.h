@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "ShowOffNVSE.h"
 #include "utility.h"
 
 #if 0
@@ -495,7 +496,29 @@ bool Cmd_GetCalculatedItemValue_Execute(COMMAND_ARGS)
 	return Cmd_GetCalculatedItemValue_Eval(thisObj, (void*)bAccountForBarterChanges, item, result);
 }
 
+DEFINE_COMMAND_PLUGIN(GetEquippedWeapon, "", true, nullptr);
+bool Cmd_GetEquippedWeapon_Execute(COMMAND_ARGS)
+{
+	auto weap = ((Actor*)thisObj)->GetEquippedWeapon();
+	if (!weap)
+		weap = g_fistsWeapon;
+	REFR_RES = weap->refID;
+	return true;
+}
 
+DEFINE_COMMAND_PLUGIN(GetEquippedWeaponRef, "", true, nullptr);
+bool Cmd_GetEquippedWeaponRef_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	//Copying JIP's GetEquippedItemRef
+	auto weapInfo = ((Actor*)thisObj)->baseProcess->GetWeaponInfo();
+	if (weapInfo && weapInfo->extendData)
+	{
+		if (auto const invRef = InventoryRefCreateEntry(thisObj, weapInfo->type, weapInfo->countDelta, weapInfo->extendData->GetFirstItem()))
+			REFR_RES = invRef->refID;
+	}
+	return true;
+}
 
 
 

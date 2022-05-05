@@ -694,7 +694,7 @@ public:
 	char GetCurrentAIPackage();
 	char GetCurrentAIProcedure();
 	bool IsFleeing();
-	TESObjectWEAP *GetEquippedWeapon();
+	TESObjectWEAP *GetEquippedWeapon() const;
 	bool IsItemEquipped(TESForm *item);
 	bool GetEquippedItemData(UInt32 slotIndex, ItemEntryData &itemData);
 	UInt8 EquippedWeaponHasMod(UInt8 modID);

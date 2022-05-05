@@ -61,6 +61,7 @@ extern BSWin32Audio* g_bsWin32Audio;
 extern DataHandler* g_dataHandler;
 extern BSAudioManager* g_audioManager;
 extern Sky** g_currentSky;
+extern TESObjectWEAP* g_fistsWeapon;
 
 //-Hook Globals
 extern std::atomic<bool> g_canPlayerPickpocketInCombat;

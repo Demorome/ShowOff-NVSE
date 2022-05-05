@@ -610,7 +610,7 @@ public:
 	// Accounts for ammo hardcore mode weight changes, normal base weight otherwise.
 	double GetModifiedWeight(bool isHardcore);
 	
-	UInt8 GetOverridingModIdx();
+	UInt8 GetOverridingModIdx() const;
 	const char* GetDescriptionText();
 	TESLeveledList* GetLvlList();
 	void SetJIPFlag(UInt8 jipFlag, bool bSet);
@@ -618,7 +618,7 @@ public:
 	bool IsDisabled() { return flags & kFormFlags_IsPermanent; }
 	bool IsDeleted() { return flags & kFormFlags_Deleted; }
 	bool GetDontSave() { return flags & kFormFlags_DontSaveForm; }
-	bool IsItem();
+	bool IsItem() const;
 	[[nodiscard]] bool IsActorAlt()	//works for baseforms as well as refrs
 	{
 		auto const base = this->TryGetREFRParent();

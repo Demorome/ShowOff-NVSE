@@ -117,6 +117,7 @@ DataHandler* g_dataHandler = nullptr;
 BSAudioManager* g_audioManager = nullptr;
 Sky** g_currentSky = nullptr;
 RefID g_xMarkerFormID = 0x3B;
+TESObjectWEAP* g_fistsWeapon = nullptr;
 
 // Hook Globals
 std::atomic<bool> g_canPlayerPickpocketInCombat = false;
@@ -211,6 +212,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		g_tileMenuArray = *(TileMenu***)0x11F350C; 
 		g_screenWidth = *(UInt32*)0x11C73E0;
 		g_screenHeight = *(UInt32*)0x11C7190;
+		g_fistsWeapon = *(TESObjectWEAP**)0x11CA278;
 
 		HandleHooks::HandleDelayedGameHooks();
 		HandleHooks::HandleDelayedEventHooks();
@@ -598,6 +600,8 @@ extern "C"
 
 		//========v1.50
 		/*3D32*/	REG_CMD(SetEnableParent)
+		/*3D33*/	REG_CMD(GetEquippedWeapon)
+		/*3D34*/	REG_CMD(GetEquippedWeaponRef)
 	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		

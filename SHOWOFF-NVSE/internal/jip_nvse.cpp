@@ -18,7 +18,7 @@ void (*ReadRecord64)(void* outData);
 void (*SkipNBytes)(UInt32 byteNum);
 InventoryRef* (*InventoryRefGetForID)(UInt32 refID);
 
-UInt8 TESForm::GetOverridingModIdx()
+UInt8 TESForm::GetOverridingModIdx() const
 {
 	ModInfo* info = mods.GetLastItem();
 	return info ? info->modIndex : 0xFF;
@@ -121,7 +121,7 @@ __declspec(naked) TESForm* __stdcall LookupFormByRefID(UInt32 refID)
 	}
 }
 
-TESObjectWEAP* Actor::GetEquippedWeapon()
+TESObjectWEAP* Actor::GetEquippedWeapon() const
 {
 	if (baseProcess)
 	{
@@ -170,7 +170,7 @@ const bool kInventoryType[121] =
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0
 };
 
-bool TESForm::IsItem()
+bool TESForm::IsItem() const
 {
 	return kInventoryType[this->typeID];
 }
