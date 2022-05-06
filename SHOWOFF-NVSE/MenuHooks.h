@@ -14,11 +14,3 @@ namespace GetLevelUpMenuUnspentPoints
 	void __fastcall CloseMenu_Hook();
 	void WriteRetrievalHook();
 }
-
-// Used for SetNoEquipShowOff
-namespace PreventInvItemActivation
-{
-	bool __fastcall CanActivateItemHook(TESForm* item, Actor* actor);
-	void WriteOnActivateItemHook();
-	void OnActivateInventoryItemHook();
-}

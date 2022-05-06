@@ -527,8 +527,8 @@ extern "C"
 		/*3CF7*/ REG_CMD(GetActorValueDamage)
 		/*3CF8*/ REG_CMD_ARR(GetPipboyRadioVoiceEntryData)  // todo: FIX CRASHING (when music plays and arg1 = 1?)
 		/*3CF9*/ REG_CMD_ARR(GetEquippedItemRefs)
-		/*3CFA*/ REG_CMD(SetNoEquipShowOff)
-		/*3CFB*/ REG_CMD_AMB(GetNoEquipShowOff)	// can return a form (function) or a bool.
+		/*3CFA*/ REG_CMD(SetNoEquipShowOff) // deprecated.
+		/*3CFB*/ REG_CMD_AMB(GetNoEquipShowOff)	// can return a form (function) or a bool. Deprecated.
 		/*3CFC*/ REG_CMD(SetShowOffOnCornerMessageEventHandler)
 
 		//========v1.30

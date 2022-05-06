@@ -65,8 +65,9 @@ extern TESObjectWEAP* g_fistsWeapon;
 
 //-Hook Globals
 extern std::atomic<bool> g_canPlayerPickpocketInCombat;
+#if 0
 extern ActorAndItemPairs g_noEquipMap;
-extern mod_and_function_map g_NoEquipFunctions;
+#endif
 extern bool g_bNoSelfRepairingBrokenItems;
 extern bool g_bNoVendorRepairingBrokenItems;
 extern bool g_bResetInteriorResetsActors;

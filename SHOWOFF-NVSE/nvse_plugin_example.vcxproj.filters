@@ -2133,6 +2133,9 @@
     <ClInclude Include="..\nvse\NVSEParamInfo.h">
       <Filter>nvse</Filter>
     </ClInclude>
+    <ClInclude Include="EventParams.h">
+      <Filter>Events</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />
