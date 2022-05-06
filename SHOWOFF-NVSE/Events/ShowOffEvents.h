@@ -176,9 +176,9 @@ namespace ActorValueChangeHooks
 	}
 }
 
-namespace OnActivate
+namespace OnPreActivate
 {
-	constexpr char eventName[] = "ShowOff:OnRegularActivate";
+	constexpr char eventName[] = "ShowOff:OnPreActivate";
 
 	bool __fastcall HandleEvent(TESObjectREFR* activated, Actor* activator)
 	{
@@ -370,7 +370,7 @@ void RegisterEvents()
 		g_eventInterface->RegisterEvent(eventName, std::size(paramTypes), paramTypes, flags);
 	};
 
-	RegisterEvent(OnActivate::eventName, kEventParams_OneForm_OneInt);
+	RegisterEvent(OnPreActivate::eventName, kEventParams_OneReference_OneInt);
 	RegisterEvent(PreActivateInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneInt);
 
 #if _DEBUG
@@ -383,7 +383,7 @@ namespace HandleHooks
 {
 	void HandleEventHooks()
 	{
-		OnActivate::WriteHook();
+		OnPreActivate::WriteHook();
 		PreActivateInventoryItem::WriteHooks();
 #if _DEBUG
 		//ActorValueChangeHooks::WriteHook();
