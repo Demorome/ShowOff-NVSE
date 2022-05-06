@@ -415,7 +415,6 @@ namespace HandleHooks
 {
 	void HandleFunctionHooks()
 	{
-		PreventInvItemActivation::WriteOnActivateItemHook();
 		GetLevelUpMenuUnspentPoints::WriteRetrievalHook();
 
 #if 0

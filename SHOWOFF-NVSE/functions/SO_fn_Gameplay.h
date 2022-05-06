@@ -830,8 +830,8 @@ bool Cmd_SetExplosionRefRadius_Execute(COMMAND_ARGS)
 	return true;
 }
 
+#if 0
 ActorAndItemPairs g_noEquipMap;
-mod_and_function_map g_NoEquipFunctions;  // Each mod can only assign one function.
 
 bool TryExtractActorItemPair(TESObjectREFR* thisObj, TESForm* item, ActorAndItemPair& actorAndItemOut)
 {
@@ -843,11 +843,14 @@ bool TryExtractActorItemPair(TESObjectREFR* thisObj, TESForm* item, ActorAndItem
 	actorAndItemOut = { actorID, itemID };
 	return true;
 }
+#endif
 
 // Differs from NoUnequip extradata mechanic! It's also not savebaked.
 bool Cmd_SetNoEquipShowOff_Execute(COMMAND_ARGS)
 {
 	*result = false;
+
+#if 0 //deprecated
 	TESForm* item;
 	UInt32 bNoEquip;
 	Script* function = nullptr;	// UDF event script which passes "this" = actor and 1 arg: baseItem. todo: ItemInvRef if possible!
@@ -884,6 +887,7 @@ bool Cmd_SetNoEquipShowOff_Execute(COMMAND_ARGS)
 			*result = g_noEquipMap.erase(noEquipData);
 		}
 	}
+#endif
 	return true;
 }
 
@@ -891,6 +895,7 @@ bool Cmd_SetNoEquipShowOff_Execute(COMMAND_ARGS)
 bool Cmd_GetNoEquipShowOff_Execute(COMMAND_ARGS)
 {
 	*result = 0;
+#if 0
 	TESForm* item;
 	UInt32 bGetFunction = false;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &item, &bGetFunction))
@@ -910,6 +915,7 @@ bool Cmd_GetNoEquipShowOff_Execute(COMMAND_ARGS)
 			return true;
 		*result = g_noEquipMap.find(noEquipData) != g_noEquipMap.end();
 	}
+#endif
 	return true;
 }
 

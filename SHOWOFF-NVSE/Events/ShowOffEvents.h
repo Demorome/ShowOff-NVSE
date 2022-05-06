@@ -1,10 +1,12 @@
 ﻿#pragma once
+#include "EventParams.h"
 
 // Credits to Karut (from JohnnyGuitar) for making the Event Framework.
 
 DEFINE_COMMAND_ALT_PLUGIN(SetShowOffOnCornerMessageEventHandler, SetOnCornerMessageEventHandler, "", false, kParams_Event);
+#if _DEBUG
 DEFINE_COMMAND_ALT_PLUGIN(SetShowOffOnActorValueChangeEventHandler, SetOnAVChangeEventHandler, "", false, kParams_Event);	//TODO: change args
-
+#endif
 
 EventInformation* OnCornerMessage;
 EventInformation* OnActorValueChange;
@@ -219,8 +221,8 @@ namespace OnActivate
 			pushad	//unknown what the __fastcall function will preserve, so store everything.
 			mov edx, dword ptr [ebp + activator]
 			call HandleEvent
-			popad
 			test al, al
+			popad
 			jnz doNormal
 			jmp retnFalse
 
@@ -236,83 +238,144 @@ namespace OnActivate
 	}
 }
 
-
-using EventParamType = NVSEEventManagerInterface::ParamType;
-
-static EventParamType kEventParams_OneForm_OneInt[2] =
+namespace PreActivateInventoryItem
 {
-	EventParamType::eParamType_AnyForm,
-	EventParamType::eParamType_Int
-};
+	constexpr char eventName[] = "ShowOff:OnPreActivateInventoryItem";
 
-static EventParamType kEventParams_OneInt_OneFloat_OneArray_OneString_OneForm_OneReference_OneBaseform[] =
-{
-	EventParamType::eParamType_Int,
-	EventParamType::eParamType_Float,
-	EventParamType::eParamType_Array,
-	EventParamType::eParamType_String,
-	EventParamType::eParamType_AnyForm,
-	EventParamType::eParamType_Reference,
-	EventParamType::eParamType_BaseForm,
-};
+	static const UInt32 g_inventoryMenuSelectionAddr = 0x11D9EA8;
 
-/*
-static EventParamType kEventParams_GameEvent[2] =
-{
-	EventParamType::eParamType_AnyForm, EventParamType::eParamType_AnyForm
-};
+	bool __fastcall CanUseItem(ContChangesEntry* itemEntry, void* edx)
+	{
+		if (!itemEntry || !itemEntry->type)
+			return false;
 
-static EventParamType kEventParams_OneForm[1] =
-{
-	EventParamType::eParamType_AnyForm,
-};
+		auto constexpr resultCallback = [](NVSEArrayVarInterface::Element& result, void* shouldActivateAdrr) -> bool
+		{
+			if (UInt32& shouldActivate = *static_cast<UInt32*>(shouldActivateAdrr))
+			{
+				shouldActivate = result.Bool();
+			}
+			return true;
+		};
+		UInt32 shouldActivate = true;
+		auto const itemForm = itemEntry->type;
+		TESObjectREFR* invRef = itemEntry->extendData
+			? InventoryRefCreateEntry(g_thePlayer, itemEntry->type, itemEntry->countDelta, itemEntry->extendData->GetFirstItem())
+			: nullptr;
+
+		g_eventInterface->DispatchEventAlt(eventName, resultCallback, &shouldActivate, 
+			g_thePlayer, itemForm, invRef, shouldActivate);
+
+		if (g_ShowFuncDebug)
+			Console_Print("CanActivateItemHook: CanActivate: %i, Item: [%08X], %s, type: %u", shouldActivate, itemForm->refID, itemForm->GetName(), itemForm->typeID);
+
+		return shouldActivate;
+	}
+
+	__declspec(naked) void HookOnClickAmmo()
+	{
+		_asm
+		{
+			//ecx = g_inventoryMenuSelection
+			mov		eax, [ecx + 8]
+			test	eax, eax
+			jz		Done
+
+			call	CanUseItem // register stomping should be fine.
+			test	al, al
+			jz		PreventActivation
+
+			mov		ecx, g_inventoryMenuSelectionAddr
+			mov		ecx, dword ptr ds : [ecx]
+			mov		eax, [ecx + 8]
+			ret
+
+			PreventActivation :
+			mov		eax, 0
+			Done :
+			ret
+		}
+	}
+
+	__declspec(naked) void HookHandleOnClickEquipOrUnEquip()
+	{
+		static const UInt32 endHandleClick = 0x780B8E,
+			HandleEquipOrUnEquip = 0x780D60;
+
+		_asm
+		{
+			//ecx = InventoryMenu
+			mov		ecx, g_inventoryMenuSelectionAddr
+			mov		ecx, dword ptr ds : [ecx]
+			call	CanUseItem // register stomping should be fine.
+			test	al, al
+			jz		PreventActivation
+
+			mov		ecx, [ebp-0x64] 
+			call	HandleEquipOrUnEquip 
+			ret
+
+			PreventActivation :
+			add		esp, 4	// remove return addr that was pushed.
+			jmp		endHandleClick
+		}
+	}
+
+	__declspec(naked) void HookHandleHotkeyEquipOrUnEquip()
+	{
+		static const UInt32 normalRetnAdrr = 0x701FB3,
+			endFunctionAddr = 0x702130;
+		_asm
+		{
+			//ecx = ContChangesEntry
+			call	CanUseItem  //register stomping should be fine
+			test	al, al
+			jz		PreventActivation
+
+			mov		ecx, [ebp - 0xC]  //in case ecx got stomped, restore it
+			mov		eax, [ecx + 8]
+			jmp		normalRetnAdrr
+
+			PreventActivation :
+			jmp		endFunctionAddr
+		}
+	}
+
+	void WriteHooks()
+	{
+		// Replace "call InventoryMenu::HandleEquipOrUnEquip"
+		WriteRelCall(0x7805CC, (UInt32)HookHandleOnClickEquipOrUnEquip);
+
+		// Replace "call TESForm::GetFlags(g_inventoryMenuSelection)"
+		WriteRelCall(0x780648, (UInt32)HookOnClickAmmo);
+
+		// Replace "call TESForm::GetFlags(entry)"
+		WriteRelJump(0x701FAE, (UInt32)HookHandleHotkeyEquipOrUnEquip);
+	}
+}
 
 
-static EventParamType kEventParams_OneString[1] =
-{
-	EventParamType::eParamType_String
-};
-
-static EventParamType kEventParams_OneInteger[1] =
-{
-	EventParamType::eParamType_Integer
-};
-
-static EventParamType kEventParams_TwoIntegers[2] =
-{
-	EventParamType::eParamType_Integer, EventParamType::eParamType_Integer
-};
-
-static EventParamType kEventParams_OneFloat_OneRef[2] =
-{
-	 EventParamType::eParamType_Float, EventParamType::eParamType_AnyForm
-};
-
-static EventParamType kEventParams_OneRef_OneInt[2] =
-{
-	EventParamType::eParamType_AnyForm, EventParamType::eParamType_Integer
-};
-
-static EventParamType kEventParams_OneArray[1] =
-{
-	EventParamType::eParamType_Array
-};
-*/
 void RegisterEvents()
 {
+	OnCornerMessage = JGCreateEvent("OnCornerMessage", 5, 0, NULL);
+#if _DEBUG
+	OnActorValueChange = JGCreateEvent("OnActorValueChange", 4, 0, NULL);
+#endif
+
 	using EventFlags = NVSEEventManagerInterface::EventFlags;
 
-	OnCornerMessage = JGCreateEvent("OnCornerMessage", 5, 0, NULL);
-	OnActorValueChange = JGCreateEvent("OnActorValueChange", 4, 0, NULL);
+	auto constexpr RegisterEvent =
+		[]<UInt8 N>(const char* eventName, EventParamType(&paramTypes)[N], EventFlags flags = EventFlags::kFlags_None)
+	{
+		g_eventInterface->RegisterEvent(eventName, std::size(paramTypes), paramTypes, flags);
+	};
 
-	g_eventInterface->RegisterEvent(OnActivate::eventName, std::size(kEventParams_OneForm_OneInt), 
-		kEventParams_OneForm_OneInt, EventFlags::kFlags_None);
-
+	RegisterEvent(OnActivate::eventName, kEventParams_OneForm_OneInt);
+	RegisterEvent(PreActivateInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneInt);
 
 #if _DEBUG
 	constexpr char DebugEventName[] = "ShowOff:DebugEvent";
-	g_eventInterface->RegisterEvent(DebugEventName, std::size(kEventParams_OneInt_OneFloat_OneArray_OneString_OneForm_OneReference_OneBaseform),
-		kEventParams_OneInt_OneFloat_OneArray_OneString_OneForm_OneReference_OneBaseform, EventFlags::kFlags_None);
+	RegisterEvent(DebugEventName,kEventParams_OneInt_OneFloat_OneArray_OneString_OneForm_OneReference_OneBaseform);
 #endif
 }
 
@@ -320,10 +383,10 @@ namespace HandleHooks
 {
 	void HandleEventHooks()
 	{
-		//ActorValueChangeHooks::WriteHook();
 		OnActivate::WriteHook();
+		PreActivateInventoryItem::WriteHooks();
 #if _DEBUG
-		
+		//ActorValueChangeHooks::WriteHook();
 #endif
 	}
 

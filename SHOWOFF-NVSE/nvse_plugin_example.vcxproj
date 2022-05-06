@@ -976,6 +976,7 @@
     <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\value.hpp" />
     <ClInclude Include="Changelog.txt" />
     <ClInclude Include="easing.h" />
+    <ClInclude Include="EventParams.h" />
     <ClInclude Include="Events\CustomEventFilters.h" />
     <ClInclude Include="Events\JohnnyEventPredefinitions.h" />
     <ClInclude Include="Events\LambdaVarContext.h" />
