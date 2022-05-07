@@ -872,7 +872,7 @@ bool Cmd_ResetInteriorAlt_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(SetEnableParent, "", true, kParams_OneOptionalForm);
+DEFINE_COMMAND_ALT_PLUGIN(SetEnableParent, SetParentRef, "", true, kParams_OneOptionalForm);
 bool Cmd_SetEnableParent_Execute(COMMAND_ARGS)
 {
 	TESObjectREFR* newParent = nullptr;
