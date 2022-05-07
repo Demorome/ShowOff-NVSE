@@ -227,8 +227,8 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 			EventInfo->AddQueuedEvents();
 			EventInfo->DeleteEvents();
 		}
+		EventHandling::HandleGameLoopEvents();
 		break;
-
 	case NVSEMessagingInterface::kMessage_RuntimeScriptError:
 		//_MESSAGE("Received runtime script error message %s", msg->data);
 		break;

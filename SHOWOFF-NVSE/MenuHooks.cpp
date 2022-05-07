@@ -71,3 +71,72 @@ namespace GetLevelUpMenuUnspentPoints
 
 	void WriteRetrievalHook() { WriteRelCall(0x785866, (UInt32)CloseMenu_Hook); }
 }
+
+namespace LevelUpMenuHooks
+{
+	// Taken from Tweaks
+	__declspec(naked) void LevelUpMenuClickPerkHook()
+	{
+		_asm
+		{
+			mov ecx, dword ptr ss : [ebp - 0x10] // LevelUpMenu
+			mov eax, [ecx + 0x60] // numPerksToAssign
+			test eax, eax
+			jne clickPerk
+			mov edx, [ecx + 0x58] // numAssignedPerks
+			test edx, edx
+			je noClick
+
+			clickPerk :
+			mov eax, 0x785AD3
+			push dword ptr ss : [ebp + 0xC]
+			jmp eax
+
+			noClick :
+			mov eax, 0x785DE8
+			jmp eax
+		}
+	}
+
+	// Taken from Tweaks.
+	UInt32 IsPlayerAtPerkLevel()
+	{
+		UInt32 iLevelsPerPerk = *(UInt32*)0x11CD078;
+		return (g_thePlayer->GetLevel() % iLevelsPerPerk) == 0;
+	}
+
+	// Taken from Tweaks.
+	double __fastcall PerkMenuCheckNumSelectedPerks(Tile* tile, void* edx, int key)
+	{
+		auto menu = LevelUpMenu::GetSingleton();
+		if (menu->numAssignedPerks >= menu->numPerksToAssign)
+		{
+			// will prevent the tile from being clicked
+			return 0;
+		}
+		return tile->GetValueFloat(key);
+	}
+
+	void WriteHooksForShowPerkMenu()
+	{
+		// == Credits to Stewie for this all this code, taken from patchShowPerksMenuEvenIfNoneToAssign.
+
+		// Prevent clicking on perks if there are none to assign.
+		// Needed to prevent jank for ShowPerkMenu.
+		// While this does overwrite a hook for Tweaks, it should make no difference who wrote this hook.
+		WriteRelJump(0x785ACC, UInt32(LevelUpMenuClickPerkHook)); 
+
+		// init number of perks to assign to be 0 if not on a perk level
+		SafeWriteBuf(0x78508C, "\x8B\x0D\xDC\x9F\x1D\x01\x89\x41\x60\x0F\x1F\x40", 12);
+		WriteRelCall(0x785087, UInt32(IsPlayerAtPerkLevel));
+
+
+		// == Hooks below taken from Tweaks, from CustomPerksPerLevel::InitHooks
+
+		// remove call resetting selected Perks when one is selected
+		NopFunctionCall(0x785B2C, 1);
+
+		// wrap call checking tile alpha, prevent clicking on the tile if numPerksToAssign perks are already selected
+		WriteRelCall(0x785B0F, UInt32(PerkMenuCheckNumSelectedPerks));
+	}
+}

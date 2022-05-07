@@ -62,6 +62,13 @@ static EventParamType kEventParams_OneReference_OneInt[] =
 	EventParamType::eParamType_Int,
 };
 
+
+static EventParamType kEventParams_OneForm_OneReference_OneInt[] =
+{
+	EventParamType::eParamType_AnyForm,
+	EventParamType::eParamType_Reference,
+	EventParamType::eParamType_Int,
+};
 static EventParamType kEventParams_OneBaseForm_OneReference_OneInt[] =
 {
 	EventParamType::eParamType_BaseForm,

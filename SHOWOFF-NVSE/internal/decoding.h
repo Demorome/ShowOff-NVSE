@@ -1615,7 +1615,7 @@ public:
 	UInt32 numPerksToAssign;  // Max amount, not the amount left.
 	ListBox<ActorValueCode> skillListBox;
 	ListBox<BGSPerk> perkListBox;
-	tList<BGSPerk> availablePerks; // perks to show in the perk listBox (with full alpha)
+	tList<BGSPerk> availablePerks; // perks to show in the perk listBox (including non-selectable ones, if gs_bHideUnavailablePerks = 1)
 };
 STATIC_ASSERT(sizeof(LevelUpMenu) == 0xCC);
 
