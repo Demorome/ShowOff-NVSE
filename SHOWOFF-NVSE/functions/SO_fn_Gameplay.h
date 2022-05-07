@@ -43,7 +43,7 @@ bool Cmd_SetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
 	UInt32 bOn;
 	if (NUM_ARGS && ExtractArgsEx(EXTRACT_ARGS_EX, &bOn))
 	{
-		bool bCheck = PickpocketEquippedItems::CanPlayerPickpocketEqItems();
+		const bool bCheck = PickpocketEquippedItems::CanPlayerPickpocketEqItems();
 		if (bOn && !bCheck)
 		{
 			// replace check in ContainerMenu::ShouldHideItem while pickpocketting for item being worn, with a check the target is a child
@@ -103,7 +103,7 @@ bool Cmd_IsWeaponMelee_Eval(COMMAND_ARGS_EVAL)
 	auto const weapon = DYNAMIC_CAST(form, TESForm, TESObjectWEAP);
 	if (!weapon) return true;
 
-	UINT8 weapType = weapon->eWeaponType;
+	const UINT8 weapType = weapon->eWeaponType;
 	*result = weapType <= 2;
 	return true;
 }
@@ -159,7 +159,7 @@ bool Cmd_IsWeaponRanged_Eval(COMMAND_ARGS_EVAL)
 	auto const weapon = DYNAMIC_CAST(form, TESForm, TESObjectWEAP);
 	if (!weapon) return true;
 
-	UINT8 weapType = weapon->eWeaponType;
+	const UINT8 weapType = weapon->eWeaponType;
 	*result = weapType >= 3 && weapType <= 13;
 
 	return true;
@@ -179,9 +179,9 @@ bool Cmd_IsEquippedWeaponRanged_Eval(COMMAND_ARGS_EVAL)
 	if (thisObj)
 	{
 		if (!thisObj->IsActor()) return true;
-		if (TESObjectWEAP* weapon = ((Actor*)thisObj)->GetEquippedWeapon())
+		if (const TESObjectWEAP* weapon = ((Actor*)thisObj)->GetEquippedWeapon())
 		{
-			UINT8 weapType = weapon->eWeaponType;
+			const UINT8 weapType = weapon->eWeaponType;
 			*result = weapType >= 3 && weapType <= 13;
 		}
 	}
@@ -206,7 +206,7 @@ bool Cmd_GetChallengeProgress_Eval(COMMAND_ARGS_EVAL)
 	*result = 0;
 	if (arg1)
 	{
-		auto challenge = (TESChallenge*)arg1;
+		const auto challenge = (TESChallenge*)arg1;
 		if (IS_TYPE(challenge, TESChallenge))
 			*result = challenge->progress;
 	}
@@ -232,7 +232,7 @@ bool Cmd_GetPCCanFastTravel_Eval(COMMAND_ARGS_EVAL)
 {
 	// Credits to Jazz for the "silence QueueUIMessage" trick (see AddNoteNS).
 	SafeWrite8((UInt32)QueueUIMessage, 0xC3);	// RETN
-	auto canFastTravelAddr = GetRelJumpAddr(0x798026); // call the function indirectly for compatibility with Stewie tweaks, kudos to Stewie.
+	const auto canFastTravelAddr = GetRelJumpAddr(0x798026); // call the function indirectly for compatibility with Stewie tweaks, kudos to Stewie.
 	*result = ThisStdCall<bool>(canFastTravelAddr, g_thePlayer);
 	//*result = ThisStdCall<bool>((UInt32)0x93D660, g_thePlayer);
 	SafeWrite8((UInt32)QueueUIMessage, 0x55);	// PUSH EBP
@@ -310,13 +310,13 @@ bool Cmd_GetActorHasBaseFlag_Eval(COMMAND_ARGS_EVAL)
 	if (!actor) return true;
 	if (flagToCheck < 16)  //check FlagsLow (0-15)
 	{
-		UInt32 lowFlags = actor->baseData.flags & 0xFFFF;  //copied from NVSE's GetActorBaseFlagsLow
+		const UInt32 lowFlags = actor->baseData.flags & 0xFFFF;  //copied from NVSE's GetActorBaseFlagsLow
 		*result = (lowFlags >> flagToCheck) & 1;
 	}
 	else  //check FlagsHigh (0-15)
 	{
 		flagToCheck -= 16;  //set the base to 0. At flagToCheck == 16, this equals 0.
-		UInt32 highFlags = (actor->baseData.flags >> 16) & 0xFFFF;  //copied from NVSE's GetActorBaseFlagsHigh
+		const UInt32 highFlags = (actor->baseData.flags >> 16) & 0xFFFF;  //copied from NVSE's GetActorBaseFlagsHigh
 		*result = (highFlags >> flagToCheck) & 1;
 	}
 	return true;
@@ -428,15 +428,15 @@ bool Cmd_ForceWeaponJamAnim_Execute(COMMAND_ARGS)
 	*result = false;
 	if (IS_ACTOR(thisObj))
 	{
-		auto actor = (Actor*)thisObj;
+		const auto actor = (Actor*)thisObj;
 		if (auto const weapn = actor->GetEquippedWeapon())
 		{
 			// Copies the code at 0x89667E for post-reload jamming.
-			auto animGroupID = ThisStdCall<UInt32>(0x51E2A0, weapn, 0) + 23;  // TESObjectWEAP::GetReloadAnimGroup + 23
-			auto animKey = ThisStdCall<UInt16>(0x897910, actor, animGroupID, 0, 0, 0);  //Actor__GetAnimKey
+			const auto animGroupID = ThisStdCall<UInt32>(0x51E2A0, weapn, 0) + 23;  // TESObjectWEAP::GetReloadAnimGroup + 23
+			const auto animKey = ThisStdCall<UInt16>(0x897910, actor, animGroupID, 0, 0, 0);  //Actor__GetAnimKey
 			if (CdeclCall<UInt32>(0x5F2440, animKey) == animGroupID)  // calls AnimGroupID::GetGroupID, which gets the lowers bits of animKey.
 			{
-				if (auto animData = actor->GetAnimData())
+				if (const auto animData = actor->GetAnimData())
 				{
 					ThisStdCall<void*>(0x8B28C0, actor, animGroupID, animData);  // Actor::8B28C0
 					auto const animSeqElem = animData->animSequence[4];  // 4 = kSequence_Weapon
@@ -457,7 +457,7 @@ bool Cmd_GetCalculatedSkillPoints_Eval(COMMAND_ARGS_EVAL)
 	UInt32 levelOverride = 0;
 	if (arg1) levelOverride = (UInt32)arg1;
 
-	auto avOwner = &g_thePlayer->avOwner;
+	const auto avOwner = &g_thePlayer->avOwner;
 	auto level = levelOverride ? levelOverride : avOwner->GetLevel();
 	level += LevelUpMenu::GetSingleton() ? 0 : 1;  // Add +1 level to accurately predict the outcome for the next level up, if not in levelup menu.
 	auto intelligence = avOwner->GetNormalizedPermanentAV(kAVCode_Intelligence);
@@ -496,7 +496,7 @@ bool Cmd_GetLevelUpMenuPoints_Execute(COMMAND_ARGS)
 			else
 			{
 				// menu->numPerksToAssign is always set to something in vanilla, it's the availablePerks.Empty() that determines if no perk menu is shown.
-				*result = menu->availablePerks.Empty() ? 0 : menu->numPerksToAssign;
+				*result = menu->perksList.Empty() ? 0 : menu->numPerksToAssign;
 			}
 		}
 		else  // Check for Skills
@@ -516,7 +516,7 @@ bool Cmd_GetCalculatedPerkPoints_Eval(COMMAND_ARGS_EVAL)
 	UInt32 levelOverride = 0;
 	if (arg1) levelOverride = (UInt32)arg1;
 
-	auto avOwner = &g_thePlayer->avOwner;
+	const auto avOwner = &g_thePlayer->avOwner;
 	auto level = levelOverride ? levelOverride : avOwner->GetLevel();
 	level += LevelUpMenu::GetSingleton() ? 0 : 1;  // Add +1 level to accurately predict the outcome for the next level up, if not in levelup menu.
 	auto const gs_iLevelsPerPerk = GetIntGameSetting(0x11CD074);
@@ -575,15 +575,20 @@ bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &numPerks, &menuTitleBuf))
 		return true;
 
-	// NOTE: Tweaks' bLevelUpAlwaysShowsPerks can be useful for allowing perk previews when the player has no perk points for this level-up.
-	// Seems to work fine with iPerksPerLevel
+	const UInt16 oldCode = *(UInt16*)0x784F26;
+
+	// Credits to Stewie for this piece of code (from bLevelUpAlwaysShowsPerks).
+	// Create the perk list even if not on a perk level
+	SafeWrite16(0x784F26, 0x25EB);
+
 	if (auto const menu = LevelUpMenu::Create())
 	{
-		if (!menu->availablePerks.Empty())
+		if (!menu->perksList.Empty())
 		{
 			if (numPerks > -1)
 			{
-				menu->SetNumPerksToAssign(numPerks);
+				//TODO: fix the cap, need to only count selectable perks.
+				menu->SetNumPerksToAssign(std::min((UInt32)numPerks, menu->perksList.Count()));
 			}
 			
 			menu->SetCurrentPage(LevelUpMenu::kPerkSelection);
@@ -606,6 +611,10 @@ bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
 			menu->Close();
 		}
 	}
+
+	// restore code change
+	SafeWrite16(0x784F26, oldCode);
+
 	return true;
 }
 
@@ -758,7 +767,7 @@ bool Cmd_SetLevelUpMenuPoints_Execute(COMMAND_ARGS)
 		}
 		else
 		{
-			if (currentPage == LevelUpMenu::kPerkSelection && !menu->availablePerks.Empty())
+			if (currentPage == LevelUpMenu::kPerkSelection && !menu->perksList.Empty())
 			{
 				// todo: ??
 				menu->numPerksToAssign = iNewPoints;
@@ -1032,7 +1041,7 @@ bool Cmd_SetPlantedExplosive_Execute(COMMAND_ARGS)
 	
 	if (auto const actor = DYNAMIC_CAST(thisObj, TESObjectREFR, Actor))
 	{
-		auto hiProc = (HighProcess*)actor->baseProcess;
+		const auto hiProc = (HighProcess*)actor->baseProcess;
 		if (!hiProc || hiProc->processLevel)
 			return true;
 
@@ -1103,7 +1112,7 @@ bool Cmd_GetActorPreferredWeapon_Execute(COMMAND_ARGS)
 	UInt32 combatWeaponType = 6;
 	if (!thisObj || NOT_ACTOR(thisObj) || !ExtractArgsEx(EXTRACT_ARGS_EX, &combatWeaponType))
 		return true;
-	auto weapForm = ThisStdCall<TESObjectWEAP*>(0x891C80, thisObj, combatWeaponType); //Actor::GetPreferredWeapon
+	const auto weapForm = ThisStdCall<TESObjectWEAP*>(0x891C80, thisObj, combatWeaponType); //Actor::GetPreferredWeapon
 	if (weapForm)
 		REFR_RES = weapForm->refID;  
 	return true;
@@ -1121,7 +1130,7 @@ bool Cmd_TryDropWeapon_Execute(COMMAND_ARGS)
 	// Retrieve info about actor's weapon, for comparison later.
 	ContChangesEntry* weaponInfo = actor->baseProcess->GetWeaponInfo();
 	if (!weaponInfo || !weaponInfo->type) return true;  //actor has no weapon to unequip
-	SInt32 prevCount = weaponInfo->countDelta;
+	const SInt32 prevCount = weaponInfo->countDelta;
 #if _DEBUG
 	Console_Print("TryDropWeapon >> Count delta: %i", prevCount);
 #endif

@@ -2,16 +2,10 @@
 #include "EventParams.h"
 
 // Credits to Karut (from JohnnyGuitar) for making the Event Framework.
-
-DEFINE_COMMAND_ALT_PLUGIN(SetShowOffOnCornerMessageEventHandler, SetOnCornerMessageEventHandler, "", false, kParams_Event);
-#if _DEBUG
-DEFINE_COMMAND_ALT_PLUGIN(SetShowOffOnActorValueChangeEventHandler, SetOnAVChangeEventHandler, "", false, kParams_Event);	//TODO: change args
-#endif
-
 EventInformation* OnCornerMessage;
 EventInformation* OnActorValueChange;
 
-
+DEFINE_COMMAND_ALT_PLUGIN(SetShowOffOnCornerMessageEventHandler, SetOnCornerMessageEventHandler, "", false, kParams_Event);
 bool Cmd_SetShowOffOnCornerMessageEventHandler_Execute(COMMAND_ARGS)
 {
 	UInt32 setOrRemove;
@@ -27,6 +21,8 @@ bool Cmd_SetShowOffOnCornerMessageEventHandler_Execute(COMMAND_ARGS)
 	return true;
 }
 
+#if _DEBUG
+DEFINE_COMMAND_ALT_PLUGIN(SetShowOffOnActorValueChangeEventHandler, SetOnAVChangeEventHandler, "", false, kParams_Event);	//TODO: change args
 bool Cmd_SetShowOffOnActorValueChangeEventHandler_Execute(COMMAND_ARGS)
 {
 	UInt32 setOrRemove;
@@ -43,16 +39,7 @@ bool Cmd_SetShowOffOnActorValueChangeEventHandler_Execute(COMMAND_ARGS)
 	}
 	return true;
 }
-
-
-/*
-DEFINE_COMMAND_PLUGIN(SetOnHitAltEventHandler, , 0, 3, kParams_JIP_OneForm_OneInt_OneOptionalForm);
-bool Cmd_SetOnHitAltEventHandler_Execute(COMMAND_ARGS)
-{
-	return SetActorEventHandler_Execute(PASS_COMMAND_ARGS, s_onHitEventMap, kHookActorFlag3_OnHit, kHook_OnHitEvent);
-}
-*/
-
+#endif
 
 namespace CornerMessageHooks
 {
@@ -194,7 +181,9 @@ namespace OnPreActivate
 		g_eventInterface->DispatchEventAlt(eventName, resultCallback, &shouldActivate, activated, activator, shouldActivate);
 
 #if _DEBUG
-		Console_Print("OnActivate HOOK - Activated: [%08X], activator: [%08X]", activated ? activated->refID : 0, 
+		Console_Print("OnActivate HOOK - Activated: [%08X] {%s} (%s), activator: [%08X]", activated ? activated->refID : 0, 
+			activated ? activated->GetName() : "",
+			activated ? activated->GetTheName() : "",
 			activator ? activator->refID : 0);
 #endif
 		return shouldActivate != 0;
@@ -377,6 +366,14 @@ void RegisterEvents()
 	constexpr char DebugEventName[] = "ShowOff:DebugEvent";
 	RegisterEvent(DebugEventName,kEventParams_OneInt_OneFloat_OneArray_OneString_OneForm_OneReference_OneBaseform);
 #endif
+}
+
+namespace EventHandling
+{
+	void HandleGameLoopEvents()
+	{
+		
+	}
 }
 
 namespace HandleHooks

@@ -10,6 +10,11 @@ TraitNameMap *g_traitNameMap = (TraitNameMap*)0x11F32F4;
 const _TraitNameToID TraitNameToID = (_TraitNameToID)0xA01860;
 UInt32 (*TraitNameToIDAdd)(const char*, UInt32) = (UInt32 (*)(const char*, UInt32))0xA00940;
 
+enum
+{
+	kAddr_TileGetFloat = 0xA011B0,
+};
+
 UInt32 Tile::TraitNameToID(const char *traitName)
 {
 	return ::TraitNameToID(traitName);
@@ -35,6 +40,12 @@ Tile::Value *Tile::GetValue(UInt32 typeID)
 Tile::Value *Tile::GetValueName(const char *valueName)
 {
 	return GetValue(TraitNameToID(valueName));
+}
+
+__declspec(naked) float Tile::GetValueFloat(UInt32 id)
+{
+	static const UInt32 procAddr = kAddr_TileGetFloat;
+	__asm	jmp		procAddr
 }
 
 DListNode<Tile> *Tile::GetNthChild(UInt32 index)

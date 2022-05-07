@@ -14,3 +14,8 @@ namespace GetLevelUpMenuUnspentPoints
 	void __fastcall CloseMenu_Hook();
 	void WriteRetrievalHook();
 }
+
+namespace LevelUpMenuHooks
+{
+	void WriteHooksForShowPerkMenu();
+}

@@ -1577,7 +1577,7 @@ public:
 	// Call this before calling SetCurrentPage so the initial perk count is accurate (will be 1 otherwise).
 	void SetNumPerksToAssign(int newCount)
 	{
-		auto const numAvailablePerks = availablePerks.Count();
+		auto const numAvailablePerks = perksList.Count();
 		numPerksToAssign = std::min<UInt32>(newCount, numAvailablePerks);
 	}
 
@@ -1615,7 +1615,7 @@ public:
 	UInt32 numPerksToAssign;  // Max amount, not the amount left.
 	ListBox<ActorValueCode> skillListBox;
 	ListBox<BGSPerk> perkListBox;
-	tList<BGSPerk> availablePerks; // perks to show in the perk listBox (with full alpha)
+	tList<BGSPerk> perksList; // perks to show in the perk listBox (including non-selectable ones, if gs_bHideUnavailablePerks = 1)
 };
 STATIC_ASSERT(sizeof(LevelUpMenu) == 0xCC);
 
