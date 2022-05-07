@@ -566,6 +566,12 @@ bool Cmd_SetLevelUpMenuCurrentPage_Execute(COMMAND_ARGS)
 	return true;
 }
 
+class AcceptPerkIfPlayerCanPick
+{
+public:
+	bool Accept(BGSPerk* item) { return item->GetActorCanPickPerk(g_thePlayer); }
+};
+
 bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
 {
 	*result = false;  // result = hasShownPerks
@@ -585,10 +591,11 @@ bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
 	{
 		if (!menu->perksList.Empty())
 		{
-			if (numPerks > -1)
+			if (numPerks > -1)  //non-default amount
 			{
-				//TODO: fix the cap, need to only count selectable perks.
-				menu->SetNumPerksToAssign(std::min((UInt32)numPerks, menu->perksList.Count()));
+				AcceptPerkIfPlayerCanPick op;
+				auto const numSelectablePerks = menu->perksList.CountIf(op);
+				menu->SetNumPerksToAssign(std::min((UInt32)numPerks, numSelectablePerks));
 			}
 			
 			menu->SetCurrentPage(LevelUpMenu::kPerkSelection);

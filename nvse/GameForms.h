@@ -5572,6 +5572,9 @@ public:
 	PerkData				data;				// 38
 	ConditionList			conditions;			// 40
 	tList<BGSPerkEntry>		entries;			// 48
+
+	bool GetActorHasRequirements(Actor* actor);
+	bool GetActorCanPickPerk(Actor* actor);
 };
 
 class TESCasino : public TESForm

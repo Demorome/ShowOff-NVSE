@@ -431,6 +431,17 @@ void BGSListForm::DumpToFile(const char* fileName, bool append)
 	}
 }
 
+bool BGSPerk::GetActorHasRequirements(Actor* actor)
+{
+	return ThisStdCall_B(0x785150, this, actor);
+}
+
+bool BGSPerk::GetActorCanPickPerk(Actor* actor)
+{
+	return GetActorHasRequirements(actor) && 
+		actor->GetLevel() >= this->data.minLevel;
+}
+
 bool TESForm::IsInventoryObject() const
 {
 	typedef bool (*_IsInventoryObjectType)(UInt32 formType);
