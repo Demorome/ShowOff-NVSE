@@ -4419,6 +4419,15 @@ public:
 
 	bool SetStage(UInt8 stageID);
 	BGSQuestObjective *GetObjective(UInt32 objectiveID);
+
+	[[nodiscard]] bool IsCompleted() const
+	{
+		return (flags & 2) != 0;
+	}
+	[[nodiscard]] bool IsFailed() const
+	{
+		return (flags & 0x40) != 0;
+	}
 };
 
 STATIC_ASSERT(sizeof(TESQuest) == 0x6C);

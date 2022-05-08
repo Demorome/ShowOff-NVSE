@@ -343,6 +343,21 @@ namespace PreActivateInventoryItem
 	}
 }
 
+namespace OnQuestAdded
+{
+	constexpr char eventName[] = "ShowOff:OnQuestAdded";
+
+	void __cdecl handleQuestUpdateMessage(TESQuest* quest)
+	{
+		g_eventInterface->DispatchEvent(eventName, nullptr, quest);
+		CdeclCall(0x77A480, quest);
+	}
+
+	void WriteHook()
+	{
+		WriteRelCall(0x5EC66E, (UInt32)handleQuestUpdateMessage);
+	}
+}
 
 void RegisterEvents()
 {
@@ -361,6 +376,8 @@ void RegisterEvents()
 
 	RegisterEvent(OnPreActivate::eventName, kEventParams_OneReference_OneInt);
 	RegisterEvent(PreActivateInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneInt);
+	RegisterEvent(OnQuestAdded::eventName, kEventParams_OneBaseForm);
+
 
 #if _DEBUG
 	constexpr char DebugEventName[] = "ShowOff:DebugEvent";
@@ -372,7 +389,7 @@ namespace EventHandling
 {
 	void HandleGameLoopEvents()
 	{
-		
+
 	}
 }
 
@@ -382,6 +399,7 @@ namespace HandleHooks
 	{
 		OnPreActivate::WriteHook();
 		PreActivateInventoryItem::WriteHooks();
+		OnQuestAdded::WriteHook();
 #if _DEBUG
 		//ActorValueChangeHooks::WriteHook();
 #endif
