@@ -11,8 +11,6 @@
 
 DEFINE_COMMAND_ALT_PLUGIN(ShowingOffDisable, DisableIFYouDidntNotice, "Does the same thing as vanilla Disable. For showing off!", true, kParams_OneOptionalInt);
 DEFINE_COMMAND_ALT_PLUGIN(ShowingOffEnable, EnableIFYouDidntNotice, "Does the same thing as vanilla Enable. For showing off!", true, kParams_OneOptionalInt);
-DEFINE_COMMAND_ALT_PLUGIN(DisableAlt, SnigOff, "Ignores the EnableParent limitation.", true, kParams_OneOptionalInt);
-DEFINE_COMMAND_ALT_PLUGIN(EnableAlt, SnigOn, "Ignores the EnableParent limitation.", true, kParams_OneOptionalInt);
 DEFINE_COMMAND_ALT_PLUGIN(ListAddList, AddFormListToFormList, "", false, kParams_TwoFormLists_OneOptionalIndex);
 DEFINE_COMMAND_PLUGIN(MessageExAltShowoff, "", false, kParams_JIP_OneFloat_OneInt_OneFormatString);
 DEFINE_CMD_COND_PLUGIN(IsCornerMessageDisplayed, "Returns 1/0 depending on if a corner message is displayed.", false, NULL);
@@ -59,19 +57,58 @@ bool Cmd_ShowingOffEnable_Execute(COMMAND_ARGS) {
 	return Cmd_Enable(PASS_COMMAND_ARGS);
 }
 
+UInt32 g_fadeOut;
+
+__declspec(naked) bool ParseParametersHook()
+{
+	_asm
+	{
+		mov		eax, g_fadeOut
+		mov		dword ptr [ebp - 4], eax
+		mov		al, 1	// parse was successful
+		ret
+	}
+}
+
+DEFINE_COMMAND_ALT_PLUGIN(DisableAlt, SnigOff, "Ignores the EnableParent limitation.", true, kParams_TwoOptionalInts);
 bool Cmd_DisableAlt_Execute(COMMAND_ARGS)
 {
-	// Modify code to skip over the "If this has an EnableParent" check.
-	WriteRelJump(0x5C465D, 0x5C4740);
+	g_fadeOut = 0;
+	UInt32 skipGetDontSaveCheck = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &g_fadeOut, &skipGetDontSaveCheck))
+		return true;
+
+	// Skip parsing parameters.
+	WriteRelCall(0x5C460D, (UInt32)ParseParametersHook);
+
+	if (skipGetDontSaveCheck)
+	{
+		WriteRelJump(0x5C4643, 0x5C4740);
+	}
+	else
+	{
+		// Modify code to skip over the "If this has an EnableParent" check.
+		WriteRelJump(0x5C465D, 0x5C4740);
+	}
 
 	bool const success = Cmd_Disable(PASS_COMMAND_ARGS);
 
 	// Undo code modification.
-	WriteRelJe(0x5C465D, 0x5C4740);
+	WriteRelCall(0x5C460D, 0x5ACCB0);
+
+	if (skipGetDontSaveCheck)
+	{
+		WriteRelCall(0x5C4643, 0x4077C0);
+	}
+	else
+	{
+		WriteRelJe(0x5C465D, 0x5C4740);
+	}
 
 	return success;
 }
 
+DEFINE_COMMAND_ALT_PLUGIN(EnableAlt, SnigOn, "Ignores the EnableParent limitation.", true, kParams_OneOptionalInt);
 bool Cmd_EnableAlt_Execute(COMMAND_ARGS)
 {
 	// Modify code to skip over the "If this has an EnableParent" check.
