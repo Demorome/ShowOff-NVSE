@@ -248,9 +248,7 @@ namespace PreActivateInventoryItem
 		};
 		UInt32 shouldActivate = true;
 		auto const itemForm = itemEntry->type;
-		TESObjectREFR* invRef = itemEntry->extendData
-			? InventoryRefCreateEntry(g_thePlayer, itemEntry->type, itemEntry->countDelta, itemEntry->extendData->GetFirstItem())
-			: nullptr;
+		auto* invRef = CreateRefForStack(g_thePlayer, itemEntry);
 
 		g_eventInterface->DispatchEventAlt(eventName, resultCallback, &shouldActivate, 
 			g_thePlayer, itemForm, invRef, shouldActivate);
@@ -359,6 +357,68 @@ namespace OnQuestAdded
 	}
 }
 
+namespace OnCalculateSellPrice
+{
+	constexpr char eventNameAdd[] = "ShowOff:OnCalculateSellPrice:+";
+	constexpr char eventNameSub[] = "ShowOff:OnCalculateSellPrice:-";
+	constexpr char eventNameMult[] = "ShowOff:OnCalculateSellPrice:*";
+
+	void HandleEvent(float& newPrice, ContChangesEntry* itemEntry)
+	{
+		auto* baseItem = itemEntry->type;
+		auto* invRef = CreateRefForStack(g_thePlayer, itemEntry);
+
+		auto constexpr multCallback = [](NVSEArrayVarInterface::Element& result, void* newPriceAddr) -> bool
+		{
+			float& newPrice = *static_cast<float*>(newPriceAddr);
+			if (result.type != NVSEArrayVarInterface::kType_Numeric)
+				return true;
+			newPrice *= result.Number();
+			return true;
+		};
+		g_eventInterface->DispatchEventAlt(eventNameMult, multCallback, &newPrice, g_thePlayer, baseItem, invRef);
+
+		auto constexpr addCallback = [](NVSEArrayVarInterface::Element& result, void* newPriceAddr) -> bool
+		{
+			float& newPrice = *static_cast<float*>(newPriceAddr);
+			newPrice += result.Number();
+			return true;
+		};
+		g_eventInterface->DispatchEventAlt(eventNameAdd, addCallback, &newPrice, g_thePlayer, baseItem, invRef);
+
+		auto constexpr subCallback = [](NVSEArrayVarInterface::Element& result, void* newPriceAddr) -> bool
+		{
+			float& newPrice = *static_cast<float*>(newPriceAddr);
+			newPrice -= result.Number();
+			return true;
+		};
+		g_eventInterface->DispatchEventAlt(eventNameSub, subCallback, &newPrice, g_thePlayer, baseItem, invRef);
+
+#if _DEBUG
+		Console_Print("== ShowOff:OnCalculateSellPrice - newPrice: %f, itemEditorID: %s ==", 
+			newPrice, itemEntry->type->GetName());
+#endif
+	}
+
+	// Recalculate sell price of an item.
+	static double __cdecl HookFAbs(float price)
+	{
+		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());  //credits to Kormakur for this trick.
+
+		auto& newPrice = *reinterpret_cast<float*>(ebp - 0xC);
+		auto* itemEntry = *reinterpret_cast<ContChangesEntry**>(ebp + 0xC);
+		HandleEvent(newPrice, itemEntry);
+
+		return fabs(static_cast<double>(newPrice));
+	}
+
+	void WriteHook()
+	{
+		WriteRelCall(0x72EFFE, (UInt32)HookFAbs);
+	}
+}
+
+
 void RegisterEvents()
 {
 	OnCornerMessage = JGCreateEvent("OnCornerMessage", 5, 0, NULL);
@@ -377,6 +437,10 @@ void RegisterEvents()
 	RegisterEvent(OnPreActivate::eventName, kEventParams_OneReference_OneInt);
 	RegisterEvent(PreActivateInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneInt);
 	RegisterEvent(OnQuestAdded::eventName, kEventParams_OneBaseForm);
+
+	RegisterEvent(OnCalculateSellPrice::eventNameAdd, kEventParams_OneBaseForm_OneReference);
+	RegisterEvent(OnCalculateSellPrice::eventNameSub, kEventParams_OneBaseForm_OneReference);
+	RegisterEvent(OnCalculateSellPrice::eventNameMult, kEventParams_OneBaseForm_OneReference);
 
 
 #if _DEBUG
@@ -400,6 +464,7 @@ namespace HandleHooks
 		OnPreActivate::WriteHook();
 		PreActivateInventoryItem::WriteHooks();
 		OnQuestAdded::WriteHook();
+		OnCalculateSellPrice::WriteHook();
 #if _DEBUG
 		//ActorValueChangeHooks::WriteHook();
 #endif

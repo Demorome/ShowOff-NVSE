@@ -25,6 +25,11 @@ UInt8 TESForm::GetOverridingModIdx() const
 }
 
 
+TESObjectREFR* __fastcall CreateRefForStack(TESObjectREFR* container, ContChangesEntry* menuEntry)
+{
+	return (container && menuEntry) ? InventoryRefCreateEntry(container, menuEntry->type, menuEntry->countDelta, menuEntry->extendData ? menuEntry->extendData->GetFirstItem() : NULL) : NULL;
+}
+
 __declspec(naked) float __fastcall GetAxisDistance(TESObjectREFR* ref1, TESObjectREFR* ref2, UInt8 axis)
 {
 	__asm

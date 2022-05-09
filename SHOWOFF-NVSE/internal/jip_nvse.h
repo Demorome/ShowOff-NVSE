@@ -90,6 +90,7 @@ struct ArrayData_JIP
 	}
 };
 
+TESObjectREFR* __fastcall CreateRefForStack(TESObjectREFR* container, ContChangesEntry* menuEntry);
 
 float __fastcall GetAxisDistance(TESObjectREFR* ref1, TESObjectREFR* ref2, UInt8 axis);
 
