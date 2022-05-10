@@ -418,6 +418,49 @@ namespace OnCalculateSellPrice
 	}
 }
 
+namespace OnProjectileDestroy
+{
+	constexpr char eventName[] = "ShowOff:OnProjectileDestroy";
+
+	void __fastcall HandleEvent(Projectile* proj)
+	{
+		g_eventInterface->DispatchEvent(eventName, proj);
+	}
+
+	void __declspec(naked) Projectile_Free_Hook()
+	{
+		static UInt32 const retnAddr = 0x9BC489;
+		_asm
+		{
+			push	ecx
+			call	HandleEvent  // ecx should still be the Projectile (this)
+			pop		ecx
+			mov		eax, dword ptr ds : [0x11C16BC]
+			jmp		retnAddr
+		}
+	}
+
+	void WriteHook()
+	{
+		WriteRelJump(0x9BC484, (UInt32)Projectile_Free_Hook);
+	}
+}
+
+
+
+using EventFlags = NVSEEventManagerInterface::EventFlags;
+
+template<UInt8 N>
+bool RegisterEvent(const char* eventName, EventParamType(&paramTypes)[N], 
+	EventFlags flags = EventFlags::kFlags_None)
+{
+	return g_eventInterface->RegisterEvent(eventName, std::size(paramTypes), paramTypes, flags);
+};
+bool RegisterEvent(const char* eventName, nullptr_t null,
+	EventFlags flags = EventFlags::kFlags_None)
+{
+	return g_eventInterface->RegisterEvent(eventName, 0, nullptr, flags);
+};
 
 void RegisterEvents()
 {
@@ -426,13 +469,6 @@ void RegisterEvents()
 	OnActorValueChange = JGCreateEvent("OnActorValueChange", 4, 0, NULL);
 #endif
 
-	using EventFlags = NVSEEventManagerInterface::EventFlags;
-
-	auto constexpr RegisterEvent =
-		[]<UInt8 N>(const char* eventName, EventParamType(&paramTypes)[N], EventFlags flags = EventFlags::kFlags_None)
-	{
-		g_eventInterface->RegisterEvent(eventName, std::size(paramTypes), paramTypes, flags);
-	};
 
 	RegisterEvent(OnPreActivate::eventName, kEventParams_OneReference_OneInt);
 	RegisterEvent(PreActivateInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneInt);
@@ -442,11 +478,13 @@ void RegisterEvents()
 	RegisterEvent(OnCalculateSellPrice::eventNameSub, kEventParams_OneBaseForm_OneReference);
 	RegisterEvent(OnCalculateSellPrice::eventNameMult, kEventParams_OneBaseForm_OneReference);
 
+	//TODO: maybe only clear callbacks if thisObj filter is specified?
+	RegisterEvent(OnProjectileDestroy::eventName, nullptr, EventFlags::kFlag_FlushOnLoad);
 
-#if _DEBUG
+
+	// For debugging the Event API
 	constexpr char DebugEventName[] = "ShowOff:DebugEvent";
 	RegisterEvent(DebugEventName,kEventParams_OneInt_OneFloat_OneArray_OneString_OneForm_OneReference_OneBaseform);
-#endif
 }
 
 namespace EventHandling
@@ -465,6 +503,7 @@ namespace HandleHooks
 		PreActivateInventoryItem::WriteHooks();
 		OnQuestAdded::WriteHook();
 		OnCalculateSellPrice::WriteHook();
+		OnProjectileDestroy::WriteHook();
 #if _DEBUG
 		//ActorValueChangeHooks::WriteHook();
 #endif
