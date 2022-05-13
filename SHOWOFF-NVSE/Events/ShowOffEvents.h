@@ -469,22 +469,22 @@ void RegisterEvents()
 	OnActorValueChange = JGCreateEvent("OnActorValueChange", 4, 0, NULL);
 #endif
 
-
 	RegisterEvent(OnPreActivate::eventName, kEventParams_OneReference_OneInt);
 	RegisterEvent(PreActivateInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneInt);
 	RegisterEvent(OnQuestAdded::eventName, kEventParams_OneBaseForm);
-
+	 
 	RegisterEvent(OnCalculateSellPrice::eventNameAdd, kEventParams_OneBaseForm_OneReference);
 	RegisterEvent(OnCalculateSellPrice::eventNameSub, kEventParams_OneBaseForm_OneReference);
 	RegisterEvent(OnCalculateSellPrice::eventNameMult, kEventParams_OneBaseForm_OneReference);
 
 	//TODO: maybe only clear callbacks if thisObj filter is specified?
 	RegisterEvent(OnProjectileDestroy::eventName, nullptr, EventFlags::kFlag_FlushOnLoad);
-
+	/*
 
 	// For debugging the Event API
 	constexpr char DebugEventName[] = "ShowOff:DebugEvent";
 	RegisterEvent(DebugEventName,kEventParams_OneInt_OneFloat_OneArray_OneString_OneForm_OneReference_OneBaseform);
+	*/
 }
 
 namespace EventHandling
