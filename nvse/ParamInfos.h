@@ -604,7 +604,7 @@ static ParamInfo kParams_GenericDeleteForm[3] =
 	{	"index",			kParamType_Integer,	0	},
 };
 
-static ParamInfo kParams_OneIntOneForm[2] =
+static ParamInfo kParams_OneInt_OneForm[2] =
 {
 	{	"index",	kParamType_Integer, 0	},
 	{	"form",		kParamType_AnyForm,	0	},

@@ -602,6 +602,7 @@ extern "C"
 		/*3D32*/	REG_CMD(SetEnableParent)
 		/*3D33*/	REG_CMD(GetEquippedWeapon)
 		/*3D34*/	REG_CMD(GetEquippedWeaponRef)
+		/*3D35*/	REG_CMD(GetCalculatedAPCost)
 	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		

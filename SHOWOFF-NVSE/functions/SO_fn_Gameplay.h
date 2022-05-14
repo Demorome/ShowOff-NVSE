@@ -37,6 +37,8 @@ DEFINE_COMMAND_PLUGIN(SetExplosionRefRadius, "", true, kParams_OneFloat);
 DEFINE_COMMAND_ALT_PLUGIN(SetNoEquipShowOff, SetNoEquipSO, "Sets whether or not there's a prevention for an item baseform from being activated from an actor's inventory.", false, kParams_OneForm_OneInt_OneOptionalScript);
 DEFINE_COMMAND_ALT_PLUGIN(GetNoEquipShowOff, GetNoEquipSO, "Returns whether or not there's a prevention for an item baseform from being activated from an actor's inventory.", false, kParams_OneForm_OneInt);
 DEFINE_COMMAND_ALT_PLUGIN(SetOwnershipTemp, ImGoingToBorrowThis, "A mix of SetOwnership and SetCellOwnership, but non-savebaked.", false, kParams_TwoOptionalForms);
+DEFINE_COMMAND_ALT_PLUGIN(GetCalculatedAPCost, GetCalculatedWeaponAttackAPCost, "", false, kParams_OneInt_OneOptionalForm);
+
 
 bool Cmd_SetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
 {
@@ -962,8 +964,73 @@ bool Cmd_SetOwnershipTemp_Execute(COMMAND_ARGS)
 	return true;
 }
 
+bool Cmd_GetCalculatedAPCost_Execute(COMMAND_ARGS)
+{
+	*result = 0;
 
+	enum eMode : UInt32
+	{
+		GetDefaultAttackCost = 0,
+		GetSpecialAttack1Cost,
+		GetSpecialAttack2Cost
+	} mode;
 
+	TESObjectWEAP* weapon = nullptr;  // if omitted, use player's currently equipped weapon (could be fists)
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &mode, &weapon))
+		return true;
+
+	if (CdeclCall<bool>(0x9526B0)) // GetIsGodMode
+		return true; //every action is 0 AP.
+
+	thisObj = g_thePlayer;
+	if (!weapon)
+	{
+		weapon = ((Actor*)thisObj)->GetEquippedWeapon();
+		if (!weapon)
+			weapon = g_fistsWeapon;
+	}
+
+	if (mode == GetDefaultAttackCost)
+	{
+		//implicitly called on the player, so it accounts for ActionPointCost Perk Entry Point.
+		*result = CdeclCall<double>(0x66DCE0, weapon);
+	}
+	else
+	{
+		if (VATSMenu::GetSingleton())
+		{
+			// Costs have been pre-calculated and stored in globals.
+			if (mode == GetSpecialAttack1Cost)
+			{
+				*result = *reinterpret_cast<float*>(0x11DB0B8); // g_vatSpecialAttack1APCost
+			}
+			else
+			{
+				*result = *reinterpret_cast<float*>(0x11DB0C0); // g_vatSpecialAttack2APCost
+			}
+		}
+		else
+		{
+			// TODO: Must calculate the cost ourselves. Won't account for hooks.
+			// Replicate code at 0x7EB920
+			/*
+			if (mode == GetSpecialAttack1Cost)
+			{
+				
+			}
+			else
+			{
+				//todo: make result 0 if player does not have access to the attack.
+				float apCost = GetFltGameSetting(0x11D12E4); //  gs_fCrossAPCost
+				ApplyPerkModifiers(kPerkEntry_ActionPointCost, thisObj, weapon, &apCost);
+				*result = apCost;
+			}
+			*/
+		}
+	}
+
+	return true;
+}
 
 
 

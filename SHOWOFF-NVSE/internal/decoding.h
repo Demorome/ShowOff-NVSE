@@ -1918,6 +1918,7 @@ public:
 	TileText			*tile09C;		// 09C
 	TileImage			*tile0A0;		// 0A0
 	TileImage			*tile0A4;		// 0A4
+
 	UInt32				unk0A8[2];		// 0A8
 	ListBox<UInt32>		queuedActions;	// 0B0
 	UInt32				unk0E0[18];		// 0E0
@@ -1927,6 +1928,11 @@ public:
 	float				unk134[3];		// 134
 	UInt8				unk140;			// 140
 	UInt8				pad141[3];		// 141
+
+	// Taken from Tweaks
+	static VATSMenu* GetSingleton() { return *(VATSMenu**)0x11DB0D4; };
+	// Taken from Tweaks
+	static TESObjectREFR* GetTarget() { return *(TESObjectREFR**)0x11F21CC; };
 };
 
 // FC

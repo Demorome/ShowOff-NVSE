@@ -1,5 +1,7 @@
 #pragma once
 
+#include <intrin.h>
+
 void __stdcall SafeWrite8(UInt32 addr, UInt32 data);
 void __stdcall SafeWrite16(UInt32 addr, UInt32 data);
 void __stdcall SafeWrite32(UInt32 addr, UInt32 data);
@@ -34,3 +36,5 @@ void NopIndirectCall(UInt32 addr, UInt32 numArgs);
 void NopIndirectCall(UInt32 addr);
 
 UInt32 GetRelJumpAddr(UInt32 jumpSrc);
+
+UInt8* GetParentBasePtr(void* addressOfReturnAddress, bool lambda = false);

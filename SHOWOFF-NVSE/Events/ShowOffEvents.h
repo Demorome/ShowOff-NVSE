@@ -248,9 +248,7 @@ namespace PreActivateInventoryItem
 		};
 		UInt32 shouldActivate = true;
 		auto const itemForm = itemEntry->type;
-		TESObjectREFR* invRef = itemEntry->extendData
-			? InventoryRefCreateEntry(g_thePlayer, itemEntry->type, itemEntry->countDelta, itemEntry->extendData->GetFirstItem())
-			: nullptr;
+		auto* invRef = CreateRefForStack(g_thePlayer, itemEntry);
 
 		g_eventInterface->DispatchEventAlt(eventName, resultCallback, &shouldActivate, 
 			g_thePlayer, itemForm, invRef, shouldActivate);
@@ -343,6 +341,126 @@ namespace PreActivateInventoryItem
 	}
 }
 
+namespace OnQuestAdded
+{
+	constexpr char eventName[] = "ShowOff:OnQuestAdded";
+
+	void __cdecl handleQuestUpdateMessage(TESQuest* quest)
+	{
+		g_eventInterface->DispatchEvent(eventName, nullptr, quest);
+		CdeclCall(0x77A480, quest);
+	}
+
+	void WriteHook()
+	{
+		WriteRelCall(0x5EC66E, (UInt32)handleQuestUpdateMessage);
+	}
+}
+
+namespace OnCalculateSellPrice
+{
+	constexpr char eventNameAdd[] = "ShowOff:OnCalculateSellPrice:+";
+	constexpr char eventNameSub[] = "ShowOff:OnCalculateSellPrice:-";
+	constexpr char eventNameMult[] = "ShowOff:OnCalculateSellPrice:*";
+
+	void HandleEvent(float& newPrice, ContChangesEntry* itemEntry)
+	{
+		auto* baseItem = itemEntry->type;
+		auto* invRef = CreateRefForStack(g_thePlayer, itemEntry);
+
+		auto constexpr multCallback = [](NVSEArrayVarInterface::Element& result, void* newPriceAddr) -> bool
+		{
+			float& newPrice = *static_cast<float*>(newPriceAddr);
+			if (result.type != NVSEArrayVarInterface::kType_Numeric)
+				return true;
+			newPrice *= result.Number();
+			return true;
+		};
+		g_eventInterface->DispatchEventAlt(eventNameMult, multCallback, &newPrice, g_thePlayer, baseItem, invRef);
+
+		auto constexpr addCallback = [](NVSEArrayVarInterface::Element& result, void* newPriceAddr) -> bool
+		{
+			float& newPrice = *static_cast<float*>(newPriceAddr);
+			newPrice += result.Number();
+			return true;
+		};
+		g_eventInterface->DispatchEventAlt(eventNameAdd, addCallback, &newPrice, g_thePlayer, baseItem, invRef);
+
+		auto constexpr subCallback = [](NVSEArrayVarInterface::Element& result, void* newPriceAddr) -> bool
+		{
+			float& newPrice = *static_cast<float*>(newPriceAddr);
+			newPrice -= result.Number();
+			return true;
+		};
+		g_eventInterface->DispatchEventAlt(eventNameSub, subCallback, &newPrice, g_thePlayer, baseItem, invRef);
+
+#if _DEBUG
+		Console_Print("== ShowOff:OnCalculateSellPrice - newPrice: %f, itemEditorID: %s ==", 
+			newPrice, itemEntry->type->GetName());
+#endif
+	}
+
+	// Recalculate sell price of an item.
+	static double __cdecl HookFAbs(float price)
+	{
+		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());  //credits to Kormakur for this trick.
+
+		auto& newPrice = *reinterpret_cast<float*>(ebp - 0xC);
+		auto* itemEntry = *reinterpret_cast<ContChangesEntry**>(ebp + 0xC);
+		HandleEvent(newPrice, itemEntry);
+
+		return fabs(static_cast<double>(newPrice));
+	}
+
+	void WriteHook()
+	{
+		WriteRelCall(0x72EFFE, (UInt32)HookFAbs);
+	}
+}
+
+namespace OnProjectileDestroy
+{
+	constexpr char eventName[] = "ShowOff:OnProjectileDestroy";
+
+	void __fastcall HandleEvent(Projectile* proj)
+	{
+		g_eventInterface->DispatchEvent(eventName, proj);
+	}
+
+	void __declspec(naked) Projectile_Free_Hook()
+	{
+		static UInt32 const retnAddr = 0x9BC489;
+		_asm
+		{
+			push	ecx
+			call	HandleEvent  // ecx should still be the Projectile (this)
+			pop		ecx
+			mov		eax, dword ptr ds : [0x11C16BC]
+			jmp		retnAddr
+		}
+	}
+
+	void WriteHook()
+	{
+		WriteRelJump(0x9BC484, (UInt32)Projectile_Free_Hook);
+	}
+}
+
+
+
+using EventFlags = NVSEEventManagerInterface::EventFlags;
+
+template<UInt8 N>
+bool RegisterEvent(const char* eventName, EventParamType(&paramTypes)[N], 
+	EventFlags flags = EventFlags::kFlags_None)
+{
+	return g_eventInterface->RegisterEvent(eventName, std::size(paramTypes), paramTypes, flags);
+};
+bool RegisterEvent(const char* eventName, nullptr_t null,
+	EventFlags flags = EventFlags::kFlags_None)
+{
+	return g_eventInterface->RegisterEvent(eventName, 0, nullptr, flags);
+};
 
 void RegisterEvents()
 {
@@ -351,28 +469,29 @@ void RegisterEvents()
 	OnActorValueChange = JGCreateEvent("OnActorValueChange", 4, 0, NULL);
 #endif
 
-	using EventFlags = NVSEEventManagerInterface::EventFlags;
-
-	auto constexpr RegisterEvent =
-		[]<UInt8 N>(const char* eventName, EventParamType(&paramTypes)[N], EventFlags flags = EventFlags::kFlags_None)
-	{
-		g_eventInterface->RegisterEvent(eventName, std::size(paramTypes), paramTypes, flags);
-	};
-
 	RegisterEvent(OnPreActivate::eventName, kEventParams_OneReference_OneInt);
 	RegisterEvent(PreActivateInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneInt);
+	RegisterEvent(OnQuestAdded::eventName, kEventParams_OneBaseForm);
+	 
+	RegisterEvent(OnCalculateSellPrice::eventNameAdd, kEventParams_OneBaseForm_OneReference);
+	RegisterEvent(OnCalculateSellPrice::eventNameSub, kEventParams_OneBaseForm_OneReference);
+	RegisterEvent(OnCalculateSellPrice::eventNameMult, kEventParams_OneBaseForm_OneReference);
 
-#if _DEBUG
+	//TODO: maybe only clear callbacks if thisObj filter is specified?
+	RegisterEvent(OnProjectileDestroy::eventName, nullptr, EventFlags::kFlag_FlushOnLoad);
+	/*
+
+	// For debugging the Event API
 	constexpr char DebugEventName[] = "ShowOff:DebugEvent";
 	RegisterEvent(DebugEventName,kEventParams_OneInt_OneFloat_OneArray_OneString_OneForm_OneReference_OneBaseform);
-#endif
+	*/
 }
 
 namespace EventHandling
 {
 	void HandleGameLoopEvents()
 	{
-		
+
 	}
 }
 
@@ -382,6 +501,9 @@ namespace HandleHooks
 	{
 		OnPreActivate::WriteHook();
 		PreActivateInventoryItem::WriteHooks();
+		OnQuestAdded::WriteHook();
+		OnCalculateSellPrice::WriteHook();
+		OnProjectileDestroy::WriteHook();
 #if _DEBUG
 		//ActorValueChangeHooks::WriteHook();
 #endif
