@@ -259,7 +259,6 @@ static constexpr NVSEParamInfo kNVSEParams_TwoStrings_TwoOptionalStrings_TwoOpti
 	{	"bool",	kNVSEParamType_Boolean,1	},
 };
 
-
 static constexpr NVSEParamInfo kNVSEParams_TwoNums_OneArray_OneStr_ThreeForms[7] =
 {
 	{	"num",	kNVSEParamType_Number,	0	},

@@ -445,8 +445,38 @@ namespace OnProjectileDestroy
 		WriteRelJump(0x9BC484, (UInt32)Projectile_Free_Hook);
 	}
 }
+namespace OnProjectileCreate
+{
+	constexpr char eventName[] = "ShowOff:OnProjectileCreate";
 
+	void __fastcall HandleEvent(Projectile* proj, Actor* projOwner, TESObjectWEAP* weapon)
+	{
+		g_eventInterface->DispatchEvent(eventName, proj, projOwner, weapon);
+	}
 
+	void __declspec(naked) CreateProjectile_Hook()
+	{
+		static UInt32 const retnAddr = 0x9BD523;
+		_asm
+		{
+			mov		ecx, [ebp - 0x14] // liveProjectile (arg1)
+			mov		edx, [ebp + 0xC] // actor (arg2)
+			mov		esi, [ebp + 0x14] // weapon (arg3)
+			push	esi
+			call	HandleEvent
+
+			// do the regular code
+			mov		eax, [ebp - 0x14]
+			mov		ecx, [ebp - 0xC]
+			jmp	retnAddr
+		}
+	}
+
+	void WriteHook()
+	{
+		WriteRelJump(0x9BD51D, (UInt32)CreateProjectile_Hook);
+	}
+}
 
 using EventFlags = NVSEEventManagerInterface::EventFlags;
 
@@ -479,8 +509,10 @@ void RegisterEvents()
 
 	//TODO: maybe only clear callbacks if thisObj filter is specified?
 	RegisterEvent(OnProjectileDestroy::eventName, nullptr, EventFlags::kFlag_FlushOnLoad);
-	/*
+	RegisterEvent(OnProjectileCreate::eventName, kEventParams_OneReference_OneBaseForm, EventFlags::kFlag_FlushOnLoad);
 
+
+	/*
 	// For debugging the Event API
 	constexpr char DebugEventName[] = "ShowOff:DebugEvent";
 	RegisterEvent(DebugEventName,kEventParams_OneInt_OneFloat_OneArray_OneString_OneForm_OneReference_OneBaseform);
@@ -504,6 +536,7 @@ namespace HandleHooks
 		OnQuestAdded::WriteHook();
 		OnCalculateSellPrice::WriteHook();
 		OnProjectileDestroy::WriteHook();
+		OnProjectileCreate::WriteHook();
 #if _DEBUG
 		//ActorValueChangeHooks::WriteHook();
 #endif
