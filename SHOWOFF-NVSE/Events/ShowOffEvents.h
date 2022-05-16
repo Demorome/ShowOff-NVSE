@@ -616,8 +616,8 @@ namespace HandleHooks
 		OnCalculateSellPrice::WriteHook();
 		OnProjectileDestroy::WriteHook();
 		OnProjectileCreate::WriteHook();
-#if _DEBUG
 		OnProjectileImpact::WriteHook();
+#if _DEBUG
 		//ActorValueChangeHooks::WriteHook();
 #endif
 	}
