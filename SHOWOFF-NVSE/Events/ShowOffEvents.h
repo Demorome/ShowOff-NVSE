@@ -468,7 +468,7 @@ namespace OnProjectileCreate
 			// do the regular code
 			mov		eax, [ebp - 0x14]
 			mov		ecx, [ebp - 0xC]
-			jmp	retnAddr
+			jmp		retnAddr
 		}
 	}
 
@@ -547,7 +547,7 @@ namespace OnProjectileImpact
 		}
 	}
 
-	void WriteHook()
+	void WriteHooks()
 	{
 		//Don't hook 0x9C20BF, because JIP does so already.
 		WriteRelJump(0x9C20B1, (UInt32)HookLoopCheck);
@@ -556,6 +556,50 @@ namespace OnProjectileImpact
 	}
 }
 
+namespace OnLockpickMenuClose
+{
+	constexpr char eventName[] = "ShowOff:OnLockpickMenuClose";
+
+	enum class CloseReason : UInt32
+	{
+		kLockOpened = 0,
+		kLockForceBroken,
+		kManualExit
+	};
+
+	void HandleEvent(const LockPickMenu* menu, CloseReason reason)
+	{
+		g_eventInterface->DispatchEvent(eventName, menu->targetRef, reason);
+	}
+
+	void __cdecl ForceFailHook()
+	{
+		auto const menu = LockPickMenu::GetSingleton();
+		menu->stage = 7;
+		HandleEvent(menu, CloseReason::kLockForceBroken);
+	}
+
+	void __cdecl ManualExitHook()
+	{
+		auto const menu = LockPickMenu::GetSingleton();
+		menu->stage = 7;
+		HandleEvent(menu, CloseReason::kManualExit);
+	}
+
+	void __cdecl OpenLockHook()
+	{
+		auto const menu = LockPickMenu::GetSingleton();
+		menu->stage = 7;
+		HandleEvent(menu, CloseReason::kLockOpened);
+	}
+
+	void WriteHooks()
+	{
+		WriteRelCall(0x790383, (UInt32)ManualExitHook);
+		WriteRelCall(0x78F97B, (UInt32)OpenLockHook);
+		WriteRelCall(0x7904AF, (UInt32)ForceFailHook);
+	}
+}
 
 using EventFlags = NVSEEventManagerInterface::EventFlags;
 
@@ -591,6 +635,7 @@ void RegisterEvents()
 	RegisterEvent(OnProjectileCreate::eventName, kEventParams_OneReference_OneBaseForm, EventFlags::kFlag_FlushOnLoad);
 	RegisterEvent(OnProjectileImpact::eventName, kEventParams_OneReference_OneBaseForm_OneReference, EventFlags::kFlag_FlushOnLoad);
 
+	RegisterEvent(OnLockpickMenuClose::eventName, kEventParams_OneInt);
 	/*
 	// For debugging the Event API
 	constexpr char DebugEventName[] = "ShowOff:DebugEvent";
@@ -616,7 +661,8 @@ namespace HandleHooks
 		OnCalculateSellPrice::WriteHook();
 		OnProjectileDestroy::WriteHook();
 		OnProjectileCreate::WriteHook();
-		OnProjectileImpact::WriteHook();
+		OnProjectileImpact::WriteHooks();
+		OnLockpickMenuClose::WriteHooks();
 #if _DEBUG
 		//ActorValueChangeHooks::WriteHook();
 #endif

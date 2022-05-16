@@ -1500,7 +1500,7 @@ public:
 	LockPickMenu();
 	~LockPickMenu();
 
-	UInt32					unk28;			// 28
+	UInt32					stage;			// 28, name copied from Tweaks
 	TileRect				*tile2C;		// 2C
 	TileRect				*tile30;		// 30
 	TileRect				*tile34;		// 34
@@ -1540,6 +1540,8 @@ public:
 	NiQuaternion			quaternionB4;	// B4
 	NiQuaternion			quaternionC4;	// C4
 	NiQuaternion			quaternionD4;	// D4
+
+	static LockPickMenu* GetSingleton() { return *(LockPickMenu**)0x11DA204; }; //copied from Tweaks
 };
 STATIC_ASSERT(sizeof(LockPickMenu) == 0xE4);
 
