@@ -942,9 +942,90 @@ bool Cmd_SetEnableParent_Execute(COMMAND_ARGS)
 
 #if _DEBUG
 
+// Copied from Tweaks
+double dAtan(double value)
+{
+	bool sign = (value < 0);
+	if (sign) value = -value;
+
+	bool complement = (value > 1.0);
+	if (complement) value = 1.0 / value;
+
+	bool region = (value > kDblTanPId12);
+	if (region)
+		value = (value - kDblTanPId6) / (1.0 + kDblTanPId6 * value);
+
+	double res = value;
+	value *= value;
+	res *= (1.6867629106 + value * 0.4378497304) / (1.6867633134 + value);
+
+	if (region) res += kDblPId6;
+	if (complement) res = kDblPId2 - res;
+
+	return sign ? -res : res;
+}
+
+// Copied from Tweaks.
+double GetVectorAngle2D(NiPoint2* pt)
+{
+	double angle;
+	if (pt->y == 0)
+	{
+		if (pt->x <= 0)
+		{
+			angle = kDblPIx3d2;
+		}
+		else
+		{
+			angle = kDblPId2;
+		}
+	}
+	else
+	{
+		double ratio = pt->x / pt->y;
+		angle = dAtan(ratio);
+		if (pt->y < 0.0)
+		{
+			angle += kDblPI;
+		}
+	}
+
+	return angle;
+}
 
 
+// Copied from Tweaks
+// Returns a subtly different result than vanilla's Cmd_GetHeadingAngle...
+double GetAngleBetweenPoints(NiPoint3* actorPos, NiPoint3* playerPos, float offset = 0)
+{
+	NiPoint3 diff;
+	diff.Init(actorPos);
+	diff.Subtract(playerPos);
 
+	double angle = GetVectorAngle2D((NiPoint2*)&diff) - offset;
+	if (angle > -kDblPI)
+	{
+		if (angle > kDblPI)
+		{
+			angle = kDblPIx2 - angle;
+		}
+	}
+	else
+	{
+		angle += kDblPIx2;
+	}
+	return angle * kDblRad2Deg;
+}
+
+DEFINE_COMMAND_PLUGIN(GetHeadingAngleTEST, "", false, kParams_OneForm);
+bool Cmd_GetHeadingAngleTEST_Execute(COMMAND_ARGS)
+{
+	TESObjectREFR* ref;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &ref);
+	auto playerRotation = ((Actor*)thisObj)->AdjustRot(0);
+	*result = GetAngleBetweenPoints(ref->GetPos(), thisObj->GetPos(), playerRotation);
+	return true;
+}
 
 DEFINE_COMMAND_PLUGIN(GetPipboyRadioSounds, "", false, NULL);
 bool Cmd_GetPipboyRadioSounds_Execute(COMMAND_ARGS)

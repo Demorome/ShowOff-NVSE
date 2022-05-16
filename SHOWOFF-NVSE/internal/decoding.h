@@ -560,12 +560,10 @@ public:
 	struct ImpactData
 	{
 		TESObjectREFR	*refr;			// 00
-		UInt32			unk04[2];		// 04
-		float			unk0C;			// 0C
-		UInt32			unk10[2];		// 10
-		float			unk18;			// 18
+		NiVector3		pos;			// Gotten from JIP
+		NiVector3		rot;			// Gotten from JIP
 		hkpRigidBody	*rigidBody;		// 1C
-		UInt32			unk20;			// 20
+		UInt32			materialType;	// 20, gotten from JIP
 		SInt32			hitLocation;	// 24
 		UInt32			unk28;			// 28
 		UInt32			unk2C;			// 2C
@@ -615,6 +613,9 @@ public:
 	UInt8				byte148;		// 148
 	UInt8				pad149[3];		// 149
 	float				range;			// 14C
+
+	// Copied from JIP's Projectile::GetData
+	[[nodiscard]] TESObjectREFR* GetImpactRef() const;
 };
 STATIC_ASSERT(sizeof(Projectile) == 0x150);
 

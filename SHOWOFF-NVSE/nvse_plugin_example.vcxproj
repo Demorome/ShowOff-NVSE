@@ -992,6 +992,7 @@
     <ClInclude Include="functions\SO_fn_Items.h" />
     <ClInclude Include="functions\SO_fn_Math.h" />
     <ClInclude Include="functions\SO_fn_Misc.h" />
+    <ClInclude Include="functions\SO_fn_Refs.h" />
     <ClInclude Include="functions\SO_fn_Settings.h" />
     <ClInclude Include="functions\SO_fn_Topics.h" />
     <ClInclude Include="internal\ExtractArgs_TypeSafe.h" />

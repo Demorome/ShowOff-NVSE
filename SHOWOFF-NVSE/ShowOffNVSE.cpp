@@ -26,6 +26,7 @@
 #include "functions/SO_fn_Factions.h"
 #include "functions/SO_fn_Topics.h"
 #include "functions/SO_fn_Math.h"
+#include "functions/SO_fn_Refs.h"
 
 // Events
 #include "Events/JohnnyEventPredefinitions.h"
@@ -603,6 +604,7 @@ extern "C"
 		/*3D33*/	REG_CMD(GetEquippedWeapon)
 		/*3D34*/	REG_CMD(GetEquippedWeaponRef)
 		/*3D35*/	REG_CMD(GetCalculatedAPCost)
+		/*3D36*/	REG_CMD_ARR(GetPosArray)
 	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
@@ -618,6 +620,8 @@ extern "C"
 #endif
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
+
+		REG_CMD(GetHeadingAngleTEST)
 
 		REG_CMD(Debug_DispatchEvent)
 		REG_CMD_FORM(GetSelectedItemRefSO)

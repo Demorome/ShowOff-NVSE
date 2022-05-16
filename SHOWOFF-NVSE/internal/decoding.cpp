@@ -40,6 +40,23 @@ struct NavMeshClosedDoorInfo;
 FontHeightData s_fontHeightDatas[90];
 
 
+TESObjectREFR* Projectile::GetImpactRef() const
+{
+	if (hasImpacted)
+	{
+		const ListNode<ImpactData>* traverse = impactDataList.Head();
+		do
+		{
+			ImpactData* impactData = traverse->data;
+			if (impactData && impactData->refr)
+			{
+				return impactData->refr;
+			}
+		} while (traverse = traverse->next);
+	}
+	return nullptr;
+}
+
 __declspec(naked) NiVector3* FontManager::GetStringDimensions(NiVector3* outDims, const char* srcString, UInt32 fontID, UInt32 maxFlt, UInt32 startIdx)
 {
 	static const UInt32 procAddr = 0xA1B020;

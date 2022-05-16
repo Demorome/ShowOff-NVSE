@@ -31,7 +31,8 @@ kDbl2dPI,
 kDbl4dPI,
 kDblTanPId6,
 kDblTanPId12,
-kDblPId180;
+kDblPId180,
+kDblRad2Deg; //from Tweaks
 
 // From JIP
 extern const float kFlt1d100K, kFlt1d1K, kFlt1d200, kFlt1d100, kFltPId180, kFlt1d10, kFltHalf, kFltOne, kFltPId2, kFltPI, kFltPIx2, kFlt10, kFlt180dPI, kFlt100, kFlt200, kFlt1000, kFltMax;

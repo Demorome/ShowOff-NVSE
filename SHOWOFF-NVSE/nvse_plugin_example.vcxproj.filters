@@ -2136,6 +2136,9 @@
     <ClInclude Include="EventParams.h">
       <Filter>Events</Filter>
     </ClInclude>
+    <ClInclude Include="functions\SO_fn_Refs.h">
+      <Filter>functions</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

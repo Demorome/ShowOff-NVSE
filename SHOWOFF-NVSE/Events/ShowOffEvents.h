@@ -477,6 +477,85 @@ namespace OnProjectileCreate
 		WriteRelJump(0x9BD51D, (UInt32)CreateProjectile_Hook);
 	}
 }
+namespace OnProjectileImpact
+{
+	constexpr char eventName[] = "ShowOff:OnProjectileImpact";
+
+	void __fastcall HandleEvent(Projectile* proj, void* edx)
+	{
+		proj->hasImpacted = true; //was gonna be set to true later, anyways.
+
+		if (static_cast<BGSProjectile*>(proj->baseForm)->type != 2)  //if not Lobber-type
+		{
+			// Copying JIP code for ProjectileImpactHook
+			// Updating the proj's position to its impactPos.
+			// Likely done to make "GetPos" calls accurate inside the event handler.
+			if (auto const impactData = proj->impactDataList.Head()->data)
+				*proj->PosVector() = impactData->pos;
+		}
+		g_eventInterface->DispatchEvent(eventName, proj, proj->sourceRef, proj->sourceWeap, proj->GetImpactRef());
+	}
+
+	static const UInt32 loopEndAddr = 0x9C20BF;
+	void __declspec(naked) HookLoopCheck()
+	{
+		static const UInt32 continueLoopAddr = 0x9C1BD6;
+		__asm
+		{
+			movzx	edx, al
+			test	edx, edx
+			jz		continueLoop
+			// else, loop is ending, call event.
+			mov     ecx, [ebp - 0x58]  // proj
+			call	HandleEvent
+			jmp		loopEndAddr
+
+			continueLoop:
+			jmp		continueLoopAddr
+		}
+	}
+
+	void __declspec(naked) HookJz()
+	{
+		static const UInt32 keepLoopGoingAddr = 0x9C1BE0;
+		__asm
+		{
+			jnz		keepLoopGoing
+
+			mov     ecx, [ebp - 0x58]  // proj
+			call	HandleEvent
+			jmp		loopEndAddr
+
+			keepLoopGoing:
+			jmp		keepLoopGoingAddr
+		}
+	}
+
+	void __declspec(naked) HookJnz()
+	{
+		static const UInt32 keepLoopGoingAddr = 0x9C1BF3;
+		__asm
+		{
+			jz		keepLoopGoing
+
+			mov     ecx, [ebp - 0x58]  // proj
+			call	HandleEvent
+			jmp		loopEndAddr
+
+			keepLoopGoing :
+			jmp		keepLoopGoingAddr
+		}
+	}
+
+	void WriteHook()
+	{
+		//Don't hook 0x9C20BF, because JIP does so already.
+		WriteRelJump(0x9C20B1, (UInt32)HookLoopCheck);
+		WriteRelJump(0x9C1BDA, (UInt32)HookJz);
+		WriteRelJump(0x9C1BED, (UInt32)HookJnz);
+	}
+}
+
 
 using EventFlags = NVSEEventManagerInterface::EventFlags;
 
@@ -510,7 +589,7 @@ void RegisterEvents()
 	//TODO: maybe only clear callbacks if thisObj filter is specified?
 	RegisterEvent(OnProjectileDestroy::eventName, nullptr, EventFlags::kFlag_FlushOnLoad);
 	RegisterEvent(OnProjectileCreate::eventName, kEventParams_OneReference_OneBaseForm, EventFlags::kFlag_FlushOnLoad);
-
+	RegisterEvent(OnProjectileImpact::eventName, kEventParams_OneReference_OneBaseForm_OneReference, EventFlags::kFlag_FlushOnLoad);
 
 	/*
 	// For debugging the Event API
@@ -538,6 +617,7 @@ namespace HandleHooks
 		OnProjectileDestroy::WriteHook();
 		OnProjectileCreate::WriteHook();
 #if _DEBUG
+		OnProjectileImpact::WriteHook();
 		//ActorValueChangeHooks::WriteHook();
 #endif
 	}
