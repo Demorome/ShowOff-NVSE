@@ -394,7 +394,7 @@ namespace OnCalculateSellPrice
 		};
 		g_eventInterface->DispatchEventAlt(eventNameSub, subCallback, &newPrice, g_thePlayer, baseItem, invRef);
 
-#if _DEBUG
+#if _DEBUG && 0
 		Console_Print("== ShowOff:OnCalculateSellPrice - newPrice: %f, itemEditorID: %s ==", 
 			newPrice, itemEntry->type->GetName());
 #endif
@@ -601,6 +601,77 @@ namespace OnLockpickMenuClose
 	}
 }
 
+namespace OnQueueCornerMessage
+{
+	constexpr char eventName[] = "ShowOff:OnQueueCornerMessage";
+
+	// Warning: msgText is not fully formatted, i.e. can have "&sUActnVats" and other formatting tricks.
+	void DispatchEvent(HUDMainMenu::QueuedMessage* msg)
+	{
+		void* displayTime = *(void**)&msg->displayTime;
+		g_eventInterface->DispatchEvent(eventName, nullptr, msg->msgText, 
+			msg->iconPath, msg->soundPath, displayTime);
+	}
+
+	void __fastcall tListAppendHook(tList<HUDMainMenu::QueuedMessage>* msgList, void* edx, 
+		HUDMainMenu::QueuedMessage** msg)
+	{
+		// Run our code
+		DispatchEvent(*msg);
+
+		// Regular code
+		ThisStdCall(0x905820, msgList, msg);
+	}
+
+	void __fastcall tListInsertHook(tList<HUDMainMenu::QueuedMessage>* msgList, void* edx,
+		HUDMainMenu::QueuedMessage** msg)
+	{
+		// Run our code
+		DispatchEvent(*msg);
+
+		// Regular code
+		ThisStdCall(0x5AE3D0, msgList, msg);
+	}
+
+	void WriteHooks()
+	{
+		WriteRelCall(0x7754FA, (UInt32)tListAppendHook);
+		WriteRelCall(0x775624, (UInt32)tListAppendHook);
+		WriteRelCall(0x775610, (UInt32)tListInsertHook);
+	}
+}
+
+namespace OnShowCornerMessage
+{
+	constexpr char eventName[] = "ShowOff:OnShowCornerMessage";
+
+	// Warning: msgText is not fully formatted, i.e. can have "&sUActnVats" and other formatting tricks.
+	void DispatchEvent(HUDMainMenu::QueuedMessage* msg)
+	{
+		void* displayTime = *(void**)&msg->displayTime;
+		g_eventInterface->DispatchEvent(eventName, nullptr, msg->msgText,
+			msg->iconPath, msg->soundPath, displayTime);
+	}
+
+	tList<HUDMainMenu::QueuedMessage>* __fastcall
+		thisHook(tList<HUDMainMenu::QueuedMessage>* msgList)
+	{
+		// Our code
+		DispatchEvent(msgList->Head()->data);
+
+		// regular code
+		return msgList;
+	}
+
+	void WriteHooks()
+	{
+		WriteRelCall(0x7757F9, (UInt32)thisHook);
+		WriteRelCall(0x77550A, (UInt32)thisHook);
+	}
+}
+
+
+
 using EventFlags = NVSEEventManagerInterface::EventFlags;
 
 template<UInt8 N>
@@ -636,6 +707,12 @@ void RegisterEvents()
 	RegisterEvent(OnProjectileImpact::eventName, kEventParams_OneReference_OneBaseForm_OneReference, EventFlags::kFlag_FlushOnLoad);
 
 	RegisterEvent(OnLockpickMenuClose::eventName, kEventParams_OneInt);
+
+	RegisterEvent(OnQueueCornerMessage::eventName, kEventParams_ThreeStrings_OneFloat);
+	RegisterEvent(OnShowCornerMessage::eventName, kEventParams_ThreeStrings_OneFloat);
+#if _DEBUG
+
+#endif
 	/*
 	// For debugging the Event API
 	constexpr char DebugEventName[] = "ShowOff:DebugEvent";
@@ -663,7 +740,10 @@ namespace HandleHooks
 		OnProjectileCreate::WriteHook();
 		OnProjectileImpact::WriteHooks();
 		OnLockpickMenuClose::WriteHooks();
+		OnQueueCornerMessage::WriteHooks();
+		OnShowCornerMessage::WriteHooks();
 #if _DEBUG
+
 		//ActorValueChangeHooks::WriteHook();
 #endif
 	}

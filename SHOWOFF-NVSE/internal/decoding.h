@@ -978,7 +978,7 @@ public:
 	struct QueuedMessage
 	{
 		char	msgText[0x204];			// 000
-		char	iconPate[MAX_PATH];		// 204
+		char	iconPath[MAX_PATH];		// 204
 		char	soundPath[MAX_PATH];	// 308
 		float	displayTime;			// 40C
 	};

@@ -100,3 +100,11 @@ static EventParamType kEventParams_OneInt[] =
 {
 	EventParamType::eParamType_Int,
 };
+
+static EventParamType kEventParams_ThreeStrings_OneFloat[] =
+{
+	EventParamType::eParamType_String,
+	EventParamType::eParamType_String,
+	EventParamType::eParamType_String,
+	EventParamType::eParamType_Float,
+};
