@@ -670,7 +670,44 @@ namespace OnShowCornerMessage
 	}
 }
 
+namespace OnFireWeapon
+{
+	constexpr char eventName[] = "ShowOff:OnFireWeapon";
 
+	// Runs before ModifyChanceForAmmoItem perk entry point can add items.
+	// Runs before the weapon is damaged from firing.
+	// 
+	void __fastcall DispatchEvent(Actor* actor, TESObjectWEAP* weap)
+	{
+		g_eventInterface->DispatchEvent(eventName, actor, weap);
+	}
+
+	void __declspec(naked) Hook()
+	{
+		UInt32 static const retnAddr = 0x523199;
+		__asm
+		{
+			// regular code
+			mov		eax, [edx + 0x100]
+			call	eax
+			push	eax  // store result
+
+			// Our code
+			mov		ecx, [ebp + 0x8] //actor
+			mov		edx, [ebp - 0x238] //weapon
+			call	DispatchEvent
+
+			// back to regular
+			pop		eax  // restore result
+			jmp		retnAddr
+		}
+	}
+
+	void WriteHook()
+	{
+		WriteRelJump(0x523191, (UInt32)Hook);
+	}
+}
 
 using EventFlags = NVSEEventManagerInterface::EventFlags;
 
@@ -710,8 +747,9 @@ void RegisterEvents()
 
 	RegisterEvent(OnQueueCornerMessage::eventName, kEventParams_ThreeStrings_OneFloat);
 	RegisterEvent(OnShowCornerMessage::eventName, kEventParams_ThreeStrings_OneFloat);
-#if _DEBUG
+	RegisterEvent(OnFireWeapon::eventName, kEventParams_OneReference_OneBaseForm);
 
+#if _DEBUG
 #endif
 	/*
 	// For debugging the Event API
@@ -742,8 +780,8 @@ namespace HandleHooks
 		OnLockpickMenuClose::WriteHooks();
 		OnQueueCornerMessage::WriteHooks();
 		OnShowCornerMessage::WriteHooks();
+		OnFireWeapon::WriteHook();
 #if _DEBUG
-
 		//ActorValueChangeHooks::WriteHook();
 #endif
 	}
