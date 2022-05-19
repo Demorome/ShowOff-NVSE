@@ -647,12 +647,27 @@ namespace OnShowCornerMessage
 {
 	constexpr char eventName[] = "ShowOff:OnShowCornerMessage";
 
+	std::string g_msgText, g_iconPath, g_soundPath;
+
 	// Warning: msgText is not fully formatted, i.e. can have "&sUActnVats" and other formatting tricks.
 	void DispatchEvent(HUDMainMenu::QueuedMessage* msg)
 	{
+		auto constexpr postCallback = [](void* nothing, NVSEEventManagerInterface::DispatchReturn retn)
+		{
+			g_msgText.clear();
+			g_iconPath.clear();
+			g_soundPath.clear();
+		};
+
+		// Keep strings alive in case of dispatch deferral.
+		g_msgText = msg->msgText;
+		g_iconPath = msg->iconPath;
+		g_soundPath = msg->soundPath;
+
 		void* displayTime = *(void**)&msg->displayTime;
-		g_eventInterface->DispatchEventThreadSafe(eventName, nullptr, msg->msgText,
-			msg->iconPath, msg->soundPath, displayTime);
+		// Event can run outside main thread; defer dispatch in that case.
+		g_eventInterface->DispatchEventThreadSafe(eventName, postCallback, nullptr, g_msgText.c_str(),
+			g_iconPath.c_str(), g_soundPath.c_str(), displayTime);
 	}
 
 	tList<HUDMainMenu::QueuedMessage>* __fastcall
