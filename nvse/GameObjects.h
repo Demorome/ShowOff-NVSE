@@ -807,6 +807,12 @@ public:
 		UInt8		isHostile;
 		UInt8		isDetected;
 		UInt8		pad06[2];
+
+		CompassTarget(Actor* target, bool isHostile, bool isDetected)
+			: target(target), isHostile(isHostile), isDetected(isDetected)
+		{}
+		CompassTarget(const CompassTarget& t) : target(t.target), isHostile(t.isHostile), isDetected(t.isDetected)
+		{}
 	};
 
 	UInt32								unk1C8[16];				// 1C8	208 could be a DialogPackage

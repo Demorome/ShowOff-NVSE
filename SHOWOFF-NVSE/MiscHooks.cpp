@@ -415,7 +415,7 @@ namespace GetCompassTargets
 {
 	// Caches CompassTargets that are actually shown in compass.
 	// Should be refreshed every frame.
-	std::vector<CompassTarget*> g_TargetsInCompass;
+	std::vector<CompassTarget> g_TargetsInCompass;
 
 	int __fastcall GetSize_Hook(const tList<CompassTarget>* compassTargets)
 	{
@@ -430,7 +430,7 @@ namespace GetCompassTargets
 		// Fill in the list.
 		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
 		auto* target = *reinterpret_cast<CompassTarget**>(ebp - 0xFC);
-		g_TargetsInCompass.push_back(target);
+		g_TargetsInCompass.emplace_back(*target); //copy the compass target in case it gets invalidated.
 	}
 
 	void WriteHooks()

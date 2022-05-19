@@ -1,7 +1,8 @@
 ﻿#pragma once
+#include "MiscHooks.h"
 
-DEFINE_COMMAND_PLUGIN(GetPosArray, "Returns an array of the 3 axis positions of a reference", 
-	true, nullptr);
+DEFINE_COMMAND_PLUGIN(GetPosArray, "Returns an array of the 3 axis positions of a reference",
+                      true, nullptr);
 bool Cmd_GetPosArray_Execute(COMMAND_ARGS)
 {
 	ArrayElementL const posElems[] =
@@ -11,7 +12,7 @@ bool Cmd_GetPosArray_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(GetCompassTargets, , 0, 1, kParams_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(GetCompassTargets, , 0, kParams_OneOptionalInt);
 bool Cmd_GetCompassTargets_Execute(COMMAND_ARGS)
 {
 	*result = 0;
@@ -26,20 +27,16 @@ bool Cmd_GetCompassTargets_Execute(COMMAND_ARGS)
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &includeWhat))
 		return true;
 
-	NVSEArrayVar* hostileArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+	NVSEArrayVar* resArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+	g_arrInterface->AssignCommandResult(resArr, result);
 	for (auto const iter : GetCompassTargets::g_TargetsInCompass)
 	{
 		if (includeWhat == IncludeAll
 			|| (includeWhat == IncludeNonHostiles && !iter->isHostile)
 			|| (includeWhat == IncludeHostiles && iter->isHostile))
 		{
-			g_arrInterface->AppendElement(hostileArr, NVSEArrayElement(iter->target));
+			g_arrInterface->AppendElement(resArr, ArrayElementL(iter->target));
 		}
-	}
-
-	if (g_arrInterface->GetArraySize(hostileArr))
-	{
-		g_arrInterface->AssignCommandResult(hostileArr, result);
 	}
 	return true;
 }

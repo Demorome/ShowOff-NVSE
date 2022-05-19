@@ -39,5 +39,5 @@ namespace GetCompassTargets
 
 	// Caches CompassTargets that are actually shown in compass.
 	// Should be refreshed every frame.
-	extern std::vector<CompassTarget*> g_TargetsInCompass;
+	extern std::vector<CompassTarget> g_TargetsInCompass;
 }

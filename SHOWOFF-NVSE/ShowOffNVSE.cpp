@@ -605,6 +605,7 @@ extern "C"
 		/*3D34*/	REG_CMD(GetEquippedWeaponRef)
 		/*3D35*/	REG_CMD(GetCalculatedAPCost)
 		/*3D36*/	REG_CMD_ARR(GetPosArray)
+		/*3D37*/	REG_CMD_ARR(GetCompassTargets)
 	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
