@@ -12,7 +12,7 @@ bool Cmd_GetPosArray_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(GetCompassTargets, , 0, kParams_OneOptionalInt);
+DEFINE_COMMAND_PLUGIN(GetCompassTargets, , false, kParams_OneOptionalInt);
 bool Cmd_GetCompassTargets_Execute(COMMAND_ARGS)
 {
 	*result = 0;
@@ -32,10 +32,10 @@ bool Cmd_GetCompassTargets_Execute(COMMAND_ARGS)
 	for (auto const iter : GetCompassTargets::g_TargetsInCompass)
 	{
 		if (includeWhat == IncludeAll
-			|| (includeWhat == IncludeNonHostiles && !iter->isHostile)
-			|| (includeWhat == IncludeHostiles && iter->isHostile))
+			|| (includeWhat == IncludeNonHostiles && !iter.isHostile)
+			|| (includeWhat == IncludeHostiles && iter.isHostile))
 		{
-			g_arrInterface->AppendElement(resArr, ArrayElementL(iter->target));
+			g_arrInterface->AppendElement(resArr, ArrayElementL(iter.target));
 		}
 	}
 	return true;
