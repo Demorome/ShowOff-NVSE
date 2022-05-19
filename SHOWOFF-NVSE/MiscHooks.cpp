@@ -411,13 +411,46 @@ namespace AllowInteriorCellToUpdateWeathers
 	}
 }
 
+namespace GetCompassTargets
+{
+	// Caches CompassTargets that are actually shown in compass.
+	// Should be refreshed every frame.
+	std::vector<CompassTarget*> g_TargetsInCompass;
+
+	int __fastcall GetSize_Hook(const tList<CompassTarget>* compassTargets)
+	{
+		g_TargetsInCompass.clear();
+		return compassTargets->Count();
+	}
+
+	void __fastcall PropagateIntValue_Hook(Tile* tile, void* edx, UInt32 tileValue, int a3)
+	{
+		ThisStdCall<void>(0x700320, tile, tileValue, a3); // Regular code
+
+		// Fill in the list.
+		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+		auto* target = *reinterpret_cast<CompassTarget**>(ebp - 0xFC);
+		g_TargetsInCompass.push_back(target);
+	}
+
+	void WriteHooks()
+	{
+		// Will empty the list.
+		// Replace "call TList__GetSize"
+		WriteRelCall(0x779F7A, (UInt32)GetSize_Hook);
+
+		// Will fill the list.
+		WriteRelCall(0x77A2FA, (UInt32)PropagateIntValue_Hook);
+	}
+}
+
 namespace HandleHooks
 {
 	void HandleFunctionHooks()
 	{
 		GetLevelUpMenuUnspentPoints::WriteRetrievalHook();
 		LevelUpMenuHooks::WriteHooksForShowPerkMenu();
-
+		GetCompassTargets::WriteHooks();
 #if 0
 		WriteRelCall(0x8B0FF0, UInt32(Actor_Spread_PerkModifier_Hook));
 

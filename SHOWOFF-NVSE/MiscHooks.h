@@ -32,3 +32,12 @@ namespace PickpocketInCombat
 	bool __fastcall ShowPickpocketStringInCombat(Actor* actor, void* edx, char a2);
 	tList<PlayerCharacter::CompassTarget>* __fastcall ShowPickpocketStringInCombat2(PlayerCharacter* player, void* edx);
 }
+
+namespace GetCompassTargets
+{
+	using CompassTarget = PlayerCharacter::CompassTarget;
+
+	// Caches CompassTargets that are actually shown in compass.
+	// Should be refreshed every frame.
+	extern std::vector<CompassTarget*> g_TargetsInCompass;
+}
