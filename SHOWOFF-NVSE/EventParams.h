@@ -3,6 +3,30 @@
 
 using EventParamType = NVSEEventManagerInterface::ParamType;
 
+static EventParamType kEventParams_GameEvent[2] =
+{
+	EventParamType::eParamType_AnyForm, EventParamType::eParamType_AnyForm
+};
+
+static EventParamType kEventParams_OneRef[1] =
+{
+	EventParamType::eParamType_AnyForm,
+};
+
+static EventParamType kEventParams_OneInt[] =
+{
+	EventParamType::eParamType_Int,
+};
+
+static EventParamType kEventParams_TwoInts[2] =
+{
+	EventParamType::eParamType_Int, EventParamType::eParamType_Int
+};
+
+static EventParamType kEventParams_OneInt_OneRef[2] =
+{
+	EventParamType::eParamType_Int, EventParamType::eParamType_AnyForm
+};
 
 static EventParamType kEventParams_OneForm[1] =
 {
@@ -12,16 +36,6 @@ static EventParamType kEventParams_OneForm[1] =
 static EventParamType kEventParams_OneString[1] =
 {
 	EventParamType::eParamType_String
-};
-
-static EventParamType kEventParams_OneInteger[1] =
-{
-	EventParamType::eParamType_Int
-};
-
-static EventParamType kEventParams_TwoIntegers[2] =
-{
-	EventParamType::eParamType_Int, EventParamType::eParamType_Int
 };
 
 static EventParamType kEventParams_OneFloat_OneForm[2] =
@@ -94,11 +108,6 @@ static EventParamType kEventParams_OneReference_OneBaseForm_OneReference[] =
 	EventParamType::eParamType_Reference,
 	EventParamType::eParamType_BaseForm,
 	EventParamType::eParamType_Reference,
-};
-
-static EventParamType kEventParams_OneInt[] =
-{
-	EventParamType::eParamType_Int,
 };
 
 static EventParamType kEventParams_ThreeStrings_OneFloat[] =

@@ -765,7 +765,7 @@ struct NVSESerializationInterface
  *	(i.e. the pointer to it may never become invalid).
  *  For example, a good way to define it is to make a global variable like this:
  *
- *	    static ParamType s_MyEventParams[] = { Script::eVarType_Ref, Script::eVarType_String };
+ *	    static ParamType s_MyEventParams[] = { ParamType::eParamType_AnyForm, ParamType::eParamType_String };
  *
  *	Then you can pass it into PluginEventInfo like this:
  *
@@ -787,7 +787,7 @@ struct NVSEEventManagerInterface
 {
 	typedef void (*EventHandler)(TESObjectREFR* thisObj, void* parameters);
 
-	//May be expanded later...
+	// Mostly just used for filtering information (setup in SetEventHandler).
 	enum ParamType : int8_t
 	{
 		eParamType_Float = 0,
@@ -807,11 +807,14 @@ struct NVSEEventManagerInterface
 		// When attempting to set an event handler, if the filter-to-set is a reference the paramType is BaseForm, will reject that filter.
 		// Otherwise, behaves the same as eParamType_RefVar.
 		eParamType_BaseForm,
-		eParamType_Invalid
+
+		eParamType_Invalid,
+		eParamType_Anything
 	};
 	static bool IsFormParam(ParamType pType)
 	{
-		return pType == eParamType_RefVar || pType == eParamType_Reference || pType == eParamType_BaseForm;
+		return pType == eParamType_RefVar || pType == eParamType_Reference || pType == eParamType_BaseForm
+			|| pType == eParamType_Anything;
 	}
 
 	enum EventFlags : UInt32
@@ -820,6 +823,9 @@ struct NVSEEventManagerInterface
 
 		//If on, will remove all set handlers for the event every game load.
 		kFlag_FlushOnLoad = 1 << 0,
+
+		//Identifies script-created events, for the DispatchEvent(Alt) script functions.
+		kFlag_IsUserDefined = 1 << 1,
 	};
 
 	// Registers a new event which can be dispatched to scripts and plugins. Returns false if event with name already exists.
@@ -832,13 +838,14 @@ struct NVSEEventManagerInterface
 
 	enum DispatchReturn : int8_t
 	{
-		kRetn_Error = -1,
+		kRetn_UnknownEvent = -2,  // for plugins, events are supposed to be pre-defined.
+		kRetn_GenericError = -1,  // anything > -1 is a good result.
 		kRetn_Normal = 0,
 		kRetn_EarlyBreak,
 	};
 	typedef bool (*DispatchCallback)(NVSEArrayVarInterface::Element& result, void* anyData);
 
-	// If resultCallback is not null, then it is called for each event handler that is dispatched, which allows checking the result of each dispatch.
+	// If resultCallback is not null, then it is called for each SCRIPT event handler that is dispatched, which allows checking the result of each dispatch.
 	// If the callback returns false, then dispatching for the event will end prematurely, and this returns kRetn_EarlyBreak.
 	// anyData arg is passed to the callbacks.
 	DispatchReturn(*DispatchEventAlt)(const char* eventName, DispatchCallback resultCallback, void* anyData, TESObjectREFR* thisObj, ...);
@@ -848,6 +855,16 @@ struct NVSEEventManagerInterface
 
 	// Same as script function RemoveEventHandler but for native functions
 	bool (*RemoveNativeEventHandler)(const char* eventName, EventHandler func);
+
+	bool (*RegisterEventWithAlias)(const char* name, const char* alias, UInt8 numParams, ParamType* paramTypes, EventFlags flags);
+
+	// Same as DispatchEvent, but if attempting to dispatch outside of the game's main thread, the dispatch will be deferred.
+	// Recommended to avoid potential multithreaded crashes, usually related to Console_Print.
+	bool (*DispatchEventThreadSafe)(const char* eventName, TESObjectREFR* thisObj, ...);
+
+	// Same as DispatchEventAlt, but if attempting to dispatch outside of the game's main thread, the dispatch will be deferred.
+	// Recommended to avoid potential multithreaded crashes, usually related to Console_Print.
+	DispatchReturn(*DispatchEventAltThreadSafe)(const char* eventName, DispatchCallback resultCallback, void* anyData, TESObjectREFR* thisObj, ...);
 };
 #endif
 

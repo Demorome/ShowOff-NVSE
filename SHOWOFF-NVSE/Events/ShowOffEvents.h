@@ -93,6 +93,7 @@ namespace CornerMessageHooks
 	}
 }
 
+#if 0
 namespace ActorValueChangeHooks
 {
 	void __fastcall ActorValueChange_EventHandler(ActorValueOwner *avOwner, int avCode, float previousVal, float newVal, ActorValueOwner *attackerAvOwner)
@@ -162,6 +163,7 @@ namespace ActorValueChangeHooks
 		WriteRelCall(0x66EE58, (UInt32)HandleAVChangeHook);
 	}
 }
+#endif
 
 namespace OnPreActivate
 {
@@ -649,7 +651,7 @@ namespace OnShowCornerMessage
 	void DispatchEvent(HUDMainMenu::QueuedMessage* msg)
 	{
 		void* displayTime = *(void**)&msg->displayTime;
-		g_eventInterface->DispatchEvent(eventName, nullptr, msg->msgText,
+		g_eventInterface->DispatchEventThreadSafe(eventName, nullptr, msg->msgText,
 			msg->iconPath, msg->soundPath, displayTime);
 	}
 
