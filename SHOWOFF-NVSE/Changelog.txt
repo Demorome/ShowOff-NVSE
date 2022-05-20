@@ -228,7 +228,7 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 
 //===v1.50
 
-*AS OF THIS VERSION, xNVSE 6.2.7 or greater is required.*
+*AS OF THIS VERSION, xNVSE 6.2.8 or greater is required.*
 
 ===Bug Fixes:
 * ShowPerkMenu: 
