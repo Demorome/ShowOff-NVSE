@@ -917,9 +917,11 @@ void RegisterEvents()
 	RegisterEvent(OnShowCornerMessage::eventName, kEventParams_ThreeStrings_OneFloat);
 	RegisterEvent(OnFireWeapon::eventName, kEventParams_OneReference_OneBaseForm);
 
-#if _DEBUG
 	RegisterEvent(OnCalculateEffectEntryMagnitude::eventName,
 		kEventParams_OneReference_TwoBaseForms_OneInt_OneBaseForm_OneInt_ThreeFloats);
+
+#if _DEBUG
+
 #endif
 	/*
 	// For debugging the Event API
@@ -951,8 +953,9 @@ namespace HandleHooks
 		OnQueueCornerMessage::WriteHooks();
 		OnShowCornerMessage::WriteHooks();
 		OnFireWeapon::WriteHook();
-#if _DEBUG
 		OnCalculateEffectEntryMagnitude::WriteHooks();
+
+#if _DEBUG
 		//ActorValueChangeHooks::WriteHook();
 #endif
 	}

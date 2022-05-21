@@ -420,7 +420,7 @@ namespace GetCompassTargets
 	int __fastcall GetSize_Hook(const tList<CompassTarget>* compassTargets)
 	{
 		g_TargetsInCompass.clear();
-		return compassTargets->Count();
+		return compassTargets ? compassTargets->Count() : 0;
 	}
 
 	void __fastcall PropagateIntValue_Hook(Tile* tile, void* edx, UInt32 tileValue, int a3)
