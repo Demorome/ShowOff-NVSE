@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "EventParams.h"
+#include "GameEffects.h"
 
 // Credits to Karut (from JohnnyGuitar) for making the Event Framework.
 EventInformation* OnCornerMessage;
@@ -726,6 +727,116 @@ namespace OnFireWeapon
 	}
 }
 
+namespace OnCalculateEffectEntryMagnitude
+{
+	constexpr char eventName[] = "ShowOff:OnCalculateEffectMagnitude";
+
+	inline NumberModifications<float> g_MagnitudeModModifiers;
+
+	double HandleEvent(float normalModifier, UInt32 isHostile, UInt8* ebp)
+	{
+		auto* target = *reinterpret_cast<MagicTarget**>(ebp - 0x28);
+		auto* caster = *reinterpret_cast<MagicCaster**>(ebp + 8);
+		auto* magicItem = *reinterpret_cast<MagicItem**>(ebp + 0xC);
+		auto* itemForm = DYNAMIC_CAST(magicItem, MagicItem, TESForm);
+
+		const auto* activeEff = *reinterpret_cast<ActiveEffect**>(ebp + 0x10);
+		auto* baseEffect = activeEff->effectItem->setting;
+
+		void* multArg = *(void**)&normalModifier;
+		void* magnitude = *(void**)&activeEff->magnitude;
+		void* duration = *(void**)&activeEff->duration;
+
+		// WARNING: can run outside main thread (i.e when loading).
+		// Thus, no calls to Console_Print should occur during then!
+		// Can't delay this dispatch, otherwise effects wouldn't apply in time.
+		g_eventInterface->DispatchEvent(eventName, target->GetActor(), caster->GetActor(), 
+			itemForm, baseEffect, activeEff->spellType, activeEff->enchantObject, isHostile, multArg,
+			magnitude, duration);
+			
+		g_MagnitudeModModifiers.ModValue(normalModifier);
+		g_MagnitudeModModifiers.Clear();
+
+		return normalModifier;
+	}
+
+	double __cdecl HandleHostileEffect(float normalModifier)
+	{
+		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+		auto magnitudeMult = HandleEvent(normalModifier, true, ebp);
+
+		// TODO: Cap magnitudeMult by max player resistance (if target is the player).
+
+		return magnitudeMult;
+	}
+	double __cdecl HandleNormalEffect(float normalModifier)
+	{
+		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+
+		// No cap needs to be applied, since the player isn't resisting anything.
+		return HandleEvent(normalModifier, false, ebp);
+	}
+
+	void __declspec(naked) CalcRegularEffectHook()
+	{
+		__asm
+		{
+			//result in st(0)
+			push	ecx
+			fstp	[esp]
+			call	HandleNormalEffect  //result in st(0)
+			//add	esp, 4
+
+			// do regular code
+			mov     esp, ebp
+			pop     ebp
+			retn    0xC
+		}
+	}
+
+	void __declspec(naked) CalcHostileEffectResistHook()
+	{
+		__asm
+		{
+			// just called CalculateSpellMagnitudeMultFromResistance, result in st(0)
+			push	ecx
+			fstp	[esp]
+			call	HandleHostileEffect  //result in st(0)
+			//add	esp, 4  //not needed
+
+			// do regular code
+			mov     esp, ebp
+			pop     ebp
+			retn    0xC
+		}
+	}
+
+	void WriteHooks()
+	{
+		// Overwrite function epilogue
+		WriteRelJump(0x8C4322, (UInt32)CalcRegularEffectHook);
+
+		// Overwrite code following call to CalculateSpellMagnitudeMultFromResistance
+		WriteRelJump(0x8C431C, (UInt32)CalcHostileEffectResistHook);
+	}
+}
+
+DEFINE_COMMAND_PLUGIN(SetEffectMagnitudeModifier, "", false, kParams_OneFloat_OneString);
+bool Cmd_SetEffectMagnitudeModifier_Execute(COMMAND_ARGS)
+{
+	*result = false;
+	float fMod;
+	char modType[2];
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &fMod, &modType))
+		return true;
+
+	ScopedLock lock(g_Lock);
+	*result = OnCalculateEffectEntryMagnitude::g_MagnitudeModModifiers.TryAddMod(fMod, modType[0]);
+
+	return true;
+}
+
+
 using EventFlags = NVSEEventManagerInterface::EventFlags;
 
 template<UInt8 N>
@@ -767,6 +878,8 @@ void RegisterEvents()
 	RegisterEvent(OnFireWeapon::eventName, kEventParams_OneReference_OneBaseForm);
 
 #if _DEBUG
+	RegisterEvent(OnCalculateEffectEntryMagnitude::eventName,
+		kEventParams_OneReference_TwoBaseForms_OneInt_OneBaseForm_OneInt_ThreeFloats);
 #endif
 	/*
 	// For debugging the Event API
@@ -799,6 +912,7 @@ namespace HandleHooks
 		OnShowCornerMessage::WriteHooks();
 		OnFireWeapon::WriteHook();
 #if _DEBUG
+		OnCalculateEffectEntryMagnitude::WriteHooks();
 		//ActorValueChangeHooks::WriteHook();
 #endif
 	}

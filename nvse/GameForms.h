@@ -974,16 +974,28 @@ public:
 	virtual void	Unk_0F(void); // pure virtual
 
 	EffectItemList	list;	// 00C
-//	UInt32	unk018;			// 018
-	// perhaps types are no longer correct!
-	enum EType{
-		kType_None = 0,
-		kType_Spell = 1,
-		kType_Enchantment = 2,
-		kType_Alchemy = 3,
-		kType_Ingredient = 4,
+
+	// Copied from JIP
+	enum MagicItemType
+	{
+		//	SpellItem
+		kActorEffect = 0,
+		kDisease = 1,
+		kPower = 2,
+		kLesserPower = 3,
+		kAbility = 4,
+		kPoison = 5,
+		kAddiction = 10,
+
+		//	EnchantmentItem
+		kObjectEffect = 6,
+
+		//	AlchemyItem
+		kIngestible = 7,
+
+		//	IngredientItem
+		kIngredient = 8
 	};
-	EType Type() const;
 };
 
 STATIC_ASSERT(sizeof(MagicItem) == 0x1C);
@@ -2624,7 +2636,7 @@ public:
 
 	virtual void	ByteSwap(void);
 
-	enum
+	enum Type : UInt32
 	{
 		kType_ActorEffect	= 0,
 		kType_Disease,
@@ -2635,7 +2647,7 @@ public:
 		kType_Addiction		= 10,
 	};
 
-	UInt32		type;		// 34
+	Type		type;		// 34
 	UInt32		unk38;		// 38
 	UInt32		unk3C;		// 3C
 	UInt8		spellFlags;	// 40

@@ -73,6 +73,23 @@ bool Cmd_IsBaseForm_Execute(COMMAND_ARGS)
 	return true;
 }
 
+DEFINE_COMMAND_PLUGIN(IsOutsideMainThread, "", false, NULL);
+bool Cmd_IsOutsideMainThread_Execute(COMMAND_ARGS)
+{
+	*result = GetCurrentThreadId() != g_mainThreadID;
+	return true;
+}
+
+
+
+
+
+
+
+
+#if _DEBUG
+
+
 DEFINE_COMMAND_PLUGIN(Debug_UpdateWeather, "", false, NULL);
 bool Cmd_Debug_UpdateWeather_Execute(COMMAND_ARGS)
 {
@@ -84,9 +101,6 @@ bool Cmd_Debug_UpdateWeather_Execute(COMMAND_ARGS)
 	}
 	return true;
 }
-
-
-#if _DEBUG
 
 DEFINE_COMMAND_PLUGIN_EXP_SAFE(Debug_DispatchEvent, "", false, kNVSEParams_TwoNums_OneArray_OneStr_ThreeForms);
 bool Cmd_Debug_DispatchEvent_Execute(COMMAND_ARGS)

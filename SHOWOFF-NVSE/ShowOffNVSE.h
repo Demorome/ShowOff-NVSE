@@ -48,6 +48,8 @@ typedef InventoryRef* (*_InventoryRefCreate)(TESObjectREFR* container, const Inv
 extern _InventoryRefCreate InventoryRefCreate;
 extern NVSEEventManagerInterface* g_eventInterface;
 
+extern DWORD g_mainThreadID;
+
 //Singletons
 extern HUDMainMenu* g_HUDMainMenu;
 extern TileMenu** g_tileMenuArray;

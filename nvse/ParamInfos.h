@@ -51,6 +51,12 @@ static ParamInfo kParams_OneFloat[1] =
 {
 	{	"float", kParamType_Float,	0 },
 };
+static ParamInfo kParams_OneFloat_OneString[2] =
+{
+	{	"float", kParamType_Float,	0 },
+	{	"string", kParamType_String,	0 },
+};
+
 
 static ParamInfo  kParams_OneFloat_OneOptionalInt[2] =
 {

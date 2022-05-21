@@ -90,6 +90,9 @@
     <ClCompile Include="internal\ExtractArgs_TypeSafe.cpp">
       <Filter>internal</Filter>
     </ClCompile>
+    <ClCompile Include="internal\SOTypes.cpp">
+      <Filter>internal</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="functions\SO_fn_Misc.h">
@@ -224,7 +227,6 @@
     <ClInclude Include="..\nvse\ParamInfos.h">
       <Filter>nvse</Filter>
     </ClInclude>
-    <ClInclude Include="SOTypes.h" />
     <ClInclude Include="Events\LambdaVarContext.h">
       <Filter>Events</Filter>
     </ClInclude>
@@ -2138,6 +2140,9 @@
     </ClInclude>
     <ClInclude Include="functions\SO_fn_Refs.h">
       <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="SOTypes.h">
+      <Filter>internal</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

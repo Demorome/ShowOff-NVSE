@@ -44,7 +44,7 @@ public:
 	float			duration;			// 20 - adjusted based on target?
 	MagicTarget		*target;			// 24
 	MagicCaster		*caster;			// 28
-	UInt32			spellType;			// 2C e.g. SpellItem::kType_Ability
+	SpellItem::Type	spellType;			// 2C
 	UInt32			unk30;				// 30
 	UInt32			unk34;				// 34
 	UInt32			unk38;				// 38

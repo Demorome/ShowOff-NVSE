@@ -104,6 +104,8 @@ _UncaptureLambdaVars UncaptureLambdaVars;
 ExpressionEvaluatorUtils g_expEvalUtils;
 NVSEEventManagerInterface* g_eventInterface = nullptr;
 
+DWORD g_mainThreadID = 0;
+
 // Singletons
 HUDMainMenu* g_HUDMainMenu = nullptr;
 TileMenu** g_tileMenuArray = nullptr;
@@ -334,7 +336,9 @@ extern "C"
 		if (!nvse->isEditor) 
 		{
 			PluginHandle const nvsePluginHandle = nvse->GetPluginHandle();  //from JiPLN
-			
+
+			g_mainThreadID = GetCurrentThreadId();
+
 			auto const nvseData = (NVSEDataInterface*)nvse->QueryInterface(kInterface_Data);
 			InventoryRefGetForID = (InventoryRef * (*)(UInt32 refID))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID);
 			InventoryRefCreate = (_InventoryRefCreate)nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceCreate);
@@ -606,6 +610,9 @@ extern "C"
 		/*3D35*/	REG_CMD(GetCalculatedAPCost)
 		/*3D36*/	REG_CMD_ARR(GetPosArray)
 		/*3D37*/	REG_CMD_ARR(GetCompassTargets)
+		/*3D38*/	REG_CMD(SetEffectMagnitudeModifier)
+		/*3D39*/	REG_CMD(IsOutsideMainThread)
+
 	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
@@ -621,6 +628,7 @@ extern "C"
 #endif
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
+
 
 		REG_CMD(GetHeadingAngleTEST)
 

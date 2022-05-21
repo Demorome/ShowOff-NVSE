@@ -6,7 +6,7 @@
 #define NVSE_VERSION_INTEGER_MINOR	2
 #define NVSE_VERSION_INTEGER_BETA	8
 #define NVSE_VERSION_VERSTRING		"0, 6, 2, 8"
-#define NVSE_VERSION_PADDEDSTRING	"0008"
+#define NVSE_VERSION_PADDEDSTRING	"0006"
 
 // build numbers do not appear to follow the same format as with oblivion
 #define MAKE_NEW_VEGAS_VERSION_EX(major, minor, build, sub)	(((major & 0xFF) << 24) | ((minor & 0xFF) << 16) | ((build & 0xFFF) << 4) | (sub & 0xF))

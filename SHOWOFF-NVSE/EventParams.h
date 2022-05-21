@@ -109,6 +109,28 @@ static EventParamType kEventParams_OneReference_OneBaseForm_OneReference[] =
 	EventParamType::eParamType_BaseForm,
 	EventParamType::eParamType_Reference,
 };
+static EventParamType kEventParams_OneReference_TwoBaseForms_OneFloat_OneInt[] =
+{
+	EventParamType::eParamType_Reference,
+	EventParamType::eParamType_BaseForm,
+	EventParamType::eParamType_BaseForm,
+	EventParamType::eParamType_Float,
+	EventParamType::eParamType_Int,
+};
+static EventParamType kEventParams_OneReference_TwoBaseForms_OneInt_OneBaseForm_OneInt_ThreeFloats[] =
+{
+	EventParamType::eParamType_Reference,
+	EventParamType::eParamType_BaseForm,
+	EventParamType::eParamType_BaseForm,
+	EventParamType::eParamType_Int,
+	EventParamType::eParamType_BaseForm,
+	EventParamType::eParamType_Int,
+	EventParamType::eParamType_Float,
+	EventParamType::eParamType_Float,
+	EventParamType::eParamType_Float,
+};
+
+
 
 static EventParamType kEventParams_ThreeStrings_OneFloat[] =
 {
