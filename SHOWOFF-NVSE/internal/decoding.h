@@ -39,6 +39,8 @@ enum ActorValueCode
 	kAVCode_Energy,
 	kAVCode_Responsibility,
 	kAVCode_Mood,
+
+	//SPECIAL begin
 	kAVCode_Strength,
 	kAVCode_Perception,
 	kAVCode_Endurance,
@@ -46,6 +48,8 @@ enum ActorValueCode
 	kAVCode_Intelligence,
 	kAVCode_Agility,
 	kAVCode_Luck,
+	//SPECIAL end
+
 	kAVCode_ActionPoints,
 	kAVCode_CarryWeight,
 	kAVCode_CritChance,
@@ -66,6 +70,8 @@ enum ActorValueCode
 	kAVCode_LeftMobilityCondition,
 	kAVCode_RightMobilityCondition,
 	kAVCode_BrainCondition,
+
+	//skills begin
 	kAVCode_Barter,
 	kAVCode_BigGuns,
 	kAVCode_EnergyWeapons,
@@ -80,6 +86,8 @@ enum ActorValueCode
 	kAVCode_Speech,
 	kAVCode_Survival,
 	kAVCode_Unarmed,
+	// skills end
+
 	kAVCode_InventoryWeight,
 	kAVCode_Paralysis,
 	kAVCode_Invisibility,
@@ -96,6 +104,7 @@ enum ActorValueCode
 	kAVCode_FrostResist,
 	kAVCode_EnergyResist,
 	kAVCode_EmpResist,
+
 	kAVCode_Variable01,
 	kAVCode_Variable02,
 	kAVCode_Variable03,
@@ -106,6 +115,7 @@ enum ActorValueCode
 	kAVCode_Variable08,
 	kAVCode_Variable09,
 	kAVCode_Variable10,
+
 	kAVCode_IgnoreCrippledLimbs,
 	kAVCode_Dehydration,
 	kAVCode_Hunger,

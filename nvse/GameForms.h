@@ -870,7 +870,7 @@ public:
 	EffectItem();
 	~EffectItem();
 
-	enum
+	enum Range : UInt32
 	{
 		kRange_Self = 0,
 		kRange_Touch,
@@ -901,7 +901,7 @@ public:
 	UInt32				magnitude;			// 00	used as a float
 	UInt32				area;				// 04
 	UInt32				duration;			// 08
-	UInt32				range;				// 0C
+	Range				range;				// 0C
 	UInt32				actorValueOrOther;	// 10
 	EffectSetting		*setting;			// 14
 	float				cost;				// 18 on autocalc items this seems to be the cost

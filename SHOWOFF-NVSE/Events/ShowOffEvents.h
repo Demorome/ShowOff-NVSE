@@ -732,6 +732,7 @@ namespace OnCalculateEffectEntryMagnitude
 	constexpr char eventName[] = "ShowOff:OnCalculateEffectMagnitude";
 
 	inline NumberModifications<float> g_MagnitudeModModifiers;
+	inline EffectItem* g_liveEffectItem = nullptr;
 
 	double HandleEvent(float normalModifier, UInt32 isHostile, UInt8* ebp)
 	{
@@ -745,7 +746,10 @@ namespace OnCalculateEffectEntryMagnitude
 
 		void* multArg = *(void**)&normalModifier;
 		void* magnitude = *(void**)&activeEff->magnitude;
-		void* duration = *(void**)&activeEff->duration;
+		void* duration = *(void**)&activeEff->duration; // not modified by perk effects, like Modify Positive Chem Duration
+
+		// Store effect Item for one frame, so it can be queried in a function inside the event.
+		g_liveEffectItem = activeEff->effectItem;
 
 		// WARNING: can run outside main thread (i.e when loading).
 		// Thus, no calls to Console_Print should occur during then!
@@ -753,6 +757,8 @@ namespace OnCalculateEffectEntryMagnitude
 		g_eventInterface->DispatchEvent(eventName, target->GetActor(), caster->GetActor(), 
 			itemForm, baseEffect, activeEff->spellType, activeEff->enchantObject, isHostile, multArg,
 			magnitude, duration);
+
+		g_liveEffectItem = nullptr;
 			
 		g_MagnitudeModModifiers.ModValue(normalModifier);
 		g_MagnitudeModModifiers.Clear();
@@ -833,6 +839,40 @@ bool Cmd_SetEffectMagnitudeModifier_Execute(COMMAND_ARGS)
 	ScopedLock lock(g_Lock);
 	*result = OnCalculateEffectEntryMagnitude::g_MagnitudeModModifiers.TryAddMod(fMod, modType[0]);
 
+	return true;
+}
+
+DEFINE_COMMAND_PLUGIN(GetLiveEffectBaseTrait, "", false, kParams_OneInt);
+// Copied code from JIP's GetNthEffectTraitNumeric
+bool Cmd_GetLiveEffectBaseTrait_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	UInt32 traitID;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &traitID))
+		return true;
+	EffectItem* effItem = OnCalculateEffectEntryMagnitude::g_liveEffectItem;
+	if (!effItem) return true;
+	switch (traitID)
+	{
+	case 0:
+		*result = effItem->magnitude;
+		break;
+	case 1:
+		*result = effItem->area;
+		break;
+	case 2:
+		*result = effItem->duration;
+		break;
+	case 3:
+		*result = effItem->range;
+		break;
+	case 4:
+		*result = effItem->actorValueOrOther;
+		break;
+	case 5:
+		*result = effItem->cost;  // unused in NV?
+		break;
+	}
 	return true;
 }
 

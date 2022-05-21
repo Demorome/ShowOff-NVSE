@@ -612,7 +612,8 @@ extern "C"
 		/*3D37*/	REG_CMD_ARR(GetCompassTargets)
 		/*3D38*/	REG_CMD(SetEffectMagnitudeModifier)
 		/*3D39*/	REG_CMD(IsOutsideMainThread)
-
+		/*3D3A*/	REG_CMD(GetLiveEffectBaseTrait)
+		/*3D3B*/	REG_CMD_STR(GetActorValueName)
 	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
