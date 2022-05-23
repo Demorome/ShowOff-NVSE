@@ -876,6 +876,41 @@ bool Cmd_GetLiveEffectBaseTrait_Execute(COMMAND_ARGS)
 	return true;
 }
 
+namespace OnTeammateStateChange
+{
+	constexpr char eventName[] = "ShowOff:OnTeammateStateChange";
+
+	void __fastcall HandleOnRemove(tList<Actor*> *teammates, void* edx, Actor** actorPtr)
+	{
+		// Do regular code
+		ThisStdCall(0x905330, teammates, actorPtr); // tList::Remove
+
+		// Run our code
+		Actor* actor = *actorPtr;
+		UInt32 constexpr isAdded = false;
+		actor->isTeammate = false; // update before the event runs.
+		g_eventInterface->DispatchEventThreadSafe(eventName, nullptr, actor, isAdded);
+	}
+
+	void __fastcall HandleOnAdd(tList<Actor*> *teammates, void* edx, Actor** actorPtr)
+	{
+		// Do regular code
+		ThisStdCall(0x5AE3D0, teammates, actorPtr);
+
+		// Run our code
+		Actor* actor = *actorPtr;
+		UInt32 constexpr isAdded = true;
+		actor->isTeammate = true; // update before the event runs.
+		g_eventInterface->DispatchEventThreadSafe(eventName, nullptr, actor, isAdded);
+	}
+
+	void WriteHooks()
+	{
+		WriteRelCall(0x8BCB29, (UInt32)HandleOnRemove);
+		WriteRelCall(0x8ABFC9, (UInt32)HandleOnAdd);
+	}
+}
+
 
 using EventFlags = NVSEEventManagerInterface::EventFlags;
 
@@ -920,6 +955,8 @@ void RegisterEvents()
 	RegisterEvent(OnCalculateEffectEntryMagnitude::eventName,
 		kEventParams_OneReference_TwoBaseForms_OneInt_OneBaseForm_OneInt_ThreeFloats);
 
+	RegisterEvent(OnTeammateStateChange::eventName, kEventParams_OneInt);
+
 #if _DEBUG
 
 #endif
@@ -954,6 +991,7 @@ namespace HandleHooks
 		OnShowCornerMessage::WriteHooks();
 		OnFireWeapon::WriteHook();
 		OnCalculateEffectEntryMagnitude::WriteHooks();
+		OnTeammateStateChange::WriteHooks();
 
 #if _DEBUG
 		//ActorValueChangeHooks::WriteHook();
