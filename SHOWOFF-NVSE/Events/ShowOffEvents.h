@@ -911,6 +911,28 @@ namespace OnTeammateStateChange
 	}
 }
 
+namespace OnPCMiscStatChange
+{
+	constexpr char eventName[] = "ShowOff:OnPCMiscStatChange";
+
+	int __cdecl HandleEvent()
+	{
+		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+		auto const statCode = *reinterpret_cast<MiscStatCode*>(ebp + 0x8);
+		auto const modVal = *reinterpret_cast<int*>(ebp + 0xC);
+		g_eventInterface->DispatchEventThreadSafe(eventName, nullptr, g_thePlayer, statCode, modVal);
+
+		// Do regular code
+		return 1003; // StatsMenu::GetMenuID
+	}
+
+	void WriteHook()
+	{
+		// replace "call StatsMenu::GetMenuID"
+		WriteRelCall(0x4D5E6A, (UInt32)HandleEvent);
+	}
+}
+
 
 using EventFlags = NVSEEventManagerInterface::EventFlags;
 
@@ -956,6 +978,7 @@ void RegisterEvents()
 		kEventParams_OneReference_TwoBaseForms_OneInt_OneBaseForm_OneInt_ThreeFloats);
 
 	RegisterEvent(OnTeammateStateChange::eventName, kEventParams_OneInt);
+	RegisterEvent(OnPCMiscStatChange::eventName, kEventParams_TwoInts);
 
 #if _DEBUG
 
@@ -992,6 +1015,7 @@ namespace HandleHooks
 		OnFireWeapon::WriteHook();
 		OnCalculateEffectEntryMagnitude::WriteHooks();
 		OnTeammateStateChange::WriteHooks();
+		OnPCMiscStatChange::WriteHook();
 
 #if _DEBUG
 		//ActorValueChangeHooks::WriteHook();

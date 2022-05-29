@@ -123,7 +123,7 @@ enum ActorValueCode
 	kAVCode_DamageThreshold,
 };
 
-enum MiscStatCode
+enum MiscStatCode : UInt32
 {
 	kMiscStat_QuestsCompleted,
 	kMiscStat_LocationsDiscovered,
