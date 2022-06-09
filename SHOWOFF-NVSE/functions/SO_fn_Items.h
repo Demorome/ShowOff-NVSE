@@ -152,7 +152,7 @@ bool Cmd_GetEquippedItemRefs_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(RemoveAllItemsShowOff, "", true, kParams_TwoOptionalInts_OneOptionalContainerRef_OneOptionalList);
+DEFINE_CMD_ALT_PLUGIN(RemoveAllItemsShowOff, YouDontNeedAllThisShit, "", true, kParams_TwoOptionalInts_OneOptionalContainerRef_OneOptionalList);
 
 
 
