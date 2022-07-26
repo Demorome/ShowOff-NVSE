@@ -240,8 +240,10 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 * SetEnableParent
 * GetEquippedWeapon
 * GetEquippedWeaponRef
+* ??
 
-===New Event Handlers (for SetEventHandler):
+===New Event Handlers (for SetEventHandlerAlt):
+* ??
 
 
 ====== (Template:)

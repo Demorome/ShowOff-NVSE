@@ -734,7 +734,7 @@ namespace OnCalculateEffectEntryMagnitude
 	inline NumberModifications<float> g_MagnitudeModModifiers;
 	inline EffectItem* g_liveEffectItem = nullptr;
 
-	double HandleEvent(float normalModifier, UInt32 isHostile, UInt8* ebp)
+	double HandleEvent(float modifier, UInt32 isHostile, UInt8* ebp)
 	{
 		auto* target = *reinterpret_cast<MagicTarget**>(ebp - 0x28);
 		auto* caster = *reinterpret_cast<MagicCaster**>(ebp + 8);
@@ -744,7 +744,7 @@ namespace OnCalculateEffectEntryMagnitude
 		const auto* activeEff = *reinterpret_cast<ActiveEffect**>(ebp + 0x10);
 		auto* baseEffect = activeEff->effectItem->setting;
 
-		void* multArg = *(void**)&normalModifier;
+		void* multArg = *(void**)&modifier;
 		void* magnitude = *(void**)&activeEff->magnitude;
 		void* duration = *(void**)&activeEff->duration; // not modified by perk effects, like Modify Positive Chem Duration
 
@@ -760,10 +760,10 @@ namespace OnCalculateEffectEntryMagnitude
 
 		g_liveEffectItem = nullptr;
 			
-		g_MagnitudeModModifiers.ModValue(normalModifier);
+		g_MagnitudeModModifiers.ModValue(modifier);
 		g_MagnitudeModModifiers.Clear();
 
-		return normalModifier;
+		return modifier;
 	}
 
 	double __cdecl HandleHostileEffect(float normalModifier)
