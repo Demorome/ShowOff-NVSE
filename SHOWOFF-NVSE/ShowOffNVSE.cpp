@@ -610,7 +610,7 @@ extern "C"
 		/*3D35*/	REG_CMD(GetCalculatedAPCost)
 		/*3D36*/	REG_CMD_ARR(GetPosArray)
 		/*3D37*/	REG_CMD_ARR(GetCompassTargets)
-		/*3D38*/	REG_CMD(SetEffectMagnitudeModifier)
+		/*3D38*/	REG_CMD(SetLiveEffectMagnitudeModifier)
 		/*3D39*/	REG_CMD(IsOutsideMainThread)
 		/*3D3A*/	REG_CMD(GetLiveEffectBaseTrait)
 		/*3D3B*/	REG_CMD_STR(GetActorValueName)

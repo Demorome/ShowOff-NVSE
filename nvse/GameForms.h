@@ -1837,6 +1837,9 @@ public:
 	UInt32			unk01C;			// 01C
 	UInt32			status;			// 020	bit0 = displayed, bit 1 = completed. 1 and 3 significant. If setting it to 3, quest flags bit1 will be set also.
 
+	bool IsCompleted() { return status & eQObjStatus_completed; };
+	bool IsDisplayed() { return status & eQObjStatus_displayed; };
+
 	SInt32 GetTargetIndex(TESObjectREFR *refr);
 };
 

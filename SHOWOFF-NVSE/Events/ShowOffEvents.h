@@ -827,13 +827,13 @@ namespace OnCalculateEffectEntryMagnitude
 	}
 }
 
-DEFINE_COMMAND_PLUGIN(SetEffectMagnitudeModifier, "", false, kParams_OneFloat_OneString);
-bool Cmd_SetEffectMagnitudeModifier_Execute(COMMAND_ARGS)
+DEFINE_COMMAND_PLUGIN(SetLiveEffectMagnitudeModifier, "", false, kParams_OneFloat_OneString);
+bool Cmd_SetLiveEffectMagnitudeModifier_Execute(COMMAND_ARGS)
 {
 	*result = false;
 	float fMod;
 	char modType[2];
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &fMod, &modType))
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &fMod, &modType) || !modType[0])
 		return true;
 
 	ScopedLock lock(g_Lock);
@@ -933,6 +933,43 @@ namespace OnPCMiscStatChange
 	}
 }
 
+namespace OnDisplayOrCompleteObjective
+{
+	constexpr char onDisplayName[] = "ShowOff:OnDisplayObjective";
+	constexpr char onCompleteName[] = "ShowOff:OnCompleteObjective";
+
+	static UInt32 hookedAddr = 0;
+
+	TESQuest* __fastcall Hook(BGSQuestObjective* objective)
+	{
+		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+		const auto newStatus = *reinterpret_cast<UInt32*>(ebp + 8);
+
+		if (newStatus == 1 && !objective->status)
+		{
+			g_eventInterface->DispatchEventThreadSafe(onDisplayName, nullptr, nullptr, objective->quest, objective->objectiveId);
+		}
+		else if (newStatus == 3 && objective->status == 1 && !objective->quest->IsCompleted())
+		{
+			g_eventInterface->DispatchEventThreadSafe(onCompleteName, nullptr, nullptr, objective->quest, objective->objectiveId);
+		}
+
+		return ThisStdCall<TESQuest*>(hookedAddr, objective);
+	}
+
+	void WriteDelayedHook()
+	{
+		// Add compatibility with Tweaks by indirectly calling the function at the address.
+		hookedAddr = GetRelJumpAddr(0x5EC5DC);
+		WriteRelCall(0x5EC5DC, (UInt32)Hook);
+		// We could have hooked the HUDMainMenu::SetQuestUpdateText calls, but that would cause incompatibility with Tweaks' "No Quest Messages".
+	}
+}
+
+
+
+
+
 
 using EventFlags = NVSEEventManagerInterface::EventFlags;
 
@@ -980,6 +1017,9 @@ void RegisterEvents()
 	RegisterEvent(OnTeammateStateChange::eventName, kEventParams_OneInt);
 	RegisterEvent(OnPCMiscStatChange::eventName, kEventParams_TwoInts);
 
+	RegisterEvent(OnDisplayOrCompleteObjective::onDisplayName, kEventParams_OneBaseForm_OneInt);
+	RegisterEvent(OnDisplayOrCompleteObjective::onCompleteName, kEventParams_OneBaseForm_OneInt);
+
 #if _DEBUG
 
 #endif
@@ -1025,6 +1065,10 @@ namespace HandleHooks
 	void HandleDelayedEventHooks()
 	{
 		CornerMessageHooks::WriteDelayedHook();
+		OnDisplayOrCompleteObjective::WriteDelayedHook();
+
+#if _DEBUG
+#endif
 	}
 
 }
