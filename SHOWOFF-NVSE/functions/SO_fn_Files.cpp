@@ -684,7 +684,7 @@ namespace IniToNVSE
 		
 	namespace SetINIValue
 	{
-		SI_Error SetIniValue(CSimpleIniA &ini, StringOrNumber& newValue,
+		SI_Error SetIniValue(CSimpleIniA &ini, const StringOrNumber& newValue,
 			const char* section, const char* key, 
 			const char* comment)
 		{
@@ -697,15 +697,14 @@ namespace IniToNVSE
 				}
 				return SI_FAIL;
 			}
-			else //assume number
+
+			// assume number-type
+			if (auto const e = ini.SetDoubleValue(section, key, std::get<double>(newValue), comment);
+				e >= SI_OK)
 			{
-				if (auto const e = ini.SetDoubleValue(section, key, std::get<double>(newValue), comment);
-					e >= SI_OK)
-				{
-					return e;
-				}
-				return SI_FAIL;
+				return e;
 			}
+			return SI_FAIL;
 		}
 
 		
@@ -718,7 +717,7 @@ namespace IniToNVSE
 				return;
 			auto& [section, key, fullPath] = maybe_Args.value();
 
-			if (auto cachedIni = g_CachedIniFiles.GetPtr(relIniPath))
+			if (const auto cachedIni = g_CachedIniFiles.GetPtr(relIniPath))
 			{
 				ScopedLock lock(g_IniMapLock);
 				*result = SetIniValue(*cachedIni, newValue, section, key, comment);
@@ -727,9 +726,8 @@ namespace IniToNVSE
 			{
 				CSimpleIniA iniLocal(true);
 				bool const existed = iniLocal.LoadFile(fullPath.c_str()) >= SI_OK;
-				bool const created = 
-					SetIniValue(iniLocal, newValue, section, key, comment)
-					== SI_INSERTED;
+				*result = SetIniValue(iniLocal, newValue, section, key, comment);
+				bool const created = *result == SI_INSERTED;
 
 				if (existed || created)
 				{
