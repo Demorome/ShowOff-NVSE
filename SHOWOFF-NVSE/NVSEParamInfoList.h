@@ -147,6 +147,13 @@ static constexpr NVSEParamInfo kNVSEParams_OneString_OneFloatOrString_TwoOptiona
 	{	"string",	kNVSEParamType_String,1	},
 	{	"string",	kNVSEParamType_String,1	},
 };
+static constexpr NVSEParamInfo kNVSEParams_OneString_OneInt_TwoOptionalStrings[4] =
+{
+	{	"string",	kNVSEParamType_String,0	},
+	{	"int",		kNVSEParamType_Number,0	},
+	{	"string",	kNVSEParamType_String,1	},
+	{	"string",	kNVSEParamType_String,1	},
+};
 static constexpr NVSEParamInfo kNVSEParams_OneString_OneFloatOrString_TwoOptionalStrings_TwoOptionalBools[6] =
 {
 	{	"string",	kNVSEParamType_String,0	},

@@ -727,7 +727,7 @@ namespace IniToNVSE
 				CSimpleIniA iniLocal(true);
 				bool const existed = iniLocal.LoadFile(fullPath.c_str()) >= SI_OK;
 				*result = SetIniValue(iniLocal, newValue, section, key, comment);
-				bool const created = *result == SI_INSERTED;
+				bool const created = static_cast<SI_Error>(*result) == SI_INSERTED;
 
 				if (existed || created)
 				{
@@ -737,7 +737,53 @@ namespace IniToNVSE
 			}
 		}
 	}
-	
+
+	namespace SetINIInteger
+	{
+		SI_Error SetIniInteger(CSimpleIniA& ini, int newValue,
+			const char* section, const char* key,
+			const char* comment)
+		{
+			// assume number-type
+			if (auto const e = ini.SetLongValue(section, key, newValue, comment);
+				e >= SI_OK)
+			{
+				return e;
+			}
+			return SI_FAIL;
+		}
+
+
+		void Call(std::string& sectionAndKey, int newValue, const char* relIniPath,
+			const char* comment, Script* scriptObj, double* result)
+		{
+			std::string defaultModPath;
+			auto maybe_Args = ExtractIniArgs(sectionAndKey, defaultModPath, relIniPath, scriptObj);
+			if (!maybe_Args)
+				return;
+			auto& [section, key, fullPath] = maybe_Args.value();
+
+			if (const auto cachedIni = g_CachedIniFiles.GetPtr(relIniPath))
+			{
+				ScopedLock lock(g_IniMapLock);
+				*result = SetIniInteger(*cachedIni, newValue, section, key, comment);
+			}
+			else
+			{
+				CSimpleIniA iniLocal(true);
+				bool const existed = iniLocal.LoadFile(fullPath.c_str()) >= SI_OK;
+				*result = SetIniInteger(iniLocal, newValue, section, key, comment);
+				bool const created = static_cast<SI_Error>(*result) == SI_INSERTED;
+
+				if (existed || created)
+				{
+					ScopedLock lock(g_IniMapLock);
+					g_CachedIniFiles.Emplace(relIniPath, std::move(iniLocal));
+				}
+			}
+		}
+	}
+
 	namespace GetINIValue
 	{
 		void GetOrDefaultIniValue(CSimpleIniA& ini, const char* section, 
@@ -889,6 +935,23 @@ bool Cmd_SetINIValue_Cached_Execute(COMMAND_ARGS)
 			std::tie(iniPath, comment));
 
 		IniToNVSE::SetINIValue::Call(sectionAndKey, newVal, iniPath, comment, scriptObj, result);
+	}
+	return true;
+}
+
+bool Cmd_SetINIInteger_Cached_Execute(COMMAND_ARGS)
+{
+	*result = SI_Error::SI_FAIL;
+	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
+		eval.ExtractArgs())
+	{
+		std::string sectionAndKey;
+		int newVal;
+		const char* iniPath = nullptr, * comment = nullptr;
+		EXTRACT_ALL_ARGS_EXP(SetINIInteger_Cached, eval, std::tie(sectionAndKey, newVal),
+			std::tie(iniPath, comment));
+
+		IniToNVSE::SetINIInteger::Call(sectionAndKey, newVal, iniPath, comment, scriptObj, result);
 	}
 	return true;
 }

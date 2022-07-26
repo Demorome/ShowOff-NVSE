@@ -21,6 +21,7 @@ DEFINE_COMMAND_ALT_PLUGIN_EXP(WriteToJSONFile, WriteToJSON, "", false, kNVSEPara
 //caution for desyncs with the other ini functions.
 
 DEFINE_COMMAND_PLUGIN_EXP_SAFE(SetINIValue_Cached, "", false, kNVSEParams_OneString_OneFloatOrString_TwoOptionalStrings);
+DEFINE_COMMAND_PLUGIN_EXP_SAFE(SetINIInteger_Cached, "", false, kNVSEParams_OneString_OneInt_TwoOptionalStrings);
 
 DEFINE_COMMAND_PLUGIN_EXP_SAFE(GetINIFloatOrCreate_Cached, "", false, kNVSEParams_OneString_OneOptionalString_OneOptionalFloat_OneOptionalString);
 DEFINE_COMMAND_PLUGIN_EXP_SAFE(GetINIStringOrCreate_Cached, "", false, kNVSEParams_OneString_ThreeOptionalStrings);

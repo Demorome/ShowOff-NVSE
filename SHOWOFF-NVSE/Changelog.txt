@@ -235,6 +235,7 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 - Copied code from Tweaks to prevent perks from being selected if there are none to assign (used to go to -1 perks).
 - Copied code from Tweaks to force the perk menu to open even if not on a perk level (allows previewing perks).
 - Copied code from Tweaks to allow multiple perks to be selected.
+* Fixed SetINIValue_Cached not returning the right result sometimes.
 
 ===New Functions:
 * SetEnableParent
