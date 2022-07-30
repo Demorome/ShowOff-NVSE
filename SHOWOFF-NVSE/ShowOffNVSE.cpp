@@ -632,6 +632,7 @@ extern "C"
 #if _DEBUG  //for functions being tested (or just abandoned).
 
 
+		REG_CMD(ForceWeaponJamAnimAlt)
 		REG_CMD(GetHeadingAngleTEST)
 
 		REG_CMD(Debug_DispatchEvent)

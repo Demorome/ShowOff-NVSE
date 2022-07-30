@@ -444,6 +444,31 @@ namespace GetCompassTargets
 	}
 }
 
+namespace FixOnAddBlockType
+{
+	void __fastcall Hook(ExtraDataList* xDataList, void* edx, ScriptEventList* eventList)
+	{
+		// Call BaseExtraList__ExtraScript__SetEventList (which we overwrote).
+		ThisStdCall(0x419F80, xDataList, eventList);
+
+		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+		auto* script = *reinterpret_cast<Script**>(ebp - 0x30);
+
+		// maybe not needed?
+		auto* thisObj = TESObjectREFR::Create(true);
+
+		CALL_MEMBER_FN(script, Execute)(thisObj, eventList, nullptr, 0);
+
+		if (thisObj)
+			thisObj->Destroy(true);
+	}
+
+	void WriteHook()
+	{
+		WriteRelCall(0x87F0A9, (UInt32)Hook);
+	}
+}
+
 namespace HandleHooks
 {
 	void HandleFunctionHooks()
@@ -497,6 +522,8 @@ namespace HandleHooks
 	{
 		PatchShowRaceMenu();
 		PatchResetCell::WriteHook();
+		//TODO: make optional?
+		FixOnAddBlockType::WriteHook();
 	}
 
 	void HandleGameHooks()

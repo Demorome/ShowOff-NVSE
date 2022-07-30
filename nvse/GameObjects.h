@@ -614,7 +614,7 @@ public:
 	UInt8								jipActorFlags3;				// 107
 	UInt32								lifeState;					// 108	saved as byte HasHealth = 1 or 2, optionally 6, 5 = IsRestrained
 	UInt32								criticalStage;				// 10C
-	UInt32								unk110;						// 110-
+	UInt32								animGroupID110;				// 110- decoded by Tweaks (?).
 	float								flt114;						// 114
 	UInt8								byte118;					// 118-
 	UInt8								byte119;					// 119+

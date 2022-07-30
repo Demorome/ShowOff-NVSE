@@ -817,6 +817,7 @@ namespace OnCalculateEffectEntryMagnitude
 		}
 	}
 
+	//TODO: hook near 0x7E0C1F (watch for Tweaks)
 	void WriteHooks()
 	{
 		// Overwrite function epilogue
@@ -966,8 +967,26 @@ namespace OnDisplayOrCompleteObjective
 	}
 }
 
+// Like NVSE OnAdd, but runs for all vanilla OnAdd instances.
+// (Needs unique hooks, NVSE hooks didn't expect non-references to be passed to MergeScriptEvent).
+// Relevant addresses: 0x57506B, 0x574AFA, 0x574C28, 0x574D00, 0x574F03
+#if 0
+namespace OnAddAlt
+{
+	constexpr char eventName[] = "ShowOff:OnAdd";
 
+	void __fastcall Hook()
+	{
+		g_eventInterface->DispatchEventThreadSafe(eventName, nullptr, nullptr, );
 
+	}
+
+	void WriteHook()
+	{
+		WriteRelCall(, (UInt32)Hook);
+	}
+}
+#endif
 
 
 
