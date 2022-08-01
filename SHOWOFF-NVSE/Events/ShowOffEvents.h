@@ -972,28 +972,39 @@ static constexpr UInt32 MergeScriptEventAddr = 0x5AC750;
 // Like NVSE OnAdd, but runs for all vanilla OnAdd instances.
 // (Needs unique hooks, NVSE hooks didn't expect non-references to be passed to MergeScriptEvent).
 // Relevant addresses: 0x57506B, 0x574AFA, 0x574C28, 0x574D00, 0x574F03
-#if _DEBUG
 namespace OnAddAlt
 {
 	constexpr char eventName[] = "ShowOff:OnAdd";
 
-	// non-null if picking up a reference in the game world, otherwise must create an invRef.
+	// non-null if picking up a reference in the game world
 	static TESObjectREFR* g_AddedItemRef = nullptr;
 
 	struct InvRefCreatingInfo
 	{
-		TESObjectREFR* m_owner{};
-		TESForm* m_item{};
-		ExtraDataList* m_xData{};
-		SInt32 m_count{}; //xCount?
 		void Fill(TESObjectREFR* owner, TESForm* item, ExtraDataList* xData, SInt32 count)
 		{
 			m_owner = owner; m_item = item; m_xData = xData; m_count = count;
 		}
+		TESObjectREFR* GetInvRef()
+		{
+			if (m_cachedInvRef)
+				return m_cachedInvRef;
+			if (!m_item || !m_owner)
+				return nullptr;
+			m_cachedInvRef = InventoryRefCreateEntry(m_owner, m_item, m_count, m_xData);
+			return m_cachedInvRef;
+		}
 		void Reset()
 		{
-			m_owner = {}; m_item = {}; m_xData = {}; m_count = {};
+			m_owner = {}; m_item = {}; m_xData = {}; m_count = {}; m_cachedInvRef = {};
 		}
+	private:
+		TESObjectREFR* m_owner{};
+		TESForm* m_item{};
+		ExtraDataList* m_xData{};
+		SInt32 m_count{}; //xCount?
+
+		TESObjectREFR* m_cachedInvRef{};
 	};
 	static InvRefCreatingInfo g_InvRefCreatingInfo;
 
@@ -1002,23 +1013,21 @@ namespace OnAddAlt
 	{
 		if (g_AddedItemRef)
 			return g_AddedItemRef;
-		//else, must create invRef.
-		if (!g_InvRefCreatingInfo.m_owner)
-			return nullptr;
-		//TODO
+		//else, must get invRef.
+		return g_InvRefCreatingInfo.GetInvRef();
 	}
 
 	void HandleEvent(TESObjectREFR* newOwner, TESForm* item, ExtraDataList* xData, SInt32 count)
 	{
 		g_InvRefCreatingInfo.Fill(newOwner, item, xData, count);
-		g_eventInterface->DispatchEvent(eventName, nullptr, nullptr, item, newOwner);
+		g_eventInterface->DispatchEvent(eventName, nullptr, item, newOwner);
 		g_InvRefCreatingInfo.Reset();
 	}
 
 	void HandleEvent(TESObjectREFR* newOwner, TESObjectREFR* itemRef)
 	{
 		g_AddedItemRef = itemRef;
-		g_eventInterface->DispatchEvent(eventName, nullptr, nullptr, itemRef->baseForm, newOwner);
+		g_eventInterface->DispatchEvent(eventName, nullptr, itemRef->baseForm, newOwner);
 		g_AddedItemRef = nullptr;
 	}
 
@@ -1131,7 +1140,20 @@ namespace OnAddAlt
 		PickUpItem::WriteHooks();
 	}
 }
-#endif
+
+DEFINE_COMMAND_ALT_PLUGIN(GetAddedInvRefShowOff, GetAddedInvRefSO, "", false, nullptr);
+bool Cmd_GetAddedInvRefShowOff_Execute(COMMAND_ARGS)
+{
+	if (auto const itemRef = OnAddAlt::GetItemRef())
+	{
+		REFR_RES = itemRef->refID;
+	}
+	else *result = 0;
+	return true;
+}
+
+
+
 
 
 using EventFlags = NVSEEventManagerInterface::EventFlags;
@@ -1183,6 +1205,8 @@ void RegisterEvents()
 	RegisterEvent(OnDisplayOrCompleteObjective::onDisplayName, kEventParams_OneBaseForm_OneInt);
 	RegisterEvent(OnDisplayOrCompleteObjective::onCompleteName, kEventParams_OneBaseForm_OneInt);
 
+	RegisterEvent(OnAddAlt::eventName, kEventParams_OneBaseForm_OneReference);
+
 #if _DEBUG
 
 #endif
@@ -1219,6 +1243,7 @@ namespace HandleHooks
 		OnCalculateEffectEntryMagnitude::WriteHooks();
 		OnTeammateStateChange::WriteHooks();
 		OnPCMiscStatChange::WriteHook();
+		OnAddAlt::WriteHooks();
 
 #if _DEBUG
 		//ActorValueChangeHooks::WriteHook();

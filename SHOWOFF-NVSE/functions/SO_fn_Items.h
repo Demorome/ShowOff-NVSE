@@ -530,9 +530,6 @@ bool Cmd_GetEquippedWeaponRef_Execute(COMMAND_ARGS)
 
 
 
-
-
-
 #if _DEBUG
 
 

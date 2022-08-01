@@ -615,6 +615,7 @@ extern "C"
 		/*3D3A*/	REG_CMD(GetLiveEffectBaseTrait)
 		/*3D3B*/	REG_CMD_STR(GetActorValueName)
 		/*3D3C*/    REG_CMD(SetINIInteger_Cached)
+		/*3D3D*/	REG_CMD_FORM(GetAddedInvRefShowOff)
 	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
