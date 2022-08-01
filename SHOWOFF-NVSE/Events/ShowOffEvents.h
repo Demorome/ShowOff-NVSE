@@ -972,6 +972,7 @@ static constexpr UInt32 MergeScriptEventAddr = 0x5AC750;
 // Like NVSE OnAdd, but runs for all vanilla OnAdd instances.
 // (Needs unique hooks, NVSE hooks didn't expect non-references to be passed to MergeScriptEvent).
 // Relevant addresses: 0x57506B, 0x574AFA, 0x574C28, 0x574D00, 0x574F03
+// Event runs slightly AFTER vanilla OnAdd.
 namespace OnAddAlt
 {
 	constexpr char eventName[] = "ShowOff:OnAdd";
@@ -1141,8 +1142,8 @@ namespace OnAddAlt
 	}
 }
 
-DEFINE_COMMAND_ALT_PLUGIN(GetAddedInvRefShowOff, GetAddedInvRefSO, "", false, nullptr);
-bool Cmd_GetAddedInvRefShowOff_Execute(COMMAND_ARGS)
+DEFINE_COMMAND_ALT_PLUGIN(GetAddedItemRefShowOff, GetAddedItemRefSO, "", false, nullptr);
+bool Cmd_GetAddedItemRefShowOff_Execute(COMMAND_ARGS)
 {
 	if (auto const itemRef = OnAddAlt::GetItemRef())
 	{

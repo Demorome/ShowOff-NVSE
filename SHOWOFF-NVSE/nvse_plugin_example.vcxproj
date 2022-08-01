@@ -208,7 +208,7 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Message>Installing DLL...</Message>
+      <Message>Installing DLL and PDB...</Message>
       <Command>copy "$(TargetPath)" "$(FalloutNVPath)\Data\NVSE\Plugins\$(TargetFileName)"
 copy "$(SolutionDir)Release\$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\ShowOffNVSE.pdb"</Command>
     </PostBuildEvent>
