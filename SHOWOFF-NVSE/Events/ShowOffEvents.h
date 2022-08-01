@@ -967,27 +967,171 @@ namespace OnDisplayOrCompleteObjective
 	}
 }
 
+static constexpr UInt32 MergeScriptEventAddr = 0x5AC750;
+
 // Like NVSE OnAdd, but runs for all vanilla OnAdd instances.
 // (Needs unique hooks, NVSE hooks didn't expect non-references to be passed to MergeScriptEvent).
 // Relevant addresses: 0x57506B, 0x574AFA, 0x574C28, 0x574D00, 0x574F03
-#if 0
+#if _DEBUG
 namespace OnAddAlt
 {
 	constexpr char eventName[] = "ShowOff:OnAdd";
 
-	void __fastcall Hook()
-	{
-		g_eventInterface->DispatchEventThreadSafe(eventName, nullptr, nullptr, );
+	// non-null if picking up a reference in the game world, otherwise must create an invRef.
+	static TESObjectREFR* g_AddedItemRef = nullptr;
 
+	struct InvRefCreatingInfo
+	{
+		TESObjectREFR* m_owner{};
+		TESForm* m_item{};
+		ExtraDataList* m_xData{};
+		SInt32 m_count{}; //xCount?
+		void Fill(TESObjectREFR* owner, TESForm* item, ExtraDataList* xData, SInt32 count)
+		{
+			m_owner = owner; m_item = item; m_xData = xData; m_count = count;
+		}
+		void Reset()
+		{
+			m_owner = {}; m_item = {}; m_xData = {}; m_count = {};
+		}
+	};
+	static InvRefCreatingInfo g_InvRefCreatingInfo;
+
+	// using a function so creating an invRef is on-demand, instead of a constant drain.
+	TESObjectREFR* GetItemRef()
+	{
+		if (g_AddedItemRef)
+			return g_AddedItemRef;
+		//else, must create invRef.
+		if (!g_InvRefCreatingInfo.m_owner)
+			return nullptr;
+		//TODO
 	}
 
-	void WriteHook()
+	void HandleEvent(TESObjectREFR* newOwner, TESForm* item, ExtraDataList* xData, SInt32 count)
 	{
-		WriteRelCall(, (UInt32)Hook);
+		g_InvRefCreatingInfo.Fill(newOwner, item, xData, count);
+		g_eventInterface->DispatchEvent(eventName, nullptr, nullptr, item, newOwner);
+		g_InvRefCreatingInfo.Reset();
+	}
+
+	void HandleEvent(TESObjectREFR* newOwner, TESObjectREFR* itemRef)
+	{
+		g_AddedItemRef = itemRef;
+		g_eventInterface->DispatchEvent(eventName, nullptr, nullptr, itemRef->baseForm, newOwner);
+		g_AddedItemRef = nullptr;
+	}
+
+	namespace HandleAddItem
+	{
+		void __fastcall Hook(void* xChanges, void* edx, TESForm* item, ExtraDataList* xData, SInt32 count)
+		{
+			auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+			auto* newOwner = *reinterpret_cast<TESObjectREFR**>(ebp - 0xC);
+
+			HandleEvent(newOwner, item, xData, count);
+
+			// Call ExtraContainerChanges_4C29A0 (which we overwrote)
+			ThisStdCall(0x4C29A0, xChanges, item, xData, count);
+		}
+
+		void WriteHook()
+		{
+			WriteRelCall(0x575091, (UInt32)Hook);
+		}
+	}
+
+	namespace EquipForRef
+	{
+		void __fastcall Hook(ExtraContainerChanges::Data* xChanges, void* edx, TESForm* item, SInt32 count,
+			TESObjectREFR* newOwner, ExtraDataList* xData, int a6, int a7)
+		{
+			HandleEvent(newOwner, item, xData, count);
+
+			// Call ExtraContainerChanges__Data__EquipForRef (which we overwrote)
+			ThisStdCall(0x4BFFE0, xChanges, item, count, newOwner, xData, a6, a7);
+		}
+
+		void WriteHook()
+		{
+			WriteRelCall(0x574B19, (UInt32)Hook);
+		}
+	}
+
+	namespace PickUpItem
+	{
+		namespace InitialOnAdd
+		{
+			void __cdecl Hook(TESObjectREFR* newOwner, ExtraDataList* xData, int eventId)
+			{
+				CdeclCall(MergeScriptEventAddr, newOwner, xData, eventId);
+
+				auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+				auto* itemRef = *reinterpret_cast<TESObjectREFR**>(ebp + 8);
+
+				HandleEvent(newOwner, itemRef);
+			}
+
+			void WriteHook()
+			{
+				WriteRelCall(0x574C28, (UInt32)Hook);
+			}
+		}
+
+		namespace RockItProjectile
+		{
+			void __cdecl Hook(TESObjectREFR* newOwner, ExtraDataList* xData, int eventId)
+			{
+				CdeclCall(MergeScriptEventAddr, newOwner, xData, eventId);
+
+				auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+				const auto* rockItContChanges = *reinterpret_cast<ContChangesEntry**>(ebp - 0x60);
+
+				//todo: is it safe to use countDelta here? Should Count extradata be checked? idk
+				HandleEvent(newOwner, rockItContChanges->type, xData, rockItContChanges->countDelta);
+			}
+
+			void WriteHook()
+			{
+				WriteRelCall(0x574D00, (UInt32)Hook);
+			}
+		}
+	
+		namespace OtherProjectile
+		{
+			void __cdecl Hook(TESObjectREFR* newOwner, ExtraDataList* xData, int eventId)
+			{
+				CdeclCall(MergeScriptEventAddr, newOwner, xData, eventId);
+
+				auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+				auto* form = *reinterpret_cast<TESForm**>(ebp - 0x24);
+
+				// todo: verify if assuming count = 1 is safe!
+				HandleEvent(newOwner, form, xData, 1);
+			}
+
+			void WriteHook()
+			{
+				WriteRelCall(0x574F03, (UInt32)Hook);
+			}
+		}
+
+		void WriteHooks()
+		{
+			InitialOnAdd::WriteHook();
+			RockItProjectile::WriteHook();
+			OtherProjectile::WriteHook();
+		}
+	}
+
+	void WriteHooks()
+	{
+		HandleAddItem::WriteHook();
+		EquipForRef::WriteHook();
+		PickUpItem::WriteHooks();
 	}
 }
 #endif
-
 
 
 using EventFlags = NVSEEventManagerInterface::EventFlags;
