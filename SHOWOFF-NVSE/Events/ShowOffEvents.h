@@ -230,11 +230,11 @@ namespace OnPreActivate
 	}
 }
 
+static const UInt32 g_inventoryMenuSelectionAddr = 0x11D9EA8;
+
 namespace PreActivateInventoryItem
 {
 	constexpr char eventName[] = "ShowOff:OnPreActivateInventoryItem";
-
-	static const UInt32 g_inventoryMenuSelectionAddr = 0x11D9EA8;
 
 	bool __fastcall CanUseItem(ContChangesEntry* itemEntry, void* edx)
 	{
@@ -341,6 +341,63 @@ namespace PreActivateInventoryItem
 
 		// Replace "call TESForm::GetFlags(entry)"
 		WriteRelJump(0x701FAE, (UInt32)HookHandleHotkeyEquipOrUnEquip);
+	}
+}
+
+namespace PreDropInventoryItem
+{
+	constexpr char eventName[] = "ShowOff:OnPreDropInventoryItem";
+
+	bool HandleEvent()
+	{
+		auto constexpr resultCallback = [](NVSEArrayVarInterface::Element& result, void* shouldDropAddr) -> bool
+		{
+			if (UInt32& shouldDrop = *static_cast<UInt32*>(shouldDropAddr))
+				shouldDrop = result.Bool();
+			return true;
+		};
+		UInt32 shouldDrop = true;
+
+		auto const itemEntry = *reinterpret_cast<ContChangesEntry**>(g_inventoryMenuSelectionAddr);
+		auto const itemForm = itemEntry->type;
+		auto* invRef = CreateRefForStack(g_thePlayer, itemEntry);
+
+		g_eventInterface->DispatchEventAlt(eventName, resultCallback, &shouldDrop,
+			g_thePlayer, itemForm, invRef, shouldDrop);
+
+		return shouldDrop;
+	}
+
+	__declspec(naked) void Hook()
+	{
+		static UInt32 const IsEnoughRoomNearPlayerToDropItem = 0x9614B0,
+			NotEnoughRoomAddr = 0x780AD2, CancelledByEventAddr = 0x780B8E,
+			DropItemAddr = 0x780AFC;
+		_asm
+		{
+			call	IsEnoughRoomNearPlayerToDropItem
+			movzx	ecx, al
+			test	ecx, ecx
+			jz		NotEnoughRoom
+
+			call	HandleEvent
+			movzx	ecx, al
+			test	ecx, ecx
+			jz		CancelledByEvent
+
+			jmp		DropItemAddr
+
+			NotEnoughRoom :
+			jmp		NotEnoughRoomAddr
+
+			CancelledByEvent :  // skip showing the "not enough room" UI message.
+			jmp		CancelledByEventAddr
+		}
+	}
+
+	void WriteHook()
+	{
+		WriteRelJump(0x780AC6, (UInt32)Hook);
 	}
 }
 
@@ -1155,8 +1212,6 @@ bool Cmd_GetAddedItemRefShowOff_Execute(COMMAND_ARGS)
 
 
 
-
-
 using EventFlags = NVSEEventManagerInterface::EventFlags;
 
 template<UInt8 N>
@@ -1180,6 +1235,7 @@ void RegisterEvents()
 
 	RegisterEvent(OnPreActivate::eventName, kEventParams_OneReference_OneInt);
 	RegisterEvent(PreActivateInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneInt);
+	RegisterEvent(PreDropInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneInt);
 	RegisterEvent(OnQuestAdded::eventName, kEventParams_OneBaseForm);
 	 
 	RegisterEvent(OnCalculateSellPrice::eventNameAdd, kEventParams_OneBaseForm_OneReference);
@@ -1207,7 +1263,6 @@ void RegisterEvents()
 	RegisterEvent(OnDisplayOrCompleteObjective::onCompleteName, kEventParams_OneBaseForm_OneInt);
 
 	RegisterEvent(OnAddAlt::eventName, kEventParams_OneBaseForm_OneReference);
-
 #if _DEBUG
 
 #endif
@@ -1248,6 +1303,7 @@ namespace HandleHooks
 
 #if _DEBUG
 		//ActorValueChangeHooks::WriteHook();
+		PreDropInventoryItem::WriteHook();
 #endif
 	}
 
