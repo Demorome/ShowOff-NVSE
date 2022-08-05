@@ -115,7 +115,7 @@ struct ScriptVar
 
 // only records individual objects if there's a block that matches it
 // ### how can it tell?
-struct ScriptEventList
+struct ScriptEventList // also called "ScriptLocals"
 {
 	enum
 	{
@@ -156,7 +156,7 @@ struct ScriptEventList
 		kEvent_OnReset =					0x80000000		// 0x0054E5FB
 	};
 
-	struct Event
+	struct Event  // Beth used the name Action_Object
 	{
 		TESForm		*object;
 		UInt32		eventMask;
@@ -176,7 +176,7 @@ struct ScriptEventList
 	UInt32			m_unk1;			// 04
 	EventList		*m_eventList;	// 08
 	VarList			*m_vars;		// 0C
-	Struct10		*unk010;		// 10
+	Struct10		*pScriptEffectData;	// 10
 
 	void Dump(void);
 	ScriptVar *GetVariable(UInt32 id);

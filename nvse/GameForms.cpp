@@ -58,6 +58,13 @@ TESLeveledList* TESForm::GetLvlList()
 	return NULL;
 }
 
+Script* TESForm::GetScript() const
+{
+	if (auto const scriptableForm = DYNAMIC_CAST(this, TESForm, TESScriptableForm))
+		return scriptableForm->script;
+	return nullptr;
+}
+
 UInt8 TESForm::GetModIndex() const
 {
 	return modIndex;

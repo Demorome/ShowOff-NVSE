@@ -32,6 +32,8 @@ class ImageSpaceModifierInstanceRB;
 struct NavMeshClosedDoorInfo;
 //#endif
 
+static constexpr UInt32 MergeScriptEventAddr = 0x5AC750;
+
 enum ActorValueCode
 {
 	kAVCode_Aggression,
