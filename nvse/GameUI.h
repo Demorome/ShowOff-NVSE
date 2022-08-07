@@ -228,6 +228,20 @@ public:
 	Tile *AddTileFromTemplate(Tile *destTile, const char *templateName, UInt32 arg3);
 };
 
+// Taken from Tweaks
+struct HotKeyWheel
+{
+	TileRect* parent;
+	TileRect* hotkeys[8];
+	UInt8 byte24;
+	UInt8 gap25[3];
+	UInt32 selectedHotkey;
+	UInt32 selectedHotkeyTrait;
+	UInt32 selectedTextTrait;
+
+	void SetVisible(bool isVisible) { ThisStdCall(0x701760, this, isVisible); }
+};
+
 // 170
 class RaceSexMenu : public Menu		// 1036
 {

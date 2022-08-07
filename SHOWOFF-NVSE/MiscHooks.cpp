@@ -445,41 +445,40 @@ namespace GetCompassTargets
 	}
 }
 
-namespace FixOnAddBlockType
-{
-	void __fastcall Hook(ExtraDataList* xDataList, void* edx, ScriptEventList* eventList)
-	{
-		// Call BaseExtraList__ExtraScript__SetEventList (which we overwrote).
-		ThisStdCall(0x419F80, xDataList, eventList);
-
-		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
-		auto* script = *reinterpret_cast<Script**>(ebp - 0x30);
-
-		// needed, for whatever reason.
-		auto* thisObj = TESObjectREFR::Create(true);
-		CALL_MEMBER_FN(script, Execute)(thisObj, eventList, nullptr, 0);
-		if (thisObj)
-			thisObj->Destroy(true);
-	}
-
-	void WriteHook()
-	{
-		WriteRelCall(0x87F0A9, (UInt32)Hook);
-	}
-}
-
 namespace Experimental
 {
+	namespace FixOnAddForDeathItems
+	{
+		void __fastcall Hook(ExtraDataList* xDataList, void* edx, ScriptEventList* eventList)
+		{
+			// Call BaseExtraList__ExtraScript__SetEventList (which we overwrote).
+			ThisStdCall(0x419F80, xDataList, eventList);
+
+			auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+			auto* script = *reinterpret_cast<Script**>(ebp - 0x30);
+
+			// needed, for whatever reason.
+			auto* thisObj = TESObjectREFR::Create(true);
+			CALL_MEMBER_FN(script, Execute)(thisObj, eventList, nullptr, 0);
+			if (thisObj)
+				thisObj->Destroy(true);
+		}
+
+		void WriteHook()
+		{
+			WriteRelCall(0x87F0A9, (UInt32)Hook);
+		}
+	}
+
 	// Fixes the OnDrop + OnUnequip blocktypes not running for certain function calls.
 	// The issue, it seems, is that while the MarkScriptEvent functions do set up the event to run,
 	// the scripts for the items will try to run on the next frame, which won't happen if the new container for the items isn't fully loaded,
 	// nor if the item is deleted from the world entirely.
-
 	// TODO: fix bug w/ OnEquip blocktype + RemoveMe (OnEquip runs twice???)
-	namespace FixOnDropAndOnUnequipBlockType  
+	namespace FixOnDropAndOnUnequip 
 	{
 		// Run the script as an event is dispatched, to avoid having to wait for the object's script to run again to trigger the event blocktype in the script.
-		void DispatchScriptForEvent(const TESForm* formForEvent, BaseExtraList* extraList)
+		void DispatchScriptForEvent(const TESForm* formForEvent, BaseExtraList* extraList, TESObjectREFR* container)
 		{
 			if (auto const script = formForEvent->GetScript();
 				script && extraList)
@@ -497,7 +496,7 @@ namespace Experimental
 				}
 
 				auto* thisObj = TESObjectREFR::Create(true);
-				CALL_MEMBER_FN(script, Execute)(thisObj, extraScript->eventList, nullptr, 0);
+				CALL_MEMBER_FN(script, Execute)(thisObj, extraScript->eventList, container, false);
 				if (thisObj)
 					thisObj->Destroy(true);
 			}
@@ -512,7 +511,7 @@ namespace Experimental
 			// our code
 			auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
 			auto const itemForm = *reinterpret_cast<TESForm**>(ebp + itemEBPOffset);
-			DispatchScriptForEvent(itemForm, extraList);
+			DispatchScriptForEvent(itemForm, extraList, container);
 		}
 
 		void WriteHooks()
@@ -582,10 +581,11 @@ namespace HandleHooks
 		PatchShowRaceMenu();
 		PatchResetCell::WriteHook();
 
+		/*
 		//TODO: make optional?
-		FixOnAddBlockType::WriteHook();
-
+		Experimental::FixOnAddBlockType::WriteHook();
 		Experimental::FixOnDropAndOnUnequipBlockType::WriteHooks();
+		*/
 	}
 
 	void HandleGameHooks()

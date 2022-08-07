@@ -236,7 +236,7 @@ namespace PreActivateInventoryItem
 {
 	constexpr char eventName[] = "ShowOff:OnPreActivateInventoryItem";
 
-	bool __fastcall CanUseItem(ContChangesEntry* itemEntry, void* edx)
+	bool __fastcall CanUseItem(ContChangesEntry* itemEntry, void* edx, bool isHotkeyUse)
 	{
 		if (!itemEntry || !itemEntry->type)
 			return false;
@@ -253,8 +253,16 @@ namespace PreActivateInventoryItem
 		auto const itemForm = itemEntry->type;
 		auto* invRef = CreateRefForStack(g_thePlayer, itemEntry);
 
+		UInt32 selectedHotkey = 0;
+		if (isHotkeyUse)
+		{
+			auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+			auto const hotkeyData = *reinterpret_cast<HotKeyWheel**>(ebp - 0x1C);
+			selectedHotkey = hotkeyData->selectedHotkey + 1;
+		}
+
 		g_eventInterface->DispatchEventAlt(eventName, resultCallback, &shouldActivate, 
-			g_thePlayer, itemForm, invRef, shouldActivate);
+			g_thePlayer, itemForm, invRef, shouldActivate, selectedHotkey);
 
 		if (g_ShowFuncDebug)
 			Console_Print("CanActivateItemHook: CanActivate: %i, Item: [%08X], %s, type: %u", shouldActivate, itemForm->refID, itemForm->GetName(), itemForm->typeID);
@@ -271,6 +279,7 @@ namespace PreActivateInventoryItem
 			test	eax, eax
 			jz		Done
 
+			push	0
 			call	CanUseItem // register stomping should be fine.
 			test	al, al
 			jz		PreventActivation
@@ -297,6 +306,7 @@ namespace PreActivateInventoryItem
 			//ecx = InventoryMenu
 			mov		ecx, g_inventoryMenuSelectionAddr
 			mov		ecx, dword ptr ds : [ecx]
+			push	0
 			call	CanUseItem // register stomping should be fine.
 			test	al, al
 			jz		PreventActivation
@@ -318,7 +328,8 @@ namespace PreActivateInventoryItem
 		_asm
 		{
 			//ecx = ContChangesEntry
-			call	CanUseItem  //register stomping should be fine
+			push	1
+			call	CanUseItem //register stomping should be fine
 			test	al, al
 			jz		PreventActivation
 
@@ -1238,7 +1249,7 @@ void RegisterEvents()
 #endif
 
 	RegisterEvent(OnPreActivate::eventName, kEventParams_OneReference_OneInt);
-	RegisterEvent(PreActivateInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneInt);
+	RegisterEvent(PreActivateInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_TwoInts);
 	RegisterEvent(PreDropInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneInt);
 	RegisterEvent(OnQuestAdded::eventName, kEventParams_OneBaseForm);
 	 
@@ -1246,7 +1257,6 @@ void RegisterEvents()
 	RegisterEvent(OnCalculateSellPrice::eventNameSub, kEventParams_OneBaseForm_OneReference);
 	RegisterEvent(OnCalculateSellPrice::eventNameMult, kEventParams_OneBaseForm_OneReference);
 
-	//TODO: maybe only clear callbacks if thisObj filter is specified?
 	RegisterEvent(OnProjectileDestroy::eventName, nullptr, EventFlags::kFlag_FlushOnLoad);
 	RegisterEvent(OnProjectileCreate::eventName, kEventParams_OneReference_OneBaseForm, EventFlags::kFlag_FlushOnLoad);
 	RegisterEvent(OnProjectileImpact::eventName, kEventParams_OneReference_OneBaseForm_OneReference, EventFlags::kFlag_FlushOnLoad);
