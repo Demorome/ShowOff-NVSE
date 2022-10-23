@@ -181,7 +181,7 @@ namespace OnPreActivate
 			return true;
 		};
 		UInt32 shouldActivate = true;
-		g_eventInterface->DispatchEventAlt(eventName, resultCallback, &shouldActivate, activated, activator, shouldActivate);
+		g_eventInterface->DispatchEventAlt(eventName, resultCallback, &shouldActivate, activated, activator, &shouldActivate);
 
 #if _DEBUG
 		Console_Print("OnActivate HOOK - Activated: [%08X] {%s} (%s), activator: [%08X]", activated ? activated->refID : 0, 
@@ -262,7 +262,7 @@ namespace PreActivateInventoryItem
 		}
 
 		g_eventInterface->DispatchEventAlt(eventName, resultCallback, &shouldActivate, 
-			g_thePlayer, itemForm, invRef, shouldActivate, selectedHotkey);
+			g_thePlayer, itemForm, invRef, &shouldActivate, selectedHotkey);
 
 		if (g_ShowFuncDebug)
 			Console_Print("CanActivateItemHook: CanActivate: %i, Item: [%08X], %s, type: %u", shouldActivate, itemForm->refID, itemForm->GetName(), itemForm->typeID);
@@ -374,7 +374,7 @@ namespace PreDropInventoryItem
 		auto* invRef = CreateRefForStack(g_thePlayer, itemEntry);
 
 		g_eventInterface->DispatchEventAlt(eventName, resultCallback, &shouldDrop,
-			g_thePlayer, itemForm, invRef, shouldDrop);
+			g_thePlayer, itemForm, invRef, &shouldDrop);
 
 		return shouldDrop;
 	}
@@ -1248,9 +1248,9 @@ void RegisterEvents()
 	OnActorValueChange = JGCreateEvent("OnActorValueChange", 4, 0, NULL);
 #endif
 
-	RegisterEvent(OnPreActivate::eventName, kEventParams_OneReference_OneInt);
-	RegisterEvent(PreActivateInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_TwoInts);
-	RegisterEvent(PreDropInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneInt);
+	RegisterEvent(OnPreActivate::eventName, kEventParams_OneReference_OneIntPtr);
+	RegisterEvent(PreActivateInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneIntPtr_OneInt);
+	RegisterEvent(PreDropInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneIntPtr);
 	RegisterEvent(OnQuestAdded::eventName, kEventParams_OneBaseForm);
 	 
 	RegisterEvent(OnCalculateSellPrice::eventNameAdd, kEventParams_OneBaseForm_OneReference);
