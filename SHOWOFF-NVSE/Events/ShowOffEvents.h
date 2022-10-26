@@ -1235,11 +1235,20 @@ bool RegisterEvent(const char* eventName, EventParamType(&paramTypes)[N],
 {
 	return g_eventInterface->RegisterEvent(eventName, std::size(paramTypes), paramTypes, flags);
 };
-bool RegisterEvent(const char* eventName, nullptr_t null,
+bool RegisterEvent(const char* eventName, nullptr_t nullParams,
 	EventFlags flags = EventFlags::kFlags_None)
 {
 	return g_eventInterface->RegisterEvent(eventName, 0, nullptr, flags);
 };
+
+#if _DEBUG
+void Bro(TESObjectREFR*, void*) { Console_Print("Test1"); }
+void Bro2(TESObjectREFR*, void*) { Console_Print("Test2"); }
+/*
+void Bro() { Console_Print("Test1"); }
+void Bro2() { Console_Print("Test2"); }
+*/
+#endif
 
 void RegisterEvents()
 {
@@ -1277,9 +1286,14 @@ void RegisterEvents()
 	RegisterEvent(OnDisplayOrCompleteObjective::onCompleteName, kEventParams_OneBaseForm_OneInt);
 
 	RegisterEvent(OnAddAlt::eventName, kEventParams_OneBaseForm_OneReference);
+
+
+
 #if _DEBUG
 
 #endif
+
+
 	/*
 	// For debugging the Event API
 	constexpr char DebugEventName[] = "ShowOff:DebugEvent";
@@ -1327,6 +1341,12 @@ namespace HandleHooks
 		OnDisplayOrCompleteObjective::WriteDelayedHook();
 
 #if _DEBUG
+		RegisterEvent("yUI:JG:OnRender", nullptr, NVSEEventManagerInterface::kFlag_IsUserDefined);
+		g_eventInterface->SetNativeEventHandler("yUI:JG:OnRender", Bro);
+		g_eventInterface->SetNativeEventHandler("yUI:JG:OnRender", Bro2);
+
+		auto expression = g_scriptInterface->CompileExpression(R"(SetOnRenderUpdateEventHandler 1 ({} => DispatchEventAlt "yUI:JG:OnRender") 4)");
+		g_scriptInterface->CallFunctionAlt(expression, nullptr, 0);
 #endif
 	}
 
