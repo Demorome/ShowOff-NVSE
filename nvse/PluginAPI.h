@@ -572,16 +572,34 @@ struct NVSEScriptInterface
 		kVersion = 1
 	};
 
-	bool	(* CallFunction)(Script* funcScript, TESObjectREFR* callingObj, TESObjectREFR* container,
-		NVSEArrayVarInterface::Element * result, UInt8 numArgs, ...);
+	bool	(*CallFunction)(Script* funcScript, TESObjectREFR* callingObj, TESObjectREFR* container,
+		NVSEArrayVarInterface::Element* result, UInt8 numArgs, ...);
 
-	UInt32	(* GetFunctionParams)(Script* funcScript, UInt8* paramTypesOut);
-	bool	(* ExtractArgsEx)(ParamInfo * paramInfo, void * scriptDataIn, UInt32 * scriptDataOffset, Script * scriptObj,
-		ScriptEventList * eventList, ...);
-	bool	(* ExtractFormatStringArgs)(UInt32 fmtStringPos, char* buffer, ParamInfo * paramInfo, void * scriptDataIn, 
-		UInt32 * scriptDataOffset, Script * scriptObj, ScriptEventList * eventList, UInt32 maxParams, ...);
+	UInt32	(*GetFunctionParams)(Script* funcScript, UInt8* paramTypesOut);
+	bool	(*ExtractArgsEx)(ParamInfo* paramInfo, void* scriptDataIn, UInt32* scriptDataOffset, Script* scriptObj,
+		ScriptEventList* eventList, ...);
+	bool	(*ExtractFormatStringArgs)(UInt32 fmtStringPos, char* buffer, ParamInfo* paramInfo, void* scriptDataIn,
+		UInt32* scriptDataOffset, Script* scriptObj, ScriptEventList* eventList, UInt32 maxParams, ...);
 
-	bool	(* CallFunctionAlt)(Script* funcScript, TESObjectREFR* callingObj, UInt8 numArgs, ...);
+	bool	(*CallFunctionAlt)(Script* funcScript, TESObjectREFR* callingObj, UInt8 numArgs, ...);
+
+	// Compile a partial script without a script name
+	// Example:
+	//   Script* script = g_scriptInterface->CompileScript(R"(Begin Function{ }
+	//		PlaceAtMe Explosion
+	//	 end)");
+	//   g_scriptInterface->CallFunctionAlt(script, *g_thePlayer, 0);
+	Script* (*CompileScript)(const char* scriptText);
+
+	// Compile one line* script that returns a result utilizing the NVSE expression evaluator
+	// Example:
+	//   Script* condition = g_scriptInterface->CompileExpression("GetAV Health > 10");
+	//   g_scriptInterface->CallFunction(condition, *g_thePlayer, nullptr, &result, 0);
+	//   if (!result.GetNumber()) return;
+	// Script can then be passed to CallFunction which will set the passed Element* result with the result of the script function call
+	//
+	// *if expression contains SetFunctionValue and %R for line breaks it can be multiline as well
+	Script* (*CompileExpression)(const char* expression);
 };
 
 #endif
@@ -865,6 +883,12 @@ struct NVSEEventManagerInterface
 
 		// When implicitly creating a new event via the script function SetEventHandler(Alt), these flags are set.
 		kFlag_IsUserDefined = kFlag_HasUnknownArgTypes | kFlag_AllowScriptDispatch,
+
+		// If on, for events with a DispatchCallback, will report an error if no callback result is passed by an event handler.
+		// (This happens if SetFunctionValue isn't used anywhere during a script callback, for example).
+		// (Reporting an error will also prevent other handlers from executing).
+		// Otherwise, the callback will be sent an ArrayElement with Invalid type. 
+		kFlag_ReportErrorIfNoResultGiven = 1 << 3
 	};
 
 	// Registers a new event which can be dispatched to scripts and plugins.
