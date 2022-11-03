@@ -502,7 +502,7 @@ namespace OnProjectileDestroy
 
 	void __fastcall HandleEvent(Projectile* proj)
 	{
-		g_eventInterface->DispatchEvent(eventName, proj);
+		g_eventInterface->DispatchEvent(eventName, proj, proj->sourceRef, proj->sourceWeap);
 	}
 
 	void __declspec(naked) Projectile_Free_Hook()
