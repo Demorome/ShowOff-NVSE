@@ -769,7 +769,8 @@ namespace OnFireWeapon
 
 	// Runs before ModifyChanceForAmmoItem perk entry point can add items.
 	// Runs before the weapon is damaged from firing.
-	// 
+	// Runs before JIP's SetOnFireWeaponEventHandler
+	// Unlike the above, works in Godmode.
 	void __fastcall DispatchEvent(Actor* actor, TESObjectWEAP* weap)
 	{
 		g_eventInterface->DispatchEvent(eventName, actor, weap);
@@ -1283,7 +1284,9 @@ namespace HandleHooks
 		OnQueueCornerMessage::WriteHooks();
 		OnShowCornerMessage::WriteHooks();
 		OnFireWeapon::WriteHook();
+#if _DEBUG
 		OnCalculateEffectEntryMagnitude::WriteHooks();
+#endif
 		OnPCMiscStatChange::WriteHook();
 		OnAddAlt::WriteHooks();
 
