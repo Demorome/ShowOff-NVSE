@@ -1264,7 +1264,7 @@ void RegisterEvents()
 	RegisterEvent(OnCalculateSellPrice::eventNameSub, kEventParams_OneBaseForm_OneReference);
 	RegisterEvent(OnCalculateSellPrice::eventNameMult, kEventParams_OneBaseForm_OneReference);
 
-	RegisterEvent(OnProjectileDestroy::eventName, nullptr, EventFlags::kFlag_FlushOnLoad);
+	RegisterEvent(OnProjectileDestroy::eventName, kEventParams_OneReference_OneBaseForm, EventFlags::kFlag_FlushOnLoad);
 	RegisterEvent(OnProjectileCreate::eventName, kEventParams_OneReference_OneBaseForm, EventFlags::kFlag_FlushOnLoad);
 	RegisterEvent(OnProjectileImpact::eventName, kEventParams_OneReference_OneBaseForm_OneReference, EventFlags::kFlag_FlushOnLoad);
 
@@ -1274,8 +1274,10 @@ void RegisterEvents()
 	RegisterEvent(OnShowCornerMessage::eventName, kEventParams_ThreeStrings_OneFloat);
 	RegisterEvent(OnFireWeapon::eventName, kEventParams_OneReference_OneBaseForm);
 
+#if _DEBUG
 	RegisterEvent(OnCalculateEffectEntryMagnitude::eventName,
 		kEventParams_OneReference_TwoBaseForms_OneInt_OneBaseForm_OneInt_ThreeFloats);
+#endif
 
 	RegisterEvent(OnTeammateStateChange::eventName, kEventParams_OneInt);
 	RegisterEvent(OnPCMiscStatChange::eventName, kEventParams_TwoInts);
