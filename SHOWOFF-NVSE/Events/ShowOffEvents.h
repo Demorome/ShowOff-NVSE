@@ -478,6 +478,8 @@ namespace OnCalculateSellPrice
 #endif
 	}
 
+	CallOverride g_override;
+
 	// Recalculate sell price of an item.
 	static double __cdecl HookFAbs(float price)
 	{
@@ -487,12 +489,12 @@ namespace OnCalculateSellPrice
 		auto* itemEntry = *reinterpret_cast<ContChangesEntry**>(ebp + 0xC);
 		HandleEvent(newPrice, itemEntry);
 
-		return fabs(static_cast<double>(newPrice));
+		return CdeclCall<double>(g_override.GetOverwrittenAddr(), newPrice);
 	}
 
-	void WriteHook()
+	void WriteDelayedHook() //avoid conflict with NVAC hook
 	{
-		WriteRelCall(0x72EFFE, (UInt32)HookFAbs);
+		g_override.WriteRelCall(0x72EFFE, (UInt32)HookFAbs);
 	}
 }
 
@@ -1277,7 +1279,6 @@ namespace HandleHooks
 		OnPreActivate::WriteHook();
 		PreActivateInventoryItem::WriteHooks();
 		OnQuestAdded::WriteHook();
-		OnCalculateSellPrice::WriteHook();
 		OnProjectileDestroy::WriteHook();
 		OnProjectileCreate::WriteHook();
 		OnProjectileImpact::WriteHooks();
@@ -1301,7 +1302,7 @@ namespace HandleHooks
 	{
 		CornerMessageHooks::WriteDelayedHook();
 		OnDisplayOrCompleteObjective::WriteDelayedHook();
-
+		OnCalculateSellPrice::WriteDelayedHook();
 #if _DEBUG
 #endif
 	}
