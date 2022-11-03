@@ -176,7 +176,8 @@ namespace OnPreActivate
 		{
 			if (UInt32 &shouldActivate = *static_cast<UInt32*>(shouldActivateAdrr))
 			{
-				shouldActivate = result.Bool();
+				if (result.IsValid())
+					shouldActivate = result.Bool();
 			}
 			return true;
 		};
@@ -245,7 +246,8 @@ namespace PreActivateInventoryItem
 		{
 			if (UInt32& shouldActivate = *static_cast<UInt32*>(shouldActivateAdrr))
 			{
-				shouldActivate = result.Bool();
+				if (result.IsValid())
+					shouldActivate = result.Bool();
 			}
 			return true;
 		};
@@ -364,7 +366,8 @@ namespace PreDropInventoryItem
 		auto constexpr resultCallback = [](NVSEArrayVarInterface::Element& result, void* shouldDropAddr) -> bool
 		{
 			if (UInt32& shouldDrop = *static_cast<UInt32*>(shouldDropAddr))
-				shouldDrop = result.Bool();
+				if (result.IsValid())
+					shouldDrop = result.Bool();
 			return true;
 		};
 		UInt32 shouldDrop = true;
@@ -441,9 +444,9 @@ namespace OnCalculateSellPrice
 
 		auto constexpr multCallback = [](NVSEArrayVarInterface::Element& result, void* newPriceAddr) -> bool
 		{
-			float& newPrice = *static_cast<float*>(newPriceAddr);
-			if (result.type != NVSEArrayVarInterface::kType_Numeric)
+			if (result.type != NVSEArrayVarInterface::kType_Numeric) [[unlikely]]
 				return true;
+			float& newPrice = *static_cast<float*>(newPriceAddr);
 			newPrice *= result.Number();
 			return true;
 		};
@@ -451,6 +454,8 @@ namespace OnCalculateSellPrice
 
 		auto constexpr addCallback = [](NVSEArrayVarInterface::Element& result, void* newPriceAddr) -> bool
 		{
+			if (result.type != NVSEArrayVarInterface::kType_Numeric) [[unlikely]]
+				return true;
 			float& newPrice = *static_cast<float*>(newPriceAddr);
 			newPrice += result.Number();
 			return true;
@@ -459,6 +464,8 @@ namespace OnCalculateSellPrice
 
 		auto constexpr subCallback = [](NVSEArrayVarInterface::Element& result, void* newPriceAddr) -> bool
 		{
+			if (result.type != NVSEArrayVarInterface::kType_Numeric) [[unlikely]]
+				return true;
 			float& newPrice = *static_cast<float*>(newPriceAddr);
 			newPrice -= result.Number();
 			return true;
