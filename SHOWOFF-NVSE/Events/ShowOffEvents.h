@@ -962,7 +962,8 @@ namespace OnPCMiscStatChange
 		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
 		auto const statCode = *reinterpret_cast<MiscStatCode*>(ebp + 0x8);
 		auto const modVal = *reinterpret_cast<int*>(ebp + 0xC);
-		g_eventInterface->DispatchEventThreadSafe(eventName, nullptr, g_thePlayer, statCode, modVal);
+		auto const newVal = CdeclCall<int>(0x5A3370, statCode); // GetPCMiscStat
+		g_eventInterface->DispatchEventThreadSafe(eventName, nullptr, g_thePlayer, statCode, modVal, newVal);
 
 		// Do regular code
 		return 1003; // StatsMenu::GetMenuID
@@ -1245,7 +1246,7 @@ void RegisterEvents()
 		kEventParams_OneReference_TwoBaseForms_OneInt_OneBaseForm_OneInt_ThreeFloats);
 #endif
 
-	RegisterEvent(OnPCMiscStatChange::eventName, kEventParams_TwoInts);
+	RegisterEvent(OnPCMiscStatChange::eventName, kEventParams_ThreeInts);
 
 	RegisterEvent(OnDisplayOrCompleteObjective::onDisplayName, kEventParams_OneBaseForm_OneInt);
 	RegisterEvent(OnDisplayOrCompleteObjective::onCompleteName, kEventParams_OneBaseForm_OneInt);
