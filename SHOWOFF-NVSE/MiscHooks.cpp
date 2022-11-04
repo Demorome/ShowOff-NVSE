@@ -583,6 +583,7 @@ namespace HandleHooks
 
 		/*
 		//TODO: make optional?
+		//TODO: need to learn more about why it kinda works..
 		Experimental::FixOnAddBlockType::WriteHook();
 		Experimental::FixOnDropAndOnUnequipBlockType::WriteHooks();
 		*/

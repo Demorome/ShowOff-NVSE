@@ -644,8 +644,8 @@ namespace OnLockpickMenuClose
 	{
 		kLockOpened = 0,
 		kLockForceBroken,
-		kManualExit,
-		kStewieNoMoreLockpicksAfterFailedForceAttempt
+		kStewieNoMoreLockpicksAfterFailedForceAttempt,
+		kManualExit
 	};
 
 	void HandleEvent(const LockPickMenu* menu, CloseReason reason)
@@ -1255,9 +1255,11 @@ void RegisterEvents()
 
 	RegisterEvent(OnPreActivate::eventName, kEventParams_OneReference_OneIntPtr);
 	RegisterEvent(PreActivateInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneIntPtr_OneInt);
+	// TODO: TEST PreDropInventoryItem
 	RegisterEvent(PreDropInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneIntPtr);
 	RegisterEvent(OnQuestAdded::eventName, kEventParams_OneBaseForm);
-	 
+
+	//TODO: document / modify!
 	RegisterEvent(OnCalculateSellPrice::eventNameAdd, kEventParams_OneBaseForm_OneReference);
 	RegisterEvent(OnCalculateSellPrice::eventNameSub, kEventParams_OneBaseForm_OneReference);
 	RegisterEvent(OnCalculateSellPrice::eventNameMult, kEventParams_OneBaseForm_OneReference);
@@ -1282,6 +1284,7 @@ void RegisterEvents()
 	RegisterEvent(OnDisplayOrCompleteObjective::onDisplayName, kEventParams_OneBaseForm_OneInt);
 	RegisterEvent(OnDisplayOrCompleteObjective::onCompleteName, kEventParams_OneBaseForm_OneInt);
 
+	//TODO: document!
 	RegisterEvent(OnAddAlt::eventName, kEventParams_OneBaseForm_OneReference);
 #if _DEBUG
 
@@ -1322,7 +1325,6 @@ namespace HandleHooks
 		OnAddAlt::WriteHooks();
 
 #if _DEBUG
-		//ActorValueChangeHooks::WriteHook();
 		PreDropInventoryItem::WriteHook();
 #endif
 	}

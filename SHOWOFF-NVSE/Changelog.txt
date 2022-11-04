@@ -228,23 +228,51 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 
 //===v1.50
 
-*AS OF THIS VERSION, xNVSE 6.2.8 or greater is required.*
+*AS OF THIS VERSION, xNVSE 6.2.9 or greater is required.*
+
+===Misc:
+* A .pdb file is now included, to produce better crash logs with Cobb's crash logger.
+* Added aliases for the INI functions.
+* JSON functions will give better error messages.
 
 ===Bug Fixes:
 * ShowPerkMenu: 
 - Copied code from Tweaks to prevent perks from being selected if there are none to assign (used to go to -1 perks).
 - Copied code from Tweaks to force the perk menu to open even if not on a perk level (allows previewing perks).
 - Copied code from Tweaks to allow multiple perks to be selected.
-* Fixed SetINIValue_Cached not returning the right result sometimes.
+
+* RandSeeded and company: 
+- Fixed bug where no matter what seed was being given, it always resorted to default.
+
+* 
 
 ===New Functions:
 * SetEnableParent
 * GetEquippedWeapon
 * GetEquippedWeaponRef
-* ??
+* GetCalculatedAPCost
+* GetPosArray
+* GetCompassTargets
+* IsOutsideMainThread
+* GetLiveEffectBaseTrait
+* GetActorValueName
+* SetINIInteger_Cached
+* GetAddedItemRefShowOff
 
 ===New Event Handlers (for SetEventHandlerAlt):
-* ??
+* "ShowOff:OnPreActivate"
+* "ShowOff:OnPreActivateInventoryItem"
+* "ShowOff:OnLockpickMenuClose"
+* "ShowOff:OnPCMiscStatChange"
+* "ShowOff:OnProjectileCreate"
+* "ShowOff:OnProjectileDestroy"
+* "ShowOff:OnProjectileImpact"
+* "ShowOff:OnQuestAdded"
+* "ShowOff:OnQueueCornerMessage"
+* "ShowOff:OnShowCornerMessage"
+* "ShowOff:OnDisplayObjective"
+* "ShowOff:OnCompleteObjective"
+* "ShowOff:OnFireWeapon"
 
 
 ====== (Template:)
