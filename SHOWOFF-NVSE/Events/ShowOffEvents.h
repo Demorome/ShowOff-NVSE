@@ -478,7 +478,7 @@ namespace OnCalculateSellPrice
 #endif
 	}
 
-	CallOverride g_override;
+	CallDetour g_override;
 
 	// Recalculate sell price of an item.
 	static double __cdecl HookFAbs(float price)
@@ -644,7 +644,8 @@ namespace OnLockpickMenuClose
 	{
 		kLockOpened = 0,
 		kLockForceBroken,
-		kManualExit
+		kManualExit,
+		kStewieNoMoreLockpicksAfterFailedForceAttempt
 	};
 
 	void HandleEvent(const LockPickMenu* menu, CloseReason reason)
@@ -652,11 +653,39 @@ namespace OnLockpickMenuClose
 		g_eventInterface->DispatchEvent(eventName, menu->targetRef, reason);
 	}
 
-	void __cdecl ForceFailHook()
+	inline CallDetour g_ForceOpenAttemptOverride;
+	int __cdecl ForceOpenAttemptHook(int playerLockpickSkill, int lockLevel)
 	{
+		auto const chanceResult = CdeclCall<int>(g_ForceOpenAttemptOverride.GetOverwrittenAddr(), playerLockpickSkill, lockLevel);
+
 		auto const menu = LockPickMenu::GetSingleton();
-		menu->stage = 7;
-		HandleEvent(menu, CloseReason::kLockForceBroken);
+		// do nothing if the lock is already successfully forced and rotating
+		if (menu->isForceRotate)
+			return chanceResult;
+
+		int randomNum;
+		_asm {
+			mov randomNum, esi
+		}
+
+		if (randomNum >= chanceResult) // if player failed to force open the lock
+		{
+			// Compatibility with Tweak's ForceLockUsesBobbyPins
+			if (*reinterpret_cast<UInt8*>(0x79040D) == 0xE8)
+			{
+				// Assume Tweak's hook was installed.
+				// While this is still a failed attempt, it is no longer guaranteed to close the menu,
+				// ..since it now only closes when player runs out of lockpicks.
+				if (float numBobbyPins = menu->tile30->GetValueFloat(*(UInt32*)0x11DA1F8) - 1.0F;
+					numBobbyPins <= 0)
+				{
+					HandleEvent(menu, CloseReason::kStewieNoMoreLockpicksAfterFailedForceAttempt);
+				}
+				return chanceResult;
+			} //else, Tweaks hook is not installed.
+			HandleEvent(menu, CloseReason::kLockForceBroken);
+		}
+		return chanceResult;
 	}
 
 	void __cdecl ManualExitHook()
@@ -677,7 +706,7 @@ namespace OnLockpickMenuClose
 	{
 		WriteRelCall(0x790383, (UInt32)ManualExitHook);
 		WriteRelCall(0x78F97B, (UInt32)OpenLockHook);
-		WriteRelCall(0x7904AF, (UInt32)ForceFailHook);
+		g_ForceOpenAttemptOverride.WriteRelCall(0x7903D9, (UInt32)ForceOpenAttemptHook); // replace CalculateForceLockChance(..)
 	}
 }
 

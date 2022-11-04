@@ -1540,7 +1540,7 @@ public:
 	float					cylinderAngle;	// 8C
 	float					pickAngle;		// 90
 	float					pickHealth;		// 94
-	UInt8					byte98;			// 98
+	bool					isForceRotate;	// 98, credits to Stewie
 	UInt8					byte99;			// 99
 	UInt8					pad9A[2];		// 99
 	NiControllerSequence	*ctrlSeq9C;		// 9C

@@ -38,3 +38,16 @@ void NopIndirectCall(UInt32 addr);
 UInt32 GetRelJumpAddr(UInt32 jumpSrc);
 
 UInt8* GetParentBasePtr(void* addressOfReturnAddress, bool lambda = false);
+
+// Stores the function-to-call before overwriting it, to call the overwritten function after our hook is over.
+class CallDetour
+{
+	UInt32 overwritten_addr = 0;
+public:
+	void WriteRelCall(UInt32 jumpSrc, UInt32 jumpTgt)
+	{
+		overwritten_addr = GetRelJumpAddr(jumpSrc);
+		return ::WriteRelCall(jumpSrc, jumpTgt);
+	}
+	[[nodiscard]] UInt32 GetOverwrittenAddr() const { return overwritten_addr; }
+};

@@ -136,16 +136,3 @@ UInt8* GetParentBasePtr(void* addressOfReturnAddress, bool lambda)
 #endif
 	return *reinterpret_cast<UInt8**>(basePtr);
 }
-
-// Stores the function-to-call before overwriting it, to call the overwritten function after our hook is over.
-class CallOverride
-{
-	UInt32 overwritten_addr = 0;
-public:
-	void WriteRelCall(UInt32 jumpSrc, UInt32 jumpTgt)
-	{
-		overwritten_addr = GetRelJumpAddr(jumpSrc);
-		return ::WriteRelCall(jumpSrc, jumpTgt);
-	}
-	[[nodiscard]] UInt32 GetOverwrittenAddr() const { return overwritten_addr; }
-};
