@@ -12,7 +12,7 @@ You may also contact me directly on Discord. Username: `Demorome#2870`
 
 
 # Requirements
-Requires xNVSE v6.2.6 or greater: https://github.com/xNVSE/NVSE/releases.
+Requires xNVSE v6.2.9 or greater: https://github.com/xNVSE/NVSE/releases.
 
 
 # Installation
