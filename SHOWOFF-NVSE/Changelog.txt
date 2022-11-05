@@ -244,8 +244,6 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 * RandSeeded and company: 
 - Fixed bug where no matter what seed was being given, it always resorted to default.
 
-* 
-
 ===New Functions:
 * SetEnableParent
 * GetEquippedWeapon
@@ -262,6 +260,7 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 ===New Event Handlers (for SetEventHandlerAlt):
 * "ShowOff:OnPreActivate"
 * "ShowOff:OnPreActivateInventoryItem"
+* "ShowOff:OnPreDropInventoryItem"
 * "ShowOff:OnLockpickMenuClose"
 * "ShowOff:OnPCMiscStatChange"
 * "ShowOff:OnProjectileCreate"

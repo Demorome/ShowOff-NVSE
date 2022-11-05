@@ -1255,7 +1255,6 @@ void RegisterEvents()
 
 	RegisterEvent(OnPreActivate::eventName, kEventParams_OneReference_OneIntPtr);
 	RegisterEvent(PreActivateInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneIntPtr_OneInt);
-	// TODO: TEST PreDropInventoryItem
 	RegisterEvent(PreDropInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneIntPtr);
 	RegisterEvent(OnQuestAdded::eventName, kEventParams_OneBaseForm);
 
@@ -1310,6 +1309,7 @@ namespace HandleHooks
 	{
 		OnPreActivate::WriteHook();
 		PreActivateInventoryItem::WriteHooks();
+		PreDropInventoryItem::WriteHook();
 		OnQuestAdded::WriteHook();
 		OnProjectileDestroy::WriteHook();
 		OnProjectileCreate::WriteHook();
@@ -1325,7 +1325,6 @@ namespace HandleHooks
 		OnAddAlt::WriteHooks();
 
 #if _DEBUG
-		PreDropInventoryItem::WriteHook();
 #endif
 	}
 
