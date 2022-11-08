@@ -710,51 +710,11 @@ namespace OnLockpickMenuClose
 	}
 }
 
-namespace OnQueueCornerMessage
-{
-	constexpr char eventName[] = "ShowOff:OnQueueCornerMessage";
-
-	// Warning: msgText is not fully formatted, i.e. can have "&sUActnVats" and other formatting tricks.
-	void DispatchEvent(HUDMainMenu::QueuedMessage* msg)
-	{
-		void* displayTime = *(void**)&msg->displayTime;
-		g_eventInterface->DispatchEvent(eventName, nullptr, msg->msgText, 
-			msg->iconPath, msg->soundPath, displayTime);
-	}
-
-	void __fastcall tListAppendHook(tList<HUDMainMenu::QueuedMessage>* msgList, void* edx, 
-		HUDMainMenu::QueuedMessage** msg)
-	{
-		// Run our code
-		DispatchEvent(*msg);
-
-		// Regular code
-		ThisStdCall(0x905820, msgList, msg);
-	}
-
-	void __fastcall tListInsertHook(tList<HUDMainMenu::QueuedMessage>* msgList, void* edx,
-		HUDMainMenu::QueuedMessage** msg)
-	{
-		// Run our code
-		DispatchEvent(*msg);
-
-		// Regular code
-		ThisStdCall(0x5AE3D0, msgList, msg);
-	}
-
-	void WriteHooks()
-	{
-		WriteRelCall(0x7754FA, (UInt32)tListAppendHook);
-		WriteRelCall(0x775624, (UInt32)tListAppendHook);
-		WriteRelCall(0x775610, (UInt32)tListInsertHook);
-	}
-}
-
 namespace OnShowCornerMessage
 {
 	constexpr char eventName[] = "ShowOff:OnShowCornerMessage";
 
-	std::string g_msgText, g_iconPath, g_soundPath;
+	static std::string g_msgText, g_iconPath, g_soundPath;
 
 	// Warning: msgText is not fully formatted, i.e. can have "&sUActnVats" and other formatting tricks.
 	void DispatchEvent(HUDMainMenu::QueuedMessage* msg)
@@ -777,20 +737,62 @@ namespace OnShowCornerMessage
 			g_iconPath.c_str(), g_soundPath.c_str(), displayTime);
 	}
 
-	tList<HUDMainMenu::QueuedMessage>* __fastcall
-		thisHook(tList<HUDMainMenu::QueuedMessage>* msgList)
+	bool __fastcall tListIsEmptyHook(tList<HUDMainMenu::QueuedMessage>* msgList)
 	{
-		// Our code
-		DispatchEvent(msgList->Head()->data);
+		const bool isEmpty = msgList->Empty();
+		if (!isEmpty)
+			DispatchEvent(msgList->Head()->data);
 
-		// regular code
-		return msgList;
+		return isEmpty;
 	}
 
 	void WriteHooks()
 	{
-		WriteRelCall(0x7757F9, (UInt32)thisHook);
-		WriteRelCall(0x77550A, (UInt32)thisHook);
+		// For delayed (queued) messages.
+		WriteRelCall(0x77578D, (UInt32)tListIsEmptyHook);
+	}
+}
+
+namespace OnQueueCornerMessage
+{
+	constexpr char eventName[] = "ShowOff:OnQueueCornerMessage";
+
+	// Warning: msgText is not fully formatted, i.e. can have "&sUActnVats" and other formatting tricks.
+	void DispatchEvent(HUDMainMenu::QueuedMessage* msg)
+	{
+		void* displayTime = *(void**)&msg->displayTime;
+		g_eventInterface->DispatchEvent(eventName, nullptr, msg->msgText, 
+			msg->iconPath, msg->soundPath, displayTime);
+	}
+
+	template <bool ShowMsgNow>
+	void __fastcall tListAppendHook(tList<HUDMainMenu::QueuedMessage>* msgList, void* edx, 
+		HUDMainMenu::QueuedMessage** msg)
+	{
+		// Run our code
+		DispatchEvent(*msg);
+		if constexpr (ShowMsgNow)
+			OnShowCornerMessage::DispatchEvent(*msg);
+
+		// Regular code
+		ThisStdCall(0x905820, msgList, msg);
+	}
+
+	void __fastcall tListInsertHook(tList<HUDMainMenu::QueuedMessage>* msgList, void* edx,
+		HUDMainMenu::QueuedMessage** msg)
+	{
+		// Run our code
+		DispatchEvent(*msg);
+
+		// Regular code
+		ThisStdCall(0x5AE3D0, msgList, msg);
+	}
+
+	void WriteHooks()
+	{
+		WriteRelCall(0x7754FA, (UInt32)tListAppendHook<true>);
+		WriteRelCall(0x775624, (UInt32)tListAppendHook<false>);
+		WriteRelCall(0x775610, (UInt32)tListInsertHook);
 	}
 }
 
@@ -988,7 +990,7 @@ namespace OnPCMiscStatChange
 {
 	constexpr char eventName[] = "ShowOff:OnPCMiscStatChange";
 
-	int __cdecl HandleEvent()
+	int __cdecl HookGetMenuID()
 	{
 		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
 		auto const statCode = *reinterpret_cast<MiscStatCode*>(ebp + 0x8);
@@ -1003,7 +1005,7 @@ namespace OnPCMiscStatChange
 	void WriteHook()
 	{
 		// replace "call StatsMenu::GetMenuID"
-		WriteRelCall(0x4D5E6A, (UInt32)HandleEvent);
+		WriteRelCall(0x4D5E6A, (UInt32)HookGetMenuID);
 	}
 }
 
@@ -1012,9 +1014,9 @@ namespace OnDisplayOrCompleteObjective
 	constexpr char onDisplayName[] = "ShowOff:OnDisplayObjective";
 	constexpr char onCompleteName[] = "ShowOff:OnCompleteObjective";
 
-	static UInt32 hookedAddr = 0;
+	static CallDetour GetQuestDetour;
 
-	TESQuest* __fastcall Hook(BGSQuestObjective* objective)
+	TESQuest* __fastcall HookGetQuest(BGSQuestObjective* objective)
 	{
 		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
 		const auto newStatus = *reinterpret_cast<UInt32*>(ebp + 8);
@@ -1028,15 +1030,15 @@ namespace OnDisplayOrCompleteObjective
 			g_eventInterface->DispatchEventThreadSafe(onCompleteName, nullptr, nullptr, objective->quest, objective->objectiveId);
 		}
 
-		return ThisStdCall<TESQuest*>(hookedAddr, objective);
+		return ThisStdCall<TESQuest*>(GetQuestDetour.GetOverwrittenAddr(), objective);
 	}
 
 	void WriteDelayedHook()
 	{
 		// Add compatibility with Tweaks by indirectly calling the function at the address.
-		hookedAddr = GetRelJumpAddr(0x5EC5DC);
-		WriteRelCall(0x5EC5DC, (UInt32)Hook);
-		// We could have hooked the HUDMainMenu::SetQuestUpdateText calls, but that would cause incompatibility with Tweaks' "No Quest Messages".
+		GetQuestDetour.WriteRelCall(0x5EC5DC, (UInt32)HookGetQuest);
+		// We could have hooked the HUDMainMenu::SetQuestUpdateText calls,
+		// ..but that would cause incompatibility with Tweaks' "No Quest Messages".
 	}
 }
 
@@ -1105,7 +1107,7 @@ namespace OnAddAlt
 
 	namespace HandleAddItem
 	{
-		void __fastcall Hook(void* xChanges, void* edx, TESForm* item, ExtraDataList* xData, SInt32 count)
+		void __fastcall HookExtraContainerChanges_Unk(void* xChanges, void* edx, TESForm* item, ExtraDataList* xData, SInt32 count)
 		{
 			auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
 			auto* newOwner = *reinterpret_cast<TESObjectREFR**>(ebp - 0xC);
@@ -1118,13 +1120,13 @@ namespace OnAddAlt
 
 		void WriteHook()
 		{
-			WriteRelCall(0x575091, (UInt32)Hook);
+			WriteRelCall(0x575091, (UInt32)HookExtraContainerChanges_Unk);
 		}
 	}
 
 	namespace EquipForRef
 	{
-		void __fastcall Hook(ExtraContainerChanges::Data* xChanges, void* edx, TESForm* item, SInt32 count,
+		void __fastcall HookEquipForRef(ExtraContainerChanges::Data* xChanges, void* edx, TESForm* item, SInt32 count,
 			TESObjectREFR* newOwner, ExtraDataList* xData, int a6, int a7)
 		{
 			HandleEvent(newOwner, item, xData, count);
@@ -1135,7 +1137,7 @@ namespace OnAddAlt
 
 		void WriteHook()
 		{
-			WriteRelCall(0x574B19, (UInt32)Hook);
+			WriteRelCall(0x574B19, (UInt32)HookEquipForRef);
 		}
 	}
 
@@ -1143,7 +1145,7 @@ namespace OnAddAlt
 	{
 		namespace InitialOnAdd
 		{
-			void __cdecl Hook(TESObjectREFR* newOwner, ExtraDataList* xData, int eventId)
+			void __cdecl HookMergeScriptEvent(TESObjectREFR* newOwner, ExtraDataList* xData, int eventId)
 			{
 				CdeclCall(MergeScriptEventAddr, newOwner, xData, eventId);
 
@@ -1155,13 +1157,13 @@ namespace OnAddAlt
 
 			void WriteHook()
 			{
-				WriteRelCall(0x574C28, (UInt32)Hook);
+				WriteRelCall(0x574C28, (UInt32)HookMergeScriptEvent);
 			}
 		}
 
 		namespace RockItProjectile
 		{
-			void __cdecl Hook(TESObjectREFR* newOwner, ExtraDataList* xData, int eventId)
+			void __cdecl HookMergeScriptEvent(TESObjectREFR* newOwner, ExtraDataList* xData, int eventId)
 			{
 				CdeclCall(MergeScriptEventAddr, newOwner, xData, eventId);
 
@@ -1174,13 +1176,13 @@ namespace OnAddAlt
 
 			void WriteHook()
 			{
-				WriteRelCall(0x574D00, (UInt32)Hook);
+				WriteRelCall(0x574D00, (UInt32)HookMergeScriptEvent);
 			}
 		}
 	
 		namespace OtherProjectile
 		{
-			void __cdecl Hook(TESObjectREFR* newOwner, ExtraDataList* xData, int eventId)
+			void __cdecl HookMergeScriptEvent(TESObjectREFR* newOwner, ExtraDataList* xData, int eventId)
 			{
 				CdeclCall(MergeScriptEventAddr, newOwner, xData, eventId);
 
@@ -1193,7 +1195,7 @@ namespace OnAddAlt
 
 			void WriteHook()
 			{
-				WriteRelCall(0x574F03, (UInt32)Hook);
+				WriteRelCall(0x574F03, (UInt32)HookMergeScriptEvent);
 			}
 		}
 

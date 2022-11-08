@@ -46,8 +46,12 @@ class CallDetour
 public:
 	void WriteRelCall(UInt32 jumpSrc, UInt32 jumpTgt)
 	{
+		if (*reinterpret_cast<UInt8*>(jumpSrc) != 0xE8) {
+			_ERROR("Cannot write detour; jumpSrc is not a function call.");
+			return;
+		}
 		overwritten_addr = GetRelJumpAddr(jumpSrc);
-		return ::WriteRelCall(jumpSrc, jumpTgt);
+		::WriteRelCall(jumpSrc, jumpTgt);
 	}
 	[[nodiscard]] UInt32 GetOverwrittenAddr() const { return overwritten_addr; }
 };
