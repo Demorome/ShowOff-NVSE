@@ -523,7 +523,7 @@ bool Cmd_SetSecuritronExpressionTemp_Execute(COMMAND_ARGS)
 }
 
 DEFINE_CMD_ALT_COND_PLUGIN(GetIsPlayerOverencumbered, IsPCOverencumbered, 
-	"An alternative to SUP's IsPlayerOverencumbered", true, kParams_OneInt);
+	"An alternative to SUP's IsPlayerOverencumbered", true, kParams_OneOptionalInt);
 bool Cmd_GetIsPlayerOverencumbered_Eval(COMMAND_ARGS_EVAL)
 {
 	// Imitate PlayerCharacter::GetIsOverencumbered at 0x954CC0.
