@@ -274,6 +274,14 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 * "ShowOff:OnFireWeapon"
 
 
+//===v1.51
+
+===Bug Fixes:
+* Fixed bad hook for the "ShowOff:OnShowCornerMessage" event. This may fix the NVAC-related crashes users have reported.
+
+===Function changes:
+* Allow passing a formlist of items for GetEquippedItemRefForItem
+
 ====== (Template:)
 
 //===v???
@@ -281,6 +289,9 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 *
 
 ===New Functions:
+*
+
+===Function changes:
 *
 
 ******DON'T FORGET TO UPDATE THE PLUGIN VERSION BEFORE EVERY RELEASE*********

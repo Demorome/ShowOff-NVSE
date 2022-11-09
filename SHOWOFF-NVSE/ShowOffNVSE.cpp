@@ -38,7 +38,7 @@
 // Plugin Stuff
 IDebugLog g_Log("ShowOffNVSE.log");
 HMODULE	g_ShowOffHandle;
-constexpr UInt32 g_PluginVersion = 150;
+constexpr UInt32 g_PluginVersion = 151;
 
 // Allows modmakers to toggle ShowOff's debug messages for some of its functions.
 #ifdef _DEBUG

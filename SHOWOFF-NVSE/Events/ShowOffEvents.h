@@ -706,7 +706,8 @@ namespace OnLockpickMenuClose
 	{
 		WriteRelCall(0x790383, (UInt32)ManualExitHook);
 		WriteRelCall(0x78F97B, (UInt32)OpenLockHook);
-		g_ForceOpenAttemptOverride.WriteRelCall(0x7903D9, (UInt32)ForceOpenAttemptHook); // replace CalculateForceLockChance(..)
+		// replace CalculateForceLockChance(..)
+		g_ForceOpenAttemptOverride.WriteRelCall(0x7903D9, (UInt32)ForceOpenAttemptHook);
 	}
 }
 

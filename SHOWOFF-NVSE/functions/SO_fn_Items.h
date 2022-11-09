@@ -374,7 +374,8 @@ TESObjectREFR* __fastcall GetEquippedItemRefForItem_Call(Actor* actor, TESForm* 
 	auto const contChanges = dynamic_cast<ExtraContainerChanges*>(actor->extraDataList.GetByType(kExtraData_ContainerChanges));
 	if (contChanges->data && contChanges->data->objList)
 	{
-		for (auto itemIter = contChanges->data->objList->Begin(); !itemIter.End(); ++itemIter)  // see GetHotkeyItem from NVSE for similar loop example.
+		// see GetHotkeyItem from NVSE for similar loop example.
+		for (auto itemIter = contChanges->data->objList->Begin(); !itemIter.End(); ++itemIter)
 		{
 			if (baseItem != itemIter->type)
 				continue;
@@ -392,18 +393,30 @@ TESObjectREFR* __fastcall GetEquippedItemRefForItem_Call(Actor* actor, TESForm* 
 	return nullptr;
 }
 
-DEFINE_COMMAND_PLUGIN(GetEquippedItemRefForItem, "Returns the equipped inv ref for the base item if that base item is equipped.", true, kParams_OneForm);
+DEFINE_COMMAND_PLUGIN(GetEquippedItemRefForItem, "Returns the equipped inv ref for the base item if that base item is equipped.", 
+	true, kParams_OneForm);
 bool Cmd_GetEquippedItemRefForItem_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	TESForm* itemForm;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &itemForm) && itemForm
-		&& IS_ACTOR(thisObj)
-		&& itemForm->IsItem() && !IS_REFERENCE(itemForm))
+	TESForm* itemForm_OrList;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &itemForm_OrList) && itemForm_OrList
+		&& IS_ACTOR(thisObj) && !IS_REFERENCE(itemForm_OrList))
 	{
-		if (auto const itemRef = GetEquippedItemRefForItem_Call((Actor*)thisObj, itemForm))
+		if (IS_TYPE(itemForm_OrList, BGSListForm))
 		{
-			REFR_RES = itemRef->refID;
+			auto formList = static_cast<BGSListForm*>(itemForm_OrList);
+			for (tList<TESForm>::Iterator iter = formList->list.Begin(); !iter.End(); ++iter)
+			{
+				if (auto const itemRef = GetEquippedItemRefForItem_Call((Actor*)thisObj, itemForm_OrList))
+				{
+					REFR_RES = itemRef->refID;
+					break;
+				}
+			}
+		}
+		else {
+			if (auto const itemRef = GetEquippedItemRefForItem_Call((Actor*)thisObj, itemForm_OrList))
+				REFR_RES = itemRef->refID;
 		}
 	}
 	return true;
