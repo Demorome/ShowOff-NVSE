@@ -19,7 +19,7 @@ using namespace std::literals;
 extern ICriticalSection g_Lock;
 extern std::atomic<bool> g_ShowFuncDebug;
 
-//NVSE Globals
+// NVSE Globals
 extern bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
 extern bool (*ExtractFormatStringArgs)(UInt32 fmtStringPos, char* buffer, COMMAND_ARGS_EX, UInt32 maxParams, ...);  // From JIP_NVSE.H
 extern NVSEArrayVarInterface* g_arrInterface;
@@ -50,7 +50,7 @@ extern NVSEEventManagerInterface* g_eventInterface;
 
 extern DWORD g_mainThreadID;
 
-//Singletons
+// Singletons
 extern HUDMainMenu* g_HUDMainMenu;
 extern TileMenu** g_tileMenuArray;
 extern UInt32 g_screenWidth;
@@ -64,6 +64,9 @@ extern DataHandler* g_dataHandler;
 extern BSAudioManager* g_audioManager;
 extern Sky** g_currentSky;
 extern TESObjectWEAP* g_fistsWeapon;
+
+// Game functions
+extern bool (__cdecl *GetIsGodMode)();
 
 //-Hook Globals
 extern std::atomic<bool> g_canPlayerPickpocketInCombat;

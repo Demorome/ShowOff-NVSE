@@ -1615,16 +1615,16 @@ public:
 	ActorValueOwner();
 	~ActorValueOwner();
 
-	virtual UInt32	GetBaseActorValue(UInt32 avCode);		// GetBaseActorValue (used from Eval) result in EAX
+	virtual UInt32	GetBaseActorValueInt(UInt32 avCode);		// GetBaseActorValue (used from Eval) result in EAX
 	virtual float	GetBaseAVFloat(UInt32 avCode);			// GetBaseActorValue internal, result in st
-	virtual int		Fn_02(UInt32 avCode);					// GetActorValue internal, result in EAX
+	virtual int		GetActorValueInt(UInt32 avCode);					// GetActorValue internal, result in EAX
 	virtual float	GetActorValue(UInt32 avCode);			// GetActorValue (used from Eval) result in EAX
 	virtual float	GetTempActorValue(UInt32 avCode);					// GetBaseActorValue04 (internal) result in st
 	virtual float	GetActorValueDamage(UInt32 avCode);					// Returns the negative damage modifier
 	virtual float	GetPermActorValue(UInt32 avCode);					// GetDamageActorValue or GetModifiedActorValue		called from Fn_08, result in st, added to Fn_01
 	virtual UInt32	GetNormalizedPermanentAV(UInt32 avCode);					// Manipulate GetPermanentActorValue, maybe convert to integer.
 	virtual float	GetPermanentActorValue(UInt32 avCode);	// GetPermanentActorValue (used from Eval) result in EAX
-	virtual Actor* Fn_09(void);							// GetActorBase (= this - 0x100) or GetActorBase (= this - 0x0A4)
+	virtual Actor*	GetActor(void);							// GetActorBase (= this - 0x100) or GetActorBase (= this - 0x0A4)
 	virtual UInt16	GetLevel();								// GetLevel (from ActorBase)
 
 	float GetThresholdedActorValue(UInt32 avCode) { return ThisStdCall<float>(0x66EF50, this, avCode); }

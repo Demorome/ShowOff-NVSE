@@ -1008,7 +1008,7 @@ bool Cmd_GetCalculatedAPCost_Execute(COMMAND_ARGS)
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &mode, &weapon))
 		return true;
 
-	if (CdeclCall<bool>(0x9526B0)) // GetIsGodMode
+	if (GetIsGodMode())
 		return true; //every action is 0 AP.
 
 	thisObj = g_thePlayer;

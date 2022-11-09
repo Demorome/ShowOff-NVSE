@@ -38,7 +38,7 @@
 // Plugin Stuff
 IDebugLog g_Log("ShowOffNVSE.log");
 HMODULE	g_ShowOffHandle;
-constexpr UInt32 g_PluginVersion = 151;
+constexpr UInt32 g_PluginVersion = 155;
 
 // Allows modmakers to toggle ShowOff's debug messages for some of its functions.
 #ifdef _DEBUG
@@ -121,6 +121,9 @@ BSAudioManager* g_audioManager = nullptr;
 Sky** g_currentSky = nullptr;
 RefID g_xMarkerFormID = 0x3B;
 TESObjectWEAP* g_fistsWeapon = nullptr;
+
+// Game functions
+bool (__cdecl* GetIsGodMode)() = nullptr;
 
 // Hook Globals
 std::atomic<bool> g_canPlayerPickpocketInCombat = false;
@@ -216,6 +219,8 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		g_screenWidth = *(UInt32*)0x11C73E0;
 		g_screenHeight = *(UInt32*)0x11C7190;
 		g_fistsWeapon = *(TESObjectWEAP**)0x11CA278;
+
+		GetIsGodMode = reinterpret_cast<bool(*)()>(0x9526B0);
 
 		HandleHooks::HandleDelayedGameHooks();
 		HandleHooks::HandleDelayedEventHooks();
@@ -616,6 +621,9 @@ extern "C"
 		/*3D3B*/	REG_CMD_STR(GetActorValueName)
 		/*3D3C*/    REG_CMD(SetINIInteger_Cached)
 		/*3D3D*/	REG_CMD_FORM(GetAddedItemRefShowOff)
+
+		//========v1.55
+		/*3D3E*/	REG_CMD(GetIsPlayerOverencumbered)
 	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		

@@ -191,7 +191,7 @@ __declspec(naked) UInt32 Actor::GetLevel()
 
 bool Actor::IsInvisible()
 {
-	return (avOwner.Fn_02(kAVCode_Invisibility) > 0) || (avOwner.Fn_02(kAVCode_Chameleon) > 0);
+	return (avOwner.GetActorValueInt(kAVCode_Invisibility) > 0) || (avOwner.GetActorValueInt(kAVCode_Chameleon) > 0);
 }
 
 SInt32 Actor::GetDetectionLevelAlt(Actor* target, bool calculateSneakLevel)
