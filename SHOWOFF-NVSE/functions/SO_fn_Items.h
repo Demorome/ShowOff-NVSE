@@ -407,7 +407,7 @@ bool Cmd_GetEquippedItemRefForItem_Execute(COMMAND_ARGS)
 			auto formList = static_cast<BGSListForm*>(itemForm_OrList);
 			for (tList<TESForm>::Iterator iter = formList->list.Begin(); !iter.End(); ++iter)
 			{
-				if (auto const itemRef = GetEquippedItemRefForItem_Call((Actor*)thisObj, itemForm_OrList))
+				if (auto const itemRef = GetEquippedItemRefForItem_Call((Actor*)thisObj, iter.Get()))
 				{
 					REFR_RES = itemRef->refID;
 					break;
