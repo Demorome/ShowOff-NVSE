@@ -3214,7 +3214,7 @@ public:
 		eCritDamage_OnDeath				= 0x1
 	};
 
-	enum
+	enum WeaponModEffects : UInt32
 	{
 		kWeaponModEffect_None = 0,
 		kWeaponModEffect_IncreaseDamage,

@@ -57,8 +57,14 @@ void HandleINIOptions()
 	sectionName = "Repair";
 	g_bNoSelfRepairingBrokenItems = ini.GetOrCreate(sectionName, "bNoSelfRepairingBrokenItems", 0, 
 		"; If 1 (true), broken items (0% condition) cannot be repaired in the pipboy repair menu.");
-	g_bNoVendorRepairingBrokenItems = ini.GetOrCreate(sectionName, "bNoVendorRepairingBrokenItems", 0, 
+	g_bNoVendorRepairingBrokenItems = ini.GetOrCreate(sectionName, "bNoVendorRepairingBrokenItems", 0,
 		"; If 1 (true), broken items (0% condition) cannot be repaired in the vendor repair menu.");
+
+
+	// Fixes
+	sectionName = "Fixes";
+	g_bFixCaravanCurrencyRemoval = ini.GetOrCreate(sectionName, "bFixCaravanCurrencyRemoval", 1,
+		"; If 1 (true), when removing currencies after losing in Caravan, will make change if needed by turning faction currency into caps.");
 
 	//Experimental (hidden)
 	sectionName = "Experimental";

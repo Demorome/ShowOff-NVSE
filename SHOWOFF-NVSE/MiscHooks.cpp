@@ -581,6 +581,13 @@ namespace HandleHooks
 		PatchShowRaceMenu();
 		PatchResetCell::WriteHook();
 
+#if 0
+		if (g_bFixCaravanCurrencyRemoval)
+		{
+			TODO
+		}
+#endif
+
 		/*
 		//TODO: make optional?
 		//TODO: need to learn more about why it kinda works..

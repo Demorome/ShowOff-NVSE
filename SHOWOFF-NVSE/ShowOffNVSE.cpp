@@ -130,6 +130,7 @@ std::atomic<bool> g_canPlayerPickpocketInCombat = false;
 
 
 //todo: remove INI globals and make a class for them (unordered map, access value via string key)
+
 bool g_bResetInteriorResetsActors;
 bool g_bNoSelfRepairingBrokenItems;
 bool g_bNoVendorRepairingBrokenItems;
@@ -137,6 +138,7 @@ bool g_bAlwaysUpdateWeatherForInteriors;
 bool g_bUseGamesettingsForFistFatigueDamage;
 bool g_bCreaturesDealMeleeFatigueDmg;
 bool g_bUnarmedWeaponsDealFatigueDmg;
+bool g_bFixCaravanCurrencyRemoval;
 
 //-Force Pickpocketting INI globals (enabled via function)
 std::atomic<float> g_fForcePickpocketBaseAPCost;
@@ -624,6 +626,7 @@ extern "C"
 
 		//========v1.55
 		/*3D3E*/	REG_CMD(GetIsPlayerOverencumbered)
+		/*3D3F*/	REG_CMD(RefillPlayerAmmo)
 	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		

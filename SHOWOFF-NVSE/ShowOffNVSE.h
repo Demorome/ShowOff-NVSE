@@ -80,6 +80,7 @@ extern bool g_bAlwaysUpdateWeatherForInteriors;
 extern bool g_bUseGamesettingsForFistFatigueDamage;
 extern bool g_bCreaturesDealMeleeFatigueDmg;
 extern bool g_bUnarmedWeaponsDealFatigueDmg;
+extern bool g_bFixCaravanCurrencyRemoval;
 
 
 //-Force Pickpocketting INI globals (enabled via function)

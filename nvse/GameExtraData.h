@@ -361,6 +361,10 @@ public:
 		float GetItemHealthPerc(bool arg1 = true);
 		ExtraDataList *GetEquippedExtra();
 		float CalculateWeaponDamage(float condition, TESForm *ammo);
+
+		[[nodiscard]] bool HasWeaponMod(TESObjectWEAP::WeaponModEffects effectCode) const {
+			return ThisStdCall_B(0x4BDA70, const_cast<EntryData*>(this), effectCode);
+		}
 	};
 
 	struct EntryDataList : tList<EntryData>

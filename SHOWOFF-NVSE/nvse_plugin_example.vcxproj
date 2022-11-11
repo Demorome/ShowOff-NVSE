@@ -1016,6 +1016,7 @@ copy "$(SolutionDir)Release\$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugi
     <ClInclude Include="ShowOffNVSE.h" />
     <ClInclude Include="SimpleINILibrary\SimpleIni.h" />
     <ClInclude Include="SOTypes.h" />
+    <ClInclude Include="StoredINI.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Armadillo Library\armadillo_bits\config.hpp.cmake" />

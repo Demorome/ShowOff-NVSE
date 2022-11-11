@@ -508,8 +508,8 @@ public:
 	virtual void		Unk_F7(void);
 	virtual void		Unk_F8(void);
 	virtual void		Unk_F9(void);
-	virtual void		Unk_FA(void);
-	virtual void		Unk_FB(TESForm *form, UInt32 arg2, UInt8 arg3, UInt8 arg4);
+	virtual void		Reload(TESObjectWEAP* weapon, UInt32 animType, UInt8 hasExtendedClip); // credits to JIP
+	virtual void		Reload2(TESObjectWEAP* weapon, UInt32 animType, UInt8 hasExtendedClip, UInt8 isInstantSwapHotkey); // credits to JIP
 	virtual void		Unk_FC(void);
 	virtual void		Unk_FD(void);
 	virtual void		Unk_FE(void);
