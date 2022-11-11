@@ -282,6 +282,16 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 ===Function changes:
 * Allow passing a formlist of items for GetEquippedItemRefForItem
 
+
+//===v1.55
+
+===Bug Fixes:
+*
+
+===New Functions:
+* Fixed GetEquippedItemRefForItem not working properly with formlists.
+
+
 ====== (Template:)
 
 //===v???
