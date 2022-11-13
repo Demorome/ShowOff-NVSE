@@ -508,8 +508,8 @@ public:
 	virtual void		Unk_F7(void);
 	virtual void		Unk_F8(void);
 	virtual void		Unk_F9(void);
-	virtual void		Unk_FA(void);
-	virtual void		Unk_FB(TESForm *form, UInt32 arg2, UInt8 arg3, UInt8 arg4);
+	virtual void		Reload(TESObjectWEAP* weapon, UInt32 animType, UInt8 hasExtendedClip); // credits to JIP
+	virtual void		Reload2(TESObjectWEAP* weapon, UInt32 animType, UInt8 hasExtendedClip, UInt8 isInstantSwapHotkey); // credits to JIP
 	virtual void		Unk_FC(void);
 	virtual void		Unk_FD(void);
 	virtual void		Unk_FE(void);
@@ -614,7 +614,7 @@ public:
 	UInt8								jipActorFlags3;				// 107
 	UInt32								lifeState;					// 108	saved as byte HasHealth = 1 or 2, optionally 6, 5 = IsRestrained
 	UInt32								criticalStage;				// 10C
-	UInt32								unk110;						// 110-
+	UInt32								animGroupID110;				// 110- decoded by Tweaks (?).
 	float								flt114;						// 114
 	UInt8								byte118;					// 118-
 	UInt8								byte119;					// 119+

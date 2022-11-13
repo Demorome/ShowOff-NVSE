@@ -2144,6 +2144,9 @@
     <ClInclude Include="SOTypes.h">
       <Filter>internal</Filter>
     </ClInclude>
+    <ClInclude Include="StoredINI.h">
+      <Filter>internal</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

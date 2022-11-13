@@ -1,18 +1,5 @@
 ﻿#pragma once
 
-DEFINE_CMD_COND_PLUGIN(GetNumActorsInRangeFromRef, "Returns the amount of actors that are a certain distance nearby to the calling reference.", true, kParams_OneFloat_OneOptionalInt);
-DEFINE_CMD_COND_PLUGIN(GetNumCombatActorsFromActor, "Returns the amount of actors that are allies/targets to the calling actor, with optional filters.", true, kParams_OneOptionalFloat_OneOptionalInt);
-DEFINE_CMD_COND_PLUGIN(GetCreatureTurningSpeed, "", false, kParams_OneOptionalActorBase);  //copied after GetCreatureCombatSkill from JG
-DEFINE_COMMAND_PLUGIN(SetCreatureTurningSpeed, "", false, kParams_OneFloat_OneOptionalActorBase);
-DEFINE_CMD_COND_PLUGIN(GetCreatureFootWeight, "", false, kParams_OneOptionalActorBase);
-DEFINE_COMMAND_PLUGIN(SetCreatureFootWeight, "", false, kParams_OneFloat_OneOptionalActorBase);
-DEFINE_COMMAND_PLUGIN(SetCreatureReach, "", false, kParams_OneInt_OneOptionalActorBase);
-DEFINE_COMMAND_PLUGIN(SetCreatureBaseScale, "", false, kParams_OneFloat_OneOptionalActorBase);
-DEFINE_CMD_COND_PLUGIN(GetNumCompassHostiles, "Returns the amount of hostile actors on compass, w/ optional filters.", false, kParams_OneOptionalFloat_OneOptionalInt);
-DEFINE_CMD_ALT_COND_PLUGIN(GetActorValueDamage, GetAVDamage, "Returns the damage modifier applied to the actor's AV", true, kParams_OneActorValue);
-
-
-
 //Code ripped from both JIP (GetActorsByProcessingLevel) and SUP (FindClosestActorFromRef).
 UInt32 __fastcall GetNumActorsInRangeFromRef_Call(TESObjectREFR* const thisObj, float const range, UInt32 const flags)
 {
@@ -68,6 +55,8 @@ UInt32 __fastcall GetNumActorsInRangeFromRef_Call(TESObjectREFR* const thisObj, 
 	return numActors; 
 }
 
+DEFINE_CMD_COND_PLUGIN(GetNumActorsInRangeFromRef, "Returns the amount of actors that are a certain distance nearby to the calling reference.", 
+	true, kParams_OneFloat_OneOptionalInt);
 bool Cmd_GetNumActorsInRangeFromRef_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = GetNumActorsInRangeFromRef_Call(thisObj, *(float*)&arg1, (UInt32)arg2);
@@ -192,6 +181,8 @@ UInt32 __fastcall GetNumCombatActorsFromActorCALL(TESObjectREFR* thisObj, float 
 	return numActors;
 }
 
+DEFINE_CMD_COND_PLUGIN(GetNumCombatActorsFromActor, "Returns the amount of actors that are allies/targets to the calling actor, with optional filters.", 
+	true, kParams_OneOptionalFloat_OneOptionalInt);
 bool Cmd_GetNumCombatActorsFromActor_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = GetNumCombatActorsFromActorCALL(thisObj, *(float*)&arg1, (UInt32)arg2);
@@ -208,6 +199,8 @@ bool Cmd_GetNumCombatActorsFromActor_Execute(COMMAND_ARGS)
 	return true;
 }
 
+//copied after GetCreatureCombatSkill from JG
+DEFINE_CMD_COND_PLUGIN(GetCreatureTurningSpeed, "", false, kParams_OneOptionalActorBase); 
 bool Cmd_GetCreatureTurningSpeed_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = -1;
@@ -230,6 +223,7 @@ bool Cmd_GetCreatureTurningSpeed_Execute(COMMAND_ARGS)
 }
 
 // Credits to JIP LN for the SetCreature__ code format.
+DEFINE_COMMAND_PLUGIN(SetCreatureTurningSpeed, "", false, kParams_OneFloat_OneOptionalActorBase);
 bool Cmd_SetCreatureTurningSpeed_Execute(COMMAND_ARGS)
 {
 	*result = false;
@@ -249,6 +243,7 @@ bool Cmd_SetCreatureTurningSpeed_Execute(COMMAND_ARGS)
 	return true;
 }
 
+DEFINE_CMD_COND_PLUGIN(GetCreatureFootWeight, "", false, kParams_OneOptionalActorBase);
 bool Cmd_GetCreatureFootWeight_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = -1;
@@ -270,7 +265,7 @@ bool Cmd_GetCreatureFootWeight_Execute(COMMAND_ARGS)
 	return Cmd_GetCreatureFootWeight_Eval(thisObj, creature, 0, result);
 }
 
-
+DEFINE_COMMAND_PLUGIN(SetCreatureFootWeight, "", false, kParams_OneFloat_OneOptionalActorBase);
 bool Cmd_SetCreatureFootWeight_Execute(COMMAND_ARGS)
 {
 	*result = 0;
@@ -290,7 +285,7 @@ bool Cmd_SetCreatureFootWeight_Execute(COMMAND_ARGS)
 	return true;
 }
 
-
+DEFINE_COMMAND_PLUGIN(SetCreatureReach, "", false, kParams_OneInt_OneOptionalActorBase);
 bool Cmd_SetCreatureReach_Execute(COMMAND_ARGS)
 {
 	*result = 0;
@@ -310,7 +305,7 @@ bool Cmd_SetCreatureReach_Execute(COMMAND_ARGS)
 	return true;
 }
 
-
+DEFINE_COMMAND_PLUGIN(SetCreatureBaseScale, "", false, kParams_OneFloat_OneOptionalActorBase);
 bool Cmd_SetCreatureBaseScale_Execute(COMMAND_ARGS)
 {
 	*result = 0;
@@ -380,6 +375,8 @@ UInt32 __fastcall GetNumCompassHostiles_Call(TESObjectREFR* const thisObj, float
 	return numHostiles;
 }
 
+DEFINE_CMD_COND_PLUGIN(GetNumCompassHostiles, "Returns the amount of hostile actors on compass, w/ optional filters.", 
+	false, kParams_OneOptionalFloat_OneOptionalInt);
 bool Cmd_GetNumCompassHostiles_Eval(COMMAND_ARGS_EVAL)
 {
 	float const max_range = *(float*)&arg1;
@@ -398,6 +395,8 @@ bool Cmd_GetNumCompassHostiles_Execute(COMMAND_ARGS)
 	return true;
 }
 
+DEFINE_CMD_ALT_COND_PLUGIN(GetActorValueDamage, GetAVDamage, 
+	"Returns the damage modifier applied to the actor's AV", true, kParams_OneActorValue);
 bool Cmd_GetActorValueDamage_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = -1;
@@ -523,8 +522,31 @@ bool Cmd_SetSecuritronExpressionTemp_Execute(COMMAND_ARGS)
 	return true;
 }
 
-
-
+DEFINE_CMD_ALT_COND_PLUGIN(GetIsPlayerOverencumbered, IsPCOverencumbered, 
+	"An alternative to SUP's IsPlayerOverencumbered", false, kParams_OneOptionalInt);
+bool Cmd_GetIsPlayerOverencumbered_Eval(COMMAND_ARGS_EVAL)
+{
+	// Imitate PlayerCharacter::GetIsOverencumbered at 0x954CC0.
+	if (bool const ignoreGodMode = reinterpret_cast<UInt32>(arg1) != 0; 
+		!ignoreGodMode)
+	{
+		if (GetIsGodMode()) {
+			*result = 0;
+			return true;
+		}
+	}
+	auto const weight = g_thePlayer->avOwner.GetActorValueInt(kAVCode_InventoryWeight);
+	// Actor::GetMaxCarryWeightPerkModified
+	auto const maxWeight = ThisStdCall<double>(0x8A0C20, g_thePlayer);
+	*result = maxWeight < weight;
+	return true;
+}
+bool Cmd_GetIsPlayerOverencumbered_Execute(COMMAND_ARGS)
+{
+	UInt32 ignoreGodMode = false;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &ignoreGodMode);
+	return Cmd_GetIsPlayerOverencumbered_Eval(nullptr, reinterpret_cast<void*>(ignoreGodMode), nullptr, result);
+}
 
 
 

@@ -1,12 +1,6 @@
 ﻿#pragma once
 
 DEFINE_COMMAND_ALT_PLUGIN(DumpFormList, FListDump, "", false, kParams_OneFormList_OneOptionalString_OneOptionalInt);
-DEFINE_CMD_COND_PLUGIN(ConditionPrint, "Returns 1, and prints a message to console. Meant for testing if previous conditions passed.", false, NULL);
-DEFINE_COMMAND_PLUGIN(GetShowOffDebugMode, "", false, NULL);
-DEFINE_COMMAND_PLUGIN(SetShowOffDebugMode, "Set to 1 to enable debug prints for certain ShowOff functions.", false, kParams_OneInt);
-DEFINE_COMMAND_ALT_PLUGIN(IsBaseForm, IsBasedForm, "", false, kParams_OneForm);
-
-
 bool Cmd_DumpFormList_Execute(COMMAND_ARGS)
 {
 	BGSListForm* FList = nullptr;
@@ -26,6 +20,9 @@ bool Cmd_DumpFormList_Execute(COMMAND_ARGS)
 	return true;
 }
 
+DEFINE_CMD_COND_PLUGIN(ConditionPrint, 
+	"Returns 1, and prints a message to console. Meant for testing if previous conditions passed.", 
+	false, NULL);
 //Would be cool if this could return whatever is calling this condition, or at what address etc..
 bool Cmd_ConditionPrint_Execute(COMMAND_ARGS)
 {
@@ -48,11 +45,14 @@ bool Cmd_ConditionPrint_Eval(COMMAND_ARGS_EVAL)
 	return true;
 }
 
+DEFINE_COMMAND_PLUGIN(GetShowOffDebugMode, "", false, NULL);
 bool Cmd_GetShowOffDebugMode_Execute(COMMAND_ARGS)
 {
 	*result = g_ShowFuncDebug;
 	return true;
 }
+DEFINE_COMMAND_PLUGIN(SetShowOffDebugMode, "Set to 1 to enable debug prints for certain ShowOff functions.", 
+	false, kParams_OneInt);
 bool Cmd_SetShowOffDebugMode_Execute(COMMAND_ARGS)
 {
 	UInt32 bOn = false;
@@ -61,6 +61,7 @@ bool Cmd_SetShowOffDebugMode_Execute(COMMAND_ARGS)
 	return true;
 }
 
+DEFINE_COMMAND_ALT_PLUGIN(IsBaseForm, IsBasedForm, "", false, kParams_OneForm);
 bool Cmd_IsBaseForm_Execute(COMMAND_ARGS)
 {
 	*result = false;
@@ -80,7 +81,46 @@ bool Cmd_IsOutsideMainThread_Execute(COMMAND_ARGS)
 	return true;
 }
 
+DEFINE_COMMAND_PLUGIN(RefillPlayerAmmo, "", false, kParams_OneInt);
+bool Cmd_RefillPlayerAmmo_Execute(COMMAND_ARGS)
+{
+	SInt32 count;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &count))
+		return true;
+	
+	const auto weapInfo = g_thePlayer->baseProcess->GetWeaponInfo();
+	if (!weapInfo)
+		return true;
+	const auto weap = static_cast<TESObjectWEAP*>(weapInfo->type);
 
+	// Player reload code happens at 0x9497AA, copying that.
+	const auto regenRate = ThisStdCall<double>(0x709430, weap, weapInfo->HasWeaponMod(TESObjectWEAP::kWeaponModEffect_RegenerateAmmo_Seconds));
+	if (regenRate > 0)
+	{
+		Console_Print("Cannot refill a weapon with an ammo regen per second!");
+		return true;
+	}
+
+	const auto hasExtendedClip = weapInfo->HasWeaponMod(TESObjectWEAP::kWeaponModEffect_IncreaseClipCapacity);
+	if (const auto ammoInfo = g_thePlayer->baseProcess->GetAmmoInfo())
+	{
+		g_thePlayer->AddItem(ammoInfo->type, nullptr, count);
+		auto const clipMax = ThisStdCall<SInt32>(0x4FE160, weap, hasExtendedClip);
+		auto const numLeftToAdd = clipMax - ammoInfo->countDelta;
+		ammoInfo->countDelta += std::min(numLeftToAdd, count);
+	}
+	else if (const auto defaultAmmo = ThisStdCall<TESAmmo*>(0x474920, &weap->ammo))
+	{
+		g_thePlayer->AddItem(defaultAmmo, nullptr, count);
+		// player was fully out of ammo; reload the weapon.
+		g_thePlayer->Reload2(weap, 2, hasExtendedClip, false); // 0x95D3F0
+	}
+	else
+	{
+		Console_Print("Unable to find default ammo for the weapon!");
+	}
+	return true;
+}
 
 
 

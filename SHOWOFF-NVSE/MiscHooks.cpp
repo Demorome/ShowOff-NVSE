@@ -1,5 +1,6 @@
 ﻿#include "MiscHooks.h"
 
+#include "GameRTTI.h"
 #include "MenuHooks.h"
 #include "SafeWrite.h"
 #include "ShowOffNVSE.h"
@@ -444,6 +445,88 @@ namespace GetCompassTargets
 	}
 }
 
+namespace Experimental
+{
+	namespace FixOnAddForDeathItems
+	{
+		void __fastcall Hook(ExtraDataList* xDataList, void* edx, ScriptEventList* eventList)
+		{
+			// Call BaseExtraList__ExtraScript__SetEventList (which we overwrote).
+			ThisStdCall(0x419F80, xDataList, eventList);
+
+			auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+			auto* script = *reinterpret_cast<Script**>(ebp - 0x30);
+
+			// needed, for whatever reason.
+			auto* thisObj = TESObjectREFR::Create(true);
+			CALL_MEMBER_FN(script, Execute)(thisObj, eventList, nullptr, 0);
+			if (thisObj)
+				thisObj->Destroy(true);
+		}
+
+		void WriteHook()
+		{
+			WriteRelCall(0x87F0A9, (UInt32)Hook);
+		}
+	}
+
+	// Fixes the OnDrop + OnUnequip blocktypes not running for certain function calls.
+	// The issue, it seems, is that while the MarkScriptEvent functions do set up the event to run,
+	// the scripts for the items will try to run on the next frame, which won't happen if the new container for the items isn't fully loaded,
+	// nor if the item is deleted from the world entirely.
+	// TODO: fix bug w/ OnEquip blocktype + RemoveMe (OnEquip runs twice???)
+	namespace FixOnDropAndOnUnequip 
+	{
+		// Run the script as an event is dispatched, to avoid having to wait for the object's script to run again to trigger the event blocktype in the script.
+		void DispatchScriptForEvent(const TESForm* formForEvent, BaseExtraList* extraList, TESObjectREFR* container)
+		{
+			if (auto const script = formForEvent->GetScript();
+				script && extraList)
+			{
+				if (!extraList->HasType(kExtraData_Script))
+				{
+					// ExtraDataList__SetExtraScript_Script
+					ThisStdCall(0x419ED0, extraList, script);
+				}
+				auto const extraScript = GetExtraTypeJIP(extraList, Script);
+				if (!extraScript->eventList)
+				{
+					auto const eventList = ThisStdCall<ScriptEventList*>(0x5ABF60, script);
+					extraScript->eventList = eventList;
+				}
+
+				auto* thisObj = TESObjectREFR::Create(true);
+				CALL_MEMBER_FN(script, Execute)(thisObj, extraScript->eventList, container, false);
+				if (thisObj)
+					thisObj->Destroy(true);
+			}
+		}
+
+		template <UInt8 itemEBPOffset>
+		void __cdecl Hook(TESObjectREFR* container, BaseExtraList* extraList, UInt32 eventID)
+		{
+			// do regular code
+			CdeclCall(MergeScriptEventAddr, container, extraList, eventID);
+
+			// our code
+			auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+			auto const itemForm = *reinterpret_cast<TESForm**>(ebp + itemEBPOffset);
+			DispatchScriptForEvent(itemForm, extraList, container);
+		}
+
+		void WriteHooks()
+		{
+			// Overwrite MergeScriptEvent calls
+			// Ignore the call at 0x57510E, if the xData is null it's useless to us anyways, otherwise it can trigger the OnDrop event twice.
+			// BUG: The calls below may not trigger during a RemoveItem script function call, esp. if the item is unequipped (cuz no xData gets passed).
+			// Solution: use RemoveItemTarget or some other alternative.
+			// These hooks will run after a potential OnUnequip call, so it doubles as a way to ensure that blocktype gets run in time.
+			WriteRelCall(0x4C41DC, (UInt32)Hook<0xC>);
+			WriteRelCall(0x4C42B2, (UInt32)Hook<0xC>);
+		}
+	}
+}
+
 namespace HandleHooks
 {
 	void HandleFunctionHooks()
@@ -497,6 +580,20 @@ namespace HandleHooks
 	{
 		PatchShowRaceMenu();
 		PatchResetCell::WriteHook();
+
+#if 0
+		if (g_bFixCaravanCurrencyRemoval)
+		{
+			TODO
+		}
+#endif
+
+		/*
+		//TODO: make optional?
+		//TODO: need to learn more about why it kinda works..
+		Experimental::FixOnAddBlockType::WriteHook();
+		Experimental::FixOnDropAndOnUnequipBlockType::WriteHooks();
+		*/
 	}
 
 	void HandleGameHooks()

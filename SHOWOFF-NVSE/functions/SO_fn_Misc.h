@@ -486,10 +486,8 @@ public:
 
 	UInt32 seed;
 	// constructor that sets seed
-	Random_Engine(UInt32 newSeed)
-	{
-		seed = newSeed;
-	}
+	Random_Engine(UInt32 newSeed) : std::default_random_engine(newSeed), seed(newSeed)
+	{}
 };
 
 UnorderedMap<UInt32, Random_Engine*> g_ModsAndSeedsMap;

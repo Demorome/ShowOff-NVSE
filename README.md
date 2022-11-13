@@ -12,11 +12,13 @@ You may also contact me directly on Discord. Username: `Demorome#2870`
 
 
 # Requirements
-Requires xNVSE v6.2.6 or greater: https://github.com/xNVSE/NVSE/releases.
+Requires xNVSE v6.2.9 or greater: https://github.com/xNVSE/NVSE/releases.
 
 
 # Installation
 `ShowOffNVSE.dll` and `ShowOffNVSE.ini` must end up under `Fallout New Vegas/Data/nvse/plugins/..` (in the `plugins` folder).
+
+Installing `ShowOffNVSE.pdb` is optional, but it is recommended to install it alongside the other files, as it will make crash loggers give more precise information about how a crash happened.
 
 Installing the primary .zip file from a mod manager should also work.
 `ShowOffNVSE_INI.zip` need only be installed once; new INI options are automatically added to the file.

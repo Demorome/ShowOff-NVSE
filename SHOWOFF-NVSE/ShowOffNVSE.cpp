@@ -38,7 +38,7 @@
 // Plugin Stuff
 IDebugLog g_Log("ShowOffNVSE.log");
 HMODULE	g_ShowOffHandle;
-constexpr UInt32 g_PluginVersion = 150;
+constexpr UInt32 g_PluginVersion = 155;
 
 // Allows modmakers to toggle ShowOff's debug messages for some of its functions.
 #ifdef _DEBUG
@@ -122,11 +122,15 @@ Sky** g_currentSky = nullptr;
 RefID g_xMarkerFormID = 0x3B;
 TESObjectWEAP* g_fistsWeapon = nullptr;
 
+// Game functions
+bool (__cdecl* GetIsGodMode)() = nullptr;
+
 // Hook Globals
 std::atomic<bool> g_canPlayerPickpocketInCombat = false;
 
 
 //todo: remove INI globals and make a class for them (unordered map, access value via string key)
+
 bool g_bResetInteriorResetsActors;
 bool g_bNoSelfRepairingBrokenItems;
 bool g_bNoVendorRepairingBrokenItems;
@@ -134,6 +138,7 @@ bool g_bAlwaysUpdateWeatherForInteriors;
 bool g_bUseGamesettingsForFistFatigueDamage;
 bool g_bCreaturesDealMeleeFatigueDmg;
 bool g_bUnarmedWeaponsDealFatigueDmg;
+bool g_bFixCaravanCurrencyRemoval;
 
 //-Force Pickpocketting INI globals (enabled via function)
 std::atomic<float> g_fForcePickpocketBaseAPCost;
@@ -216,6 +221,8 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		g_screenWidth = *(UInt32*)0x11C73E0;
 		g_screenHeight = *(UInt32*)0x11C7190;
 		g_fistsWeapon = *(TESObjectWEAP**)0x11CA278;
+
+		GetIsGodMode = reinterpret_cast<bool(*)()>(0x9526B0);
 
 		HandleHooks::HandleDelayedGameHooks();
 		HandleHooks::HandleDelayedEventHooks();
@@ -610,10 +617,16 @@ extern "C"
 		/*3D35*/	REG_CMD(GetCalculatedAPCost)
 		/*3D36*/	REG_CMD_ARR(GetPosArray)
 		/*3D37*/	REG_CMD_ARR(GetCompassTargets)
-		/*3D38*/	REG_CMD(SetEffectMagnitudeModifier)
+		/*3D38*/	REG_CMD(SetLiveEffectMagnitudeModifier)
 		/*3D39*/	REG_CMD(IsOutsideMainThread)
 		/*3D3A*/	REG_CMD(GetLiveEffectBaseTrait)
 		/*3D3B*/	REG_CMD_STR(GetActorValueName)
+		/*3D3C*/    REG_CMD(SetINIInteger_Cached)
+		/*3D3D*/	REG_CMD_FORM(GetAddedItemRefShowOff)
+
+		//========v1.55
+		/*3D3E*/	REG_CMD(GetIsPlayerOverencumbered)
+		/*3D3F*/	REG_CMD(RefillPlayerAmmo)
 	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
@@ -631,6 +644,7 @@ extern "C"
 #if _DEBUG  //for functions being tested (or just abandoned).
 
 
+		REG_CMD(ForceWeaponJamAnimAlt)
 		REG_CMD(GetHeadingAngleTEST)
 
 		REG_CMD(Debug_DispatchEvent)

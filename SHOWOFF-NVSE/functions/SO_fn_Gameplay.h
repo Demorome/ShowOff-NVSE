@@ -20,6 +20,9 @@ DEFINE_CMD_ALT_COND_PLUGIN(GetWeaponHasFlag, WeaponHasFlag, "", false, kParams_O
 DEFINE_COMMAND_ALT_PLUGIN(SetWeaponFlag, SetWeaponHasFlag, "", false, kParams_TwoInts_OneOptionalObjectID);
 DEFINE_CMD_ALT_COND_PLUGIN(GetActorHasBaseFlag, ActorHasBaseFlag, "", false, kParams_OneInt_OneOptionalActorBase);
 DEFINE_COMMAND_ALT_PLUGIN(ForceWeaponJamAnim, ForceJamAnim, "", true, NULL);
+#if _DEBUG
+DEFINE_COMMAND_ALT_PLUGIN(ForceWeaponJamAnimAlt, ForceJamAnimAlt, "", true, NULL);
+#endif
 DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedSkillPoints, GetCalculatedSkillPointsEarnedPerLevel, "Gets the amount of skill points the player would get for their current level.", false, kParams_OneOptionalInt);
 DEFINE_COMMAND_PLUGIN(GetLevelUpMenuPoints, "", false, kParams_TwoOptionalInts);
 DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedPerkPoints, GetCalculatedPerkPointsEarnedPerLevel, "Gets the amount of perk points the player would get for their current level.", false, kParams_OneOptionalInt);
@@ -451,6 +454,32 @@ bool Cmd_ForceWeaponJamAnim_Execute(COMMAND_ARGS)
 	}
 	return true;
 }
+
+#if _DEBUG
+bool Cmd_ForceWeaponJamAnimAlt_Execute(COMMAND_ARGS)
+{
+	*result = false;
+	if (IS_ACTOR(thisObj))
+	{
+		const auto actor = (Actor*)thisObj;
+		if (auto const weapn = actor->GetEquippedWeapon())
+		{
+			// Copies the code at 0x893884 for weapon condition jamming.
+			const auto animGroupID = ThisStdCall<UInt32>(0x51E2A0, weapn, 0) + 23;  // TESObjectWEAP::GetReloadAnimGroup + 23
+			const auto animKey = ThisStdCall<UInt16>(0x897910, actor, animGroupID, 0, 0, 0);  //Actor__GetAnimKey
+			if (CdeclCall<UInt32>(0x5F2440, animKey) == animGroupID)  // calls AnimGroupID::GetGroupID, which gets the lowers bits of animKey.
+			{
+				if (actor->GetAnimData())
+				{
+					actor->animGroupID110 = animGroupID;  //still triggers JIP OnReload...
+					*result = true;
+				}
+			}
+		}
+	}
+	return true;
+}
+#endif
 
 
 bool Cmd_GetCalculatedSkillPoints_Eval(COMMAND_ARGS_EVAL)
@@ -979,7 +1008,7 @@ bool Cmd_GetCalculatedAPCost_Execute(COMMAND_ARGS)
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &mode, &weapon))
 		return true;
 
-	if (CdeclCall<bool>(0x9526B0)) // GetIsGodMode
+	if (GetIsGodMode())
 		return true; //every action is 0 AP.
 
 	thisObj = g_thePlayer;

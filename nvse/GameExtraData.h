@@ -361,6 +361,10 @@ public:
 		float GetItemHealthPerc(bool arg1 = true);
 		ExtraDataList *GetEquippedExtra();
 		float CalculateWeaponDamage(float condition, TESForm *ammo);
+
+		[[nodiscard]] bool HasWeaponMod(TESObjectWEAP::WeaponModEffects effectCode) const {
+			return ThisStdCall_B(0x4BDA70, const_cast<EntryData*>(this), effectCode);
+		}
 	};
 
 	struct EntryDataList : tList<EntryData>
@@ -424,6 +428,10 @@ public:
 };
 typedef ExtraContainerChanges::EntryData ContChangesEntry;
 typedef ExtraContainerChanges::FoundEquipData EquipData;
+
+// real class names
+typedef	ExtraContainerChanges::Data InventoryChanges;
+typedef	ExtraContainerChanges::EntryData EntryData;
 
 // https://stackoverflow.com/questions/50888127/how-can-i-use-an-unordered-set-with-a-custom-struct
 class EquipDataHashFunction {

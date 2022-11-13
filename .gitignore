@@ -340,3 +340,6 @@ ASALocalRun/
 *.tlog
 *.idb
 *.lastbuildstate
+*.lib
+common/Debug VC9/common_vc9.idb
+common/Debug VC9/common_vc9.lib

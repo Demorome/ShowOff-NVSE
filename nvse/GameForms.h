@@ -625,6 +625,8 @@ public:
 		return IS_ID(base, TESNPC) || IS_ID(base, TESCreature);
 	}
 
+	Script* GetScript() const;
+
 	MEMBER_FN_PREFIX(TESForm);
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 	DEFINE_MEMBER_FN(MarkAsTemporary, void, 0x00484490);	// probably a member of TESForm
@@ -1613,16 +1615,16 @@ public:
 	ActorValueOwner();
 	~ActorValueOwner();
 
-	virtual UInt32	GetBaseActorValue(UInt32 avCode);		// GetBaseActorValue (used from Eval) result in EAX
+	virtual UInt32	GetBaseActorValueInt(UInt32 avCode);		// GetBaseActorValue (used from Eval) result in EAX
 	virtual float	GetBaseAVFloat(UInt32 avCode);			// GetBaseActorValue internal, result in st
-	virtual int		Fn_02(UInt32 avCode);					// GetActorValue internal, result in EAX
+	virtual int		GetActorValueInt(UInt32 avCode);					// GetActorValue internal, result in EAX
 	virtual float	GetActorValue(UInt32 avCode);			// GetActorValue (used from Eval) result in EAX
 	virtual float	GetTempActorValue(UInt32 avCode);					// GetBaseActorValue04 (internal) result in st
 	virtual float	GetActorValueDamage(UInt32 avCode);					// Returns the negative damage modifier
 	virtual float	GetPermActorValue(UInt32 avCode);					// GetDamageActorValue or GetModifiedActorValue		called from Fn_08, result in st, added to Fn_01
 	virtual UInt32	GetNormalizedPermanentAV(UInt32 avCode);					// Manipulate GetPermanentActorValue, maybe convert to integer.
 	virtual float	GetPermanentActorValue(UInt32 avCode);	// GetPermanentActorValue (used from Eval) result in EAX
-	virtual Actor* Fn_09(void);							// GetActorBase (= this - 0x100) or GetActorBase (= this - 0x0A4)
+	virtual Actor*	GetActor(void);							// GetActorBase (= this - 0x100) or GetActorBase (= this - 0x0A4)
 	virtual UInt16	GetLevel();								// GetLevel (from ActorBase)
 
 	float GetThresholdedActorValue(UInt32 avCode) { return ThisStdCall<float>(0x66EF50, this, avCode); }
@@ -1836,6 +1838,9 @@ public:
 	tList<Target>	targets;		// 014
 	UInt32			unk01C;			// 01C
 	UInt32			status;			// 020	bit0 = displayed, bit 1 = completed. 1 and 3 significant. If setting it to 3, quest flags bit1 will be set also.
+
+	bool IsCompleted() { return status & eQObjStatus_completed; };
+	bool IsDisplayed() { return status & eQObjStatus_displayed; };
 
 	SInt32 GetTargetIndex(TESObjectREFR *refr);
 };
@@ -3209,7 +3214,7 @@ public:
 		eCritDamage_OnDeath				= 0x1
 	};
 
-	enum
+	enum WeaponModEffects : UInt32
 	{
 		kWeaponModEffect_None = 0,
 		kWeaponModEffect_IncreaseDamage,

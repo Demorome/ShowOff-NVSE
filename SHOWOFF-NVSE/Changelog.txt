@@ -228,7 +228,12 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 
 //===v1.50
 
-*AS OF THIS VERSION, xNVSE 6.2.8 or greater is required.*
+*AS OF THIS VERSION, xNVSE 6.2.9 or greater is required.*
+
+===Misc:
+* A .pdb file is now included, to produce better crash logs with Cobb's crash logger.
+* Added aliases for the INI functions.
+* JSON functions will give better error messages.
 
 ===Bug Fixes:
 * ShowPerkMenu: 
@@ -236,13 +241,46 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 - Copied code from Tweaks to force the perk menu to open even if not on a perk level (allows previewing perks).
 - Copied code from Tweaks to allow multiple perks to be selected.
 
+* RandSeeded and company: 
+- Fixed bug where no matter what seed was being given, it always resorted to default.
+
 ===New Functions:
 * SetEnableParent
 * GetEquippedWeapon
 * GetEquippedWeaponRef
+* GetCalculatedAPCost
+* GetPosArray
+* GetCompassTargets
+* IsOutsideMainThread
+* GetLiveEffectBaseTrait
+* GetActorValueName
+* SetINIInteger_Cached
+* GetAddedItemRefShowOff
 
-===New Event Handlers (for SetEventHandler):
+===New Event Handlers (for SetEventHandlerAlt):
+* "ShowOff:OnPreActivate"
+* "ShowOff:OnPreActivateInventoryItem"
+* "ShowOff:OnPreDropInventoryItem"
+* "ShowOff:OnLockpickMenuClose"
+* "ShowOff:OnPCMiscStatChange"
+* "ShowOff:OnProjectileCreate"
+* "ShowOff:OnProjectileDestroy"
+* "ShowOff:OnProjectileImpact"
+* "ShowOff:OnQuestAdded"
+* "ShowOff:OnQueueCornerMessage"
+* "ShowOff:OnShowCornerMessage"
+* "ShowOff:OnDisplayObjective"
+* "ShowOff:OnCompleteObjective"
+* "ShowOff:OnFireWeapon"
 
+
+//===v1.51
+
+===Bug Fixes:
+* Fixed bad hook for the "ShowOff:OnShowCornerMessage" event. This may fix the NVAC-related crashes users have reported.
+
+===Function changes:
+* Allow passing a formlist of items for GetEquippedItemRefForItem
 
 ====== (Template:)
 
@@ -251,6 +289,9 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 *
 
 ===New Functions:
+*
+
+===Function changes:
 *
 
 ******DON'T FORGET TO UPDATE THE PLUGIN VERSION BEFORE EVERY RELEASE*********

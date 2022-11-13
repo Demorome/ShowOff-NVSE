@@ -190,7 +190,8 @@ namespace JsonToNVSE
 		const std::string &JSON_FullPath, 
 		const std::string_view relativePath, 
 		const std::string_view& funcName, 
-		const bool cache)
+		const bool cache, 
+		PluginExpressionEvaluator *eval = {})
 	{
 		if (auto const cachedRef = g_CachedJSONFiles.GetPtr(relativePath.data()))
 		{
@@ -207,20 +208,26 @@ namespace JsonToNVSE
 		}
 		catch (tao::pegtl::parse_error& e)
 		{
-			if (IsConsoleMode() || g_ShowFuncDebug)
+			if (eval)
+				eval->Error("Failed to parse file (%s)", e.what());
+			else
 				Console_Print("%s >> Could not parse JSON file, likely due to invalid formatting.", funcName.data());
 			_MESSAGE("ReadArrayFromJSONFile >> PARSE ERROR (%s)", e.what());
+	
 		}
 		catch (std::filesystem::filesystem_error& e)
 		{
-			if (IsConsoleMode() || g_ShowFuncDebug)
+			if (eval)
+				eval->Error("File not found (%s)", e.what());
+			else
 				Console_Print("%s >> Could not find JSON file.", funcName.data());
 			_MESSAGE("ReadArrayFromJSONFile >> FILE NOT FOUND (%s)", e.what());
 		}
 		return {};
 	}
 
-	std::optional<JsonValueVariant_ContainsRef> GetJSONValueAtJSONPointer(const JsonValueVariant &value, const std::string& jsonPointer, const std::string_view& funcName)
+	std::optional<JsonValueVariant_ContainsRef> GetJSONValueAtJSONPointer(const JsonValueVariant &value, 
+		const std::string& jsonPointer, const std::string_view& funcName, PluginExpressionEvaluator* eval = {})
 	{
 		try
 		{
@@ -232,19 +239,25 @@ namespace JsonToNVSE
 		}
 		catch (const std::runtime_error& e)
 		{
-			if (IsConsoleMode() || g_ShowFuncDebug)
+			if (eval)
+				eval->Error("Invalid JSON pointer arg (%s).", e.what());
+			else
 				Console_Print("%s >> Invalid JSON pointer arg.", funcName.data());
 			_MESSAGE("%s >> JSON POINTER ERROR (%s)", funcName.data(), e.what());
 		}
 		catch (const std::out_of_range& e)
 		{
-			if (IsConsoleMode() || g_ShowFuncDebug)
+			if (eval)
+				eval->Error("Invalid JSON pointer arg (out of range) (%s).", e.what());
+			else
 				Console_Print("%s >> Invalid JSON pointer arg.", funcName.data());
 			_MESSAGE("%s >> JSON POINTER ERROR (OUT OF RANGE) (%s)", funcName.data(), e.what());
 		}
 		catch (const std::invalid_argument& e)
 		{
-			if (IsConsoleMode() || g_ShowFuncDebug)
+			if (eval)
+				eval->Error("Invalid JSON pointer arg (invalid arg) (%s).", e.what());
+			else
 				Console_Print("%s >> Invalid JSON pointer arg.", funcName.data());
 			_MESSAGE("%s >> JSON POINTER ERROR (Invalid Arg) (%s)", funcName.data(), e.what());
 		}
@@ -365,7 +378,7 @@ namespace JsonToNVSE
 
 
 	bool InsertValueAtJSONPointer(JsonValueVariant &baseVariant, const JsonValueVariant &insertVariant, const std::string &jsonPointer, 
-		const std::string_view &funcName)
+		const std::string_view &funcName, PluginExpressionEvaluator* eval = {})
 	{
 		return std::visit([&]<typename T0, typename T1>(T0 &&base, T1 &&insert) -> bool {
 			if constexpr (decay_equiv<T0, T1>::value)
@@ -378,7 +391,9 @@ namespace JsonToNVSE
 				}
 				catch(std::exception &e)
 				{
-					if (IsConsoleMode() || g_ShowFuncDebug)
+					if (eval)
+						eval->Error("Invalid JSON pointer arg (%s)", e.what());
+					else
 						Console_Print("%s >> Invalid JSON pointer arg.", funcName.data());
 					_MESSAGE("%s >> JSON POINTER ERROR (%s)", funcName.data(), e.what());
 					return false;
@@ -419,10 +434,10 @@ namespace JsonToNVSE
 
 		constexpr std::string_view funcName = { "ReadFromJSONFile" };
 		bool success = false;
-		if (auto jsonValOpt = ReadJSONWithParser(parser, JSON_FullPath, relPath, funcName, cache))
+		if (auto jsonValOpt = ReadJSONWithParser(parser, JSON_FullPath, relPath, funcName, cache, &eval))
 		{
 			auto const jsonVal = GetRef(*jsonValOpt);
-			if (auto const JsonRef = GetJSONValueAtJSONPointer(jsonVal, jsonPointer, funcName))
+			if (auto const JsonRef = GetJSONValueAtJSONPointer(jsonVal, jsonPointer, funcName, &eval))
 			{
 				std::visit([scriptObj, &eval](auto&& val) {
 					auto res = JsonToNVSE::GetNVSEFromJSON(val.get(), scriptObj);
@@ -450,13 +465,7 @@ bool Cmd_ReadFromJSONFile_Execute(COMMAND_ARGS)
 	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
 		eval.ExtractArgs())
 	{
-		if (!TryReadFromJSONFile(eval, scriptObj))
-		{
-			ArrayElementL invalidRetn;
-			eval.AssignCommandResult(invalidRetn);	//report error, since return value is too ambiguous.
-			//will inform script. If in console mode OR in ShowOff debug mode, will inform the nature of the error.
-			//todo: report better error instead!
-		}
+		TryReadFromJSONFile(eval, scriptObj); //error reporting now happens inside the function.
 	}
 #if TEST_JSON_READ_PERFORMANCE
 	auto const end = std::chrono::high_resolution_clock::now();
@@ -518,7 +527,7 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 		if (readFileAtJPointer)
 		{
 			constexpr std::string_view funcName = { "WriteToJSONFile" };
-			if (auto jsonValOpt = ReadJSONWithParser(parser, JSON_FullPath, relPath, funcName, cache))
+			if (auto jsonValOpt = ReadJSONWithParser(parser, JSON_FullPath, relPath, funcName, cache, &eval))
 			{
 				JsonValueVariant* jsonVal = std::get_if<JsonValueVariant>(&jsonValOpt.value());
 				bool jsonCached = false; // assume new value was created (uncached)
@@ -535,7 +544,7 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 					jsonCached = true;
 				}
 
-				if (InsertValueAtJSONPointer(*jsonVal, GetRef(elemAsJSON), jsonPointer, funcName))
+				if (InsertValueAtJSONPointer(*jsonVal, GetRef(elemAsJSON), jsonPointer, funcName, &eval))
 				{
 					//Change elemAsJSON to point to the entire parsed file (which was modified).
 					if (!jsonCached)
@@ -675,7 +684,7 @@ namespace IniToNVSE
 		
 	namespace SetINIValue
 	{
-		SI_Error SetIniValue(CSimpleIniA &ini, StringOrNumber& newValue,
+		SI_Error SetIniValue(CSimpleIniA &ini, const StringOrNumber& newValue,
 			const char* section, const char* key, 
 			const char* comment)
 		{
@@ -688,15 +697,14 @@ namespace IniToNVSE
 				}
 				return SI_FAIL;
 			}
-			else //assume number
+
+			// assume number-type
+			if (auto const e = ini.SetDoubleValue(section, key, std::get<double>(newValue), comment);
+				e >= SI_OK)
 			{
-				if (auto const e = ini.SetDoubleValue(section, key, std::get<double>(newValue), comment);
-					e >= SI_OK)
-				{
-					return e;
-				}
-				return SI_FAIL;
+				return e;
 			}
+			return SI_FAIL;
 		}
 
 		
@@ -709,7 +717,7 @@ namespace IniToNVSE
 				return;
 			auto& [section, key, fullPath] = maybe_Args.value();
 
-			if (auto cachedIni = g_CachedIniFiles.GetPtr(relIniPath))
+			if (const auto cachedIni = g_CachedIniFiles.GetPtr(relIniPath))
 			{
 				ScopedLock lock(g_IniMapLock);
 				*result = SetIniValue(*cachedIni, newValue, section, key, comment);
@@ -718,9 +726,8 @@ namespace IniToNVSE
 			{
 				CSimpleIniA iniLocal(true);
 				bool const existed = iniLocal.LoadFile(fullPath.c_str()) >= SI_OK;
-				bool const created = 
-					SetIniValue(iniLocal, newValue, section, key, comment)
-					== SI_INSERTED;
+				*result = SetIniValue(iniLocal, newValue, section, key, comment);
+				bool const created = static_cast<SI_Error>(*result) == SI_INSERTED;
 
 				if (existed || created)
 				{
@@ -730,7 +737,53 @@ namespace IniToNVSE
 			}
 		}
 	}
-	
+
+	namespace SetINIInteger
+	{
+		SI_Error SetIniInteger(CSimpleIniA& ini, int newValue,
+			const char* section, const char* key,
+			const char* comment)
+		{
+			// assume number-type
+			if (auto const e = ini.SetLongValue(section, key, newValue, comment);
+				e >= SI_OK)
+			{
+				return e;
+			}
+			return SI_FAIL;
+		}
+
+
+		void Call(std::string& sectionAndKey, int newValue, const char* relIniPath,
+			const char* comment, Script* scriptObj, double* result)
+		{
+			std::string defaultModPath;
+			auto maybe_Args = ExtractIniArgs(sectionAndKey, defaultModPath, relIniPath, scriptObj);
+			if (!maybe_Args)
+				return;
+			auto& [section, key, fullPath] = maybe_Args.value();
+
+			if (const auto cachedIni = g_CachedIniFiles.GetPtr(relIniPath))
+			{
+				ScopedLock lock(g_IniMapLock);
+				*result = SetIniInteger(*cachedIni, newValue, section, key, comment);
+			}
+			else
+			{
+				CSimpleIniA iniLocal(true);
+				bool const existed = iniLocal.LoadFile(fullPath.c_str()) >= SI_OK;
+				*result = SetIniInteger(iniLocal, newValue, section, key, comment);
+				bool const created = static_cast<SI_Error>(*result) == SI_INSERTED;
+
+				if (existed || created)
+				{
+					ScopedLock lock(g_IniMapLock);
+					g_CachedIniFiles.Emplace(relIniPath, std::move(iniLocal));
+				}
+			}
+		}
+	}
+
 	namespace GetINIValue
 	{
 		void GetOrDefaultIniValue(CSimpleIniA& ini, const char* section, 
@@ -882,6 +935,23 @@ bool Cmd_SetINIValue_Cached_Execute(COMMAND_ARGS)
 			std::tie(iniPath, comment));
 
 		IniToNVSE::SetINIValue::Call(sectionAndKey, newVal, iniPath, comment, scriptObj, result);
+	}
+	return true;
+}
+
+bool Cmd_SetINIInteger_Cached_Execute(COMMAND_ARGS)
+{
+	*result = SI_Error::SI_FAIL;
+	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
+		eval.ExtractArgs())
+	{
+		std::string sectionAndKey;
+		int newVal;
+		const char* iniPath = nullptr, * comment = nullptr;
+		EXTRACT_ALL_ARGS_EXP(SetINIInteger_Cached, eval, std::tie(sectionAndKey, newVal),
+			std::tie(iniPath, comment));
+
+		IniToNVSE::SetINIInteger::Call(sectionAndKey, newVal, iniPath, comment, scriptObj, result);
 	}
 	return true;
 }

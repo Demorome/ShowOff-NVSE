@@ -22,6 +22,15 @@ static EventParamType kEventParams_TwoInts[2] =
 {
 	EventParamType::eParamType_Int, EventParamType::eParamType_Int
 };
+static EventParamType kEventParams_ThreeInts[3] =
+{
+	EventParamType::eParamType_Int, EventParamType::eParamType_Int, EventParamType::eParamType_Int
+};
+
+static EventParamType kEventParams_OneBaseForm_OneInt[2] =
+{
+	EventParamType::eParamType_BaseForm, EventParamType::eParamType_Int
+};
 
 static EventParamType kEventParams_OneInt_OneRef[2] =
 {
@@ -75,7 +84,11 @@ static EventParamType kEventParams_OneReference_OneInt[] =
 	EventParamType::eParamType_Reference,
 	EventParamType::eParamType_Int,
 };
-
+static EventParamType kEventParams_OneReference_OneIntPtr[] =
+{
+	EventParamType::eParamType_Reference,
+	EventParamType::eParamType_IntPtr,
+};
 static EventParamType kEventParams_OneBaseForm[] =
 {
 	EventParamType::eParamType_BaseForm,
@@ -87,11 +100,37 @@ static EventParamType kEventParams_OneForm_OneReference_OneInt[] =
 	EventParamType::eParamType_Reference,
 	EventParamType::eParamType_Int,
 };
+static EventParamType kEventParams_OneForm_OneReference_OneIntPtr[] =
+{
+	EventParamType::eParamType_AnyForm,
+	EventParamType::eParamType_Reference,
+	EventParamType::eParamType_IntPtr,
+};
 static EventParamType kEventParams_OneBaseForm_OneReference_OneInt[] =
 {
 	EventParamType::eParamType_BaseForm,
 	EventParamType::eParamType_Reference,
 	EventParamType::eParamType_Int,
+};
+static EventParamType kEventParams_OneBaseForm_OneReference_OneIntPtr[] =
+{
+	EventParamType::eParamType_BaseForm,
+	EventParamType::eParamType_Reference,
+	EventParamType::eParamType_IntPtr,
+};
+static EventParamType kEventParams_OneBaseForm_OneReference_TwoInts[] =
+{
+	EventParamType::eParamType_BaseForm,
+	EventParamType::eParamType_Reference,
+	EventParamType::eParamType_Int,
+	EventParamType::eParamType_Int
+};
+static EventParamType kEventParams_OneBaseForm_OneReference_OneIntPtr_OneInt[] =
+{
+	EventParamType::eParamType_BaseForm,
+	EventParamType::eParamType_Reference,
+	EventParamType::eParamType_IntPtr,
+	EventParamType::eParamType_Int
 };
 static EventParamType kEventParams_OneBaseForm_OneReference[] =
 {

@@ -20,14 +20,15 @@ DEFINE_COMMAND_ALT_PLUGIN_EXP(WriteToJSONFile, WriteToJSON, "", false, kNVSEPara
 
 //caution for desyncs with the other ini functions.
 
-DEFINE_COMMAND_PLUGIN_EXP_SAFE(SetINIValue_Cached, "", false, kNVSEParams_OneString_OneFloatOrString_TwoOptionalStrings);
+DEFINE_COMMAND_ALT_PLUGIN_EXP_SAFE(SetINIValue_Cached, SetINIValC, "", false, kNVSEParams_OneString_OneFloatOrString_TwoOptionalStrings);
+DEFINE_COMMAND_ALT_PLUGIN_EXP_SAFE(SetINIInteger_Cached, SetINIIntC, "", false, kNVSEParams_OneString_OneInt_TwoOptionalStrings);
 
-DEFINE_COMMAND_PLUGIN_EXP_SAFE(GetINIFloatOrCreate_Cached, "", false, kNVSEParams_OneString_OneOptionalString_OneOptionalFloat_OneOptionalString);
-DEFINE_COMMAND_PLUGIN_EXP_SAFE(GetINIStringOrCreate_Cached, "", false, kNVSEParams_OneString_ThreeOptionalStrings);
+DEFINE_COMMAND_ALT_PLUGIN_EXP_SAFE(GetINIFloatOrCreate_Cached, GetINIFltOrCreateC, "", false, kNVSEParams_OneString_OneOptionalString_OneOptionalFloat_OneOptionalString);
+DEFINE_COMMAND_ALT_PLUGIN_EXP_SAFE(GetINIStringOrCreate_Cached, GetINIStrOrCreateC, "", false, kNVSEParams_OneString_ThreeOptionalStrings);
 DEFINE_COMMAND_ALT_PLUGIN_EXP_SAFE(GetINIFloatOrDefault_Cached, GetINIFloat_Cached, "", false, kNVSEParams_OneString_OneOptionalString_OneOptionalFloat);
 DEFINE_COMMAND_ALT_PLUGIN_EXP_SAFE(GetINIStringOrDefault_Cached, GetINIString_Cached, "", false, kNVSEParams_OneString_TwoOptionalStrings);
 
-DEFINE_COMMAND_PLUGIN_EXP_SAFE(HasINISetting_Cached, "", false, kNVSEParams_OneString_OneOptionalString);
+DEFINE_COMMAND_ALT_PLUGIN_EXP_SAFE(HasINISetting_Cached, HasINISettingC, "", false, kNVSEParams_OneString_OneOptionalString);
 DEFINE_COMMAND_ALT_PLUGIN_EXP_SAFE(SaveCachedIniFile, SaveCachedIni, "", false, kNVSEParams_OneOptionalString);
 DEFINE_COMMAND_PLUGIN_EXP_SAFE(ReloadIniCache, "", false, kNVSEParams_OneOptionalString);
 

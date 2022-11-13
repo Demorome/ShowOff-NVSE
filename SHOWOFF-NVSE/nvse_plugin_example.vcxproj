@@ -208,8 +208,9 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Message>Installing DLL...</Message>
-      <Command>copy "$(TargetPath)" "$(FalloutNVPath)\Data\NVSE\Plugins\$(TargetFileName)"</Command>
+      <Message>Installing DLL and PDB...</Message>
+      <Command>copy "$(TargetPath)" "$(FalloutNVPath)\Data\NVSE\Plugins\$(TargetFileName)"
+copy "$(SolutionDir)Release\$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\ShowOffNVSE.pdb"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release GECK|Win32'">
@@ -1015,6 +1016,7 @@
     <ClInclude Include="ShowOffNVSE.h" />
     <ClInclude Include="SimpleINILibrary\SimpleIni.h" />
     <ClInclude Include="SOTypes.h" />
+    <ClInclude Include="StoredINI.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Armadillo Library\armadillo_bits\config.hpp.cmake" />

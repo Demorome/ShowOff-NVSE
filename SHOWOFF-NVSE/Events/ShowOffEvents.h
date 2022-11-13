@@ -176,12 +176,13 @@ namespace OnPreActivate
 		{
 			if (UInt32 &shouldActivate = *static_cast<UInt32*>(shouldActivateAdrr))
 			{
-				shouldActivate = result.Bool();
+				if (result.IsValid())
+					shouldActivate = result.Bool();
 			}
 			return true;
 		};
 		UInt32 shouldActivate = true;
-		g_eventInterface->DispatchEventAlt(eventName, resultCallback, &shouldActivate, activated, activator, shouldActivate);
+		g_eventInterface->DispatchEventAlt(eventName, resultCallback, &shouldActivate, activated, activator, &shouldActivate);
 
 #if _DEBUG
 		Console_Print("OnActivate HOOK - Activated: [%08X] {%s} (%s), activator: [%08X]", activated ? activated->refID : 0, 
@@ -230,13 +231,13 @@ namespace OnPreActivate
 	}
 }
 
+static const UInt32 g_inventoryMenuSelectionAddr = 0x11D9EA8;
+
 namespace PreActivateInventoryItem
 {
 	constexpr char eventName[] = "ShowOff:OnPreActivateInventoryItem";
 
-	static const UInt32 g_inventoryMenuSelectionAddr = 0x11D9EA8;
-
-	bool __fastcall CanUseItem(ContChangesEntry* itemEntry, void* edx)
+	bool __fastcall CanUseItem(ContChangesEntry* itemEntry, void* edx, bool isHotkeyUse)
 	{
 		if (!itemEntry || !itemEntry->type)
 			return false;
@@ -245,7 +246,8 @@ namespace PreActivateInventoryItem
 		{
 			if (UInt32& shouldActivate = *static_cast<UInt32*>(shouldActivateAdrr))
 			{
-				shouldActivate = result.Bool();
+				if (result.IsValid())
+					shouldActivate = result.Bool();
 			}
 			return true;
 		};
@@ -253,8 +255,16 @@ namespace PreActivateInventoryItem
 		auto const itemForm = itemEntry->type;
 		auto* invRef = CreateRefForStack(g_thePlayer, itemEntry);
 
+		UInt32 selectedHotkey = 0;
+		if (isHotkeyUse)
+		{
+			auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+			auto const hotkeyData = *reinterpret_cast<HotKeyWheel**>(ebp - 0x1C);
+			selectedHotkey = hotkeyData->selectedHotkey + 1;
+		}
+
 		g_eventInterface->DispatchEventAlt(eventName, resultCallback, &shouldActivate, 
-			g_thePlayer, itemForm, invRef, shouldActivate);
+			g_thePlayer, itemForm, invRef, &shouldActivate, selectedHotkey);
 
 		if (g_ShowFuncDebug)
 			Console_Print("CanActivateItemHook: CanActivate: %i, Item: [%08X], %s, type: %u", shouldActivate, itemForm->refID, itemForm->GetName(), itemForm->typeID);
@@ -271,6 +281,7 @@ namespace PreActivateInventoryItem
 			test	eax, eax
 			jz		Done
 
+			push	0
 			call	CanUseItem // register stomping should be fine.
 			test	al, al
 			jz		PreventActivation
@@ -297,6 +308,7 @@ namespace PreActivateInventoryItem
 			//ecx = InventoryMenu
 			mov		ecx, g_inventoryMenuSelectionAddr
 			mov		ecx, dword ptr ds : [ecx]
+			push	0
 			call	CanUseItem // register stomping should be fine.
 			test	al, al
 			jz		PreventActivation
@@ -318,7 +330,8 @@ namespace PreActivateInventoryItem
 		_asm
 		{
 			//ecx = ContChangesEntry
-			call	CanUseItem  //register stomping should be fine
+			push	1
+			call	CanUseItem //register stomping should be fine
 			test	al, al
 			jz		PreventActivation
 
@@ -341,6 +354,64 @@ namespace PreActivateInventoryItem
 
 		// Replace "call TESForm::GetFlags(entry)"
 		WriteRelJump(0x701FAE, (UInt32)HookHandleHotkeyEquipOrUnEquip);
+	}
+}
+
+namespace PreDropInventoryItem
+{
+	constexpr char eventName[] = "ShowOff:OnPreDropInventoryItem";
+
+	bool HandleEvent()
+	{
+		auto constexpr resultCallback = [](NVSEArrayVarInterface::Element& result, void* shouldDropAddr) -> bool
+		{
+			if (UInt32& shouldDrop = *static_cast<UInt32*>(shouldDropAddr))
+				if (result.IsValid())
+					shouldDrop = result.Bool();
+			return true;
+		};
+		UInt32 shouldDrop = true;
+
+		auto const itemEntry = *reinterpret_cast<ContChangesEntry**>(g_inventoryMenuSelectionAddr);
+		auto const itemForm = itemEntry->type;
+		auto* invRef = CreateRefForStack(g_thePlayer, itemEntry);
+
+		g_eventInterface->DispatchEventAlt(eventName, resultCallback, &shouldDrop,
+			g_thePlayer, itemForm, invRef, &shouldDrop);
+
+		return shouldDrop;
+	}
+
+	__declspec(naked) void Hook()
+	{
+		static UInt32 const IsEnoughRoomNearPlayerToDropItem = 0x9614B0,
+			NotEnoughRoomAddr = 0x780AD2, CancelledByEventAddr = 0x780B8E,
+			DropItemAddr = 0x780AFC;
+		_asm
+		{
+			call	IsEnoughRoomNearPlayerToDropItem
+			movzx	ecx, al
+			test	ecx, ecx
+			jz		NotEnoughRoom
+
+			call	HandleEvent
+			movzx	ecx, al
+			test	ecx, ecx
+			jz		CancelledByEvent
+
+			jmp		DropItemAddr
+
+			NotEnoughRoom :
+			jmp		NotEnoughRoomAddr
+
+			CancelledByEvent :  // skip showing the "not enough room" UI message.
+			jmp		CancelledByEventAddr
+		}
+	}
+
+	void WriteHook()
+	{
+		WriteRelJump(0x780AC6, (UInt32)Hook);
 	}
 }
 
@@ -373,9 +444,9 @@ namespace OnCalculateSellPrice
 
 		auto constexpr multCallback = [](NVSEArrayVarInterface::Element& result, void* newPriceAddr) -> bool
 		{
-			float& newPrice = *static_cast<float*>(newPriceAddr);
-			if (result.type != NVSEArrayVarInterface::kType_Numeric)
+			if (result.type != NVSEArrayVarInterface::kType_Numeric) [[unlikely]]
 				return true;
+			float& newPrice = *static_cast<float*>(newPriceAddr);
 			newPrice *= result.Number();
 			return true;
 		};
@@ -383,6 +454,8 @@ namespace OnCalculateSellPrice
 
 		auto constexpr addCallback = [](NVSEArrayVarInterface::Element& result, void* newPriceAddr) -> bool
 		{
+			if (result.type != NVSEArrayVarInterface::kType_Numeric) [[unlikely]]
+				return true;
 			float& newPrice = *static_cast<float*>(newPriceAddr);
 			newPrice += result.Number();
 			return true;
@@ -391,6 +464,8 @@ namespace OnCalculateSellPrice
 
 		auto constexpr subCallback = [](NVSEArrayVarInterface::Element& result, void* newPriceAddr) -> bool
 		{
+			if (result.type != NVSEArrayVarInterface::kType_Numeric) [[unlikely]]
+				return true;
 			float& newPrice = *static_cast<float*>(newPriceAddr);
 			newPrice -= result.Number();
 			return true;
@@ -403,6 +478,8 @@ namespace OnCalculateSellPrice
 #endif
 	}
 
+	CallDetour g_override;
+
 	// Recalculate sell price of an item.
 	static double __cdecl HookFAbs(float price)
 	{
@@ -412,12 +489,12 @@ namespace OnCalculateSellPrice
 		auto* itemEntry = *reinterpret_cast<ContChangesEntry**>(ebp + 0xC);
 		HandleEvent(newPrice, itemEntry);
 
-		return fabs(static_cast<double>(newPrice));
+		return CdeclCall<double>(g_override.GetOverwrittenAddr(), newPrice);
 	}
 
-	void WriteHook()
+	void WriteDelayedHook() //avoid conflict with NVAC hook
 	{
-		WriteRelCall(0x72EFFE, (UInt32)HookFAbs);
+		g_override.WriteRelCall(0x72EFFE, (UInt32)HookFAbs);
 	}
 }
 
@@ -427,7 +504,7 @@ namespace OnProjectileDestroy
 
 	void __fastcall HandleEvent(Projectile* proj)
 	{
-		g_eventInterface->DispatchEvent(eventName, proj);
+		g_eventInterface->DispatchEvent(eventName, proj, proj->sourceRef, proj->sourceWeap);
 	}
 
 	void __declspec(naked) Projectile_Free_Hook()
@@ -567,6 +644,7 @@ namespace OnLockpickMenuClose
 	{
 		kLockOpened = 0,
 		kLockForceBroken,
+		kStewieNoMoreLockpicksAfterFailedForceAttempt,
 		kManualExit
 	};
 
@@ -575,11 +653,39 @@ namespace OnLockpickMenuClose
 		g_eventInterface->DispatchEvent(eventName, menu->targetRef, reason);
 	}
 
-	void __cdecl ForceFailHook()
+	inline CallDetour g_ForceOpenAttemptOverride;
+	int __cdecl ForceOpenAttemptHook(int playerLockpickSkill, int lockLevel)
 	{
+		auto const chanceResult = CdeclCall<int>(g_ForceOpenAttemptOverride.GetOverwrittenAddr(), playerLockpickSkill, lockLevel);
+
 		auto const menu = LockPickMenu::GetSingleton();
-		menu->stage = 7;
-		HandleEvent(menu, CloseReason::kLockForceBroken);
+		// do nothing if the lock is already successfully forced and rotating
+		if (menu->isForceRotate)
+			return chanceResult;
+
+		int randomNum;
+		_asm {
+			mov randomNum, esi
+		}
+
+		if (randomNum >= chanceResult) // if player failed to force open the lock
+		{
+			// Compatibility with Tweak's ForceLockUsesBobbyPins
+			if (*reinterpret_cast<UInt8*>(0x79040D) == 0xE8)
+			{
+				// Assume Tweak's hook was installed.
+				// While this is still a failed attempt, it is no longer guaranteed to close the menu,
+				// ..since it now only closes when player runs out of lockpicks.
+				if (float numBobbyPins = menu->tile30->GetValueFloat(*(UInt32*)0x11DA1F8) - 1.0F;
+					numBobbyPins <= 0)
+				{
+					HandleEvent(menu, CloseReason::kStewieNoMoreLockpicksAfterFailedForceAttempt);
+				}
+				return chanceResult;
+			} //else, Tweaks hook is not installed.
+			HandleEvent(menu, CloseReason::kLockForceBroken);
+		}
+		return chanceResult;
 	}
 
 	void __cdecl ManualExitHook()
@@ -600,47 +706,8 @@ namespace OnLockpickMenuClose
 	{
 		WriteRelCall(0x790383, (UInt32)ManualExitHook);
 		WriteRelCall(0x78F97B, (UInt32)OpenLockHook);
-		WriteRelCall(0x7904AF, (UInt32)ForceFailHook);
-	}
-}
-
-namespace OnQueueCornerMessage
-{
-	constexpr char eventName[] = "ShowOff:OnQueueCornerMessage";
-
-	// Warning: msgText is not fully formatted, i.e. can have "&sUActnVats" and other formatting tricks.
-	void DispatchEvent(HUDMainMenu::QueuedMessage* msg)
-	{
-		void* displayTime = *(void**)&msg->displayTime;
-		g_eventInterface->DispatchEvent(eventName, nullptr, msg->msgText, 
-			msg->iconPath, msg->soundPath, displayTime);
-	}
-
-	void __fastcall tListAppendHook(tList<HUDMainMenu::QueuedMessage>* msgList, void* edx, 
-		HUDMainMenu::QueuedMessage** msg)
-	{
-		// Run our code
-		DispatchEvent(*msg);
-
-		// Regular code
-		ThisStdCall(0x905820, msgList, msg);
-	}
-
-	void __fastcall tListInsertHook(tList<HUDMainMenu::QueuedMessage>* msgList, void* edx,
-		HUDMainMenu::QueuedMessage** msg)
-	{
-		// Run our code
-		DispatchEvent(*msg);
-
-		// Regular code
-		ThisStdCall(0x5AE3D0, msgList, msg);
-	}
-
-	void WriteHooks()
-	{
-		WriteRelCall(0x7754FA, (UInt32)tListAppendHook);
-		WriteRelCall(0x775624, (UInt32)tListAppendHook);
-		WriteRelCall(0x775610, (UInt32)tListInsertHook);
+		// replace CalculateForceLockChance(..)
+		g_ForceOpenAttemptOverride.WriteRelCall(0x7903D9, (UInt32)ForceOpenAttemptHook);
 	}
 }
 
@@ -648,7 +715,7 @@ namespace OnShowCornerMessage
 {
 	constexpr char eventName[] = "ShowOff:OnShowCornerMessage";
 
-	std::string g_msgText, g_iconPath, g_soundPath;
+	static std::string g_msgText, g_iconPath, g_soundPath;
 
 	// Warning: msgText is not fully formatted, i.e. can have "&sUActnVats" and other formatting tricks.
 	void DispatchEvent(HUDMainMenu::QueuedMessage* msg)
@@ -671,20 +738,62 @@ namespace OnShowCornerMessage
 			g_iconPath.c_str(), g_soundPath.c_str(), displayTime);
 	}
 
-	tList<HUDMainMenu::QueuedMessage>* __fastcall
-		thisHook(tList<HUDMainMenu::QueuedMessage>* msgList)
+	bool __fastcall tListIsEmptyHook(tList<HUDMainMenu::QueuedMessage>* msgList)
 	{
-		// Our code
-		DispatchEvent(msgList->Head()->data);
+		const bool isEmpty = msgList->Empty();
+		if (!isEmpty)
+			DispatchEvent(msgList->Head()->data);
 
-		// regular code
-		return msgList;
+		return isEmpty;
 	}
 
 	void WriteHooks()
 	{
-		WriteRelCall(0x7757F9, (UInt32)thisHook);
-		WriteRelCall(0x77550A, (UInt32)thisHook);
+		// For delayed (queued) messages.
+		WriteRelCall(0x77578D, (UInt32)tListIsEmptyHook);
+	}
+}
+
+namespace OnQueueCornerMessage
+{
+	constexpr char eventName[] = "ShowOff:OnQueueCornerMessage";
+
+	// Warning: msgText is not fully formatted, i.e. can have "&sUActnVats" and other formatting tricks.
+	void DispatchEvent(HUDMainMenu::QueuedMessage* msg)
+	{
+		void* displayTime = *(void**)&msg->displayTime;
+		g_eventInterface->DispatchEvent(eventName, nullptr, msg->msgText, 
+			msg->iconPath, msg->soundPath, displayTime);
+	}
+
+	template <bool ShowMsgNow>
+	void __fastcall tListAppendHook(tList<HUDMainMenu::QueuedMessage>* msgList, void* edx, 
+		HUDMainMenu::QueuedMessage** msg)
+	{
+		// Run our code
+		DispatchEvent(*msg);
+		if constexpr (ShowMsgNow)
+			OnShowCornerMessage::DispatchEvent(*msg);
+
+		// Regular code
+		ThisStdCall(0x905820, msgList, msg);
+	}
+
+	void __fastcall tListInsertHook(tList<HUDMainMenu::QueuedMessage>* msgList, void* edx,
+		HUDMainMenu::QueuedMessage** msg)
+	{
+		// Run our code
+		DispatchEvent(*msg);
+
+		// Regular code
+		ThisStdCall(0x5AE3D0, msgList, msg);
+	}
+
+	void WriteHooks()
+	{
+		WriteRelCall(0x7754FA, (UInt32)tListAppendHook<true>);
+		WriteRelCall(0x775624, (UInt32)tListAppendHook<false>);
+		WriteRelCall(0x775610, (UInt32)tListInsertHook);
 	}
 }
 
@@ -694,7 +803,8 @@ namespace OnFireWeapon
 
 	// Runs before ModifyChanceForAmmoItem perk entry point can add items.
 	// Runs before the weapon is damaged from firing.
-	// 
+	// Runs before JIP's SetOnFireWeaponEventHandler
+	// Unlike the above, works in Godmode.
 	void __fastcall DispatchEvent(Actor* actor, TESObjectWEAP* weap)
 	{
 		g_eventInterface->DispatchEvent(eventName, actor, weap);
@@ -734,7 +844,7 @@ namespace OnCalculateEffectEntryMagnitude
 	inline NumberModifications<float> g_MagnitudeModModifiers;
 	inline EffectItem* g_liveEffectItem = nullptr;
 
-	double HandleEvent(float normalModifier, UInt32 isHostile, UInt8* ebp)
+	double HandleEvent(float modifier, UInt32 isHostile, UInt8* ebp)
 	{
 		auto* target = *reinterpret_cast<MagicTarget**>(ebp - 0x28);
 		auto* caster = *reinterpret_cast<MagicCaster**>(ebp + 8);
@@ -744,7 +854,7 @@ namespace OnCalculateEffectEntryMagnitude
 		const auto* activeEff = *reinterpret_cast<ActiveEffect**>(ebp + 0x10);
 		auto* baseEffect = activeEff->effectItem->setting;
 
-		void* multArg = *(void**)&normalModifier;
+		void* multArg = *(void**)&modifier;
 		void* magnitude = *(void**)&activeEff->magnitude;
 		void* duration = *(void**)&activeEff->duration; // not modified by perk effects, like Modify Positive Chem Duration
 
@@ -760,10 +870,10 @@ namespace OnCalculateEffectEntryMagnitude
 
 		g_liveEffectItem = nullptr;
 			
-		g_MagnitudeModModifiers.ModValue(normalModifier);
+		g_MagnitudeModModifiers.ModValue(modifier);
 		g_MagnitudeModModifiers.Clear();
 
-		return normalModifier;
+		return modifier;
 	}
 
 	double __cdecl HandleHostileEffect(float normalModifier)
@@ -817,6 +927,7 @@ namespace OnCalculateEffectEntryMagnitude
 		}
 	}
 
+	//TODO: hook near 0x7E0C1F (watch for Tweaks)
 	void WriteHooks()
 	{
 		// Overwrite function epilogue
@@ -827,13 +938,13 @@ namespace OnCalculateEffectEntryMagnitude
 	}
 }
 
-DEFINE_COMMAND_PLUGIN(SetEffectMagnitudeModifier, "", false, kParams_OneFloat_OneString);
-bool Cmd_SetEffectMagnitudeModifier_Execute(COMMAND_ARGS)
+DEFINE_COMMAND_PLUGIN(SetLiveEffectMagnitudeModifier, "", false, kParams_OneFloat_OneString);
+bool Cmd_SetLiveEffectMagnitudeModifier_Execute(COMMAND_ARGS)
 {
 	*result = false;
 	float fMod;
 	char modType[2];
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &fMod, &modType))
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &fMod, &modType) || !modType[0])
 		return true;
 
 	ScopedLock lock(g_Lock);
@@ -876,51 +987,17 @@ bool Cmd_GetLiveEffectBaseTrait_Execute(COMMAND_ARGS)
 	return true;
 }
 
-namespace OnTeammateStateChange
-{
-	constexpr char eventName[] = "ShowOff:OnTeammateStateChange";
-
-	void __fastcall HandleOnRemove(tList<Actor*> *teammates, void* edx, Actor** actorPtr)
-	{
-		// Do regular code
-		ThisStdCall(0x905330, teammates, actorPtr); // tList::Remove
-
-		// Run our code
-		Actor* actor = *actorPtr;
-		UInt32 constexpr isAdded = false;
-		actor->isTeammate = false; // update before the event runs.
-		g_eventInterface->DispatchEventThreadSafe(eventName, nullptr, actor, isAdded);
-	}
-
-	void __fastcall HandleOnAdd(tList<Actor*> *teammates, void* edx, Actor** actorPtr)
-	{
-		// Do regular code
-		ThisStdCall(0x5AE3D0, teammates, actorPtr);
-
-		// Run our code
-		Actor* actor = *actorPtr;
-		UInt32 constexpr isAdded = true;
-		actor->isTeammate = true; // update before the event runs.
-		g_eventInterface->DispatchEventThreadSafe(eventName, nullptr, actor, isAdded);
-	}
-
-	void WriteHooks()
-	{
-		WriteRelCall(0x8BCB29, (UInt32)HandleOnRemove);
-		WriteRelCall(0x8ABFC9, (UInt32)HandleOnAdd);
-	}
-}
-
 namespace OnPCMiscStatChange
 {
 	constexpr char eventName[] = "ShowOff:OnPCMiscStatChange";
 
-	int __cdecl HandleEvent()
+	int __cdecl HookGetMenuID()
 	{
 		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
 		auto const statCode = *reinterpret_cast<MiscStatCode*>(ebp + 0x8);
 		auto const modVal = *reinterpret_cast<int*>(ebp + 0xC);
-		g_eventInterface->DispatchEventThreadSafe(eventName, nullptr, g_thePlayer, statCode, modVal);
+		auto const newVal = CdeclCall<int>(0x5A3370, statCode); // GetPCMiscStat
+		g_eventInterface->DispatchEventThreadSafe(eventName, nullptr, g_thePlayer, statCode, modVal, newVal);
 
 		// Do regular code
 		return 1003; // StatsMenu::GetMenuID
@@ -929,9 +1006,233 @@ namespace OnPCMiscStatChange
 	void WriteHook()
 	{
 		// replace "call StatsMenu::GetMenuID"
-		WriteRelCall(0x4D5E6A, (UInt32)HandleEvent);
+		WriteRelCall(0x4D5E6A, (UInt32)HookGetMenuID);
 	}
 }
+
+namespace OnDisplayOrCompleteObjective
+{
+	constexpr char onDisplayName[] = "ShowOff:OnDisplayObjective";
+	constexpr char onCompleteName[] = "ShowOff:OnCompleteObjective";
+
+	static CallDetour GetQuestDetour;
+
+	TESQuest* __fastcall HookGetQuest(BGSQuestObjective* objective)
+	{
+		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+		const auto newStatus = *reinterpret_cast<UInt32*>(ebp + 8);
+
+		if (newStatus == 1 && !objective->status)
+		{
+			g_eventInterface->DispatchEventThreadSafe(onDisplayName, nullptr, nullptr, objective->quest, objective->objectiveId);
+		}
+		else if (newStatus == 3 && objective->status == 1 && !objective->quest->IsCompleted())
+		{
+			g_eventInterface->DispatchEventThreadSafe(onCompleteName, nullptr, nullptr, objective->quest, objective->objectiveId);
+		}
+
+		return ThisStdCall<TESQuest*>(GetQuestDetour.GetOverwrittenAddr(), objective);
+	}
+
+	void WriteDelayedHook()
+	{
+		// Add compatibility with Tweaks by indirectly calling the function at the address.
+		GetQuestDetour.WriteRelCall(0x5EC5DC, (UInt32)HookGetQuest);
+		// We could have hooked the HUDMainMenu::SetQuestUpdateText calls,
+		// ..but that would cause incompatibility with Tweaks' "No Quest Messages".
+	}
+}
+
+// Like NVSE OnAdd, but runs for all vanilla OnAdd instances.
+// (Needs unique hooks, NVSE hooks didn't expect non-references to be passed to MergeScriptEvent).
+// Relevant addresses: 0x57506B, 0x574AFA, 0x574C28, 0x574D00, 0x574F03
+// Event runs slightly AFTER vanilla OnAdd.
+namespace OnAddAlt
+{
+	constexpr char eventName[] = "ShowOff:OnAdd";
+
+	// non-null if picking up a reference in the game world
+	static TESObjectREFR* g_AddedItemRef = nullptr;
+
+	struct InvRefCreatingInfo
+	{
+		void Fill(TESObjectREFR* owner, TESForm* item, ExtraDataList* xData, SInt32 count)
+		{
+			m_owner = owner; m_item = item; m_xData = xData; m_count = count;
+		}
+		TESObjectREFR* GetInvRef()
+		{
+			if (m_cachedInvRef)
+				return m_cachedInvRef;
+			if (!m_item || !m_owner)
+				return nullptr;
+			m_cachedInvRef = InventoryRefCreateEntry(m_owner, m_item, m_count, m_xData);
+			return m_cachedInvRef;
+		}
+		void Reset()
+		{
+			m_owner = {}; m_item = {}; m_xData = {}; m_count = {}; m_cachedInvRef = {};
+		}
+	private:
+		TESObjectREFR* m_owner{};
+		TESForm* m_item{};
+		ExtraDataList* m_xData{};
+		SInt32 m_count{}; //xCount?
+
+		TESObjectREFR* m_cachedInvRef{};
+	};
+	static InvRefCreatingInfo g_InvRefCreatingInfo;
+
+	// using a function so creating an invRef is on-demand, instead of a constant drain.
+	TESObjectREFR* GetItemRef()
+	{
+		if (g_AddedItemRef)
+			return g_AddedItemRef;
+		//else, must get invRef.
+		return g_InvRefCreatingInfo.GetInvRef();
+	}
+
+	void HandleEvent(TESObjectREFR* newOwner, TESForm* item, ExtraDataList* xData, SInt32 count)
+	{
+		g_InvRefCreatingInfo.Fill(newOwner, item, xData, count);
+		g_eventInterface->DispatchEvent(eventName, nullptr, item, newOwner);
+		g_InvRefCreatingInfo.Reset();
+	}
+
+	void HandleEvent(TESObjectREFR* newOwner, TESObjectREFR* itemRef)
+	{
+		g_AddedItemRef = itemRef;
+		g_eventInterface->DispatchEvent(eventName, nullptr, itemRef->baseForm, newOwner);
+		g_AddedItemRef = nullptr;
+	}
+
+	namespace HandleAddItem
+	{
+		void __fastcall HookExtraContainerChanges_Unk(void* xChanges, void* edx, TESForm* item, ExtraDataList* xData, SInt32 count)
+		{
+			auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+			auto* newOwner = *reinterpret_cast<TESObjectREFR**>(ebp - 0xC);
+
+			HandleEvent(newOwner, item, xData, count);
+
+			// Call ExtraContainerChanges_4C29A0 (which we overwrote)
+			ThisStdCall(0x4C29A0, xChanges, item, xData, count);
+		}
+
+		void WriteHook()
+		{
+			WriteRelCall(0x575091, (UInt32)HookExtraContainerChanges_Unk);
+		}
+	}
+
+	namespace EquipForRef
+	{
+		void __fastcall HookEquipForRef(ExtraContainerChanges::Data* xChanges, void* edx, TESForm* item, SInt32 count,
+			TESObjectREFR* newOwner, ExtraDataList* xData, int a6, int a7)
+		{
+			HandleEvent(newOwner, item, xData, count);
+
+			// Call ExtraContainerChanges__Data__EquipForRef (which we overwrote)
+			ThisStdCall(0x4BFFE0, xChanges, item, count, newOwner, xData, a6, a7);
+		}
+
+		void WriteHook()
+		{
+			WriteRelCall(0x574B19, (UInt32)HookEquipForRef);
+		}
+	}
+
+	namespace PickUpItem
+	{
+		namespace InitialOnAdd
+		{
+			void __cdecl HookMergeScriptEvent(TESObjectREFR* newOwner, ExtraDataList* xData, int eventId)
+			{
+				CdeclCall(MergeScriptEventAddr, newOwner, xData, eventId);
+
+				auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+				auto* itemRef = *reinterpret_cast<TESObjectREFR**>(ebp + 8);
+
+				HandleEvent(newOwner, itemRef);
+			}
+
+			void WriteHook()
+			{
+				WriteRelCall(0x574C28, (UInt32)HookMergeScriptEvent);
+			}
+		}
+
+		namespace RockItProjectile
+		{
+			void __cdecl HookMergeScriptEvent(TESObjectREFR* newOwner, ExtraDataList* xData, int eventId)
+			{
+				CdeclCall(MergeScriptEventAddr, newOwner, xData, eventId);
+
+				auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+				const auto* rockItContChanges = *reinterpret_cast<ContChangesEntry**>(ebp - 0x60);
+
+				//todo: is it safe to use countDelta here? Should Count extradata be checked? idk
+				HandleEvent(newOwner, rockItContChanges->type, xData, rockItContChanges->countDelta);
+			}
+
+			void WriteHook()
+			{
+				WriteRelCall(0x574D00, (UInt32)HookMergeScriptEvent);
+			}
+		}
+	
+		namespace OtherProjectile
+		{
+			void __cdecl HookMergeScriptEvent(TESObjectREFR* newOwner, ExtraDataList* xData, int eventId)
+			{
+				CdeclCall(MergeScriptEventAddr, newOwner, xData, eventId);
+
+				auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+				auto* form = *reinterpret_cast<TESForm**>(ebp - 0x24);
+
+				// todo: verify if assuming count = 1 is safe!
+				HandleEvent(newOwner, form, xData, 1);
+			}
+
+			void WriteHook()
+			{
+				WriteRelCall(0x574F03, (UInt32)HookMergeScriptEvent);
+			}
+		}
+
+		void WriteHooks()
+		{
+			InitialOnAdd::WriteHook();
+			RockItProjectile::WriteHook();
+			OtherProjectile::WriteHook();
+		}
+	}
+
+	void WriteHooks()
+	{
+		HandleAddItem::WriteHook();
+		EquipForRef::WriteHook();
+		PickUpItem::WriteHooks();
+	}
+}
+
+DEFINE_COMMAND_ALT_PLUGIN(GetAddedItemRefShowOff, GetAddedItemRefSO, "", false, nullptr);
+bool Cmd_GetAddedItemRefShowOff_Execute(COMMAND_ARGS)
+{
+	if (auto const itemRef = OnAddAlt::GetItemRef())
+	{
+		REFR_RES = itemRef->refID;
+	}
+	else *result = 0;
+	return true;
+}
+
+namespace OnDropAlt
+{
+	constexpr char eventName[] = "ShowOff:OnDrop";
+
+}
+
 
 
 using EventFlags = NVSEEventManagerInterface::EventFlags;
@@ -955,16 +1256,17 @@ void RegisterEvents()
 	OnActorValueChange = JGCreateEvent("OnActorValueChange", 4, 0, NULL);
 #endif
 
-	RegisterEvent(OnPreActivate::eventName, kEventParams_OneReference_OneInt);
-	RegisterEvent(PreActivateInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneInt);
+	RegisterEvent(OnPreActivate::eventName, kEventParams_OneReference_OneIntPtr);
+	RegisterEvent(PreActivateInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneIntPtr_OneInt);
+	RegisterEvent(PreDropInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneIntPtr);
 	RegisterEvent(OnQuestAdded::eventName, kEventParams_OneBaseForm);
-	 
+
+	//TODO: document / modify!
 	RegisterEvent(OnCalculateSellPrice::eventNameAdd, kEventParams_OneBaseForm_OneReference);
 	RegisterEvent(OnCalculateSellPrice::eventNameSub, kEventParams_OneBaseForm_OneReference);
 	RegisterEvent(OnCalculateSellPrice::eventNameMult, kEventParams_OneBaseForm_OneReference);
 
-	//TODO: maybe only clear callbacks if thisObj filter is specified?
-	RegisterEvent(OnProjectileDestroy::eventName, nullptr, EventFlags::kFlag_FlushOnLoad);
+	RegisterEvent(OnProjectileDestroy::eventName, kEventParams_OneReference_OneBaseForm, EventFlags::kFlag_FlushOnLoad);
 	RegisterEvent(OnProjectileCreate::eventName, kEventParams_OneReference_OneBaseForm, EventFlags::kFlag_FlushOnLoad);
 	RegisterEvent(OnProjectileImpact::eventName, kEventParams_OneReference_OneBaseForm_OneReference, EventFlags::kFlag_FlushOnLoad);
 
@@ -974,12 +1276,18 @@ void RegisterEvents()
 	RegisterEvent(OnShowCornerMessage::eventName, kEventParams_ThreeStrings_OneFloat);
 	RegisterEvent(OnFireWeapon::eventName, kEventParams_OneReference_OneBaseForm);
 
+#if _DEBUG
 	RegisterEvent(OnCalculateEffectEntryMagnitude::eventName,
 		kEventParams_OneReference_TwoBaseForms_OneInt_OneBaseForm_OneInt_ThreeFloats);
+#endif
 
-	RegisterEvent(OnTeammateStateChange::eventName, kEventParams_OneInt);
-	RegisterEvent(OnPCMiscStatChange::eventName, kEventParams_TwoInts);
+	RegisterEvent(OnPCMiscStatChange::eventName, kEventParams_ThreeInts);
 
+	RegisterEvent(OnDisplayOrCompleteObjective::onDisplayName, kEventParams_OneBaseForm_OneInt);
+	RegisterEvent(OnDisplayOrCompleteObjective::onCompleteName, kEventParams_OneBaseForm_OneInt);
+
+	//TODO: document!
+	RegisterEvent(OnAddAlt::eventName, kEventParams_OneBaseForm_OneReference);
 #if _DEBUG
 
 #endif
@@ -1004,8 +1312,8 @@ namespace HandleHooks
 	{
 		OnPreActivate::WriteHook();
 		PreActivateInventoryItem::WriteHooks();
+		PreDropInventoryItem::WriteHook();
 		OnQuestAdded::WriteHook();
-		OnCalculateSellPrice::WriteHook();
 		OnProjectileDestroy::WriteHook();
 		OnProjectileCreate::WriteHook();
 		OnProjectileImpact::WriteHooks();
@@ -1013,18 +1321,23 @@ namespace HandleHooks
 		OnQueueCornerMessage::WriteHooks();
 		OnShowCornerMessage::WriteHooks();
 		OnFireWeapon::WriteHook();
+#if _DEBUG
 		OnCalculateEffectEntryMagnitude::WriteHooks();
-		OnTeammateStateChange::WriteHooks();
+#endif
 		OnPCMiscStatChange::WriteHook();
+		OnAddAlt::WriteHooks();
 
 #if _DEBUG
-		//ActorValueChangeHooks::WriteHook();
 #endif
 	}
 
 	void HandleDelayedEventHooks()
 	{
 		CornerMessageHooks::WriteDelayedHook();
+		OnDisplayOrCompleteObjective::WriteDelayedHook();
+		OnCalculateSellPrice::WriteDelayedHook();
+#if _DEBUG
+#endif
 	}
 
 }
