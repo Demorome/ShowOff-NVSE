@@ -1,14 +1,9 @@
 ﻿#pragma once
 
 
-DEFINE_COMMAND_ALT_PLUGIN(ListAddArray_OLD, AddArrayToFormList_OLD, "", false, kParams_OneFormlist_OneArray_OneOptionalIndex);
-DEFINE_COMMAND_ALT_PLUGIN_EXP(ListAddArray, AddArrayToFormList, "", false, kNVSEParams_OneForm_OneArray_OneOptionalIndex);
-
-
-
 
 //ripped code from FOSE's ListAddForm
-void ListAddArray_Call(BGSListForm* pListForm, NVSEArrayVar* inArr, SInt32 index, double *result, const bool checkForDupes = false)
+void ListAddArray_Call(BGSListForm* pListForm, NVSEArrayVar* inArr, SInt32 index, double *result/*, const bool checkForDupes = false*/)
 {
 	UInt32 const size = g_arrInterface->GetArraySize(inArr);
 	auto elements = std::make_unique<ArrayElementR[]>(size);
@@ -17,7 +12,8 @@ void ListAddArray_Call(BGSListForm* pListForm, NVSEArrayVar* inArr, SInt32 index
 	if (auto const Add_Array_Element_To_FormList = [&](const int elemIndex)
 	{
 		auto const form = elements[elemIndex].Form();
-		if (form == nullptr) return true;  //acts as a continue.
+		if (form == nullptr) 
+			return true;  //acts as a continue.
 		if (UInt32 const addedAtIndex = pListForm->AddAt(form, index);
 			addedAtIndex == eListInvalid)
 		{
@@ -28,22 +24,25 @@ void ListAddArray_Call(BGSListForm* pListForm, NVSEArrayVar* inArr, SInt32 index
 	}; index == eListEnd)
 	{
 		for (int i = 0; i < size; i++) {
-			if (!Add_Array_Element_To_FormList(i)) break;
+			if (!Add_Array_Element_To_FormList(i)) 
+				break;
 		}
 	}
 	else
 	{
 		for (int i = size - 1; i >= 0; i--) {
-			if (!Add_Array_Element_To_FormList(i)) break;
+			if (!Add_Array_Element_To_FormList(i)) 
+				break;
 		}
 	}
 }
 
-
+DEFINE_COMMAND_ALT_PLUGIN(ListAddArray_OLD, AddArrayToFormList_OLD, "", 
+	false, kParams_OneFormlist_OneArray_OneOptionalIndex);
 bool Cmd_ListAddArray_OLD_Execute(COMMAND_ARGS)
 {
 	*result = 1;	//bSuccess
-	BGSListForm* pListForm = NULL;
+	BGSListForm* pListForm;
 	UInt32 arrID;
 	SInt32 index = eListEnd;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pListForm, &arrID, &index))
@@ -55,6 +54,8 @@ bool Cmd_ListAddArray_OLD_Execute(COMMAND_ARGS)
 	return true;
 }
 
+DEFINE_COMMAND_ALT_PLUGIN_EXP(ListAddArray, AddArrayToFormList, "", 
+	false, kNVSEParams_OneForm_OneArray_OneOptionalIndex);
 bool Cmd_ListAddArray_Execute(COMMAND_ARGS)
 {
 	*result = 1;	//bSuccess
