@@ -2147,6 +2147,12 @@
     <ClInclude Include="StoredINI.h">
       <Filter>internal</Filter>
     </ClInclude>
+    <ClInclude Include="functions\SO_fn_AuxTimer.h">
+      <Filter>functions</Filter>
+    </ClInclude>
+    <ClInclude Include="AuxTimers.h">
+      <Filter>internal</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="exports.def" />

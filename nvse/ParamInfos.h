@@ -26,6 +26,28 @@ static ParamInfo kParams_OneInt_OneOptionalInt[2] =
 	{	"int", kParamType_Integer, 1 },
 };
 
+static ParamInfo kParams_OneInt_FiveOptionalFloats[6] =
+{
+	{	"int", kParamType_Integer, 0 },
+	{	"float", kParamType_Double, 1 },
+	{	"float", kParamType_Double, 1 },
+	{	"float", kParamType_Double, 1 },
+	{	"float", kParamType_Double, 1 },
+	{	"float", kParamType_Double, 1 },
+};
+
+static ParamInfo kParams_OneInt_SixOptionalFloats[7] =
+{
+	{	"int", kParamType_Integer, 0 },
+	{	"float", kParamType_Double, 1 },
+	{	"float", kParamType_Double, 1 },
+	{	"float", kParamType_Double, 1 },
+	{	"float", kParamType_Double, 1 },
+	{	"float", kParamType_Double, 1 },
+	{	"float", kParamType_Double, 1 },
+};
+
+
 static ParamInfo kParams_TwoOptionalInts[2] =
 {
 	{	"int", kParamType_Integer, 1 },
@@ -133,12 +155,26 @@ static ParamInfo kParams_OneString_ThreeOptionalStrings[4] =
 	{	"string",	kParamType_String,	1 },
 };
 
-
 static ParamInfo kParams_OneString_OneArray_OneOptionalInt[3] =
 {
 	{	"string",	kParamType_String,	0 },
 	{	"array",	kParamType_Integer,	0 },
 	{	"int",		kParamType_Integer,	1 },
+};
+
+static ParamInfo kParams_OneString_OneOptionalInt_OneOptionalForm[3] =
+{
+	{	"string",	kParamType_String,	0 },
+	{	"int",		kParamType_Integer,	1 },
+	{	"form",		kParamType_AnyForm,	1 },
+};
+
+static ParamInfo kParams_OneString_OneOptionalDouble_OneOptionalInt_OneOptionalForm[4] =
+{
+	{	"string",	kParamType_String,	0 },
+	{	"double",	kParamType_Double,	1 },
+	{	"int",		kParamType_Integer,	1 },
+	{	"form",		kParamType_AnyForm,	1 },
 };
 
 static ParamInfo kParams_TwoFloats[2] =

@@ -3,6 +3,7 @@
 #include <random>
 #include <unordered_set>
 
+#include "AuxTimers.h"
 #include "GameExtraData.h"
 #include "GameRTTI.h"
 #include "SafeWrite.h"
@@ -30,7 +31,7 @@ DEFINE_CMD_ALT_COND_PLUGIN(IsNight, BloodyTears, "Returns true if it's night acc
 DEFINE_CMD_COND_PLUGIN(IsLimbCrippled, "If no args are passed / arg is -1, returns true if actor has any crippled limbs. Otherwise, checks if the specified limb is crippled.", true, kParams_TwoOptionalInts);
 DEFINE_CMD_COND_PLUGIN(GetNumCrippledLimbs, "", true, kParams_OneOptionalInt);
 DEFINE_CMD_COND_PLUGIN(GetCrippledLimbsAsBitMask, "", true, kParams_OneOptionalInt);
-DEFINE_COMMAND_PLUGIN(ClearShowoffSavedData, "", false, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(ClearShowoffSavedData, "", false, kParams_TwoInts);
 DEFINE_CMD_ALT_COND_PLUGIN(GetCalculatedMaxCarryWeight, GetMaxCarryWeightPerkModified, "Accounts for GetMaxCarryWeight perk entry.", true, NULL);
 DEFINE_COMMAND_ALT_PLUGIN(SetRandomizerSeed, SetSeed, "", false, kParams_OneOptionalInt);
 DEFINE_COMMAND_ALT_PLUGIN(SetSeedUsingForm, SetFormSeed, "", false, kParams_OneOptionalForm);
@@ -453,11 +454,13 @@ bool Cmd_GetCrippledLimbsAsBitMask_Execute(COMMAND_ARGS)
 // Copied ClearJIPSavedData
 bool Cmd_ClearShowoffSavedData_Execute(COMMAND_ARGS)
 {
-	UInt32 auxStringMaps;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &auxStringMaps)) return true;
+	UInt32 auxStringMaps, auxTimerMaps;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &auxStringMaps, &auxTimerMaps)) return true;
 	UInt8 modIdx = scriptObj->GetOverridingModIdx();
 	if (auxStringMaps && s_auxStringMapArraysPerm.Erase((auxStringMaps == 2) ? 0xFF : modIdx))  //todo: fix .Erase not doing anything!
 		s_dataChangedFlags |= kChangedFlag_AuxStringMaps;
+	if (auxTimerMaps && s_auxTimerMapArraysPerm.Erase((auxTimerMaps == 2) ? 0xFF : modIdx))
+		s_dataChangedFlags |= kChangedFlag_AuxTimerMaps;
 	return true;
 }
 

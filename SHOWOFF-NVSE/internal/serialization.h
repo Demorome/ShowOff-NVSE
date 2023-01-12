@@ -1,67 +1,68 @@
 ﻿#pragma once
+#include "AuxTimers.h"
 #include "jip_nvse.h"
 
 
-// ripped from JIP LN
+// All ripped from JIP LN's serialization.h
 
-enum
+void ProcessDataChangedFlags(DataChangedFlags changedFlags)
 {
-	kChangedFlag_AuxStringMaps = 1 << 0,
-
-	kChangedFlag_All = kChangedFlag_AuxStringMaps //| kChangedFlag_RefMaps | kChangedFlag_LinkedRefs,
-};
-
-
-void DoLoadGameCleanup() 
-{
-	ScopedLock lock(g_Lock);
-	if (s_dataChangedFlags & kChangedFlag_AuxStringMaps) s_auxStringMapArraysPerm.Clear();
-	s_dataChangedFlags = 0;
+	if (changedFlags & kChangedFlag_AuxStringMaps) s_auxStringMapArraysPerm.Clear();
+	if (changedFlags & kChangedFlag_AuxTimerMaps) s_auxTimerMapArraysPerm.Clear();
 }
 
-char s_lastLoadedPath[MAX_PATH];  //static buffer, use locks before modifying
+char s_lastLoadedPath[MAX_PATH];
+
+UInt8* s_loadGameBuffer = nullptr;
+UInt32 s_loadGameBufferSize = 0x10000;
+
+__declspec(noinline) UInt8* __fastcall GetLoadGameBuffer(UInt32 length)
+{
+	if (s_loadGameBufferSize < length)
+	{
+		s_loadGameBufferSize = length;
+		if (s_loadGameBuffer)
+			_aligned_free(s_loadGameBuffer);
+		s_loadGameBuffer = (UInt8*)_aligned_malloc(length, 0x10);
+	}
+	else if (!s_loadGameBuffer)
+		s_loadGameBuffer = (UInt8*)_aligned_malloc(s_loadGameBufferSize, 0x10);
+	ReadRecordData(s_loadGameBuffer, length);
+	return s_loadGameBuffer;
+}
 
 void LoadGameCallback(void*)
 {
-	const char* currentPath = GetSavePath();
-	g_Lock.Enter();
-	if (strcmp(s_lastLoadedPath, currentPath) != 0)
-	{
-		StrCopy(s_lastLoadedPath, currentPath);
-		s_dataChangedFlags = kChangedFlag_All;
-	}
-	g_Lock.Leave();
+	// loaded path is checked in message handler.
 	UInt8 const changedFlags = s_dataChangedFlags;
-	DoLoadGameCleanup();
+	ProcessDataChangedFlags(static_cast<DataChangedFlags>(changedFlags));
+	// s_dataChangedFlags is reset @ PostLoadGame msg handler.
 
-	UInt32 type, length, buffer4, skipSize;
+	UInt32 type, version, length, nRefs, buffer4;
 	UInt8 buffer1, modIdx, loopBuffer;
 	UInt16 nRecs, nVals, nVars;
 	char varName[0x50];
 	char keyName[0x50];
 
-	while (GetNextRecordInfo(&type, (UInt32*)&s_serializedVersion, &length))
+	while (GetNextRecordInfo(&type, &version, &length))
 	{
 		switch (type)
 		{
 		case 'SMSO':
 		{
 			if (!(changedFlags & kChangedFlag_AuxStringMaps)) continue;
-			AuxStringMapVarsMap* rVarsMap;
-			AuxStringMapIDsMap* idsMap;
-			skipSize = (s_serializedVersion < 10) ? 4 : 8;  //No idea if this is still needed (was in JIP)
 			nRecs = ReadRecord16();  //the saved size of s_auxStringMapArraysPerm
 			while (nRecs)
 			{
 				nRecs--;
 				buffer1 = ReadRecord8();  //modID
 				if (!ResolveRefID(buffer1 << 24, &buffer4)) continue;  //checks if mod is still loaded(?)
-				rVarsMap = NULL;
+				AuxStringMapVarsMap* rVarsMap = NULL;
 				modIdx = buffer4 >> 24;
 				nVars = ReadRecord16();  //amount of auxStringMaps owned by the mod.
 				while (nVars)
 				{
-					idsMap = NULL;
+					AuxStringMapIDsMap* idsMap = NULL;
 					buffer1 = ReadRecord8();  //length of char* for the name of an auxStringMap
 					ReadRecordData(varName, buffer1);  //retrieve the char*
 					varName[buffer1] = 0; //idk
@@ -87,13 +88,92 @@ void LoadGameCallback(void*)
 						//I'll keep it for now, but I doubt it'll get used.
 						//Who knows, maybe I need to skip bytes myself, for whatever reason.
 						else if (buffer1 == 1)
-							SkipNBytes(skipSize);  //if not a valid form, skip bytes?
+							SkipNBytes(8);  //if not a valid form, skip bytes?
 						else if (buffer1 == 2)
 							SkipNBytes(4);
 						else SkipNBytes(ReadRecord16());
 						nVals--;
 					}
 					nVars--;
+				}
+			}
+			break;
+		}
+		case 'TAOS':
+		{
+			if (!(changedFlags & kChangedFlag_AuxTimerMaps) || (version < AuxTimerVersion))
+				break;
+			UInt8* bufPos = GetLoadGameBuffer(length);
+			nRecs = *(UInt16*)bufPos;
+			bufPos += sizeof(UInt16);
+			while (nRecs)
+			{
+				modIdx = *bufPos++;
+				nRecs--;
+				if (modIdx > 5 && GetResolvedModIndex(&modIdx))
+				{
+					AuxTimerOwnersMap* ownersMap = nullptr;
+					nRefs = *(UInt16*)bufPos;
+					bufPos += sizeof(UInt16);
+					while (nRefs)
+					{
+						UInt32 refID = *(UInt32*)bufPos;
+						bufPos += sizeof(UInt32);
+						nVars = *(UInt16*)bufPos;
+						bufPos += sizeof(UInt16);
+						if ((refID = GetResolvedRefID(refID)) && (LookupFormByRefID(refID) || HasChangeData(refID)))
+						{
+							if (!ownersMap) ownersMap = s_auxTimerMapArraysPerm.Emplace(modIdx, AlignBucketCount(nRefs));
+							AuxTimerVarsMap* aVarsMap = ownersMap->Emplace(refID, AlignBucketCount(nVars));
+							while (nVars)
+							{
+								buffer1 = *bufPos++;
+								if (!buffer1)
+									goto avSkipVars;
+								UInt8* namePos = bufPos;
+								bufPos += buffer1;
+								auto timeLeft = *(double*)bufPos;
+								*bufPos = 0; // what is the point?
+								bufPos += sizeof(double);
+								auto flags = *(UInt32*)bufPos;
+								aVarsMap->Emplace((char*)namePos, timeLeft, flags); // emplace AuxTimerValue
+								nVars--;
+							}
+						}
+						else
+						{
+							while (nVars)
+							{
+								buffer1 = *bufPos++;
+								bufPos += buffer1;
+							avSkipVars:
+								bufPos += sizeof(double) + sizeof(UInt32);
+								nVars--;
+							}
+						}
+						nRefs--;
+					}
+				}
+				else
+				{
+					// Skip over invalid saved data (invalid modID).
+					// Unsure if needed, but JIP has it, so...
+					nRefs = *(UInt16*)bufPos;
+					bufPos += 2;
+					while (nRefs)
+					{
+						bufPos += 4;
+						nVars = *(UInt16*)bufPos;
+						bufPos += 2;
+						while (nVars)
+						{
+							buffer1 = *bufPos++;
+							bufPos += buffer1;
+							bufPos += sizeof(double) + sizeof(UInt32);
+							nVars--;
+						}
+						nRefs--;
+					}
 				}
 			}
 			break;
@@ -110,10 +190,7 @@ void SaveGameCallback(void*)
 	UInt8 buffer1, loopBuffer;
 	UInt16 buffer2;
 
-	ScopedLock lock(g_Lock);
-	 
-	StrCopy(s_lastLoadedPath, GetSavePath());
-	s_dataChangedFlags = 0;
+	// s_dataChangedFlags gets set to 0 in NVSE OnLoad message handler.
 
 	if (buffer2 = s_auxStringMapArraysPerm.Size())
 	{
@@ -138,13 +215,28 @@ void SaveGameCallback(void*)
 			}
 		}
 	}
-}
 
-void NewGameCallback(void*)
-{
-	s_dataChangedFlags = kChangedFlag_All;
-	DoLoadGameCleanup();
-	
-	ScopedLock lock(g_Lock);
-	s_lastLoadedPath[0] = 0;
+	if (buffer2 = s_auxTimerMapArraysPerm.Size())
+	{
+		// "ShowOff (SO) AuxTimer (AT)"
+		WriteRecord('TAOS', AuxTimerVersion, &buffer2, 2);
+		for (auto avModIt = s_auxTimerMapArraysPerm.Begin(); avModIt; ++avModIt)
+		{
+			WriteRecord8(avModIt.Key());
+			WriteRecord16(avModIt().Size());
+			for (auto avOwnerIt = avModIt().Begin(); avOwnerIt; ++avOwnerIt)
+			{
+				WriteRecord32(avOwnerIt.Key());
+				WriteRecord16(avOwnerIt().Size());
+				for (auto avVarIt = avOwnerIt().Begin(); avVarIt; ++avVarIt)
+				{
+					buffer1 = StrLen(avVarIt.Key());
+					WriteRecord8(buffer1);
+					WriteRecordData(avVarIt.Key(), buffer1);
+					avVarIt().WriteValData();
+				}
+			}
+		}
+	}
+
 }

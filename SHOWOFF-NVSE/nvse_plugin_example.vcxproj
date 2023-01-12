@@ -976,6 +976,7 @@ copy "$(SolutionDir)Release\$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugi
     <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\ubjson.hpp" />
     <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\utf8.hpp" />
     <ClInclude Include="art-of-cpp\taocpp-json\include\tao\json\value.hpp" />
+    <ClInclude Include="AuxTimers.h" />
     <ClInclude Include="Changelog.txt" />
     <ClInclude Include="easing.h" />
     <ClInclude Include="EventParams.h" />
@@ -984,6 +985,7 @@ copy "$(SolutionDir)Release\$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugi
     <ClInclude Include="Events\LambdaVarContext.h" />
     <ClInclude Include="Events\ShowOffEvents.h" />
     <ClInclude Include="Events\EventFilteringInterface.h" />
+    <ClInclude Include="functions\SO_fn_AuxTimer.h" />
     <ClInclude Include="functions\SO_fn_Factions.h" />
     <ClInclude Include="functions\SO_fn_Actors.h" />
     <ClInclude Include="functions\SO_fn_Array.h" />

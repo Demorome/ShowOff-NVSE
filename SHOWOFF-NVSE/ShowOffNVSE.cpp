@@ -27,6 +27,7 @@
 #include "functions/SO_fn_Topics.h"
 #include "functions/SO_fn_Math.h"
 #include "functions/SO_fn_Refs.h"
+#include "functions/SO_fn_AuxTimer.h"
 
 // Events
 #include "Events/JohnnyEventPredefinitions.h"
@@ -174,16 +175,27 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 	case NVSEMessagingInterface::kMessage_LoadGame:
 		break;
 	case NVSEMessagingInterface::kMessage_SaveGame:
+		// Copied from jip_nvse.cpp
+		COPY_BYTES(s_lastLoadedPath, msg->fosPath, msg->dataLen + 1);
+		s_dataChangedFlags = 0;
 		break;
 	case NVSEMessagingInterface::kMessage_PreLoadGame:
-		//_MESSAGE("Received PRELOAD message with file path %s", msg->data);
+		// Copied jip_nvse.cpp
+		if (!StrEqualCS(msg->fosPath, s_lastLoadedPath))
+		{
+			COPY_BYTES(s_lastLoadedPath, msg->fosPath, msg->dataLen + 1);
+			s_dataChangedFlags = kChangedFlag_All;
+		}
 		break;
 	case NVSEMessagingInterface::kMessage_PostLoadGame:
-		//_MESSAGE("Received POST POS LOAD GAME message with file path %s", msg->data);
+		if (msg->fosLoaded)
+		{
+			// JIP calls DoLoadGameHousekeeping() here
+			s_dataChangedFlags = 0;
+		}
 		break;
 	case NVSEMessagingInterface::kMessage_PostLoad:
 		//_MESSAGE("Received POST LOAD message with file path %s", msg->data);
-
 		break;
 	case NVSEMessagingInterface::kMessage_PostPostLoad:
 		//_MESSAGE("Received POST POS LOAD message with file path %s", msg->data);
@@ -195,7 +207,9 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		//_MESSAGE("Received exit game via console qqq command message");
 		break;
 	case NVSEMessagingInterface::kMessage_ExitToMainMenu:
-		//_MESSAGE("Received exit game to main menu message");
+		// Copied from jip_nvse.cpp
+		ProcessDataChangedFlags(kChangedFlag_All);
+		s_lastLoadedPath[0] = 0;
 		break;
 	case NVSEMessagingInterface::kMessage_Precompile:
 		//_MESSAGE("Received precompile message with script at %08x", msg->data);
@@ -206,7 +220,6 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		break;
 
 	case NVSEMessagingInterface::kMessage_DeferredInit:
-
 		// From JiP's patches_game.h
 		g_thePlayer = PlayerCharacter::GetSingleton();
 		g_playerAVOwner = &g_thePlayer->avOwner;
@@ -627,6 +640,7 @@ extern "C"
 		//========v1.55
 		/*3D3E*/	REG_CMD(GetIsPlayerOverencumbered)
 		/*3D3F*/	REG_CMD(RefillPlayerAmmo)
+		
 	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
@@ -642,7 +656,7 @@ extern "C"
 #endif
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
-
+		REG_CMD(SetFlyCamera)
 
 		REG_CMD(ForceWeaponJamAnimAlt)
 		REG_CMD(GetHeadingAngleTEST)

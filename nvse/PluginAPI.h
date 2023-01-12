@@ -177,7 +177,13 @@ struct NVSEMessagingInterface
 		const char	* sender;
 		UInt32		type;
 		UInt32		dataLen;
-		void		* data;
+		union
+		{
+			// Copied from jip_nvse.cpp
+			void* data;
+			const char* fosPath;
+			bool		fosLoaded;
+		};
 	};
 
 	typedef void (* EventCallback)(Message* msg);

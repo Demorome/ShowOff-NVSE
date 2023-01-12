@@ -99,9 +99,6 @@ float GetDistance3D(TESObjectREFR* ref1, TESObjectREFR* ref2);
 
 TESForm* __stdcall LookupFormByRefID(UInt32 refID);
 
-
-extern std::atomic<UInt32> s_serializedVersion;
-
 class AuxVariableValue
 {
 	UInt8		type;
@@ -128,12 +125,7 @@ class AuxVariableValue
 	{
 		if (type == 1)
 		{
-			if (s_serializedVersion < 10)
-			{
-				refID = ReadRecord32();
-				num = *(float*)&refID;
-			}
-			else ReadRecord64(&num);
+			ReadRecord64(&num);
 		}
 		else if (type == 2)
 		{
@@ -259,9 +251,20 @@ struct AuxStringMapInfo
 	AuxStringMapModsMap& ModsMap() { return isPerm ? s_auxStringMapArraysPerm : s_auxStringMapArraysTemp; }
 };
 
+enum DataChangedFlags : UInt8
+{
+	kChangedFlag_None = 0,
+	kChangedFlag_AuxStringMaps = 1 << 0,
+	kChangedFlag_AuxTimerMaps = 1 << 1,
+
+	kChangedFlag_All = kChangedFlag_AuxStringMaps | kChangedFlag_AuxTimerMaps
+};
+
 extern std::atomic<UInt8> s_dataChangedFlags; // For AuxVar serialization.
 
-
+bool __fastcall GetResolvedModIndex(UInt8* pModIdx);
+bool __stdcall HasChangeData(UInt32 refID);
+UInt32 __fastcall GetResolvedRefID(UInt32 refID);
 
 
 

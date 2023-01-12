@@ -261,7 +261,7 @@ AuxVariableValue* __fastcall AuxStringMapAddValue(Script* scriptObj, char* varNa
 		ScopedLock lock(g_Lock);  //since ModsMap() returns the global.
 		return &varInfo.ModsMap()[varInfo.modIndex][varName][keyName];
 	}
-	return NULL;
+	return nullptr;
 }
 
 bool Cmd_AuxStringMapArraySetFloat_Execute(COMMAND_ARGS)

@@ -94,6 +94,10 @@ public:
 typedef void* (__cdecl* memcpy_t)(void*, const void*, size_t);
 extern memcpy_t MemCopy, MemMove;
 
+// JIP again
+#define COPY_BYTES(dest, src, count) __movsb((UInt8*)(dest), (const UInt8*)(src), count)
+
+// More JIP
 union Coordinate
 {
 	UInt32		xy;
@@ -173,6 +177,8 @@ float __vectorcall ACos(float x);
 float __vectorcall ATan2(float y, float x);
 
 //===End JIP math stuff 
+
+// Below is from JIP's utility.h/cpp
 
 UInt32 __fastcall RGBHexToDec(UInt32 rgb);
 

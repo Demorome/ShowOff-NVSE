@@ -122,6 +122,40 @@ bool Cmd_RefillPlayerAmmo_Execute(COMMAND_ARGS)
 	return true;
 }
 
+// TODO
+DEFINE_COMMAND_ALT_PLUGIN(SetFlyCamera, SetFC, "", false, kParams_OneInt_FiveOptionalFloats);
+bool Cmd_SetFlyCamera_Execute(COMMAND_ARGS)
+{
+	enum Modes : SInt32
+	{
+		kMode_Off = 0,
+		// These are the modes from TFC, offset by +1.
+		kMode_SetFlyCamOn_Default,
+		kMode_SetFlyCamOn_FreezeTime_SetUnkByteToTrue,
+		kMode_SetFlyCamOn_FreezeTime_SetUnkByteToTrue_2, /*duplicate functionality*/
+		kMode_SetFlyCamOn_SetUnkByteToTrue,
+
+		// Does not enable flycam
+		kMode_SetUnkByteToFalse,
+
+		kMode_SetFlyCamOn_FreezeTime_SetUnkByteToTrue_3 /*duplicate functionality*/
+	};
+
+
+
+	Modes mode;
+	/*
+	double pos[3] = { g_thePlayer->posX, g_thePlayer->posY,
+		g_thePlayer->posZ + (g_thePlayer->GetScaledHeight() * g_thePlayer->eyeHeight) };
+	double rot[2] = { g_thePlayer->rotZ, g_thePlayer->rotX }; 
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &mode, &pos, &rot))
+		return true;
+	*/
+
+	//g_thePlayer->cam
+
+	return true;
+}
 
 
 

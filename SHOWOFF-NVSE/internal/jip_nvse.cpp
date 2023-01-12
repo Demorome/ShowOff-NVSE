@@ -136,9 +136,8 @@ TESObjectWEAP* Actor::GetEquippedWeapon() const
 	return NULL;
 }
 
-std::atomic<UInt32> s_serializedVersion = 9;
-
-AuxStringMapModsMap s_auxStringMapArraysPerm, s_auxStringMapArraysTemp;  //Ensure thread safety when modifying these globals!!
+//Ensure thread safety when modifying these globals!
+AuxStringMapModsMap s_auxStringMapArraysPerm, s_auxStringMapArraysTemp;
 
 UInt32 __fastcall GetSubjectID(TESForm* form, TESObjectREFR* thisObj)
 {
@@ -147,7 +146,7 @@ UInt32 __fastcall GetSubjectID(TESForm* form, TESObjectREFR* thisObj)
 	return 0;
 }
 
-std::atomic<UInt8> s_dataChangedFlags = 0; // For AuxVar serialization.
+std::atomic<UInt8> s_dataChangedFlags = kChangedFlag_None; // For AuxVar serialization.
 
 
 __declspec(naked) ExtraContainerChanges::EntryDataList* TESObjectREFR::GetContainerChangesList()
@@ -178,4 +177,77 @@ const bool kInventoryType[121] =
 bool TESForm::IsItem() const
 {
 	return kInventoryType[this->typeID];
+}
+
+__declspec(naked) bool __fastcall GetResolvedModIndex(UInt8* pModIdx)
+{
+	__asm
+	{
+		movzx	edx, byte ptr[ecx]
+		cmp		dl, 0xFF
+		jz		retn1
+		mov		eax, g_BGSSaveLoadGame
+		mov		al, [eax + edx + 0x44]
+		cmp		al, 0xFF
+		jz		retn0
+		mov[ecx], al
+		retn1 :
+		mov		al, 1
+			retn
+			retn0 :
+		xor al, al
+			retn
+	}
+}
+
+__declspec(naked) bool __stdcall HasChangeData(UInt32 refID)
+{
+	__asm
+	{
+		mov		eax, g_BGSSaveLoadGame
+		mov		ecx, [eax]
+		mov		eax, [esp + 4]
+		xor edx, edx
+		div		dword ptr[ecx + 4]
+		mov		eax, [ecx + 8]
+		mov		eax, [eax + edx * 4]
+		test	eax, eax
+		jz		done
+		mov		edx, [esp + 4]
+		ALIGN 16
+		iterHead:
+		cmp[eax + 4], edx
+			jz		found
+			mov		eax, [eax]
+			test	eax, eax
+			jnz		iterHead
+			retn	4
+			found:
+		mov		al, 1
+			done :
+			retn	4
+	}
+}
+
+__declspec(naked) UInt32 __fastcall GetResolvedRefID(UInt32 refID)
+{
+	__asm
+	{
+		push	ecx
+		movzx	edx, byte ptr[esp + 3]
+		cmp		dl, 0xFF
+		jz		retnArg
+		mov		ecx, g_BGSSaveLoadGame
+		mov		al, [ecx + edx + 0x44]
+		cmp		al, 0xFF
+		jz		retn0
+		mov[esp + 3], al
+		retnArg :
+		pop		eax
+			retn
+			retn0 :
+		xor eax, eax
+			pop		ecx
+			retn
+	}
 }
