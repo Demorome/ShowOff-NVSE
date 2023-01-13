@@ -1,3 +1,4 @@
+#pragma once
 #include "AuxTimers.h"
 #include "JohnnyEventPredefinitions.h"
 
@@ -86,8 +87,6 @@ bool Cmd_AuxTimerStop_Execute(COMMAND_ARGS)
 			if (!value)
 				return true;
 
-			AUX_TIMER_CS;
-
 			if (fireEvent)
 			{
 				for (auto const& callback : OnAuxTimerStop->EventCallbacks) {
@@ -97,6 +96,7 @@ bool Cmd_AuxTimerStop_Execute(COMMAND_ARGS)
 				}
 			}
 
+			AUX_TIMER_CS;
 			varInfo.ModsMap().Get(varInfo.modIndex).Get(varInfo.ownerID).Erase(varName);
 			if (varInfo.ModsMap().Get(varInfo.modIndex).Get(varInfo.ownerID).Empty()){
 				varInfo.ModsMap().Get(varInfo.modIndex).Erase(varInfo.ownerID);
