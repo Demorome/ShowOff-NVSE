@@ -23,12 +23,13 @@ bool Cmd_SetShowOffOnCornerMessageEventHandler_Execute(COMMAND_ARGS)
 
 EventInformation* OnAuxTimerStart;
 DEFINE_COMMAND_ALT_PLUGIN(SetOnAuxTimerStartHandler, SetOnTimerStartHandler, "", false,
-	kParams_Event_OneString_OneOptionalForm);
+	kParams_EventNoFlag_OneString_OneOptionalForm);
 bool Cmd_SetOnAuxTimerStartHandler_Execute(COMMAND_ARGS)
 {
 	UInt32 setOrRemove;
 	Script* script;
 	EventFilterStructOneFormOneString filters;
+	filters.form = nullptr;
 	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &filters.str, &filters.form)
 		|| NOT_TYPE(script, Script)))
 	{
@@ -38,7 +39,7 @@ bool Cmd_SetOnAuxTimerStartHandler_Execute(COMMAND_ARGS)
 	if (!filters.form)
 	{
 		if (!thisObj)
-			return true;
+			thisObj = g_thePlayer;
 		filters.form = thisObj;
 	}
 
@@ -53,13 +54,14 @@ bool Cmd_SetOnAuxTimerStartHandler_Execute(COMMAND_ARGS)
 
 EventInformation* OnAuxTimerStop;
 DEFINE_COMMAND_ALT_PLUGIN(SetOnAuxTimerStopHandler, SetOnTimerStopHandler, "", false,
-	kParams_Event_OneString_OneOptionalForm);
+	kParams_EventNoFlag_OneString_OneOptionalForm);
 bool Cmd_SetOnAuxTimerStopHandler_Execute(COMMAND_ARGS)
 {
 	UInt32 setOrRemove;
 	Script* script;
 	EventFilterStructOneFormOneString filters;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &filters.str, &filters.form)
+	filters.form = nullptr;
+	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, filters.str, &filters.form)
 		|| NOT_TYPE(script, Script)))
 	{
 		return true;
@@ -68,7 +70,7 @@ bool Cmd_SetOnAuxTimerStopHandler_Execute(COMMAND_ARGS)
 	if (!filters.form)
 	{
 		if (!thisObj)
-			return true;
+			thisObj = g_thePlayer;
 		filters.form = thisObj;
 	}
 

@@ -264,6 +264,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		const auto vatsTimeMult = ThisStdCall<double>(0x9C8CC0, reinterpret_cast<void*>(0x11F2250));
 		const auto isMenuMode = CdeclCall<bool>(0x702360);
 
+		AUX_TIMER_CS;
 		if (!s_auxTimerMapArraysPerm.Empty())
 			s_dataChangedFlags |= kChangedFlag_AuxTimerMaps; // assume a timer will change
 		AuxTimer::DoCountdown(vatsTimeMult, isMenuMode, s_auxTimerMapArraysPerm);

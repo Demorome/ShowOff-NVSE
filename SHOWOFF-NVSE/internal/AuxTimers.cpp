@@ -40,8 +40,8 @@ namespace AuxTimer
 				for (auto auxVarNameMapIter = refOwnersMapIter.Get().Begin(); 
 					!auxVarNameMapIter.End(); ++auxVarNameMapIter)
 				{
-					auto ownerFormID = refOwnersMapIter.Key();
-					if ((ownerFormID = GetResolvedRefID(ownerFormID)) && (LookupFormByRefID(ownerFormID) || HasChangeData(ownerFormID)))
+					const auto ownerFormID = refOwnersMapIter.Key();
+					if (const auto* ownerForm = LookupFormByRefID(ownerFormID))
 					{
 						auto& timer = auxVarNameMapIter.Get();
 
@@ -63,14 +63,14 @@ namespace AuxTimer
 							if (timer.m_timeRemaining <= 0.0)
 							{
 								for (auto const& callback : OnAuxTimerStop->EventCallbacks) {
-									FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStop->numMaxArgs, auxVarNameMapIter.Key(), ownerFormID);
+									FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStop->numMaxArgs, auxVarNameMapIter.Key(), ownerForm);
 								}
 
 								if (timer.m_flags & AuxTimerValue::kFlag_AutoRestarts) {
 									timer.m_timeRemaining = timer.m_timeToCountdown;
 
 									for (auto const& callback : OnAuxTimerStart->EventCallbacks) {
-										FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStart->numMaxArgs, auxVarNameMapIter.Key(), ownerFormID);
+										FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStart->numMaxArgs, auxVarNameMapIter.Key(), ownerForm);
 									}
 								}
 								else {

@@ -100,7 +100,7 @@ struct EventFilterStructOneFormOneInt {
 
 struct EventFilterStructOneFormOneString {
 	TESForm* form;
-	const char* str;
+	char str[0x80];
 };
 
 // Filters are non-optional
