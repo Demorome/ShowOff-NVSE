@@ -8,7 +8,7 @@
 void ProcessDataChangedFlags(DataChangedFlags changedFlags)
 {
 	if (changedFlags & kChangedFlag_AuxStringMaps) s_auxStringMapArraysPerm.Clear();
-	if (changedFlags & kChangedFlag_AuxTimerMaps) s_auxTimerMapArraysPerm.Clear();
+	if (changedFlags & kChangedFlag_AuxTimerMaps) AuxTimer::s_auxTimerMapArraysPerm.Clear();
 }
 
 char s_lastLoadedPath[MAX_PATH];
@@ -101,7 +101,7 @@ void LoadGameCallback(void*)
 		}
 		case 'TAOS':
 		{
-			if (!(changedFlags & kChangedFlag_AuxTimerMaps) || (version < AuxTimerVersion))
+			if (!(changedFlags & kChangedFlag_AuxTimerMaps) || (version < AuxTimer::AuxTimerVersion))
 				break;
 			UInt8* bufPos = GetLoadGameBuffer(length);
 			nRecs = *(UInt16*)bufPos;
@@ -112,7 +112,7 @@ void LoadGameCallback(void*)
 				nRecs--;
 				if (modIdx > 5 && GetResolvedModIndex(&modIdx))
 				{
-					AuxTimerOwnersMap* ownersMap = nullptr;
+					AuxTimer::AuxTimerOwnersMap* ownersMap = nullptr;
 					nRefs = *(UInt16*)bufPos;
 					bufPos += sizeof(UInt16);
 					while (nRefs)
@@ -123,20 +123,28 @@ void LoadGameCallback(void*)
 						bufPos += sizeof(UInt16);
 						if ((refID = GetResolvedRefID(refID)) && (LookupFormByRefID(refID) || HasChangeData(refID)))
 						{
-							if (!ownersMap) ownersMap = s_auxTimerMapArraysPerm.Emplace(modIdx, AlignBucketCount(nRefs));
-							AuxTimerVarsMap* aVarsMap = ownersMap->Emplace(refID, AlignBucketCount(nVars));
+							if (!ownersMap) ownersMap = AuxTimer::s_auxTimerMapArraysPerm.Emplace(modIdx, AlignBucketCount(nRefs));
+							AuxTimer::AuxTimerVarsMap* aVarsMap = ownersMap->Emplace(refID, AlignBucketCount(nVars));
 							while (nVars)
 							{
-								buffer1 = *bufPos++;
+								buffer1 = *bufPos++; // strLen for auxvar name
 								if (!buffer1)
 									goto avSkipVars;
 								UInt8* namePos = bufPos;
-								bufPos += buffer1;
-								auto timeLeft = *(double*)bufPos;
-								*bufPos = 0; // what is the point?
+								bufPos += buffer1; // skip to after auxvar name
+
+								auto timeToCountdown = *(double*)bufPos;
+								*bufPos = 0; // add null terminator for auxvar name
 								bufPos += sizeof(double);
+
+								auto timeLeft = *(double*)bufPos;
+								bufPos += sizeof(double);
+
 								auto flags = *(UInt32*)bufPos;
-								aVarsMap->Emplace((char*)namePos, timeLeft, flags); // emplace AuxTimerValue
+								bufPos += sizeof(UInt32);
+
+								// emplace AuxTimerValue
+								aVarsMap->Emplace((char*)namePos, timeToCountdown, timeLeft, flags); 
 								nVars--;
 							}
 						}
@@ -144,10 +152,10 @@ void LoadGameCallback(void*)
 						{
 							while (nVars)
 							{
-								buffer1 = *bufPos++;
-								bufPos += buffer1;
+								buffer1 = *bufPos++; // strLen for auxvar name
+								bufPos += buffer1; // skip to after auxvar name
 							avSkipVars:
-								bufPos += sizeof(double) + sizeof(UInt32);
+								bufPos += sizeof(double) + sizeof(double) + sizeof(UInt32);
 								nVars--;
 							}
 						}
@@ -167,9 +175,9 @@ void LoadGameCallback(void*)
 						bufPos += 2;
 						while (nVars)
 						{
-							buffer1 = *bufPos++;
-							bufPos += buffer1;
-							bufPos += sizeof(double) + sizeof(UInt32);
+							buffer1 = *bufPos++; // strLen for auxvar name
+							bufPos += buffer1; // skip to after auxvar name
+							bufPos += sizeof(double) + sizeof(double) + sizeof(UInt32);
 							nVars--;
 						}
 						nRefs--;
@@ -216,11 +224,11 @@ void SaveGameCallback(void*)
 		}
 	}
 
-	if (buffer2 = s_auxTimerMapArraysPerm.Size())
+	if (buffer2 = AuxTimer::s_auxTimerMapArraysPerm.Size())
 	{
 		// "ShowOff (SO) AuxTimer (AT)"
-		WriteRecord('TAOS', AuxTimerVersion, &buffer2, 2);
-		for (auto avModIt = s_auxTimerMapArraysPerm.Begin(); avModIt; ++avModIt)
+		WriteRecord('TAOS', AuxTimer::AuxTimerVersion, &buffer2, 2);
+		for (auto avModIt = AuxTimer::s_auxTimerMapArraysPerm.Begin(); avModIt; ++avModIt)
 		{
 			WriteRecord8(avModIt.Key());
 			WriteRecord16(avModIt().Size());

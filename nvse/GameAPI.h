@@ -991,3 +991,28 @@ class NavMeshInfoMap: public TESForm
 };
 
 */
+
+struct Timer
+{
+	UInt8 disableCounter;		 // 00
+	UInt8 gap01[3];				 // 01
+	float fpsClamp;				 // 04
+	float fpsClampRemainder;	 // 08
+	float secondsPassed;		 // 0C
+	float lastSecondsPassed;	 // 10
+	UInt32 msPassed;			 // 14
+	UInt32 unk18;				 // 18
+	byte isChangeTimeMultSlowly; // 1C
+	byte unk1D;					 // 1D
+	byte unk1E;					 // 1E
+	byte unk1F;					 // 1F
+};
+
+struct TimeGlobal : Timer
+{
+	float unk20; // 020
+	float unk24; // 024
+	float unk28; // 028
+};
+
+extern TimeGlobal* g_timeGlobal;

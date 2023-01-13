@@ -1,5 +1,6 @@
 #include "AuxTimers.h"
 
+using namespace AuxTimer;
 
 ICriticalSection g_AuxTimerLock;
 #define AUX_TIMER_CS ScopedLock lock(g_AuxTimerLock)
@@ -20,12 +21,12 @@ bool Cmd_AuxTimerStart_Execute(COMMAND_ARGS)
 		if (varInfo.ownerID)
 		{
 			AUX_TIMER_CS;
-			AuxTimerValue* value = ATGetValue(varInfo, false);
+			AuxTimerValue* value = GetTimerValue(varInfo, false);
 			if (!value)
 			{
 				if (timeToCountdown == -1.0)
 					return true; //todo: dispatch xNVSE error
-				value = ATGetValue(varInfo, true);
+				value = GetTimerValue(varInfo, true);
 			}
 
 			// TODO: fire OnTimerStart event
@@ -54,7 +55,7 @@ bool Cmd_AuxTimerStart_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(AuxTimerStop, "Stops an auxvar timer on a form.",
+DEFINE_COMMAND_ALT_PLUGIN(AuxTimerStop, AuxTimerDelete, "Stops an auxvar timer on a form.",
 	false, kParams_OneString_OneOptionalInt_OneOptionalForm);
 bool Cmd_AuxTimerStop_Execute(COMMAND_ARGS)
 {
@@ -68,13 +69,16 @@ bool Cmd_AuxTimerStop_Execute(COMMAND_ARGS)
 		AuxTimerMapInfo const varInfo(form, thisObj, scriptObj, varName);
 		if (varInfo.ownerID)
 		{
-			AuxTimerValue* value = ATGetValue(varInfo, false);
+			AuxTimerValue* value = GetTimerValue(varInfo, false);
 			if (!value)
 				return true;
 
 			AUX_TIMER_CS;
+
+			/* TODO: just delete the AuxVar
 			value->m_timeRemaining = 0.0;
 			value->m_flags &= ~AuxTimerValue::kFlag_IsPaused;
+			*/
 
 			// TODO: fire OnTimerStop event
 
@@ -104,7 +108,7 @@ bool Cmd_AuxTimerPaused_Execute(COMMAND_ARGS)
 		AuxTimerMapInfo const varInfo(form, thisObj, scriptObj, varName);
 		if (varInfo.ownerID)
 		{
-			AuxTimerValue* value = ATGetValue(varInfo, false);
+			AuxTimerValue* value = GetTimerValue(varInfo, false);
 			if (!value)
 				return true;
 
@@ -144,7 +148,7 @@ bool Cmd_AuxTimerTimeElapsed_Execute(COMMAND_ARGS)
 		AuxTimerMapInfo const varInfo(form, thisObj, scriptObj, varName);
 		if (varInfo.ownerID)
 		{
-			AuxTimerValue* value = ATGetValue(varInfo, false);
+			AuxTimerValue* value = GetTimerValue(varInfo, false);
 			if (!value)
 				return true;
 			*result = value->GetTimeElapsed();
@@ -166,7 +170,7 @@ bool Cmd_AuxTimerTimeToCountdown_Execute(COMMAND_ARGS)
 		AuxTimerMapInfo const varInfo(form, thisObj, scriptObj, varName);
 		if (varInfo.ownerID)
 		{
-			AuxTimerValue* value = ATGetValue(varInfo, false);
+			AuxTimerValue* value = GetTimerValue(varInfo, false);
 			if (!value)
 				return true;
 			*result = value->m_timeToCountdown;
@@ -188,7 +192,7 @@ bool Cmd_AuxTimerTimeLeft_Execute(COMMAND_ARGS)
 		AuxTimerMapInfo const varInfo(form, thisObj, scriptObj, varName);
 		if (varInfo.ownerID)
 		{
-			AuxTimerValue* value = ATGetValue(varInfo, false);
+			AuxTimerValue* value = GetTimerValue(varInfo, false);
 			if (!value)
 				return true;
 			*result = value->m_timeRemaining;

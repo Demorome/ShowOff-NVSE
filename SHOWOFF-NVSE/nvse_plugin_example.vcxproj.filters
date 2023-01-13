@@ -93,6 +93,9 @@
     <ClCompile Include="internal\SOTypes.cpp">
       <Filter>internal</Filter>
     </ClCompile>
+    <ClCompile Include="internal\AuxTimers.cpp">
+      <Filter>internal</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="functions\SO_fn_Misc.h">

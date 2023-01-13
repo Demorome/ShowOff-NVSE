@@ -122,6 +122,7 @@ BSAudioManager* g_audioManager = nullptr;
 Sky** g_currentSky = nullptr;
 RefID g_xMarkerFormID = 0x3B;
 TESObjectWEAP* g_fistsWeapon = nullptr;
+TimeGlobal* g_timeGlobal = nullptr;
 
 // Game functions
 bool (__cdecl* GetIsGodMode)() = nullptr;
@@ -192,6 +193,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		{
 			// JIP calls DoLoadGameHousekeeping() here
 			s_dataChangedFlags = 0;
+			AuxTimer::HandleAutoRemoveTempTimers();
 		}
 		break;
 	case NVSEMessagingInterface::kMessage_PostLoad:
@@ -210,6 +212,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		// Copied from jip_nvse.cpp
 		ProcessDataChangedFlags(kChangedFlag_All);
 		s_lastLoadedPath[0] = 0;
+		AuxTimer::HandleAutoRemoveTempTimers();
 		break;
 	case NVSEMessagingInterface::kMessage_Precompile:
 		//_MESSAGE("Received precompile message with script at %08x", msg->data);
@@ -237,11 +240,13 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 
 		GetIsGodMode = reinterpret_cast<bool(*)()>(0x9526B0);
 
+		// from xNVSE
+		g_timeGlobal = reinterpret_cast<TimeGlobal*>(0x11F6394);
+
 		HandleHooks::HandleDelayedGameHooks();
 		HandleHooks::HandleDelayedEventHooks();
 
 		Console_Print("ShowOff NVSE version: %.2f", (g_PluginVersion / 100.0F));
-
 		break;
 
 	case NVSEMessagingInterface::kMessage_MainGameLoop:
@@ -251,6 +256,16 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 			EventInfo->DeleteEvents();
 		}
 		EventHandling::HandleGameLoopEvents();
+
+		// Copied from xNVSE
+		const auto vatsTimeMult = ThisStdCall<double>(0x9C8CC0, reinterpret_cast<void*>(0x11F2250));
+		const auto isMenuMode = CdeclCall<bool>(0x702360);
+
+		if (!s_auxTimerMapArraysPerm.Empty())
+			s_dataChangedFlags |= kChangedFlag_AuxTimerMaps; // assume a timer will change
+		AuxTimer::DoCountdown(vatsTimeMult, isMenuMode, s_auxTimerMapArraysPerm);
+		AuxTimer::DoCountdown(vatsTimeMult, isMenuMode, s_auxTimerMapArraysTemp);
+
 		break;
 	case NVSEMessagingInterface::kMessage_RuntimeScriptError:
 		//_MESSAGE("Received runtime script error message %s", msg->data);
