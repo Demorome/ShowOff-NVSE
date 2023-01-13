@@ -49,7 +49,9 @@ bool Cmd_AuxTimerStart_Execute(COMMAND_ARGS)
 			}
 
 			for (auto const& callback : OnAuxTimerStart->EventCallbacks) {
-				FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStart->numMaxArgs, varName, varInfo.ownerID);
+				if (varInfo.modIndex != 0xFF || callback.ScriptForEvent->GetOverridingModIdx() == varInfo.modIndex) {
+					FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStart->numMaxArgs, varName, varInfo.ownerID);
+				}
 			}
 			
 			if (varInfo.isPerm)
@@ -64,7 +66,7 @@ bool Cmd_AuxTimerStart_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_ALT_PLUGIN(AuxTimerStop, AuxTimerDelete, "Stops an auxvar timer on a form.",
+DEFINE_COMMAND_ALT_PLUGIN(AuxTimerStop, AuxTimerErase, "Stops/erases an auxvar timer on a form.",
 	false, kParams_OneString_OneOptionalInt_OneOptionalForm);
 bool Cmd_AuxTimerStop_Execute(COMMAND_ARGS)
 {
@@ -89,7 +91,9 @@ bool Cmd_AuxTimerStop_Execute(COMMAND_ARGS)
 			if (fireEvent)
 			{
 				for (auto const& callback : OnAuxTimerStop->EventCallbacks) {
-					FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStop->numMaxArgs, varName, varInfo.ownerID);
+					if (varInfo.modIndex != 0xFF || callback.ScriptForEvent->GetOverridingModIdx() == varInfo.modIndex) {
+						FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStop->numMaxArgs, varName, varInfo.ownerID);
+					}
 				}
 			}
 

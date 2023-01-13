@@ -62,15 +62,22 @@ namespace AuxTimer
 
 							if (timer.m_timeRemaining <= 0.0)
 							{
+								const bool isPerm = (auxVarNameMapIter.Key()[0] != '*');
+								const bool isPrivate = (auxVarNameMapIter.Key()[!isPerm] == '_');
+
 								for (auto const& callback : OnAuxTimerStop->EventCallbacks) {
-									FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStop->numMaxArgs, auxVarNameMapIter.Key(), ownerForm);
+									if (!isPrivate || callback.ScriptForEvent->GetOverridingModIdx() == modMapIter.Key()) {
+										FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStop->numMaxArgs, auxVarNameMapIter.Key(), ownerForm);
+									}
 								}
 
 								if (timer.m_flags & AuxTimerValue::kFlag_AutoRestarts) {
 									timer.m_timeRemaining = timer.m_timeToCountdown;
 
 									for (auto const& callback : OnAuxTimerStart->EventCallbacks) {
-										FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStart->numMaxArgs, auxVarNameMapIter.Key(), ownerForm);
+										if (!isPrivate || callback.ScriptForEvent->GetOverridingModIdx() == modMapIter.Key()) {
+											FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStart->numMaxArgs, auxVarNameMapIter.Key(), ownerForm);
+										}
 									}
 								}
 								else {
