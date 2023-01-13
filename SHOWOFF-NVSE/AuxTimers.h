@@ -27,7 +27,7 @@ namespace AuxTimer
 		};
 		UInt32 m_flags;
 
-		//AuxTimerValue() : m_flags(kFlag_Defaults) { ReadValData(); }
+		AuxTimerValue() : m_timeToCountdown(0.0), m_timeRemaining(0.0), m_flags(kFlag_Defaults) { }
 		AuxTimerValue(double timeToCountdown, UInt32 flags = kFlag_Defaults) :
 			m_timeToCountdown(timeToCountdown), m_timeRemaining(timeToCountdown), m_flags(flags) { }
 		AuxTimerValue(double timeToCountdown, double timeRemaining, UInt32 flags = kFlag_Defaults) :
@@ -58,15 +58,6 @@ namespace AuxTimer
 			WriteRecord64(&m_timeRemaining);
 			WriteRecord32(m_flags);
 		}
-
-	private:
-#if 0
-		void ReadValData() {
-			ReadRecord64(&m_timeToCountdown);
-			ReadRecord64(&m_timeRemaining);
-			m_flags = ReadRecord32();
-		}
-#endif
 	};
 	static_assert(sizeof(AuxTimerValue) == 24);
 
@@ -82,7 +73,7 @@ namespace AuxTimer
 	{
 		UInt32		ownerID;
 		UInt32		modIndex;
-		char* varName;
+		char		*varName;
 		bool		isPerm;
 
 		AuxTimerMapInfo(TESForm* form, TESObjectREFR* thisObj, const Script* scriptObj, char* pVarName)

@@ -1,6 +1,11 @@
 ﻿#pragma once
 #include "EventFilteringInterface.h"
 #include <unordered_set>
+#include <memory>
+#include <mutex>
+#include <shared_mutex>
+
+#include "GameObjects.h"
 
 class EventInformation;
 void* __fastcall GenericCreateFilter(void** maxFilters, UInt32 numFilters);
@@ -123,7 +128,7 @@ private:
 	std::shared_mutex QueueRWLock; //need a readers writer lock to protect from multiple users registering an event in the same frame (very rare, but can happen)
 public:
 	const char* EventName;
-	UInt8 numMaxArgs;
+	UInt8 numMaxArgs; // dispatched args #
 	UInt8 numMaxFilters;
 	std::vector<BaseEventClass> EventCallbacks;
 	EventInformation(const char* EventName, UInt8& numMaxArgs, UInt8& numMaxFilters, void* (__fastcall* CreatorFunction)(void**, UInt32) = GenericCreateFilter)
@@ -248,48 +253,10 @@ public:
 	int a = sizeof(std::unordered_set<char>);
 };
 typedef EventInformation* EventInfo;
-std::mutex EventsArrayMutex;
-std::vector<EventInfo> EventsArray;
+extern std::mutex EventsArrayMutex;
+extern std::vector<EventInfo> EventsArray;
 
-
-
-void* __fastcall GenericCreateFilter(void** Filters, UInt32 numFilters) {
-	return new JohnnyEventFiltersForm(Filters, numFilters);
-}
-
-
-
-EventInfo FindHandlerInfoByChar(const char* nameToFind)
-{
-	auto it = EventsArray.begin();
-	while (it != EventsArray.end())
-	{
-		if (!(_stricmp((*it)->EventName, nameToFind)))
-			return *it;
-		it++;
-	}
-	return NULL;
-}
-
-EventInfo __cdecl JGCreateEvent(const char* EventName, UInt8 maxArgs, UInt8 maxFilters, void* (__fastcall* CreatorFunction)(void**, UInt32))
-{
-	std::lock_guard<std::mutex> lock(EventsArrayMutex);
-	EventInfo eventinfo = new EventInformation(EventName, maxArgs, maxFilters, CreatorFunction);
-	EventsArray.push_back(eventinfo);
-	return eventinfo;
-
-}
-
-
-void __cdecl JGFreeEvent(EventInfo& toRemove)
-{
-	std::lock_guard<std::mutex> lock(EventsArrayMutex);
-	if (!toRemove) return;
-	auto it = std::find(std::begin(EventsArray), std::end(EventsArray), toRemove);
-	if (it != EventsArray.end())
-	{
-		delete* it;
-		it = EventsArray.erase(it);
-	}
-	toRemove = NULL;
-}
+void* __fastcall GenericCreateFilter(void** Filters, UInt32 numFilters);
+EventInfo FindHandlerInfoByChar(const char* nameToFind);
+EventInfo __cdecl JGCreateEvent(const char* EventName, UInt8 maxArgs, UInt8 maxFilters, void* (__fastcall* CreatorFunction)(void**, UInt32));
+void __cdecl JGFreeEvent(EventInfo& toRemove);

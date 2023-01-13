@@ -64,6 +64,7 @@ extern DataHandler* g_dataHandler;
 extern BSAudioManager* g_audioManager;
 extern Sky** g_currentSky;
 extern TESObjectWEAP* g_fistsWeapon;
+extern BGSSaveLoadGame* g_BGSSaveLoadGame;
 
 // Game functions
 extern bool (__cdecl *GetIsGodMode)();

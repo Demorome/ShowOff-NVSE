@@ -1,11 +1,10 @@
 ﻿#pragma once
+#include "EventFilteringInterface.h"
 
 class JohnnyEventFiltersOneFormOneInt : EventHandlerInterface
 {
-
-
 	typedef  std::unordered_set<unsigned int> RefUnorderedSet;
-private:
+
 	RefUnorderedSet* Filters = 0;
 
 	RefUnorderedSet* GetFilter(UInt32 filter)
@@ -18,7 +17,6 @@ public:
 
 	JohnnyEventFiltersOneFormOneInt(void** filters, UInt32 nuFilters)
 	{
-
 		numFilters = nuFilters;
 		Filters = new RefUnorderedSet[numFilters];
 		GenFilters = new GenericFilters[numFilters];
@@ -96,3 +94,62 @@ struct EventFilterStructOneFormOneInt {
 	TESForm* form;
 	int intID;
 };
+
+
+// =====
+
+struct EventFilterStructOneFormOneString {
+	TESForm* form;
+	const char* str;
+};
+
+// Filters are non-optional
+struct JohnnyEventFiltersOneFormOneString : EventHandlerInterface
+{
+	static constexpr UInt8 NumFilters = 2;
+
+	JohnnyEventFiltersOneFormOneString(void** filters)
+	{
+		const auto& filterStruct = *reinterpret_cast<EventFilterStructOneFormOneString*>(filters);
+		numFilters = NumFilters;
+		GenFilters = new GenericFilters[NumFilters];
+		GenFilters[0].refID = filterStruct.form ? filterStruct.form->refID : 0;
+		GenFilters[1].str = CopyString(filterStruct.str);
+	}
+	~JohnnyEventFiltersOneFormOneString() override
+	{
+		free(GenFilters[1].str);
+		delete[] GenFilters;
+		GenFilters = nullptr;
+	}
+
+	bool IsInFilter(UInt32 filterNum, GenericFilters toSearch) override
+	{
+		if (filterNum == 0)
+			return toSearch.refID == GenFilters[0].refID;
+		if (filterNum == 1)
+			return StrEqualCI(toSearch.str, GenFilters[1].str);
+		return false;
+	}
+	void InsertToFilter(UInt32 filterNum, GenericFilters toInsert) override
+	{}
+	void DeleteFromFilter(UInt32 filterNum, GenericFilters toDelete) override
+	{}
+	bool IsFilterEmpty(UInt32 filterNum) override
+	{
+		return false; // should never be empty (non-optional filters)
+	}
+	bool IsFilterEqual(GenericFilters filter, UInt32 nuFilter) override
+	{
+		return IsInFilter(nuFilter, filter);
+	}
+	bool IsAcceptedParameter(GenericFilters parameter) override
+	{
+		return false; // will check if param is accepted within event handler func.
+	}
+	void SetUpFiltering() override
+	{}
+};
+void* __fastcall CreateOneFormOneStringFilter(void** Filters, UInt32 numFilters_unused) {
+	return new JohnnyEventFiltersOneFormOneString(Filters);
+}

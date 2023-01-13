@@ -459,7 +459,7 @@ bool Cmd_ClearShowoffSavedData_Execute(COMMAND_ARGS)
 	UInt8 modIdx = scriptObj->GetOverridingModIdx();
 	if (auxStringMaps && s_auxStringMapArraysPerm.Erase((auxStringMaps == 2) ? 0xFF : modIdx))  //todo: fix .Erase not doing anything!
 		s_dataChangedFlags |= kChangedFlag_AuxStringMaps;
-	if (auxTimerMaps && s_auxTimerMapArraysPerm.Erase((auxTimerMaps == 2) ? 0xFF : modIdx))
+	if (auxTimerMaps && AuxTimer::s_auxTimerMapArraysPerm.Erase((auxTimerMaps == 2) ? 0xFF : modIdx))
 		s_dataChangedFlags |= kChangedFlag_AuxTimerMaps;
 	return true;
 }

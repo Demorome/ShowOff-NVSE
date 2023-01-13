@@ -1,6 +1,7 @@
 ﻿#pragma once
 
 #include "LambdaVarContext.h"
+#include <nvse/GameAPI.h>
 
 //From JohnnyGuitar NVSE
 
@@ -69,7 +70,6 @@ public:
 	//Function used by the filter to check if the object passed is an accepted parameter
 	virtual bool IsAcceptedParameter(GenericFilters toCheck) = 0;
 	virtual UInt32 GetNumFilters() { return numFilters; }
-
 };
 
 

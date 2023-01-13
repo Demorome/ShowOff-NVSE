@@ -1,4 +1,8 @@
 ﻿#include "AuxTimers.h"
+#include "JohnnyEventPredefinitions.h"
+
+extern EventInformation* OnAuxTimerStart;
+extern EventInformation* OnAuxTimerStop;
 
 namespace AuxTimer
 {
@@ -58,12 +62,16 @@ namespace AuxTimer
 
 							if (timer.m_timeRemaining <= 0.0)
 							{
-								// TODO: run OnTimerStop
+								for (auto const& callback : OnAuxTimerStop->EventCallbacks) {
+									FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStop->numMaxArgs, auxVarNameMapIter.Key(), ownerFormID);
+								}
 
 								if (timer.m_flags & AuxTimerValue::kFlag_AutoRestarts) {
-									// TODO: run OnTimerStart
-
 									timer.m_timeRemaining = timer.m_timeToCountdown;
+
+									for (auto const& callback : OnAuxTimerStart->EventCallbacks) {
+										FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStart->numMaxArgs, auxVarNameMapIter.Key(), ownerFormID);
+									}
 								}
 								else {
 									auxVarNameMapIter.Remove(); // valid mid-loop according to JIP's ClearJIPSavedData
@@ -96,6 +104,7 @@ namespace AuxTimer
 				{
 					if (auxVarNameMapIter.Get().m_flags & AuxTimerValue::kFlag_AutoRemoveOnLoadAndMainMenu)
 						auxVarNameMapIter.Remove();
+					// intentionally not running OnTimerStop event for these
 				}
 				if (refOwnersMapIter.Get().Empty())
 					refOwnersMapIter.Remove();

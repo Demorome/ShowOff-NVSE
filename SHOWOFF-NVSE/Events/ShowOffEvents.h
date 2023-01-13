@@ -3,8 +3,7 @@
 #include "GameEffects.h"
 
 // Credits to Karut (from JohnnyGuitar) for making the Event Framework.
-EventInformation* OnCornerMessage;
-EventInformation* OnActorValueChange;
+EventInformation* OnCornerMessage; 
 
 DEFINE_COMMAND_ALT_PLUGIN(SetShowOffOnCornerMessageEventHandler, SetOnCornerMessageEventHandler, "", false, kParams_Event);
 bool Cmd_SetShowOffOnCornerMessageEventHandler_Execute(COMMAND_ARGS)
@@ -22,25 +21,65 @@ bool Cmd_SetShowOffOnCornerMessageEventHandler_Execute(COMMAND_ARGS)
 	return true;
 }
 
-#if _DEBUG
-DEFINE_COMMAND_ALT_PLUGIN(SetShowOffOnActorValueChangeEventHandler, SetOnAVChangeEventHandler, "", false, kParams_Event);	//TODO: change args
-bool Cmd_SetShowOffOnActorValueChangeEventHandler_Execute(COMMAND_ARGS)
+EventInformation* OnAuxTimerStart;
+DEFINE_COMMAND_ALT_PLUGIN(SetOnAuxTimerStartHandler, SetOnTimerStartHandler, "", false,
+	kParams_Event_OneString_OneOptionalForm);
+bool Cmd_SetOnAuxTimerStartHandler_Execute(COMMAND_ARGS)
 {
 	UInt32 setOrRemove;
 	Script* script;
-	UInt32 flags = 0;  //reserved for future use
-	//todo: extract AV code filter, positive or negative change bool filter
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags) || NOT_TYPE(script, Script))) return true;
-	if (OnActorValueChange)
+	EventFilterStructOneFormOneString filters;
+	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &filters.str, &filters.form)
+		|| NOT_TYPE(script, Script)))
 	{
-		//TODO: Add filters
+		return true;
+	}
+
+	if (!filters.form)
+	{
+		if (!thisObj)
+			return true;
+		filters.form = thisObj;
+	}
+
+	if (OnAuxTimerStart)
+	{
 		if (setOrRemove)
-			OnActorValueChange->RegisterEvent(script, NULL);
-		else OnActorValueChange->RemoveEvent(script, NULL);
+			OnAuxTimerStart->RegisterEvent(script, (void**)&filters);
+		else OnAuxTimerStart->RemoveEvent(script, (void**)&filters);
 	}
 	return true;
 }
-#endif
+
+EventInformation* OnAuxTimerStop;
+DEFINE_COMMAND_ALT_PLUGIN(SetOnAuxTimerStopHandler, SetOnTimerStopHandler, "", false,
+	kParams_Event_OneString_OneOptionalForm);
+bool Cmd_SetOnAuxTimerStopHandler_Execute(COMMAND_ARGS)
+{
+	UInt32 setOrRemove;
+	Script* script;
+	EventFilterStructOneFormOneString filters;
+	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &filters.str, &filters.form)
+		|| NOT_TYPE(script, Script)))
+	{
+		return true;
+	}
+
+	if (!filters.form)
+	{
+		if (!thisObj)
+			return true;
+		filters.form = thisObj;
+	}
+
+	if (OnAuxTimerStop)
+	{
+		if (setOrRemove)
+			OnAuxTimerStop->RegisterEvent(script, (void**)&filters);
+		else OnAuxTimerStop->RemoveEvent(script, (void**)&filters);
+	}
+	return true;
+}
 
 namespace CornerMessageHooks
 {
@@ -1233,8 +1272,6 @@ namespace OnDropAlt
 
 }
 
-
-
 using EventFlags = NVSEEventManagerInterface::EventFlags;
 
 template<UInt8 N>
@@ -1252,9 +1289,8 @@ bool RegisterEvent(const char* eventName, nullptr_t null,
 void RegisterEvents()
 {
 	OnCornerMessage = JGCreateEvent("OnCornerMessage", 5, 0, NULL);
-#if _DEBUG
-	OnActorValueChange = JGCreateEvent("OnActorValueChange", 4, 0, NULL);
-#endif
+	OnAuxTimerStart = JGCreateEvent("OnTimerStart", 2, 2, CreateOneFormOneStringFilter);
+	OnAuxTimerStop = JGCreateEvent("OnTimerStop", 2, 2, CreateOneFormOneStringFilter);
 
 	RegisterEvent(OnPreActivate::eventName, kEventParams_OneReference_OneIntPtr);
 	RegisterEvent(PreActivateInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneIntPtr_OneInt);
@@ -1288,7 +1324,8 @@ void RegisterEvents()
 
 	//TODO: document!
 	RegisterEvent(OnAddAlt::eventName, kEventParams_OneBaseForm_OneReference);
-#if _DEBUG
+
+	#if _DEBUG
 
 #endif
 	/*

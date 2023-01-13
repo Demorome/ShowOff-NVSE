@@ -96,6 +96,9 @@
     <ClCompile Include="internal\AuxTimers.cpp">
       <Filter>internal</Filter>
     </ClCompile>
+    <ClCompile Include="Events\JohnnyEventPredefinitions.cpp">
+      <Filter>Events</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="functions\SO_fn_Misc.h">

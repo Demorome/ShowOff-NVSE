@@ -1,4 +1,8 @@
 #include "AuxTimers.h"
+#include "JohnnyEventPredefinitions.h"
+
+extern EventInformation* OnAuxTimerStart;
+extern EventInformation* OnAuxTimerStop;
 
 using namespace AuxTimer;
 
@@ -29,8 +33,6 @@ bool Cmd_AuxTimerStart_Execute(COMMAND_ARGS)
 				value = GetTimerValue(varInfo, true);
 			}
 
-			// TODO: fire OnTimerStart event
-
 			if (timeToCountdown == -1.0)
 			{
 				if (flags != AuxTimerValue::kFlag_Defaults)
@@ -41,6 +43,10 @@ bool Cmd_AuxTimerStart_Execute(COMMAND_ARGS)
 			{
 				value->SetTimeToCountdown(timeToCountdown);
 				value->m_flags = flags;
+			}
+
+			for (auto const& callback : OnAuxTimerStart->EventCallbacks) {
+				FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStart->numMaxArgs, varName, varInfo.ownerID);
 			}
 			
 			if (varInfo.isPerm)
@@ -75,12 +81,19 @@ bool Cmd_AuxTimerStop_Execute(COMMAND_ARGS)
 
 			AUX_TIMER_CS;
 
-			/* TODO: just delete the AuxVar
-			value->m_timeRemaining = 0.0;
-			value->m_flags &= ~AuxTimerValue::kFlag_IsPaused;
-			*/
+			if (fireEvent)
+			{
+				for (auto const& callback : OnAuxTimerStop->EventCallbacks) {
+					FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStop->numMaxArgs, varName, varInfo.ownerID);
+				}
+			}
 
-			// TODO: fire OnTimerStop event
+			varInfo.ModsMap().Get(varInfo.modIndex).Get(varInfo.ownerID).Erase(varName);
+			if (varInfo.ModsMap().Get(varInfo.modIndex).Get(varInfo.ownerID).Empty()){
+				varInfo.ModsMap().Get(varInfo.modIndex).Erase(varInfo.ownerID);
+				if (varInfo.ModsMap().Get(varInfo.modIndex).Empty())
+					varInfo.ModsMap().Erase(varInfo.modIndex);
+			}
 
 			if (varInfo.isPerm)
 			{

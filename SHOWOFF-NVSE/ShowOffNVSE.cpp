@@ -123,6 +123,7 @@ Sky** g_currentSky = nullptr;
 RefID g_xMarkerFormID = 0x3B;
 TESObjectWEAP* g_fistsWeapon = nullptr;
 TimeGlobal* g_timeGlobal = nullptr;
+BGSSaveLoadGame* g_BGSSaveLoadGame = nullptr;
 
 // Game functions
 bool (__cdecl* GetIsGodMode)() = nullptr;
@@ -237,6 +238,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		g_screenWidth = *(UInt32*)0x11C73E0;
 		g_screenHeight = *(UInt32*)0x11C7190;
 		g_fistsWeapon = *(TESObjectWEAP**)0x11CA278;
+		g_BGSSaveLoadGame = *(BGSSaveLoadGame**)0x11DDF38;
 
 		GetIsGodMode = reinterpret_cast<bool(*)()>(0x9526B0);
 
@@ -250,6 +252,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		break;
 
 	case NVSEMessagingInterface::kMessage_MainGameLoop:
+	{
 		for (const auto& EventInfo : EventsArray)
 		{
 			EventInfo->AddQueuedEvents();
@@ -265,8 +268,8 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 			s_dataChangedFlags |= kChangedFlag_AuxTimerMaps; // assume a timer will change
 		AuxTimer::DoCountdown(vatsTimeMult, isMenuMode, s_auxTimerMapArraysPerm);
 		AuxTimer::DoCountdown(vatsTimeMult, isMenuMode, s_auxTimerMapArraysTemp);
-
 		break;
+	}
 	case NVSEMessagingInterface::kMessage_RuntimeScriptError:
 		//_MESSAGE("Received runtime script error message %s", msg->data);
 		break;
@@ -400,7 +403,6 @@ extern "C"
 			SkipNBytes = serialization->SkipNBytes;
 			serialization->SetLoadCallback(nvsePluginHandle, LoadGameCallback);
 			serialization->SetSaveCallback(nvsePluginHandle, SaveGameCallback);
-			serialization->SetNewGameCallback(nvsePluginHandle, NewGameCallback);
 			
 			g_scriptInterface = (NVSEScriptInterface*)nvse->QueryInterface(kInterface_Script);
 			ExtractArgsEx = g_scriptInterface->ExtractArgsEx;
@@ -655,6 +657,14 @@ extern "C"
 		//========v1.55
 		/*3D3E*/	REG_CMD(GetIsPlayerOverencumbered)
 		/*3D3F*/	REG_CMD(RefillPlayerAmmo)
+		/*3D40*/	REG_CMD(AuxTimerStart)
+		/*3D41*/	REG_CMD(AuxTimerStop)
+		/*3D42*/	REG_CMD(AuxTimerPaused)
+		/*3D43*/	REG_CMD(AuxTimerTimeElapsed)
+		/*3D44*/	REG_CMD(AuxTimerTimeToCountdown)
+		/*3D45*/	REG_CMD(AuxTimerTimeLeft)
+		/*3D46*/	REG_CMD(SetOnAuxTimerStartHandler)
+		/*3D47*/	REG_CMD(SetOnAuxTimerStopHandler)
 		
 	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
