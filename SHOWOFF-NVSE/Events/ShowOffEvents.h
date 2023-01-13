@@ -28,21 +28,24 @@ bool Cmd_SetOnAuxTimerStartHandler_Execute(COMMAND_ARGS)
 {
 	UInt32 setOrRemove;
 	Script* script;
-	EventFilterStructOneFormOneString filters;
-	filters.form = nullptr;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &filters.str, &filters.form)
+	GenericFilters filters[2];
+	char strBuf[0x80];
+	filters[0].form = nullptr;
+	filters[1].str = strBuf;
+	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, filters[1].str, &filters[0].form)
 		|| NOT_TYPE(script, Script)))
 	{
 		return true;
 	}
 
-	if (!filters.form)
+	if (!filters[0].form)
 	{
 		if (!thisObj)
 			thisObj = g_thePlayer;
-		filters.form = thisObj;
+		filters[0].form = thisObj;
 	}
 
+	filters[0].refID = filters[0].form->refID;
 	if (OnAuxTimerStart)
 	{
 		if (setOrRemove)
@@ -59,26 +62,29 @@ bool Cmd_SetOnAuxTimerStopHandler_Execute(COMMAND_ARGS)
 {
 	UInt32 setOrRemove;
 	Script* script;
-	EventFilterStructOneFormOneString filters;
-	filters.form = nullptr;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, filters.str, &filters.form)
+	GenericFilters filters[2];
+	char strBuf[0x80];
+	filters[0].form = nullptr;
+	filters[1].str = strBuf;
+	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, filters[1].str, &filters[0].form)
 		|| NOT_TYPE(script, Script)))
 	{
 		return true;
 	}
 
-	if (!filters.form)
+	if (!filters[0].form)
 	{
 		if (!thisObj)
 			thisObj = g_thePlayer;
-		filters.form = thisObj;
+		filters[0].form = thisObj;
 	}
 
+	filters[0].refID = filters[0].form->refID;
 	if (OnAuxTimerStop)
 	{
 		if (setOrRemove)
-			OnAuxTimerStop->RegisterEvent(script, (void**)&filters);
-		else OnAuxTimerStop->RemoveEvent(script, (void**)&filters);
+			OnAuxTimerStop->RegisterEvent(script, (void**)filters); //TODO: fix redundant handlers being added
+		else OnAuxTimerStop->RemoveEvent(script, (void**)filters);
 	}
 	return true;
 }

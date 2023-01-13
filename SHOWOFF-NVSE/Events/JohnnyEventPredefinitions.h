@@ -10,6 +10,7 @@
 class EventInformation;
 void* __fastcall GenericCreateFilter(void** maxFilters, UInt32 numFilters);
 
+#if 0 // todo: make it compatible with my changes to how void** filters are passed/handled
 class JohnnyEventFiltersForm : EventHandlerInterface
 {
 	typedef  std::unordered_set<unsigned int> RefUnorderedSet;
@@ -119,6 +120,7 @@ public:
 		} while (iterator = iterator->next);
 	}
 };
+#endif
 
 class EventInformation
 {
@@ -156,6 +158,9 @@ public:
 
 	void virtual RegisterEvent(Script* script, void** filters)
 	{
+		// workaround karut's hackiness
+		const auto* filtersArr = reinterpret_cast<GenericFilters*>(filters);
+
 		UInt32 maxFilters = this->numMaxFilters;
 		for (auto it = this->EventCallbacks.begin(); it != this->EventCallbacks.end(); ++it)
 		{
@@ -166,7 +171,7 @@ public:
 				int i = 0; // filter iterator
 				for (; i < maxFilters; i++)
 				{
-					if (!(it->eventFilter->IsFilterEqual(filters[i], i))) break;
+					if (!(it->eventFilter->IsFilterEqual(filtersArr[i], i))) break;
 				}
 				if (i >= maxFilters) return;
 			}
@@ -183,7 +188,7 @@ public:
 				int i = 0; // filter iterator
 				for (; i < maxFilters; i++)
 				{
-					if (!(it->eventFilter->IsFilterEqual(filters[i], i))) break;
+					if (!(it->eventFilter->IsFilterEqual(filtersArr[i], i))) break;
 				}
 				if (i >= maxFilters) return;
 			}

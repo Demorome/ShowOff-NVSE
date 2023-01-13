@@ -3,9 +3,11 @@
 std::mutex EventsArrayMutex;
 std::vector<EventInfo> EventsArray;
 
+#if 0
 void* __fastcall GenericCreateFilter(void** Filters, UInt32 numFilters) {
 	return new JohnnyEventFiltersForm(Filters, numFilters);
 }
+#endif
 
 EventInfo FindHandlerInfoByChar(const char* nameToFind)
 {

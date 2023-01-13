@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "EventFilteringInterface.h"
 
+#if 0 // todo: make it compatible with my changes to how void** filters are passed/handled
 class JohnnyEventFiltersOneFormOneInt : EventHandlerInterface
 {
 	typedef  std::unordered_set<unsigned int> RefUnorderedSet;
@@ -94,14 +95,10 @@ struct EventFilterStructOneFormOneInt {
 	TESForm* form;
 	int intID;
 };
+#endif
 
 
 // =====
-
-struct EventFilterStructOneFormOneString {
-	TESForm* form;
-	char str[0x80];
-};
 
 // Filters are non-optional
 struct JohnnyEventFiltersOneFormOneString : EventHandlerInterface
@@ -110,11 +107,11 @@ struct JohnnyEventFiltersOneFormOneString : EventHandlerInterface
 
 	JohnnyEventFiltersOneFormOneString(void** filters)
 	{
-		const auto& filterStruct = *reinterpret_cast<EventFilterStructOneFormOneString*>(filters);
+		const auto& filterArr = reinterpret_cast<GenericFilters*>(filters);
 		numFilters = NumFilters;
 		GenFilters = new GenericFilters[NumFilters];
-		GenFilters[0].refID = filterStruct.form ? filterStruct.form->refID : 0;
-		GenFilters[1].str = CopyString(filterStruct.str);
+		GenFilters[0].refID = filterArr[0].refID;
+		GenFilters[1].str = CopyString(filterArr[1].str);
 	}
 	~JohnnyEventFiltersOneFormOneString() override
 	{
