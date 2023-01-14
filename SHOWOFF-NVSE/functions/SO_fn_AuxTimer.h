@@ -96,12 +96,13 @@ bool Cmd_AuxTimerStop_Execute(COMMAND_ARGS)
 				}
 			}
 
+			auto& modsMap = varInfo.ModsMap();
 			AUX_TIMER_CS;
-			varInfo.ModsMap().Get(varInfo.modIndex).Get(varInfo.ownerID).Erase(varName);
-			if (varInfo.ModsMap().Get(varInfo.modIndex).Get(varInfo.ownerID).Empty()){
-				varInfo.ModsMap().Get(varInfo.modIndex).Erase(varInfo.ownerID);
-				if (varInfo.ModsMap().Get(varInfo.modIndex).Empty())
-					varInfo.ModsMap().Erase(varInfo.modIndex);
+			modsMap.GetPtr(varInfo.modIndex)->GetPtr(varInfo.ownerID)->Erase(varName);
+			if (modsMap.GetPtr(varInfo.modIndex)->GetPtr(varInfo.ownerID)->Empty()){
+				modsMap.GetPtr(varInfo.modIndex)->Erase(varInfo.ownerID);
+				if (modsMap.GetPtr(varInfo.modIndex)->Empty())
+					modsMap.Erase(varInfo.modIndex);
 			}
 
 			if (varInfo.isPerm)
