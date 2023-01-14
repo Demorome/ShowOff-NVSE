@@ -195,6 +195,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 			// JIP calls DoLoadGameHousekeeping() here
 			s_dataChangedFlags = 0;
 			AuxTimer::HandleAutoRemoveTempTimers();
+			FlushJGInterfaceEvents();
 		}
 		break;
 	case NVSEMessagingInterface::kMessage_PostLoad:
@@ -214,6 +215,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		ProcessDataChangedFlags(kChangedFlag_All);
 		s_lastLoadedPath[0] = 0;
 		AuxTimer::HandleAutoRemoveTempTimers();
+		FlushJGInterfaceEvents();
 		break;
 	case NVSEMessagingInterface::kMessage_Precompile:
 		//_MESSAGE("Received precompile message with script at %08x", msg->data);

@@ -83,10 +83,16 @@ bool Cmd_SetOnAuxTimerStopHandler_Execute(COMMAND_ARGS)
 	if (OnAuxTimerStop)
 	{
 		if (setOrRemove)
-			OnAuxTimerStop->RegisterEvent(script, (void**)filters); //TODO: fix redundant handlers being added
+			OnAuxTimerStop->RegisterEvent(script, (void**)filters);
 		else OnAuxTimerStop->RemoveEvent(script, (void**)filters);
 	}
 	return true;
+}
+
+void FlushJGInterfaceEvents()
+{
+	OnAuxTimerStop->FlushEventCallbacks();
+	OnAuxTimerStart->FlushEventCallbacks();
 }
 
 namespace CornerMessageHooks
