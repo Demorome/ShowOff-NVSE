@@ -24,6 +24,7 @@ namespace AuxTimer
 			kFlag_AutoRemoveOnLoadAndMainMenu = 1 << 3, // disabled/ignored for savebaked timers.
 			kFlag_AutoRestarts = 1 << 4,
 			kFlag_IsPaused = 1 << 5,
+			kFlag_NotAffectedByTimeMult_InMenuMode = 1 << 6, // if on, seconds-based timers won't be affected by TimeMult in MenuMode.
 		};
 		UInt32 m_flags;
 

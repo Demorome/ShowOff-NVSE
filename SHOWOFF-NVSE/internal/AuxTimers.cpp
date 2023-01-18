@@ -31,7 +31,10 @@ namespace AuxTimer
 	{
 		if (auxTimers.Empty())
 			return;
-			
+
+		const double secondsDeltaWithMult = static_cast<double>(g_timeGlobal->secondsPassed) * vatsTimeMult;
+		const double secondsDeltas[2] = { secondsDeltaWithMult, static_cast<double>(g_timeGlobal->secondsPassed) };
+
 		for (auto modMapIter = auxTimers.Begin(); !modMapIter.End(); ++modMapIter)
 		{
 			for (auto refOwnersMapIter = modMapIter.Get().Begin(); 
@@ -53,8 +56,10 @@ namespace AuxTimer
 						{
 							if (timer.m_flags & AuxTimerValue::kFlag_CountInSeconds)
 							{
-								const double secondsDelta = static_cast<double>(g_timeGlobal->secondsPassed) * vatsTimeMult;
-								timer.m_timeRemaining -= secondsDelta;
+								const bool notAffectedByTimeMult = 
+									(timer.m_flags & AuxTimerValue::kFlag_NotAffectedByTimeMult_InMenuMode)
+									&& isMenuMode;
+								timer.m_timeRemaining -= secondsDeltas[notAffectedByTimeMult ? 1 : 0];
 							}
 							else {
 								--timer.m_timeRemaining;
