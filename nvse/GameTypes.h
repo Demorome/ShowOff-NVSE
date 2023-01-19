@@ -32,6 +32,7 @@ enum
 	eListCount =	-3,
 };
 
+// These decls were taken from JIP
 typedef void* (*_FormHeap_Allocate)(UInt32 size);
 extern const _FormHeap_Allocate FormHeap_Allocate;
 
@@ -94,6 +95,7 @@ template <typename T_Data> struct ListNode
 	}
 };
 
+// Copied from JIP
 template <class Item> class tList
 {
 public:
@@ -275,6 +277,15 @@ public:
 			else node->data = item;
 		}
 		return index;
+	}
+
+	void Prepend(Item* item)
+	{
+		if (item)
+		{
+			if (m_listHead.data) m_listHead.Insert(item);
+			else m_listHead.data = item;
+		}
 	}
 
 	void Insert(Item *item)

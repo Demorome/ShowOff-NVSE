@@ -320,6 +320,7 @@ copy "$(SolutionDir)Release\$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugi
     <ClCompile Include="internal\AuxTimers.cpp" />
     <ClCompile Include="internal\ExtractArgs_TypeSafe.cpp" />
     <ClCompile Include="internal\SOTypes.cpp" />
+    <ClCompile Include="InventoryRef.cpp" />
     <ClCompile Include="MenuHooks.cpp" />
     <ClCompile Include="MiscHooks.cpp" />
     <ClCompile Include="internal\containers.cpp" />

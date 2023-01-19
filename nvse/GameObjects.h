@@ -181,6 +181,7 @@ public:
 	bool MoveToCell(TESForm *worldOrCell, NiVector3 &posVector);
 	void DeleteReference();
 	TESObjectREFR *GetMerchantContainer();
+	ContChangesEntry* GetContainerChangesEntry(TESForm* itemForm) const;
 	float GetWaterImmersionPerc();
 	bool IsMobile();
 	bool IsGrabbable();

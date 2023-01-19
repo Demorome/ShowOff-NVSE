@@ -545,6 +545,86 @@ bool Cmd_GetEquippedWeaponRef_Execute(COMMAND_ARGS)
 
 #if _DEBUG
 
+// Will be able to get the inventory reference's original extendDataList.
+TESObjectREFR* __fastcall CreateRefForStackWithoutCopy(TESObjectREFR* container, ContChangesEntry* entry)
+{
+	if (container && entry)
+	{
+		InventoryRef::Data const data{ entry->type, entry, entry->extendData ? entry->extendData->GetFirstItem() : nullptr };
+		auto const invRef = InventoryRefCreate(container, data, false);
+		return invRef->tempRef;
+	}
+	return nullptr;
+}
+
+// Mostly copied from JIP's SetItemRefCurrentHealth, and code from 0x7B8092
+DEFINE_COMMAND_PLUGIN(SetSingleItemRefCurrentHealth,
+	"Sets the health of a single item for an inv ref. Can split off from a stack, and end up in a new stack.", 
+	true, kParams_OneFloat_OneOptionalInt);
+bool Cmd_SetSingleItemRefCurrentHealth_Execute(COMMAND_ARGS)
+{
+	*result = 0; // modified invRef refID (could be placed in a new stack, or stay in the same old if no changes were made).
+	float health;
+	UInt32 setPercent = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &health, &setPercent))
+		return true;
+	InventoryRef* invRef = InventoryRefGetForID(thisObj->refID);
+	if (!invRef) 
+		return true;
+
+	float const baseHealth = invRef->data.entry->GetBaseHealth();
+	if (baseHealth == 0) 
+		return true;
+
+	if (setPercent)
+		health *= baseHealth;
+
+	if (health > baseHealth)
+		health = baseHealth;
+
+	auto const oldStackCount = invRef->GetCount();
+	if (oldStackCount == 1)
+	{
+		if (ExtraDataList* xData = invRef->data.xData) {
+			if (ExtraHealth* xHealth = GetExtraTypeJIP(xData, Health))
+				xHealth->health = health;
+			else
+				xData->Add(ExtraHealth::Create(health));
+		}
+		else if (xData = invRef->CreateExtraData()) {
+			xData->Add(ExtraHealth::Create(health));
+		}
+		REFR_RES = invRef->tempRef->refID;
+	}
+	else // create a new single stack, separating it from its old stack xDataList.
+	{
+		// Copied part of xNVSE's SetRefCount
+		if (invRef->data.xData)
+		{
+			if (auto* xCount = (ExtraCount*)invRef->data.xData->GetByType(kExtraData_Count)) 
+				xCount->count = oldStackCount - 1;
+		}
+		--invRef->data.entry->countDelta;
+
+		// Create the new single stack with our health changes.
+		ExtraDataList* newDataList = ExtraDataList::Create();
+		newDataList->Copy(invRef->data.xData);
+		if (auto* xCount = (ExtraCount*)newDataList->GetByType(kExtraData_Count))
+			xCount->count = 1;
+		newDataList->Add(ExtraHealth::Create(health));
+		auto* entry = invRef->CopyWithNewExtraData(newDataList);
+		auto* newRefr = CreateRefForStackWithoutCopy(invRef->containerRef, entry);
+		REFR_RES = newRefr ? newRefr->refID : 0;
+	}
+
+	//### todo: copy the cleanup loop at 0x7B8160 to put the changed invRef inside a new stack,
+	// ...if it is now identical to another inv item.
+	// This would only change a slight visual bug.
+
+	*result = 1;
+	return true;
+}
+
 
 bool CanItemRepairTarget(TESForm* repairingItem, TESForm* itemToRepair)
 {
@@ -608,18 +688,6 @@ bool Cmd_GetItemCanBeRepairedByTarget_Execute(COMMAND_ARGS)
 		return true;
 
 	return Cmd_GetItemCanBeRepairedByTarget_Eval(thisObj, itemToRepair, itemTarget, result);
-}
-
-// Will be able to get the inventory reference's original extendDataList.
-TESObjectREFR* __fastcall CreateRefForStackWithoutCopy(TESObjectREFR* container, ContChangesEntry* menuEntry)
-{
-	if (container && menuEntry)
-	{
-		InventoryRef::Data const data{ menuEntry->type, menuEntry, menuEntry->extendData ? menuEntry->extendData->GetFirstItem() : nullptr };
-		auto const invRef = InventoryRefCreate(container, data, false);
-		return invRef->tempRef;
-	}
-	return nullptr;
 }
 
 DEFINE_COMMAND_PLUGIN(GetSelectedItemRefSO, "", false, kParams_OneOptionalInt);

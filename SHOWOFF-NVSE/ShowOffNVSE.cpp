@@ -685,6 +685,9 @@ extern "C"
 #endif
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
+
+		REG_CMD_FORM(SetSingleItemRefCurrentHealth)
+
 		REG_CMD(SetFlyCamera)
 
 		REG_CMD(ForceWeaponJamAnimAlt)

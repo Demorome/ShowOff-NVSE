@@ -2,6 +2,7 @@
 //#include "GameBSExtraData.h"
 #include "GameObjects.h"
 
+// Copied from JIP
 struct InventoryRef
 {
 	struct Data
@@ -17,6 +18,8 @@ struct InventoryRef
 	bool				removed;		// 2D
 	UInt8				pad2E[2];		// 2E
 
-	SInt32 GetCount();
+	SInt32 GetCount() const { return data.entry->countDelta; }
 	ExtraDataList* CreateExtraData();
+	// Returns the copied-to ContChangesEntry*, if it exists.
+	ContChangesEntry* CopyWithNewExtraData(ExtraDataList* newDataList);
 };

@@ -99,6 +99,9 @@
     <ClCompile Include="Events\JohnnyEventPredefinitions.cpp">
       <Filter>Events</Filter>
     </ClCompile>
+    <ClCompile Include="InventoryRef.cpp">
+      <Filter>nvse</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="functions\SO_fn_Misc.h">

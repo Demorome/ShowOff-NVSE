@@ -39,7 +39,7 @@ struct BaseExtraList
 	BSExtraData *Add(BSExtraData *xData);
 	void RemoveAll(bool doFree = true);
 	bool MarkScriptEvent(UInt32 eventMask, TESForm *eventTarget);
-	void Copy(BaseExtraList *sourceList);
+	void Copy(BaseExtraList *sourceList); // safe even if copying a nullptr list
 	void DebugDump() const;
 	bool IsWorn();
 	char GetExtraFactionRank(TESFaction *faction);

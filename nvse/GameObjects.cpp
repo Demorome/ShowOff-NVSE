@@ -215,9 +215,42 @@ bool Actor::Detects(Actor* target)
 	return detectionLevel > 0;
 }
 
-//from JIP
+// From JIP
 TESObjectREFR* TESObjectREFR::GetMerchantContainer()
 {
 	ExtraMerchantContainer* xMerchCont = GetExtraTypeJIP(&extraDataList, MerchantContainer);
 	return xMerchCont ? xMerchCont->containerRef : NULL;
+}
+
+// from JIP
+__declspec(naked) ContChangesEntry* TESObjectREFR::GetContainerChangesEntry(TESForm* itemForm) const
+{
+	__asm
+	{
+		push	kExtraData_ContainerChanges
+		add		ecx, 0x44
+		call	BaseExtraList::GetByType
+		test	eax, eax
+		jz		done
+		mov		eax, [eax + 0xC]
+		test	eax, eax
+		jz		done
+		mov		ecx, [eax]
+		mov		edx, [esp + 4]
+		ALIGN 16
+		itemIter:
+		test	ecx, ecx
+			jz		retnNULL
+			mov		eax, [ecx]
+			mov		ecx, [ecx + 4]
+			test	eax, eax
+			jz		itemIter
+			cmp[eax + 8], edx
+			jnz		itemIter
+			retn	4
+			retnNULL:
+		xor eax, eax
+			done :
+		retn	4
+	}
 }

@@ -755,3 +755,79 @@ ExtraHotkey *ExtraHotkey::Create(UInt8 _index)
 	dataPtr[3] = _index;
 	return (ExtraHotkey*)dataPtr;
 }
+
+// Copied from JIP
+__declspec(naked) float __vectorcall ExtraContainerChanges::EntryData::GetWeaponModEffectValue(UInt32 effectType) const
+{
+	__asm
+	{
+		push	edx
+		mov		eax, [ecx]
+		test	eax, eax
+		jz		retn0
+		mov		edx, [ecx + 8]
+		mov		ecx, [eax]
+		test	ecx, ecx
+		jz		retn0
+		push	edx
+		push	kExtraData_WeaponModFlags
+		call	BaseExtraList::GetByType
+		pop		ecx
+		test	eax, eax
+		jz		retn0
+		mov		dl, [eax + 0xC]
+		mov		eax, [esp]
+		test	dl, 1
+		jz		check2nd
+		cmp[ecx + 0x180], eax
+		jnz		check2nd
+		movss	xmm0, [ecx + 0x18C]
+		pop		ecx
+		retn
+		check2nd :
+		test	dl, 2
+			jz		check3rd
+			cmp[ecx + 0x184], eax
+			jnz		check3rd
+			movss	xmm0, [ecx + 0x190]
+			pop		ecx
+			retn
+			check3rd :
+		test	dl, 4
+			jz		retn0
+			cmp[ecx + 0x188], eax
+			jnz		retn0
+			movss	xmm0, [ecx + 0x194]
+			pop		ecx
+			retn
+			retn0 :
+		xorps	xmm0, xmm0
+			pop		ecx
+			retn
+	}
+}
+
+// Copied from JIP
+__declspec(naked) float __vectorcall ExtraContainerChanges::EntryData::GetBaseHealth() const
+{
+	__asm
+	{
+		mov		eax, [ecx + 8]
+		mov		dl, [eax + 4]
+		cmp		dl, kFormType_TESObjectWEAP
+		jnz		notWeapon
+		cvtsi2ss	xmm1, [eax + 0x98]
+		mov		edx, 0xA
+		call	ContChangesEntry::GetWeaponModEffectValue
+		addss	xmm0, xmm1
+		retn
+		notWeapon :
+		cmp		dl, kFormType_TESObjectARMO
+			jnz		done
+			cvtsi2ss	xmm0, [eax + 0x6C]
+			retn
+			done :
+		xorps	xmm0, xmm0
+			retn
+	}
+}
