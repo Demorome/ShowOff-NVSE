@@ -338,7 +338,8 @@ bool Cmd_GetIngestibleConsumeSound_Execute(COMMAND_ARGS)
 	{
 		if (auto const ingestible = DYNAMIC_CAST(form, TESForm, AlchemyItem))
 		{
-			REFR_RES = ingestible->consumeSound->refID;
+			if (ingestible->consumeSound)
+				REFR_RES = ingestible->consumeSound->refID;
 		}
 	}
 	return true;
