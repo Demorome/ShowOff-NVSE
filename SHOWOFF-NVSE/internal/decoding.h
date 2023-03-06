@@ -3922,3 +3922,15 @@ struct AnimGroupClassify
 	UInt8	byte03;		// 03
 };
 extern AnimGroupClassify s_animGroupClassify[];
+
+// Credits to c6
+// Taken from JG's decoding.h
+class TESCaravanDeck : public TESForm {
+public:
+	TESCaravanDeck();
+	~TESCaravanDeck();
+	TESFullName name;
+	tList<TESCaravanCard>* cards;
+	UInt32 count;
+};
+STATIC_ASSERT(sizeof(TESCaravanDeck) == 0x2C);

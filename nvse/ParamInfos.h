@@ -553,6 +553,15 @@ static ParamInfo kParams_TwoForms[2] =
 	{	"form",	kParamType_AnyForm,	0	},
 };
 
+static ParamInfo kParams_TwoForms_OneOptionalInt[3] =
+{
+	{	"form",	kParamType_AnyForm,	0	},
+	{	"form",	kParamType_AnyForm,	0	},
+	{	"int",	kParamType_Integer,	1	},
+};
+
+
+
 static ParamInfo kParams_OneForm_OneArray[2] =
 {
 	{	"form",	kParamType_AnyForm,	0	},

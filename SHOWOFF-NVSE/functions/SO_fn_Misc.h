@@ -952,6 +952,99 @@ bool Cmd_GetActorValueName_Execute(COMMAND_ARGS)
 
 #if _DEBUG
 
+
+
+DEFINE_COMMAND_PLUGIN(CaravanDeckGetCards, "", false, kParams_OneForm);
+bool Cmd_CaravanDeckGetCards_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	TESForm* deckForm;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &deckForm) || !IS_TYPE(deckForm, TESCaravanDeck))
+		return true;
+	const auto* deck = static_cast<TESCaravanDeck*>(deckForm);
+	if (deck->cards->Empty())
+		return true;
+	auto data = std::make_unique<ArrayElementL[]>(deck->count);
+	size_t i = 0;
+	for (auto iter = deck->cards->Begin(); !iter.End(); ++iter) {
+		data[i] = iter.Get();
+		i++;
+	}
+	NVSEArrayVar* resArr = g_arrInterface->CreateArray(data.get(), deck->count, scriptObj);
+	g_arrInterface->AssignCommandResult(resArr, result);
+	return true;
+}
+
+DEFINE_COMMAND_PLUGIN(CaravanDeckRemoveCard, "", false, kParams_TwoForms);
+bool Cmd_CaravanDeckRemoveCard_Execute(COMMAND_ARGS)
+{
+	*result = 0; //numRemoved
+	TESForm* deckForm;
+	TESForm* cardForm;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &deckForm, &cardForm) 
+		|| !IS_TYPE(deckForm, TESCaravanDeck) || !IS_TYPE(cardForm, TESCaravanCard))
+	{
+		return true;
+	}
+	auto* deck = static_cast<TESCaravanDeck*>(deckForm);
+	auto* card = static_cast<TESCaravanCard*>(cardForm);
+	if (deck->cards->Empty())
+		return true;
+	*result = deck->cards->Remove(card);
+	deck->count -= *result;
+	return true;
+}
+
+DEFINE_COMMAND_PLUGIN(CaravanDeckAddCard, "", false, kParams_TwoForms_OneOptionalInt);
+bool Cmd_CaravanDeckAddCard_Execute(COMMAND_ARGS)
+{
+	*result = eListInvalid;
+	TESForm* deckForm;
+	TESForm* cardForm;
+	SInt32 n = eListEnd;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &deckForm, &cardForm, &n)
+		|| !IS_TYPE(deckForm, TESCaravanDeck) || !IS_TYPE(cardForm, TESCaravanCard))
+	{
+		return true;
+	}
+	auto* deck = static_cast<TESCaravanDeck*>(deckForm);
+	auto* card = static_cast<TESCaravanCard*>(cardForm);
+	*result = deck->cards->AddAt(card, n);
+	++deck->count;
+	return true;
+}
+
+DEFINE_COMMAND_PLUGIN(CaravanDeckGetCount, "", false, kParams_OneForm);
+bool Cmd_CaravanDeckGetCount_Execute(COMMAND_ARGS)
+{
+	*result = -1;
+	TESForm* deckForm;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &deckForm) || !IS_TYPE(deckForm, TESCaravanDeck) )
+		return true;
+	auto* deck = static_cast<TESCaravanDeck*>(deckForm);
+	*result = deck->count;
+	return true;
+}
+
+DEFINE_COMMAND_PLUGIN(CaravanDeckGetCardIndex, "", false, kParams_TwoForms);
+bool Cmd_CaravanDeckGetCardIndex_Execute(COMMAND_ARGS)
+{
+	*result = eListInvalid;
+	TESForm* deckForm;
+	TESForm* cardForm;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &deckForm, &cardForm)
+		|| !IS_TYPE(deckForm, TESCaravanDeck) || !IS_TYPE(cardForm, TESCaravanCard))
+	{
+		return true;
+	}
+	auto* deck = static_cast<TESCaravanDeck*>(deckForm);
+	auto* card = static_cast<TESCaravanCard*>(cardForm);
+	*result = deck->cards->GetIndexOf(card);
+	return true;
+}
+
+
+
 // Copied from Tweaks
 double dAtan(double value)
 {

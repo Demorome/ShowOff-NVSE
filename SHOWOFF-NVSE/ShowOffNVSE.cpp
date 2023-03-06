@@ -686,6 +686,7 @@ extern "C"
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
 
+		REG_CMD_ARR(CaravanDeckGetCards)
 		REG_CMD_FORM(SetSingleItemRefCurrentHealth)
 
 		REG_CMD(SetFlyCamera)
