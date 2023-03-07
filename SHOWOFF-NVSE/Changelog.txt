@@ -286,7 +286,7 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 //===v1.55
 
 ===Bug Fixes:
-*
+* Fixed GetIngestibleConsumeSound causing a crash if the ingestible has no consume sound.
 
 ===New Functions:
 * Fixed GetEquippedItemRefForItem not working properly with formlists.

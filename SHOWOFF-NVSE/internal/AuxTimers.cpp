@@ -50,7 +50,13 @@ namespace AuxTimer
 
 						if (timer.m_flags & AuxTimerValue::kFlag_IsPaused)
 							continue;
-						
+
+						if (timer.m_flags & AuxTimerValue::kFlag_DontRunWhenPaused)
+						{
+							if (IsConsoleMode() || StartMenu::GetSingleton())
+								continue;
+						}
+							
 						if ((timer.m_flags & AuxTimerValue::kFlag_RunInMenuMode && isMenuMode) 
 							|| (timer.m_flags & AuxTimerValue::kFlag_RunInGameMode && !isMenuMode))
 						{

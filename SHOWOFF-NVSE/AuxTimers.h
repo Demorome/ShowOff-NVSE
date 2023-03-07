@@ -25,6 +25,7 @@ namespace AuxTimer
 			kFlag_AutoRestarts = 1 << 4,
 			kFlag_IsPaused = 1 << 5,
 			kFlag_NotAffectedByTimeMult_InMenuMode = 1 << 6, // if on, seconds-based timers won't be affected by TimeMult in MenuMode.
+			kFlag_DontRunWhenPaused = 1 << 7, // timer pauses when game is paused (main menu, pause menu, console menu).
 		};
 		UInt32 m_flags;
 
