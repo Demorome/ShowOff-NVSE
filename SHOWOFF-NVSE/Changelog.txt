@@ -287,6 +287,7 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 
 ===Bug Fixes:
 * Fixed GetIngestibleConsumeSound causing a crash if the ingestible has no consume sound.
+* Fixed hook for "ShowOff:OnProjectileCreate" causing issues with continuous beam-type projectiles
 
 ===New Functions:
 * Fixed GetEquippedItemRefForItem not working properly with formlists.
