@@ -438,8 +438,12 @@ namespace GetCompassTargets
 	{
 		// Will empty the list.
 		// Replace "call TList__GetSize"
-		WriteRelCall(0x779F7A, (UInt32)GetSize_Hook);
+		WriteRelCall(0x779F6F, (UInt32)GetSize_Hook);
 
+		// Optimize the code by removing a duplicate "call TList__GetSize" call.
+		// Credits to Stewie for the idea.
+		NopFunctionCall(0x779F7A);
+		
 		// Will fill the list.
 		WriteRelCall(0x77A2FA, (UInt32)PropagateIntValue_Hook);
 	}
