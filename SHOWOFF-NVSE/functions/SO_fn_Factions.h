@@ -85,3 +85,24 @@ bool Cmd_SetEnemyTemp_Execute(COMMAND_ARGS)
 	}
 	return true;
 }
+
+/* Kinda redundant with SetReputation, as it turns out
+
+static ParamInfo kParams_OneFaction_OneOptionalInt[] =
+{
+	{	"faction",	kParamType_Faction,	0	},
+	{	"bFame",	kParamType_Integer,	1	},
+};
+
+DEFINE_COMMAND_ALT_PLUGIN(ClearReputation, ResetReputation, , false, kParams_OneFaction_OneOptionalInt);
+bool Cmd_ClearReputation_Execute(COMMAND_ARGS)
+{
+	TESFaction* faction;
+	UInt32 bFame = -1; // -1 = clear both reps. 0 = clear infamy. 1 = clear fame
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &faction, &bFame) && faction)
+	{
+		
+	}
+	return true;
+}
+*/

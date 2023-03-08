@@ -668,8 +668,7 @@ extern "C"
 		/*3D45*/	REG_CMD(AuxTimerTimeLeft)
 		/*3D46*/	REG_CMD(SetOnAuxTimerStartHandler)
 		/*3D47*/	REG_CMD(SetOnAuxTimerStopHandler)
-		/*3D48*/	REG_CMD(ClearShowoffSavedData)  //todo: fix not working for aux stringMaps.
-		
+		/*3D48*/	REG_CMD(ClearShowoffSavedData)  //todo: fix not working for aux stringMaps.		
 	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
