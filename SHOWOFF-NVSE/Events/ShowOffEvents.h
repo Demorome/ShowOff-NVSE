@@ -137,7 +137,9 @@ namespace CornerMessageHooks
 			cornerMessageHookJmpSrc.erase(
 				std::find(cornerMessageHookJmpSrc.begin(), cornerMessageHookJmpSrc.end(), tweakConflictAddr)
 			);
-			_MESSAGE("Conflict detected with (presumably) Tweaks, preventing hook from being installed at %x", tweakConflictAddr);
+#if _DEBUG
+			_DMESSAGE("Conflict detected with (presumably) Tweaks, preventing hook from being installed at %x", tweakConflictAddr);
+#endif
 		}
 		
 		for (auto const jmpSrc : cornerMessageHookJmpSrc)
