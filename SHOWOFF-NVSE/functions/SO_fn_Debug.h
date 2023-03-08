@@ -84,6 +84,7 @@ bool Cmd_IsOutsideMainThread_Execute(COMMAND_ARGS)
 DEFINE_COMMAND_PLUGIN(RefillPlayerAmmo, "", false, kParams_OneInt);
 bool Cmd_RefillPlayerAmmo_Execute(COMMAND_ARGS)
 {
+	*result = 0; // bSuccess
 	SInt32 count;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &count))
 		return true;
@@ -97,7 +98,8 @@ bool Cmd_RefillPlayerAmmo_Execute(COMMAND_ARGS)
 	const auto regenRate = ThisStdCall<double>(0x709430, weap, weapInfo->HasWeaponMod(TESObjectWEAP::kWeaponModEffect_RegenerateAmmo_Seconds));
 	if (regenRate > 0)
 	{
-		Console_Print("Cannot refill a weapon with an ammo regen per second!");
+		if (IsConsoleMode())
+			Console_Print("Cannot refill a weapon with an ammo regen per second!");
 		return true;
 	}
 
@@ -117,8 +119,11 @@ bool Cmd_RefillPlayerAmmo_Execute(COMMAND_ARGS)
 	}
 	else
 	{
-		Console_Print("Unable to find default ammo for the weapon!");
+		if (IsConsoleMode())
+			Console_Print("Unable to find default ammo for the weapon!");
+		return true;
 	}
+	*result = 1;
 	return true;
 }
 
