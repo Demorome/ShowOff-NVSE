@@ -1112,7 +1112,7 @@ namespace OnAddAlt
 	void HandleEvent(TESObjectREFR* newOwner, TESObjectREFR* itemRef)
 	{
 		g_AddedItemRef = itemRef;
-		g_eventInterface->DispatchEvent(eventName, nullptr, itemRef->baseForm, newOwner);
+		g_eventInterface->DispatchEvent(eventName, itemRef, itemRef->baseForm, newOwner);
 		g_AddedItemRef = nullptr;
 	}
 

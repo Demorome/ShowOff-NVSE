@@ -305,7 +305,7 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 
 //===v1.60
 ===Bug Fixes:
-* 
+* Removed confusing hook conflict detection msg related to Tweaks.
 
 ===New Functions:
 *
