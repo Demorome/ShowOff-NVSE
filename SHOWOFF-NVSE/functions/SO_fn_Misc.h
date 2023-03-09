@@ -938,7 +938,88 @@ bool Cmd_GetActorValueName_Execute(COMMAND_ARGS)
 	return true;
 }
 
+enum AmmoNameType
+{
+	kAmmoName_Full = 0,
+	kAmmoName_Short,
+	kAmmoName_Abbreviation
+};
 
+// Copied a bit from xNVSE's SetName
+DEFINE_COMMAND_PLUGIN(SetAmmoName, "", false, kParams_OneString_OneOptionalInt_OneOptionalForm);
+bool Cmd_SetAmmoName_Execute(COMMAND_ARGS)
+{
+	*result = 0; // success
+	char string[256];
+	UInt32 nameTypeToChange = 0;
+	TESForm* form = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &string, &nameTypeToChange, &form))
+		return true;
+
+	form = form->TryGetREFRParent();
+	if (!form) {
+		if (!thisObj) return true;
+		form = thisObj->baseForm;
+	}
+	if (!IS_TYPE(form, TESAmmo))
+		return true;
+
+	*result = 1;
+	if (nameTypeToChange == kAmmoName_Full) {
+		if (TESFullName* name = form->GetFullName()) {
+			name->name.Set(string);
+		}
+	}
+	else if (nameTypeToChange == kAmmoName_Short) {
+		((TESAmmo*)form)->shortName.Set(string);
+	}
+	else if (nameTypeToChange == kAmmoName_Abbreviation) {
+		((TESAmmo*)form)->abbreviation.Set(string);
+	}
+	else
+		*result = 0;
+	return true;
+}
+
+// Copied a bit from xNVSE's GetName
+DEFINE_COMMAND_PLUGIN(GetAmmoName, "", false, kParams_OneOptionalInt_OneOptionalForm);
+bool Cmd_GetAmmoName_Execute(COMMAND_ARGS)
+{
+	const char* name = ""; // result
+
+	UInt32 nameTypeToChange = 0;
+	TESForm* form = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &nameTypeToChange, &form))
+	{
+		form = form->TryGetREFRParent();
+		if (!form) {
+			if (!thisObj) return true;
+			form = thisObj->baseForm;
+		}
+		if (!IS_TYPE(form, TESAmmo))
+			return true;
+
+		String* nameString = nullptr;
+		if (nameTypeToChange == kAmmoName_Full) {
+			if (TESFullName* name = form->GetFullName()) {
+				nameString = &name->name;
+			}
+		}
+		else if (nameTypeToChange == kAmmoName_Short) {
+			nameString = &((TESAmmo*)form)->shortName;
+		}
+		else if (nameTypeToChange == kAmmoName_Abbreviation) {
+			nameString = &((TESAmmo*)form)->abbreviation;
+		}
+
+		if (nameString && nameString->m_data && nameString->m_dataLen)
+			name = nameString->m_data;
+		else
+			name = "<no name>"; // mimick xNVSE's GetFullName
+	}
+	g_strInterface->Assign(PASS_COMMAND_ARGS, name);
+	return true;
+}
 
 
 

@@ -162,6 +162,12 @@ static ParamInfo kParams_OneString_OneArray_OneOptionalInt[3] =
 	{	"int",		kParamType_Integer,	1 },
 };
 
+
+static ParamInfo kParams_OneOptionalInt_OneOptionalForm[2] =
+{
+	{	"int",		kParamType_Integer,	1 },
+	{	"form",		kParamType_AnyForm,	1 },
+};
 static ParamInfo kParams_OneString_OneOptionalInt_OneOptionalForm[3] =
 {
 	{	"string",	kParamType_String,	0 },

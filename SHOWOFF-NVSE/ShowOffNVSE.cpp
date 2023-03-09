@@ -669,6 +669,10 @@ extern "C"
 		/*3D46*/	REG_CMD(SetOnAuxTimerStartHandler)
 		/*3D47*/	REG_CMD(SetOnAuxTimerStopHandler)
 		/*3D48*/	REG_CMD(ClearShowoffSavedData)  //todo: fix not working for aux stringMaps.		
+
+		//========v1.60
+		/*3D49*/	REG_CMD(SetAmmoName)
+		/*3D4A*/	REG_CMD_STR(GetAmmoName)
 	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
