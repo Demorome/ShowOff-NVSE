@@ -1237,10 +1237,37 @@ bool Cmd_GetAddedItemRefShowOff_Execute(COMMAND_ARGS)
 	return true;
 }
 
+// TODO
 namespace OnDropAlt
 {
 	constexpr char eventName[] = "ShowOff:OnDrop";
 
+}
+
+namespace OnReadBook
+{
+	constexpr char eventName[] = "ShowOff:OnReadBook";
+
+	CallDetour g_detour;
+
+	void __cdecl Hook(MiscStatCode code)
+	{
+		// do regular code
+		CdeclCall(g_detour.GetOverwrittenAddr(), code);
+
+		// our code
+		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+		auto* book = *reinterpret_cast<TESObjectBOOK**>(ebp - 0x28);
+		auto* reader = *reinterpret_cast<Actor**>(ebp + 8);
+
+		g_eventInterface->DispatchEvent(eventName, reader, book);
+	}
+
+	void WriteDelayedHook()
+	{
+		// replace "call IncPCMiscStat"
+		g_detour.WriteRelCall(0x515195, (UInt32)Hook);
+	}
 }
 
 using EventFlags = NVSEEventManagerInterface::EventFlags;
@@ -1294,8 +1321,9 @@ void RegisterEvents()
 	RegisterEvent(OnDisplayOrCompleteObjective::onDisplayName, kEventParams_OneBaseForm_OneInt);
 	RegisterEvent(OnDisplayOrCompleteObjective::onCompleteName, kEventParams_OneBaseForm_OneInt);
 
-	//TODO: document!
+	// v1.60
 	RegisterEvent(OnAddAlt::eventName, kEventParams_OneBaseForm_OneReference);
+	RegisterEvent(OnReadBook::eventName, kEventParams_OneBaseForm);
 
 	#if _DEBUG
 
@@ -1347,6 +1375,7 @@ namespace HandleHooks
 		CornerMessageHooks::WriteDelayedHook();
 		OnDisplayOrCompleteObjective::WriteDelayedHook();
 		OnCalculateSellPrice::WriteDelayedHook();
+		OnReadBook::WriteDelayedHook();
 #if _DEBUG
 #endif
 	}

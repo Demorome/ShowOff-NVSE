@@ -47,6 +47,7 @@ enum
 	kInterface_Data,
 	// Added v0006
 	kInterface_EventManager,
+	kInterface_Logging,
 
 	kInterface_Max
 };
@@ -1358,4 +1359,19 @@ struct PluginTokenSlice
 	double			m_lower;
 	std::string		m_lowerStr;
 	std::string		m_upperStr;
+};
+
+// Added in 6.3.0
+struct NVSELoggingInterface
+{
+	enum {
+		kVersion = 1
+	};
+
+	// Use the returned string to determine where to output plugin logs.
+	// Value is determined in nvse_config.ini, under [Logging]: "sPluginLogPath".
+	// The path is relative to base game folder.
+	// If empty string (logPath[0] == 0), use the base game folder.
+	// The returned string will never be nullptr.
+	const char* (__fastcall* GetPluginLogPath)();
 };

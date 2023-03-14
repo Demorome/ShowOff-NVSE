@@ -37,7 +37,7 @@
 
 
 // Plugin Stuff
-IDebugLog g_Log("ShowOffNVSE.log");
+IDebugLog g_Log; // file will be open after NVSE plugin load
 HMODULE	g_ShowOffHandle;
 constexpr UInt32 g_PluginVersion = 155;
 
@@ -320,7 +320,6 @@ extern "C"
 			char buffer[100];
 			sprintf_s(buffer, 100,"NVSE version too old (got %08X expected at least %08X)", nvse->nvseVersion, PACKED_NVSE_VERSION);
 			MessageBoxA(nullptr, buffer, "ShowOff", MB_ICONEXCLAMATION);  //MessageBoxA usage style copied from lStewieAl.
-			_ERROR("%s", buffer);
 			return false;
 		}
 		
@@ -331,7 +330,6 @@ extern "C"
 				char buffer[100];
 				sprintf_s(buffer, 100, "Incorrect runtime version (got %08X need at least %08X)", nvse->runtimeVersion, RUNTIME_VERSION_1_4_0_525);
 				MessageBoxA(nullptr, buffer, "ShowOff", MB_ICONEXCLAMATION);
-				_ERROR("%s", buffer);
 				return false;
 			}
 
@@ -339,7 +337,6 @@ extern "C"
 			{
 				char buffer[] = "NoGore is not supported";
 				MessageBoxA(nullptr, buffer, "ShowOff", MB_ICONEXCLAMATION);
-				_ERROR("%s", buffer);
 				return false;
 			}
 		}
@@ -350,7 +347,6 @@ extern "C"
 				char buffer[100];
 				sprintf_s(buffer, 100, "Incorrect editor version (got %08X, need at least %08X)", nvse->editorVersion, CS_VERSION_1_4_0_518);
 				MessageBoxA(nullptr, buffer, "ShowOff", MB_ICONEXCLAMATION);
-				_ERROR("%s", buffer);
 				return false;
 			}
 		}
@@ -362,6 +358,17 @@ extern "C"
 
 	bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	{
+		// register to receive messages from NVSE
+		((NVSEMessagingInterface*)nvse->QueryInterface(kInterface_Messaging))->RegisterListener(nvse->GetPluginHandle(), "NVSE", MessageHandler);
+
+		{ 
+			// set up log file
+			auto* logItf = (NVSELoggingInterface*)nvse->QueryInterface(kInterface_Logging);
+			std::string logPath = logItf->GetPluginLogPath();
+			logPath += "ShowOffNVSE.log";
+			g_Log.Open(logPath.c_str());
+		}
+
 		if (nvse->isEditor)
 		{
 			_MESSAGE("ShowOffNVSE Loaded successfully (Editor).\nShowOffNVSE plugin version: %u\n", g_PluginVersion);
@@ -370,10 +377,7 @@ extern "C"
 		{
 			_MESSAGE("ShowOffNVSE Loaded successfully (In-Game).\nShowOffNVSE plugin version: %u\n", g_PluginVersion);
 		}
-		
-		// register to receive messages from NVSE
-		((NVSEMessagingInterface*)nvse->QueryInterface(kInterface_Messaging))->RegisterListener(nvse->GetPluginHandle(), "NVSE", MessageHandler);
-
+	
 		if (!nvse->isEditor) 
 		{
 			PluginHandle const nvsePluginHandle = nvse->GetPluginHandle();  //from JiPLN

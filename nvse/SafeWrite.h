@@ -2,6 +2,9 @@
 
 #include <intrin.h>
 
+#define __HOOK __declspec(naked) void
+// Credits to Kormakur for the idea.
+
 void __stdcall SafeWrite8(UInt32 addr, UInt32 data);
 void __stdcall SafeWrite16(UInt32 addr, UInt32 data);
 void __stdcall SafeWrite32(UInt32 addr, UInt32 data);
@@ -39,7 +42,7 @@ UInt32 GetRelJumpAddr(UInt32 jumpSrc);
 
 UInt8* GetParentBasePtr(void* addressOfReturnAddress, bool lambda = false);
 
-// Stores the function-to-call before overwriting it, to call the overwritten function after our hook is over.
+// Stores the function-to-call before overwriting it, to allow calling the overwritten function after our hook is over.
 class CallDetour
 {
 	UInt32 overwritten_addr = 0;
