@@ -1,4 +1,4 @@
-# Showoff-NVSE
+# ShowOff-NVSE
 An NVSE plugin which adds new functions, as well as some engine-level tweaks.\
 For heathens who have forsaken the Vanilla-Style way. 
 
