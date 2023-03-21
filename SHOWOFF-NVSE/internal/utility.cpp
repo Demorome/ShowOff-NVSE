@@ -1733,8 +1733,6 @@ TESActorBase* Actor::GetActorBase()
 	return (xLvlCre && xLvlCre->form) ? (TESActorBase*)xLvlCre->form : (TESActorBase*)baseForm;
 }
 
-
-
 __declspec(naked) TESObjectCELL* TESObjectREFR::GetParentCell()
 {
 	__asm
@@ -1753,35 +1751,72 @@ __declspec(naked) TESObjectCELL* TESObjectREFR::GetParentCell()
 	}
 }
 
+
+TESBipedModelForm* CastFormToBipedModel(TESForm* form)
+{
+	if (!form) return nullptr;
+	switch (form->typeID)
+	{
+	case kFormType_TESObjectARMO:
+		auto armo = (TESObjectARMO*)form;
+		return &armo->bipedModel;
+
+	case kFormType_TESObjectARMA:
+		auto arma = (TESObjectARMA*)form;
+		return &arma->bipedModel;
+
+	case kFormType_TESObjectCLOT:
+		auto clot = (TESObjectCLOT*)form;
+		return &clot->bipedModel;
+	}
+	return nullptr;
+}
+
+TESRace* CastFormToRace(TESForm* form)
+{
+	if (!form) return nullptr;
+	switch (form->typeID)
+	{
+	case kFormType_TESRace:
+		return (TESRace*)form;
+
+	case kFormType_TESNPC:
+		auto npc = (TESNPC*)form;
+		return npc->race.race;
+	}
+	return nullptr;
+}
+
 // Copied after NVSE's IsPlayable
 bool IsFormPlayable(TESForm* form)
 {
-	TESBipedModelForm* biped = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
+	TESBipedModelForm* biped = CastFormToBipedModel(form);
 	if (biped)
 		return biped->IsPlayable();
-	TESObjectWEAP* weap = DYNAMIC_CAST(form, TESForm, TESObjectWEAP);
-	if (weap)
-		return weap->IsPlayable();
-	TESAmmo* ammo = DYNAMIC_CAST(form, TESForm, TESAmmo);
-	if (ammo)
-		return ammo->IsPlayable();
-	TESRace* race = DYNAMIC_CAST(form, TESForm, TESRace);
-	if (race)
+
+	if (IS_TYPE(form, TESObjectWEAP))
+		return ((TESObjectWEAP*)form)->IsPlayable();
+
+	if (IS_TYPE(form, TESAmmo))
+		return ((TESAmmo*)form)->IsPlayable();
+
+	if (auto race = CastFormToRace(form))
 		return race->IsPlayable();
+
 	return true;
 }
 
 bool IsItemPlayable(TESForm* form)
 {
-	TESBipedModelForm* biped = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
-	if (biped)
+	if (auto biped = CastFormToBipedModel(form))
 		return biped->IsPlayable();
-	TESObjectWEAP* weap = DYNAMIC_CAST(form, TESForm, TESObjectWEAP);
-	if (weap)
-		return weap->IsPlayable();
-	TESAmmo* ammo = DYNAMIC_CAST(form, TESForm, TESAmmo);
-	if (ammo)
-		return ammo->IsPlayable();
+
+	if (IS_TYPE(form, TESObjectWEAP))
+		return ((TESObjectWEAP*)form)->IsPlayable();
+
+	if (IS_TYPE(form, TESAmmo))
+		return ((TESAmmo*)form)->IsPlayable();
+
 	return true;
 }
 
@@ -1790,7 +1825,7 @@ short GetEquipType(TESForm* form)  // Ammo is not equip-able in the same sense a
 	if (IS_TYPE(form, TESObjectWEAP)) {
 		return kEquipType_Weapon;
 	}
-	if (DYNAMIC_CAST(form, TESForm, TESBipedModelForm)) {
+	if (CastFormToBipedModel(form)) {
 		return kEquipType_Armor;
 	}
 	return false;
@@ -1798,12 +1833,11 @@ short GetEquipType(TESForm* form)  // Ammo is not equip-able in the same sense a
 
 bool IsEquipableItemPlayable(TESForm* form)  // Ammo is not equip-able in the same sense.
 {
-	TESBipedModelForm* biped = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
+	TESBipedModelForm* biped = CastFormToBipedModel(form);
 	if (biped)
 		return biped->IsPlayable();
-	TESObjectWEAP* weap = DYNAMIC_CAST(form, TESForm, TESObjectWEAP);
-	if (weap)
-		return weap->IsPlayable();
+	if (IS_TYPE(form, TESObjectWEAP))
+		return ((TESObjectWEAP*)form)->IsPlayable();
 	return true;
 }
 
@@ -1816,7 +1850,7 @@ UInt32 GetFormEquipSlotMask(TESForm* form)
 	}
 	else
 	{
-		TESBipedModelForm* pBip = DYNAMIC_CAST(form, TESForm, TESBipedModelForm);
+		TESBipedModelForm* pBip = CastFormToBipedModel(form);
 		if (pBip)
 			equipSlotMask = pBip->partMask;
 	}

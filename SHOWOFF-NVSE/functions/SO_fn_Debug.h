@@ -127,6 +127,23 @@ bool Cmd_RefillPlayerAmmo_Execute(COMMAND_ARGS)
 	return true;
 }
 
+
+DEFINE_COMMAND_PLUGIN(KillAllHostiles, "", false, kParams_OneOptionalActorRef);
+bool Cmd_KillAllHostiles_Execute(COMMAND_ARGS)
+{
+	Actor* killer = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &killer))
+		return true;
+	for (auto iter = g_thePlayer->compassTargets->Begin(); !iter.End(); ++iter) {
+		PlayerCharacter::CompassTarget* target = iter.Get();
+		if (target->isHostile && target->target) {
+			target->target->Kill(static_cast<Actor*>(killer));
+		}
+	}
+	return true;
+}
+
+
 // TODO
 DEFINE_COMMAND_ALT_PLUGIN(SetFlyCamera, SetFC, "", false, kParams_OneInt_FiveOptionalFloats);
 bool Cmd_SetFlyCamera_Execute(COMMAND_ARGS)

@@ -308,7 +308,8 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 * Removed confusing hook conflict detection msg related to Tweaks.
 
 ===New Functions:
-*
+* Get/SetAmmoName
+* KillAllHostiles
 
 ===Function changes:
 * RefillPlayerAmmo now only shows error console messages if console is open, and returns 1/0 for success.

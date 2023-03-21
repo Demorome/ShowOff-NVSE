@@ -677,6 +677,7 @@ extern "C"
 		//========v1.60
 		/*3D49*/	REG_CMD(SetAmmoName)
 		/*3D4A*/	REG_CMD_STR(GetAmmoName)
+		/*3D4B*/	REG_CMD(KillAllHostiles)
 	
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		

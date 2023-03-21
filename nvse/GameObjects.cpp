@@ -194,6 +194,11 @@ bool Actor::IsInvisible()
 	return (avOwner.GetActorValueInt(kAVCode_Invisibility) > 0) || (avOwner.GetActorValueInt(kAVCode_Chameleon) > 0);
 }
 
+void Actor::Kill(Actor* killer)
+{
+	ThisStdCall<void>(0x89D900, this, killer, 0.0f);
+}
+
 SInt32 Actor::GetDetectionLevelAlt(Actor* target, bool calculateSneakLevel)
 {
 	bool isTargetInCombat;
