@@ -727,6 +727,7 @@ public:
 	SInt32 GetDetectionLevelAlt(Actor* target, bool calculateSneakLevel);
 	bool Detects(Actor* target);
 	float GetHealthEffectsSum();
+	void Kill(Actor* killer);
 };
 
 // 1C0
