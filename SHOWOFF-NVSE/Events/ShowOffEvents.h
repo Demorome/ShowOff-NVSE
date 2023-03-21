@@ -1270,6 +1270,49 @@ namespace OnReadBook
 	}
 }
 
+namespace OnDispositionChange
+{
+	constexpr char eventName[] = "ShowOff:OnDispositionChange";
+
+	CallDetour g_detour;
+
+	int __fastcall HandleEvent(int dispMod, void* edx)
+	{
+		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+		auto* actor = *reinterpret_cast<Actor**>(ebp - 0x20);
+
+		if (dispMod) // if any changes are made
+			g_eventInterface->DispatchEvent(eventName, actor, dispMod);
+
+		// ensure EAX is still what it should be.
+		return dispMod;
+	}
+
+	__HOOK TruncateFloat_Hook()
+	{
+		__asm
+		{
+			// call what would be TruncateFloat
+			call	g_detour.overwritten_addr
+
+			// result in EAX (int)
+			mov		ecx, eax
+			call	HandleEvent
+
+			retn
+		}
+	}
+
+	void WriteDelayedHooks()
+	{
+		// Replace TruncateFloat calls
+		g_detour.WriteRelCall(0x87FC3A, (UInt32)TruncateFloat_Hook);
+
+		// Don't bother saving the likely identical call function addr.
+		WriteRelCall(0x87FC73, (UInt32)TruncateFloat_Hook);
+	}
+}
+
 using EventFlags = NVSEEventManagerInterface::EventFlags;
 
 template<UInt8 N>
@@ -1324,6 +1367,7 @@ void RegisterEvents()
 	// v1.60
 	RegisterEvent(OnAddAlt::eventName, kEventParams_OneBaseForm_OneReference);
 	RegisterEvent(OnReadBook::eventName, kEventParams_OneBaseForm);
+	RegisterEvent(OnDispositionChange::eventName, kEventParams_OneInt);
 
 	#if _DEBUG
 
@@ -1376,6 +1420,7 @@ namespace HandleHooks
 		OnDisplayOrCompleteObjective::WriteDelayedHook();
 		OnCalculateSellPrice::WriteDelayedHook();
 		OnReadBook::WriteDelayedHook();
+		OnDispositionChange::WriteDelayedHooks();
 #if _DEBUG
 #endif
 	}

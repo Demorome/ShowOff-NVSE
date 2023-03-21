@@ -313,6 +313,10 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 ===Function changes:
 * RefillPlayerAmmo now only shows error console messages if console is open, and returns 1/0 for success.
 
+===New Events:
+* "ShowOff:OnReadBook"
+* "ShowOff:OnDispositionChange"
+* "ShowOff:OnAdd"
 
 ====== (Template:)
 
