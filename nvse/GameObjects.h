@@ -92,7 +92,7 @@ public:
 	virtual void		Unk_82(void);
 	virtual UInt32		Unk_83(void);
 	virtual void		Unk_84(UInt32 arg0);
-	virtual UInt32		Unk_85(void);			
+	virtual UInt32		Unk_85(void);
 	virtual bool		IsCharacter();			// return false for Actor and Creature, true for character and PlayerCharacter
 	virtual bool		IsCreature();
 	virtual bool		IsExplosion();
@@ -113,7 +113,7 @@ public:
 		kFlags_Temporary			= 0x00004000,
 		kFlags_IgnoreFriendlyHits	= 0x00100000,
 		kFlags_Destroyed			= 0x00800000,
-		
+
 		kChanged_Inventory			= 0x08000000,
 	};
 
@@ -142,10 +142,10 @@ public:
 	TESSound		*loopSound;				// 01C
 
 	TESForm			*baseForm;				// 020
-	
+
 	float			rotX, rotY, rotZ;		// 024 - either public or accessed via simple inline accessor common to all child classes
 	float			posX, posY, posZ;		// 030 - seems to be private
-	float			scale;					// 03C 
+	float			scale;					// 03C
 
 	TESObjectCELL	*parentCell;			// 040
 	ExtraDataList	extraDataList;			// 044
@@ -266,7 +266,7 @@ public:
 	virtual void		Unk_BE(void);
 	virtual void		Unk_BF(void);
 	virtual void		Unk_C0(void);
-	
+
 	BaseProcess		*baseProcess;	// 68
 	UInt32			unk6C;			// 6C - loaded
 	TESObjectREFR	*unk70;			// 70 - loaded
@@ -389,7 +389,7 @@ public:
 		//	Running		0x200
 		//	Sneaking	0x400
 
-		// bit 11 = swimming 
+		// bit 11 = swimming
 		// bit 9 = sneaking
 		// bit 8 = run
 		// bit 7 = walk
@@ -570,7 +570,7 @@ public:
 	virtual void		Unk_134(void);
 	virtual void		Unk_135(void);
 	virtual void		Unk_136(void);
-	
+
 	MagicCaster			magicCaster;			// 088
 	MagicTarget			magicTarget;			// 094
 	ActorValueOwner		avOwner;				// 0A4
@@ -677,7 +677,7 @@ public:
 	UInt8								byte1B2;					// 1B2
 	UInt8								byte1B3;					// 1B3
 
-	// OBSE: unk1 looks like quantity, usu. 1; ignored for ammo (equips entire stack). In NVSE, pretty much always forced internally to 1 
+	// OBSE: unk1 looks like quantity, usu. 1; ignored for ammo (equips entire stack). In NVSE, pretty much always forced internally to 1
 	// OBSE: itemExtraList is NULL as the container changes entry is not resolved before the call
 	// NVSE: Default values are those used by the vanilla script functions.
 	void EquipItem(TESForm *objType, UInt32 equipCount = 1, ExtraDataList *itemExtraList = NULL, UInt32 unk3 = 1, bool lockEquip = false, UInt32 unk5 = 1);	// unk3 apply enchantment on player differently
@@ -1018,7 +1018,7 @@ public:
 	UInt8								byteE3B;				// E3B
 	BSSimpleArray<TESAmmo*>				pcAmmo;					// E3C
 	UInt32								unkE4C;					// E4C
-		// 7C6 is a boolean meaning toddler, 
+		// 7C6 is a boolean meaning toddler,
 		// 7C7 byte bool PCCanUsePowerArmor, Byt0E39 referenced during LoadGame
 		// Used by TFC : 7E8/EC/F0 stores Pos, 7F0 adjusted by scaledHeight , 7E0 stores RotZ, 7E4 RotX
 		// Quest Stage LogEntry at 6B0.

@@ -226,7 +226,7 @@ SInt32 Actor::GetDetectionLevelAlt(Actor* target, bool calculateSneakLevel)
 		isTargetInCombat = target->isInCombat;
 
 	bool out = false;  // throwaway variable to reference.
-	
+
 	// SInt32 __thiscall Actor_GetDetected(Actor *this, bool calculateSneakLevel, Actor *toDetect, int *out, char a5, bool isTargetInCombat, int a7, int a8)
 	return ThisStdCall<SInt32>(0x8A0D10, this, calculateSneakLevel, target, &out, 0, isTargetInCombat, 0, 0);
 }

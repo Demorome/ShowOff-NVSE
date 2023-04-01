@@ -6,7 +6,7 @@ bool Cmd_DumpFormList_Execute(COMMAND_ARGS)
 	BGSListForm* FList = nullptr;
 	char fileName[MAX_PATH] = "default";
 	UInt32 bAppend = 1;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &FList, &fileName, &bAppend) 
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &FList, &fileName, &bAppend)
 		|| !IS_TYPE(FList, BGSListForm)) return true;
 
 	if (strcmp(fileName, "default") == 0)  //if they are the same, i.e. filepathStr was not passed.
@@ -20,8 +20,8 @@ bool Cmd_DumpFormList_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_CMD_COND_PLUGIN(ConditionPrint, 
-	"Returns 1, and prints a message to console. Meant for testing if previous conditions passed.", 
+DEFINE_CMD_COND_PLUGIN(ConditionPrint,
+	"Returns 1, and prints a message to console. Meant for testing if previous conditions passed.",
 	false, NULL);
 //Would be cool if this could return whatever is calling this condition, or at what address etc..
 bool Cmd_ConditionPrint_Execute(COMMAND_ARGS)
@@ -51,7 +51,7 @@ bool Cmd_GetShowOffDebugMode_Execute(COMMAND_ARGS)
 	*result = g_ShowFuncDebug;
 	return true;
 }
-DEFINE_COMMAND_PLUGIN(SetShowOffDebugMode, "Set to 1 to enable debug prints for certain ShowOff functions.", 
+DEFINE_COMMAND_PLUGIN(SetShowOffDebugMode, "Set to 1 to enable debug prints for certain ShowOff functions.",
 	false, kParams_OneInt);
 bool Cmd_SetShowOffDebugMode_Execute(COMMAND_ARGS)
 {
@@ -88,7 +88,7 @@ bool Cmd_RefillPlayerAmmo_Execute(COMMAND_ARGS)
 	SInt32 count;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &count))
 		return true;
-	
+
 	const auto weapInfo = g_thePlayer->baseProcess->GetWeaponInfo();
 	if (!weapInfo)
 		return true;
@@ -179,7 +179,7 @@ bool Cmd_SetFlyCamera_Execute(COMMAND_ARGS)
 	/*
 	double pos[3] = { g_thePlayer->posX, g_thePlayer->posY,
 		g_thePlayer->posZ + (g_thePlayer->GetScaledHeight() * g_thePlayer->eyeHeight) };
-	double rot[2] = { g_thePlayer->rotZ, g_thePlayer->rotX }; 
+	double rot[2] = { g_thePlayer->rotZ, g_thePlayer->rotX };
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &mode, &pos, &rot))
 		return true;
 	*/
