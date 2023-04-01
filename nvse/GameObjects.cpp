@@ -5,6 +5,7 @@
 #include "GameExtraData.h"
 #include "GameTasks.h"
 #include "GameUI.h"
+#include "SafeWrite.h"
 
 ScriptEventList *TESObjectREFR::GetEventList() const
 {
@@ -197,6 +198,23 @@ bool Actor::IsInvisible()
 void Actor::Kill(Actor* killer)
 {
 	ThisStdCall<void>(0x89D900, this, killer, 0.0f);
+}
+
+bool Actor::GetShouldAttack(Actor* target)
+{
+	// Check out 0x59ED30
+	if (!target)
+		return false;
+
+	if (target->isInCombat && target->GetCombatController())
+	{
+		// CombatManager_992640
+		if (ThisStdCall_B(0x992640, *(void**)0x11F1958, this, target)) // 0x11F1958 = g_combatManager
+			return false;
+	}
+	// call Actor::GetShouldAttack
+	int factionRelation_Out;
+	return ThisStdCall_B(0x8B06D0, this, target, 0, &factionRelation_Out, 0);
 }
 
 SInt32 Actor::GetDetectionLevelAlt(Actor* target, bool calculateSneakLevel)

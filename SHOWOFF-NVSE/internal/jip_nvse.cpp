@@ -69,7 +69,7 @@ float GetDistance3D(TESObjectREFR* ref1, TESObjectREFR* ref2)
 	return GetAxisDistance(ref1, ref2, 7);
 }
 
-__declspec(naked) bool Actor::IsInCombatWith(Actor* target)
+__declspec(naked) bool __fastcall Actor::IsInCombatWith(Actor* target) const
 {
 	__asm
 	{
@@ -78,23 +78,20 @@ __declspec(naked) bool Actor::IsInCombatWith(Actor* target)
 		jz		done
 		mov		ecx, [eax + 4]
 		mov		eax, [eax + 8]
-		mov		edx, [esp + 4]
 		test	eax, eax
-		jnz		iterHead
-		done :
-		retn	4
-			lea		esp, [esp]
-			fnop
-			iterHead :
+		jz		done
+		ALIGN 16
+		iterHead:
 		cmp[ecx], edx
 			jz		rtnTrue
 			add		ecx, 4
 			dec		eax
 			jnz		iterHead
-			retn	4
-			rtnTrue:
+			retn
+			rtnTrue :
 		mov		al, 1
-			retn	4
+			done :
+			retn
 	}
 }
 

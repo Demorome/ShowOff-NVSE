@@ -496,6 +496,7 @@ struct ProcessManager
 	UInt32					unk088[54];			// 088
 
 	int GetTotalDetectionValue(Actor *actor, bool arg2 = false);
+	static ProcessManager* GetSingleton() { {return (ProcessManager*)0x11E0E80; } } // copied from JIP
 };
 
 struct DetectionData

@@ -701,7 +701,11 @@ public:
 	UInt8 EquippedWeaponHasMod(UInt8 modID);
 	bool IsSneaking();
 	void StopCombat();
-	bool IsInCombatWith(Actor *target);
+
+	// if "this" is the player, won't work properly!
+	// See JIP's Cmd_IsInCombatWith
+	bool __fastcall IsInCombatWith(Actor* target) const;
+
 	int GetDetectionValue(Actor *detected);
 	TESPackage *GetStablePackage();
 	PackageInfo *GetPackageInfo();
@@ -728,6 +732,7 @@ public:
 	bool Detects(Actor* target);
 	float GetHealthEffectsSum();
 	void Kill(Actor* killer);
+	bool GetShouldAttack(Actor* target);
 };
 
 // 1C0

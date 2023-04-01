@@ -127,17 +127,27 @@ bool Cmd_RefillPlayerAmmo_Execute(COMMAND_ARGS)
 	return true;
 }
 
-
+// Copied JIP's GetActorsByProcessingLevel code
 DEFINE_COMMAND_PLUGIN(KillAllHostiles, "", false, kParams_OneOptionalActorRef);
 bool Cmd_KillAllHostiles_Execute(COMMAND_ARGS)
 {
 	Actor* killer = nullptr;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &killer))
 		return true;
-	for (auto iter = g_thePlayer->compassTargets->Begin(); !iter.End(); ++iter) {
-		PlayerCharacter::CompassTarget* target = iter.Get();
-		if (target->isHostile && target->target) {
-			target->target->Kill(static_cast<Actor*>(killer));
+	ProcessManager* procMngr = ProcessManager::GetSingleton();
+	MobileObject** objArray = procMngr->objects.data, ** arrEnd = objArray;
+	objArray += procMngr->beginOffsets[0];
+	arrEnd += procMngr->endOffsets[0];
+	for (; objArray != arrEnd; objArray++)
+	{
+		auto actor = static_cast<Actor*>(*objArray);
+		if (actor && IS_ACTOR(actor))
+		{
+			if (actor->IsInCombatWith(g_thePlayer)
+				|| actor->GetShouldAttack(g_thePlayer))
+			{
+				actor->Kill(killer);
+			}
 		}
 	}
 	return true;

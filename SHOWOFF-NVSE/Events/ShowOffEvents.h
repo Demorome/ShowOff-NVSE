@@ -399,6 +399,8 @@ namespace PreActivateInventoryItem
 		}
 	}
 
+	// TODO: hook here as well - 0x88C650, 0x88C790
+	// BUT make sure it won't run twice w/ hook at 0x7805CC
 	void WriteHooks()
 	{
 		// Replace "call InventoryMenu::HandleEquipOrUnEquip"
@@ -408,6 +410,7 @@ namespace PreActivateInventoryItem
 		WriteRelCall(0x780648, (UInt32)HookOnClickAmmo);
 
 		// Replace "call TESForm::GetFlags(entry)"
+		// TODO: make sure this works w/ changing ammo via hotkey 2
 		WriteRelJump(0x701FAE, (UInt32)HookHandleHotkeyEquipOrUnEquip);
 	}
 }

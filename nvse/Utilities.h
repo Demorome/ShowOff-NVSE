@@ -226,6 +226,20 @@ __forceinline UInt8 ThisStdCall_B(UInt32 _f, void* _t, T1 a1, T2 a2, T3 a3)
 } 
 
 //Demo added:
+template <typename T1, typename T2, typename T3, typename T4>
+__forceinline UInt8 ThisStdCall_B(UInt32 _f, void* _t, T1 a1, T2 a2, T3 a3, T4 a4)
+{
+	class T {}; union { UInt32 x; UInt8(T::* m)(T1, T2, T3, T4); } u = { _f };
+	return ((T*)_t->*u.m)(a1, a2, a3, a4);
+}
+
+template <typename T1, typename T2, typename T3, typename T4, typename T5>
+__forceinline UInt8 ThisStdCall_B(UInt32 _f, void* _t, T1 a1, T2 a2, T3 a3, T4 a4, T5 a5)
+{
+	class T {}; union { UInt32 x; UInt8(T::* m)(T1, T2, T3, T4, T5); } u = { _f };
+	return ((T*)_t->*u.m)(a1, a2, a3, a4, a5);
+}
+
 template <typename T1, typename T2, typename T3, typename T4, typename T5, typename T6>
 __forceinline UInt8 ThisStdCall_B(UInt32 _f, void* _t, T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6)
 {
