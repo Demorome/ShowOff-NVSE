@@ -304,6 +304,9 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 * ClearShowoffSavedData
 
 //===v1.60
+
+*AS OF THIS VERSION, xNVSE 6.3.0 or greater is required.*
+
 ===Bug Fixes:
 * Removed confusing hook conflict detection msg related to Tweaks.
 

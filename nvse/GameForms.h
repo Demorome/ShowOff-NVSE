@@ -10,7 +10,7 @@
 
 void Console_Print(const char* fmt, ...);
 
-enum FormType
+enum FormType : UInt32
 {
 	kFormType_None = 0,
 	kFormType_TES4,
@@ -59,7 +59,7 @@ enum FormType
 	kFormType_TESLevCreature,
 	kFormType_TESLevCharacter,
 	kFormType_TESKey,							// Inventory object
-	kFormType_AlchemyItem,						// Inventory object
+	kFormType_AlchemyItem,						// Inventory object, Ingestible
 	kFormType_BGSIdleMarker,
 	kFormType_BGSNote,							// Inventory object
 	kFormType_BGSConstructibleObject,			// Inventory object

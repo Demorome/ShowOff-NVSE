@@ -288,13 +288,14 @@ namespace OnPreActivate
 
 static const UInt32 g_inventoryMenuSelectionAddr = 0x11D9EA8;
 
+// Will only run for the player, since I'm too lazy to make actors not get stuck in a trying-to-activate loop.
 namespace PreActivateInventoryItem
 {
 	constexpr char eventName[] = "ShowOff:OnPreActivateInventoryItem";
 
-	bool __fastcall CanUseItem(ContChangesEntry* itemEntry, void* edx, bool isHotkeyUse)
+	bool CanUseItemRef(TESObjectREFR* invRef, bool isHotkeyUse)
 	{
-		if (!itemEntry || !itemEntry->type)
+		if (!invRef || !invRef->baseForm)
 			return false;
 
 		auto constexpr resultCallback = [](NVSEArrayVarInterface::Element& result, void* shouldActivateAdrr) -> bool
@@ -307,27 +308,60 @@ namespace PreActivateInventoryItem
 			return true;
 		};
 		UInt32 shouldActivate = true;
-		auto const itemForm = itemEntry->type;
-		auto* invRef = CreateRefForStack(g_thePlayer, itemEntry);
 
 		UInt32 selectedHotkey = 0;
 		if (isHotkeyUse)
 		{
+			// This trick works because HookHandleHotkeyEquipOrUnEquip was a jump, not a call.
 			auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
 			auto const hotkeyData = *reinterpret_cast<HotKeyWheel**>(ebp - 0x1C);
 			selectedHotkey = hotkeyData->selectedHotkey + 1;
 		}
 
 		g_eventInterface->DispatchEventAlt(eventName, resultCallback, &shouldActivate, 
-			g_thePlayer, itemForm, invRef, &shouldActivate, selectedHotkey);
+			g_thePlayer, invRef->baseForm, invRef, &shouldActivate, selectedHotkey);
 
 		if (g_ShowFuncDebug)
-			Console_Print("CanActivateItemHook: CanActivate: %i, Item: [%08X], %s, type: %u", shouldActivate, itemForm->refID, itemForm->GetName(), itemForm->typeID);
+			Console_Print("CanActivateItemHook: CanActivate: %i, Item: [%08X], %s, type: %u", 
+				shouldActivate, invRef->baseForm->refID, invRef->baseForm->GetName(), invRef->baseForm->typeID);
 
 		return shouldActivate;
 	}
 
-	__declspec(naked) void HookOnClickAmmo()
+	bool __fastcall CanUseItemEntry(ContChangesEntry* itemEntry, void* edx, bool isHotkeyUse)
+	{
+		if (!itemEntry)
+			return false;
+		auto* invRef = CreateRefForStack(g_thePlayer, itemEntry);
+		return CanUseItemRef(invRef, isHotkeyUse);
+	}
+
+	__HOOK HookHandleOnClickEquipOrUnEquip()
+	{
+		static const UInt32 endHandleClick = 0x780B8E,
+			HandleEquipOrUnEquip = 0x780D60;
+
+		_asm
+		{
+			//ecx = InventoryMenu
+			mov		ecx, g_inventoryMenuSelectionAddr
+			mov		ecx, dword ptr ds : [ecx]
+			push	0
+			call	CanUseItemEntry // register stomping should be fine.
+			test	al, al
+			jz		PreventActivation
+
+			mov		ecx, [ebp - 0x64]
+			call	HandleEquipOrUnEquip
+			ret
+
+			PreventActivation :
+			add		esp, 4	// remove return addr that was pushed.
+			jmp		endHandleClick
+		}
+	}
+
+	__HOOK HookOnClickAmmo()
 	{
 		_asm
 		{
@@ -337,7 +371,7 @@ namespace PreActivateInventoryItem
 			jz		Done
 
 			push	0
-			call	CanUseItem // register stomping should be fine.
+			call	CanUseItemEntry // register stomping should be fine.
 			test	al, al
 			jz		PreventActivation
 
@@ -353,32 +387,7 @@ namespace PreActivateInventoryItem
 		}
 	}
 
-	__declspec(naked) void HookHandleOnClickEquipOrUnEquip()
-	{
-		static const UInt32 endHandleClick = 0x780B8E,
-			HandleEquipOrUnEquip = 0x780D60;
-
-		_asm
-		{
-			//ecx = InventoryMenu
-			mov		ecx, g_inventoryMenuSelectionAddr
-			mov		ecx, dword ptr ds : [ecx]
-			push	0
-			call	CanUseItem // register stomping should be fine.
-			test	al, al
-			jz		PreventActivation
-
-			mov		ecx, [ebp-0x64] 
-			call	HandleEquipOrUnEquip 
-			ret
-
-			PreventActivation :
-			add		esp, 4	// remove return addr that was pushed.
-			jmp		endHandleClick
-		}
-	}
-
-	__declspec(naked) void HookHandleHotkeyEquipOrUnEquip()
+	__HOOK HookHandleHotkeyEquipOrUnEquip()
 	{
 		static const UInt32 normalRetnAdrr = 0x701FB3,
 			endFunctionAddr = 0x702130;
@@ -386,7 +395,7 @@ namespace PreActivateInventoryItem
 		{
 			//ecx = ContChangesEntry
 			push	1
-			call	CanUseItem //register stomping should be fine
+			call	CanUseItemEntry //register stomping should be fine
 			test	al, al
 			jz		PreventActivation
 
@@ -399,8 +408,52 @@ namespace PreActivateInventoryItem
 		}
 	}
 
-	// TODO: hook here as well - 0x88C650, 0x88C790
-	// BUT make sure it won't run twice w/ hook at 0x7805CC
+	bool __fastcall CanUnequipItemWithExtraData(Actor* this_ECX, TESForm* itemForm_EDX, int count, ExtraDataList* xData)
+	{
+		// We only care about preventing activation for the player
+		if (!itemForm_EDX || this_ECX != g_thePlayer)
+			return true;
+		auto* invRef = InventoryRefCreateEntry(this_ECX, itemForm_EDX, count, xData);
+		return CanUseItemRef(invRef, false);
+	}
+
+	__HOOK HookHandleUnequipItem()
+	{
+		static const UInt32 normalReturnAddr = 0x88C79A,
+			endFunctionAddr = 0x88C829;
+		_asm
+		{
+			// Copy regular code we just overwrote
+			mov		[ebp - 0x4], ecx
+
+			// Avoid running our checks twice by checking if the func we're hooking was called by a func we already hooked.
+			mov		eax, [ebp + 0x4] // get retn addr
+			cmp		eax, 0x780F58 // in InventoryMenu::HandleEquipOrUnEquip
+			je		DoRegularCode
+			cmp		eax, 0x7020C4 // in HotKeyWheel::HandleEquipUnequip
+			je		DoRegularCode
+
+			// Check if we should prevent unequipping
+			mov		edx, [ebp + 0x8] // item
+			mov		eax, [ebp + 0x10] // xData
+			push	eax
+			mov		eax, [ebp + 0xC] // count
+			push	eax
+			call	CanUnequipItemWithExtraData
+			// (stack is cleaned up by callee)
+			test	al, al
+			jz		PreventActivation
+
+		DoRegularCode:
+			// Do regular code
+			mov     eax, [ebp - 0x4]
+			jmp		normalReturnAddr
+
+		PreventActivation :
+			jmp		endFunctionAddr
+		}
+	}
+
 	void WriteHooks()
 	{
 		// Replace "call InventoryMenu::HandleEquipOrUnEquip"
@@ -410,8 +463,65 @@ namespace PreActivateInventoryItem
 		WriteRelCall(0x780648, (UInt32)HookOnClickAmmo);
 
 		// Replace "call TESForm::GetFlags(entry)"
-		// TODO: make sure this works w/ changing ammo via hotkey 2
 		WriteRelJump(0x701FAE, (UInt32)HookHandleHotkeyEquipOrUnEquip);
+
+		// New hook to handle special plugin/scripted inv item activation.
+		WriteRelJump(0x88C794, (UInt32)HookHandleUnequipItem);
+
+		// TODO: WRITE HOOK FOR changing ammo via hotkey 2
+		// maybe at 0x4BF88B
+	}
+
+	CallDetour g_equipItemHook;
+
+	// Replaces TESForm::GetTypeID
+	// Calling code will prevent activation if the typeID we return is invalid.
+	FormType __fastcall HookHandleEquipItem(TESForm* itemForm, void* edx)
+	{
+		FormType typeID = ThisStdCall<FormType>(g_equipItemHook.GetOverwrittenAddr(), itemForm);
+
+		// Avoid running our checks twice by checking if this func was called by a func we already hooked.
+		void* addrOfReturnAddr = _AddressOfReturnAddress();
+		UInt32 returnAddr = *(UInt32*)addrOfReturnAddr;
+		if (returnAddr == 0x780F31	/* in InventoryMenu::HandleEquipOrUnEquip */
+			|| returnAddr == 0x702084 /* in HotKeyWheel::HandleEquipUnequip */)
+		{
+			return typeID;
+		}
+
+		switch (typeID)
+		{
+		case kFormType_TESObjectARMO:
+		case kFormType_TESObjectWEAP:
+		case kFormType_TESAmmo:
+		case kFormType_BGSProjectile:
+		case kFormType_TESObjectBOOK:
+		case kFormType_IngredientItem:
+		case kFormType_AlchemyItem:
+		{
+			auto* ebp = GetParentBasePtr(addrOfReturnAddr);
+			auto* actor = *reinterpret_cast<Actor**>(ebp - 0x4);
+			// We only care about preventing activation for the player
+			if (actor != g_thePlayer)
+				return typeID;
+
+			auto* xData = *reinterpret_cast<ExtraDataList**>(ebp + 0x10);
+			auto count = *reinterpret_cast<int*>(ebp + 0xC);
+
+			auto* invRef = InventoryRefCreateEntry(actor, itemForm, count, xData);
+			bool canUseItem = CanUseItemRef(invRef, false);
+			return canUseItem ? typeID : kFormType_None;
+		}
+		default:
+			return typeID; // return invalid typeID for equipping
+		}
+	}
+
+	void WriteDelayedHooks()
+	{
+		// New hook to handle special plugin/scripted inv item activation.
+		// Replace "call TESForm::GetTypeID"
+		g_equipItemHook.WriteRelCall(0x88C65C, (UInt32)HookHandleEquipItem);
 	}
 }
 
@@ -1424,6 +1534,7 @@ namespace HandleHooks
 		OnCalculateSellPrice::WriteDelayedHook();
 		OnReadBook::WriteDelayedHook();
 		OnDispositionChange::WriteDelayedHooks();
+		PreActivateInventoryItem::WriteDelayedHooks();
 #if _DEBUG
 #endif
 	}

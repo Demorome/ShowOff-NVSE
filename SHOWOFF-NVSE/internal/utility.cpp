@@ -1757,17 +1757,21 @@ TESBipedModelForm* CastFormToBipedModel(TESForm* form)
 	if (!form) return nullptr;
 	switch (form->typeID)
 	{
-	case kFormType_TESObjectARMO:
-		auto armo = (TESObjectARMO*)form;
-		return &armo->bipedModel;
-
-	case kFormType_TESObjectARMA:
-		auto arma = (TESObjectARMA*)form;
-		return &arma->bipedModel;
-
-	case kFormType_TESObjectCLOT:
-		auto clot = (TESObjectCLOT*)form;
-		return &clot->bipedModel;
+		case kFormType_TESObjectARMO:
+		{
+			auto armo = (TESObjectARMO*)form;
+			return &armo->bipedModel;
+		}
+		case kFormType_TESObjectARMA:
+		{
+			auto arma = (TESObjectARMA*)form;
+			return &arma->bipedModel;
+		}
+		case kFormType_TESObjectCLOT:
+		{
+			auto clot = (TESObjectCLOT*)form;
+			return &clot->bipedModel;
+		}
 	}
 	return nullptr;
 }
