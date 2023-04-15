@@ -12,7 +12,7 @@ You may also contact me directly on Discord. Username: `Demorome#2870`
 
 
 # Requirements
-Requires xNVSE v6.2.9 or greater: https://github.com/xNVSE/NVSE/releases.
+Requires xNVSE v6.3.0 or greater: https://github.com/xNVSE/NVSE/releases.
 
 
 # Installation
@@ -77,7 +77,7 @@ If you have anymore questions, feel free to join us on the [xNVSE community Disc
 All releases are free to be used by anyone.\
 As for redistribution or taking code from this plugin for your own use...
 
-Keep in mind that much of the ShowOff NVSE code is taken from others .\
+Keep in mind that much of the ShowOff NVSE code is taken from others.\
 I (Demorome) try to make it clear from where such code came from.\
 If you want to use code I took from someone else, you should ask the original creator for permission.\
 Besides that, you may use any of my code anywhere without asking for my permission, so long as you credit me.
@@ -123,8 +123,6 @@ Code taken from:
 [JIP LN NVSE](https://www.nexusmods.com/newvegas/mods/58277) - extends scripting capabilities far beyond limits of the vanilla game.
 
 [Johnny Guitar NVSE](https://www.nexusmods.com/newvegas/mods/66927) - same as the above, but with more PLAY THE GUITAR, PLAY IT AGAIN, MY JOHNNYYYYYYYYYYYY.
-
-[SUP NVSE](https://www.nexusmods.com/newvegas/mods/71878) - It's the same deal as the JIP and Johnny. More functions!
 
 [Hot Reload](https://www.nexusmods.com/newvegas/mods/70962) - lets you use external editors for scripting and reload scripts without restarting the game, a must-have for any scripter.
 
