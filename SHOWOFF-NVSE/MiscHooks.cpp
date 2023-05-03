@@ -536,7 +536,6 @@ namespace HandleHooks
 	void HandleFunctionHooks()
 	{
 		GetLevelUpMenuUnspentPoints::WriteRetrievalHook();
-		LevelUpMenuHooks::WriteHooksForShowPerkMenu();
 		GetCompassTargets::WriteHooks();
 #if 0
 		WriteRelCall(0x8B0FF0, UInt32(Actor_Spread_PerkModifier_Hook));
@@ -607,8 +606,15 @@ namespace HandleHooks
 		HandleGameTweaks();
 	}
 
+//======= Delayed hooks
+
+	void HandleDelayedFunctionHooks()
+	{
+		LevelUpMenuHooks::ShowPerkMenu::WriteDelayedHooks();
+	}
+
 	void HandleDelayedGameHooks()
 	{
-
+		HandleDelayedFunctionHooks();
 	}
 }

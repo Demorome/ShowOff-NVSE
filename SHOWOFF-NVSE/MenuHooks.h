@@ -17,5 +17,8 @@ namespace GetLevelUpMenuUnspentPoints
 
 namespace LevelUpMenuHooks
 {
-	void WriteHooksForShowPerkMenu();
+	namespace ShowPerkMenu
+	{
+		void WriteDelayedHooks();
+	}
 }

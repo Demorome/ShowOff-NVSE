@@ -109,34 +109,51 @@ namespace LevelUpMenuHooks
 	double __fastcall PerkMenuCheckNumSelectedPerks(Tile* tile, void* edx, int key)
 	{
 		auto menu = LevelUpMenu::GetSingleton();
-		if (menu->numAssignedPerks >= menu->numPerksToAssign)
+		if (menu->numPerksToAssign != 1)
 		{
-			// will prevent the tile from being clicked
-			return 0;
+			if (menu->numAssignedPerks >= menu->numPerksToAssign)
+			{
+				// will prevent the tile from being clicked
+				return 0;
+			}
+		}
+		else
+		{
+			// Reset selected perks first, to emulate vanilla behavior,
+			// ..which is to allow swapping the sole selected perk for another by clicking on another perk.
+			ThisStdCall(0x787850, &menu->perkListBox, 1);
 		}
 		return tile->GetValueFloat(key);
 	}
 
-	void WriteHooksForShowPerkMenu()
+	namespace ShowPerkMenu
 	{
-		// == Credits to Stewie for this all this code, taken from patchShowPerksMenuEvenIfNoneToAssign.
+		void WriteDelayedHooks()
+		{
+			// == Credits to lStewieAl for this all this code, taken from patchShowPerksMenuEvenIfNoneToAssign.
 
-		// Prevent clicking on perks if there are none to assign.
-		// Needed to prevent jank for ShowPerkMenu.
-		// While this does overwrite a hook for Tweaks, it should make no difference who wrote this hook.
-		WriteRelJump(0x785ACC, UInt32(LevelUpMenuClickPerkHook)); 
+			// Prevent clicking on perks if there are none to assign.
+			// Needed to prevent jank for ShowPerkMenu.
+			// While this does overwrite a hook for Tweaks, it should make no difference who wrote this hook.
+			WriteRelJump(0x785ACC, UInt32(LevelUpMenuClickPerkHook));
 
-		// init number of perks to assign to be 0 if not on a perk level
-		SafeWriteBuf(0x78508C, "\x8B\x0D\xDC\x9F\x1D\x01\x89\x41\x60\x0F\x1F\x40", 12);
-		WriteRelCall(0x785087, UInt32(IsPlayerAtPerkLevel));
+			// init number of perks to assign to be 0 if not on a perk level
+			SafeWriteBuf(0x78508C, "\x8B\x0D\xDC\x9F\x1D\x01\x89\x41\x60\x0F\x1F\x40", 12);
+			WriteRelCall(0x785087, UInt32(IsPlayerAtPerkLevel));
 
 
-		// == Hooks below taken from Tweaks, from CustomPerksPerLevel::InitHooks
+			// == Hooks below taken from Tweaks, from CustomPerksPerLevel::InitHooks
 
-		// remove call resetting selected Perks when one is selected
-		NopFunctionCall(0x785B2C, 1);
+			// remove call resetting selected Perks when one is selected
+			// In PerkMenuCheckNumSelectedPerks, we will reset selected perks if there was just 1 perk to allot at the start.
+			NopFunctionCall(0x785B2C, 1);
 
-		// wrap call checking tile alpha, prevent clicking on the tile if numPerksToAssign perks are already selected
-		WriteRelCall(0x785B0F, UInt32(PerkMenuCheckNumSelectedPerks));
+			// wrap call checking tile alpha, prevent clicking on the tile if numPerksToAssign perks are already selected
+			// If there was only 1 perk to assign to start with, won't prevent vanilla behavior,
+			//	..which is to allow clicking on another perk and just have the selection swap.
+			// Note: This hook must be delayed so it can overwrite Tweak's.
+			WriteRelCall(0x785B0F, UInt32(PerkMenuCheckNumSelectedPerks));
+		}
 	}
+
 }
