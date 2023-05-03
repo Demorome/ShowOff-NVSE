@@ -311,6 +311,7 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 
 ===Bug Fixes:
 * Removed confusing hook conflict detection msg related to Tweaks.
+* Level Up Menu: Fixed hook oversight that changed the vanilla behavior for how perk selection can be swapped
 
 ===New Functions:
 * Get/SetAmmoName
