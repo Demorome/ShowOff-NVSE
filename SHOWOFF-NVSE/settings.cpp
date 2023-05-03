@@ -18,11 +18,8 @@ void HandleINIOptions()
 	auto errVal = ini.LoadFile(iniPath);
 	if (errVal == SI_Error::SI_FILE)
 	{
-		if (GetModuleHandle(MO2_VFS_DLL_NAME))
-		{
-			// don't create the file if using MO2, and don't harass people to go download the INI since it's optional.
-			return;
-		}
+		// don't create the file, and don't harass people to go download the INI since it's optional.
+		return;
 	}
 
 	// INI
