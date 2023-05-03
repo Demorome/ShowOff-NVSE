@@ -20,8 +20,7 @@ void HandleINIOptions()
 	{
 		if (GetModuleHandle(MO2_VFS_DLL_NAME))
 		{
-			// user is using VFS and will probably not notice the ini if it were to generate in the MO2 overwrites folder, so don't create one
-			MessageBoxA(NULL, "ShowOff INI file not found, please download it or create an empty file " INI_NAME " in \'Data\\NVSE\\Plugins\\\' !", "ShowOff NVSE", MB_ICONINFORMATION);
+			// don't create the file if using MO2, and don't harass people to go download the INI since it's optional.
 			return;
 		}
 	}

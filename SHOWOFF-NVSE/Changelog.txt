@@ -316,12 +316,14 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 
 ===Function changes:
 * RefillPlayerAmmo now only shows error console messages if console is open, and returns 1/0 for success.
-* A couple of SO's item functions should now run faster, thanks to Stewie fixing the abuse of the slow DYNAMIC_CAST function.
+* A couple of SO's item functions should now run faster, thanks to lStewieAl fixing the abuse of the slow DYNAMIC_CAST function.
 
 ===New Events:
 * "ShowOff:OnReadBook"
 * "ShowOff:OnDispositionChange"
 * "ShowOff:OnAdd"
+* "ShowOff:OnPreEquip" ???????
+
 
 ====== (Template:)
 

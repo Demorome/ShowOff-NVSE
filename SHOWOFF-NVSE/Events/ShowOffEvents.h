@@ -293,7 +293,12 @@ namespace PreActivateInventoryItem
 {
 	constexpr char eventName[] = "ShowOff:OnPreActivateInventoryItem";
 
-	bool CanUseItemRef(TESObjectREFR* invRef, bool isHotkeyUse)
+	// Alt event that also runs for special cases, like EquipItem or Tweak's bQuickUse
+	// Also won't run for unequipping stuff????????????????
+	constexpr char eventNameOnPreEquip[] = "ShowOff:OnPreEquip";
+
+	// isSpecialEquip: true if EquipItem, Tweak's bQuickUse or other is used.
+	bool CanUseItemRef(TESObjectREFR* invRef, bool isHotkeyUse/*, bool isSpecialEquip*/)
 	{
 		if (!invRef || !invRef->baseForm)
 			return false;
