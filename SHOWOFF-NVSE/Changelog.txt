@@ -307,6 +307,8 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 
 *AS OF THIS VERSION, xNVSE 6.3.0 or greater is required.*
 
+*Also, the ShowOff INI file is now optional, meaning a warning message will no longer appear if it is not found*
+
 ===Bug Fixes:
 * Removed confusing hook conflict detection msg related to Tweaks.
 
