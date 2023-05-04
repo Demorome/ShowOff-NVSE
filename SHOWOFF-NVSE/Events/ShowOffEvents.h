@@ -1478,6 +1478,35 @@ namespace OnDispositionChange
 	}
 }
 
+namespace OnPreLifeStateChange
+{
+	constexpr char eventName[] = "ShowOff:OnPreLifeStateChange";
+
+	CallDetour g_detour;
+
+	void** __fastcall GetINIValueAddrHook(Setting* thisSetting)
+	{
+		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+		auto* actor = *reinterpret_cast<Actor**>(ebp - 0x2C); // see 0x8A1825
+		auto newLifeState = *reinterpret_cast<UInt32*>(ebp + 0x8);
+		UInt32 oldLifeState = actor->lifeState;
+
+		g_eventInterface->DispatchEvent(eventName, actor, oldLifeState, newLifeState);
+
+#if _DEBUG
+		Console_Print("OnPreLifeStateChange HOOK >> RAN");
+#endif
+
+		// do regular code
+		return ThisStdCall<void**>(g_detour.GetOverwrittenAddr(), thisSetting);
+	}
+
+	void WriteHook()
+	{
+		g_detour.WriteRelCall(0x8A182D, (UInt32)GetINIValueAddrHook);
+	}
+}
+
 using EventFlags = NVSEEventManagerInterface::EventFlags;
 
 template<UInt8 N>
@@ -1501,7 +1530,6 @@ void RegisterEvents()
 	RegisterEvent(OnPreActivate::eventName, kEventParams_OneReference_OneIntPtr);
 	RegisterEvent(PreActivateInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneIntPtr_OneInt);
 	RegisterEvent(PreActivateInventoryItem::eventNameAlt, kEventParams_OneBaseForm_OneReference_OneIntPtr_TwoInts);
-	RegisterEvent(PreDropInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneIntPtr);
 	RegisterEvent(OnQuestAdded::eventName, kEventParams_OneBaseForm);
 
 	//TODO: document / modify!
@@ -1534,6 +1562,8 @@ void RegisterEvents()
 	RegisterEvent(OnAddAlt::eventName, kEventParams_OneBaseForm_OneReference);
 	RegisterEvent(OnReadBook::eventName, kEventParams_OneBaseForm);
 	RegisterEvent(OnDispositionChange::eventName, kEventParams_OneInt);
+	RegisterEvent(PreDropInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneIntPtr);
+	RegisterEvent(OnPreLifeStateChange::eventName, kEventParams_TwoInts);
 
 	#if _DEBUG
 
