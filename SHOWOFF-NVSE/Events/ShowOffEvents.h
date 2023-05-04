@@ -293,19 +293,17 @@ namespace PreActivateInventoryItem
 {
 	constexpr char eventName[] = "ShowOff:OnPreActivateInventoryItem";
 
-	// Alt event that also runs for special cases, like EquipItem or Tweak's bQuickUse
-	// Also won't run for unequipping stuff????????????????
-	constexpr char eventNameOnPreEquip[] = "ShowOff:OnPreEquip";
+	// Will also run on special activation, with an arg to indicate if it is.
+	constexpr char eventNameAlt[] = "ShowOff:OnPreActivateInventoryItemAlt";
 
-	// isSpecialEquip: true if EquipItem, Tweak's bQuickUse or other is used.
-	bool CanUseItemRef(TESObjectREFR* invRef, bool isHotkeyUse/*, bool isSpecialEquip*/)
+	bool CanUseItemRef(TESObjectREFR* invRef, bool isHotkeyUse)
 	{
 		if (!invRef || !invRef->baseForm)
 			return false;
 
-		auto constexpr resultCallback = [](NVSEArrayVarInterface::Element& result, void* shouldActivateAdrr) -> bool
+		auto constexpr resultCallback = [](NVSEArrayVarInterface::Element& result, void* shouldActivateAddr) -> bool
 		{
-			if (UInt32& shouldActivate = *static_cast<UInt32*>(shouldActivateAdrr))
+			if (UInt32& shouldActivate = *static_cast<UInt32*>(shouldActivateAddr))
 			{
 				if (result.IsValid())
 					shouldActivate = result.Bool();
@@ -325,6 +323,11 @@ namespace PreActivateInventoryItem
 
 		g_eventInterface->DispatchEventAlt(eventName, resultCallback, &shouldActivate, 
 			g_thePlayer, invRef->baseForm, invRef, &shouldActivate, selectedHotkey);
+
+		// Since we're inside this function, we can assume no special activation is going on.
+		UInt32 isSpecialActivation = false;
+		g_eventInterface->DispatchEventAlt(eventNameAlt, resultCallback, &shouldActivate,
+			g_thePlayer, invRef->baseForm, invRef, &shouldActivate, selectedHotkey, isSpecialActivation);
 
 		if (g_ShowFuncDebug)
 			Console_Print("CanActivateItemHook: CanActivate: %i, Item: [%08X], %s, type: %u", 
@@ -413,49 +416,137 @@ namespace PreActivateInventoryItem
 		}
 	}
 
-	bool __fastcall CanUnequipItemWithExtraData(Actor* this_ECX, TESForm* itemForm_EDX, int count, ExtraDataList* xData)
+	namespace HandleSpecialActivation
 	{
-		// We only care about preventing activation for the player
-		if (!itemForm_EDX || this_ECX != g_thePlayer)
-			return true;
-		auto* invRef = InventoryRefCreateEntry(this_ECX, itemForm_EDX, count, xData);
-		return CanUseItemRef(invRef, false);
-	}
-
-	__HOOK HookHandleUnequipItem()
-	{
-		static const UInt32 normalReturnAddr = 0x88C79A,
-			endFunctionAddr = 0x88C829;
-		_asm
+		// Should only be called if EquipItem, Tweak's bQuickUse, or another special item activation method is used.
+		bool CanSpecialUseItemRef(TESObjectREFR* invRef)
 		{
-			// Copy regular code we just overwrote
-			mov		[ebp - 0x4], ecx
+			if (!invRef || !invRef->baseForm)
+				return false;
 
-			// Avoid running our checks twice by checking if the func we're hooking was called by a func we already hooked.
-			mov		eax, [ebp + 0x4] // get retn addr
-			cmp		eax, 0x780F58 // in InventoryMenu::HandleEquipOrUnEquip
-			je		DoRegularCode
-			cmp		eax, 0x7020C4 // in HotKeyWheel::HandleEquipUnequip
-			je		DoRegularCode
+			auto constexpr resultCallback = [](NVSEArrayVarInterface::Element& result, void* shouldActivateAddr) -> bool
+			{
+				if (UInt32& shouldActivate = *static_cast<UInt32*>(shouldActivateAddr))
+				{
+					if (result.IsValid())
+						shouldActivate = result.Bool();
+				}
+				return true;
+			};
+			UInt32 shouldActivate = true;
 
-			// Check if we should prevent unequipping
-			mov		edx, [ebp + 0x8] // item
-			mov		eax, [ebp + 0x10] // xData
-			push	eax
-			mov		eax, [ebp + 0xC] // count
-			push	eax
-			call	CanUnequipItemWithExtraData
-			// (stack is cleaned up by callee)
-			test	al, al
-			jz		PreventActivation
+			// Will always be 0, since this is a special activation.
+			UInt32 selectedHotkey = 0;
 
-		DoRegularCode:
-			// Do regular code
-			mov     eax, [ebp - 0x4]
-			jmp		normalReturnAddr
+			// Dispatch alt event w/ isSpecialActivation = true
+			// (Don't dispatch regular event, to maintain backwards compatibility)
+			UInt32 isSpecialActivation = true;
+			g_eventInterface->DispatchEventAlt(eventNameAlt, resultCallback, &shouldActivate,
+				g_thePlayer, invRef->baseForm, invRef, &shouldActivate, selectedHotkey, isSpecialActivation);
 
-		PreventActivation :
-			jmp		endFunctionAddr
+			if (g_ShowFuncDebug)
+				Console_Print("Can(Special)UseItemRef hook: CanActivate: %i, Item: [%08X], %s, type: %u",
+					shouldActivate, invRef->baseForm->refID, invRef->baseForm->GetName(), invRef->baseForm->typeID);
+
+			return shouldActivate;
+		}
+
+		namespace UnequipItem
+		{
+			bool __fastcall CanUnequipItemWithExtraData(Actor* this_ECX, TESForm* itemForm_EDX, 
+				int count, ExtraDataList* xData)
+			{
+				// We only care about preventing activation for the player
+				if (!itemForm_EDX || this_ECX != g_thePlayer)
+					return true;
+				auto* invRef = InventoryRefCreateEntry(this_ECX, itemForm_EDX, count, xData);
+				return CanSpecialUseItemRef(invRef);
+			}
+
+			__HOOK Hook()
+			{
+				static const UInt32 normalReturnAddr = 0x88C79A,
+					endFunctionAddr = 0x88C829;
+				_asm
+				{
+					// Copy regular code we just overwrote
+					mov		[ebp - 0x4], ecx
+
+					// Avoid running our checks twice by checking if the func we're hooking was called by a func we already hooked.
+					mov		eax, [ebp + 0x4] // get retn addr
+					cmp		eax, 0x780F58 // in InventoryMenu::HandleEquipOrUnEquip
+					je		DoRegularCode
+					cmp		eax, 0x7020C4 // in HotKeyWheel::HandleEquipUnequip
+					je		DoRegularCode
+
+					// Check if we should prevent unequipping
+					mov		edx, [ebp + 0x8] // item
+					mov		eax, [ebp + 0x10] // xData
+					push	eax
+					mov		eax, [ebp + 0xC] // count
+					push	eax
+					call	CanUnequipItemWithExtraData
+					// (stack is cleaned up by callee)
+					test	al, al
+					jz		PreventActivation
+
+				DoRegularCode :
+					// Do regular code
+					mov     eax, [ebp - 0x4]
+					jmp		normalReturnAddr
+
+				PreventActivation :
+					jmp		endFunctionAddr
+				}
+			}
+		}
+
+		namespace EquipItem
+		{
+			CallDetour g_Hook;
+
+			// Replaces TESForm::GetTypeID
+			// Calling code will prevent activation if the typeID we return is invalid.
+			FormType __fastcall Hook(TESForm* itemForm, void* edx)
+			{
+				FormType typeID = ThisStdCall<FormType>(g_Hook.GetOverwrittenAddr(), itemForm);
+
+				// Avoid running our checks twice by checking if this func was called by a func we already hooked.
+				auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+				auto returnAddr = *reinterpret_cast<UInt32*>(ebp + 0x4);
+				if (returnAddr == 0x780F31	/* in InventoryMenu::HandleEquipOrUnEquip */
+					|| returnAddr == 0x702084 /* in HotKeyWheel::HandleEquipUnequip */)
+				{
+					return typeID;
+				}
+
+				switch (typeID)
+				{
+				case kFormType_TESObjectARMO:
+				case kFormType_TESObjectWEAP:
+				case kFormType_TESAmmo:
+				case kFormType_BGSProjectile:
+				case kFormType_TESObjectBOOK:
+				case kFormType_IngredientItem:
+				case kFormType_AlchemyItem:
+				{
+
+					auto* actor = *reinterpret_cast<Actor**>(ebp - 0x4);
+					// We only care about preventing activation for the player
+					if (actor != g_thePlayer)
+						return typeID;
+
+					auto* xData = *reinterpret_cast<ExtraDataList**>(ebp + 0x10);
+					auto count = *reinterpret_cast<int*>(ebp + 0xC);
+
+					auto* invRef = InventoryRefCreateEntry(actor, itemForm, count, xData);
+					bool canUseItem = CanSpecialUseItemRef(invRef);
+					return canUseItem ? typeID : kFormType_None;
+				}
+				default:
+					return typeID; // return invalid typeID for equipping
+				}
+			}
 		}
 	}
 
@@ -471,62 +562,18 @@ namespace PreActivateInventoryItem
 		WriteRelJump(0x701FAE, (UInt32)HookHandleHotkeyEquipOrUnEquip);
 
 		// New hook to handle special plugin/scripted inv item activation.
-		WriteRelJump(0x88C794, (UInt32)HookHandleUnequipItem);
+		WriteRelJump(0x88C794, (UInt32)HandleSpecialActivation::UnequipItem::Hook);
 
 		// TODO: WRITE HOOK FOR changing ammo via hotkey 2
+		// eh, bit too niche for the headache
 		// maybe at 0x4BF88B
-	}
-
-	CallDetour g_equipItemHook;
-
-	// Replaces TESForm::GetTypeID
-	// Calling code will prevent activation if the typeID we return is invalid.
-	FormType __fastcall HookHandleEquipItem(TESForm* itemForm, void* edx)
-	{
-		FormType typeID = ThisStdCall<FormType>(g_equipItemHook.GetOverwrittenAddr(), itemForm);
-
-		// Avoid running our checks twice by checking if this func was called by a func we already hooked.
-		void* addrOfReturnAddr = _AddressOfReturnAddress();
-		UInt32 returnAddr = *(UInt32*)addrOfReturnAddr;
-		if (returnAddr == 0x780F31	/* in InventoryMenu::HandleEquipOrUnEquip */
-			|| returnAddr == 0x702084 /* in HotKeyWheel::HandleEquipUnequip */)
-		{
-			return typeID;
-		}
-
-		switch (typeID)
-		{
-		case kFormType_TESObjectARMO:
-		case kFormType_TESObjectWEAP:
-		case kFormType_TESAmmo:
-		case kFormType_BGSProjectile:
-		case kFormType_TESObjectBOOK:
-		case kFormType_IngredientItem:
-		case kFormType_AlchemyItem:
-		{
-			auto* ebp = GetParentBasePtr(addrOfReturnAddr);
-			auto* actor = *reinterpret_cast<Actor**>(ebp - 0x4);
-			// We only care about preventing activation for the player
-			if (actor != g_thePlayer)
-				return typeID;
-
-			auto* xData = *reinterpret_cast<ExtraDataList**>(ebp + 0x10);
-			auto count = *reinterpret_cast<int*>(ebp + 0xC);
-
-			auto* invRef = InventoryRefCreateEntry(actor, itemForm, count, xData);
-			bool canUseItem = CanUseItemRef(invRef, false);
-			return canUseItem ? typeID : kFormType_None;
-		}
-		default:
-			return typeID; // return invalid typeID for equipping
-		}
 	}
 
 	void WriteDelayedHooks()
 	{
 		// New hook to handle special plugin/scripted inv item activation.
 		// Replace "call TESForm::GetTypeID"
-		g_equipItemHook.WriteRelCall(0x88C65C, (UInt32)HookHandleEquipItem);
+		HandleSpecialActivation::EquipItem::g_Hook.WriteRelCall(0x88C65C, (UInt32)HandleSpecialActivation::EquipItem::Hook);
 	}
 }
 
@@ -1453,6 +1500,7 @@ void RegisterEvents()
 
 	RegisterEvent(OnPreActivate::eventName, kEventParams_OneReference_OneIntPtr);
 	RegisterEvent(PreActivateInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneIntPtr_OneInt);
+	RegisterEvent(PreActivateInventoryItem::eventNameAlt, kEventParams_OneBaseForm_OneReference_OneIntPtr_TwoInts);
 	RegisterEvent(PreDropInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneIntPtr);
 	RegisterEvent(OnQuestAdded::eventName, kEventParams_OneBaseForm);
 
