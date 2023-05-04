@@ -1494,14 +1494,14 @@ namespace OnPreLifeStateChange
 		g_eventInterface->DispatchEvent(eventName, actor, oldLifeState, newLifeState);
 
 #if _DEBUG
-		Console_Print("OnPreLifeStateChange HOOK >> RAN");
+		Console_Print("OnPreLifeStateChange HOOK >> RAN. oldLifeState: %u, newLifeState: %u", oldLifeState, newLifeState);
 #endif
 
 		// do regular code
 		return ThisStdCall<void**>(g_detour.GetOverwrittenAddr(), thisSetting);
 	}
 
-	void WriteHook()
+	void WriteDelayedHook()
 	{
 		g_detour.WriteRelCall(0x8A182D, (UInt32)GetINIValueAddrHook);
 	}
@@ -1618,6 +1618,8 @@ namespace HandleHooks
 		OnReadBook::WriteDelayedHook();
 		OnDispositionChange::WriteDelayedHooks();
 		PreActivateInventoryItem::WriteDelayedHooks();
+		OnPreLifeStateChange::WriteDelayedHook();
+
 #if _DEBUG
 #endif
 	}
