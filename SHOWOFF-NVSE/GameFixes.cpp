@@ -68,19 +68,21 @@ namespace GameFixes
 			bool g_NoEquip = false;
 
 			// Make it so the item cannot be equipped.
-			// Replaces a call to ExtraDataList::UpdateExtraWornOrWornLeft (0x41AA20)
-			void __fastcall DoFix(ExtraDataList* xData, void* edx,
-				bool addOrRemove /*always false here, so remove*/, bool updateExtraWornLeftOrWorn)
+			// Replaces a call to ExtraDataList::GetCannotWear (0x418B10)
+			bool __fastcall DoFix(ExtraDataList* nthExtraDataList, void* edx)
 			{
-				// Do regular code
-				ThisStdCall(g_detourDoFix.GetOverwrittenAddr(), xData, addOrRemove, updateExtraWornLeftOrWorn);
+				// Do regular code.
+				// Cache result, because we'll be updating the CannotWear xData right after.
+				auto cannotWear = ThisStdCall<bool>(g_detourDoFix.GetOverwrittenAddr(), nthExtraDataList);
 
-				// Our addition: add "cannotWear" xData if g_NoEquip is true
-				if (g_NoEquip)
+				// Our addition: add "cannotWear" xData if g_NoEquip is true.
+				if (!cannotWear && g_NoEquip)
 				{
 					// ExtraDataList::UpdateCannotWear
-					ThisStdCall(0x41AB70, xData, true);
+					ThisStdCall(0x41AB70, nthExtraDataList, true);
 				}
+
+				return cannotWear;
 			}
 
 			bool __fastcall FirstHook(TESForm* thisActor, void* edx, TESForm* item,
@@ -126,7 +128,7 @@ namespace GameFixes
 				g_detour2ndCall.WriteRelCall(0x88D964, (UInt32)SecondHook);
 
 				// Uses the g_NoEquip global set up by the hooks above.
-				g_detourDoFix.WriteRelCall(0x4C112C, (UInt32)DoFix);
+				g_detourDoFix.WriteRelCall(0x4C0DC8, (UInt32)DoFix);
 			}
 		}
 	}
