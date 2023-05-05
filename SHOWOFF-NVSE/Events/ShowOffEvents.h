@@ -1478,6 +1478,9 @@ namespace OnDispositionChange
 	}
 }
 
+#if 0
+// DO NOT USE
+// Runs when actors are loading in, which will lead to buggy behavior if handlers depend on this event.
 namespace OnPreLifeStateChange
 {
 	constexpr char eventName[] = "ShowOff:OnPreLifeStateChange";
@@ -1506,6 +1509,7 @@ namespace OnPreLifeStateChange
 		g_detour.WriteRelCall(0x8A182D, (UInt32)GetINIValueAddrHook);
 	}
 }
+#endif
 
 using EventFlags = NVSEEventManagerInterface::EventFlags;
 
@@ -1563,7 +1567,9 @@ void RegisterEvents()
 	RegisterEvent(OnReadBook::eventName, kEventParams_OneBaseForm);
 	RegisterEvent(OnDispositionChange::eventName, kEventParams_OneInt);
 	RegisterEvent(PreDropInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneIntPtr);
+#if 0
 	RegisterEvent(OnPreLifeStateChange::eventName, kEventParams_TwoInts);
+#endif
 
 	#if _DEBUG
 
@@ -1618,7 +1624,9 @@ namespace HandleHooks
 		OnReadBook::WriteDelayedHook();
 		OnDispositionChange::WriteDelayedHooks();
 		PreActivateInventoryItem::WriteDelayedHooks();
+#if 0
 		OnPreLifeStateChange::WriteDelayedHook();
+#endif
 
 #if _DEBUG
 #endif
