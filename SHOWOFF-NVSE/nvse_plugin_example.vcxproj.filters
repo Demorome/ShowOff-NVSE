@@ -102,6 +102,9 @@
     <ClCompile Include="InventoryRef.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
+    <ClCompile Include="GameFixes.cpp">
+      <Filter>Hooks</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="functions\SO_fn_Misc.h">
@@ -2161,6 +2164,9 @@
     </ClInclude>
     <ClInclude Include="AuxTimers.h">
       <Filter>internal</Filter>
+    </ClInclude>
+    <ClInclude Include="GameFixes.h">
+      <Filter>Hooks</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

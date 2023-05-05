@@ -2,6 +2,7 @@
 
 #include "GameRTTI.h"
 #include "MenuHooks.h"
+#include "GameFixes.h"
 #include "SafeWrite.h"
 #include "ShowOffNVSE.h"
 #include "StewieMagic.h"
@@ -353,52 +354,9 @@ namespace MakeUnarmedWeaponsDealFatigueDmg
 	}
 }
 
-void PatchShowRaceMenu()
+namespace Fixes
 {
-	// Prevent ShowRaceMenu from resetting active temp effects.
-	NopFunctionCall(0x7ADDC7, 1);
 
-	// Prevent ShowRaceMenu from resetting abilities.
-	PatchMemoryNop(0x7ADDD2, 5);
-}
-
-namespace PatchResetCell	
-{
-	__declspec(naked) void GetShouldRespawnHook()
-	{
-		static const UInt32 retnAddr = 0x54E1CD,
-			getShouldRespawnAddr = 0x881C90;
-		
-		enum {
-			cellDetachTime = -0x4 //-0x8
-		};
-		_asm
-		{
-			//cmp [ebp + cellDetachTime], -1		//did not work!
-			cmp dword ptr ss : [ebp + cellDetachTime], -1
-			jg doNormal
-			jnz skipIniCheck //jump if -2, essentially
-			cmp g_bResetInteriorResetsActors, 0
-			jz doNormal
-			skipIniCheck:
-			mov al, 1
-			jmp retnAddr
-
-			doNormal:
-			call getShouldRespawnAddr
-			jmp retnAddr
-		}
-	}
-
-	void WriteHook()
-	{
-		// replace jnz -> JG	(compares with -1, add support for -2)
-		SafeWrite8(0x54E09A, 0x7F);
-
-		//Replace Actor::GetShouldRespawn call in Cell::HandleResets
-		//...Cuz it checks for time even though ResetInterior was called.
-		WriteRelJump(0x54E1C8, (UInt32)GetShouldRespawnHook);
-	}
 }
 
 namespace AllowInteriorCellToUpdateWeathers
@@ -579,30 +537,10 @@ namespace HandleHooks
 			MakeUnarmedWeaponsDealFatigueDmg::WriteHook();
 	}
 
-	void HandleGameFixes()
-	{
-		PatchShowRaceMenu();
-		PatchResetCell::WriteHook();
-
-#if 0
-		if (g_bFixCaravanCurrencyRemoval)
-		{
-			TODO
-		}
-#endif
-
-		/*
-		//TODO: make optional?
-		//TODO: need to learn more about why it kinda works..
-		Experimental::FixOnAddBlockType::WriteHook();
-		Experimental::FixOnDropAndOnUnequipBlockType::WriteHooks();
-		*/
-	}
-
 	void HandleGameHooks()
 	{
 		HandleFunctionHooks();
-		HandleGameFixes();
+		GameFixes::WriteFixes();
 		HandleGameTweaks();
 	}
 
@@ -616,5 +554,6 @@ namespace HandleHooks
 	void HandleDelayedGameHooks()
 	{
 		HandleDelayedFunctionHooks();
+		GameFixes::WriteDelayedFixes();
 	}
 }

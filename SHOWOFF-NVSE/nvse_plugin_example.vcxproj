@@ -316,6 +316,7 @@ copy "$(SolutionDir)Release\$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugi
     <ClCompile Include="Events\JohnnyEventPredefinitions.cpp" />
     <ClCompile Include="Events\LambdaVarContext.cpp" />
     <ClCompile Include="functions\SO_fn_Files.cpp" />
+    <ClCompile Include="GameFixes.cpp" />
     <ClCompile Include="GameUI.cpp" />
     <ClCompile Include="internal\AuxTimers.cpp" />
     <ClCompile Include="internal\ExtractArgs_TypeSafe.cpp" />
@@ -1002,6 +1003,7 @@ copy "$(SolutionDir)Release\$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugi
     <ClInclude Include="functions\SO_fn_Refs.h" />
     <ClInclude Include="functions\SO_fn_Settings.h" />
     <ClInclude Include="functions\SO_fn_Topics.h" />
+    <ClInclude Include="GameFixes.h" />
     <ClInclude Include="internal\ExtractArgs_TypeSafe.h" />
     <ClInclude Include="InventoryRef.h" />
     <ClInclude Include="MenuHooks.h" />
