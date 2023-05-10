@@ -1411,6 +1411,7 @@ namespace OnDropAlt
 
 namespace OnReadBook
 {
+	// Runs right after the book is read, before the UI message is queued.
 	constexpr char eventName[] = "ShowOff:OnReadBook";
 
 	CallDetour g_detour;
@@ -1437,6 +1438,7 @@ namespace OnReadBook
 
 namespace OnDispositionChange
 {
+	// Runs right before the disposition is changed.
 	constexpr char eventName[] = "ShowOff:OnDispositionChange";
 
 	CallDetour g_detour;
