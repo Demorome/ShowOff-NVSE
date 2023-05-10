@@ -56,6 +56,9 @@ namespace GameFixes
 		}
 	}
 
+#if 0
+	// TODO: FIX
+	// Does not work for NPCs, introduces weird behavior where they no longer unequip their weapon.
 	namespace EquipOrUnequipItem
 	{
 		// Vanilla "noEquip" flag for UnequipItem doesn't work; it goes unused.
@@ -132,6 +135,7 @@ namespace GameFixes
 			}
 		}
 	}
+#endif
 
 	void WriteFixes()
 	{
@@ -154,6 +158,8 @@ namespace GameFixes
 
 	void WriteDelayedFixes()
 	{
+#if 0
 		EquipOrUnequipItem::FixNoEquip::WriteDelayedHooks();
+#endif
 	}
 }

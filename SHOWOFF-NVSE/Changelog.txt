@@ -309,9 +309,6 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 
 *Also, the ShowOff INI file is now optional, meaning a warning message will no longer appear if it is not found*
 
-===Vanilla fixes:
-* UnequipItem and spinoffs: fixes the "noEquip" flag, which never did anything.
-
 ===Bug Fixes:
 * Removed confusing hook conflict detection msg related to Tweaks.
 * Level Up Menu: Fixed hook oversight that changed the vanilla behavior for how perk selection can be swapped
