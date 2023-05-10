@@ -325,7 +325,6 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 * "ShowOff:OnReadBook"
 * "ShowOff:OnDispositionChange"
 * "ShowOff:OnAdd"
-* "ShowOff:OnPreActivateInventoryItemAlt"
 
 
 ====== (Template:)
