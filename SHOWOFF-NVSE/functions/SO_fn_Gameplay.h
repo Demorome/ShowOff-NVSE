@@ -5,16 +5,25 @@
 #include "GameSettings.h"
 #include "MenuHooks.h"
 
-DEFINE_COMMAND_ALT_PLUGIN(SetPlayerCanPickpocketEquippedItems, SetPCCanStealEqItems, "Toggles the ability to pickpocket equipped items.", false, kParams_OneInt);
-DEFINE_CMD_ALT_COND_PLUGIN(GetPlayerCanPickpocketEquippedItems, GetPCCanStealEqItems, "Checks if the player can pickpocket equipped items.", false, NULL);
-DEFINE_CMD_COND_PLUGIN(GetPCHasSleepWaitOverride, "Returns whether or not the player has a Sleep/Wait prevention override", false, NULL);
-DEFINE_COMMAND_PLUGIN(SetPCHasSleepWaitOverride, "Sets whether or not the player has a Sleep/Wait prevention override", false, kParams_OneInt);
-DEFINE_CMD_COND_PLUGIN(IsWeaponMelee, "Returns 1 if the weapon's base form is of one of the three weapon types belonging to melee-range weapons.", true, kParams_OneOptionalObjectID);
-DEFINE_CMD_COND_PLUGIN(IsEquippedWeaponMelee, "Returns 1 if the calling actor's equipped weapon's base form is of one of the three weapon types belonging to melee-range weapons.", true, NULL);
-DEFINE_CMD_COND_PLUGIN(IsWeaponRanged, "Returns 1 if the weapon's base form is one of the weapon types belonging to NON melee-range weapons.", true, kParams_OneOptionalObjectID);
-DEFINE_CMD_COND_PLUGIN(IsEquippedWeaponRanged, "Returns 1 if the calling actor's equipped weapon's base form is one of the weapon types belonging to NON melee-range weapons.", true, NULL);
+DEFINE_COMMAND_ALT_PLUGIN(SetPlayerCanPickpocketEquippedItems, SetPCCanStealEqItems, "Toggles the ability to pickpocket equipped items.", 
+	false, kParams_OneInt);
+DEFINE_CMD_ALT_COND_PLUGIN(GetPlayerCanPickpocketEquippedItems, GetPCCanStealEqItems, "Checks if the player can pickpocket equipped items.", 
+	false, NULL);
+DEFINE_CMD_COND_PLUGIN(GetPCHasSleepWaitOverride, "Returns whether or not the player has a Sleep/Wait prevention override", 
+	false, NULL);
+DEFINE_COMMAND_PLUGIN(SetPCHasSleepWaitOverride, "Sets whether or not the player has a Sleep/Wait prevention override", 
+	false, kParams_OneInt);
+DEFINE_CMD_COND_PLUGIN(IsWeaponMelee, "Returns 1 if the weapon's base form is of one of the three weapon types belonging to melee-range weapons.", 
+	false, kParams_OneOptionalObjectID);
+DEFINE_CMD_COND_PLUGIN(IsEquippedWeaponMelee, "Returns 1 if the calling actor's equipped weapon's base form is of one of the three weapon types belonging to melee-range weapons.", 
+	true, NULL);
+DEFINE_CMD_COND_PLUGIN(IsWeaponRanged, "Returns 1 if the weapon's base form is one of the weapon types belonging to NON melee-range weapons.", 
+	false, kParams_OneOptionalObjectID);
+DEFINE_CMD_COND_PLUGIN(IsEquippedWeaponRanged, "Returns 1 if the calling actor's equipped weapon's base form is one of the weapon types belonging to NON melee-range weapons.", 
+	true, NULL);
 DEFINE_CMD_COND_PLUGIN(GetChallengeProgress, "Returns the progress made on a challenge.", false, kParams_OneChallenge)
-DEFINE_CMD_COND_PLUGIN(GetPCHasScriptedFastTravelOverride, "Returns whether or not the player is restricted by EnableFastTravel", false, NULL);
+DEFINE_CMD_COND_PLUGIN(GetPCHasScriptedFastTravelOverride, "Returns whether or not the player is restricted by EnableFastTravel", 
+	false, NULL);
 DEFINE_CMD_COND_PLUGIN(GetPCCanFastTravel, "", false, NULL);
 DEFINE_CMD_ALT_COND_PLUGIN(GetWeaponHasFlag, WeaponHasFlag, "", false, kParams_OneInt_OneOptionalObjectID);
 DEFINE_COMMAND_ALT_PLUGIN(SetWeaponFlag, SetWeaponHasFlag, "", false, kParams_TwoInts_OneOptionalObjectID);
