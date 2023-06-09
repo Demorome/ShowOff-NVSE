@@ -718,12 +718,32 @@ namespace OnCalculateSellPrice
 	}
 }
 
+namespace OnProjectileStuff
+{
+	// Dark magic stolen from JIP's ProjectileImpactHook.
+	// Without it, projectile is reported as being in the wrong location (in script functions, at the time of the event).
+	void UpdateProjectilePosition(Projectile* proj)
+	{
+		auto* baseProj = static_cast<BGSProjectile*>(proj->baseForm);
+		if (baseProj->type != 2)
+		{
+			if (auto* data = proj->impactDataList.Head()->Data();
+				data != nullptr)
+			{
+				*proj->PosVector() = data->pos;
+			}
+		}
+	}
+}
+
 namespace OnProjectileDestroy
 {
+	using namespace OnProjectileStuff;
 	constexpr char eventName[] = "ShowOff:OnProjectileDestroy";
 
 	void __fastcall HandleEvent(Projectile* proj)
 	{
+		UpdateProjectilePosition(proj);
 		g_eventInterface->DispatchEvent(eventName, proj, proj->sourceRef, proj->sourceWeap);
 	}
 
@@ -747,6 +767,7 @@ namespace OnProjectileDestroy
 }
 namespace OnProjectileCreate
 {
+	using namespace OnProjectileStuff;
 	constexpr char eventName[] = "ShowOff:OnProjectileCreate";
 
 	void __fastcall HandleEvent(Projectile* proj, Actor* projOwner, TESObjectWEAP* weapon)
@@ -779,6 +800,7 @@ namespace OnProjectileCreate
 }
 namespace OnProjectileImpact
 {
+	using namespace OnProjectileStuff;
 	constexpr char eventName[] = "ShowOff:OnProjectileImpact";
 
 	void __fastcall HandleEvent(Projectile* proj, void* edx)
@@ -787,7 +809,10 @@ namespace OnProjectileImpact
 
 		// Only run if a new impact has been detected.
 		if (bool const detectedNewImpact = *reinterpret_cast<char*>(ebp - 0xD))
+		{
+			UpdateProjectilePosition(proj);
 			g_eventInterface->DispatchEvent(eventName, proj, proj->sourceRef, proj->sourceWeap, proj->GetImpactRef());
+		}
 	}
 
 	void __declspec(naked) EndFunctionHook()
