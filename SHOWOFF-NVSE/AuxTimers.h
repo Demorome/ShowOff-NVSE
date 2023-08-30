@@ -1,5 +1,6 @@
 #pragma once
 #include "jip_nvse.h"
+#include "CustomEventFilters.h"
 
 namespace AuxTimer
 {

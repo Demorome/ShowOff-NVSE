@@ -513,7 +513,6 @@ namespace HandleHooks
 		//WriteRelCall(0x770C0D, UINT32(ShowPickpocketStringInCombat2)); //breaks health target UI
 		// Possible solution: open and hook the companion loot exchange menu instead?
 #endif
-
 	}
 
 	void HandleGameTweaks()

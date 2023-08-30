@@ -641,6 +641,18 @@ static ParamInfo kParams_OneInt_OneOptionalActorBase[2] =
 	{	"base actor",	kParamType_ActorBase,	1	},
 };
 
+static ParamInfo kParams_EightOptionalInts[8] =
+{
+	{	"int",			kParamType_Integer,		1	},
+	{	"int",			kParamType_Integer,		1	},
+	{	"int",			kParamType_Integer,		1	},
+	{	"int",			kParamType_Integer,		1	},
+	{	"int",			kParamType_Integer,		1	},
+	{	"int",			kParamType_Integer,		1	},
+	{	"int",			kParamType_Integer,		1	},
+	{	"int",			kParamType_Integer,		1	},
+};
+
 static ParamInfo kParams_OneRace[1] =
 {
 	{	"race",	kParamType_Race,	0	},

@@ -50,8 +50,11 @@ bool Cmd_AuxTimerStart_Execute(COMMAND_ARGS)
 			}
 
 			for (auto const& callback : OnAuxTimerStart->EventCallbacks) {
-				if (varInfo.modIndex != 0xFF || callback.ScriptForEvent->GetOverridingModIdx() == varInfo.modIndex) {
-					FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStart->numMaxArgs, varName, varInfo.ownerID);
+				auto* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneString*>(callback.eventFilter);
+				if (filter->IsInFilter(0, varInfo.ownerID) && filter->IsInFilter(1, varName)) {
+					if (varInfo.modIndex != 0xFF || callback.ScriptForEvent->GetOverridingModIdx() == varInfo.modIndex) {
+						FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStart->numMaxArgs, varName, LookupFormByRefID(varInfo.ownerID));
+					}
 				}
 			}
 			
@@ -90,8 +93,11 @@ bool Cmd_AuxTimerStop_Execute(COMMAND_ARGS)
 			if (fireEvent)
 			{
 				for (auto const& callback : OnAuxTimerStop->EventCallbacks) {
-					if (varInfo.modIndex != 0xFF || callback.ScriptForEvent->GetOverridingModIdx() == varInfo.modIndex) {
-						FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStop->numMaxArgs, varName, varInfo.ownerID);
+					auto* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneString*>(callback.eventFilter);
+					if (filter->IsInFilter(0, varInfo.ownerID) && filter->IsInFilter(1, varName)) {
+						if (varInfo.modIndex != 0xFF || callback.ScriptForEvent->GetOverridingModIdx() == varInfo.modIndex) {
+							FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStop->numMaxArgs, varName, LookupFormByRefID(varInfo.ownerID));
+						}
 					}
 				}
 			}

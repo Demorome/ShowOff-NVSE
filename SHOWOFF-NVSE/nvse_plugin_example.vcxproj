@@ -313,6 +313,7 @@ copy "$(SolutionDir)Release\$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugi
     <ClCompile Include="..\nvse\NiTypes.cpp" />
     <ClCompile Include="..\nvse\SafeWrite.cpp" />
     <ClCompile Include="..\nvse\Utilities.cpp" />
+    <ClCompile Include="Events\CustomEventFilters.cpp" />
     <ClCompile Include="Events\JohnnyEventPredefinitions.cpp" />
     <ClCompile Include="Events\LambdaVarContext.cpp" />
     <ClCompile Include="functions\SO_fn_Files.cpp" />

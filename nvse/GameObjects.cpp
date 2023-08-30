@@ -94,6 +94,11 @@ bool PlayerCharacter::SetSkeletonPath(const char* newPath)
 	return true;
 }
 
+void PlayerCharacter::UpdateCamera(bool isCalledFromFunc21, bool _zero_skipUpdateLOD)
+{
+	ThisStdCall(0x94AE40, this, (UInt8)isCalledFromFunc21, (UInt8)_zero_skipUpdateLOD);
+}
+
 void TESObjectREFR::Update3D()
 {
 	if (this == PlayerCharacter::GetSingleton())
@@ -215,6 +220,11 @@ bool Actor::GetShouldAttack(Actor* target)
 	// call Actor::GetShouldAttack
 	int factionRelation_Out;
 	return ThisStdCall_B(0x8B06D0, this, target, 0, &factionRelation_Out, 0);
+}
+
+void Actor::SetWantsWeaponOut(bool wantsWeaponOut)
+{
+	ThisStdCall(0x8A6840, this, (UInt8)wantsWeaponOut);
 }
 
 SInt32 Actor::GetDetectionLevelAlt(Actor* target, bool calculateSneakLevel)

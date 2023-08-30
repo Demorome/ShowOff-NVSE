@@ -152,3 +152,8 @@ AnimGroupClassify s_animGroupClassify[] =
 	{1, 4, 0, 0}, {1, 4, 0, 0}, {1, 4, 0, 0}, {1, 4, 0, 0}, {1, 4, 0, 0}, {2, 5, 0, 0}, {2, 5, 0, 0}, {2, 5, 0, 0}, {2, 5, 0, 0}, {1, 0, 0, 0},
 	{2, 5, 0, 0}, {2, 5, 0, 0}, {2, 5, 0, 0}, {2, 5, 0, 0}
 };
+
+void __cdecl PlayMenuSound(MenuSoundCode soundCode)
+{
+	return CdeclCall(0x717280, soundCode);
+}

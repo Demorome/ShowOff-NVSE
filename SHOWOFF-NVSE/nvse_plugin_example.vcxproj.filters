@@ -105,6 +105,9 @@
     <ClCompile Include="GameFixes.cpp">
       <Filter>Hooks</Filter>
     </ClCompile>
+    <ClCompile Include="Events\CustomEventFilters.cpp">
+      <Filter>Events</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="functions\SO_fn_Misc.h">

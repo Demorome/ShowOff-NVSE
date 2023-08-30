@@ -77,8 +77,11 @@ namespace AuxTimer
 								const bool isPrivate = (auxVarNameMapIter.Key()[!isPerm] == '_');
 
 								for (auto const& callback : OnAuxTimerStop->EventCallbacks) {
-									if (!isPrivate || callback.ScriptForEvent->GetOverridingModIdx() == modMapIter.Key()) {
-										FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStop->numMaxArgs, auxVarNameMapIter.Key(), ownerForm);
+									auto* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneString*>(callback.eventFilter);
+									if (filter->IsInFilter(0, ownerFormID) && filter->IsInFilter(1, auxVarNameMapIter.Key())) {
+										if (!isPrivate || callback.ScriptForEvent->GetOverridingModIdx() == modMapIter.Key()) {
+											FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStop->numMaxArgs, auxVarNameMapIter.Key(), ownerForm);
+										}
 									}
 								}
 
@@ -86,8 +89,11 @@ namespace AuxTimer
 									timer.m_timeRemaining = timer.m_timeToCountdown;
 
 									for (auto const& callback : OnAuxTimerStart->EventCallbacks) {
-										if (!isPrivate || callback.ScriptForEvent->GetOverridingModIdx() == modMapIter.Key()) {
-											FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStart->numMaxArgs, auxVarNameMapIter.Key(), ownerForm);
+										auto* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneString*>(callback.eventFilter);
+										if (filter->IsInFilter(0, ownerFormID) && filter->IsInFilter(1, auxVarNameMapIter.Key())) {
+											if (!isPrivate || callback.ScriptForEvent->GetOverridingModIdx() == modMapIter.Key()) {
+												FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStart->numMaxArgs, auxVarNameMapIter.Key(), ownerForm);
+											}
 										}
 									}
 								}

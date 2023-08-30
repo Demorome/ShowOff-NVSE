@@ -3935,3 +3935,20 @@ public:
 	UInt32 count;
 };
 STATIC_ASSERT(sizeof(TESCaravanDeck) == 0x2C);
+
+// From lStewieAl's decoding
+enum MenuSoundCode : UInt32
+{
+	UIMenuOK = 1,
+	UIMenuCancel = 2,
+	UIMenuPrevNext = 3,
+	UIMenuFocus = 4,
+	UIPopUpQuestNew = 8,
+	UIPopUpMessageGeneral = 10,
+	UIPopUpMessageGeneral_ = 19,
+	UIMenuCancel_ = 20,
+	UILevelUp = 21,
+	UIMenuMode = 36
+};
+
+void __cdecl PlayMenuSound(MenuSoundCode soundCode);

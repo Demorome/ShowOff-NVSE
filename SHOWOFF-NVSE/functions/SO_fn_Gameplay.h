@@ -1071,12 +1071,34 @@ bool Cmd_GetCalculatedAPCost_Execute(COMMAND_ARGS)
 }
 
 
+DEFINE_COMMAND_PLUGIN(IsAiming, "", true, nullptr);
+bool Cmd_IsAiming_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	if (thisObj && IS_ACTOR(thisObj))
+	{
+		auto* actor = static_cast<Actor*>(thisObj);
+		if (actor->baseProcess)
+			*result = actor->baseProcess->IsAiming();
+	}
+	return true;
+}
 
-
-
-
-
-
+DEFINE_COMMAND_PLUGIN(IsBlockingOrAiming, "", true, nullptr);
+bool Cmd_IsBlockingOrAiming_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	if (thisObj && IS_ACTOR(thisObj))
+	{
+		auto* actor = static_cast<Actor*>(thisObj);
+		if (actor->baseProcess)
+		{
+			*result = actor->baseProcess->IsAiming()
+				|| actor->baseProcess->GetCurrentAnimAction() == 7; // block
+		}
+	}
+	return true;
+}
 
 
 

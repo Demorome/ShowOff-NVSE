@@ -733,6 +733,7 @@ public:
 	float GetHealthEffectsSum();
 	void Kill(Actor* killer);
 	bool GetShouldAttack(Actor* target);
+	void SetWantsWeaponOut(bool wantsWeaponOut);
 };
 
 // 1C0
@@ -1035,5 +1036,8 @@ public:
 
 	bool ToggleFirstPerson(bool toggleON);
 	char GetDetectionState();
+
+	// Credits to lStewieAl
+	void UpdateCamera(bool isCalledFromFunc21, bool _zero_skipUpdateLOD);
 };
 STATIC_ASSERT(sizeof(PlayerCharacter) == 0xE50);

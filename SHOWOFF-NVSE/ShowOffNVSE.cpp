@@ -39,7 +39,7 @@
 // Plugin Stuff
 IDebugLog g_Log; // file will be open after NVSE plugin load
 HMODULE	g_ShowOffHandle;
-constexpr UInt32 g_PluginVersion = 160;
+constexpr UInt32 g_PluginVersion = 165;
 
 // Allows modmakers to toggle ShowOff's debug messages for some of its functions.
 #ifdef _DEBUG
@@ -188,14 +188,14 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 			COPY_BYTES(s_lastLoadedPath, msg->fosPath, msg->dataLen + 1);
 			s_dataChangedFlags = kChangedFlag_All;
 		}
+		AuxTimer::HandleAutoRemoveTempTimers();
+		FlushJGInterfaceEvents();
 		break;
 	case NVSEMessagingInterface::kMessage_PostLoadGame:
 		if (msg->fosLoaded)
 		{
 			// JIP calls DoLoadGameHousekeeping() here
 			s_dataChangedFlags = 0;
-			AuxTimer::HandleAutoRemoveTempTimers();
-			FlushJGInterfaceEvents();
 		}
 		break;
 	case NVSEMessagingInterface::kMessage_PostLoad:
@@ -358,8 +358,10 @@ extern "C"
 
 	bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	{
+		PluginHandle const nvsePluginHandle = nvse->GetPluginHandle();  //from JiPLN
+
 		// register to receive messages from NVSE
-		((NVSEMessagingInterface*)nvse->QueryInterface(kInterface_Messaging))->RegisterListener(nvse->GetPluginHandle(), "NVSE", MessageHandler);
+		((NVSEMessagingInterface*)nvse->QueryInterface(kInterface_Messaging))->RegisterListener(nvsePluginHandle, "NVSE", MessageHandler);
 
 		{ 
 			// set up log file
@@ -380,8 +382,6 @@ extern "C"
 	
 		if (!nvse->isEditor) 
 		{
-			PluginHandle const nvsePluginHandle = nvse->GetPluginHandle();  //from JiPLN
-
 			g_mainThreadID = GetCurrentThreadId();
 
 			auto const nvseData = (NVSEDataInterface*)nvse->QueryInterface(kInterface_Data);
@@ -584,7 +584,7 @@ extern "C"
 		/*3CFD*/ REG_CMD_FORM(GetIngestibleConsumeSound)
 		/*3CFE*/ REG_CMD(SetIngestibleConsumeSound)
 		/*3CFF*/ REG_CMD(SetFactionCombatReactionTemp) /*A merge of SetAllyTemp and SetEnemyTemp. Now undocumented since it's clearer to use the other two.*/
-		/*3D00*/ REG_CMD(GetEquippedItemRefForItem)
+		/*3D00*/ REG_CMD_FORM(GetEquippedItemRefForItem)
 		/*3D01*/ REG_CMD(SetAllyTemp)
 		/*3D02*/ REG_CMD(SetEnemyTemp)
 		/*3D03*/ REG_CMD_ARR(TopicInfoGetResponseStrings)
@@ -678,7 +678,11 @@ extern "C"
 		/*3D49*/	REG_CMD(SetAmmoName)
 		/*3D4A*/	REG_CMD_STR(GetAmmoName)
 		/*3D4B*/	REG_CMD(KillAllHostiles)
-	
+
+		//========v1.65
+		/*3D4C*/	REG_CMD(IsAiming)
+		/*3D4D*/	REG_CMD(IsBlockingOrAiming)
+
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
 		//========v1.??

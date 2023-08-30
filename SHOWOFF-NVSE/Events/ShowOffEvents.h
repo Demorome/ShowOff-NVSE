@@ -77,6 +77,8 @@ bool Cmd_SetOnAuxTimerStopHandler_Execute(COMMAND_ARGS)
 		if (!thisObj)
 			thisObj = g_thePlayer;
 		filters[0].form = thisObj;
+		if (!filters[0].form)
+			return true;
 	}
 
 	filters[0].refID = filters[0].form->refID;
@@ -260,29 +262,71 @@ namespace OnPreActivate
 		{
 			//Check if this instance of TESObjectREFR::Activate was called by Activate func.
 			//(We don't want the event to run for that)
-			mov eax, dword ptr [ebp + 4]	//rtn addr
-			cmp eax, 0x5B5B1D	//one of the return addresses to Activate_Execute
-			je doNormal
-			cmp eax, 0x5B5B4D
-			je doNormal
+			mov		eax, dword ptr [ebp + 4]	//rtn addr
+			cmp		eax, 0x5B5B1D	//one of the return addresses to Activate_Execute
+			je		doNormal
+			cmp		eax, 0x5B5B4D
+			je		doNormal
 
 			pushad	//unknown what the __fastcall function will preserve, so store everything.
-			mov edx, dword ptr [ebp + activator]
-			call HandleEvent
-			test al, al
+			mov		edx, dword ptr [ebp + activator]
+			call	HandleEvent
+			test	al, al
 			popad
-			jnz doNormal
-			jmp retnFalse
+			jnz		doNormal
+			jmp		retnFalse
 
-			doNormal:
-			call getBaseForm	
-			jmp retnAddr
+		doNormal:
+			call	getBaseForm	
+			jmp		retnAddr
 		}
 	}
 
 	void WriteHook()
 	{
 		WriteRelJump(0x573347, (UInt32)Hook);
+	}
+}
+
+namespace OnPreScriptedActivate
+{
+	constexpr char eventName[] = "ShowOff:OnPreScriptedActivate";
+
+	bool __fastcall HandleEvent(TESObjectREFR* activated, TESObjectREFR* actionRef, UInt32 runOnActivateBlock)
+	{
+		auto constexpr resultCallback = [](NVSEArrayVarInterface::Element& result, void* shouldActivateAddr) -> bool
+			{
+				if (UInt32& shouldActivate = *static_cast<UInt32*>(shouldActivateAddr))
+					if (result.IsValid())
+						shouldActivate = result.Bool();
+				return true;
+			};
+		UInt32 shouldActivate = true;
+
+		g_eventInterface->DispatchEventAlt(eventName, resultCallback, &shouldActivate,
+			activated, actionRef, runOnActivateBlock, &shouldActivate);
+
+		return shouldActivate != 0;
+	}
+
+	CallDetour g_detour;
+
+	bool __fastcall MaybePreventScriptedActivation(TESObjectREFR* actionRef, void* edx)
+	{
+		auto isDisabled = ThisStdCall<bool>(g_detour.GetOverwrittenAddr(), actionRef);
+		if (isDisabled)
+			return true;
+
+		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+		auto* toActivate = *reinterpret_cast<TESObjectREFR**>(ebp + 0x10);
+		auto runOnActivateBlock = *reinterpret_cast<UInt32*>(ebp - 0x8);
+		return !HandleEvent(toActivate, actionRef, runOnActivateBlock);
+	}
+
+	void WriteDelayedHooks()
+	{
+		// replaces TESForm::IsDisabled
+		g_detour.WriteRelCall(0x5B5AD0, (UInt32)MaybePreventScriptedActivation);
 	}
 }
 
@@ -1538,6 +1582,56 @@ namespace OnPreLifeStateChange
 }
 #endif
 
+//TODO: Make this work with npcs, not just player.
+// TODO: make this not run when player isn't starting a new reload (just spamming reload key)
+namespace OnPreReload
+{
+	constexpr char eventName[] = "ShowOff:OnPreReload";
+
+	bool __fastcall HandleEvent(Actor* actor, TESObjectWEAP* weaponBaseForm)
+	{
+		if (!weaponBaseForm)
+			return true; // shouldReload = true, do the normal code
+
+		auto constexpr resultCallback = [](NVSEArrayVarInterface::Element& result, void* shouldReloadAddr) -> bool
+			{
+				if (UInt32& shouldDrop = *static_cast<UInt32*>(shouldReloadAddr))
+					if (result.IsValid())
+						shouldDrop = result.Bool();
+				return true;
+			};
+		UInt32 shouldReload = true;
+
+		g_eventInterface->DispatchEventAlt(eventName, resultCallback, &shouldReload,
+			actor, weaponBaseForm, &shouldReload);
+
+		return shouldReload != 0;
+	}
+
+	__HOOK MaybePreventReload()
+	{
+		UInt32 static const EarlyEndAddr = 0x95D447,
+			NormalReturnAddr = 0x95D3FB;
+		__asm
+		{
+			mov		edx, [ebp + -0x8]  // weapon
+			call	HandleEvent
+			test	al, al
+			jnz		DoNormal
+		// else, prevent reloading
+			jmp		EarlyEndAddr
+		DoNormal:
+			cmp		[ebp + 0x8], 0
+			jmp		NormalReturnAddr
+		}
+	}
+
+	void WriteHooks()
+	{
+		WriteRelJump(0x95D3F4, (UInt32)MaybePreventReload);
+	}
+}
+
 using EventFlags = NVSEEventManagerInterface::EventFlags;
 
 template<UInt8 N>
@@ -1577,7 +1671,8 @@ void RegisterEvents()
 
 	RegisterEvent(OnQueueCornerMessage::eventName, kEventParams_ThreeStrings_OneFloat);
 	RegisterEvent(OnShowCornerMessage::eventName, kEventParams_ThreeStrings_OneFloat);
-	RegisterEvent(OnFireWeapon::eventName, kEventParams_OneReference_OneBaseForm);
+	// TODO: DOCUMENT!!!!!!
+	RegisterEvent(OnFireWeapon::eventName, kEventParams_OneBaseForm, EventFlags::kFlag_FlushOnLoad);
 
 #if _DEBUG
 	RegisterEvent(OnCalculateEffectEntryMagnitude::eventName,
@@ -1597,6 +1692,10 @@ void RegisterEvents()
 #if 0
 	RegisterEvent(OnPreLifeStateChange::eventName, kEventParams_TwoInts);
 #endif
+
+	// v1.65
+	RegisterEvent(OnPreReload::eventName, kEventParams_OneBaseForm_OneIntPtr, EventFlags::kFlag_FlushOnLoad);
+	RegisterEvent(OnPreScriptedActivate::eventName, kEventParams_OneReference_OneInt_OneIntPtr);
 
 	#if _DEBUG
 
@@ -1638,7 +1737,7 @@ namespace HandleHooks
 #endif
 		OnPCMiscStatChange::WriteHook();
 		OnAddAlt::WriteHooks();
-
+		OnPreReload::WriteHooks();
 #if _DEBUG
 #endif
 	}
@@ -1654,7 +1753,7 @@ namespace HandleHooks
 #if 0
 		OnPreLifeStateChange::WriteDelayedHook();
 #endif
-
+		OnPreScriptedActivate::WriteDelayedHooks();
 #if _DEBUG
 #endif
 	}

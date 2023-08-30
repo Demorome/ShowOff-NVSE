@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "decoding.h"
+#include "SOTypes.h"
 
 enum IDAFunctionNames
 {

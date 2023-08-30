@@ -326,7 +326,7 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 * "ShowOff:OnDispositionChange"
 * "ShowOff:OnAdd"
 
-//===v1.61
+//===v1.65
 ===Bug Fixes:
 * Fix innacurate projectile position in OnProjectileImpact/Destroy.
 

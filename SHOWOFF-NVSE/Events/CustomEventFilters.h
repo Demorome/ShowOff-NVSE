@@ -147,6 +147,4 @@ struct JohnnyEventFiltersOneFormOneString : EventHandlerInterface
 	void SetUpFiltering() override
 	{}
 };
-void* __fastcall CreateOneFormOneStringFilter(void** Filters, UInt32 numFilters_unused) {
-	return new JohnnyEventFiltersOneFormOneString(Filters);
-}
+void* __fastcall CreateOneFormOneStringFilter(void** Filters, UInt32 numFilters_unused);
