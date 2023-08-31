@@ -1,5 +1,6 @@
 ﻿#include "AuxTimers.h"
 #include "JohnnyEventPredefinitions.h"
+#include "utility.h"
 
 extern EventInformation* OnAuxTimerStart;
 extern EventInformation* OnAuxTimerStop;
@@ -53,7 +54,7 @@ namespace AuxTimer
 
 						if (timer.m_flags & AuxTimerValue::kFlag_DontRunWhenPaused)
 						{
-							if (IsConsoleMode() || StartMenu::GetSingleton())
+							if (IsGamePaused())
 								continue;
 						}
 							
@@ -105,6 +106,7 @@ namespace AuxTimer
 					}
 					else // invalid form
 					{
+						// Don't care about invalidating the iterator
 						auxVarNameMapIter.Remove();
 					}
 				}

@@ -362,6 +362,11 @@ public:
 	UInt32		unk028[571];		// 028
 
 	static ConsoleManager * GetSingleton(void);
+
+	bool IsConsoleOpen()
+	{
+		return ThisStdCall<bool>(0x4A4020, this);
+	}
 };
 STATIC_ASSERT(sizeof(ConsoleManager) == 0x914);
 

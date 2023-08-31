@@ -2072,3 +2072,11 @@ std::string RefToString(TESForm* form)
 
 	return result;
 }
+
+bool IsGamePaused()
+{
+	bool isMainOrPauseMenuOpen = *(Menu**)0x11DAAC0; // g_startMenu, credits to lStewieAl
+	auto* console = ConsoleManager::GetSingleton();
+
+	return isMainOrPauseMenuOpen || console->IsConsoleOpen();
+}
