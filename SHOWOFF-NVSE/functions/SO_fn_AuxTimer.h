@@ -101,15 +101,10 @@ bool Cmd_AuxTimerStop_Execute(COMMAND_ARGS)
 					}
 				}
 			}
-
-			auto& modsMap = varInfo.ModsMap();
 			AUX_TIMER_CS;
-			modsMap.GetPtr(varInfo.modIndex)->GetPtr(varInfo.ownerID)->Erase(varName);
-			if (modsMap.GetPtr(varInfo.modIndex)->GetPtr(varInfo.ownerID)->Empty()){
-				modsMap.GetPtr(varInfo.modIndex)->Erase(varInfo.ownerID);
-				if (modsMap.GetPtr(varInfo.modIndex)->Empty())
-					modsMap.Erase(varInfo.modIndex);
-			}
+			std::vector<AuxTimerPendingRemoval>& timersToRemove = varInfo.isPerm ? g_auxTimersToRemovePerm : g_auxTimersToRemoveTemp;
+			timersToRemove.emplace_back(AuxTimerPendingRemoval{ varInfo.modIndex, varInfo.ownerID, varName });
+			value->m_flags |= AuxTimerValue::kFlag_PendingRemoval;
 
 			if (varInfo.isPerm)
 			{

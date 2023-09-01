@@ -13,7 +13,7 @@ namespace AuxTimer
 		double m_timeToCountdown; //original value of time to start counting down.
 		double m_timeRemaining; //counts down to 0. If below or at 0, timer is stopped/not running.
 
-		enum Flags
+		enum Flags : UInt32
 		{
 			// On by default
 			kFlag_RunInMenuMode = 1 << 0,
@@ -27,6 +27,9 @@ namespace AuxTimer
 			kFlag_IsPaused = 1 << 5,
 			kFlag_NotAffectedByTimeMult_InMenuMode = 1 << 6, // if on, seconds-based timers won't be affected by TimeMult in MenuMode.
 			kFlag_DontRunWhenPaused = 1 << 7, // timer pauses when game is paused (main menu, pause menu, console menu).
+
+			// Off by default, hidden and undocumented, for good reason
+			kFlag_PendingRemoval = (UInt32)1 << (UInt32)31, // if on, prevent all changes to the timer, for it will be deleted soon.
 		};
 		UInt32 m_flags;
 
@@ -54,6 +57,9 @@ namespace AuxTimer
 		}
 		[[nodiscard]] double GetTimeElapsed() const {
 			return m_timeToCountdown - m_timeRemaining;
+		}
+		[[nodiscard]] bool IsPendingRemoval() const {
+			return (m_flags & kFlag_PendingRemoval) != 0;
 		}
 
 		void WriteValData() const {
@@ -110,8 +116,26 @@ namespace AuxTimer
 		}
 	};
 
-	AuxTimerValue* __fastcall GetTimerValue(const AuxTimerMapInfo& varInfo, bool createIfNotFound, bool* isCreated = nullptr);
+	AuxTimerValue* __fastcall GetTimerValue(const AuxTimerMapInfo& varInfo, bool createIfNotFound);
 
-	void DoCountdown(double vatsTimeMult, bool isMenuMode, AuxTimerModsMap& auxTimers);
+	namespace Impl
+	{
+		void DoCountdown(double vatsTimeMult, bool isMenuMode, bool isTemp);
+	}
+	void DoCountdown(double vatsTimeMult, bool isMenuMode);
 	void HandleAutoRemoveTempTimers();
+
+	struct AuxTimerPendingRemoval
+	{
+		UInt32		ownerID;
+		UInt32		modIndex;
+		std::string	varName;
+	};
+
+	extern std::vector<AuxTimerPendingRemoval> g_auxTimersToRemovePerm, g_auxTimersToRemoveTemp;
+	namespace Impl
+	{
+		void RemovePendingTimers(bool clearTemp);
+	}
+	void RemovePendingTimers();
 }

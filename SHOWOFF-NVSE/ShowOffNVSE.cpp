@@ -188,6 +188,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 			COPY_BYTES(s_lastLoadedPath, msg->fosPath, msg->dataLen + 1);
 			s_dataChangedFlags = kChangedFlag_All;
 		}
+		AuxTimer::RemovePendingTimers();
 		AuxTimer::HandleAutoRemoveTempTimers();
 		FlushJGInterfaceEvents();
 		break;
@@ -214,6 +215,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		// Copied from jip_nvse.cpp
 		ProcessDataChangedFlags(kChangedFlag_All);
 		s_lastLoadedPath[0] = 0;
+		AuxTimer::RemovePendingTimers();
 		AuxTimer::HandleAutoRemoveTempTimers();
 		FlushJGInterfaceEvents();
 		break;
@@ -267,10 +269,10 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		const auto isMenuMode = CdeclCall<bool>(0x702360);
 
 		AUX_TIMER_CS;
+		AuxTimer::RemovePendingTimers();
 		if (!s_auxTimerMapArraysPerm.Empty())
 			s_dataChangedFlags |= kChangedFlag_AuxTimerMaps; // assume a timer will change
-		AuxTimer::DoCountdown(vatsTimeMult, isMenuMode, s_auxTimerMapArraysPerm);
-		AuxTimer::DoCountdown(vatsTimeMult, isMenuMode, s_auxTimerMapArraysTemp);
+		AuxTimer::DoCountdown(vatsTimeMult, isMenuMode);
 		break;
 	}
 	case NVSEMessagingInterface::kMessage_RuntimeScriptError:

@@ -9,113 +9,135 @@ namespace AuxTimer
 {
 	AuxTimerModsMap s_auxTimerMapArraysPerm, s_auxTimerMapArraysTemp;
 
-	AuxTimerValue* __fastcall GetTimerValue(const AuxTimerMapInfo& varInfo, bool createIfNotFound, bool* isCreated)
+	std::vector<AuxTimerPendingRemoval> g_auxTimersToRemovePerm, g_auxTimersToRemoveTemp;
+
+	AuxTimerValue* __fastcall GetTimerValue(const AuxTimerMapInfo& varInfo, bool createIfNotFound)
 	{
 		if (createIfNotFound) {
-			if (isCreated)
-				*isCreated = true;
 			return &varInfo.ModsMap()[varInfo.modIndex][varInfo.ownerID][varInfo.varName];
 		}
 
-		if (isCreated)
-			*isCreated = false;
 		AuxTimerOwnersMap* ownersMap = varInfo.ModsMap().GetPtr(varInfo.modIndex);
 		if (!ownersMap)
 			return nullptr;
 		AuxTimerVarsMap* varsMap = ownersMap->GetPtr(varInfo.ownerID);
 		if (!varsMap)
 			return nullptr;
-		return varsMap->GetPtr(varInfo.varName);
+		auto* result = varsMap->GetPtr(varInfo.varName);
+		if (result && result->IsPendingRemoval())
+			return nullptr; // act as if we can't find it
+		return result;
 	}
 
-	void DoCountdown(double vatsTimeMult, bool isMenuMode, AuxTimerModsMap &auxTimers)
+	namespace Impl
 	{
-		if (auxTimers.Empty())
-			return;
-
-		const double secondsDeltaWithMult = static_cast<double>(g_timeGlobal->secondsPassed) * vatsTimeMult;
-		const double secondsDeltas[2] = { secondsDeltaWithMult, static_cast<double>(g_timeGlobal->secondsPassed) };
-
-		for (auto modMapIter = auxTimers.Begin(); !modMapIter.End(); ++modMapIter)
+		void DoCountdown(double vatsTimeMult, bool isMenuMode, bool isTemp)
 		{
-			for (auto refOwnersMapIter = modMapIter.Get().Begin(); 
-				!refOwnersMapIter.End(); ++refOwnersMapIter)
+			AuxTimerModsMap& auxTimers = isTemp ? s_auxTimerMapArraysTemp : s_auxTimerMapArraysPerm;
+
+			if (auxTimers.Empty())
+				return;
+
+			const double secondsDeltaWithMult = static_cast<double>(g_timeGlobal->secondsPassed) * vatsTimeMult;
+			const double secondsDeltas[2] = { secondsDeltaWithMult, static_cast<double>(g_timeGlobal->secondsPassed) };
+
+			for (auto modMapIter = auxTimers.Begin(); !modMapIter.End(); ++modMapIter)
 			{
-				for (auto auxVarNameMapIter = refOwnersMapIter.Get().Begin(); 
-					!auxVarNameMapIter.End(); ++auxVarNameMapIter)
+				for (auto refOwnersMapIter = modMapIter.Get().Begin(); 
+					!refOwnersMapIter.End(); ++refOwnersMapIter)
 				{
-					const auto ownerFormID = refOwnersMapIter.Key();
-					if (const auto* ownerForm = LookupFormByRefID(ownerFormID))
+					for (auto auxVarNameMapIter = refOwnersMapIter.Get().Begin(); 
+						!auxVarNameMapIter.End(); ++auxVarNameMapIter)
 					{
-						auto& timer = auxVarNameMapIter.Get();
-
-						if (timer.m_flags & AuxTimerValue::kFlag_IsPaused)
-							continue;
-
-						if (timer.m_flags & AuxTimerValue::kFlag_DontRunWhenPaused)
+						const auto ownerFormID = refOwnersMapIter.Key();
+						if (const auto* ownerForm = LookupFormByRefID(ownerFormID))
 						{
-							if (IsGamePaused())
+							auto& timer = auxVarNameMapIter.Get();
+
+							if (timer.m_flags & AuxTimerValue::kFlag_IsPaused)
 								continue;
-						}
+
+							if (timer.m_flags & AuxTimerValue::kFlag_DontRunWhenPaused)
+							{
+								if (IsGamePaused())
+									continue;
+							}
 							
-						if ((timer.m_flags & AuxTimerValue::kFlag_RunInMenuMode && isMenuMode) 
-							|| (timer.m_flags & AuxTimerValue::kFlag_RunInGameMode && !isMenuMode))
-						{
-							if (timer.m_flags & AuxTimerValue::kFlag_CountInSeconds)
+							if ((timer.m_flags & AuxTimerValue::kFlag_RunInMenuMode && isMenuMode) 
+								|| (timer.m_flags & AuxTimerValue::kFlag_RunInGameMode && !isMenuMode))
 							{
-								const bool notAffectedByTimeMult = 
-									(timer.m_flags & AuxTimerValue::kFlag_NotAffectedByTimeMult_InMenuMode)
-									&& isMenuMode;
-								timer.m_timeRemaining -= secondsDeltas[notAffectedByTimeMult ? 1 : 0];
-							}
-							else {
-								--timer.m_timeRemaining;
-							}
-
-							if (timer.m_timeRemaining <= 0.0)
-							{
-								const bool isPerm = (auxVarNameMapIter.Key()[0] != '*');
-								const bool isPrivate = (auxVarNameMapIter.Key()[!isPerm] == '_');
-
-								for (auto const& callback : OnAuxTimerStop->EventCallbacks) {
-									auto* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneString*>(callback.eventFilter);
-									if (filter->IsInFilter(0, ownerFormID) && filter->IsInFilter(1, auxVarNameMapIter.Key())) {
-										if (!isPrivate || callback.ScriptForEvent->GetOverridingModIdx() == modMapIter.Key()) {
-											FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStop->numMaxArgs, auxVarNameMapIter.Key(), ownerForm);
-										}
-									}
+								if (timer.m_flags & AuxTimerValue::kFlag_CountInSeconds)
+								{
+									const bool notAffectedByTimeMult = 
+										(timer.m_flags & AuxTimerValue::kFlag_NotAffectedByTimeMult_InMenuMode)
+										&& isMenuMode;
+									timer.m_timeRemaining -= secondsDeltas[notAffectedByTimeMult ? 1 : 0];
+								}
+								else {
+									--timer.m_timeRemaining;
 								}
 
-								if (timer.m_flags & AuxTimerValue::kFlag_AutoRestarts) {
-									timer.m_timeRemaining = timer.m_timeToCountdown;
+								if (timer.m_timeRemaining <= 0.0)
+								{
+									// Handle end-of-timer code.
+									const bool isPerm = (auxVarNameMapIter.Key()[0] != '*');
+									const bool isPrivate = (auxVarNameMapIter.Key()[!isPerm] == '_');
 
-									for (auto const& callback : OnAuxTimerStart->EventCallbacks) {
+									for (auto const& callback : OnAuxTimerStop->EventCallbacks) {
 										auto* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneString*>(callback.eventFilter);
 										if (filter->IsInFilter(0, ownerFormID) && filter->IsInFilter(1, auxVarNameMapIter.Key())) {
 											if (!isPrivate || callback.ScriptForEvent->GetOverridingModIdx() == modMapIter.Key()) {
-												FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStart->numMaxArgs, auxVarNameMapIter.Key(), ownerForm);
+												FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStop->numMaxArgs, auxVarNameMapIter.Key(), ownerForm);
 											}
 										}
 									}
-								}
-								else {
-									auxVarNameMapIter.Remove(); // valid mid-loop according to JIP's ClearJIPSavedData
+
+									// User could have called AuxTimerStop in the OnAuxTimerStop event, 
+									// ...which can be useful for stopping AutoRestart timers.
+									if (timer.IsPendingRemoval())
+										continue;
+
+									if (timer.m_flags & AuxTimerValue::kFlag_AutoRestarts) {
+										timer.m_timeRemaining = timer.m_timeToCountdown;
+
+										for (auto const& callback : OnAuxTimerStart->EventCallbacks) {
+											auto* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneString*>(callback.eventFilter);
+											if (filter->IsInFilter(0, ownerFormID) && filter->IsInFilter(1, auxVarNameMapIter.Key())) {
+												if (!isPrivate || callback.ScriptForEvent->GetOverridingModIdx() == modMapIter.Key()) {
+													FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStart->numMaxArgs, auxVarNameMapIter.Key(), ownerForm);
+												}
+											}
+										}
+
+										if (timer.IsPendingRemoval())
+											continue;
+									}
+									else {
+										// don't care about delaying removal here since it should be thread-safe anyways
+										auxVarNameMapIter.Remove(); // valid mid-loop according to JIP's ClearJIPSavedData
+									}
 								}
 							}
 						}
+						else // invalid form
+						{
+							// Don't care about delaying removal here, it's just invalid garbage now
+							auxVarNameMapIter.Remove();
+						}
 					}
-					else // invalid form
-					{
-						// Don't care about invalidating the iterator
-						auxVarNameMapIter.Remove();
-					}
+					if (refOwnersMapIter.Get().Empty())
+						refOwnersMapIter.Remove();
 				}
-				if (refOwnersMapIter.Get().Empty())
-					refOwnersMapIter.Remove();
+				if (modMapIter.Get().Empty())
+					modMapIter.Remove();
 			}
-			if (modMapIter.Get().Empty())
-				modMapIter.Remove();
 		}
+	}
+
+	void DoCountdown(double vatsTimeMult, bool isMenuMode)
+	{
+		Impl::DoCountdown(vatsTimeMult, isMenuMode, true);
+		Impl::DoCountdown(vatsTimeMult, isMenuMode, false);
 	}
 
 	void HandleAutoRemoveTempTimers()
@@ -138,6 +160,45 @@ namespace AuxTimer
 			if (modMapIter.Get().Empty())
 				modMapIter.Remove();
 		}
+	}
+
+	namespace Impl
+	{
+		void RemovePendingTimers(bool clearTemp)
+		{
+			std::vector<AuxTimerPendingRemoval>& timersToRemove = clearTemp ? g_auxTimersToRemoveTemp : g_auxTimersToRemovePerm;
+			if (timersToRemove.empty())
+				return;
+
+			// After deleting some timers, clear out the maps the timers were contained in if they're now empty.
+			std::unordered_set<UInt32> modMapsToUpdate;
+
+			AuxTimerModsMap& modsMapOfAllTimers = clearTemp ? s_auxTimerMapArraysTemp : s_auxTimerMapArraysPerm;
+			for (auto& timerToRemove : timersToRemove)
+			{
+				auto* modEntry = modsMapOfAllTimers.GetPtr(timerToRemove.modIndex);
+				auto* modAndRefEntry = modEntry->GetPtr(timerToRemove.ownerID);
+				modAndRefEntry->Erase(const_cast<char*>(timerToRemove.varName.c_str()));
+				if (modAndRefEntry->Empty()) {
+					modEntry->Erase(timerToRemove.ownerID);
+					// modAndRefEntry is no longer valid!
+					modMapsToUpdate.insert(timerToRemove.modIndex);
+				}
+			}
+			timersToRemove.clear();
+
+			for (auto modIndex : modMapsToUpdate)
+			{
+				if (modsMapOfAllTimers.GetPtr(modIndex)->Empty())
+					modsMapOfAllTimers.Erase(modIndex);
+			}
+		}
+	}
+
+	void RemovePendingTimers()
+	{
+		Impl::RemovePendingTimers(true);
+		Impl::RemovePendingTimers(false);
 	}
 }
 
