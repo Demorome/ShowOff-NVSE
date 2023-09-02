@@ -97,6 +97,7 @@ namespace AuxTimer
 			{
 				varName = pVarName;
 				isPerm = (varName[0] != '*');
+				// If an AuxTimer func is called from console, will have 0xFF aka Public mod index.
 				modIndex = (varName[!isPerm] == '_') ? 0xFF : scriptObj->GetOverridingModIdx();
 			}
 		}
@@ -113,6 +114,10 @@ namespace AuxTimer
 
 		[[nodiscard]] AuxTimerModsMap& ModsMap() const {
 			return isPerm ? s_auxTimerMapArraysPerm : s_auxTimerMapArraysTemp;
+		}
+
+		[[nodiscard]] bool IsPublic() const {
+			return modIndex == 0xFF;
 		}
 	};
 
