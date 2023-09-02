@@ -4,6 +4,7 @@
 
 extern EventInformation* OnAuxTimerStart;
 extern EventInformation* OnAuxTimerStop;
+extern EventInformation* OnAuxTimerUpdate;
 
 namespace AuxTimer
 {
@@ -69,22 +70,39 @@ namespace AuxTimer
 							if ((timer.m_flags & AuxTimerValue::kFlag_RunInMenuMode && isMenuMode) 
 								|| (timer.m_flags & AuxTimerValue::kFlag_RunInGameMode && !isMenuMode))
 							{
+								float timePassed;
 								if (timer.m_flags & AuxTimerValue::kFlag_CountInSeconds)
 								{
 									const bool notAffectedByTimeMult = 
 										(timer.m_flags & AuxTimerValue::kFlag_NotAffectedByTimeMult_InMenuMode)
 										&& isMenuMode;
-									timer.m_timeRemaining -= secondsDeltas[notAffectedByTimeMult ? 1 : 0];
+									timePassed = secondsDeltas[notAffectedByTimeMult ? 1 : 0];
+									timer.m_timeRemaining -= timePassed;
 								}
 								else {
+									timePassed = 1;
 									--timer.m_timeRemaining;
 								}
+
+								const bool isPerm = (auxVarNameMapIter.Key()[0] != '*');
+								const bool isPrivate = (auxVarNameMapIter.Key()[!isPerm] == '_');
+
+								for (auto const& callback : OnAuxTimerUpdate->EventCallbacks) {
+									auto* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneString*>(callback.eventFilter);
+									if (filter->IsInFilter(0, ownerFormID) && filter->IsInFilter(1, auxVarNameMapIter.Key())) {
+										if (!isPrivate || callback.ScriptForEvent->GetOverridingModIdx() == modMapIter.Key()) {
+											FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerUpdate->numMaxArgs, auxVarNameMapIter.Key(), ownerForm, *(UInt32*)&timePassed);
+										}
+									}
+								}
+
+								// Timer could have stopped from inside OnAuxTimerUpdate handlers
+								if (timer.IsPendingRemoval())
+									continue;
 
 								if (timer.m_timeRemaining <= 0.0)
 								{
 									// Handle end-of-timer code.
-									const bool isPerm = (auxVarNameMapIter.Key()[0] != '*');
-									const bool isPrivate = (auxVarNameMapIter.Key()[!isPerm] == '_');
 
 									for (auto const& callback : OnAuxTimerStop->EventCallbacks) {
 										auto* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneString*>(callback.eventFilter);

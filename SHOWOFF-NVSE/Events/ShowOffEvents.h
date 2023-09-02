@@ -91,10 +91,47 @@ bool Cmd_SetOnAuxTimerStopHandler_Execute(COMMAND_ARGS)
 	return true;
 }
 
+EventInformation* OnAuxTimerUpdate;
+DEFINE_COMMAND_ALT_PLUGIN(SetOnAuxTimerUpdateHandler, SetOnTimerUpdateHandler, "", false,
+	kParams_EventNoFlag_OneString_OneOptionalForm);
+bool Cmd_SetOnAuxTimerUpdateHandler_Execute(COMMAND_ARGS)
+{
+	UInt32 setOrRemove;
+	Script* script;
+	GenericFilters filters[2];
+	char strBuf[0x80];
+	filters[0].form = nullptr;
+	filters[1].str = strBuf;
+	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, filters[1].str, &filters[0].form)
+		|| NOT_TYPE(script, Script)))
+	{
+		return true;
+	}
+
+	if (!filters[0].form)
+	{
+		if (!thisObj)
+			thisObj = g_thePlayer;
+		filters[0].form = thisObj;
+		if (!filters[0].form)
+			return true;
+	}
+
+	filters[0].refID = filters[0].form->refID;
+	if (OnAuxTimerUpdate)
+	{
+		if (setOrRemove)
+			OnAuxTimerUpdate->RegisterEvent(script, (void**)filters);
+		else OnAuxTimerUpdate->RemoveEvent(script, (void**)filters);
+	}
+	return true;
+}
+
 void FlushJGInterfaceEvents()
 {
 	OnAuxTimerStop->FlushEventCallbacks();
 	OnAuxTimerStart->FlushEventCallbacks();
+	OnAuxTimerUpdate->FlushEventCallbacks();
 }
 
 namespace CornerMessageHooks
@@ -1651,6 +1688,7 @@ void RegisterEvents()
 	OnCornerMessage = JGCreateEvent("OnCornerMessage", 5, 0, NULL);
 	OnAuxTimerStart = JGCreateEvent("OnTimerStart", 2, 2, CreateOneFormOneStringFilter);
 	OnAuxTimerStop = JGCreateEvent("OnTimerStop", 2, 2, CreateOneFormOneStringFilter);
+	OnAuxTimerUpdate = JGCreateEvent("OnTimerUpdate", 3, 2, CreateOneFormOneStringFilter);
 
 	RegisterEvent(OnPreActivate::eventName, kEventParams_OneReference_OneIntPtr);
 	RegisterEvent(PreActivateInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneIntPtr_OneInt);
