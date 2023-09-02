@@ -14,7 +14,10 @@ namespace AuxTimer
 	AuxTimerValue* __fastcall GetTimerValue(const AuxTimerMapInfo& varInfo, bool createIfNotFound)
 	{
 		if (createIfNotFound) {
-			return &varInfo.ModsMap()[varInfo.modIndex][varInfo.ownerID][varInfo.varName];
+			auto &newEntry = varInfo.ModsMap()[varInfo.modIndex][varInfo.ownerID][varInfo.varName];
+			// Remove pending removal flag, just in case we're not creating a new value.
+			newEntry.m_flags &= ~AuxTimerValue::kFlag_PendingRemoval;
+			return &newEntry;
 		}
 
 		AuxTimerOwnersMap* ownersMap = varInfo.ModsMap().GetPtr(varInfo.modIndex);
@@ -178,6 +181,13 @@ namespace AuxTimer
 			{
 				auto* modEntry = modsMapOfAllTimers.GetPtr(timerToRemove.modIndex);
 				auto* modAndRefEntry = modEntry->GetPtr(timerToRemove.ownerID);
+
+				// If the AuxTimer is no longer pending removal, 
+				// ... likely because AuxTimerStart was called on it in the same frame it was stopped,
+				// ... avoid deleting the timer.
+				if (!modAndRefEntry->GetPtr(const_cast<char*>(timerToRemove.varName.c_str()))->IsPendingRemoval())
+					continue;
+
 				modAndRefEntry->Erase(const_cast<char*>(timerToRemove.varName.c_str()));
 				if (modAndRefEntry->Empty()) {
 					modEntry->Erase(timerToRemove.ownerID);
