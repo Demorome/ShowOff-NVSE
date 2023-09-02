@@ -85,12 +85,12 @@ namespace AuxTimer
 								}
 
 								const bool isPerm = (auxVarNameMapIter.Key()[0] != '*');
-								const bool isPrivate = (auxVarNameMapIter.Key()[!isPerm] == '_');
+								const bool isPublic = (auxVarNameMapIter.Key()[!isPerm] == '_');
 
 								for (auto const& callback : OnAuxTimerUpdate->EventCallbacks) {
 									auto* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneString*>(callback.eventFilter);
 									if (filter->IsInFilter(0, ownerFormID) && filter->IsInFilter(1, auxVarNameMapIter.Key())) {
-										if (!isPrivate || callback.ScriptForEvent->GetOverridingModIdx() == modMapIter.Key()) {
+										if (isPublic || callback.ScriptForEvent->GetOverridingModIdx() == modMapIter.Key()) {
 											FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerUpdate->numMaxArgs, auxVarNameMapIter.Key(), ownerForm, *(UInt32*)&timePassed);
 										}
 									}
@@ -107,15 +107,14 @@ namespace AuxTimer
 									for (auto const& callback : OnAuxTimerStop->EventCallbacks) {
 										auto* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneString*>(callback.eventFilter);
 										if (filter->IsInFilter(0, ownerFormID) && filter->IsInFilter(1, auxVarNameMapIter.Key())) {
-											if (!isPrivate || callback.ScriptForEvent->GetOverridingModIdx() == modMapIter.Key()) {
+											if (isPublic || callback.ScriptForEvent->GetOverridingModIdx() == modMapIter.Key()) {
 												FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStop->numMaxArgs, auxVarNameMapIter.Key(), ownerForm);
 											}
 										}
 									}
 
-									// User could have called AuxTimerStop in the OnAuxTimerStop event, 
-									// ...which can be useful for stopping AutoRestart timers.
-									if (timer.IsPendingRemoval())
+									// User could have called AuxTimerStop or AuxTimerStart in the OnAuxTimerStop event.
+									if (timer.IsPendingRemoval() || timer.m_timeRemaining > 0.0)
 										continue;
 
 									if (timer.m_flags & AuxTimerValue::kFlag_AutoRestarts) {
@@ -124,14 +123,11 @@ namespace AuxTimer
 										for (auto const& callback : OnAuxTimerStart->EventCallbacks) {
 											auto* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneString*>(callback.eventFilter);
 											if (filter->IsInFilter(0, ownerFormID) && filter->IsInFilter(1, auxVarNameMapIter.Key())) {
-												if (!isPrivate || callback.ScriptForEvent->GetOverridingModIdx() == modMapIter.Key()) {
+												if (isPublic || callback.ScriptForEvent->GetOverridingModIdx() == modMapIter.Key()) {
 													FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStart->numMaxArgs, auxVarNameMapIter.Key(), ownerForm);
 												}
 											}
 										}
-
-										if (timer.IsPendingRemoval())
-											continue;
 									}
 									else {
 										// don't care about delaying removal here since it should be thread-safe anyways

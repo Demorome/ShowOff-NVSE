@@ -127,8 +127,8 @@ namespace AuxTimer
 
 	struct AuxTimerPendingRemoval
 	{
-		UInt32		ownerID;
 		UInt32		modIndex;
+		UInt32		ownerID;
 		std::string	varName;
 	};
 
