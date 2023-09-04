@@ -27,6 +27,7 @@ namespace AuxTimer
 			kFlag_IsPaused = 1 << 5,
 			kFlag_NotAffectedByTimeMult_InMenuMode = 1 << 6, // if on, seconds-based timers won't be affected by TimeMult in MenuMode.
 			kFlag_DontRunWhenPaused = 1 << 7, // timer pauses when game is paused (main menu, pause menu, console menu).
+			kFlag_RunOnTimerUpdateEvent = 1 << 8, // if on, OnTimerUpdate events will trigger for this timer each frame it counts down.
 
 			// Off by default, hidden and undocumented, for good reason
 			kFlag_PendingRemoval = (UInt32)1 << (UInt32)31, // if on, prevent all changes to the timer, for it will be deleted soon.

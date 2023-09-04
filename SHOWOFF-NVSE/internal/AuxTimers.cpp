@@ -87,11 +87,13 @@ namespace AuxTimer
 								const bool isPerm = (auxVarNameMapIter.Key()[0] != '*');
 								const bool isPublic = (auxVarNameMapIter.Key()[!isPerm] == '_');
 
-								for (auto const& callback : OnAuxTimerUpdate->EventCallbacks) {
-									auto* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneString*>(callback.eventFilter);
-									if (filter->IsInFilter(0, ownerFormID) && filter->IsInFilter(1, auxVarNameMapIter.Key())) {
-										if (isPublic || callback.ScriptForEvent->GetOverridingModIdx() == modMapIter.Key()) {
-											FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerUpdate->numMaxArgs, auxVarNameMapIter.Key(), ownerForm, *(UInt32*)&timePassed);
+								if (timer.m_flags & AuxTimerValue::kFlag_RunOnTimerUpdateEvent) {
+									for (auto const& callback : OnAuxTimerUpdate->EventCallbacks) {
+										auto* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneString*>(callback.eventFilter);
+										if (filter->IsInFilter(0, ownerFormID) && filter->IsInFilter(1, auxVarNameMapIter.Key())) {
+											if (isPublic || callback.ScriptForEvent->GetOverridingModIdx() == modMapIter.Key()) {
+												FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerUpdate->numMaxArgs, auxVarNameMapIter.Key(), ownerForm, *(UInt32*)&timePassed);
+											}
 										}
 									}
 								}
