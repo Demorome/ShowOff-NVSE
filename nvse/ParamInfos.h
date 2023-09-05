@@ -462,8 +462,14 @@ static ParamInfo kParams_OneInt_OneOptionalForm[2] =
 
 static ParamInfo kParams_OneForm_OneOptionalInt[2] =
 {
-		{	"form",	kParamType_AnyForm,	0	},
+	{	"form",	kParamType_AnyForm,	0	},
 	{	"int",	kParamType_Integer,	1	},
+};
+
+static ParamInfo kParams_OneForm_OneString[2] =
+{
+	{	"form",		kParamType_AnyForm,	0	},
+	{	"string",	kParamType_String,	0	},
 };
 
 static ParamInfo kParams_TwoOptionalForms[2] =
@@ -535,6 +541,12 @@ static ParamInfo kParams_OneForm_OneInt[2] =
 	{	"form",	kParamType_AnyForm,	0	},
 	{	"int",	kParamType_Integer, 0	},
 };
+static ParamInfo kParams_OneForm_OneOptionalInt[2] =
+{
+	{	"form",	kParamType_AnyForm,	0	},
+	{	"int",	kParamType_Integer, 1	},
+};
+
 
 static ParamInfo kParams_OneForm_OneInt_OneOptionalScript[3] =
 {

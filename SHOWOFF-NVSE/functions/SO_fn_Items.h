@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "ShowOffNVSE.h"
 #include "utility.h"
+#include "MiscHooks.h"
 
 #if 0
 static EquipData FindEquipped(TESObjectREFR* thisObj, FormMatcher& matcher) {
@@ -534,6 +535,54 @@ bool Cmd_GetEquippedWeaponRef_Execute(COMMAND_ARGS)
 	return true;
 }
 
+DEFINE_COMMAND_PLUGIN_EXP(SetItemHotkeyIconPath, "", false, kNVSEParams_OneForm_OneString);
+bool Cmd_SetItemHotkeyIconPath_Execute(COMMAND_ARGS)
+{
+	using namespace SetItemHotkeyIconPath;
+	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
+		eval.ExtractArgs())
+	{
+		auto* item = eval.GetNthArg(0)->GetTESForm();
+		if (!item || !item->IsItem())
+			return true;
+		auto* newIconPath = eval.GetNthArg(1)->GetString();
+		if (!newIconPath || !newIconPath[0]) // empty string
+		{
+			// Remove hotkey icon override if it exists.
+			g_hotkeyIconOverrides.erase(item->refID);
+		}
+		else
+		{
+			g_hotkeyIconOverrides[item->refID] = std::string(newIconPath);
+		}
+	}
+	return true;
+}
+
+DEFINE_COMMAND_PLUGIN(GetItemHotkeyIconPath, "", false, kParams_OneForm_OneOptionalInt);
+bool Cmd_GetItemHotkeyIconPath_Execute(COMMAND_ARGS)
+{
+	using namespace SetItemHotkeyIconPath;
+	const char* path = "";
+	TESForm* item;
+	UInt32 bOnlyReturnOverride = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &item, &bOnlyReturnOverride) && item && item->IsItem())
+	{
+		if (auto iter = g_hotkeyIconOverrides.find(item->refID);
+			iter != g_hotkeyIconOverrides.end())
+		{
+			path = iter->second.c_str();
+		}
+		else if (!bOnlyReturnOverride)
+		{
+			TESTexture* tex = DYNAMIC_CAST(item, TESForm, TESTexture);
+			if (tex)
+				path = tex->ddsPath.m_data;
+		}
+	}
+	g_strInterface->Assign(PASS_COMMAND_ARGS, path);
+	return true;
+}
 
 
 

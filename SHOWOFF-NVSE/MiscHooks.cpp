@@ -407,6 +407,31 @@ namespace GetCompassTargets
 	}
 }
 
+namespace SetItemHotkeyIconPath
+{
+	std::unordered_map<RefID, std::string> g_hotkeyIconOverrides;
+
+	const char* __fastcall ContChangesEntry_GetImageFilename_Hook(ContChangesEntry* entry, void* edx, TESObjectREFR* owner_alwaysNullHere)
+	{
+		if (entry->type)
+		{
+			if (auto iter = g_hotkeyIconOverrides.find(entry->type->refID);
+				iter != g_hotkeyIconOverrides.end())
+			{
+				return iter->second.c_str();
+			}
+		}
+		// else, return normal path string.
+		return ThisStdCall<const char*>(0x4BE200, entry, owner_alwaysNullHere);
+	}
+
+	void WriteHooks()
+	{
+		WriteRelCall(0x77DFD4, (UInt32)ContChangesEntry_GetImageFilename_Hook);
+		WriteRelCall(0x77DCE0, (UInt32)ContChangesEntry_GetImageFilename_Hook);
+	}
+}
+
 namespace Experimental
 {
 	namespace FixOnAddForDeathItems
@@ -495,6 +520,7 @@ namespace HandleHooks
 	{
 		GetLevelUpMenuUnspentPoints::WriteRetrievalHook();
 		GetCompassTargets::WriteHooks();
+		SetItemHotkeyIconPath::WriteHooks();
 #if 0
 		WriteRelCall(0x8B0FF0, UInt32(Actor_Spread_PerkModifier_Hook));
 

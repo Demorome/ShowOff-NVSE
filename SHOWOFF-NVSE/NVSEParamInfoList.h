@@ -93,6 +93,12 @@ static constexpr NVSEParamInfo kNVSEParams_OneForm_OneArray[2] =
 	{	"form",	kNVSEParamType_Form,	0	},
 	{	"array",	kNVSEParamType_Array,	0	},
 };
+static constexpr NVSEParamInfo kNVSEParams_OneForm_OneString[2] =
+{
+	{	"form",	kNVSEParamType_Form,	0	},
+	{	"string",	kNVSEParamType_String,	0	},
+};
+
 
 
 static constexpr NVSEParamInfo kNVSEParams_OneString_OneOptionalString_OneOptionalInt[3] =

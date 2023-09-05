@@ -42,3 +42,8 @@ namespace GetCompassTargets
 	// Should be refreshed every frame.
 	extern std::vector<CompassTarget> g_TargetsInCompass;
 }
+
+namespace SetItemHotkeyIconPath
+{
+	extern std::unordered_map<RefID, std::string> g_hotkeyIconOverrides;
+}
