@@ -1669,6 +1669,59 @@ namespace OnPreReload
 	}
 }
 
+namespace OnExplosionHit
+{
+	constexpr char eventName[] = "ShowOff:OnExplosionHit";
+
+	/*
+	void* __fastcall HandleEvent(Explosion* explosion, void* edx, Actor* actor)
+	{
+		auto* hitParts = ThisStdCall<void*>(0x9B1720, explosion, actor);
+		if (hitParts)
+		{
+			g_eventInterface->DispatchEvent(eventName, explosion, actor);
+		}
+		return hitParts;
+	}
+	*/
+
+	float* g_explosionHitDmgPtr = nullptr;
+
+	void __cdecl HandleEvent(void* hitData, Actor* source, Actor* target, Explosion* explosion, float fDamage)
+	{
+		g_explosionHitDmgPtr = &fDamage;
+		g_eventInterface->DispatchEvent(eventName, explosion, target, source);
+
+		CdeclCall(0x9B5770, hitData, source, target, explosion, fDamage);
+		g_explosionHitDmgPtr = nullptr;
+	}
+
+	void WriteHooks()
+	{
+		//WriteRelCall(0x89BA03, (UInt32)HandleEvent);
+		WriteRelCall(0x9B04EF, (UInt32)HandleEvent);
+	}
+}
+
+DEFINE_COMMAND_PLUGIN(GetExplosionHitDamage, "", false, nullptr);
+bool Cmd_GetExplosionHitDamage_Execute(COMMAND_ARGS)
+{
+	auto* dmgPtr = OnExplosionHit::g_explosionHitDmgPtr;
+	*result = dmgPtr ? *dmgPtr : -1.0f;
+	return true;
+}
+DEFINE_COMMAND_PLUGIN(SetExplosionHitDamage, "", false, kParams_OneFloat);
+bool Cmd_SetExplosionHitDamage_Execute(COMMAND_ARGS)
+{
+	float fNewDmg;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &fNewDmg))
+		return true;
+	auto* dmgPtr = OnExplosionHit::g_explosionHitDmgPtr;
+	if (dmgPtr)
+		*dmgPtr = fNewDmg;
+	return true;
+}
+
 using EventFlags = NVSEEventManagerInterface::EventFlags;
 
 template<UInt8 N>
@@ -1734,10 +1787,7 @@ void RegisterEvents()
 	// v1.65
 	RegisterEvent(OnPreReload::eventName, kEventParams_OneBaseForm_OneIntPtr, EventFlags::kFlag_FlushOnLoad);
 	RegisterEvent(OnPreScriptedActivate::eventName, kEventParams_OneReference_OneInt_OneIntPtr);
-
-	#if _DEBUG
-
-#endif
+	RegisterEvent(OnExplosionHit::eventName, kEventParams_TwoReferences);
 	/*
 	// For debugging the Event API
 	constexpr char DebugEventName[] = "ShowOff:DebugEvent";
@@ -1775,7 +1825,10 @@ namespace HandleHooks
 #endif
 		OnPCMiscStatChange::WriteHook();
 		OnAddAlt::WriteHooks();
+
+		// v1.65
 		OnPreReload::WriteHooks();
+		OnExplosionHit::WriteHooks();
 #if _DEBUG
 #endif
 	}
@@ -1791,6 +1844,7 @@ namespace HandleHooks
 #if 0
 		OnPreLifeStateChange::WriteDelayedHook();
 #endif
+		// v1.65
 		OnPreScriptedActivate::WriteDelayedHooks();
 #if _DEBUG
 #endif

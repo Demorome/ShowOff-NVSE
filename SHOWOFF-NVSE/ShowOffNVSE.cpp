@@ -687,6 +687,8 @@ extern "C"
 		/*3D4E*/	REG_CMD(SetOnAuxTimerUpdateHandler)
 		/*3D4F*/	REG_CMD(SetItemHotkeyIconPath)
 		/*3D50*/	REG_CMD_STR(GetItemHotkeyIconPath)
+		/*3D51*/	REG_CMD(GetExplosionHitDamage)
+		/*3D52*/	REG_CMD(SetExplosionHitDamage)
 
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
