@@ -734,6 +734,7 @@ public:
 	void Kill(Actor* killer);
 	bool GetShouldAttack(Actor* target);
 	void SetWantsWeaponOut(bool wantsWeaponOut);
+	bool IsInReloadAnim();
 };
 
 // 1C0

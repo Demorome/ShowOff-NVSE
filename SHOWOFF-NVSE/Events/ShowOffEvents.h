@@ -1619,15 +1619,14 @@ namespace OnPreLifeStateChange
 }
 #endif
 
-//TODO: Make this work with npcs, not just player.
 // TODO: make this not run when player isn't starting a new reload (just spamming reload key)
 namespace OnPreReload
 {
-	constexpr char eventName[] = "ShowOff:OnPreReload";
+	constexpr char eventName[] = "ShowOff:OnPrePlayerReload";
 
 	bool __fastcall HandleEvent(Actor* actor, TESObjectWEAP* weaponBaseForm)
 	{
-		if (!weaponBaseForm)
+		if (!weaponBaseForm || actor->IsInReloadAnim())
 			return true; // shouldReload = true, do the normal code
 
 		auto constexpr resultCallback = [](NVSEArrayVarInterface::Element& result, void* shouldReloadAddr) -> bool
@@ -1651,14 +1650,16 @@ namespace OnPreReload
 			NormalReturnAddr = 0x95D3FB;
 		__asm
 		{
-			mov		edx, [ebp + -0x8]  // weapon
+			mov		[ebp - 4], ecx  // we overwrote this, so do it now
+
+			mov		edx, [ebp + 8]  // weapon
 			call	HandleEvent
 			test	al, al
 			jnz		DoNormal
 		// else, prevent reloading
 			jmp		EarlyEndAddr
 		DoNormal:
-			cmp		[ebp + 0x8], 0
+			cmp		dword ptr[ebp + 8], 0
 			jmp		NormalReturnAddr
 		}
 	}

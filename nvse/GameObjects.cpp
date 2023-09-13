@@ -227,6 +227,11 @@ void Actor::SetWantsWeaponOut(bool wantsWeaponOut)
 	ThisStdCall(0x8A6840, this, (UInt8)wantsWeaponOut);
 }
 
+bool Actor::IsInReloadAnim()
+{
+	return ThisStdCall<bool>(0x8A8870, this);
+}
+
 SInt32 Actor::GetDetectionLevelAlt(Actor* target, bool calculateSneakLevel)
 {
 	bool isTargetInCombat;
