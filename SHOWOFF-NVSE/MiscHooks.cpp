@@ -432,6 +432,25 @@ namespace SetItemHotkeyIconPath
 	}
 }
 
+namespace FreezeAmmoRegen
+{
+	bool g_freezeAmmoRegen = false;
+
+	CallDetour g_detour;
+	double __fastcall Weap_GetModifiedRegenRate_Hook(TESObjectWEAP* weap, void* edx, UInt8 hasAmmoRegenWeaponMod)
+	{
+		auto result = ThisStdCall<double>(g_detour.GetOverwrittenAddr(), weap, hasAmmoRegenWeaponMod);
+		if (g_freezeAmmoRegen)
+			return 0.0;
+		return result;
+	}
+
+	void WriteDelayedHooks()
+	{
+		g_detour.WriteRelCall(0x943C5C, (UInt32)Weap_GetModifiedRegenRate_Hook);
+	}
+}
+
 namespace Experimental
 {
 	namespace FixOnAddForDeathItems
@@ -574,6 +593,7 @@ namespace HandleHooks
 	void HandleDelayedFunctionHooks()
 	{
 		LevelUpMenuHooks::ShowPerkMenu::WriteDelayedHooks();
+		FreezeAmmoRegen::WriteDelayedHooks();
 	}
 
 	void HandleDelayedGameHooks()

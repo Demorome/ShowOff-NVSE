@@ -689,6 +689,8 @@ extern "C"
 		/*3D50*/	REG_CMD_STR(GetItemHotkeyIconPath)
 		/*3D51*/	REG_CMD(GetExplosionHitDamage)
 		/*3D52*/	REG_CMD(SetExplosionHitDamage)
+		/*3D53*/	REG_CMD(IsJumping)
+		/*3D54*/	REG_CMD(FreezeAmmoRegen)
 
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		

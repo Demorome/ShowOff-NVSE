@@ -47,3 +47,8 @@ namespace SetItemHotkeyIconPath
 {
 	extern std::unordered_map<RefID, std::string> g_hotkeyIconOverrides;
 }
+
+namespace FreezeAmmoRegen
+{
+	extern bool g_freezeAmmoRegen;
+}

@@ -1087,6 +1087,11 @@ public:
 	UInt32					unk610[11];			// 610
 	hkArray<hkCdPoint>		arr63C;				// 63C
 	UInt32					unk648[6];			// 648
+
+	bool IsNotJumping()
+	{
+		return ThisStdCall<bool>(0x944400, this);
+	}
 };
 STATIC_ASSERT(sizeof(bhkCharacterController) == 0x660);
 

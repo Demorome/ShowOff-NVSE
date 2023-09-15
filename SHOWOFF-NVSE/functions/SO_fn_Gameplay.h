@@ -1100,6 +1100,32 @@ bool Cmd_IsBlockingOrAiming_Execute(COMMAND_ARGS)
 	return true;
 }
 
+DEFINE_COMMAND_PLUGIN(IsJumping, "", true, nullptr);
+bool Cmd_IsJumping_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	if (thisObj && IS_ACTOR(thisObj))
+	{
+		auto* actor = static_cast<Actor*>(thisObj);
+		if (actor->baseProcess)
+		{
+			*result = !actor->baseProcess->GetCharacterController()->IsNotJumping();
+		}
+	}
+	return true;
+}
+
+DEFINE_COMMAND_PLUGIN(FreezeAmmoRegen, "", false, kParams_OneOptionalInt);
+bool Cmd_FreezeAmmoRegen_Execute(COMMAND_ARGS)
+{
+	using namespace FreezeAmmoRegen;
+	*result = g_freezeAmmoRegen != 0;
+	UInt32 bFreeze = g_freezeAmmoRegen;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bFreeze))
+		return true;
+	g_freezeAmmoRegen = bFreeze;
+	return true;
+}
 
 
 #ifdef _DEBUG
