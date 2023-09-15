@@ -1619,57 +1619,6 @@ namespace OnPreLifeStateChange
 }
 #endif
 
-// TODO: make this not run when player isn't starting a new reload (just spamming reload key)
-namespace OnPreReload
-{
-	constexpr char eventName[] = "ShowOff:OnPrePlayerReload";
-
-	bool __fastcall HandleEvent(Actor* actor, TESObjectWEAP* weaponBaseForm)
-	{
-		if (!weaponBaseForm || actor->IsInReloadAnim())
-			return true; // shouldReload = true, do the normal code
-
-		auto constexpr resultCallback = [](NVSEArrayVarInterface::Element& result, void* shouldReloadAddr) -> bool
-			{
-				if (UInt32& shouldDrop = *static_cast<UInt32*>(shouldReloadAddr))
-					if (result.IsValid())
-						shouldDrop = result.Bool();
-				return true;
-			};
-		UInt32 shouldReload = true;
-
-		g_eventInterface->DispatchEventAlt(eventName, resultCallback, &shouldReload,
-			actor, weaponBaseForm, &shouldReload);
-
-		return shouldReload != 0;
-	}
-
-	__HOOK MaybePreventReload()
-	{
-		UInt32 static const EarlyEndAddr = 0x95D447,
-			NormalReturnAddr = 0x95D3FB;
-		__asm
-		{
-			mov		[ebp - 4], ecx  // we overwrote this, so do it now
-
-			mov		edx, [ebp + 8]  // weapon
-			call	HandleEvent
-			test	al, al
-			jnz		DoNormal
-		// else, prevent reloading
-			jmp		EarlyEndAddr
-		DoNormal:
-			cmp		dword ptr[ebp + 8], 0
-			jmp		NormalReturnAddr
-		}
-	}
-
-	void WriteHooks()
-	{
-		WriteRelJump(0x95D3F4, (UInt32)MaybePreventReload);
-	}
-}
-
 namespace OnExplosionHit
 {
 	constexpr char eventName[] = "ShowOff:OnExplosionHit";
@@ -1786,7 +1735,6 @@ void RegisterEvents()
 #endif
 
 	// v1.65
-	RegisterEvent(OnPreReload::eventName, kEventParams_OneBaseForm_OneIntPtr, EventFlags::kFlag_FlushOnLoad);
 	RegisterEvent(OnPreScriptedActivate::eventName, kEventParams_OneReference_OneInt_OneIntPtr);
 	RegisterEvent(OnExplosionHit::eventName, kEventParams_TwoReferences);
 	/*
@@ -1828,7 +1776,6 @@ namespace HandleHooks
 		OnAddAlt::WriteHooks();
 
 		// v1.65
-		OnPreReload::WriteHooks();
 		OnExplosionHit::WriteHooks();
 #if _DEBUG
 #endif
