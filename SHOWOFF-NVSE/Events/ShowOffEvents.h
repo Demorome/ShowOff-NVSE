@@ -1712,7 +1712,6 @@ void RegisterEvents()
 
 	RegisterEvent(OnQueueCornerMessage::eventName, kEventParams_ThreeStrings_OneFloat);
 	RegisterEvent(OnShowCornerMessage::eventName, kEventParams_ThreeStrings_OneFloat);
-	// TODO: DOCUMENT!!!!!!
 	RegisterEvent(OnFireWeapon::eventName, kEventParams_OneBaseForm, EventFlags::kFlag_FlushOnLoad);
 
 #if _DEBUG
