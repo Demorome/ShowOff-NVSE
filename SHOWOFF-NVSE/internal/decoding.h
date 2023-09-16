@@ -557,7 +557,7 @@ public:
 		kProjFlag_Bit07Unk =			0x80,
 		kProjFlag_Bit08Unk =			0x100,
 		kProjFlag_MineDisarmed =		0x200,
-		kProjFlag_Bit0AUnk =			0x400,
+		kProjFlag_IsPickpocketLiveExplosive = 0x400,  // credits to lStewieAl
 		kProjFlag_Bit0BUnk =			0x800,
 		kProjFlag_Bit0CUnk =			0x1000,
 		kProjFlag_Bit0DUnk =			0x2000,

@@ -1672,6 +1672,60 @@ bool Cmd_SetExplosionHitDamage_Execute(COMMAND_ARGS)
 	return true;
 }
 
+namespace OnPreProjectileExplode
+{
+	constexpr char eventName[] = "ShowOff:OnPreProjectileExplode";
+
+	bool __fastcall HandleEvent(Projectile* proj, void* edx)
+	{
+		if (proj->projFlags & Projectile::kProjFlag_IsPickpocketLiveExplosive)
+			return true; // should explode
+
+		auto constexpr resultCallback = [](NVSEArrayVarInterface::Element& result, void* shouldExplodeAddr) -> bool
+			{
+				if (UInt32& shouldExplode = *static_cast<UInt32*>(shouldExplodeAddr))
+					if (result.IsValid())
+						shouldExplode = result.Bool();
+				return true;
+			};
+		UInt32 shouldExplode = true;
+
+		g_eventInterface->DispatchEventAlt(eventName, resultCallback, &shouldExplode,
+			proj, proj->sourceRef, &shouldExplode);
+
+		return shouldExplode;
+	}
+
+	__HOOK Hook()
+	{
+		static UInt32 const NormalReturnAddr = 0x9C344D,
+			EarlyEndAddr = 0x9C391A;
+		enum Offsets
+		{
+			Proj = -0xA0
+		};
+		_asm
+		{
+			mov		ecx, [ebp + Proj]
+			mov		edx, 0
+			call	HandleEvent
+			test	al, al
+			jz		PreventExplosion
+			// else, do normal code
+			jmp		NormalReturnAddr
+		PreventExplosion:
+			jmp		EarlyEndAddr
+		}
+	}
+
+	void WriteHook() 
+	{
+		WriteRelJump(0x9C343D, (UInt32)Hook);
+	}
+}
+
+
+
 using EventFlags = NVSEEventManagerInterface::EventFlags;
 
 template<UInt8 N>
@@ -1736,6 +1790,10 @@ void RegisterEvents()
 	// v1.65
 	RegisterEvent(OnPreScriptedActivate::eventName, kEventParams_OneReference_OneInt_OneIntPtr);
 	RegisterEvent(OnExplosionHit::eventName, kEventParams_TwoReferences);
+
+	// v1.70
+	RegisterEvent(OnPreProjectileExplode::eventName, kEventParams_OneReference_OneIntPtr, EventFlags::kFlag_FlushOnLoad);
+
 	/*
 	// For debugging the Event API
 	constexpr char DebugEventName[] = "ShowOff:DebugEvent";
@@ -1776,6 +1834,9 @@ namespace HandleHooks
 
 		// v1.65
 		OnExplosionHit::WriteHooks();
+
+		// v1.70
+		OnPreProjectileExplode::WriteHook();
 #if _DEBUG
 #endif
 	}
