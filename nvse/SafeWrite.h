@@ -50,7 +50,7 @@ public:
 	void WriteRelCall(UInt32 jumpSrc, UInt32 jumpTgt)
 	{
 		if (*reinterpret_cast<UInt8*>(jumpSrc) != 0xE8) {
-			_ERROR("Cannot write detour; jumpSrc is not a function call.");
+			_ERROR("Cannot write detour at %X; jumpSrc is not a function call.", jumpSrc);
 			return;
 		}
 		overwritten_addr = GetRelJumpAddr(jumpSrc);
