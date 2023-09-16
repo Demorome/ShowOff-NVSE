@@ -329,13 +329,28 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 //===v1.65
 ===Bug Fixes:
 * Fix innacurate projectile position in OnProjectileImpact/Destroy.
+* Fix IsGamePaused check for AuxTimers
+* Fixed GetEquippedItemRefForItem's return type (niche issue)
+* Fix IsWeaponMelee/IsWeaponRanged requiring a calling ref
 
 ===New Functions:
-*
+* IsAiming
+* IsBlockingOrAiming
+* SetOnAuxTimerUpdateHandler
+* SetItemHotkeyIconPath
+* GetItemHotkeyIconPath
+* GetExplosionHitDamage
+* SetExplosionHitDamage
+* IsJumping
+* FreezeAmmoRegen
+
+===New Events:
+* "ShowOff:OnExplosionHit"
+* "ShowOff:OnFireWeapon"
 
 ===Function changes:
-*
-
+* Add RunOnTimerUpdateEvent flag for AuxTimers
+* Fixed AuxTimerStop/Start potentially causing crashes inside the timer events.
 
 ====== (Template:)
 
