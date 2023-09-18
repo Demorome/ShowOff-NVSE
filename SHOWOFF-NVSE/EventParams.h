@@ -104,6 +104,21 @@ static EventParamType kEventParams_OneReference_OneInt_OneIntPtr[] =
 	EventParamType::eParamType_Int,
 	EventParamType::eParamType_IntPtr,
 };
+static EventParamType kEventParams_OneReference_OneBaseForm_OneReference_OneInt_OneIntPtr[] =
+{
+	EventParamType::eParamType_Reference,
+	EventParamType::eParamType_BaseForm,
+	EventParamType::eParamType_Reference,
+	EventParamType::eParamType_Int,
+	EventParamType::eParamType_IntPtr,
+};
+static EventParamType kEventParams_OneBaseForm_OneReference_OneInt_OneIntPtr[] =
+{
+	EventParamType::eParamType_BaseForm,
+	EventParamType::eParamType_Reference,
+	EventParamType::eParamType_Int,
+	EventParamType::eParamType_IntPtr,
+};
 static EventParamType kEventParams_OneBaseForm[] =
 {
 	EventParamType::eParamType_BaseForm,

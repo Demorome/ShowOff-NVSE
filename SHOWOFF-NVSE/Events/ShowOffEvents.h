@@ -817,15 +817,22 @@ namespace OnProjectileStuff
 	}
 }
 
+namespace OnPreProjectileExplode
+{
+	extern std::unordered_set<Projectile*> g_forceSpawnCollisionEffects;
+}
+
 namespace OnProjectileDestroy
 {
 	using namespace OnProjectileStuff;
 	constexpr char eventName[] = "ShowOff:OnProjectileDestroy";
 
+
 	void __fastcall HandleEvent(Projectile* proj)
 	{
 		UpdateProjectilePosition(proj);
 		g_eventInterface->DispatchEvent(eventName, proj, proj->sourceRef, proj->sourceWeap);
+		OnPreProjectileExplode::g_forceSpawnCollisionEffects.erase(proj);
 	}
 
 	void __declspec(naked) Projectile_Free_Hook()
@@ -1508,13 +1515,6 @@ bool Cmd_GetAddedItemRefShowOff_Execute(COMMAND_ARGS)
 	return true;
 }
 
-// TODO
-namespace OnDropAlt
-{
-	constexpr char eventName[] = "ShowOff:OnDrop";
-
-}
-
 namespace OnReadBook
 {
 	// Runs right after the book is read, before the UI message is queued.
@@ -1676,11 +1676,10 @@ namespace OnPreProjectileExplode
 {
 	constexpr char eventName[] = "ShowOff:OnPreProjectileExplode";
 
+	std::unordered_set<Projectile*> g_forceSpawnCollisionEffects;
+
 	bool __fastcall HandleEvent(Projectile* proj, void* edx)
 	{
-		if (proj->projFlags & Projectile::kProjFlag_IsPickpocketLiveExplosive)
-			return true; // should explode
-
 		auto constexpr resultCallback = [](NVSEArrayVarInterface::Element& result, void* shouldExplodeAddr) -> bool
 			{
 				if (UInt32& shouldExplode = *static_cast<UInt32*>(shouldExplodeAddr))
@@ -1693,12 +1692,22 @@ namespace OnPreProjectileExplode
 		g_eventInterface->DispatchEventAlt(eventName, resultCallback, &shouldExplode,
 			proj, proj->sourceRef, &shouldExplode);
 
+		if (!shouldExplode)
+		{
+			auto* baseProj = static_cast<BGSProjectile*>(proj->baseForm);
+			if (!(baseProj->projFlags & BGSProjectile::kFlags_AltTrigger) &&
+				!(baseProj->projFlags & BGSProjectile::kFlags_Detonates))
+			{
+				g_forceSpawnCollisionEffects.insert(proj);
+			}
+		}
+
 		return shouldExplode;
 	}
 
-	__HOOK Hook()
+	__HOOK MaybePreventExplosionHook()
 	{
-		static UInt32 const NormalReturnAddr = 0x9C344D,
+		static UInt32 const NormalReturnAddr = 0x9C35FC,
 			EarlyEndAddr = 0x9C391A;
 		enum Offsets
 		{
@@ -1707,24 +1716,202 @@ namespace OnPreProjectileExplode
 		_asm
 		{
 			mov		ecx, [ebp + Proj]
-			mov		edx, 0
 			call	HandleEvent
 			test	al, al
 			jz		PreventExplosion
-			// else, do normal code
+			// else, do normal code	
+			mov		ecx, [ebp + Proj]
+			mov		eax, [ecx + 0xFC] // projectile->sourceRef
 			jmp		NormalReturnAddr
 		PreventExplosion:
 			jmp		EarlyEndAddr
 		}
 	}
 
+	bool __fastcall CheckShouldForceSpawnCollisionEffects(Projectile* proj, void* edx)
+	{
+		return g_forceSpawnCollisionEffects.contains(proj);
+	}
+
+	__HOOK MaybeForceSpawnCollisionEffectsHook()
+	{
+		static UInt32 const NormalReturnAddr = 0x9C1F31,
+			ForceSpawnCollisionAddr = 0x9C1F6F;
+		_asm
+		{
+			call	CheckShouldForceSpawnCollisionEffects
+			test	al, al
+			jnz		ForceSpawn
+			// else, do normal code	
+			mov		ecx, [ebp - 0x58] // projectile
+			mov		eax, [ecx + 0x20] // projectile->baseForm
+			jmp		NormalReturnAddr
+		ForceSpawn:
+			jmp		ForceSpawnCollisionAddr
+		}
+	}
+
 	void WriteHook() 
 	{
-		WriteRelJump(0x9C343D, (UInt32)Hook);
+		WriteRelJump(0x9C35F1, (UInt32)MaybePreventExplosionHook);
+		WriteRelJump(0x9C1F2C, (UInt32)MaybeForceSpawnCollisionEffectsHook);
 	}
 }
 
+namespace OnPreRemoveItem
+{
+	constexpr char eventName[] = "ShowOff:OnPreRemoveItem";
 
+	enum RemovalContext : UInt32
+	{
+		kContext_BarterMenu = 0,
+		kContext_NormalContainerMenu,
+		kContext_Pickpocket,
+		kContext_Teammate,
+		kContext_RockItLauncher,
+		kContext_InventoryMenu,
+	};
+
+	bool __fastcall HandleEvent(ContChangesEntry* toRemove, TESObjectREFR* oldContainer, TESObjectREFR* newContainer, 
+		RemovalContext ctx)
+	{
+		auto constexpr resultCallback = [](NVSEArrayVarInterface::Element& result, void* shouldRemoveAddr) -> bool
+			{
+				if (UInt32& shouldRemove = *static_cast<UInt32*>(shouldRemoveAddr))
+					if (result.IsValid())
+						shouldRemove = result.Bool();
+				return true;
+			};
+		UInt32 shouldRemove = true;
+
+		g_eventInterface->DispatchEventAlt(eventName, resultCallback, &shouldRemove,
+			oldContainer, toRemove->type, newContainer, ctx, &shouldRemove);
+
+		return shouldRemove;
+	}
+
+	namespace HandleForBarterMenu
+	{
+		bool __fastcall HandleBarterMenuEvent(ContChangesEntry* toRemove, void* edx)
+		{
+			auto* menu = BarterMenu::Get();
+			bool isSelling = menu->currentItems == &menu->leftItems;
+			if (isSelling)
+				return HandleEvent(toRemove, g_thePlayer, menu->merchantRef, kContext_BarterMenu);
+			else
+				return HandleEvent(toRemove, menu->merchantRef, g_thePlayer, kContext_BarterMenu);
+		}
+
+		__HOOK MaybePreventBarterMenuTransfer()
+		{
+			static UInt32 const NormalReturnAddr = 0x72D7EC,
+				EarlyEndAddr = 0x72DAFF;
+			_asm
+			{
+				// ecx is currently g_barterMenuSelection
+				push	ecx  // storing for later
+				call	HandleBarterMenuEvent
+				test	al, al
+				jz		PreventRemoval
+				// else, do normal code
+				pop		ecx
+				mov		eax, dword ptr[ecx + 4]
+				jmp		NormalReturnAddr
+			PreventRemoval :
+				pop		ecx
+				jmp		EarlyEndAddr
+			}
+		}
+
+		// Delayed to overwrite potential inline.
+		void WriteDelayedHook()
+		{
+			WriteRelJump(0x72D7E7, (UInt32)HandleForBarterMenu::MaybePreventBarterMenuTransfer);
+		}
+	}
+
+	namespace HandleForContainerMenu
+	{
+		bool __fastcall HandleContainerMenuEvent(ContChangesEntry* toRemove, void* edx)
+		{
+			auto* menu = ContainerMenu::GetSingleton();
+			bool isPlayerDropping = menu->currentItems == &menu->leftItems;
+			if (isPlayerDropping)
+				return HandleEvent(toRemove, g_thePlayer, menu->containerRef, static_cast<RemovalContext>(menu->mode));
+			else
+				return HandleEvent(toRemove, menu->containerRef, g_thePlayer, static_cast<RemovalContext>(menu->mode));
+		}
+
+		__HOOK MaybePreventContainerMenuTransfer()
+		{
+			static UInt32 const NormalReturnAddr = 0x75BF08,
+				EarlyEndAddr = 0x75C20D;
+			_asm
+			{
+				// ecx = g_containerMenuSelection
+				push	ecx // store ecx
+				call	HandleContainerMenuEvent
+				test	al, al
+				jz		PreventRemoval
+				// else, do normal code
+				pop		ecx
+				mov		eax, dword ptr[ecx + 8]
+				jmp		NormalReturnAddr
+			PreventRemoval :
+				pop		ecx
+				jmp		EarlyEndAddr
+			}
+		}
+
+		// Delayed to overwrite potential inline.
+		void WriteDelayedHook()
+		{
+			WriteRelJump(0x75BF03, (UInt32)MaybePreventContainerMenuTransfer);
+		}
+	}
+
+	namespace HandleForInventoryMenu
+	{
+		bool __fastcall HandleInventoryMenuEvent(ContChangesEntry* toRemove, void* edx)
+		{
+			return HandleEvent(toRemove, g_thePlayer, nullptr, kContext_InventoryMenu);
+		}
+
+		__HOOK MaybePreventContainerMenuTransfer()
+		{
+			static UInt32 const NormalReturnAddr = 0x780B07,
+				EarlyEndAddr = 0x780B8E;
+			_asm
+			{
+				// ecx = g_invMenuSelection
+				push	ecx // store ecx
+				call	HandleInventoryMenuEvent
+				test	al, al
+				jz		PreventRemoval
+				// else, do normal code
+				pop		ecx
+				mov		eax, dword ptr[ecx + 4]
+				jmp		NormalReturnAddr
+			PreventRemoval :
+				pop		ecx
+				jmp		EarlyEndAddr
+			}
+		}
+
+		// Delayed to overwrite potential inline.
+		void WriteDelayedHook()
+		{
+			WriteRelJump(0x780B02, (UInt32)MaybePreventContainerMenuTransfer);
+		}
+	}
+
+	void WriteDelayedHooks()
+	{
+		HandleForBarterMenu::WriteDelayedHook();
+		HandleForContainerMenu::WriteDelayedHook();
+		HandleForInventoryMenu::WriteDelayedHook();
+	}
+}
 
 using EventFlags = NVSEEventManagerInterface::EventFlags;
 
@@ -1793,6 +1980,9 @@ void RegisterEvents()
 
 	// v1.70
 	RegisterEvent(OnPreProjectileExplode::eventName, kEventParams_OneReference_OneIntPtr, EventFlags::kFlag_FlushOnLoad);
+	RegisterEvent(OnPreRemoveItem::eventName, kEventParams_OneBaseForm_OneReference_OneInt_OneIntPtr, 
+		EventFlags::kFlag_AllowScriptDispatch);
+	
 
 	/*
 	// For debugging the Event API
@@ -1854,6 +2044,9 @@ namespace HandleHooks
 #endif
 		// v1.65
 		OnPreScriptedActivate::WriteDelayedHooks();
+
+		// v1.70
+		OnPreRemoveItem::WriteDelayedHooks();
 #if _DEBUG
 #endif
 	}
