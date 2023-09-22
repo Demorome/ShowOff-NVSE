@@ -355,6 +355,12 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 ===General changes:
 * Better hook conflict error message in log.
 
+//===v1.70
+
+===New Events:
+* "ShowOff:OnPreProjectileExplode"
+* "ShowOff:OnPreRemoveItemFromMenu"
+
 ====== (Template:)
 
 //===v???

@@ -1982,9 +1982,9 @@ void RegisterEvents()
 	OnAuxTimerStop = JGCreateEvent("OnTimerStop", 2, 2, CreateOneFormOneStringFilter);
 	OnAuxTimerUpdate = JGCreateEvent("OnTimerUpdate", 3, 2, CreateOneFormOneStringFilter);
 
-	RegisterEvent(OnPreActivate::eventName, kEventParams_OneReference_OneIntPtr, EventFlags::kFlag_AllowScriptDispatch);
-	RegisterEvent(PreActivateInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneIntPtr_OneInt, EventFlags::kFlag_AllowScriptDispatch);
-	RegisterEvent(PreActivateInventoryItem::eventNameAlt, kEventParams_OneBaseForm_OneReference_OneIntPtr_TwoInts, EventFlags::kFlag_AllowScriptDispatch);
+	RegisterEvent(OnPreActivate::eventName, kEventParams_OneReference_OneIntPtr);
+	RegisterEvent(PreActivateInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneIntPtr_OneInt);
+	RegisterEvent(PreActivateInventoryItem::eventNameAlt, kEventParams_OneBaseForm_OneReference_OneIntPtr_TwoInts);
 	RegisterEvent(OnQuestAdded::eventName, kEventParams_OneBaseForm);
 
 	//TODO: document / modify!
@@ -2017,19 +2017,18 @@ void RegisterEvents()
 	RegisterEvent(OnAddAlt::eventName, kEventParams_OneBaseForm_OneReference);
 	RegisterEvent(OnReadBook::eventName, kEventParams_OneBaseForm);
 	RegisterEvent(OnDispositionChange::eventName, kEventParams_OneInt);
-	RegisterEvent(PreDropInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneIntPtr, EventFlags::kFlag_AllowScriptDispatch);
+	RegisterEvent(PreDropInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneIntPtr);
 #if 0
 	RegisterEvent(OnPreLifeStateChange::eventName, kEventParams_TwoInts);
 #endif
 
 	// v1.65
-	RegisterEvent(OnPreScriptedActivate::eventName, kEventParams_OneReference_OneInt_OneIntPtr, EventFlags::kFlag_AllowScriptDispatch);
+	RegisterEvent(OnPreScriptedActivate::eventName, kEventParams_OneReference_OneInt_OneIntPtr);
 	RegisterEvent(OnExplosionHit::eventName, kEventParams_TwoReferences);
 
 	// v1.70
-	RegisterEvent(OnPreProjectileExplode::eventName, kEventParams_OneReference_OneIntPtr, EventFlags::kFlag_FlushOnLoad | EventFlags::kFlag_AllowScriptDispatch);
-	RegisterEvent(OnPreRemoveItemFromMenu::eventName, kEventParams_OneBaseForm_OneReference_OneInt_OneIntPtr, 
-		EventFlags::kFlag_AllowScriptDispatch);
+	RegisterEvent(OnPreProjectileExplode::eventName, kEventParams_OneReference_OneIntPtr, EventFlags::kFlag_FlushOnLoad);
+	RegisterEvent(OnPreRemoveItemFromMenu::eventName, kEventParams_OneBaseForm_OneReference_OneInt_OneIntPtr);
 	
 
 	/*
