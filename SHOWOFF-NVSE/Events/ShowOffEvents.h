@@ -1783,9 +1783,9 @@ namespace OnPreProjectileExplode
 	}
 }
 
-namespace OnPreRemoveItem
+namespace OnPreRemoveItemFromMenu
 {
-	constexpr char eventName[] = "ShowOff:OnPreRemoveItem";
+	constexpr char eventName[] = "ShowOff:OnPreRemoveItemFromMenu";
 
 	enum RemovalContext : UInt32
 	{
@@ -1795,6 +1795,7 @@ namespace OnPreRemoveItem
 		kContext_Teammate,
 		kContext_RockItLauncher,
 		kContext_InventoryMenu,
+		kContext_RepairMenu
 	};
 
 	bool __fastcall HandleEvent(ContChangesEntry* toRemove, TESObjectREFR* oldContainer, TESObjectREFR* newContainer, 
@@ -1930,11 +1931,33 @@ namespace OnPreRemoveItem
 		}
 	}
 
+	namespace HandleForRepairMenu
+	{
+		CallDetour g_detour;
+
+		bool __fastcall HandleRepairMenuEvent(Tile* tile, void* edx, UInt32 tileValue)
+		{
+			auto result = ThisStdCall<bool>(g_detour.GetOverwrittenAddr(), tile, tileValue);
+			if (!result)
+				return result;
+			auto* menu = RepairMenu::Get();
+			auto* toRemove = ThisStdCall<ContChangesEntry*>(0x7A1910, &menu->repairItems); // GetSelectedListItem
+			return HandleEvent(toRemove, g_thePlayer, nullptr, kContext_RepairMenu);
+		}
+
+		void WriteDelayedHook()
+		{
+			// Replace Tile::IsFloatValueNotNull call
+			g_detour.WriteRelCall(0x7B5BF1, (UInt32)HandleRepairMenuEvent);
+		}
+	}
+
 	void WriteDelayedHooks()
 	{
 		HandleForBarterMenu::WriteDelayedHook();
 		HandleForContainerMenu::WriteDelayedHook();
 		HandleForInventoryMenu::WriteDelayedHook();
+		HandleForRepairMenu::WriteDelayedHook();
 	}
 }
 
@@ -1959,9 +1982,9 @@ void RegisterEvents()
 	OnAuxTimerStop = JGCreateEvent("OnTimerStop", 2, 2, CreateOneFormOneStringFilter);
 	OnAuxTimerUpdate = JGCreateEvent("OnTimerUpdate", 3, 2, CreateOneFormOneStringFilter);
 
-	RegisterEvent(OnPreActivate::eventName, kEventParams_OneReference_OneIntPtr);
-	RegisterEvent(PreActivateInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneIntPtr_OneInt);
-	RegisterEvent(PreActivateInventoryItem::eventNameAlt, kEventParams_OneBaseForm_OneReference_OneIntPtr_TwoInts);
+	RegisterEvent(OnPreActivate::eventName, kEventParams_OneReference_OneIntPtr, EventFlags::kFlag_AllowScriptDispatch);
+	RegisterEvent(PreActivateInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneIntPtr_OneInt, EventFlags::kFlag_AllowScriptDispatch);
+	RegisterEvent(PreActivateInventoryItem::eventNameAlt, kEventParams_OneBaseForm_OneReference_OneIntPtr_TwoInts, EventFlags::kFlag_AllowScriptDispatch);
 	RegisterEvent(OnQuestAdded::eventName, kEventParams_OneBaseForm);
 
 	//TODO: document / modify!
@@ -1994,18 +2017,18 @@ void RegisterEvents()
 	RegisterEvent(OnAddAlt::eventName, kEventParams_OneBaseForm_OneReference);
 	RegisterEvent(OnReadBook::eventName, kEventParams_OneBaseForm);
 	RegisterEvent(OnDispositionChange::eventName, kEventParams_OneInt);
-	RegisterEvent(PreDropInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneIntPtr);
+	RegisterEvent(PreDropInventoryItem::eventName, kEventParams_OneBaseForm_OneReference_OneIntPtr, EventFlags::kFlag_AllowScriptDispatch);
 #if 0
 	RegisterEvent(OnPreLifeStateChange::eventName, kEventParams_TwoInts);
 #endif
 
 	// v1.65
-	RegisterEvent(OnPreScriptedActivate::eventName, kEventParams_OneReference_OneInt_OneIntPtr);
+	RegisterEvent(OnPreScriptedActivate::eventName, kEventParams_OneReference_OneInt_OneIntPtr, EventFlags::kFlag_AllowScriptDispatch);
 	RegisterEvent(OnExplosionHit::eventName, kEventParams_TwoReferences);
 
 	// v1.70
-	RegisterEvent(OnPreProjectileExplode::eventName, kEventParams_OneReference_OneIntPtr, EventFlags::kFlag_FlushOnLoad);
-	RegisterEvent(OnPreRemoveItem::eventName, kEventParams_OneBaseForm_OneReference_OneInt_OneIntPtr, 
+	RegisterEvent(OnPreProjectileExplode::eventName, kEventParams_OneReference_OneIntPtr, EventFlags::kFlag_FlushOnLoad | EventFlags::kFlag_AllowScriptDispatch);
+	RegisterEvent(OnPreRemoveItemFromMenu::eventName, kEventParams_OneBaseForm_OneReference_OneInt_OneIntPtr, 
 		EventFlags::kFlag_AllowScriptDispatch);
 	
 
@@ -2071,7 +2094,7 @@ namespace HandleHooks
 		OnPreScriptedActivate::WriteDelayedHooks();
 
 		// v1.70
-		OnPreRemoveItem::WriteDelayedHooks();
+		OnPreRemoveItemFromMenu::WriteDelayedHooks();
 #if _DEBUG
 #endif
 	}
