@@ -357,6 +357,9 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 
 //===v1.70
 
+===Bug Fixes:
+* Fixed "ShowOff:OnPreActivate" running for certain scripted activations, and running twice for loading doors.
+
 ===New Events:
 * "ShowOff:OnPreProjectileExplode"
 * "ShowOff:OnPreRemoveItemFromMenu"
