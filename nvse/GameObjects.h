@@ -886,10 +886,11 @@ public:
 	float								unk678;
 	float								unk67C;
 	UInt8								pcControlFlags;			// 680
-	UInt8								byte681;				// 681
+	UInt8								isWaitingForOpenContainerAnim;	// 681, credits to lStewieAl
 	UInt8								byte682;				// 682
 	UInt8								byte683;				// 683
-	UInt32								unk684[2];				// 684
+	UInt32								waitingForContainerOpenAnimPreventActivateTimer; // 684, credits to lStewieAl
+	TESObjectREFR						*activatedDoor;			// 688, credits to lStewieAl
 	ValidBip01Names						*VB01N1stPerson;		// 68C
 	void								*unk690;				// 690
 	NiNode								*playerNode;			// 694 used as node if unk64A is true

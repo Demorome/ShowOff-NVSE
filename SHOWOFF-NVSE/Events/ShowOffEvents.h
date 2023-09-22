@@ -266,6 +266,16 @@ namespace OnPreActivate
 
 	bool __fastcall HandleEvent(TESObjectREFR* activated, Actor* activator)
 	{
+		// Will be set if opening with a key.
+		auto* doorAboutToBeDoubleActivated = *reinterpret_cast<TESObjectREFR**>(0x11C9350);
+		if (doorAboutToBeDoubleActivated && doorAboutToBeDoubleActivated == activated)
+			return true;
+
+		// Will be set if opening with a key.
+		auto* containerAboutToBeDoubleActivated = *reinterpret_cast<TESObjectREFR**>(0x11C92D0);
+		if (containerAboutToBeDoubleActivated && containerAboutToBeDoubleActivated == activated)
+			return true;
+
 		auto constexpr resultCallback = [](NVSEArrayVarInterface::Element& result, void* shouldActivateAdrr) -> bool
 		{
 			if (UInt32 &shouldActivate = *static_cast<UInt32*>(shouldActivateAdrr))
@@ -287,7 +297,7 @@ namespace OnPreActivate
 		return shouldActivate != 0;
 	}	//result in AL
 
-	__declspec(naked) void Hook()
+	__HOOK Hook()
 	{
 		static UInt32 const retnAddr = 0x57334C, getBaseForm = 0x7AF430,
 			retnFalse = 0x573396;
@@ -297,12 +307,28 @@ namespace OnPreActivate
 		};
 		_asm
 		{
-			//Check if this instance of TESObjectREFR::Activate was called by Activate func.
-			//(We don't want the event to run for that)
+			// Check if this instance of TESObjectREFR::Activate was called by Activate func.
+			// (We don't want the event to run for that)
 			mov		eax, dword ptr [ebp + 4]	//rtn addr
 			cmp		eax, 0x5B5B1D	//one of the return addresses to Activate_Execute
 			je		doNormal
 			cmp		eax, 0x5B5B4D
+			je		doNormal
+			// Check if called by fade-in func (avoid running twice for load door activation)
+			cmp		eax, 0x8FEEB9
+			je		doNormal
+			// Avoid running if opening locked ref - already had the opportunity to prevent activation before lockpick menu.
+			cmp		eax, 0x78F95B
+			je		doNormal
+			// Avoid running from StartConversation script func call 
+			cmp		eax, 0x5C8961
+			je		doNormal
+			cmp		eax, 0x5C8A01
+			je		doNormal
+			// Avoid running from SetOpenState script func call
+			cmp		eax, 0x5CED9B
+			je		doNormal
+			cmp		eax, 0x5CEDCB
 			je		doNormal
 
 			pushad	//unknown what the __fastcall function will preserve, so store everything.
@@ -346,11 +372,10 @@ namespace OnPreScriptedActivate
 		return shouldActivate != 0;
 	}
 
-	CallDetour g_detour;
-
-	bool __fastcall MaybePreventScriptedActivation(TESObjectREFR* actionRef, void* edx)
+	CallDetour g_detourActivateFunc;
+	bool __fastcall MaybePreventScriptedActivation_Activate(TESObjectREFR* actionRef, void* edx)
 	{
-		auto isDisabled = ThisStdCall<bool>(g_detour.GetOverwrittenAddr(), actionRef);
+		auto isDisabled = ThisStdCall<bool>(g_detourActivateFunc.GetOverwrittenAddr(), actionRef);
 		if (isDisabled)
 			return true;
 
@@ -360,10 +385,50 @@ namespace OnPreScriptedActivate
 		return !HandleEvent(toActivate, actionRef, runOnActivateBlock);
 	}
 
+	CallDetour g_detourStartConversationFunc;
+	bool __fastcall MaybePreventScriptedActivation_StartConversation(TESObjectREFR* actionRef, void* edx)
+	{
+		auto isDisabled = ThisStdCall<bool>(g_detourStartConversationFunc.GetOverwrittenAddr(), actionRef);
+		if (isDisabled)
+			return true;
+
+		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+		auto* toActivate = *reinterpret_cast<TESObjectREFR**>(ebp + 0x10);
+		return !HandleEvent(toActivate, actionRef, 0);
+	}
+
+	__HOOK MaybePreventScriptedActivation_SetOpenState()
+	{
+		static UInt32 const NormalRtnAddr = 0x5CED74, PreventChangeRtnAddr = 0x5CEDE7;
+		_asm
+		{
+			// do the code we overwrote
+			mov		ecx, [ebp + 0x10]
+			cmp		ecx, 0
+			jz		PreventActivation
+			
+			// our code
+			mov		edx, 0
+			push	0
+			call	HandleEvent // if 0, prevent activation
+			jnz		DoNormal
+		PreventActivation:
+			jmp		PreventChangeRtnAddr
+		DoNormal:
+			jmp		NormalRtnAddr
+		}
+		
+	}
+
 	void WriteDelayedHooks()
 	{
-		// replaces TESForm::IsDisabled
-		g_detour.WriteRelCall(0x5B5AD0, (UInt32)MaybePreventScriptedActivation);
+		// replaces TESForm::IsDisabled call in Activate_Execute
+		g_detourActivateFunc.WriteRelCall(0x5B5AD0, (UInt32)MaybePreventScriptedActivation_Activate);
+
+		// replaces TESForm::IsDisabled call in StartConversation_Execute
+		g_detourStartConversationFunc.WriteRelCall(0x5C8803, (UInt32)MaybePreventScriptedActivation_StartConversation);
+
+		WriteRelJump(0x5CED6E, (UInt32)MaybePreventScriptedActivation_SetOpenState);
 	}
 }
 
