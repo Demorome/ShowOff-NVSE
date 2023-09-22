@@ -385,50 +385,10 @@ namespace OnPreScriptedActivate
 		return !HandleEvent(toActivate, actionRef, runOnActivateBlock);
 	}
 
-	CallDetour g_detourStartConversationFunc;
-	bool __fastcall MaybePreventScriptedActivation_StartConversation(TESObjectREFR* actionRef, void* edx)
-	{
-		auto isDisabled = ThisStdCall<bool>(g_detourStartConversationFunc.GetOverwrittenAddr(), actionRef);
-		if (isDisabled)
-			return true;
-
-		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
-		auto* toActivate = *reinterpret_cast<TESObjectREFR**>(ebp + 0x10);
-		return !HandleEvent(toActivate, actionRef, 0);
-	}
-
-	__HOOK MaybePreventScriptedActivation_SetOpenState()
-	{
-		static UInt32 const NormalRtnAddr = 0x5CED74, PreventChangeRtnAddr = 0x5CEDE7;
-		_asm
-		{
-			// do the code we overwrote
-			mov		ecx, [ebp + 0x10]
-			cmp		ecx, 0
-			jz		PreventActivation
-			
-			// our code
-			mov		edx, 0
-			push	0
-			call	HandleEvent // if 0, prevent activation
-			jnz		DoNormal
-		PreventActivation:
-			jmp		PreventChangeRtnAddr
-		DoNormal:
-			jmp		NormalRtnAddr
-		}
-		
-	}
-
 	void WriteDelayedHooks()
 	{
 		// replaces TESForm::IsDisabled call in Activate_Execute
 		g_detourActivateFunc.WriteRelCall(0x5B5AD0, (UInt32)MaybePreventScriptedActivation_Activate);
-
-		// replaces TESForm::IsDisabled call in StartConversation_Execute
-		g_detourStartConversationFunc.WriteRelCall(0x5C8803, (UInt32)MaybePreventScriptedActivation_StartConversation);
-
-		WriteRelJump(0x5CED6E, (UInt32)MaybePreventScriptedActivation_SetOpenState);
 	}
 }
 
