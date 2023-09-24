@@ -2,6 +2,11 @@
 
 //All code in here copied from JIP
 
+InterfaceManager* InterfaceManager::GetSingleton(void)
+{
+	return *reinterpret_cast<InterfaceManager**>(0x11D8A80);
+}
+
 __declspec(naked) UInt32 InterfaceManager::GetTopVisibleMenuID()
 {
 	__asm

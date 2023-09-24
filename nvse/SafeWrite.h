@@ -42,6 +42,8 @@ UInt32 GetRelJumpAddr(UInt32 jumpSrc);
 
 UInt8* GetParentBasePtr(void* addressOfReturnAddress, bool lambda = false);
 
+extern bool g_showedRuntimeHookConflictError;
+
 // Stores the function-to-call before overwriting it, to allow calling the overwritten function after our hook is over.
 class CallDetour
 {
@@ -50,7 +52,13 @@ public:
 	void WriteRelCall(UInt32 jumpSrc, UInt32 jumpTgt)
 	{
 		if (*reinterpret_cast<UInt8*>(jumpSrc) != 0xE8) {
-			_ERROR("Cannot write detour at %X; jumpSrc is not a function call.", jumpSrc);
+			_ERROR("Cannot write detour hook at address 0x%X; another hook made it no longer a function call.", jumpSrc);
+			if (!g_showedRuntimeHookConflictError)
+			{
+				MessageBoxA(nullptr, "Showoff xNVSE: Error detected while trying to detour-hook the game; please report what you see in the log file.", 
+					"ShowOff xNVSE", MB_ICONEXCLAMATION);
+				g_showedRuntimeHookConflictError = true;
+			}
 			return;
 		}
 		overwritten_addr = GetRelJumpAddr(jumpSrc);

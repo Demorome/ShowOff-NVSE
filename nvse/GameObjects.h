@@ -860,7 +860,7 @@ public:
 	UInt32								unk63C[3];				// 63C
 	UInt8								byte648;				// 648
 	UInt8								byte649;				// 649
-	bool								byte64A;				// 64A	= not FirstPerson
+	bool								is3rdPersonVisible;		// 64A	= not FirstPerson, credits to lStewieAl for the name.
 	bool								is3rdPerson;			// 64B
 	bool								bThirdPerson;			// 64C
 	UInt8								byte64D;				// 64D

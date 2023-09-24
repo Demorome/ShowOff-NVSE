@@ -264,7 +264,7 @@ namespace OnPreActivate
 {
 	constexpr char eventName[] = "ShowOff:OnPreActivate";
 
-	bool __fastcall HandleEvent(TESObjectREFR* activated, Actor* activator)
+	UInt32 __fastcall HandleEvent(TESObjectREFR* activated, Actor* activator)
 	{
 		// Will be set if opening with a key.
 		auto* doorAboutToBeDoubleActivated = *reinterpret_cast<TESObjectREFR**>(0x11C9350);
@@ -275,6 +275,32 @@ namespace OnPreActivate
 		auto* containerAboutToBeDoubleActivated = *reinterpret_cast<TESObjectREFR**>(0x11C92D0);
 		if (containerAboutToBeDoubleActivated && containerAboutToBeDoubleActivated == activated)
 			return true;
+
+		// Need to check a bunch of conditions to verify event would run as if hooking from 0x573347
+
+		// Check if activating ash/goo pile.
+		// Old OnPreActivate didn't run for them, only their sub-activation to get the actor's inventory.
+		if (activated->baseForm == *reinterpret_cast<TESForm**>(0x11CA27C)
+			|| activated->baseForm == *reinterpret_cast<TESForm**>(0x11CA280))
+		{
+			return true;
+		}
+
+		if (activator == g_thePlayer)
+		{
+			if (InterfaceManager::GetSingleton()->pipBoyMode == 2)
+				return 2;  // sneakily patches NVSE's OnActivate to not run in this instance
+			// Magic number 2 = will be handled in my ASM as 1, but will still early-exit the func.
+
+			if (g_thePlayer->is3rdPersonVisible != g_thePlayer->bThirdPerson)
+				return false; // sneakily patches NVSE's OnActivate to not run in this instance
+
+			if (g_thePlayer->GetIsChildSize(0) && StdCall<bool>(0x8859E0, activated)) // TESObjectREFR::CanChildUse
+				return true; // whatever, let NVSE's OnActivate run here, as a treat
+
+			if (activated->IsDestroyed() && !activated->IsActor())
+				return true; // NVSE's OnActivate will run here, yes, and to change it now would probably break stuff.
+		}
 
 		auto constexpr resultCallback = [](NVSEArrayVarInterface::Element& result, void* shouldActivateAdrr) -> bool
 		{
@@ -287,67 +313,72 @@ namespace OnPreActivate
 		};
 		UInt32 shouldActivate = true;
 		g_eventInterface->DispatchEventAlt(eventName, resultCallback, &shouldActivate, activated, activator, &shouldActivate);
-
-#if _DEBUG
-		Console_Print("OnActivate HOOK - Activated: [%08X] {%s} (%s), activator: [%08X]", activated ? activated->refID : 0, 
-			activated ? activated->GetName() : "",
-			activated ? activated->GetTheName() : "",
-			activator ? activator->refID : 0);
-#endif
-		return shouldActivate != 0;
-	}	//result in AL
+		return shouldActivate;
+	}	//result in EAX
 
 	__HOOK Hook()
 	{
-		static UInt32 const retnAddr = 0x57334C, getBaseForm = 0x7AF430,
-			retnFalse = 0x573396;
+		static UInt32 const NormalRetnAddr = 0x57318E,
+			EarlyEndAddr = 0x5737A3;
 		enum
 		{
 			activator = 8
 		};
 		_asm
 		{
+			//== Do regular code
+			mov [ebp - 0x12C], ecx
+			mov [ebp - 1], 0
+
+			//== Our code
 			// Check if this instance of TESObjectREFR::Activate was called by Activate func.
 			// (We don't want the event to run for that)
 			mov		eax, dword ptr [ebp + 4]	//rtn addr
 			cmp		eax, 0x5B5B1D	//one of the return addresses to Activate_Execute
-			je		doNormal
+			je		DoNormal
 			cmp		eax, 0x5B5B4D
-			je		doNormal
-			// Check if called by fade-in func (avoid running twice for load door activation)
+			je		DoNormal
+			// Check if called by fade-in func (avoid running event twice for load door activation)
 			cmp		eax, 0x8FEEB9
-			je		doNormal
-			// Avoid running if opening locked ref - already had the opportunity to prevent activation before lockpick menu.
+			je		DoNormal
+			// Avoid running event if opening locked ref - already had the opportunity to prevent activation before lockpick menu.
 			cmp		eax, 0x78F95B
-			je		doNormal
-			// Avoid running from StartConversation script func call 
+			je		DoNormal
+			// Avoid running event from StartConversation script func call 
 			cmp		eax, 0x5C8961
-			je		doNormal
+			je		DoNormal
 			cmp		eax, 0x5C8A01
-			je		doNormal
-			// Avoid running from SetOpenState script func call
+			je		DoNormal
+			// Avoid running event from SetOpenState script func call
 			cmp		eax, 0x5CED9B
-			je		doNormal
+			je		DoNormal
 			cmp		eax, 0x5CEDCB
-			je		doNormal
+			je		DoNormal
 
-			pushad	//unknown what the __fastcall function will preserve, so store everything.
 			mov		edx, dword ptr [ebp + activator]
 			call	HandleEvent
-			test	al, al
-			popad
-			jnz		doNormal
-			jmp		retnFalse
+			cmp		eax, 2
+			je		EarlyExitButRetnTrue
+			test	eax, eax
+			jnz		DoNormal
+			// else, return false
+			XOR		al, al
+			jmp		EarlyEndAddr
 
-		doNormal:
-			call	getBaseForm	
-			jmp		retnAddr
+		EarlyExitButRetnTrue:
+			mov		al, 1
+			jmp		EarlyEndAddr
+
+		DoNormal:
+			jmp		NormalRetnAddr
 		}
 	}
 
 	void WriteHook()
 	{
-		WriteRelJump(0x573347, (UInt32)Hook);
+		// OnPreActivate hook used to be at 0x573347, but was moved higher to allow preventing NVSE's OnActivate from running.
+		// NVSE OnActivate hook = 0x57318E
+		WriteRelJump(0x573184, (UInt32)Hook);
 	}
 }
 
@@ -679,6 +710,7 @@ namespace PreActivateInventoryItem
 	{
 		// New hook to handle special plugin/scripted inv item activation.
 		// Replace "call TESForm::GetTypeID"
+		// TODO: Fix conflit with Tweaks @ 
 		HandleSpecialActivation::EquipItem::g_Hook.WriteRelCall(0x88C65C, (UInt32)HandleSpecialActivation::EquipItem::Hook);
 	}
 }

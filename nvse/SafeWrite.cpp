@@ -48,6 +48,17 @@ void __stdcall WriteRelJump(UInt32 jumpSrc, UInt32 jumpTgt)
 
 void __stdcall WriteRelCall(UInt32 jumpSrc, UInt32 jumpTgt)
 {
+	if (*reinterpret_cast<UInt8*>(jumpSrc) != 0xE8) {
+		_ERROR("Cannot write call hook at address 0x%X; another hook made it no longer a function call.", jumpSrc);
+		if (!g_showedRuntimeHookConflictError)
+		{
+			MessageBoxA(nullptr, "Showoff xNVSE: Error detected while trying to hook the game; please report what you see in the log file.",
+				"ShowOff xNVSE", MB_ICONEXCLAMATION);
+			g_showedRuntimeHookConflictError = true;
+		}
+		return;
+	}
+
 	// ask to be able to modify the desired region of code (normally programs prevent code being modified by other code to prevent exploits)
 	UInt32 oldProtect;
 	VirtualProtect((void*)jumpSrc, 5, PAGE_EXECUTE_READWRITE, &oldProtect);
@@ -136,3 +147,5 @@ UInt8* GetParentBasePtr(void* addressOfReturnAddress, bool lambda)
 #endif
 	return *reinterpret_cast<UInt8**>(basePtr);
 }
+
+bool g_showedRuntimeHookConflictError = false;
