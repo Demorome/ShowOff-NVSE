@@ -10,7 +10,7 @@
 
 void Console_Print(const char* fmt, ...);
 
-enum FormType : UInt32
+enum FormType : UInt8
 {
 	kFormType_None = 0,
 	kFormType_TES4,

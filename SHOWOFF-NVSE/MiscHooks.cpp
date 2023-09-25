@@ -177,8 +177,8 @@ namespace PickpocketInCombat
 	void ResetPickpocketHooks()
 	{
 		//Undo function hooks.
-		WriteRelCall(0x75DBDA, UINT32(PickpocketFuncAddr1));
-		WriteRelCall(0x75DFA7, UINT32(PickpocketFuncAddr2));
+		ReplaceCall(0x75DBDA, UINT32(PickpocketFuncAddr1));
+		ReplaceCall(0x75DFA7, UINT32(PickpocketFuncAddr2));
 		WriteRelJump(0x75CED4, UINT32(PickpocketFuncAddr3));
 		SafeWrite8(0x5FA8E4, 0x74);
 		SafeWrite8(0x608200, 0x74);
@@ -206,8 +206,8 @@ namespace PickpocketInCombat
 					//PickpocketFuncAddr4
 
 					//Replace the pickpocket calculation code with an AP cost system.
-					WriteRelCall(0x75DBDA, UInt32(TryCombatPickpocket));
-					WriteRelCall(0x75DFA7, UInt32(TryCombatPickpocket));
+					ReplaceCall(0x75DBDA, UInt32(TryCombatPickpocket));
+					ReplaceCall(0x75DFA7, UInt32(TryCombatPickpocket));
 
 					// Set the pickpocket AP Cost when hovered
 					WriteRelJump(0x75CED4, UInt32(ContainerHoverItemHook));
@@ -396,14 +396,14 @@ namespace GetCompassTargets
 	{
 		// Will empty the list.
 		// Replace "call TList__GetSize"
-		WriteRelCall(0x779F6F, (UInt32)GetSize_Hook);
+		ReplaceCall(0x779F6F, (UInt32)GetSize_Hook);
 
 		// Optimize the code by removing a duplicate "call TList__GetSize" call.
 		// Credits to Stewie for the idea.
 		NopFunctionCall(0x779F7A);
 		
 		// Will fill the list.
-		WriteRelCall(0x77A2FA, (UInt32)PropagateIntValue_Hook);
+		ReplaceCall(0x77A2FA, (UInt32)PropagateIntValue_Hook);
 	}
 }
 
@@ -427,8 +427,8 @@ namespace SetItemHotkeyIconPath
 
 	void WriteHooks()
 	{
-		WriteRelCall(0x77DFD4, (UInt32)ContChangesEntry_GetImageFilename_Hook);
-		WriteRelCall(0x77DCE0, (UInt32)ContChangesEntry_GetImageFilename_Hook);
+		ReplaceCall(0x77DFD4, (UInt32)ContChangesEntry_GetImageFilename_Hook);
+		ReplaceCall(0x77DCE0, (UInt32)ContChangesEntry_GetImageFilename_Hook);
 	}
 }
 
@@ -447,7 +447,7 @@ namespace FreezeAmmoRegen
 
 	void WriteDelayedHooks()
 	{
-		g_detour.WriteRelCall(0x943C5C, (UInt32)Weap_GetModifiedRegenRate_Hook);
+		g_detour.WriteDetourCall(0x943C5C, (UInt32)Weap_GetModifiedRegenRate_Hook);
 	}
 }
 
@@ -472,7 +472,7 @@ namespace Experimental
 
 		void WriteHook()
 		{
-			WriteRelCall(0x87F0A9, (UInt32)Hook);
+			ReplaceCall(0x87F0A9, (UInt32)Hook);
 		}
 	}
 
@@ -527,8 +527,8 @@ namespace Experimental
 			// BUG: The calls below may not trigger during a RemoveItem script function call, esp. if the item is unequipped (cuz no xData gets passed).
 			// Solution: use RemoveItemTarget or some other alternative.
 			// These hooks will run after a potential OnUnequip call, so it doubles as a way to ensure that blocktype gets run in time.
-			WriteRelCall(0x4C41DC, (UInt32)Hook<0xC>);
-			WriteRelCall(0x4C42B2, (UInt32)Hook<0xC>);
+			ReplaceCall(0x4C41DC, (UInt32)Hook<0xC>);
+			ReplaceCall(0x4C42B2, (UInt32)Hook<0xC>);
 		}
 	}
 }
@@ -541,21 +541,21 @@ namespace HandleHooks
 		GetCompassTargets::WriteHooks();
 		SetItemHotkeyIconPath::WriteHooks();
 #if 0
-		WriteRelCall(0x8B0FF0, UInt32(Actor_Spread_PerkModifier_Hook));
+		ReplaceCall(0x8B0FF0, UInt32(Actor_Spread_PerkModifier_Hook));
 
 
 		// Modify a "IsInCombat" check to allow NPC activation even if they are in combat.
-		WriteRelCall(0x607E70, UINT32(PickpocketInCombat::PCCanPickpocketInCombatHOOK));
-		WriteRelCall(0x5FA81F, UINT32(PickpocketInCombat::PCCanPickpocketInCombatHOOK));  //Same thing but for Creatures (like Super Mutants).
+		ReplaceCall(0x607E70, UINT32(PickpocketInCombat::PCCanPickpocketInCombatHOOK));
+		ReplaceCall(0x5FA81F, UINT32(PickpocketInCombat::PCCanPickpocketInCombatHOOK));  //Same thing but for Creatures (like Super Mutants).
 
 		// NOTE: When failing the AP cost check, it counts as if you were caught by the actor.
 		// This could cause really weird behavior with the NPC just taking back everything that was previously stolen,
 		// not to mention you would no longer be able to pickpocket them normally after combat.
 
 		// Below isn't working currently...
-		WriteRelCall(0x77738A, UINT32(PickpocketInCombat::ShowPickpocketStringInCombat));
-		WriteRelCall(0x7772C9, UINT32(PickpocketInCombat::ShowPickpocketStringInCombat2));
-		//WriteRelCall(0x770C0D, UINT32(ShowPickpocketStringInCombat2)); //breaks health target UI
+		ReplaceCall(0x77738A, UINT32(PickpocketInCombat::ShowPickpocketStringInCombat));
+		ReplaceCall(0x7772C9, UINT32(PickpocketInCombat::ShowPickpocketStringInCombat2));
+		//ReplaceCall(0x770C0D, UINT32(ShowPickpocketStringInCombat2)); //breaks health target UI
 		// Possible solution: open and hook the companion loot exchange menu instead?
 #endif
 	}

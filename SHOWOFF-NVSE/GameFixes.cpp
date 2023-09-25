@@ -127,11 +127,11 @@ namespace GameFixes
 			void WriteDelayedHooks()
 			{
 				// These two hooks will set the g_NoEquip global.
-				g_detour1stCall.WriteRelCall(0x88D98A, (UInt32)FirstHook);
-				g_detour2ndCall.WriteRelCall(0x88D964, (UInt32)SecondHook);
+				g_detour1stCall.WriteDetourCall(0x88D98A, (UInt32)FirstHook);
+				g_detour2ndCall.WriteDetourCall(0x88D964, (UInt32)SecondHook);
 
 				// Uses the g_NoEquip global set up by the hooks above.
-				g_detourDoFix.WriteRelCall(0x4C0DC8, (UInt32)DoFix);
+				g_detourDoFix.WriteDetourCall(0x4C0DC8, (UInt32)DoFix);
 			}
 		}
 	}

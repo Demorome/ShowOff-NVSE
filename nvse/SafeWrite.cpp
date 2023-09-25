@@ -1,5 +1,7 @@
 #include "SafeWrite.h"
 
+#include "GameAPI.h" // for MessageBox
+
 void __stdcall SafeWrite8(UInt32 addr, UInt32 data)
 {
 	UInt32 oldProtect;
@@ -33,8 +35,22 @@ void __stdcall SafeWriteBuf(UInt32 addr, const void* data, UInt32 len)
 }
 
 // Use if it's not a 2 byte jz
-void __stdcall WriteRelJump(UInt32 jumpSrc, UInt32 jumpTgt)  
+bool __stdcall WriteRelJump(UInt32 jumpSrc, UInt32 jumpTgt, std::optional<std::array<UInt8, 5>> originalBytes)
 {
+	if (originalBytes.has_value())
+	{
+		auto& oldBytes = originalBytes.value();
+		for (int i = 0; i < oldBytes.size(); ++i)
+		{
+			if (*reinterpret_cast<UInt8*>(jumpSrc + i) != oldBytes[i])
+			{
+				_ERROR("Cannot write jump hook at address 0x%X; another plugin's hook already overwrote that code.", jumpSrc);
+				ShowHookConflictErrorMsg();
+				return false;
+			}
+		}
+	}
+
 	// ask to be able to modify the desired region of code (normally programs prevent code being modified by other code to prevent exploits)
 	UInt32 oldProtect;
 	VirtualProtect((void*)jumpSrc, 5, PAGE_EXECUTE_READWRITE, &oldProtect);
@@ -44,30 +60,60 @@ void __stdcall WriteRelJump(UInt32 jumpSrc, UInt32 jumpTgt)
 
 	// restore old protection of code
 	VirtualProtect((void*)jumpSrc, 5, oldProtect, &oldProtect);
+	return true;
 }
 
 void __stdcall WriteRelCall(UInt32 jumpSrc, UInt32 jumpTgt)
 {
+	// ask to be able to modify the desired region of code (normally programs prevent code being modified by other code to prevent exploits)
+	UInt32 oldProtect;
+	VirtualProtect((void*)jumpSrc, 5, PAGE_EXECUTE_READWRITE, &oldProtect);
+
+	*(UInt8*)(jumpSrc) = 0xE8; // write call instruction
+	*(UInt32*)(jumpSrc + 1) = jumpTgt - jumpSrc - 5;  // replace the relative offset for the existing call
+
+	// restore old protection of code
+	VirtualProtect((void*)jumpSrc, 5, oldProtect, &oldProtect);
+}
+
+bool __stdcall ReplaceCall(UInt32 jumpSrc, UInt32 jumpTgt, std::optional<std::array<UInt8, 4>> originalBytes, bool acceptOverwrite)
+{
 	if (*reinterpret_cast<UInt8*>(jumpSrc) != 0xE8) {
-		_ERROR("Cannot write call hook at address 0x%X; another hook made it no longer a function call.", jumpSrc);
-		if (!g_showedRuntimeHookConflictError)
+		if (!acceptOverwrite)
 		{
-			MessageBoxA(nullptr, "Showoff xNVSE: Error detected while trying to hook the game; please report what you see in the log file.",
-				"ShowOff xNVSE", MB_ICONEXCLAMATION);
-			g_showedRuntimeHookConflictError = true;
+			_ERROR("Cannot replace call at address 0x%X; another plugin's hook made it no longer a function call.", jumpSrc);
+			ShowHookConflictErrorMsg();
 		}
-		return;
+		return false;
+	}
+
+	if (originalBytes.has_value())
+	{
+		auto& oldBytes = originalBytes.value();
+		for (int i = 0; i < oldBytes.size(); ++i)
+		{
+			// +1 due to already having checked the first byte for call instruction (0xE8)
+			if (*reinterpret_cast<UInt8*>(jumpSrc + i + 1) != oldBytes[i])
+			{
+				if (!acceptOverwrite)
+				{
+					_ERROR("Cannot replace call at address 0x%X; another plugin's hook already overwrote that code.", jumpSrc);
+					ShowHookConflictErrorMsg();
+				}
+				return false;
+			}
+		}
 	}
 
 	// ask to be able to modify the desired region of code (normally programs prevent code being modified by other code to prevent exploits)
 	UInt32 oldProtect;
 	VirtualProtect((void*)jumpSrc, 5, PAGE_EXECUTE_READWRITE, &oldProtect);
 	
-	*(UInt8*)jumpSrc = 0xE8;  // write the 'call' instruction
-	*(UInt32*)(jumpSrc + 1) = jumpTgt - jumpSrc - 5;  // write the relative offset 
+	*(UInt32*)(jumpSrc + 1) = jumpTgt - jumpSrc - 5;  // replace the relative offset for the existing call
 
 	// restore old protection of code
 	VirtualProtect((void*)jumpSrc, 5, oldProtect, &oldProtect);
+	return true;
 }
 
 void WriteRelJnz(UInt32 jumpSrc, UInt32 jumpTgt)
@@ -149,3 +195,12 @@ UInt8* GetParentBasePtr(void* addressOfReturnAddress, bool lambda)
 }
 
 bool g_showedRuntimeHookConflictError = false;
+
+void ShowHookConflictErrorMsg()
+{
+	if (!g_showedRuntimeHookConflictError)
+	{
+		Console_Print("Showoff xNVSE: Detected conflict with another plugin detected while trying to hook the game; please report what you see in the log file, or check if there is an update available.");
+		g_showedRuntimeHookConflictError = true;
+	}
+}

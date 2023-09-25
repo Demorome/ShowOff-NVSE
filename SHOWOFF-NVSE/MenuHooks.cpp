@@ -69,7 +69,7 @@ namespace GetLevelUpMenuUnspentPoints
 		CdeclCall(0x7851D0);  // LevelUpMenu::Close()
 	}
 
-	void WriteRetrievalHook() { WriteRelCall(0x785866, (UInt32)CloseMenu_Hook); }
+	void WriteRetrievalHook() { ReplaceCall(0x785866, (UInt32)CloseMenu_Hook); }
 }
 
 namespace LevelUpMenuHooks
@@ -138,9 +138,8 @@ namespace LevelUpMenuHooks
 			WriteRelJump(0x785ACC, UInt32(LevelUpMenuClickPerkHook));
 
 			// init number of perks to assign to be 0 if not on a perk level
-			SafeWriteBuf(0x78508C, "\x8B\x0D\xDC\x9F\x1D\x01\x89\x41\x60\x0F\x1F\x40", 12);
-			WriteRelCall(0x785087, UInt32(IsPlayerAtPerkLevel));
-
+			SafeWriteBuf(0x78508C, "\x8B\x0D\xDC\x9F\x1D\x01\x89\x41\x60\x0F\x1F\x40", 12); // fine if Tweaks wrote this instead.
+			WriteRelCall(0x785087, UInt32(IsPlayerAtPerkLevel)); // it's 100% OK if Tweaks writes this hook for us instead.
 
 			// == Hooks below taken from Tweaks, from CustomPerksPerLevel::InitHooks
 
@@ -152,7 +151,7 @@ namespace LevelUpMenuHooks
 			// If there was only 1 perk to assign to start with, won't prevent vanilla behavior,
 			//	..which is to allow clicking on another perk and just have the selection swap.
 			// Note: This hook must be delayed so it can overwrite Tweak's.
-			WriteRelCall(0x785B0F, UInt32(PerkMenuCheckNumSelectedPerks));
+			ReplaceCall(0x785B0F, UInt32(PerkMenuCheckNumSelectedPerks));
 		}
 	}
 

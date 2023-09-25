@@ -1,6 +1,8 @@
 #pragma once
 
 #include <intrin.h>
+#include <array>
+#include <optional>
 
 #define __HOOK __declspec(naked) void
 // Credits to Kormakur for the idea.
@@ -10,9 +12,14 @@ void __stdcall SafeWrite16(UInt32 addr, UInt32 data);
 void __stdcall SafeWrite32(UInt32 addr, UInt32 data);
 void __stdcall SafeWriteBuf(UInt32 addr, const void* data, UInt32 len);
 
+// 5 bytes, returns false if the original bytecode was changed.
+bool __stdcall WriteRelJump(UInt32 jumpSrc, UInt32 jumpTgt, std::optional<std::array<UInt8, 5>> originalBytes = {});
 // 5 bytes
-void __stdcall WriteRelJump(UInt32 jumpSrc, UInt32 jumpTgt);
 void __stdcall WriteRelCall(UInt32 jumpSrc, UInt32 jumpTgt);
+// 5 bytes, returns false if there was a hook conflict.
+bool __stdcall ReplaceCall(UInt32 jumpSrc, UInt32 jumpTgt, 
+	std::optional<std::array<UInt8, 4>> originalBytes = {}, 
+	bool acceptOverwrite = false);
 
 // 6 bytes
 void WriteRelJnz(UInt32 jumpSrc, UInt32 jumpTgt);
@@ -42,27 +49,20 @@ UInt32 GetRelJumpAddr(UInt32 jumpSrc);
 
 UInt8* GetParentBasePtr(void* addressOfReturnAddress, bool lambda = false);
 
-extern bool g_showedRuntimeHookConflictError;
+extern bool g_showRuntimeHookConflictError;
 
 // Stores the function-to-call before overwriting it, to allow calling the overwritten function after our hook is over.
 class CallDetour
 {
 	UInt32 overwritten_addr = 0;
 public:
-	void WriteRelCall(UInt32 jumpSrc, UInt32 jumpTgt)
+	void WriteDetourCall(UInt32 jumpSrc, UInt32 jumpTgt, std::optional<std::array<UInt8, 4>> originalBytes = {})
 	{
-		if (*reinterpret_cast<UInt8*>(jumpSrc) != 0xE8) {
-			_ERROR("Cannot write detour hook at address 0x%X; another hook made it no longer a function call.", jumpSrc);
-			if (!g_showedRuntimeHookConflictError)
-			{
-				MessageBoxA(nullptr, "Showoff xNVSE: Error detected while trying to detour-hook the game; please report what you see in the log file.", 
-					"ShowOff xNVSE", MB_ICONEXCLAMATION);
-				g_showedRuntimeHookConflictError = true;
-			}
-			return;
-		}
 		overwritten_addr = GetRelJumpAddr(jumpSrc);
-		::WriteRelCall(jumpSrc, jumpTgt);
+		if (!::ReplaceCall(jumpSrc, jumpTgt, originalBytes, false))
+			overwritten_addr = 0;
 	}
 	[[nodiscard]] UInt32 GetOverwrittenAddr() const { return overwritten_addr; }
 };
+
+void ShowHookConflictErrorMsg();

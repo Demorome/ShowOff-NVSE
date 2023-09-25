@@ -183,7 +183,7 @@ namespace CornerMessageHooks
 		
 		for (auto const jmpSrc : cornerMessageHookJmpSrc)
 		{
-			WriteRelCall(jmpSrc, (UInt32)CornerMessageEventHook);
+			ReplaceCall(jmpSrc, (UInt32)CornerMessageEventHook);
 		}
 	}
 }
@@ -255,7 +255,7 @@ namespace ActorValueChangeHooks
 	void WriteHook()
 	{
 		// Replace "GetActorValueInfo(avCode)" call
-		WriteRelCall(0x66EE58, (UInt32)HandleAVChangeHook);
+		ReplaceCall(0x66EE58, (UInt32)HandleAVChangeHook);
 	}
 }
 #endif
@@ -419,7 +419,7 @@ namespace OnPreScriptedActivate
 	void WriteDelayedHooks()
 	{
 		// replaces TESForm::IsDisabled call in Activate_Execute
-		g_detourActivateFunc.WriteRelCall(0x5B5AD0, (UInt32)MaybePreventScriptedActivation_Activate);
+		g_detourActivateFunc.WriteDetourCall(0x5B5AD0, (UInt32)MaybePreventScriptedActivation_Activate);
 	}
 }
 
@@ -628,7 +628,6 @@ namespace PreActivateInventoryItem
 					jz		PreventActivation
 
 				DoRegularCode :
-					// Do regular code
 					mov     eax, [ebp - 0x4]
 					jmp		normalReturnAddr
 
@@ -640,24 +639,18 @@ namespace PreActivateInventoryItem
 
 		namespace EquipItem
 		{
-			CallDetour g_Hook;
-
-			// Replaces TESForm::GetTypeID
-			// Calling code will prevent activation if the typeID we return is invalid.
-			FormType __fastcall Hook(TESForm* itemForm, void* edx)
+			bool __fastcall HandleHook(Actor* actor, TESForm* itemForm)
 			{
-				FormType typeID = ThisStdCall<FormType>(g_Hook.GetOverwrittenAddr(), itemForm);
-
 				// Avoid running our checks twice by checking if this func was called by a func we already hooked.
 				auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
 				auto returnAddr = *reinterpret_cast<UInt32*>(ebp + 0x4);
 				if (returnAddr == 0x780F31	/* in InventoryMenu::HandleEquipOrUnEquip */
 					|| returnAddr == 0x702084 /* in HotKeyWheel::HandleEquipUnequip */)
 				{
-					return typeID;
+					return true;
 				}
 
-				switch (typeID)
+				switch (itemForm->typeID)
 				{
 				case kFormType_TESObjectARMO:
 				case kFormType_TESObjectWEAP:
@@ -668,21 +661,48 @@ namespace PreActivateInventoryItem
 				case kFormType_AlchemyItem:
 				{
 
-					auto* actor = *reinterpret_cast<Actor**>(ebp - 0x4);
 					// We only care about preventing activation for the player
 					if (actor != g_thePlayer)
-						return typeID;
+						return true;
 
 					auto* xData = *reinterpret_cast<ExtraDataList**>(ebp + 0x10);
 					auto count = *reinterpret_cast<int*>(ebp + 0xC);
 
 					auto* invRef = InventoryRefCreateEntry(actor, itemForm, count, xData);
-					bool canUseItem = CanSpecialUseItemRef(invRef);
-					return canUseItem ? typeID : kFormType_None;
+					return CanSpecialUseItemRef(invRef);
 				}
 				default:
-					return typeID; // return invalid typeID for equipping
+					return true; // in case someone wants to hook this func later to support more formtypes.
 				}
+			}
+
+			__HOOK Hook()
+			{
+				static const UInt32 NormalReturnAddr = 0x88C659,
+					EndFunctionAddr = 0x88C753;
+				_asm
+				{
+					// do regular code
+					sub     esp, 8
+					mov		[ebp - 4], ecx
+
+					// our code
+					mov		edx, [ebp + 0x8] // item
+					call	HandleHook
+					test	al, al
+					jz		PreventEquip
+					// else, do regular code
+					jmp		NormalReturnAddr
+
+				PreventEquip :
+					jmp		EndFunctionAddr
+				}
+			}
+
+			void WriteDelayedHooks()
+			{
+				// Avoids previous hook conflict with Tweaks, which WriteRelJumps at 0x88C659
+				WriteRelJump(0x88C653, (UInt32)Hook, std::to_array<UInt8>({ 0x83, 0xEC, 0x08, 0x89, 0x4D }));
 			}
 		}
 	}
@@ -690,10 +710,10 @@ namespace PreActivateInventoryItem
 	void WriteHooks()
 	{
 		// Replace "call InventoryMenu::HandleEquipOrUnEquip"
-		WriteRelCall(0x7805CC, (UInt32)HookHandleOnClickEquipOrUnEquip);
+		ReplaceCall(0x7805CC, (UInt32)HookHandleOnClickEquipOrUnEquip);
 
 		// Replace "call TESForm::GetFlags(g_inventoryMenuSelection)"
-		WriteRelCall(0x780648, (UInt32)HookOnClickAmmo);
+		ReplaceCall(0x780648, (UInt32)HookOnClickAmmo);
 
 		// Replace "call TESForm::GetFlags(entry)"
 		WriteRelJump(0x701FAE, (UInt32)HookHandleHotkeyEquipOrUnEquip);
@@ -709,9 +729,7 @@ namespace PreActivateInventoryItem
 	void WriteDelayedHooks()
 	{
 		// New hook to handle special plugin/scripted inv item activation.
-		// Replace "call TESForm::GetTypeID"
-		// TODO: Fix conflit with Tweaks @ 
-		HandleSpecialActivation::EquipItem::g_Hook.WriteRelCall(0x88C65C, (UInt32)HandleSpecialActivation::EquipItem::Hook);
+		HandleSpecialActivation::EquipItem::WriteDelayedHooks();
 	}
 }
 
@@ -785,7 +803,7 @@ namespace OnQuestAdded
 
 	void WriteHook()
 	{
-		WriteRelCall(0x5EC66E, (UInt32)handleQuestUpdateMessage);
+		ReplaceCall(0x5EC66E, (UInt32)handleQuestUpdateMessage);
 	}
 }
 
@@ -852,7 +870,7 @@ namespace OnCalculateSellPrice
 
 	void WriteDelayedHook() //avoid conflict with NVAC hook
 	{
-		g_override.WriteRelCall(0x72EFFE, (UInt32)HookFAbs);
+		g_override.WriteDetourCall(0x72EFFE, (UInt32)HookFAbs);
 	}
 }
 
@@ -1049,10 +1067,10 @@ namespace OnLockpickMenuClose
 
 	void WriteHooks()
 	{
-		WriteRelCall(0x790383, (UInt32)ManualExitHook);
-		WriteRelCall(0x78F97B, (UInt32)OpenLockHook);
+		ReplaceCall(0x790383, (UInt32)ManualExitHook);
+		ReplaceCall(0x78F97B, (UInt32)OpenLockHook);
 		// replace CalculateForceLockChance(..)
-		g_ForceOpenAttemptOverride.WriteRelCall(0x7903D9, (UInt32)ForceOpenAttemptHook);
+		g_ForceOpenAttemptOverride.WriteDetourCall(0x7903D9, (UInt32)ForceOpenAttemptHook);
 	}
 }
 
@@ -1095,7 +1113,7 @@ namespace OnShowCornerMessage
 	void WriteHooks()
 	{
 		// For delayed (queued) messages.
-		WriteRelCall(0x77578D, (UInt32)tListIsEmptyHook);
+		ReplaceCall(0x77578D, (UInt32)tListIsEmptyHook);
 	}
 }
 
@@ -1136,9 +1154,9 @@ namespace OnQueueCornerMessage
 
 	void WriteHooks()
 	{
-		WriteRelCall(0x7754FA, (UInt32)tListAppendHook<true>);
-		WriteRelCall(0x775624, (UInt32)tListAppendHook<false>);
-		WriteRelCall(0x775610, (UInt32)tListInsertHook);
+		ReplaceCall(0x7754FA, (UInt32)tListAppendHook<true>);
+		ReplaceCall(0x775624, (UInt32)tListAppendHook<false>);
+		ReplaceCall(0x775610, (UInt32)tListInsertHook);
 	}
 }
 
@@ -1351,7 +1369,7 @@ namespace OnPCMiscStatChange
 	void WriteHook()
 	{
 		// replace "call StatsMenu::GetMenuID"
-		WriteRelCall(0x4D5E6A, (UInt32)HookGetMenuID);
+		ReplaceCall(0x4D5E6A, (UInt32)HookGetMenuID);
 	}
 }
 
@@ -1382,7 +1400,7 @@ namespace OnDisplayOrCompleteObjective
 	void WriteDelayedHook()
 	{
 		// Add compatibility with Tweaks by indirectly calling the function at the address.
-		GetQuestDetour.WriteRelCall(0x5EC5DC, (UInt32)HookGetQuest);
+		GetQuestDetour.WriteDetourCall(0x5EC5DC, (UInt32)HookGetQuest);
 		// We could have hooked the HUDMainMenu::SetQuestUpdateText calls,
 		// ..but that would cause incompatibility with Tweaks' "No Quest Messages".
 	}
@@ -1466,7 +1484,7 @@ namespace OnAddAlt
 
 		void WriteHook()
 		{
-			WriteRelCall(0x575091, (UInt32)HookExtraContainerChanges_Unk);
+			ReplaceCall(0x575091, (UInt32)HookExtraContainerChanges_Unk);
 		}
 	}
 
@@ -1483,7 +1501,7 @@ namespace OnAddAlt
 
 		void WriteHook()
 		{
-			WriteRelCall(0x574B19, (UInt32)HookEquipForRef);
+			ReplaceCall(0x574B19, (UInt32)HookEquipForRef);
 		}
 	}
 
@@ -1503,7 +1521,7 @@ namespace OnAddAlt
 
 			void WriteHook()
 			{
-				WriteRelCall(0x574C28, (UInt32)HookMergeScriptEvent);
+				ReplaceCall(0x574C28, (UInt32)HookMergeScriptEvent);
 			}
 		}
 
@@ -1522,7 +1540,7 @@ namespace OnAddAlt
 
 			void WriteHook()
 			{
-				WriteRelCall(0x574D00, (UInt32)HookMergeScriptEvent);
+				ReplaceCall(0x574D00, (UInt32)HookMergeScriptEvent);
 			}
 		}
 	
@@ -1541,7 +1559,7 @@ namespace OnAddAlt
 
 			void WriteHook()
 			{
-				WriteRelCall(0x574F03, (UInt32)HookMergeScriptEvent);
+				ReplaceCall(0x574F03, (UInt32)HookMergeScriptEvent);
 			}
 		}
 
@@ -1595,7 +1613,7 @@ namespace OnReadBook
 	void WriteDelayedHook()
 	{
 		// replace "call IncPCMiscStat"
-		g_detour.WriteRelCall(0x515195, (UInt32)Hook);
+		g_detour.WriteDetourCall(0x515195, (UInt32)Hook);
 	}
 }
 
@@ -1636,10 +1654,10 @@ namespace OnDispositionChange
 	void WriteDelayedHooks()
 	{
 		// Replace TruncateFloat calls
-		g_detour.WriteRelCall(0x87FC3A, (UInt32)TruncateFloat_Hook);
+		g_detour.WriteDetourCall(0x87FC3A, (UInt32)TruncateFloat_Hook);
 
 		// Don't bother saving the likely identical call function addr.
-		WriteRelCall(0x87FC73, (UInt32)TruncateFloat_Hook);
+		ReplaceCall(0x87FC73, (UInt32)TruncateFloat_Hook);
 	}
 }
 
@@ -1671,7 +1689,7 @@ namespace OnPreLifeStateChange
 
 	void WriteDelayedHook()
 	{
-		g_detour.WriteRelCall(0x8A182D, (UInt32)GetINIValueAddrHook);
+		g_detour.WriteDetourCall(0x8A182D, (UInt32)GetINIValueAddrHook);
 	}
 }
 #endif
@@ -1705,8 +1723,8 @@ namespace OnExplosionHit
 
 	void WriteHooks()
 	{
-		//WriteRelCall(0x89BA03, (UInt32)HandleEvent);
-		WriteRelCall(0x9B04EF, (UInt32)HandleEvent);
+		//ReplaceCall(0x89BA03, (UInt32)HandleEvent);
+		ReplaceCall(0x9B04EF, (UInt32)HandleEvent);
 	}
 }
 
@@ -1980,7 +1998,7 @@ namespace OnPreRemoveItemFromMenu
 		void WriteDelayedHook()
 		{
 			// Replace Tile::IsFloatValueNotNull call
-			g_detour.WriteRelCall(0x7B5BF1, (UInt32)HandleRepairMenuEvent);
+			g_detour.WriteDetourCall(0x7B5BF1, (UInt32)HandleRepairMenuEvent);
 		}
 	}
 

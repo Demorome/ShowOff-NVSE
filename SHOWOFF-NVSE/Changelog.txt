@@ -364,6 +364,21 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 * "ShowOff:OnPreProjectileExplode"
 * "ShowOff:OnPreRemoveItemFromMenu"
 
+//===v1.71
+
+===Event changes:
+* "ShowOff:OnPreActivate" now runs before NVSE's "OnActivate" event, so preventing an activation in PreActivate will prevent "OnActivate" from running for that instance.
+
+===General changes:
+* Hook conflicts are now much more visible with the addition of an error msg box that will appear only once if an error is detected. Should help with error reporting.
+
+//===v1.72
+
+===Bug Fixes:
+* Hook conflict message is now just a console print; should no longer accidentally crash the game for some users.
+* Fixed a hook conflict with Tweaks at 0x88C65C (it partially broke my "ShowOff:OnPreActivateInventoryItem" event for special activations)
+* Fixed bad hook conflict message for 0x785087
+
 ====== (Template:)
 
 //===v???
