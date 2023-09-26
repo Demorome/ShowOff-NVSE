@@ -2,6 +2,8 @@
 
 #include "GameAPI.h" // for MessageBox
 
+#include "ShowOffNVSE.h" // to delay error prints until console manager is fully loaded
+
 void __stdcall SafeWrite8(UInt32 addr, UInt32 data)
 {
 	UInt32 oldProtect;
@@ -200,7 +202,11 @@ void ShowHookConflictErrorMsg()
 {
 	if (!g_showedRuntimeHookConflictError)
 	{
-		Console_Print("Showoff xNVSE: Detected conflict with another plugin detected while trying to hook the game; please report what you see in the log file, or check if there is an update available.");
+		std::string msg = "Showoff xNVSE: Detected conflict with another plugin detected while trying to hook the game; please report what you see in the log file, or check if there is an update available.";
+		if (g_thePlayer != nullptr) // if plugin init is complete
+			Console_Print(msg.c_str());
+		else
+			g_deferredPrints.emplace_back(std::move(msg));
 		g_showedRuntimeHookConflictError = true;
 	}
 }

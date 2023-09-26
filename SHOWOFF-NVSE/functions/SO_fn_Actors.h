@@ -548,9 +548,68 @@ bool Cmd_GetIsPlayerOverencumbered_Execute(COMMAND_ARGS)
 	return Cmd_GetIsPlayerOverencumbered_Eval(nullptr, reinterpret_cast<void*>(ignoreGodMode), nullptr, result);
 }
 
+// Credits to lStewieAl
+enum SpreadMode
+{
+	kSpreadMode_Scoped = 0,
+	kSpreadMode_AlwaysUseCachedValue,
+	kSpreadMode_2,
+	kSpreadMode_VATS,
+	kSpreadMode_INVALID
+};
 
+DEFINE_COMMAND_PLUGIN(GetCalculatedActorSpread, "", true, kParams_OneOptionalInt);
+bool Cmd_GetCalculatedActorSpread_Execute(COMMAND_ARGS)
+{
+	*result = -1.0;
+	if (!thisObj || !IS_ACTOR(thisObj))
+		return true;
 
+	UInt32 spreadMode = kSpreadMode_INVALID;
+	ExtractArgsEx(EXTRACT_ARGS_EX, &spreadMode);
 
+	auto* actor = static_cast<Actor*>(thisObj);
+	auto* weap = actor->GetEquippedWeapon();
+
+	if (!weap || weap->IsMelee())
+	{
+		*result = 1.0;
+		return true;
+	}
+	
+	if (spreadMode == kSpreadMode_INVALID)
+	{
+		// Determine proper spread mode to check given current game context
+		spreadMode = kSpreadMode_2; // most commonly used
+
+		if (actor == g_thePlayer)
+		{
+			/*
+			auto* vatsMenu = VATSMenu::GetSingleton();
+			if (VATSCameraData->Get()->mode == 3)
+			{
+				spreadMode = kSpreadMode_VATS;
+			}
+			*/
+			if (actor->baseProcess && actor->baseProcess->IsAiming())
+				spreadMode = kSpreadMode_Scoped;
+		}
+	}
+
+	*result = ThisStdCall<double>(0x8B0DD0, thisObj, spreadMode);
+
+	/*
+	if (actor == g_thePlayer)
+	{
+		if (!actor->IsDoingAttackAnimation())
+	}
+	else
+	{
+
+	}*/
+
+	return true;
+}
 
 
 

@@ -3350,6 +3350,7 @@ public:
 	UInt32 GetItemModEffect(UInt8 which)	{ which -= 1; ASSERT(which < 3); return effectMods[which]; }
 	float GetItemModValue1(UInt8 which)		{ which -= 1; ASSERT(which < 3); return value1Mod[which]; }
 	float GetItemModValue2(UInt8 which)		{ which -= 1; ASSERT(which < 3); return value2Mod[which]; }
+	bool IsMelee() const { return eWeaponType <= 2; };
 };
 STATIC_ASSERT(sizeof(TESObjectWEAP) == 0x388);
 

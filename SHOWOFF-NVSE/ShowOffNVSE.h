@@ -98,7 +98,7 @@ extern std::atomic<float> g_fForcePickpocketTargetStrengthMult;
 extern char* g_fForcePickpocketFailureMessage;
 
 
-
+extern std::vector<std::string> g_deferredPrints;
 
 // Misc.
 #define NUM_ARGS *((UInt8*)scriptData + *opcodeOffsetPtr)  //Probably breaks Compiler Override!! - Credits to Stewie.

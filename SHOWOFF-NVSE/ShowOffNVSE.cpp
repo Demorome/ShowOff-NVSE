@@ -39,7 +39,7 @@
 // Plugin Stuff
 IDebugLog g_Log; // file will be open after NVSE plugin load
 HMODULE	g_ShowOffHandle;
-constexpr UInt32 g_PluginVersion = 172;
+constexpr UInt32 g_PluginVersion = 173;
 
 // Allows modmakers to toggle ShowOff's debug messages for some of its functions.
 #ifdef _DEBUG
@@ -131,6 +131,14 @@ bool (__cdecl* GetIsGodMode)() = nullptr;
 // Hook Globals
 std::atomic<bool> g_canPlayerPickpocketInCombat = false;
 
+std::vector<std::string> g_deferredPrints;
+void HandleDeferredConsolePrints()
+{
+	for (auto& s : g_deferredPrints)
+		Console_Print(s.c_str());
+
+	g_deferredPrints.clear();
+}
 
 //todo: remove INI globals and make a class for them (unordered map, access value via string key)
 
@@ -251,6 +259,8 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 
 		HandleHooks::HandleDelayedGameHooks();
 		HandleHooks::HandleDelayedEventHooks();
+
+		HandleDeferredConsolePrints();
 
 		Console_Print("ShowOff xNVSE version: %.2f", (g_PluginVersion / 100.0F));
 		break;
@@ -691,6 +701,9 @@ extern "C"
 		/*3D52*/	REG_CMD(SetExplosionHitDamage)
 		/*3D53*/	REG_CMD(IsJumping)
 		/*3D54*/	REG_CMD(FreezeAmmoRegen)
+
+		//========v1.7?? (to add later when finished.
+		///*3D55*/	REG_CMD(GetCalculatedActorSpread);
 
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		

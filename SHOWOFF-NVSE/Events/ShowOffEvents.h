@@ -712,12 +712,6 @@ namespace PreActivateInventoryItem
 		// Replace "call InventoryMenu::HandleEquipOrUnEquip"
 		ReplaceCall(0x7805CC, (UInt32)HookHandleOnClickEquipOrUnEquip);
 
-		// Replace "call TESForm::GetFlags(g_inventoryMenuSelection)"
-		ReplaceCall(0x780648, (UInt32)HookOnClickAmmo);
-
-		// Replace "call TESForm::GetFlags(entry)"
-		WriteRelJump(0x701FAE, (UInt32)HookHandleHotkeyEquipOrUnEquip);
-
 		// New hook to handle special plugin/scripted inv item activation.
 		WriteRelJump(0x88C794, (UInt32)HandleSpecialActivation::UnequipItem::Hook);
 
@@ -728,6 +722,14 @@ namespace PreActivateInventoryItem
 
 	void WriteDelayedHooks()
 	{
+		// Replace "call TESForm::GetFlags(g_inventoryMenuSelection)"
+		// Delayed to (hopefully) crush NVAC conflict
+		WriteRelCall(0x780648, (UInt32)HookOnClickAmmo);
+
+		// Replace "call TESForm::GetFlags(entry)"
+		// Delayed to (hopefully) crush NVAC conflict
+		WriteRelJump(0x701FAE, (UInt32)HookHandleHotkeyEquipOrUnEquip);
+
 		// New hook to handle special plugin/scripted inv item activation.
 		HandleSpecialActivation::EquipItem::WriteDelayedHooks();
 	}

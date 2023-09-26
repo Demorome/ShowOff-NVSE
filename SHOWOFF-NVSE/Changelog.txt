@@ -377,7 +377,14 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 ===Bug Fixes:
 * Hook conflict message is now just a console print; should no longer accidentally crash the game for some users.
 * Fixed a hook conflict with Tweaks at 0x88C65C (it partially broke my "ShowOff:OnPreActivateInventoryItem" event for special activations)
-* Fixed bad hook conflict message for 0x785087
+* Fixed bad hook conflict detection for 0x785087. This caused the hook to not install, causing an insane amount of perk points to be available in the perk menu.
+* I didn't get around to fixing all reported hook conflicts, so expect another update soon.
+
+//===v1.73
+
+===Bug Fixes:
+* Hook conflicts at w/ NVAC at 0x780648 & 0x701FAE should now be resolved
+* Fixed crash by delaying hook conflict console print if hook conflict was detected right as the plugin is loading in (i.e before console is even loaded).
 
 ====== (Template:)
 
