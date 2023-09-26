@@ -735,6 +735,7 @@ public:
 	bool GetShouldAttack(Actor* target);
 	void SetWantsWeaponOut(bool wantsWeaponOut);
 	bool IsInReloadAnim();
+	bool IsDoingAttackAnimation() const;
 };
 
 // 1C0

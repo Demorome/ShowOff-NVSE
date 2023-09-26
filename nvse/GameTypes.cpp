@@ -121,3 +121,12 @@ const char *String::CStr()
 {
 	return (m_data && m_dataLen) ? m_data : "";
 }
+
+size_t String::GetLength()
+{
+	// Copy code from 0x4048E0
+	if (m_dataLen == 0xFFFF)
+		return m_data ? strlen(m_data) : 0;
+	else
+		return m_dataLen;
+}

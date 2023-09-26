@@ -576,6 +576,12 @@ bool Cmd_GetCalculatedActorSpread_Execute(COMMAND_ARGS)
 		*result = 1.0;
 		return true;
 	}
+
+	if (!actor->baseProcess || actor->baseProcess->IsWeaponOut())
+	{
+		*result = 1.0;
+		return true;
+	}
 	
 	if (spreadMode == kSpreadMode_INVALID)
 	{
@@ -591,22 +597,54 @@ bool Cmd_GetCalculatedActorSpread_Execute(COMMAND_ARGS)
 				spreadMode = kSpreadMode_VATS;
 			}
 			*/
-			if (actor->baseProcess && actor->baseProcess->IsAiming())
-				spreadMode = kSpreadMode_Scoped;
+			if (actor->baseProcess->IsAiming() && weap->targetNIF.nifPath.GetLength())
+			{
+				float filler = 0.0;
+				auto* weapInfo = actor->baseProcess->GetWeaponInfo();
+				if (!weap->IsDontHidePlayerWhileAiming() || 
+					(weapInfo && ThisStdCall<bool>(0x4BD8D0, weapInfo, TESObjectWEAP::kWeaponModEffect_IncreaseZoom, &filler))) 
+					// ApplyWeaponModModifiers
+				{
+					spreadMode = kSpreadMode_Scoped;
+				}
+			}
 		}
 	}
 
 	*result = ThisStdCall<double>(0x8B0DD0, thisObj, spreadMode);
 
-	/*
 	if (actor == g_thePlayer)
 	{
-		if (!actor->IsDoingAttackAnimation())
+		if (spreadMode == kSpreadMode_Scoped)
+		{
+			*result *= GetFltGameSetting(0x11CF718); // gs_fGunWobbleMultScope
+		}
+		else
+		{
+			if (!actor->IsDoingAttackAnimation())
+			{
+				*result *= GetFltGameSetting(0x11CEC34); // gs_fNonAttackGunWobbleMult
+			}
+			// Copying weird code starting at 0x96309E
+			const auto& unkGunWobbleDriftGlobal = *reinterpret_cast<float*>(0x11A3B2C);
+			float v60 = *result - unkGunWobbleDriftGlobal;
+			float v61 = g_timeGlobal->secondsPassed * GetFltGameSetting(0x11CF588); // fGunWobbleChaseDriftTime
+			if (v60 != 0.0)
+			{
+				if (v61 < fabs(v60))
+				{
+					if (v60 <= 0.0)
+						*result = unkGunWobbleDriftGlobal - v61;
+					else if (!actor->IsDoingAttackAnimation())
+						*result = unkGunWobbleDriftGlobal + v61;
+				}
+			}
+		}
 	}
-	else
+	else // actor is an NPC
 	{
-
-	}*/
+		*result *= GetFltGameSetting(0x11CE034); // gs_fNPCMaxGunWobbleAngle
+	}
 
 	return true;
 }

@@ -39,7 +39,7 @@
 // Plugin Stuff
 IDebugLog g_Log; // file will be open after NVSE plugin load
 HMODULE	g_ShowOffHandle;
-constexpr UInt32 g_PluginVersion = 173;
+constexpr UInt32 g_PluginVersion = 174;
 
 // Allows modmakers to toggle ShowOff's debug messages for some of its functions.
 #ifdef _DEBUG
@@ -702,8 +702,8 @@ extern "C"
 		/*3D53*/	REG_CMD(IsJumping)
 		/*3D54*/	REG_CMD(FreezeAmmoRegen)
 
-		//========v1.7?? (to add later when finished.
-		///*3D55*/	REG_CMD(GetCalculatedActorSpread);
+		//========v1.74
+		/*3D55*/	REG_CMD(GetCalculatedActorSpread);
 
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		

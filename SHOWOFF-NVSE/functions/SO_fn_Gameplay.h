@@ -454,7 +454,7 @@ bool Cmd_ForceWeaponJamAnim_Execute(COMMAND_ARGS)
 				{
 					ThisStdCall<void*>(0x8B28C0, actor, animGroupID, animData);  // Actor::8B28C0
 					auto const animSeqElem = animData->animSequence[4];  // 4 = kSequence_Weapon
-					actor->SetAnimActionAndSequence(9, animSeqElem);  // 9 = kAnimAction_Reload
+					actor->SetAnimActionAndSequence(HighProcess::kAnimAction_Reload, animSeqElem);
 					actor->Unk_12C(animKey, true);
 					*result = true;
 				}

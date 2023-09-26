@@ -3184,6 +3184,8 @@ public:
 		eFlag_BurstShot					= 0x200,
 		eFlag_RumbleAlternate			= 0x400,
 		eFlag_LongBurst					= 0x800,
+		eFlag_NightVision				= 0x1000, // credits to lStewieAl
+		eFlag_DontHidePlayerWhileAiming = 0x2000 // credits to lStewieAl
 	};
 
 	enum EEmbedWeapAV {
@@ -3351,6 +3353,7 @@ public:
 	float GetItemModValue1(UInt8 which)		{ which -= 1; ASSERT(which < 3); return value1Mod[which]; }
 	float GetItemModValue2(UInt8 which)		{ which -= 1; ASSERT(which < 3); return value2Mod[which]; }
 	bool IsMelee() const { return eWeaponType <= 2; };
+	bool IsDontHidePlayerWhileAiming() const { return weaponFlags2.IsSet(eFlag_DontHidePlayerWhileAiming); }
 };
 STATIC_ASSERT(sizeof(TESObjectWEAP) == 0x388);
 

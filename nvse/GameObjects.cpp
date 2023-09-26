@@ -6,6 +6,7 @@
 #include "GameTasks.h"
 #include "GameUI.h"
 #include "SafeWrite.h"
+#include "GameProcess.h"
 
 ScriptEventList *TESObjectREFR::GetEventList() const
 {
@@ -230,6 +231,16 @@ void Actor::SetWantsWeaponOut(bool wantsWeaponOut)
 bool Actor::IsInReloadAnim()
 {
 	return ThisStdCall<bool>(0x8A8870, this);
+}
+
+bool Actor::IsDoingAttackAnimation() const
+{
+	if (baseProcess)
+	{
+		auto action = baseProcess->GetCurrentAnimAction();
+		return action >= HighProcess::kAnimAction_Attack && action <= HighProcess::kAnimAction_Attack_Throw_Attach;
+	}
+	return false;
 }
 
 SInt32 Actor::GetDetectionLevelAlt(Actor* target, bool calculateSneakLevel)
