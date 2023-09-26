@@ -260,9 +260,9 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		HandleHooks::HandleDelayedGameHooks();
 		HandleHooks::HandleDelayedEventHooks();
 
-		HandleDeferredConsolePrints();
-
 		Console_Print("ShowOff xNVSE version: %.2f", (g_PluginVersion / 100.0F));
+
+		HandleDeferredConsolePrints();
 		break;
 
 	case NVSEMessagingInterface::kMessage_MainGameLoop:
