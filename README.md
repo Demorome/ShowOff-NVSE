@@ -116,7 +116,7 @@ Code taken from:
 * [Robert Penner's Easing Functions](http://robertpenner.com/easing/)
 
 # See Also
-[Crash Logger](https://www.nexusmods.com/newvegas/mods/72317) - if you're getting crashes with a DLL, this is the best thing to report issues to the author.
+[Yvile's Crash Logger](https://www.nexusmods.com/newvegas/mods/82540) - New and improved version! If you're getting crashes with a DLL, this is the best thing to report issues to the author.
 
 [Geck Extender](https://www.nexusmods.com/newvegas/mods/64888) - essential utility for anyone working with the GECK, many bugfixes and new features
 
