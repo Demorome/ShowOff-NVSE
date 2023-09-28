@@ -306,7 +306,7 @@ namespace OnPreActivate
 		{
 			if (UInt32 &shouldActivate = *static_cast<UInt32*>(shouldActivateAdrr))
 			{
-				if (result.IsValid())
+				if (shouldActivate && result.IsValid()) // don't allow undoing a prevention
 					shouldActivate = result.Bool();
 			}
 			return true;
@@ -392,7 +392,7 @@ namespace OnPreScriptedActivate
 		auto constexpr resultCallback = [](NVSEArrayVarInterface::Element& result, void* shouldActivateAddr) -> bool
 			{
 				if (UInt32& shouldActivate = *static_cast<UInt32*>(shouldActivateAddr))
-					if (result.IsValid())
+					if (shouldActivate && result.IsValid()) // don't allow undoing a prevention
 						shouldActivate = result.Bool();
 				return true;
 			};
@@ -443,7 +443,7 @@ namespace PreActivateInventoryItem
 		{
 			if (UInt32& shouldActivate = *static_cast<UInt32*>(shouldActivateAddr))
 			{
-				if (result.IsValid())
+				if (shouldActivate && result.IsValid()) // don't allow undoing an activation prevention
 					shouldActivate = result.Bool();
 			}
 			return true;
@@ -566,7 +566,7 @@ namespace PreActivateInventoryItem
 			{
 				if (UInt32& shouldActivate = *static_cast<UInt32*>(shouldActivateAddr))
 				{
-					if (result.IsValid())
+					if (shouldActivate && result.IsValid()) // don't allow undoing an activation prevention
 						shouldActivate = result.Bool();
 				}
 				return true;
@@ -745,7 +745,7 @@ namespace PreDropInventoryItem
 		auto constexpr resultCallback = [](NVSEArrayVarInterface::Element& result, void* shouldDropAddr) -> bool
 		{
 			if (UInt32& shouldDrop = *static_cast<UInt32*>(shouldDropAddr))
-				if (result.IsValid())
+				if (shouldDrop && result.IsValid()) // don't allow undoing a prevention
 					shouldDrop = result.Bool();
 			return true;
 		};
@@ -1774,7 +1774,7 @@ namespace OnPreProjectileExplode
 		auto constexpr resultCallback = [](NVSEArrayVarInterface::Element& result, void* shouldExplodeAddr) -> bool
 			{
 				if (UInt32& shouldExplode = *static_cast<UInt32*>(shouldExplodeAddr))
-					if (result.IsValid())
+					if (shouldExplode && result.IsValid()) // don't allow undoing a prevention
 						shouldExplode = result.Bool();
 				return true;
 			};
@@ -1870,7 +1870,7 @@ namespace OnPreRemoveItemFromMenu
 		auto constexpr resultCallback = [](NVSEArrayVarInterface::Element& result, void* shouldRemoveAddr) -> bool
 			{
 				if (UInt32& shouldRemove = *static_cast<UInt32*>(shouldRemoveAddr))
-					if (result.IsValid())
+					if (shouldRemove && result.IsValid()) // don't allow undoing a prevention
 						shouldRemove = result.Bool();
 				return true;
 			};

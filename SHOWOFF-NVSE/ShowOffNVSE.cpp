@@ -39,7 +39,7 @@
 // Plugin Stuff
 IDebugLog g_Log; // file will be open after NVSE plugin load
 HMODULE	g_ShowOffHandle;
-constexpr UInt32 g_PluginVersion = 175;
+constexpr UInt32 g_PluginVersion = 176;
 
 // Allows modmakers to toggle ShowOff's debug messages for some of its functions.
 #ifdef _DEBUG
