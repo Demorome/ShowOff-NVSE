@@ -601,4 +601,11 @@ namespace HandleHooks
 		HandleDelayedFunctionHooks();
 		GameFixes::WriteDelayedFixes();
 	}
+
+//======= Super-delayed hooks
+
+	void HandleSuperDelayedGameHooks()
+	{
+		//
+	}
 }

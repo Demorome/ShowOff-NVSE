@@ -846,7 +846,7 @@ bool Cmd_GetCalculatedItemWeight_Eval(COMMAND_ARGS_EVAL)
 				ScopedLock lockCodeOverwrites(g_Lock);
 				
 				// Skip code which adds up the weight for each item in the owner / container.
-				WriteDetourCall(0x4D09CB, (UInt32)tList_IsEmpty_ReturnFalse_Hook);
+				ReplaceCall(0x4D09CB, (UInt32)tList_IsEmpty_ReturnFalse_Hook);
 				
 				//Via supreme jank, call GetInventoryWeight.
 				//Has to be done, since there is no other function that can return the modified weight,
@@ -854,7 +854,7 @@ bool Cmd_GetCalculatedItemWeight_Eval(COMMAND_ARGS_EVAL)
 				auto itemWeight = ThisStdCall<double>(0x4D0900, contChangesData, g_thePlayer->isHardcore);
 
 				// Undo previous code change.
-				WriteDetourCall(0x4D09CB, 0x8256D0);
+				ReplaceCall(0x4D09CB, 0x8256D0);
 
 
 				*result = itemWeight;

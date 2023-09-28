@@ -370,6 +370,7 @@ namespace OnPreActivate
 			jmp		EarlyEndAddr
 
 		DoNormal:
+			mov		ecx, [ebp - 0x12C]  // restore ecx for NVSE's OnActivate hook to use.
 			jmp		NormalRetnAddr
 		}
 	}
@@ -1380,7 +1381,7 @@ namespace OnDisplayOrCompleteObjective
 	constexpr char onDisplayName[] = "ShowOff:OnDisplayObjective";
 	constexpr char onCompleteName[] = "ShowOff:OnCompleteObjective";
 
-	static CallDetour GetQuestDetour;
+	static CallDetour g_GetQuestDetour(0x44EDB0); // provide default func addr in case we need to replace NVAC hook.
 
 	TESQuest* __fastcall HookGetQuest(BGSQuestObjective* objective)
 	{
@@ -1396,15 +1397,28 @@ namespace OnDisplayOrCompleteObjective
 			g_eventInterface->DispatchEventThreadSafe(onCompleteName, nullptr, nullptr, objective->quest, objective->objectiveId);
 		}
 
-		return ThisStdCall<TESQuest*>(GetQuestDetour.GetOverwrittenAddr(), objective);
+		return ThisStdCall<TESQuest*>(g_GetQuestDetour.GetOverwrittenAddr(), objective);
 	}
 
-	void WriteDelayedHook()
+	void WriteSuperDelayedHook()
 	{
-		// Add compatibility with Tweaks by indirectly calling the function at the address.
-		GetQuestDetour.WriteDetourCall(0x5EC5DC, (UInt32)HookGetQuest);
-		// We could have hooked the HUDMainMenu::SetQuestUpdateText calls,
-		// ..but that would cause incompatibility with Tweaks' "No Quest Messages".
+		// Super-delaying this hook in case Tweaks decides to avoid NVAC hook conflict at 0x5EC5DC by delaying their hooks.
+		// We want to always hook after Tweaks does, since otherwise they'll overwrite us (tfw tweaks doesn't use detours)
+		constexpr UInt32 HookAddr = 0x5EC5DC;
+
+		if (*(UInt32*)HookAddr == 0x6610418B)
+		{
+			// the address was inlined by NVAC, so just replace it
+			// (Credits to lStewieAl for this NVAC-checking code, and for figuring out NVAC hooks in general)
+			WriteRelCall(HookAddr, (UInt32)HookGetQuest);
+		}
+		else
+		{
+			// Add compatibility with Tweaks by indirectly calling the function at the address.
+			g_GetQuestDetour.WriteDetourCall(HookAddr, (UInt32)HookGetQuest);
+			// We could have hooked the HUDMainMenu::SetQuestUpdateText calls,
+			// ..but that would cause incompatibility with Tweaks' "No Quest Messages".
+		}
 	}
 }
 
@@ -2133,7 +2147,6 @@ namespace HandleHooks
 	void HandleDelayedEventHooks()
 	{
 		CornerMessageHooks::WriteDelayedHook();
-		OnDisplayOrCompleteObjective::WriteDelayedHook();
 		OnCalculateSellPrice::WriteDelayedHook();
 		OnReadBook::WriteDelayedHook();
 		OnDispositionChange::WriteDelayedHooks();
@@ -2150,4 +2163,8 @@ namespace HandleHooks
 #endif
 	}
 
+	void HandleSuperDelayedEventHooks()
+	{
+		OnDisplayOrCompleteObjective::WriteSuperDelayedHook();
+	}
 }

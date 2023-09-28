@@ -577,7 +577,7 @@ bool Cmd_GetCalculatedActorSpread_Execute(COMMAND_ARGS)
 		return true;
 	}
 
-	if (!actor->baseProcess || actor->baseProcess->IsWeaponOut())
+	if (!actor->baseProcess || !actor->baseProcess->IsWeaponOut())
 	{
 		*result = 1.0;
 		return true;

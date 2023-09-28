@@ -39,7 +39,7 @@
 // Plugin Stuff
 IDebugLog g_Log; // file will be open after NVSE plugin load
 HMODULE	g_ShowOffHandle;
-constexpr UInt32 g_PluginVersion = 174;
+constexpr UInt32 g_PluginVersion = 175;
 
 // Allows modmakers to toggle ShowOff's debug messages for some of its functions.
 #ifdef _DEBUG
@@ -130,6 +130,7 @@ bool (__cdecl* GetIsGodMode)() = nullptr;
 
 // Hook Globals
 std::atomic<bool> g_canPlayerPickpocketInCombat = false;
+bool g_wroteSuperDelayedHooks = false;
 
 std::vector<std::string> g_deferredPrints;
 void HandleDeferredConsolePrints()
@@ -267,6 +268,13 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 
 	case NVSEMessagingInterface::kMessage_MainGameLoop:
 	{
+		if (!g_wroteSuperDelayedHooks) [[unlikely]]
+		{
+			HandleHooks::HandleSuperDelayedGameHooks();
+			HandleHooks::HandleSuperDelayedEventHooks();
+			g_wroteSuperDelayedHooks = true;
+		}
+
 		for (const auto& EventInfo : EventsArray)
 		{
 			EventInfo->AddQueuedEvents();

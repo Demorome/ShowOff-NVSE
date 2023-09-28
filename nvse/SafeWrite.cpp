@@ -46,7 +46,9 @@ bool __stdcall WriteRelJump(UInt32 jumpSrc, UInt32 jumpTgt, std::optional<std::a
 		{
 			if (*reinterpret_cast<UInt8*>(jumpSrc + i) != oldBytes[i])
 			{
-				_ERROR("Cannot write jump hook at address 0x%X; another plugin's hook already overwrote that code.", jumpSrc);
+				_ERROR("Cannot write jump hook at address 0x%X; another plugin's hook already overwrote that code with %X %X %X %X %X.", 
+					jumpSrc, *reinterpret_cast<UInt8*>(jumpSrc), *reinterpret_cast<UInt8*>(jumpSrc + 1), *reinterpret_cast<UInt8*>(jumpSrc + 2),
+					*reinterpret_cast<UInt8*>(jumpSrc + 3), *reinterpret_cast<UInt8*>(jumpSrc + 4));
 				ShowHookConflictErrorMsg();
 				return false;
 			}

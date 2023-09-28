@@ -56,6 +56,9 @@ class CallDetour
 {
 	UInt32 overwritten_addr = 0;
 public:
+	CallDetour() = default;
+	CallDetour(UInt32 defaultCallAddr) : overwritten_addr(defaultCallAddr) { ; };
+
 	void WriteDetourCall(UInt32 jumpSrc, UInt32 jumpTgt, std::optional<std::array<UInt8, 4>> originalBytes = {})
 	{
 		overwritten_addr = GetRelJumpAddr(jumpSrc);

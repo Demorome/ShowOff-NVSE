@@ -638,11 +638,11 @@ bool Cmd_ToggleQuestMessages_Execute(COMMAND_ARGS)
 	else if (bOn && !questMsgEnabled)
 	{
 		// Restore the Calls
-		ReplaceCall(0x76BADC, 0x905820);
-		ReplaceCall(0x76BAEB, 0x83FD60);
+		WriteRelCall(0x76BADC, 0x905820);
+		WriteRelCall(0x76BAEB, 0x83FD60);
 
-		ReplaceCall(0x76BAAC, 0x5AE3D0);
-		ReplaceCall(0x76BABB, 0x83FD60);
+		WriteRelCall(0x76BAAC, 0x5AE3D0);
+		WriteRelCall(0x76BABB, 0x83FD60);
 
 		WriteRelJe(0x77A5BD, 0x77A646);
 		

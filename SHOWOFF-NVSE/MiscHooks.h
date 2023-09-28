@@ -10,10 +10,12 @@ namespace HandleHooks
 {
 	void HandleGameHooks();
 	void HandleDelayedGameHooks();
+	void HandleSuperDelayedGameHooks();
 
 	//see ShowOffEvents.h
 	void HandleEventHooks(); 
 	void HandleDelayedEventHooks();
+	void HandleSuperDelayedEventHooks();
 }
 
 namespace PickpocketEquippedItems

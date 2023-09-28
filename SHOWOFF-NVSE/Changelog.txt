@@ -383,8 +383,25 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 //===v1.73
 
 ===Bug Fixes:
-* Hook conflicts at w/ NVAC at 0x780648 & 0x701FAE should now be resolved
+* Hook conflicts w/ NVAC at 0x780648 & 0x701FAE should now be resolved
 * Fixed crash by delaying hook conflict console print if hook conflict was detected right as the plugin is loading in (i.e before console is even loaded).
+
+//===v1.74
+
+===Bug Fixes:
+* Resolved hook conflict w/ NVAC at 0x5EC5DC 
+* Fixed ToggleQuestMessages, which got broken by faulty hook conflict checks at 0x76BADC, 0x76BAEB, 0x76BAAC and 0x76BABB since v1.71
+* Fixed breaking the first arg passed to the NVSE OnActivate event due to changes in 1.71. This probably broke a lot of mods relying on that event, now fixed.
+
+===New Functions:
+* GetCalculatedActorSpread
+
+
+//===v1.75
+
+===Bug Fixes:
+* Fixed GetCalculatedActorSpread always returning 1 due to faulty IsWeaponOut check
+* Fixed ObjectiveCompleted/Displayed freezing the game with NVAC, due to bug in v1.74's NVAC hook conflict resolution
 
 ====== (Template:)
 
