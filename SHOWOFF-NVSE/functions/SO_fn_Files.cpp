@@ -813,7 +813,6 @@ namespace IniToNVSE
 				return;
 			auto& [section, key, fullPath] = maybe_Args.value();
 
-			//Always try to get a cached file first; so modders can be lazy and leave "cache" arg at default.
 			if (auto const cachedIni = g_CachedIniFiles.GetPtr(relIniPath))
 			{
 				GetOrDefaultIniValue(*cachedIni, section, key, result);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <atomic>
+#include <memory>
 
 #include "ParamInfos.h"
 #include "NVSEParamInfoList.h"

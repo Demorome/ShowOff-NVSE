@@ -40,3 +40,14 @@ bool Cmd_GetCompassTargets_Execute(COMMAND_ARGS)
 	}
 	return true;
 }
+
+DEFINE_CMD_COND_PLUGIN(GetIsActivationPromptShown, , false, nullptr);
+bool Cmd_GetIsActivationPromptShown_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = g_HUDMainMenu->tile0A8->GetValueFloat(kTileValue_visible);
+	return true;
+}
+bool Cmd_GetIsActivationPromptShown_Execute(COMMAND_ARGS)
+{
+	return Cmd_GetIsActivationPromptShown_Eval(nullptr, nullptr, nullptr, result);
+}

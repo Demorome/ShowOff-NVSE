@@ -547,7 +547,7 @@ UInt32 RandSeeded_Call(UInt32 min, UInt32 max, Script* scriptObj)
 		generator = new Random_Engine(std::default_random_engine::default_seed);
 		g_ModsAndSeedsMap.Emplace(modIdx, generator);
 	}
-	std::uniform_int_distribution const distribution(min, max);
+	std::uniform_int_distribution distribution(min, max);
 	return distribution(*generator);
 }
 

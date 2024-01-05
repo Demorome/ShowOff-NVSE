@@ -1,6 +1,5 @@
 #include "ShowOffNVSE.h"
 
-#include <memory>
 #include <mutex>
 #include <shared_mutex>
 
@@ -712,6 +711,9 @@ extern "C"
 
 		//========v1.74
 		/*3D55*/	REG_CMD(GetCalculatedActorSpread);
+		
+		//========v1.76
+		/*3D56*/	REG_CMD(GetIsActivationPromptShown);
 
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
