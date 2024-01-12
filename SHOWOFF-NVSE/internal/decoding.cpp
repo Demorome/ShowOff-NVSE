@@ -14,26 +14,6 @@
 
 // Credits: JIPLN, lStewieAl, JG, and surely others.
 
-//#if 0
-class BSGameSound;
-class NiBSBoneLODController;
-class NiBSplineCompTransformInterpolator;
-struct CombatTarget;
-struct BGSSaveLoadFileEntry;
-class Sky;
-class BSTempNodeManager;
-class CombatProcedure;
-class CombatAction;
-class CombatGoal;
-class PathingLocation;
-class PathingCoverLocation;
-struct UnreachableLocation;
-struct UnreachableCoverLocation;
-class BSAudioManagerThread;
-class ImageSpaceModifierInstanceRB;
-struct NavMeshClosedDoorInfo;
-//#endif
-
 
 
 

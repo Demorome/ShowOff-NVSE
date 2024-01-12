@@ -111,6 +111,11 @@ void TESObjectREFR::Update3D()
 	}
 }
 
+NiNode* TESObjectREFR::Get3D()
+{
+	return ThisStdCall<NiNode*>(0x43FCD0, this);
+}
+
 TESObjectREFR *TESObjectREFR::Create(bool bTemp)
 {
 	TESObjectREFR *refr = (TESObjectREFR*)GameHeapAlloc(sizeof(TESObjectREFR));

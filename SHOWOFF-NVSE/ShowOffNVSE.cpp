@@ -668,8 +668,8 @@ extern "C"
 
 		//========v1.50
 		/*3D32*/	REG_CMD(SetEnableParent)
-		/*3D33*/	REG_CMD(GetEquippedWeapon)
-		/*3D34*/	REG_CMD(GetEquippedWeaponRef)
+		/*3D33*/	REG_CMD_FORM(GetEquippedWeapon)
+		/*3D34*/	REG_CMD_FORM(GetEquippedWeaponRef)
 		/*3D35*/	REG_CMD(GetCalculatedAPCost)
 		/*3D36*/	REG_CMD_ARR(GetPosArray)
 		/*3D37*/	REG_CMD_ARR(GetCompassTargets)
@@ -706,7 +706,7 @@ extern "C"
 		/*3D50*/	REG_CMD_STR(GetItemHotkeyIconPath)
 		/*3D51*/	REG_CMD(GetExplosionHitDamage)
 		/*3D52*/	REG_CMD(SetExplosionHitDamage)
-		/*3D53*/	REG_CMD(IsJumping)
+		/*3D53*/	REG_CMD(IsJumping_BROKEN)
 		/*3D54*/	REG_CMD(FreezeAmmoRegen)
 
 		//========v1.74
@@ -714,6 +714,8 @@ extern "C"
 		
 		//========v1.76
 		/*3D56*/	REG_CMD(GetIsActivationPromptShown);
+		/*3D57*/	REG_CMD(GetHitLocationLingering);
+		/*3D58*/	REG_CMD(HighlightAdditionalReferenceAlt);
 
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		

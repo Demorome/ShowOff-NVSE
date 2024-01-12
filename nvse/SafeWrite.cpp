@@ -82,7 +82,7 @@ void __stdcall WriteRelCall(UInt32 jumpSrc, UInt32 jumpTgt)
 
 bool __stdcall ReplaceCall(UInt32 jumpSrc, UInt32 jumpTgt, std::optional<std::array<UInt8, 4>> originalBytes, bool acceptOverwrite)
 {
-	if (*reinterpret_cast<UInt8*>(jumpSrc) != 0xE8) {
+	if (!AddrIsCall(jumpSrc)) {
 		if (!acceptOverwrite)
 		{
 			_ERROR("Cannot replace call at address 0x%X; another plugin's hook made it no longer a function call.", jumpSrc);
@@ -180,11 +180,21 @@ void NopIndirectCall(UInt32 addr)
 	NopIndirectCall(addr, 0);
 }
 
-// Taken from lStewieAl.
-// Returns the address of the jump/called function, assuming there is one.
 UInt32 GetRelJumpAddr(UInt32 jumpSrc)
 {
+	// Gets the relative part *(jmpSrc + 1), adds the address of jumpSrc to make it an absolute address instead of relative, 
+	// ...and adds 5 (since the relative address ignores the 5 bytes of the jump/call)
 	return *(UInt32*)(jumpSrc + 1) + jumpSrc + 5;
+}
+
+bool AddrIsCall(UInt32 addr)
+{
+	return *reinterpret_cast<UInt8*>(addr) == 0xE8;
+}
+
+bool AddrIsRelJump(UInt32 addr)
+{
+	return *reinterpret_cast<UInt8*>(addr) == 0xE9; // long jump
 }
 
 // Taken from xNVSE

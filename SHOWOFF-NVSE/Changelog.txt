@@ -403,6 +403,11 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 * Fixed GetCalculatedActorSpread always returning 1 due to faulty IsWeaponOut check
 * Fixed ObjectiveCompleted/Displayed freezing the game with NVAC, due to bug in v1.74's NVAC hook conflict resolution
 
+
+//===v1.76
+
+
+
 ====== (Template:)
 
 //===v???

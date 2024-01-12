@@ -45,7 +45,11 @@ void NopFunctionCall(UInt32 addr);
 void NopIndirectCall(UInt32 addr, UInt32 numArgs);
 void NopIndirectCall(UInt32 addr);
 
+// Taken from lStewieAl.
+// Returns the address of the jump/called function, assuming there is one.
 UInt32 GetRelJumpAddr(UInt32 jumpSrc);
+bool AddrIsCall(UInt32 addr);
+bool AddrIsRelJump(UInt32 addr);
 
 UInt8* GetParentBasePtr(void* addressOfReturnAddress, bool lambda = false);
 

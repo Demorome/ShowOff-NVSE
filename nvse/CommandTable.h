@@ -196,6 +196,27 @@ struct ParamInfo
 #define DEFINE_CMD_COND_PLUGIN(name, description, refRequired, paramInfo) \
 	DEFINE_CMD_ALT_COND_ANY(name, , description, refRequired, paramInfo, NULL)
 
+// for commands which can ONLY used as conditionals
+#define DEFINE_CMD_ALT_COND_ONLY_ANY(name, altName, description, refRequired, paramInfo, parser) \
+	extern bool Cmd_ ## name ## _Eval(COMMAND_ARGS_EVAL); \
+	static CommandInfo (kCommandInfo_ ## name) = { \
+	#name,	\
+	#altName,		\
+	0,		\
+	#description,	\
+	refRequired,	\
+	(sizeof(paramInfo) / sizeof(ParamInfo)),	\
+	paramInfo,	\
+	nullptr,	\
+	parser,	\
+	HANDLER_EVAL(Cmd_ ## name ## _Eval),	\
+	1	\
+	};
+
+#define DEFINE_CMD_COND_ONLY_PLUGIN(name, description, refRequired, paramInfo) \
+	DEFINE_CMD_ALT_COND_ONLY_ANY(name, , description, refRequired, paramInfo, NULL)
+
+
 typedef bool (* Cmd_Execute)(COMMAND_ARGS);
 bool Cmd_Default_Execute(COMMAND_ARGS);
 

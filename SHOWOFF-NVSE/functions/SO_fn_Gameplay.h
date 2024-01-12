@@ -1024,9 +1024,11 @@ bool Cmd_GetCalculatedAPCost_Execute(COMMAND_ARGS)
 	if (!weapon)
 	{
 		weapon = ((Actor*)thisObj)->GetEquippedWeapon();
-		if (!weapon)
-			weapon = g_fistsWeapon;
+		// Keep as nullptr if it's the fists to properly handle default unarmed AP costs.
+		// g_fistsWeapon's AP cost is never used, being replaced by fActionPointsAttackUnarmed 
 	}
+	else if (weapon == g_fistsWeapon)
+		weapon = nullptr;
 
 	if (mode == GetDefaultAttackCost)
 	{
@@ -1042,7 +1044,7 @@ bool Cmd_GetCalculatedAPCost_Execute(COMMAND_ARGS)
 			{
 				*result = *reinterpret_cast<float*>(0x11DB0B8); // g_vatSpecialAttack1APCost
 			}
-			else
+			else // GetSpecialAttack2Cost
 			{
 				*result = *reinterpret_cast<float*>(0x11DB0C0); // g_vatSpecialAttack2APCost
 			}
@@ -1056,7 +1058,7 @@ bool Cmd_GetCalculatedAPCost_Execute(COMMAND_ARGS)
 			{
 				
 			}
-			else
+			else // GetSpecialAttack2Cost
 			{
 				//todo: make result 0 if player does not have access to the attack.
 				float apCost = GetFltGameSetting(0x11D12E4); //  gs_fCrossAPCost
@@ -1100,8 +1102,8 @@ bool Cmd_IsBlockingOrAiming_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(IsJumping, "", true, nullptr);
-bool Cmd_IsJumping_Execute(COMMAND_ARGS)
+DEFINE_COMMAND_PLUGIN(IsJumping_BROKEN, "", true, nullptr);
+bool Cmd_IsJumping_BROKEN_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	if (thisObj && IS_ACTOR(thisObj))
@@ -1127,6 +1129,17 @@ bool Cmd_FreezeAmmoRegen_Execute(COMMAND_ARGS)
 	return true;
 }
 
+DEFINE_CMD_COND_ONLY_PLUGIN(GetHitLocationLingering, "Unlike GetHitLocation_Eval, the hit location is allowed to linger after the initial hit.", true, nullptr);
+bool Cmd_GetHitLocationLingering_Eval(COMMAND_ARGS_EVAL)
+{
+	// Code from JIP LN NVSE's Hook_GetHitLocation_Eval
+	SInt32 hitLoc = -1;
+	if (IS_ACTOR(thisObj) && ((Actor*)thisObj)->baseProcess)
+		if (ActorHitData* hitData = ((Actor*)thisObj)->baseProcess->GetHitData())
+			hitLoc = hitData->unk60; // JIP stores the hit location here so it can linger.
+	*result = hitLoc;
+	return true;
+}
 
 #ifdef _DEBUG
 

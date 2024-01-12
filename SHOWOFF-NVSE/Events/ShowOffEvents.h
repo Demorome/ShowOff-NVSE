@@ -2027,6 +2027,69 @@ namespace OnPreRemoveItemFromMenu
 	}
 }
 
+namespace OnPlayerJump
+{
+	constexpr char eventName[] = "ShowOff:OnPlayerJump";
+
+	CallDetour g_detour;
+
+	void __fastcall HandleEvent(bhkCharacterController* thisCtrler, void* edx, void* arPos)
+	{
+		if (thisCtrler == ((HighProcess*)g_thePlayer->baseProcess)->charCtrl)
+			g_eventInterface->DispatchEvent(eventName, g_thePlayer);
+		ThisStdCall(g_detour.GetOverwrittenAddr(), thisCtrler, arPos);
+	}
+
+	void WriteHook()
+	{
+		g_detour.WriteDetourCall(0xCD4454, (UInt32)HandleEvent);
+	}
+}
+
+namespace OnPOVChange
+{
+	constexpr char eventName[] = "ShowOff:OnPOVChange";
+
+	UInt32 g_pluginAddrToJumpTo;
+
+	void __fastcall HandleEvent(UInt32 isFirstPerson)
+	{
+		g_eventInterface->DispatchEvent(eventName, g_thePlayer, isFirstPerson);
+	}
+
+	// Credits to lStewieAl for this hooks
+	__declspec(naked) void SwitchPOVHook(UInt32 isToFirstPerson)
+	{
+		_asm
+		{
+			mov		ecx, isToFirstPerson
+			call	HandleEvent
+			mov		ecx, g_pluginAddrToJumpTo
+			jmp		ecx
+		}
+	}
+
+	__declspec(naked) void DefaultCleanup()
+	{
+		_asm
+		{
+			mov esp, ebp
+			pop ebp
+			ret 4
+		}
+	}
+
+	void WriteHook()
+	{
+		UInt32 const hookAddr = 0x9520E1;
+		if (AddrIsRelJump(hookAddr)) // compatibility with Tweak's hook at the same addr
+			g_pluginAddrToJumpTo = GetRelJumpAddr(hookAddr);
+		else
+			g_pluginAddrToJumpTo = (UInt32)DefaultCleanup;
+		WriteRelJump(hookAddr, UInt32(SwitchPOVHook));
+	}
+}
+
 using EventFlags = NVSEEventManagerInterface::EventFlags;
 
 template<UInt8 N>
@@ -2096,6 +2159,9 @@ void RegisterEvents()
 	RegisterEvent(OnPreProjectileExplode::eventName, kEventParams_OneReference_OneIntPtr, EventFlags::kFlag_FlushOnLoad);
 	RegisterEvent(OnPreRemoveItemFromMenu::eventName, kEventParams_OneBaseForm_OneReference_OneInt_OneIntPtr);
 	
+	// v1.76
+	RegisterEvent(OnPlayerJump::eventName, nullptr);
+	RegisterEvent(OnPOVChange::eventName, kEventParams_OneInt);
 
 	/*
 	// For debugging the Event API
@@ -2159,6 +2225,10 @@ namespace HandleHooks
 
 		// v1.70
 		OnPreRemoveItemFromMenu::WriteDelayedHooks();
+
+		// v1.76
+		OnPlayerJump::WriteHook();
+		OnPOVChange::WriteHook();
 #if _DEBUG
 #endif
 	}

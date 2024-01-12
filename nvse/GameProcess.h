@@ -5,9 +5,25 @@
 #include "GameForms.h"
 #include "GameObjects.h"
 #include "internal/NiPoint.h"
-#include "decoding.h"
 
 struct AnimData;
+class BSGameSound;
+class NiBSBoneLODController;
+class NiBSplineCompTransformInterpolator;
+struct CombatTarget;
+struct BGSSaveLoadFileEntry;
+class Sky;
+class BSTempNodeManager;
+class CombatProcedure;
+class CombatAction;
+class CombatGoal;
+class PathingLocation;
+class PathingCoverLocation;
+struct UnreachableLocation;
+struct UnreachableCoverLocation;
+class BSAudioManagerThread;
+class ImageSpaceModifierInstanceRB;
+struct NavMeshClosedDoorInfo;
 
 struct PackageInfo
 {
@@ -553,7 +569,7 @@ public:
 	virtual void	Unk_1B1();
 	virtual void	Unk_1B2();
 	virtual void	Unk_1B3();
-	virtual void	Unk_1B4();
+	virtual NiNode* GetLimbNode(UInt32 limbIdx); // taken from JIP LN
 	virtual void	Unk_1B5();
 	virtual void	Unk_1B6();
 	virtual void	Unk_1B7();

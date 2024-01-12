@@ -9,6 +9,7 @@
 #include "GameUI.h"
 #include "havok.h"
 #include "GameAPI.h"
+#include "GameProcess.h"
 
 // Credits: JIPLN, lStewieAl, JG, and surely others.
 
@@ -1893,7 +1894,80 @@ struct VATSTargetInfo
 };
 STATIC_ASSERT(sizeof(VATSTargetInfo) == 0x28);
 */
+
+// From Tweaks
+struct VATSQueuedAction
+{
+	enum ActionTypes
+	{
+		kAPCost_AttackUnarmed = 0x0,
+		kAPCost_AttackOneHandMelee = 0x1,
+		kAPCost_AttackTwoHandMelee = 0x2,
+		kAPCost_AttackPistol = 0x3,
+		kAPCost_AttackRifle = 0x4,
+		kAPCost_AttackHandle = 0x5,
+		kAPCost_AttackLauncher = 0x6,
+		kAPCost_AttackGrenade = 0x7,
+		kAPCost_AttackMine = 0x8,
+		kAPCost_Reload = 0x9,
+		kAPCost_Crouch = 0xA,
+		kAPCost_Stand = 0xB,
+		kAPCost_SwitchWeapon = 0xC,
+		kAPCost_ToggleWeaponDrawn = 0xD,
+		kAPCost_Heal = 0xE,
+		kAPCost_OneHandThrown = 0x13,
+		kAPCost_AttackThrown = 0x14,
+		kAPCost_UnarmedAttackGround = 0x15,
+		kAPCost_MAX = 0x16,
+	};
+
+	int actionType;
+	UInt8 isSuccess;
+	UInt8 byte05;
+	UInt8 isMysteriousStrangerVisit;
+	UInt8 byte07;
+	UInt8 remainingShotsToFire;
+	UInt8 count09;
+	UInt8 gap0A[2];
+	TESObjectREFR* ref;
+	UInt32 avCode;
+	ActorHitData* hitData;
+	float unk18;
+	float unk1C;
+	float apCost;
+	UInt8 isMissFortuneVisit;
+	UInt8 gap25[3];
+
+	static VATSQueuedAction* Create()
+	{
+		auto targetInfo = (VATSQueuedAction*)GameHeapAlloc(sizeof(VATSQueuedAction));
+		ThisStdCall(0x9CA4A0, targetInfo); // VATSQueuedAction::VATSQueuedAction
+		return targetInfo;
+	}
+};
+STATIC_ASSERT(sizeof(VATSQueuedAction) == 0x28);
+
+// From Tweaks
+struct VATSTargetBodyPartData
+{
+	NiPoint2 screenPos;
+	NiPoint3 relativePos;
+	NiPoint3 pos;
+	UInt32 bodyPartID;
+	float percentVisible;
+	float hitChance;
+	UInt8 isOnScreen;
+	UInt8 byte2D;
+	UInt8 shouldCalculateBodyPartVisibilityPercents;
+	UInt8 byte2F;
+	Tile* tile_body_part_percent;
+	float unk34;
+	UInt8 byte38;
+	UInt8 gap38[3];
+};
+
 // 144
+// All taken from Tweaks
 class VATSMenu : public Menu			// 1056
 {
 public:
@@ -1903,6 +1977,7 @@ public:
 	virtual void		Unk_12(void);
 
 	UInt32				unk028;			// 028
+
 	TileImage			*tile02C;		// 02C
 	TileImage			*tile030;		// 030
 	TileImage			*tile034;		// 034
@@ -1937,19 +2012,38 @@ public:
 
 	UInt32				unk0A8[2];		// 0A8
 	ListBox<UInt32>		queuedActions;	// 0B0
-	UInt32				unk0E0[18];		// 0E0
-	TESObjectREFR		*targetRef;		// 128
-	UInt32				unk12C;			// 12C
-	void				*ptr130;		// 130
-	float				unk134[3];		// 134
-	UInt8				unk140;			// 140
-	UInt8				pad141[3];		// 141
-
-	// Taken from Tweaks
+	float actionPoints;
+	float maxActionPoints;
+	UInt32 unk0E8;
+	UInt32 unk0EC;
+	float clipAmmo;
+	float reserveAmmo;
+	UInt8 isFullyZoomedIn;
+	UInt8 unk0F9;
+	UInt8 unk0FA;
+	UInt8 unk0FB;
+	UInt32 unk0FC;
+	VATSTargetBodyPartData* currentBodyPartData;
+	UInt8 hasConcentratedFire;
+	UInt8 gap105[3];
+	UInt32 unk108;
+	UInt8 byte10C;
+	UInt8 byte10D;
+	UInt8 byte10E;
+	UInt8 byte10F;
+	UInt8 byte110;
+	UInt8 pad111;
+	UInt8 pad112;
+	UInt8 pad113;
+	UInt32 time114;
+	UInt8 byte118;
+	UInt8 pad119[3];
+	VATSQueuedAction targetInfo;
+	
 	static VATSMenu* GetSingleton() { return *(VATSMenu**)0x11DB0D4; };
-	// Taken from Tweaks
 	static TESObjectREFR* GetTarget() { return *(TESObjectREFR**)0x11F21CC; };
 };
+STATIC_ASSERT(sizeof(VATSMenu) == 0x144);
 
 // FC
 class ComputersMenu : public Menu		// 1057
@@ -3701,12 +3795,21 @@ public:
 	static ExtraSpecialRenderFlags* __stdcall Create(UInt32 _flags = 0);
 };
 
-/*
 // 48
+// Credits to lStewieAl
 struct VATSCameraData
 {
-	tList<VATSTargetInfo>						targetsList;	// 00
-	UInt32							mode;			// 08
+	enum Mode : UInt32
+	{
+		kVATSMode_None = 0x0,
+		kVATSMode_TargetSelect = 0x1,
+		kVATSMode_LimbSelectOrZoom = 0x2,
+		kVATSMode_3 = 0x3,
+		kVATSMode_Playback = 0x4,
+	};
+
+	tList<VATSQueuedAction>						targetsList;	// 00
+	Mode							mode;			// 08
 	UInt32							cameraShots;			// 0C
 	BGSCameraShot					*camShot;		// 10
 	float							flt14;			// 14
@@ -3723,9 +3826,13 @@ struct VATSCameraData
 	UInt32							numKills;			// 3C
 	UInt32							unk40;			// 40
 	UInt32							unk44;			// 44
+
+	static VATSCameraData* GetSingleton()
+	{
+		return (VATSCameraData*)0x011F2250;
+	}
 };
 STATIC_ASSERT(sizeof(VATSCameraData) == 0x48);
-*/
 
 // 10
 struct SystemColorManager

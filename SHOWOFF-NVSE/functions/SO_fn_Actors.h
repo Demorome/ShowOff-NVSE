@@ -562,11 +562,12 @@ DEFINE_COMMAND_PLUGIN(GetCalculatedActorSpread, "", true, kParams_OneOptionalInt
 bool Cmd_GetCalculatedActorSpread_Execute(COMMAND_ARGS)
 {
 	*result = -1.0;
-	if (!thisObj || !IS_ACTOR(thisObj))
-		return true;
 
 	UInt32 spreadMode = kSpreadMode_INVALID;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &spreadMode);
+
+	if (!thisObj || !IS_ACTOR(thisObj))
+		return true;
 
 	auto* actor = static_cast<Actor*>(thisObj);
 	auto* weap = actor->GetEquippedWeapon();
@@ -649,9 +650,66 @@ bool Cmd_GetCalculatedActorSpread_Execute(COMMAND_ARGS)
 	return true;
 }
 
+bool(*Cmd_HighlightAdditionalReference)(COMMAND_ARGS) = (bool (*)(COMMAND_ARGS)) 0x5BB610;
 
+DEFINE_COMMAND_PLUGIN(HighlightAdditionalReferenceAlt, "", true, kParams_FourOptionalFloats);
+bool Cmd_HighlightAdditionalReferenceAlt_Execute(COMMAND_ARGS)
+{
+	*result = 0; // bSuccess
 
+	float checkInvisibility = 1.0f;
+	float setFlashing = 1.0f;
+	float filler[2];
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &checkInvisibility, &setFlashing, &filler))
+		return true;
 
+	if (!thisObj)
+		return true;
+
+	if (IS_ACTOR(thisObj) && !checkInvisibility)
+	{
+		auto* actor = static_cast<Actor*>(thisObj);
+		if (actor->avOwner.GetActorValue(kAVCode_Invisibility) > 0 || actor->avOwner.GetActorValue(kAVCode_Chameleon) > 0)
+		{
+			float hasPerk = 0.0;
+			ApplyPerkModifiers(kPerkEntry_HasImprovedDetection, g_thePlayer, &hasPerk);
+			if (!hasPerk)
+				return true;
+		}
+	}
+
+	if (!setFlashing)
+	{
+		// Prevent flashing
+		NopFunctionCall(0x5BB693, 1); // VATSHighlightData::SetFlashingRef
+
+		auto* manager = InterfaceManager::GetSingleton();
+		if (manager)
+		{
+			// If ref was already flashing, make it stop.
+			if (manager->vatsHighlightData.flashingRefIndex != -1)
+			{
+				for (int i = 0; i < manager->vatsHighlightData.numHighlightedRefs; ++i)
+				{
+					if (manager->vatsHighlightData.highlightedRefs[i].ref == thisObj)
+					{
+						manager->vatsHighlightData.flashingRefIndex = -1;
+						break;
+					}
+				}
+			}
+		}
+	}
+
+	*result = thisObj->Get3D() != nullptr;
+	Cmd_HighlightAdditionalReference(PASS_COMMAND_ARGS);
+
+	// Restore being able to set flashing
+	WriteRelCall(0x5BB693, 0x800E50);
+
+	return true;
+
+}
 
 
 #ifdef _DEBUG

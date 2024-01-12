@@ -136,6 +136,39 @@ namespace GameFixes
 		}
 	}
 #endif
+	/* Doesn't fix the bug, RIP
+	namespace PatchGetVATSValueNotWorkingForDamagePreview
+	{
+		CallDetour g_detour;
+
+		void* __cdecl HookGetCurrentQueuedAction()
+		{
+			auto* result = CdeclCall<void*>(g_detour.GetOverwrittenAddr());
+			auto* vats = VATSMenu::GetSingleton();
+			if (!result && vats && VATSCameraData::GetSingleton()->mode == 2)
+				result = &vats->targetInfo;
+			return result;
+		}
+
+		// Issue is likely caused by GetCurrentVATSQueuedAction at 0x7F5280, which is only called by GetVATSValue.
+		// For whatever reason, VATSMenu's byte118 is set to 0 when GetCurrentVATSQueuedAction is invoked to calculate the preview damage.
+		// It only returns the queued action if it's set to 1, so we'll temporarily set it to 1 when calculating preview damage to mitigate potential issues.
+		double __cdecl HookGetHealthDamage(void* vatsQueuedAction)
+		{
+			auto* vats = VATSMenu::GetSingleton();
+			vats->byte118 = 1;
+			auto result = CdeclCall<double>(g_detour.GetOverwrittenAddr(), vatsQueuedAction);
+			vats->byte118 = 0;
+			return result;
+		}
+
+		void WriteHook()
+		{
+			//g_detour.WriteDetourCall(0x7F4A72, (UInt32)HookGetHealthDamage);
+			g_detour.WriteDetourCall(0x594E9A, (UInt32)HookGetCurrentQueuedAction);
+		}
+	}
+	*/
 
 	void WriteFixes()
 	{
@@ -143,6 +176,8 @@ namespace GameFixes
 		PatchResetCell::WriteHook();
 
 #if 0
+		PatchGetVATSValueNotWorkingForDamagePreview::WriteHook();
+
 		if (g_bFixCaravanCurrencyRemoval)
 		{
 			TODO

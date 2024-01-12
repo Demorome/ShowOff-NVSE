@@ -191,6 +191,7 @@ public:
 	NiNode *GetNode(const char *nodeName);
 	hkpRigidBody *GetRigidBody(const char *nodeName);
 	bool RunScriptSource(const char *sourceStr);
+	NiNode* Get3D();
 
 	static TESObjectREFR* __stdcall Create(bool bTemp = false);
 

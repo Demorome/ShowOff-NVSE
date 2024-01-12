@@ -75,6 +75,8 @@ extern const UInt64 kSSERemoveSignMaskPD[], kSSEChangeSignMaskPD[];
 #define NOP_0xE NOP_0x7 NOP_0x7
 #define NOP_0xF NOP_0x8 NOP_0x7
 
+// From JIP
+extern const char kLwrCaseConverter[];
 
 // LightCS definitions taken from JG
 class LightCS
@@ -213,6 +215,8 @@ char __fastcall StrCompare(const char *lstr, const char *rstr);
 char __fastcall StrBeginsCS(const char *lstr, const char *rstr);
 
 char __fastcall StrBeginsCI(const char *lstr, const char *rstr);
+
+char __fastcall StrCompareCS(const char* lstr, const char* rstr);
 
 void __fastcall FixPath(char *str);
 

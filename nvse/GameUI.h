@@ -13,12 +13,14 @@ class NiNode;
 class BSShaderAccumulator;
 class ShadowSceneNode;
 class NiSourceTexture;
+class NiRefObject;
 
 typedef Menu* (*_TempMenuByType)(UInt32 menuType);
 extern const _TempMenuByType TempMenuByType;
 #define MENU_VISIBILITY ((bool*)0x11F308F)	//by JIP
 
 // 584
+// Member variables taken from Tweaks
 class InterfaceManager
 {
 public:
@@ -35,6 +37,94 @@ public:
 
 	UInt32 GetTopVisibleMenuID();
 	Tile *GetActiveTile();
+
+	// Taken from Tweaks
+	struct RefAndNiNode
+	{
+		TESObjectREFR* ref;
+		NiNode* node;
+	};
+
+	// Tweaks
+	struct VATSHighlightData
+	{
+		UInt32 mode;						// 000
+		RefAndNiNode target;				// 004
+		UInt32 numHighlightedRefs;			// 00C
+		UInt32 flashingRefIndex;			// 010
+		RefAndNiNode highlightedRefs[32];	// 014
+		UInt32 unk114;						// 114
+		UInt8 isOcclusionEnabled;			// 118
+		UInt8 unused119[16];				// 119
+		UInt8 byte12B;						// 12B
+		void* pPartialLimbQuery[16]; // IDirect3DQuery9
+		void* pEntireLimbQuery[16]; // IDirect3DQuery9
+		UInt8 hasExecutedQuery[16];
+		UInt32 totalArea[16];
+		UInt32 visibleArea[16];
+		UInt32 selectedLimbID;
+		UInt32 numHighlightedBodyParts;
+		UInt32 highLightedBodyParts[16];
+		UInt8 byte284;
+		UInt8 pad285[3];
+		float time288;
+		float distortVertical;
+		UInt32 distortDuration;
+		float vatsDistortTime;
+		UInt8 byte298;
+		UInt8 pad299[3];
+		float time29C;
+		float burstDuration;
+		float burstIntensity2;
+		float burstIntensity;
+		float pulseIntensity;
+		float pulseRadius;
+		UInt8 byte2B4;
+		UInt8 byte2B5;
+		UInt8 pad2B6[2];
+		float unk2B8;
+		float unk2BC;
+		float fVATSTargetPulseRate;
+		NiRefObject* unk2C4;
+		UInt32 visibleAreaScale_alwaysOne;
+		NiRefObject* unk2CC;
+	};
+
+	// From Tweaks
+	struct Tutorials
+	{
+		SInt32 tutorialFlags[41];
+		UInt32 currentShownHelpID;
+		UInt32 timeA8;
+	};
+
+	// Tweaks
+	struct Struct0178
+	{
+		UInt32 unk00;
+		UInt32 NiTPrimitiveArray[9];
+		UInt8 byte28;
+		UInt8 byte29;
+		UInt8 byte2A;
+		UInt8 byte2B;
+		UInt32 startTime;
+		float durationX;
+		float durationY;
+		float intensityX;
+		float intensityY;
+		float frequencyX;
+		float frequencyY;
+		float unk48;
+		float unk4C;
+		UInt32 imageSpaceEffectParam;
+		UInt8 isFlycamEnabled;
+		UInt8 byte55;
+		UInt8 byte56;
+		UInt8 byte57;
+		float fBlurRadiusHUD;
+		float fScanlineFrequencyHUD;
+		float fBlurIntensityHUD;
+	};
 
 	UInt32					flags;				// 000
 	SceneGraph				*sceneGraph004;		// 004
@@ -124,21 +214,24 @@ public:
 	UInt8					byte172;			// 172
 	UInt8					byte173;			// 173
 	FOPipboyManager			*pipboyManager;		// 174
-	UInt32					*unk178;				// 178
-	NiTArray<UInt32>		array17C;			// 17C NiTPrimitiveArray@PackedMenu@BGSMenuPacker
-	UInt32					unk18C[130];		// 18C
-	NiObject				*unk394;			// 394 seen NiSourceTexture
-	UInt32					unk398[47];			// 398
-	NiTArray<UInt32>		array454;			// 454 NiTPrimitiveArray@TextureType@BSTextureManager
-	NiTArray<UInt32>		array464;			// 464 NiTPrimitiveArray@FilterMode@NiTexturingProperty
-	UInt32					unk474[16];			// 474
-	UInt8					byte4B4;			// 4B4
+	Struct0178				unk178;				// 178
+	VATSHighlightData		vatsHighlightData;	// 1DC
+	float					scale4AC;			// 4AC
+	float					unk4B0;				// 4B0
+	UInt8					isRenderedMenuOrPipboyManager;		// 4B4
 	UInt8					byte4B5;			// 4B5
 	UInt8					byte4B6;			// 4B6
 	UInt8					byte4B7;			// 4B7
-	UInt32					unk4B8;				// 4B8
+	UInt32					queuedPipboyTabToSwitchTo;	// 4B8
 	UInt32					pipBoyMode;			// 4BC
-	UInt32					unk4C0[48];			// 4C0
+	void (*onPipboyOpenCallback)(void);			// 4C0
+	UInt32					unk4C4[2];			// 4C4
+	UInt8					byte4CC;			// 4CC
+	UInt8					byte4CD;			// 4CD
+	UInt8					pad4CE;				// 4CE
+	UInt8					pad4CF;				// 4CF
+	UInt32					unk4D0;				// 4D0
+	Tutorials				help;				// 4D4
 };
 STATIC_ASSERT(sizeof(InterfaceManager) == 0x580);
 

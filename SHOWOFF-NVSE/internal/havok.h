@@ -1071,7 +1071,7 @@ public:
 	float					flt534;				// 534
 	float					flt538;				// 538
 	float					flt53C;				// 53C
-	float					flt540;				// 540
+	float					jumpHeight;			// 540, credits to lStewieAl
 	float					startingHeight;		// 544
 	float					fallTimeElapsed;	// 548
 	float					flt54C;				// 54C
@@ -1088,6 +1088,7 @@ public:
 	hkArray<hkCdPoint>		arr63C;				// 63C
 	UInt32					unk648[6];			// 648
 
+	// WARNING: despite checking a different flag than JIP's IsInAir, it seems to perform the same.
 	bool IsNotJumping()
 	{
 		return ThisStdCall<bool>(0x944400, this);
