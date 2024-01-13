@@ -716,6 +716,7 @@ extern "C"
 		/*3D56*/	REG_CMD(GetIsActivationPromptShown);
 		/*3D57*/	REG_CMD(GetHitLocationLingering);
 		/*3D58*/	REG_CMD(HighlightAdditionalReferenceAlt);
+		/*3D58*/	REG_CMD(GetVATSMaxEngageDistance);
 
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		

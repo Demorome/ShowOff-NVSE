@@ -1141,6 +1141,16 @@ bool Cmd_GetHitLocationLingering_Eval(COMMAND_ARGS_EVAL)
 	return true;
 }
 
+DEFINE_COMMAND_PLUGIN(GetVATSMaxEngageDistance, "Accounts for Tweak's bMaxVATSDistanceUsesWeaponRange", false, nullptr);
+bool Cmd_GetVATSMaxEngageDistance_Execute(COMMAND_ARGS)
+{
+	auto callAddr = GetRelJumpAddr(0x7F548A);
+	*result = *ThisStdCall<float*>(callAddr, (void*)0x11D45B8); // 0x11D45B8 = gs_fVATSMaxEngageDistance
+	return true;
+}
+
+
+
 #ifdef _DEBUG
 
 

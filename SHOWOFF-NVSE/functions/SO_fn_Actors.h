@@ -666,7 +666,7 @@ bool Cmd_HighlightAdditionalReferenceAlt_Execute(COMMAND_ARGS)
 	if (!thisObj)
 		return true;
 
-	if (IS_ACTOR(thisObj) && !checkInvisibility)
+	if (IS_ACTOR(thisObj) && checkInvisibility)
 	{
 		auto* actor = static_cast<Actor*>(thisObj);
 		if (actor->avOwner.GetActorValue(kAVCode_Invisibility) > 0 || actor->avOwner.GetActorValue(kAVCode_Chameleon) > 0)
