@@ -2040,7 +2040,7 @@ namespace OnPlayerJump
 		ThisStdCall(g_detour.GetOverwrittenAddr(), thisCtrler, arPos);
 	}
 
-	void WriteHook()
+	void WriteDelayedHook()
 	{
 		g_detour.WriteDetourCall(0xCD4454, (UInt32)HandleEvent);
 	}
@@ -2079,7 +2079,7 @@ namespace OnPOVChange
 		}
 	}
 
-	void WriteHook()
+	void WriteDelayedHook()
 	{
 		UInt32 const hookAddr = 0x9520E1;
 		if (AddrIsRelJump(hookAddr)) // compatibility with Tweak's hook at the same addr
@@ -2087,6 +2087,26 @@ namespace OnPOVChange
 		else
 			g_pluginAddrToJumpTo = (UInt32)DefaultCleanup;
 		WriteRelJump(hookAddr, UInt32(SwitchPOVHook));
+	}
+}
+
+namespace OnChallengeProgress
+{
+	constexpr char eventName[] = "ShowOff:OnChallengeProgress";
+
+	CallDetour g_detour;
+
+	void __fastcall HandleEvent(TESChallenge* challenge)
+	{
+		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+		auto incrementAmount = *reinterpret_cast<int*>(ebp + 0x8);
+		g_eventInterface->DispatchEvent(eventName, g_thePlayer, challenge, incrementAmount);
+		ThisStdCall(g_detour.GetOverwrittenAddr(), challenge);
+	}
+
+	void WriteDelayedHook()
+	{
+		g_detour.WriteDetourCall(0x5F60F9, (UInt32)HandleEvent);
 	}
 }
 
@@ -2162,6 +2182,7 @@ void RegisterEvents()
 	// v1.76
 	RegisterEvent(OnPlayerJump::eventName, nullptr);
 	RegisterEvent(OnPOVChange::eventName, kEventParams_OneInt);
+	RegisterEvent(OnChallengeProgress::eventName, kEventParams_OneBaseForm_OneInt);
 
 	/*
 	// For debugging the Event API
@@ -2227,8 +2248,9 @@ namespace HandleHooks
 		OnPreRemoveItemFromMenu::WriteDelayedHooks();
 
 		// v1.76
-		OnPlayerJump::WriteHook();
-		OnPOVChange::WriteHook();
+		OnPlayerJump::WriteDelayedHook();
+		OnPOVChange::WriteDelayedHook();
+		OnChallengeProgress::WriteDelayedHook();
 #if _DEBUG
 #endif
 	}

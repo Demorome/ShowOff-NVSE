@@ -54,3 +54,8 @@ namespace FreezeAmmoRegen
 {
 	extern bool g_freezeAmmoRegen;
 }
+
+namespace SetForceDrawHitscanProjectiles
+{
+	extern bool g_isForcingProjectilesToDraw;
+}

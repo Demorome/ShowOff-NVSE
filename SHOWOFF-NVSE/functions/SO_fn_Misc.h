@@ -8,6 +8,7 @@
 #include "GameRTTI.h"
 #include "SafeWrite.h"
 #include "Utilities.h"
+#include "MiscHooks.h"
 
 
 DEFINE_COMMAND_ALT_PLUGIN(ShowingOffDisable, DisableIFYouDidntNotice, "Does the same thing as vanilla Disable. For showing off!", true, kParams_OneOptionalInt);
@@ -1021,7 +1022,16 @@ bool Cmd_GetAmmoName_Execute(COMMAND_ARGS)
 	return true;
 }
 
+DEFINE_COMMAND_PLUGIN(SetForceDrawHitscanProjectiles, "", false, kParams_OneInt);
+bool Cmd_SetForceDrawHitscanProjectiles_Execute(COMMAND_ARGS)
+{
+	UInt32 bForceDraw;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bForceDraw))
+		return true;
 
+	SetForceDrawHitscanProjectiles::g_isForcingProjectilesToDraw = bForceDraw != 0;
+	return true;
+}
 
 
 
