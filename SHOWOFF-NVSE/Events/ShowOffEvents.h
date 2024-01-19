@@ -964,6 +964,32 @@ namespace OnProjectileCreate
 		WriteRelJump(0x9BD51D, (UInt32)CreateProjectile_Hook);
 	}
 }
+namespace OnPreProjectileCreate
+{
+	using namespace OnProjectileStuff;
+	constexpr char eventName[] = "ShowOff:OnPreProjectileCreate";
+
+	CallDetour g_detour;
+	Projectile* __cdecl HandleEvent(BGSProjectile* proj, Actor* actor, CombatController* combatCtrl, TESObjectWEAP* weap, float posX, float posY, float posZ, float rotZ, float rotX, void* a10, TESObjectREFR* liveGrenadeTargetRef, char bAlwaysHit, char ignoreGravity, float angularMomentumZ, float angularMomentumX, TESObjectCELL* cell)
+	{
+		g_eventInterface->DispatchEvent(eventName, nullptr, actor, weap);
+
+#if _DEBUG
+		//NiPoint3 test(posX, posY, posZ);
+		//Projectile::Spawn((BGSProjectile*)LookupFormByName("superhotbulletX"), nullptr, nullptr, nullptr, test, rotZ, rotX, 0, 0, cell);
+		CdeclCall<Projectile*>(g_detour.GetOverwrittenAddr(), (BGSProjectile*)LookupFormByName("superhotbulletX"), actor, nullptr, weap, posX, posY, posZ, rotZ, rotX, nullptr, nullptr, false, false, angularMomentumZ, angularMomentumX, cell);
+#endif
+
+		auto projectile = CdeclCall<Projectile*>(g_detour.GetOverwrittenAddr(), proj, actor, combatCtrl, weap, posX, posY, posZ, rotZ, rotX, a10, liveGrenadeTargetRef, bAlwaysHit, ignoreGravity, angularMomentumZ, angularMomentumX, cell);
+
+		return projectile;
+	}
+
+	void WriteDelayedHook()
+	{
+		g_detour.WriteDetourCall(0x5245BD, (UInt32)HandleEvent);
+	}
+}
 namespace OnProjectileImpact
 {
 	using namespace OnProjectileStuff;
@@ -1712,23 +1738,30 @@ namespace OnPreLifeStateChange
 
 namespace OnExplosionHit
 {
-	constexpr char eventName[] = "ShowOff:OnExplosionHit";
-
-	/*
-	void* __fastcall HandleEvent(Explosion* explosion, void* edx, Actor* actor)
-	{
-		auto* hitParts = ThisStdCall<void*>(0x9B1720, explosion, actor);
-		if (hitParts)
-		{
-			g_eventInterface->DispatchEvent(eventName, explosion, actor);
-		}
-		return hitParts;
-	}
-	*/
+	constexpr char eventName[] = "ShowOff:OnExplosionHit"; // runs only for actors
+	constexpr char eventNameAlt[] = "ShowOff:OnExplosionHitAnyRef";
 
 	float* g_explosionHitDmgPtr = nullptr;
 
-	void __cdecl HandleEvent(void* hitData, Actor* source, Actor* target, Explosion* explosion, float fDamage)
+	CallDetour g_detourForAllRefs;
+	bool __fastcall HandleEventForAllRefs(TESObjectREFR* refr)
+	{
+		// IsDestroyed check
+		auto result = ThisStdCall<bool>(g_detourForAllRefs.GetOverwrittenAddr(), refr);
+
+		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+		auto* explosion = *reinterpret_cast<Explosion**>(ebp - 0xE4);
+		auto* source = *reinterpret_cast<Actor**>(ebp - 0x28);
+
+		g_explosionHitDmgPtr = reinterpret_cast<float*>(ebp - 0x2C);
+		g_eventInterface->DispatchEvent(eventNameAlt, explosion, refr, source);
+		g_explosionHitDmgPtr = nullptr;
+
+		return result;
+	}
+
+	CallDetour g_detourForActors;
+	void __cdecl HandleEventForActors(void* hitData, Actor* source, Actor* target, Explosion* explosion, float fDamage)
 	{
 		g_explosionHitDmgPtr = &fDamage;
 		g_eventInterface->DispatchEvent(eventName, explosion, target, source);
@@ -1737,10 +1770,11 @@ namespace OnExplosionHit
 		g_explosionHitDmgPtr = nullptr;
 	}
 
-	void WriteHooks()
+	void WriteDelayedHooks()
 	{
 		//ReplaceCall(0x89BA03, (UInt32)HandleEvent);
-		ReplaceCall(0x9B04EF, (UInt32)HandleEvent);
+		g_detourForActors.WriteDetourCall(0x9B04EF, (UInt32)HandleEventForActors);
+		g_detourForAllRefs.WriteDetourCall(0x9B03E5, (UInt32)HandleEventForAllRefs);
 	}
 }
 
@@ -2110,6 +2144,103 @@ namespace OnChallengeProgress
 	}
 }
 
+namespace OnMenuCreate
+{
+	constexpr char eventName[] = "ShowOff:OnMenuCreate";
+
+	CallDetour g_detour;
+	Menu* __fastcall HandleEvent(void* thisTileMenuArray, void* edx, int menuCode)
+	{
+		auto* menu = ThisStdCall<Menu*>(g_detour.GetOverwrittenAddr(), thisTileMenuArray, menuCode);
+		if (menu)
+		{
+			g_eventInterface->DispatchEvent(eventName, nullptr, menuCode);
+
+			if (g_ShowFuncDebug)
+				Console_Print("ShowOff:OnMenuCreate: RAN! MenuCode: %i", menuCode);
+		}
+		return menu;
+	}
+
+	void WriteDelayedHook()
+	{
+		g_detour.WriteDetourCall(0x7079A3, (UInt32)HandleEvent);
+	}
+
+	// The code below works, but doesn't seem to be firing anymore often than the above code.
+#if 0
+	void __fastcall HandleEvent(Tile* tile)
+	{
+		if (tile)
+		{
+			if (auto* menu = tile->GetParentMenu())
+			{
+				if (auto menuID = menu->GetID();
+					menuID >= 1001 && menuID <= 1084) // 1001 and 1084 are important for menu visibility array (credits to Stewie)
+				{
+					g_eventInterface->DispatchEvent(eventName, nullptr, menuID);
+
+					if (g_ShowFuncDebug)
+						Console_Print("ShowOff:OnMenuCreate: RAN! MenuCode: %i", menuID);
+				}
+			}
+		}
+	}
+
+	__HOOK Hook()
+	{
+		static UInt32 const ReturnAddr = 0xA01DE2;
+		__asm
+		{
+			mov		ecx, [ebp - 0x10]
+			call	HandleEvent
+
+			// do regular code
+			mov		ecx, [ebp - 0x10]
+			mov		[ebp - 0x40], ecx
+			jmp		ReturnAddr
+		}
+	}
+
+	void WriteDelayedHook()
+	{
+		WriteRelJump(0xA01DDC, (UInt32)Hook);
+	}
+#endif
+}
+
+namespace OnWeaponHolsterUnholster
+{
+	constexpr char eventNameUnholster[] = "ShowOff:OnWeaponUnholster";
+	constexpr char eventNameHolster[] = "ShowOff:OnWeaponHolster";
+
+	CallDetour g_detour;
+	bool __fastcall HandleEvent(Actor* actor)
+	{
+		auto currentlyWantsWeaponOut = ThisStdCall<bool>(g_detour.GetOverwrittenAddr(), actor);
+
+		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+		auto setIsOut = *reinterpret_cast<bool*>(ebp + 0x8);
+
+		if (setIsOut != currentlyWantsWeaponOut)
+		{
+			if (setIsOut)
+				g_eventInterface->DispatchEvent(eventNameUnholster, actor);
+			else
+				g_eventInterface->DispatchEvent(eventNameHolster, actor);
+
+			if (g_ShowFuncDebug)
+				Console_Print("ShowOff:OnMenuCreate: RAN! Actor: %s, holstering?: %u", actor->GetName(), static_cast<UInt32>(setIsOut));
+		}
+		return currentlyWantsWeaponOut;
+	}
+
+	void WriteDelayedHook()
+	{
+		g_detour.WriteDetourCall(0x8A68A1, (UInt32)HandleEvent);
+	}
+}
+
 using EventFlags = NVSEEventManagerInterface::EventFlags;
 
 template<UInt8 N>
@@ -2179,11 +2310,17 @@ void RegisterEvents()
 	RegisterEvent(OnPreProjectileExplode::eventName, kEventParams_OneReference_OneIntPtr, EventFlags::kFlag_FlushOnLoad);
 	RegisterEvent(OnPreRemoveItemFromMenu::eventName, kEventParams_OneBaseForm_OneReference_OneInt_OneIntPtr);
 	
-	// v1.76
+	// v1.80
 	RegisterEvent(OnPlayerJump::eventName, nullptr);
 	RegisterEvent(OnPOVChange::eventName, kEventParams_OneInt);
 	RegisterEvent(OnChallengeProgress::eventName, kEventParams_OneBaseForm_OneInt);
+	RegisterEvent(OnPreProjectileCreate::eventName, kEventParams_OneReference_OneBaseForm);
+	RegisterEvent(OnMenuCreate::eventName, kEventParams_OneInt);
+	RegisterEvent(OnExplosionHit::eventNameAlt, kEventParams_TwoReferences);
+	RegisterEvent(OnWeaponHolsterUnholster::eventNameHolster, nullptr);
+	RegisterEvent(OnWeaponHolsterUnholster::eventNameUnholster, nullptr);
 
+	
 	/*
 	// For debugging the Event API
 	constexpr char DebugEventName[] = "ShowOff:DebugEvent";
@@ -2222,9 +2359,6 @@ namespace HandleHooks
 		OnPCMiscStatChange::WriteHook();
 		OnAddAlt::WriteHooks();
 
-		// v1.65
-		OnExplosionHit::WriteHooks();
-
 		// v1.70
 		OnPreProjectileExplode::WriteHook();
 #if _DEBUG
@@ -2243,14 +2377,18 @@ namespace HandleHooks
 #endif
 		// v1.65
 		OnPreScriptedActivate::WriteDelayedHooks();
+		OnExplosionHit::WriteDelayedHooks();
 
 		// v1.70
 		OnPreRemoveItemFromMenu::WriteDelayedHooks();
 
-		// v1.76
+		// v1.80
 		OnPlayerJump::WriteDelayedHook();
 		OnPOVChange::WriteDelayedHook();
 		OnChallengeProgress::WriteDelayedHook();
+		OnPreProjectileCreate::WriteDelayedHook();
+		OnMenuCreate::WriteDelayedHook();
+		OnWeaponHolsterUnholster::WriteDelayedHook();
 #if _DEBUG
 #endif
 	}

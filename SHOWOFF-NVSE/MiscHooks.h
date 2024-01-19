@@ -59,3 +59,8 @@ namespace SetForceDrawHitscanProjectiles
 {
 	extern bool g_isForcingProjectilesToDraw;
 }
+
+namespace SetAlwaysDrawProjectileTracers
+{
+	extern bool g_alwaysDrawTracers;
+}

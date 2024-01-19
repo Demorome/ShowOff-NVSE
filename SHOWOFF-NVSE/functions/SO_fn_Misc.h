@@ -9,6 +9,7 @@
 #include "SafeWrite.h"
 #include "Utilities.h"
 #include "MiscHooks.h"
+#include <ShowOffNVSE.h>
 
 
 DEFINE_COMMAND_ALT_PLUGIN(ShowingOffDisable, DisableIFYouDidntNotice, "Does the same thing as vanilla Disable. For showing off!", true, kParams_OneOptionalInt);
@@ -1022,20 +1023,49 @@ bool Cmd_GetAmmoName_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(SetForceDrawHitscanProjectiles, "", false, kParams_OneInt);
+DEFINE_COMMAND_PLUGIN(SetForceDrawHitscanProjectiles, "", false, kParams_OneOptionalInt);
 bool Cmd_SetForceDrawHitscanProjectiles_Execute(COMMAND_ARGS)
 {
-	UInt32 bForceDraw;
+	*result = SetForceDrawHitscanProjectiles::g_isForcingProjectilesToDraw;
+	int bForceDraw = -1;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bForceDraw))
 		return true;
-
-	SetForceDrawHitscanProjectiles::g_isForcingProjectilesToDraw = bForceDraw != 0;
+	if (bForceDraw != -1)
+		SetForceDrawHitscanProjectiles::g_isForcingProjectilesToDraw = bForceDraw != 0;
 	return true;
 }
 
+DEFINE_COMMAND_PLUGIN(SetAlwaysDrawProjectileTracers, "", false, kParams_OneOptionalInt);
+bool Cmd_SetAlwaysDrawProjectileTracers_Execute(COMMAND_ARGS)
+{
+	*result = SetAlwaysDrawProjectileTracers::g_alwaysDrawTracers;
+	int bForceDraw = -1;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bForceDraw))
+		return true;
+	if (bForceDraw != -1)
+		SetAlwaysDrawProjectileTracers::g_alwaysDrawTracers = bForceDraw != 0;
+	return true;
+}
 
+DEFINE_COMMAND_PLUGIN(SpawnTracingProjectile, "Spawns a projectile following the calling projectile reference.", 
+	true, kParams_OneForm);
+bool Cmd_SpawnTracingProjectile_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	TESForm* baseProjToSpawn;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &baseProjToSpawn) || !thisObj || !IS_PROJECTILE(thisObj) || !IS_TYPE(baseProjToSpawn, BGSProjectile))
+		return true;
 
+	auto* projectileToTrail = static_cast<Projectile*>(thisObj);
 
+	// Code copied from Tweaks' PlaceTrailAt function.
+	auto* newProj = Projectile::Spawn(static_cast<BGSProjectile*>(baseProjToSpawn), nullptr, nullptr, 
+		nullptr, *projectileToTrail->GetPos(), projectileToTrail->rotZ, projectileToTrail->rotX, 
+		0, 0, projectileToTrail->parentCell);
+
+	REFR_RES = newProj->refID;
+	return true;
+}
 
 
 

@@ -38,7 +38,7 @@ extern void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCod
 extern void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int);
 extern void(__cdecl* PipBoy_SwitchToMapTab)(char, char);
 extern NiNode* (__cdecl* GetSubNodeByName)(NiAVObject*, char*);
-extern TESForm* (__cdecl* LookupFormByName)(char*);
+extern TESForm* (__cdecl* LookupFormByName)(const char*);
 extern void* (*NiAllocator)(UInt32 size);
 extern void(__thiscall* NiReleaseThenAdd)(void* address, void* object);
 extern void(__thiscall* HandleStealing)(Actor* thief, TESObjectREFR* target, TESForm* form, int quantity, int value, TESObjectREFR* owner);

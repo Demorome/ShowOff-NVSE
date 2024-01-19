@@ -38,7 +38,7 @@
 // Plugin Stuff
 IDebugLog g_Log; // file will be open after NVSE plugin load
 HMODULE	g_ShowOffHandle;
-constexpr UInt32 g_PluginVersion = 176;
+constexpr UInt32 g_PluginVersion = 180;
 
 // Allows modmakers to toggle ShowOff's debug messages for some of its functions.
 #ifdef _DEBUG
@@ -712,12 +712,16 @@ extern "C"
 		//========v1.74
 		/*3D55*/	REG_CMD(GetCalculatedActorSpread);
 		
-		//========v1.76
+		//========v1.80
 		/*3D56*/	REG_CMD(GetIsActivationPromptShown);
 		/*3D57*/	REG_CMD(GetHitLocationLingering);
 		/*3D58*/	REG_CMD(HighlightAdditionalReferenceAlt);
 		/*3D58*/	REG_CMD(GetVATSMaxEngageDistance);
 		/*3D59*/	REG_CMD(SetForceDrawHitscanProjectiles);
+		/*3D5A*/	REG_CMD(SetAlwaysDrawProjectileTracers);
+		/*3D5B*/	REG_CMD_FORM(SpawnTracingProjectile);
+		/*3D5C*/	REG_CMD(GetVATSTargetable);
+		/*3D5D*/	REG_CMD(GetProjectileRefIsStuck);
 
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		

@@ -25,7 +25,7 @@ void(__cdecl* HandleActorValueChange)(ActorValueOwner* avOwner, int avCode, floa
 void(__cdecl* HUDMainMenu_UpdateVisibilityState)(signed int) = (void(__cdecl*)(signed int))(0x771700);
 void(__cdecl* PipBoy_SwitchToMapTab)(char, char) = (void(__cdecl*)(char, char))0x704170;
 NiNode* (__cdecl* GetSubNodeByName)(NiAVObject*, char*) = (NiNode * (__cdecl*)(NiAVObject*, char*))(0x4AAE30);
-TESForm* (__cdecl* LookupFormByName)(char*) = (TESForm * (__cdecl*)(char*))(0x8D5910);
+TESForm* (__cdecl* LookupFormByName)(const char*) = (TESForm * (__cdecl*)(const char*))(0x483A00);
 void* (*NiAllocator)(UInt32 size) = (void* (*)(UInt32))0xAA13E0;
 void(__thiscall* NiReleaseThenAdd)(void* address, void* object) = (void(__thiscall*)(void*, void*))(0x66B0D0);
 void(__thiscall* HandleStealing)(Actor* thief, TESObjectREFR* target, TESForm* form, int quantity, int value, TESObjectREFR* owner) = (void(__thiscall*)(Actor*, TESObjectREFR*, TESForm*, int, int, TESObjectREFR*))(0x8BFA40);

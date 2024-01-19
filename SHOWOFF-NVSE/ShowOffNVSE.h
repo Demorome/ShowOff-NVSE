@@ -106,9 +106,11 @@ extern std::vector<std::string> g_deferredPrints;
 #define REFR_RES *(UInt32*)result  //From JIPLN
 
 //Below are already defined in GameForms.h - All from JIPLN
+#define ADDR_ReturnTrue			0x8D0360
 #define IS_TYPE(form, type) (*(UInt32*)form == kVtbl_##type)  
 #define NOT_ID(form, type) (form->typeID != kFormType_##type) 
 #define IS_ID(form, type) (form->typeID == kFormType_##type)
+#define IS_PROJECTILE(form) ((*(UInt32**)form)[0x224 >> 2] == ADDR_ReturnTrue)
 
 struct ArrayData
 {

@@ -1149,7 +1149,18 @@ bool Cmd_GetVATSMaxEngageDistance_Execute(COMMAND_ARGS)
 	return true;
 }
 
-
+DEFINE_CMD_COND_PLUGIN(GetVATSTargetable, "", true, nullptr);
+bool Cmd_GetVATSTargetable_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = 0;
+	if (thisObj)
+		*result = ThisStdCall<bool>(0x576070, thisObj);
+	return true;
+}
+bool Cmd_GetVATSTargetable_Execute(COMMAND_ARGS)
+{
+	return Cmd_GetVATSTargetable_Eval(thisObj, nullptr, nullptr, result);
+}
 
 #ifdef _DEBUG
 

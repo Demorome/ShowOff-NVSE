@@ -51,3 +51,12 @@ bool Cmd_GetIsActivationPromptShown_Execute(COMMAND_ARGS)
 {
 	return Cmd_GetIsActivationPromptShown_Eval(nullptr, nullptr, nullptr, result);
 }
+
+DEFINE_COMMAND_PLUGIN(GetProjectileRefIsStuck, , true, nullptr);
+bool Cmd_GetProjectileRefIsStuck_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	if (thisObj && thisObj->IsProjectile())
+		*result = (static_cast<Projectile*>(thisObj)->projFlags & Projectile::kProjFlag_IsStuck) != 0;
+	return true;
+}

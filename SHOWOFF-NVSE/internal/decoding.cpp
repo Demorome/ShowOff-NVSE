@@ -19,7 +19,7 @@
 
 FontHeightData s_fontHeightDatas[90];
 
-
+// From JIP
 TESObjectREFR* Projectile::GetImpactRef() const
 {
 	if (hasImpacted)
@@ -35,6 +35,13 @@ TESObjectREFR* Projectile::GetImpactRef() const
 		} while (traverse = traverse->next);
 	}
 	return nullptr;
+}
+
+// From Tweaks
+Projectile* __cdecl Projectile::Spawn(BGSProjectile* projectile, Actor* source, CombatController* combatCtrl, TESObjectWEAP* sourceWeap,
+	NiPoint3 pos, float rotZ, float rotX, float angularMomentumZ, float angularMomentumX, TESObjectCELL* cell)
+{
+	return CdeclCall<Projectile*>(0x9BCA60, projectile, source, combatCtrl, sourceWeap, pos, rotZ, rotX, 0, 0, 0, 0, angularMomentumZ, angularMomentumX, cell);
 }
 
 __declspec(naked) NiVector3* FontManager::GetStringDimensions(NiVector3* outDims, const char* srcString, UInt32 fontID, UInt32 maxFlt, UInt32 startIdx)

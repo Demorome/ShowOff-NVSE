@@ -550,7 +550,7 @@ public:
 	{
 		kProjFlag_Bit00Unk =			0x1,
 		kProjFlag_Bit01Unk =			0x2,
-		kProjFlag_Bit02Unk =			0x4,
+		kProjFlag_IsStuck =				0x4,  // credits to lStewieAl
 		kProjFlag_Bit03Unk =			0x8,
 		kProjFlag_Bit04Unk =			0x10,
 		kProjFlag_Bit05Unk =			0x20,
@@ -630,6 +630,10 @@ public:
 
 	// Copied from JIP's Projectile::GetData
 	[[nodiscard]] TESObjectREFR* GetImpactRef() const;
+
+	// Copied from Tweaks
+	static Projectile* __cdecl Spawn(BGSProjectile* projectile, Actor* source, CombatController* combatCtrl, TESObjectWEAP* sourceWeap,
+		NiPoint3 pos, float rotZ, float rotX, float angularMomentumZ, float angularMomentumX, TESObjectCELL* cell);
 };
 STATIC_ASSERT(sizeof(Projectile) == 0x150);
 

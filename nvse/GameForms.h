@@ -527,7 +527,7 @@ public:
 	virtual bool		Unk_49(void * arg0, void * arg1, void * arg2, void * arg3, void * arg4);	// looks to be func33 in Oblivion
 	virtual void		SetRefID(UInt32 refID, bool generateID);
 	virtual char *		GetName2(void);
-	virtual char *		GetName(void);
+	virtual char *		GetName(void);   //gets EditorID with JG
 	virtual bool		SetEditorID(const char * edid);		// simply returns true at run-time
 	// 4E
 	uint32_t GetId() const

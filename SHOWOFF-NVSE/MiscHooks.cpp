@@ -455,63 +455,49 @@ namespace SetForceDrawHitscanProjectiles
 {
 	bool g_isForcingProjectilesToDraw = false;
 
-	CallDetour g_detour;
+	CallDetour g_detourIsHitScan;
 	bool __fastcall BGSProjectile_IsHitScan_Hook(BGSProjectile* baseProj)
 	{
-		auto result = ThisStdCall<bool>(g_detour.GetOverwrittenAddr(), baseProj);
+		auto result = ThisStdCall<bool>(g_detourIsHitScan.GetOverwrittenAddr(), baseProj);
 		if (g_isForcingProjectilesToDraw)
-			return false; // game sets projectile to not have hitscan flag in VATS, so we copy that concept.
+			return false; // game sets projectile to not have hitscan flag in VATS, so we copy that idea.
+		return result;
+	}
+
+	CallDetour g_detourGetSource;
+	TESObjectREFR* __fastcall Projectile_GetSourceRef_Hook(Projectile* proj)
+	{
+		// force game to draw hitscan projectiles for NPC projectiles.
+		auto* result = ThisStdCall<TESObjectREFR*>(g_detourGetSource.GetOverwrittenAddr(), proj);
+		if (g_isForcingProjectilesToDraw)
+			return g_thePlayer; 
 		return result;
 	}
 
 	void WriteDelayedHooks()
 	{
-		g_detour.WriteDetourCall(0x9B7D08, (UInt32)BGSProjectile_IsHitScan_Hook);
+		g_detourIsHitScan.WriteDetourCall(0x9B7D08, (UInt32)BGSProjectile_IsHitScan_Hook);
+		g_detourGetSource.WriteDetourCall(0x9BDE33, (UInt32)Projectile_GetSourceRef_Hook);
 	}
+}
 
-#if 0
-	UInt32 g_detourAddr;
-	__HOOK Hook()
-	{
-		static UInt32 const DrawProjAddr = 0x9BD952,
-			DoRegularAddr = 0x9BD92D;
-		_asm
-		{
-			movzx	eax, g_isForcingProjectilesToDraw
-			test	eax, eax  // returns zero if eax is 0
-			jz		doChecks
-			// else, we skip the checks
-			jmp		DrawProjAddr
-		doChecks :
-			call	g_detourAddr
-			jmp		DoRegularAddr
-		}
-	}
+namespace SetAlwaysDrawProjectileTracers
+{
+	bool g_alwaysDrawTracers = false;
 
-	void WriteDelayedHooks()
-	{
-		UInt32 constexpr hookAddr = 0x9BD928;
-		g_detourAddr = GetRelJumpAddr(hookAddr);
-		WriteRelJump(hookAddr, (UInt32)Hook);
-	}
-#endif
-
-
-#if 0
 	CallDetour g_detour;
-	bool __fastcall Projectile_GetFlag_Hook(Projectile* proj, void* edx, UInt32 projFlag_IsStuck)
+	bool __fastcall BGSProjectile_CalcIsTracer_Hook(BGSProjectile* baseProj)
 	{
-		auto result = ThisStdCall<bool>(g_detour.GetOverwrittenAddr(), proj, projFlag_IsStuck);
-		if (g_isForcingProjectilesToDraw)
-			return false;
+		auto result = ThisStdCall<bool>(g_detour.GetOverwrittenAddr(), baseProj);
+		if (g_alwaysDrawTracers && baseProj->tracerChance > 0)
+			return true;
 		return result;
 	}
 
 	void WriteDelayedHooks()
 	{
-		g_detour.WriteDetourCall(0x9BD891, (UInt32)Projectile_GetFlag_Hook);
+		g_detour.WriteDetourCall(0x9B7CE8, (UInt32)BGSProjectile_CalcIsTracer_Hook);
 	}
-#endif
 }
 
 
@@ -659,6 +645,7 @@ namespace HandleHooks
 		LevelUpMenuHooks::ShowPerkMenu::WriteDelayedHooks();
 		FreezeAmmoRegen::WriteDelayedHooks();
 		SetForceDrawHitscanProjectiles::WriteDelayedHooks();
+		SetAlwaysDrawProjectileTracers::WriteDelayedHooks();
 	}
 
 	void HandleDelayedGameHooks()
