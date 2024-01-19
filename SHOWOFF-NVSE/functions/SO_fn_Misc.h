@@ -1048,12 +1048,13 @@ bool Cmd_SetAlwaysDrawProjectileTracers_Execute(COMMAND_ARGS)
 }
 
 DEFINE_COMMAND_PLUGIN(SpawnTracingProjectile, "Spawns a projectile following the calling projectile reference.", 
-	true, kParams_OneForm);
+	true, kParams_OneForm_OneOptionalInt);
 bool Cmd_SpawnTracingProjectile_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	TESForm* baseProjToSpawn;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &baseProjToSpawn) || !thisObj || !IS_PROJECTILE(thisObj) || !IS_TYPE(baseProjToSpawn, BGSProjectile))
+	UInt32 ignoreGravity = 1;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &baseProjToSpawn, &ignoreGravity) || !thisObj || !IS_PROJECTILE(thisObj) || !IS_TYPE(baseProjToSpawn, BGSProjectile))
 		return true;
 
 	auto* projectileToTrail = static_cast<Projectile*>(thisObj);
@@ -1061,7 +1062,7 @@ bool Cmd_SpawnTracingProjectile_Execute(COMMAND_ARGS)
 	// Code copied from Tweaks' PlaceTrailAt function.
 	auto* newProj = Projectile::Spawn(static_cast<BGSProjectile*>(baseProjToSpawn), nullptr, nullptr, 
 		nullptr, *projectileToTrail->GetPos(), projectileToTrail->rotZ, projectileToTrail->rotX, 
-		0, 0, projectileToTrail->parentCell);
+		0, 0, projectileToTrail->parentCell, ignoreGravity);
 
 	REFR_RES = newProj->refID;
 	return true;

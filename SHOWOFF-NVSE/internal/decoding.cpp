@@ -39,9 +39,9 @@ TESObjectREFR* Projectile::GetImpactRef() const
 
 // From Tweaks
 Projectile* __cdecl Projectile::Spawn(BGSProjectile* projectile, Actor* source, CombatController* combatCtrl, TESObjectWEAP* sourceWeap,
-	NiPoint3 pos, float rotZ, float rotX, float angularMomentumZ, float angularMomentumX, TESObjectCELL* cell)
+	NiPoint3 pos, float rotZ, float rotX, float angularMomentumZ, float angularMomentumX, TESObjectCELL* cell, bool ignoreGravity)
 {
-	return CdeclCall<Projectile*>(0x9BCA60, projectile, source, combatCtrl, sourceWeap, pos, rotZ, rotX, 0, 0, 0, 0, angularMomentumZ, angularMomentumX, cell);
+	return CdeclCall<Projectile*>(0x9BCA60, projectile, source, combatCtrl, sourceWeap, pos, rotZ, rotX, 0, 0, 0, ignoreGravity, angularMomentumZ, angularMomentumX, cell);
 }
 
 __declspec(naked) NiVector3* FontManager::GetStringDimensions(NiVector3* outDims, const char* srcString, UInt32 fontID, UInt32 maxFlt, UInt32 startIdx)

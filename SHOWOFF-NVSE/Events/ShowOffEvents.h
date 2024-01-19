@@ -977,7 +977,7 @@ namespace OnPreProjectileCreate
 #if _DEBUG
 		//NiPoint3 test(posX, posY, posZ);
 		//Projectile::Spawn((BGSProjectile*)LookupFormByName("superhotbulletX"), nullptr, nullptr, nullptr, test, rotZ, rotX, 0, 0, cell);
-		CdeclCall<Projectile*>(g_detour.GetOverwrittenAddr(), (BGSProjectile*)LookupFormByName("superhotbulletX"), actor, nullptr, weap, posX, posY, posZ, rotZ, rotX, nullptr, nullptr, false, false, angularMomentumZ, angularMomentumX, cell);
+		// CdeclCall<Projectile*>(g_detour.GetOverwrittenAddr(), (BGSProjectile*)LookupFormByName("superhotbulletX"), actor, nullptr, weap, posX, posY, posZ, rotZ, rotX, nullptr, nullptr, false, false, angularMomentumZ, angularMomentumX, cell);
 #endif
 
 		auto projectile = CdeclCall<Projectile*>(g_detour.GetOverwrittenAddr(), proj, actor, combatCtrl, weap, posX, posY, posZ, rotZ, rotX, a10, liveGrenadeTargetRef, bAlwaysHit, ignoreGravity, angularMomentumZ, angularMomentumX, cell);
@@ -2211,6 +2211,9 @@ namespace OnMenuCreate
 
 namespace OnWeaponHolsterUnholster
 {
+	// This event can be replicated using SetOnAnimActionEventHandler for the equip/unequip anim actions.
+	// The only advantage this event has is that you can also filter by weapon.
+
 	constexpr char eventNameUnholster[] = "ShowOff:OnWeaponUnholster";
 	constexpr char eventNameHolster[] = "ShowOff:OnWeaponHolster";
 
@@ -2225,9 +2228,9 @@ namespace OnWeaponHolsterUnholster
 		if (setIsOut != currentlyWantsWeaponOut)
 		{
 			if (setIsOut)
-				g_eventInterface->DispatchEvent(eventNameUnholster, actor);
+				g_eventInterface->DispatchEvent(eventNameUnholster, actor, actor->GetEquippedWeapon());
 			else
-				g_eventInterface->DispatchEvent(eventNameHolster, actor);
+				g_eventInterface->DispatchEvent(eventNameHolster, actor, actor->GetEquippedWeapon());
 
 			if (g_ShowFuncDebug)
 				Console_Print("ShowOff:OnMenuCreate: RAN! Actor: %s, holstering?: %u", actor->GetName(), static_cast<UInt32>(setIsOut));
@@ -2317,8 +2320,8 @@ void RegisterEvents()
 	RegisterEvent(OnPreProjectileCreate::eventName, kEventParams_OneReference_OneBaseForm);
 	RegisterEvent(OnMenuCreate::eventName, kEventParams_OneInt);
 	RegisterEvent(OnExplosionHit::eventNameAlt, kEventParams_TwoReferences);
-	RegisterEvent(OnWeaponHolsterUnholster::eventNameHolster, nullptr);
-	RegisterEvent(OnWeaponHolsterUnholster::eventNameUnholster, nullptr);
+	RegisterEvent(OnWeaponHolsterUnholster::eventNameHolster, kEventParams_OneBaseForm);
+	RegisterEvent(OnWeaponHolsterUnholster::eventNameUnholster, kEventParams_OneBaseForm);
 
 	
 	/*

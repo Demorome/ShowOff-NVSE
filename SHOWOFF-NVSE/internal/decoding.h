@@ -554,7 +554,7 @@ public:
 		kProjFlag_Bit03Unk =			0x8,
 		kProjFlag_Bit04Unk =			0x10,
 		kProjFlag_Bit05Unk =			0x20,
-		kProjFlag_Bit06Unk =			0x40,
+		kProjFlag_HasGravity =			0x40, // credits to lStewieAl
 		kProjFlag_Bit07Unk =			0x80,
 		kProjFlag_Bit08Unk =			0x100,
 		kProjFlag_MineDisarmed =		0x200,
@@ -565,7 +565,7 @@ public:
 		kProjFlag_Bit0EUnk =			0x4000,
 		kProjFlag_Bit0FUnk =			0x8000,		// Don't apply source-weapon's damage upon impact
 		kProjFlag_Bit10Unk =			0x10000,
-		kProjFlag_Bit11Unk =			0x20000,
+		kProjFlag_IgnoreGravity =		0x20000, // credits to lStewieAl
 		kProjFlag_Bit12Unk =			0x40000,
 		kProjFlag_Bit13Unk =			0x80000,
 		kProjFlag_Bit14Unk =			0x100000,
@@ -633,7 +633,8 @@ public:
 
 	// Copied from Tweaks
 	static Projectile* __cdecl Spawn(BGSProjectile* projectile, Actor* source, CombatController* combatCtrl, TESObjectWEAP* sourceWeap,
-		NiPoint3 pos, float rotZ, float rotX, float angularMomentumZ, float angularMomentumX, TESObjectCELL* cell);
+		NiPoint3 pos, float rotZ, float rotX, float angularMomentumZ, float angularMomentumX, TESObjectCELL* cell,
+		bool ignoreGravity = false);
 };
 STATIC_ASSERT(sizeof(Projectile) == 0x150);
 

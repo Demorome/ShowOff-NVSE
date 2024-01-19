@@ -455,29 +455,79 @@ namespace SetForceDrawHitscanProjectiles
 {
 	bool g_isForcingProjectilesToDraw = false;
 
-	CallDetour g_detourIsHitScan;
-	bool __fastcall BGSProjectile_IsHitScan_Hook(BGSProjectile* baseProj)
+	namespace SetProjIsHitScan
 	{
-		auto result = ThisStdCall<bool>(g_detourIsHitScan.GetOverwrittenAddr(), baseProj);
-		if (g_isForcingProjectilesToDraw)
-			return false; // game sets projectile to not have hitscan flag in VATS, so we copy that idea.
-		return result;
+		CallDetour g_detour;
+		bool __fastcall Hook(BGSProjectile* baseProj)
+		{
+			auto result = ThisStdCall<bool>(g_detour.GetOverwrittenAddr(), baseProj);
+			if (g_isForcingProjectilesToDraw)
+				return false; // game sets projectile to not have hitscan flag in VATS, so we copy that idea.
+			return result;
+		}
+
+		void WriteDelayedHook()
+		{
+			g_detour.WriteDetourCall(0x9B7D08, (UInt32)Hook);
+		}
 	}
 
-	CallDetour g_detourGetSource;
-	TESObjectREFR* __fastcall Projectile_GetSourceRef_Hook(Projectile* proj)
+	namespace SetHasGravityFlag
 	{
-		// force game to draw hitscan projectiles for NPC projectiles.
-		auto* result = ThisStdCall<TESObjectREFR*>(g_detourGetSource.GetOverwrittenAddr(), proj);
-		if (g_isForcingProjectilesToDraw)
-			return g_thePlayer; 
-		return result;
+		CallDetour g_detour;
+
+		// projRefFlag arg will always be kProjFlag_HasGravity
+		void __fastcall Hook(Projectile* projRef, void* edx, UInt32 projRefFlag, bool setFlag)
+		{
+			// Force gravity to not be applied to previously hitscan projectiles that are now being drawn...
+			//	...unless VATS is on since that's the only time gravity matters for hitscan projectiles (for visual flair).
+			if (setFlag && (static_cast<BGSProjectile*>(projRef->baseForm)->projFlags & BGSProjectile::kFlags_Hitscan) != 0
+				&& g_isForcingProjectilesToDraw)
+			{
+				if (auto* vatsCam = VATSCameraData::GetSingleton();
+					!vatsCam || vatsCam->mode == VATSCameraData::kVATSMode_None)
+				{
+					setFlag = false;
+				}
+			}
+			ThisStdCall(g_detour.GetOverwrittenAddr(), projRef, projRefFlag, setFlag);
+		}
+
+		void WriteDelayedHook()
+		{
+			g_detour.WriteDetourCall(0x9B7DEB, (UInt32)Hook);
+		}
+	}
+
+	namespace FixGameNotCheckingHasGravityFlag
+	{
+		CallDetour g_detour;
+
+		double __fastcall Hook(BGSProjectile* baseProj)
+		{
+			auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+			auto* projRef = *reinterpret_cast<Projectile**>(ebp - 0x18);
+
+			if ((projRef->projFlags & Projectile::kProjFlag_HasGravity) == 0
+				|| (projRef->projFlags & Projectile::kProjFlag_IgnoreGravity) != 0)
+			{
+				return 0.0;
+			}
+			else
+				return ThisStdCall<double>(g_detour.GetOverwrittenAddr(), baseProj);
+		}
+
+		void WriteDelayedHook()
+		{
+			g_detour.WriteDetourCall(0x9BE6F0, (UInt32)Hook);
+		}
 	}
 
 	void WriteDelayedHooks()
 	{
-		g_detourIsHitScan.WriteDetourCall(0x9B7D08, (UInt32)BGSProjectile_IsHitScan_Hook);
-		g_detourGetSource.WriteDetourCall(0x9BDE33, (UInt32)Projectile_GetSourceRef_Hook);
+		SetProjIsHitScan::WriteDelayedHook();
+		SetHasGravityFlag::WriteDelayedHook();
+		FixGameNotCheckingHasGravityFlag::WriteDelayedHook();
 	}
 }
 
