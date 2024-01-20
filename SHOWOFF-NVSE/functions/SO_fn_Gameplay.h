@@ -116,9 +116,8 @@ bool Cmd_IsWeaponMelee_Eval(COMMAND_ARGS_EVAL)
 
 	auto const weapon = DYNAMIC_CAST(form, TESForm, TESObjectWEAP);
 	if (!weapon) return true;
-
-	const UINT8 weapType = weapon->eWeaponType;
-	*result = weapType <= 2;
+;
+	*result = weapon->IsMelee();
 	return true;
 }
 bool Cmd_IsWeaponMelee_Execute(COMMAND_ARGS)
@@ -140,7 +139,7 @@ bool Cmd_IsEquippedWeaponMelee_Eval(COMMAND_ARGS_EVAL)
 		if (!thisObj->IsActor()) return true;
 		TESObjectWEAP* weapon = ((Actor*)thisObj)->GetEquippedWeapon();
 		if (weapon)
-			*result = weapon->eWeaponType <= 2;
+			*result = weapon->IsMelee();
 		else
 		{
 			*result = true;

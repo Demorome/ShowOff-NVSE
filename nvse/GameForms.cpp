@@ -955,3 +955,8 @@ UInt32 TESLeveledList::RemoveItem(TESForm* form)
 	} while (iter);
 	return numRemoved;
 }
+
+UInt32 TESIdleForm::GetSequenceID() const
+{
+	return data.groupFlags & 0x3F; // copying code at 0x5FF160
+}

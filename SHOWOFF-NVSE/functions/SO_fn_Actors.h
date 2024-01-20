@@ -711,6 +711,74 @@ bool Cmd_HighlightAdditionalReferenceAlt_Execute(COMMAND_ARGS)
 
 }
 
+DEFINE_COMMAND_PLUGIN(ForceRecoilAnim, "", true, nullptr);
+bool Cmd_ForceRecoilAnim_Execute(COMMAND_ARGS)
+{
+	*result = 0; // bSuccess
+	if (!thisObj || !IS_ACTOR(thisObj))
+		return true;
+
+	auto* weap = ((Actor*)thisObj)->GetEquippedWeapon();
+	if (!weap || (weap->IsMelee() && !weap->projectile))
+	{
+		ThisStdCall(0x894E90, static_cast<Actor*>(thisObj)); // Actor::SetRecoils
+		// It won't do anything if stagger anim is playing.
+		*result = 1;
+	}
+	return true;
+}
+
+DEFINE_COMMAND_ALT_PLUGIN(ForceHitStaggerReaction, ForceHitReaction, "Only works inside OnHit event handlers.",
+	true, kParams_OneOptionalInt);
+bool Cmd_ForceHitStaggerReaction_Execute(COMMAND_ARGS)
+{
+	*result = 0; // bSuccess
+	UInt32 checkForIgnoreCrippledLimbsAV = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &checkForIgnoreCrippledLimbsAV))
+		return true;
+	if (!thisObj || !IS_ACTOR(thisObj))
+		return true;
+	auto* actor = static_cast<Actor*>(thisObj);
+	if (!actor->baseProcess)
+		return true;
+
+	if (auto* hitData = actor->baseProcess->GetHitData();
+		hitData && hitData->hitLocation != -1)
+	{
+		if (actor->baseProcess->GetKnockedState())
+			return true;
+		if (checkForIgnoreCrippledLimbsAV && actor->avOwner.GetActorValueInt(eActorVal_IgnoreCrippledLimbs))
+			return true;
+
+		// Needed so that the idle anims with conditions for GetForceHitReaction will play.
+		actor->forceHit = true;
+
+		constexpr UInt32 g_idleAnimsDirectoryMap_Addr = 0x11CB6A0;
+		auto* idle = ThisStdCall<TESIdleForm*>(0x600950, *(void**)g_idleAnimsDirectoryMap_Addr, actor, hitData->projectile);
+		if (!idle)
+			return true;
+
+		auto* animData = actor->GetAnimData();
+		if (!animData || ThisStdCall<bool>(0x498D30, animData, idle)) // checks for queued anims and VATS
+			return true;
+
+		// copying code at 0x89C2DA; credits to lStewieAl for pointing this out!
+		if (actor == g_thePlayer)
+		{
+			animData->CreateForcedIdle(idle, actor, idle->GetSequenceID(), 2);
+			// todo: maybe destroy VATS camera structs like how 0x89C370 does it.
+		}
+		else
+		{
+			actor->baseProcess->SetIdleForm(idle);
+			actor->baseProcess->SetQueuedIdleFlags(0x10); // kIdleFlag_CrippledLimb
+		}
+		actor->forceHit = false;
+		*result = 1;
+	}
+	return true;
+}
+
 
 #ifdef _DEBUG
 

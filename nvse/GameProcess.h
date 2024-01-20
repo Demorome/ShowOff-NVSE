@@ -587,8 +587,8 @@ public:
 	virtual void	Unk_1C3();
 	virtual void	Unk_1C4();
 	virtual void	Unk_1C5();
-	virtual TESIdleForm* GetIdleForm350();
-	virtual void	SetIdleForm350(TESIdleForm* idleForm);
+	virtual TESIdleForm* GetIdleForm();
+	virtual void	SetIdleForm(TESIdleForm* idleForm);
 	virtual void	Unk_1C8();
 	virtual void	Unk_1C9();
 	virtual void	Unk_1CA();
@@ -815,6 +815,8 @@ struct AnimData
 	NiNode* node12C;
 	NiNode* node130;
 	tList<void> list134;
+
+	void CreateForcedIdle(TESIdleForm* idleForm, Actor* actor, UInt32 sequenceID, int a5);
 };
 STATIC_ASSERT(sizeof(AnimData) == 0x13C);
 

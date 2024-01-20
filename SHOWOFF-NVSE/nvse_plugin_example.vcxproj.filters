@@ -108,6 +108,7 @@
     <ClCompile Include="Events\CustomEventFilters.cpp">
       <Filter>Events</Filter>
     </ClCompile>
+    <ClCompile Include="..\nvse\GameProcess.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="functions\SO_fn_Misc.h">

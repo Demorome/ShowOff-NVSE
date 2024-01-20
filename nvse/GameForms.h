@@ -1910,6 +1910,7 @@ public:
 	String						editorID;		// 04C
 
 	TESIdleForm *FindIdle(Actor *animActor);
+	UInt32 GetSequenceID() const;
 };
 
 struct TESTopicInfoResponse

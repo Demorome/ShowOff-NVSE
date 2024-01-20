@@ -722,6 +722,9 @@ extern "C"
 		/*3D5B*/	REG_CMD_FORM(SpawnTracingProjectile);
 		/*3D5C*/	REG_CMD(GetVATSTargetable);
 		/*3D5D*/	REG_CMD(GetProjectileRefIsStuck);
+		/*3D5E*/	REG_CMD(ForceRecoilAnim);
+		/*3D5F*/	REG_CMD(ForceHitStaggerReaction);
+		
 
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
