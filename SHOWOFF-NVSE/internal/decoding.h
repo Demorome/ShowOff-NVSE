@@ -3839,6 +3839,8 @@ struct VATSCameraData
 };
 STATIC_ASSERT(sizeof(VATSCameraData) == 0x48);
 
+bool IsInVATS();
+
 // 10
 struct SystemColorManager
 {

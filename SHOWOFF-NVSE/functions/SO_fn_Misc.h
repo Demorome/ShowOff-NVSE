@@ -1035,15 +1035,15 @@ bool Cmd_SetForceDrawHitscanProjectiles_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(SetAlwaysDrawProjectileTracers, "", false, kParams_OneOptionalInt);
-bool Cmd_SetAlwaysDrawProjectileTracers_Execute(COMMAND_ARGS)
+DEFINE_COMMAND_PLUGIN(SetProjectileTracerChanceOverride, "", false, kParams_OneOptionalInt);
+bool Cmd_SetProjectileTracerChanceOverride_Execute(COMMAND_ARGS)
 {
-	*result = SetAlwaysDrawProjectileTracers::g_alwaysDrawTracers;
-	int bForceDraw = -1;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bForceDraw))
+	*result = SetProjectileTracerChanceOverride::g_tracerChanceOverride;
+	int overrideVal = -2;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &overrideVal))
 		return true;
-	if (bForceDraw != -1)
-		SetAlwaysDrawProjectileTracers::g_alwaysDrawTracers = bForceDraw != 0;
+	if (overrideVal >= -1)
+		SetProjectileTracerChanceOverride::g_tracerChanceOverride = overrideVal;
 	return true;
 }
 
@@ -1068,7 +1068,18 @@ bool Cmd_SpawnTracingProjectile_Execute(COMMAND_ARGS)
 	return true;
 }
 
-
+DEFINE_CMD_COND_PLUGIN(IsPlayerLookingAround, "", false, nullptr);
+bool Cmd_IsPlayerLookingAround_Execute(COMMAND_ARGS)
+{
+	//TODO: add IsMenuMode, IsVATSMode checks
+	*result = IsPlayerLookingAround::g_isPlayerLookingAround;
+	return true;
+}
+bool Cmd_IsPlayerLookingAround_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = IsPlayerLookingAround::g_isPlayerLookingAround;
+	return true;
+}
 
 #if _DEBUG
 

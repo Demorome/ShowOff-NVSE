@@ -56,6 +56,12 @@ public:
 	virtual void	Free(void);
 
 	UInt32		m_uiRefCount;	// 04
+
+	static void Replace(NiRefObject** toReplace, NiRefObject* replacement)
+	{
+		// Copying use at 0x800C25
+		ThisStdCall(0x66B0D0, toReplace, replacement);
+	}
 };
 
 // 08

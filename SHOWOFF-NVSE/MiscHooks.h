@@ -60,7 +60,12 @@ namespace SetForceDrawHitscanProjectiles
 	extern bool g_isForcingProjectilesToDraw;
 }
 
-namespace SetAlwaysDrawProjectileTracers
+namespace SetProjectileTracerChanceOverride
 {
-	extern bool g_alwaysDrawTracers;
+	extern int g_tracerChanceOverride;
+}
+
+namespace IsPlayerLookingAround
+{
+	extern bool g_isPlayerLookingAround;
 }

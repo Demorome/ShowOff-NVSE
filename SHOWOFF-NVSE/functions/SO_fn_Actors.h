@@ -683,6 +683,14 @@ bool Cmd_HighlightAdditionalReferenceAlt_Execute(COMMAND_ARGS)
 		// Prevent flashing
 		NopFunctionCall(0x5BB693, 1); // VATSHighlightData::SetFlashingRef
 
+#if 0	
+		// Doesn't work as expected: tried to prevent a crash when game sets highlighted projectile to be target ref,
+		// ...but if there's no target ref, no highlighting happens!
+
+		// Avoid setting a target ref
+		SafeWrite8(0x800DFF, 0xEB); // replace jnz with short jmp
+#endif
+
 		auto* manager = InterfaceManager::GetSingleton();
 		if (manager)
 		{
@@ -704,8 +712,31 @@ bool Cmd_HighlightAdditionalReferenceAlt_Execute(COMMAND_ARGS)
 	*result = thisObj->Get3D() != nullptr;
 	Cmd_HighlightAdditionalReference(PASS_COMMAND_ARGS);
 
-	// Restore being able to set flashing
-	WriteRelCall(0x5BB693, 0x800E50);
+	if (!setFlashing)
+	{
+		// Restore being able to set flashing
+		WriteRelCall(0x5BB693, 0x800E50);
+
+#if 0
+		// Restore setting a default target ref
+		SafeWrite8(0x800DFF, 0x75);
+#endif
+	}
+
+	if (!IsInVATS())
+	{
+		// Force the target to be set as player.
+		// This will protect against crashes where target becomes destroyed (i.e. trying to highlight a projectile that explodes).
+		// For example, I was getting a crash at 0x800483 sometimes when highlighting was enabled outside of VATS on a dynamite, right after it blew up.
+		// This was likely because the game was storing the target.ref of the now-deleted projectile reference, and attempting to check stuff on it.
+		// Target has no visual effect outside of VATS, so we don't lose anything.
+		auto& vatsHighlightData = InterfaceManager::GetSingleton()->vatsHighlightData;
+		vatsHighlightData.target.ref = g_thePlayer;
+		NiRefObject::Replace((NiRefObject**)&vatsHighlightData.target.node, g_thePlayer->Get3D());
+
+		// NOTE: still highly recommended to flush the VATS highlight targets and re-create the list every frame.
+		// Especially since having the player stay as a target for VATS would be weird...
+	}
 
 	return true;
 

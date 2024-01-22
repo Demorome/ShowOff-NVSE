@@ -140,6 +140,11 @@ AnimGroupClassify s_animGroupClassify[] =
 	{2, 5, 0, 0}, {2, 5, 0, 0}, {2, 5, 0, 0}, {2, 5, 0, 0}
 };
 
+bool IsInVATS()
+{
+	return VATSCameraData::GetSingleton() && VATSCameraData::GetSingleton()->mode != VATSCameraData::kVATSMode_None;
+}
+
 void __cdecl PlayMenuSound(MenuSoundCode soundCode)
 {
 	return CdeclCall(0x717280, soundCode);

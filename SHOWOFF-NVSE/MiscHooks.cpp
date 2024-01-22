@@ -531,22 +531,43 @@ namespace SetForceDrawHitscanProjectiles
 	}
 }
 
-namespace SetAlwaysDrawProjectileTracers
+namespace SetProjectileTracerChanceOverride
 {
-	bool g_alwaysDrawTracers = false;
+	// If -1, no override.
+	// If 0, never draw tracers.
+	// If 1, always draw tracers if it has a base tracer chance.
+	int g_tracerChanceOverride = -1;
 
 	CallDetour g_detour;
 	bool __fastcall BGSProjectile_CalcIsTracer_Hook(BGSProjectile* baseProj)
 	{
 		auto result = ThisStdCall<bool>(g_detour.GetOverwrittenAddr(), baseProj);
-		if (g_alwaysDrawTracers && baseProj->tracerChance > 0)
-			return true;
+		if (g_tracerChanceOverride != -1 && baseProj->tracerChance > 0)
+			return g_tracerChanceOverride != 0;
 		return result;
 	}
 
 	void WriteDelayedHooks()
 	{
 		g_detour.WriteDetourCall(0x9B7CE8, (UInt32)BGSProjectile_CalcIsTracer_Hook);
+	}
+}
+
+namespace IsPlayerLookingAround
+{
+	bool g_isPlayerLookingAround = false;
+
+	CallDetour g_detour;
+	bool __fastcall Player_HandleLookingAround(PlayerCharacter* player, void* edx, float timeSinceLastLastFrame, char a3, int* movFlags, int unused)
+	{
+		auto result = ThisStdCall<bool>(g_detour.GetOverwrittenAddr(), player, timeSinceLastLastFrame, a3, movFlags, unused);
+		g_isPlayerLookingAround = result;
+		return result;
+	}
+
+	void WriteDelayedHooks()
+	{
+		g_detour.WriteDetourCall(0x93F8D9, (UInt32)Player_HandleLookingAround);
 	}
 }
 
@@ -695,7 +716,8 @@ namespace HandleHooks
 		LevelUpMenuHooks::ShowPerkMenu::WriteDelayedHooks();
 		FreezeAmmoRegen::WriteDelayedHooks();
 		SetForceDrawHitscanProjectiles::WriteDelayedHooks();
-		SetAlwaysDrawProjectileTracers::WriteDelayedHooks();
+		SetProjectileTracerChanceOverride::WriteDelayedHooks();
+		IsPlayerLookingAround::WriteDelayedHooks();
 	}
 
 	void HandleDelayedGameHooks()
