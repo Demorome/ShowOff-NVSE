@@ -65,6 +65,7 @@ namespace GameFixes
 			CallDetour g_detour;
 			void __fastcall Hook(PlayerCharacter* player)
 			{
+				// NOTE: this trick only works if we aren't being called as a detour ourselves!
 				auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
 				g_isSleep = *reinterpret_cast<UInt32*>(ebp - 0x8);
 
