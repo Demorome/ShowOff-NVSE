@@ -4114,6 +4114,7 @@ public:
 	UInt32					inheritFlags;			// DC
 
 	bool IsInterior() { return worldSpace == NULL; }
+	bool GetCantWait() { return ThisStdCall<bool>(0x5444C0, this); }
 	NiNode *Get3DNode(UInt32 index);
 	void ToggleNodes(UInt32 nodeBits, UInt8 doHide);
 	void GenerateRenderedTexture(NiCamera *camera, NiRenderedTexture **outTexture);

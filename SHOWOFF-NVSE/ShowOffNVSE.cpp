@@ -725,7 +725,8 @@ extern "C"
 		/*3D5E*/	REG_CMD(ForceRecoilAnim);
 		/*3D5F*/	REG_CMD(ForceHitStaggerReaction);
 		/*3D60*/	REG_CMD(IsPlayerLookingAround);
-		
+		/*3D61*/	REG_CMD(GetActorFadeState);
+		/*3D62*/	REG_CMD(IsActorInvisibleToPlayer);
 
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
@@ -741,6 +742,8 @@ extern "C"
 #endif
 		
 #if _DEBUG  //for functions being tested (or just abandoned).
+
+		REG_CMD(SetShouldShowSleepWaitOverrideMessage);
 
 		REG_CMD_ARR(CaravanDeckGetCards)
 		REG_CMD_FORM(SetSingleItemRefCurrentHealth)

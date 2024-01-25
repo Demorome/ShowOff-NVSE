@@ -632,7 +632,7 @@ public:
 	float			unk1C;			// 1C	not initialized, only by descendant!
 	float			unk20;			// 20	not initialized, only by descendant to -1.0! flt020 gets set to GameHour minus one on package evaluation
 	UInt32			unk24;			// 24	not initialized, only by descendant!
-	UInt32			processLevel;	// 28	not initialized, only by descendant to 3 for Low, 2 for MidlleLow, 1 MiddleHighProcess and 0 for HigProcess
+	UInt32			processLevel;	// 28	not initialized, only by descendant to 3 for Low, 2 for MiddleLow, 1 MiddleHighProcess and 0 for HighProcess
 	Data2C* unk2C;			// 2C
 };
 
@@ -1037,7 +1037,21 @@ public:
 	float								lightAmount;		// 3C4
 	float								flt3C8;				// 3C8
 	UInt32								unk3CC[7];			// 3CC
-	UInt32								fadeType;			// 3E8
+
+	// Credits to lStewieAl
+	enum FadeState : UInt32
+	{
+		FADE_NORMAL = 0,
+		FADE_IN = 1,
+		FADE_OUT = 2,
+		FADE_TELEPORT_IN = 3,
+		FADE_TELEPORT_OUT = 4,
+		FADE_OUT_DISABLE = 5,
+		FADE_OUT_DELETE = 6,
+		FADE_MOVE_TO_MARKER = 7,
+		FADE_STATE_COUNT = 8
+	}									fadeType;	// 3E8	
+
 	float								delayTime;			// 3EC
 	UInt32								unk3F0;				// 3F0
 	UInt32								unk3F4;				// 3F4

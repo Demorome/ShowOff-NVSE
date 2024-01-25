@@ -9,10 +9,6 @@ DEFINE_COMMAND_ALT_PLUGIN(SetPlayerCanPickpocketEquippedItems, SetPCCanStealEqIt
 	false, kParams_OneInt);
 DEFINE_CMD_ALT_COND_PLUGIN(GetPlayerCanPickpocketEquippedItems, GetPCCanStealEqItems, "Checks if the player can pickpocket equipped items.", 
 	false, NULL);
-DEFINE_CMD_COND_PLUGIN(GetPCHasSleepWaitOverride, "Returns whether or not the player has a Sleep/Wait prevention override", 
-	false, NULL);
-DEFINE_COMMAND_PLUGIN(SetPCHasSleepWaitOverride, "Sets whether or not the player has a Sleep/Wait prevention override", 
-	false, kParams_OneInt);
 DEFINE_CMD_COND_PLUGIN(IsWeaponMelee, "Returns 1 if the weapon's base form is of one of the three weapon types belonging to melee-range weapons.", 
 	false, kParams_OneOptionalObjectID);
 DEFINE_CMD_COND_PLUGIN(IsEquippedWeaponMelee, "Returns 1 if the calling actor's equipped weapon's base form is of one of the three weapon types belonging to melee-range weapons.", 
@@ -84,6 +80,8 @@ bool Cmd_GetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
 	return true;
 }
 
+DEFINE_CMD_COND_PLUGIN(GetPCHasSleepWaitOverride, "Returns whether or not the player has a Sleep/Wait prevention override",
+	false, nullptr);
 bool Cmd_GetPCHasSleepWaitOverride_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = !g_thePlayer->canSleepWait;
@@ -91,15 +89,19 @@ bool Cmd_GetPCHasSleepWaitOverride_Eval(COMMAND_ARGS_EVAL)
 }
 bool Cmd_GetPCHasSleepWaitOverride_Execute(COMMAND_ARGS)
 {
-	Cmd_GetPCHasSleepWaitOverride_Eval(thisObj, NULL, NULL, result);
+	Cmd_GetPCHasSleepWaitOverride_Eval(thisObj, nullptr, nullptr, result);
 	return true;
 }
 
+DEFINE_COMMAND_PLUGIN(SetPCHasSleepWaitOverride, "Sets whether or not the player has a Sleep/Wait prevention override",
+	false, kParams_OneInt);
 bool Cmd_SetPCHasSleepWaitOverride_Execute(COMMAND_ARGS)
 {
 	UInt32 bOn;
 	if (ExtractArgs(EXTRACT_ARGS, &bOn))
+	{
 		g_thePlayer->canSleepWait = !bOn;
+	}
 	return true;
 }
 
@@ -1171,8 +1173,69 @@ bool Cmd_GetVATSTargetable_Execute(COMMAND_ARGS)
 
 
 
+// This works, but I decided it'd be better just to make a new flag for DisablePlayerControlsAltEx (better compatibility with other mods).
+namespace SetShouldShowSleepWaitOverrideMessage
+{
+	UInt32 m_storedFuncAddr = 0;
 
+	void __cdecl QueueUIMessage_Hook(char* msg,
+		UInt32 emotion,
+		char* imagePath,
+		char* soundName,
+		float time,
+		char instantEndCurrentMessage)
+	{
+		if (g_thePlayer->parentCell->GetCantWait())
+		{
+			// Our sleep wait override shouldn't prevent this message from being displayed.
+			CdeclCall(m_storedFuncAddr, msg, emotion, imagePath, soundName, time, instantEndCurrentMessage);
+			return;
+		}
+		// otherwise, do nothing (preventing the msg from displaying)
+	}
 
+	void WriteHooks()
+	{
+		if (!m_storedFuncAddr)
+		{
+			m_storedFuncAddr = GetRelJumpAddr(0x96A17C);
+			WriteRelCall(0x96A17C, (UInt32)QueueUIMessage_Hook);
+			WriteRelCall(0x94257F, (UInt32)QueueUIMessage_Hook);
+		}
+	}
+
+	void UndoHooks()
+	{
+		if (m_storedFuncAddr)
+		{
+			WriteRelCall(0x96A17C, m_storedFuncAddr);
+			WriteRelCall(0x94257F, m_storedFuncAddr);
+			m_storedFuncAddr = 0;
+		}
+	}
+};
+
+// Made into a separate function since SetPCHasSleepWaitOverride's change is savebaked, this isn't.
+DEFINE_COMMAND_PLUGIN(SetShouldShowSleepWaitOverrideMessage, "",
+	false, kParams_OneOptionalInt);
+bool Cmd_SetShouldShowSleepWaitOverrideMessage_Execute(COMMAND_ARGS)
+{
+	UInt32 bShouldShow = -1;
+	if (ExtractArgs(EXTRACT_ARGS, &bShouldShow))
+	{
+		*result = SetShouldShowSleepWaitOverrideMessage::m_storedFuncAddr == 0;
+
+		if (bShouldShow > 0)
+		{
+			SetShouldShowSleepWaitOverrideMessage::UndoHooks();
+		}
+		else if (!bShouldShow)
+		{
+			SetShouldShowSleepWaitOverrideMessage::WriteHooks();
+		}
+	}
+	return true;
+}
 
 DEFINE_COMMAND_PLUGIN(ApplyAddictionEffect, "", true, kParams_OneForm_OneOptionalInt);
 bool Cmd_ApplyAddictionEffect_Execute(COMMAND_ARGS)

@@ -810,6 +810,41 @@ bool Cmd_ForceHitStaggerReaction_Execute(COMMAND_ARGS)
 	return true;
 }
 
+DEFINE_COMMAND_PLUGIN(GetActorFadeState, "", true, nullptr);
+bool Cmd_GetActorFadeState_Execute(COMMAND_ARGS)
+{
+	*result = -1;
+	if (!thisObj || !IS_ACTOR(thisObj))
+		return true;
+
+	auto* actor = static_cast<Actor*>(thisObj);
+	if (actor->baseProcess && actor->baseProcess->processLevel == 0) // high process
+	{
+		auto* highProc = static_cast<HighProcess*>(actor->baseProcess);
+		*result = highProc->fadeType;
+	}
+	return true;
+}
+
+DEFINE_CMD_COND_PLUGIN(IsActorInvisibleToPlayer, "", true, nullptr);
+bool Cmd_IsActorInvisibleToPlayer_Eval(COMMAND_ARGS_EVAL)
+{
+	*result = 0;
+	if (!thisObj || !IS_ACTOR(thisObj))
+		return true;
+	auto* actor = static_cast<Actor*>(thisObj);
+	if (!actor->IsInvisible())
+		return true;
+	float hasImprovedDetection = 0.0f;
+	ApplyPerkModifiers(kPerkEntry_HasImprovedDetection, g_thePlayer, &hasImprovedDetection);
+	*result = !hasImprovedDetection;
+	return true;
+}
+bool Cmd_IsActorInvisibleToPlayer_Execute(COMMAND_ARGS)
+{
+	return Cmd_IsActorInvisibleToPlayer_Eval(thisObj, nullptr, nullptr, result);
+}
+
 
 #ifdef _DEBUG
 

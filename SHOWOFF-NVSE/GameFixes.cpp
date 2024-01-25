@@ -7,7 +7,7 @@ namespace GameFixes
 {
 	namespace ShowRaceMenu
 	{
-		void Patch()
+		void WriteHooks()
 		{
 			// Prevent ShowRaceMenu from resetting active temp effects.
 			NopFunctionCall(0x7ADDC7, 1);
@@ -53,6 +53,52 @@ namespace GameFixes
 			//Replace Actor::GetShouldRespawn call in Cell::HandleResets
 			//...Cuz it checks for time even though ResetInterior was called.
 			WriteRelJump(0x54E1C8, (UInt32)GetShouldRespawnHook);
+		}
+	}
+
+	namespace ShowSleepWaitMenu
+	{
+		bool g_isSleep = false;
+
+		namespace ShowSleepWaitMenu_CheckPreconditions
+		{
+			CallDetour g_detour;
+			void __fastcall Hook(PlayerCharacter* player)
+			{
+				auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
+				g_isSleep = *reinterpret_cast<UInt32*>(ebp - 0x8);
+
+				ThisStdCall(g_detour.GetOverwrittenAddr(), player);
+			}
+
+			void WriteDelayedHook()
+			{
+				g_detour.WriteDetourCall(0x5E00E0, (UInt32)Hook);
+			}
+		}
+
+		namespace CreateSleepWaitMenu
+		{
+			CallDetour g_detour;
+			void __cdecl Hook(bool isSleep_always1)
+			{
+				// Use isSleep global value that stores the value from the script function call.
+				CdeclCall(g_detour.GetOverwrittenAddr(), g_isSleep);
+			}
+
+			void WriteDelayedHook()
+			{
+				g_detour.WriteDetourCall(0x96A269, (UInt32)Hook);
+			}
+		}
+
+
+		void WriteDelayedHooks()
+		{
+			// Fix for ShowSleepWaitMenu (script function)
+			// If checkPreconditions == 1, then it always opens Sleep menu, regardless of isSleep arg
+			ShowSleepWaitMenu_CheckPreconditions::WriteDelayedHook();
+			CreateSleepWaitMenu::WriteDelayedHook();
 		}
 	}
 
@@ -172,9 +218,8 @@ namespace GameFixes
 
 	void WriteFixes()
 	{
-		ShowRaceMenu::Patch();
+		ShowRaceMenu::WriteHooks();
 		PatchResetCell::WriteHook();
-
 #if 0
 		PatchGetVATSValueNotWorkingForDamagePreview::WriteHook();
 
@@ -193,6 +238,7 @@ namespace GameFixes
 
 	void WriteDelayedFixes()
 	{
+		ShowSleepWaitMenu::WriteDelayedHooks();
 #if 0
 		EquipOrUnequipItem::FixNoEquip::WriteDelayedHooks();
 #endif
