@@ -1048,20 +1048,33 @@ bool Cmd_SetProjectileTracerChanceOverride_Execute(COMMAND_ARGS)
 }
 
 DEFINE_COMMAND_PLUGIN(SpawnTracingProjectile, "Spawns a projectile following the calling projectile reference.", 
-	true, kParams_OneForm_OneOptionalInt);
+	true, kParams_OneForm_TwoOptionalInts);
 bool Cmd_SpawnTracingProjectile_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	TESForm* baseProjToSpawn;
 	UInt32 ignoreGravity = 1;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &baseProjToSpawn, &ignoreGravity) || !thisObj || !IS_PROJECTILE(thisObj) || !IS_TYPE(baseProjToSpawn, BGSProjectile))
+	UInt32 bCopyData = false;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &baseProjToSpawn, &ignoreGravity, &bCopyData))
+		return true;
+	if (!thisObj || !IS_PROJECTILE(thisObj) || !IS_TYPE(baseProjToSpawn, BGSProjectile))
 		return true;
 
 	auto* projectileToTrail = static_cast<Projectile*>(thisObj);
 
+	Actor* sourceActor = nullptr;
+	//CombatController* combatCntrl = nullptr;
+	TESObjectWEAP* weap = nullptr;
+	if (bCopyData)
+	{
+		sourceActor = static_cast<Actor*>(projectileToTrail->sourceRef);
+		//combatCntrl = projectileToTrail->comba
+		weap = projectileToTrail->sourceWeap;
+	}
+
 	// Code copied from Tweaks' PlaceTrailAt function.
-	auto* newProj = Projectile::Spawn(static_cast<BGSProjectile*>(baseProjToSpawn), nullptr, nullptr, 
-		nullptr, *projectileToTrail->GetPos(), projectileToTrail->rotZ, projectileToTrail->rotX, 
+	auto* newProj = Projectile::Spawn(static_cast<BGSProjectile*>(baseProjToSpawn), sourceActor, nullptr,
+		weap, *projectileToTrail->GetPos(), projectileToTrail->rotZ, projectileToTrail->rotX,
 		0, 0, projectileToTrail->parentCell, ignoreGravity);
 
 	REFR_RES = newProj->refID;
@@ -1080,6 +1093,18 @@ bool Cmd_IsPlayerLookingAround_Eval(COMMAND_ARGS_EVAL)
 	*result = IsPlayerLookingAround::g_isPlayerLookingAround;
 	return true;
 }
+
+DEFINE_COMMAND_PLUGIN(IsFormLoading, "", false, kParams_OneForm);
+bool Cmd_IsFormLoading_Execute(COMMAND_ARGS)
+{
+	*result = false;
+	TESForm* form;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form) || !form)
+		return true;
+	*result = form->IsStillLoading();
+	return true;
+}
+
 
 #if _DEBUG
 

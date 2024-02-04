@@ -5,7 +5,9 @@
 #include "NiTypes.h"
 
 
-DEFINE_COMMAND_ALT_PLUGIN(ApplyEasing, Ease, "Applies the chosen easing function to a progress value (situtated between 0 and 1).", false, kParams_OneDouble_OneString_OneInt);
+DEFINE_COMMAND_ALT_PLUGIN(ApplyEasing, Ease, "Applies the chosen easing function to a progress value (situtated between 0 and 1).", 
+	false, kParams_OneDouble_OneString_OneInt);
+DEFINE_COMMAND_ALT_PLUGIN(ApplyEasingAlt, EaseAlt, "", false, kParams_OneDouble_TwoInts);
 
 // Extracted 2D numbers, for use as matrices, quaternions, etc.
 template <typename T>

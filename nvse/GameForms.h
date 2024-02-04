@@ -511,7 +511,7 @@ public:
 	virtual bool		Unk_39(void);
 	virtual bool		Unk_3A(void);
 	virtual bool		Unk_3B(void);
-	virtual bool		GetIsReference();
+	virtual bool		GetIsReference() const;
 	virtual bool		IsArmorAddon();
 	virtual bool		Unk_3E(void);
 	virtual bool		Unk_3F(void);	// returnTrue for refr whose baseForm is a TESActorBase
@@ -552,13 +552,14 @@ public:
 
 	enum
 	{
-		kFormFlags_Initialized = 0x00000008,	// set by TESForm::InitItem()
-		kFormFlags_Deleted = 0x00000020,
-		kFormFlags_CastShadows = 0x00000200,
-		kFormFlags_QuestItem = 0x00000400,
-		kFormFlags_IsPermanent = 0x00000800,
-		kFormFlags_DontSaveForm = 0x00004000,	// TODO: investigate
-		kFormFlags_Compressed = 0x00040000,
+		kFormFlags_Initialized = 0x8,	// set by TESForm::InitItem()
+		kFormFlags_Deleted = 0x20,
+		kFormFlags_CastShadows = 0x200,
+		kFormFlags_QuestItem = 0x400,
+		kFormFlags_IsPermanent = 0x800,
+		kFormFlags_DontSaveForm = 0x4000,	// TODO: investigate
+		kFormFlags_Compressed = 0x40000,
+		kFormFlags_IsStillLoading = 0x200000, // credits to lStewieAl
 	};
 
 	enum
@@ -590,8 +591,8 @@ public:
 
 	TESForm *TryGetREFRParent();
 	UInt8 GetModIndex() const;
-	TESFullName *GetFullName();
-	const char *GetTheName();
+	TESFullName *GetFullName() const;
+	const char *GetTheName() const;
 	bool IsCloned() const;
 
 	// adds a new form to the game (from CloneForm or LoadForm)
@@ -599,7 +600,7 @@ public:
 	// return a new base form which is the clone of this form
 	TESForm *CloneForm(bool bPersist = true) const;
 	bool IsInventoryObject() const;
-	bool IsReference();
+	bool IsReference() const;
 
 	bool HasScript();
 	bool GetScriptAndEventList(Script*& script, ScriptEventList*& eventList);
@@ -614,10 +615,11 @@ public:
 	const char* GetDescriptionText();
 	TESLeveledList* GetLvlList();
 	void SetJIPFlag(UInt8 jipFlag, bool bSet);
-	bool IsQuestItem2() { return flags & kFormFlags_QuestItem; }
-	bool IsDisabled() { return flags & kFormFlags_IsPermanent; }
-	bool IsDeleted() { return flags & kFormFlags_Deleted; }
-	bool GetDontSave() { return flags & kFormFlags_DontSaveForm; }
+	bool IsQuestItem2() const { return flags & kFormFlags_QuestItem; }
+	bool IsDisabled() const { return flags & kFormFlags_IsPermanent; }
+	bool IsDeleted() const { return flags & kFormFlags_Deleted; }
+	bool GetDontSave() const { return flags & kFormFlags_DontSaveForm; }
+	bool IsStillLoading() const { return flags & kFormFlags_IsStillLoading; }
 	bool IsItem() const;
 	[[nodiscard]] bool IsActorAlt()	//works for baseforms as well as refrs
 	{

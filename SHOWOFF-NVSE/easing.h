@@ -296,7 +296,7 @@ struct Bounce_Ease : EasingFunction_Base<T>
 
 
 template <typename T>
-std::array<std::function<T(T)>, kNumEasingModes> GetEasingFuncsFromStr(std::string& str)
+std::array<std::function<T(T)>, kNumEasingModes> GetEasingFuncsFromStr(const std::string& str)
 {
 	if (str.starts_with("sin"))
 	{
@@ -339,4 +339,48 @@ std::array<std::function<T(T)>, kNumEasingModes> GetEasingFuncsFromStr(std::stri
 		return Bounce_Ease<T>::GetModes();
 	}
 	return { nullptr, nullptr, nullptr };
+}
+
+enum EasingFuncs : UInt32
+{
+	Sine = 0,
+	Quad,
+	Cubic,
+	Quart,
+	Quint,
+	Circ,
+	Expo,
+	Back,
+	Elastic,
+	Bounce
+};
+
+template <typename T>
+std::array<std::function<T(T)>, kNumEasingModes> GetEasingFuncsFromNum(const EasingFuncs num)
+{
+	switch (num)
+	{
+	case Sine:
+		return Sine_Ease<T>::GetModes();
+	case Quad:
+		return Quad_Ease<T>::GetModes();
+	case Cubic:
+		return Cubic_Ease<T>::GetModes();
+	case Quart:
+		return Quart_Ease<T>::GetModes();
+	case Quint:
+		return Quint_Ease<T>::GetModes();
+	case Circ:
+		return Circ_Ease<T>::GetModes();
+	case Expo:
+		return Expo_Ease<T>::GetModes();
+	case Back:
+		return Back_Ease<T>::GetModes();
+	case Elastic:
+		return Elastic_Ease<T>::GetModes();
+	case Bounce:
+		return Bounce_Ease<T>::GetModes();
+	default:
+		return { nullptr, nullptr, nullptr };
+	}
 }

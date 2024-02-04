@@ -9,7 +9,7 @@
 bool Cmd_ApplyEasing_Execute(COMMAND_ARGS)
 {
 	*result = -1;
-	double input;	//assumed to be between 0-1
+	double input;	//should be between 0-1
 	char funcName[0x25];	//choose easing function, ex: "sine", "Quad". Non-case sensitive.
 	EasingMode mode;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &input, &funcName, &mode) || mode > kModeMax)
@@ -19,13 +19,28 @@ bool Cmd_ApplyEasing_Execute(COMMAND_ARGS)
 	if (auto const funcs = GetEasingFuncsFromStr<double>(funcNameStr);
 		funcs[mode])
 	{
+		input = std::clamp(input, 0.0, 1.0);
 		*result = funcs[mode](input);
 	}
 	return true;
 }
 
-
-
+bool Cmd_ApplyEasingAlt_Execute(COMMAND_ARGS)
+{
+	*result = -1;
+	double input;
+	EasingFuncs funcNum;
+	EasingMode mode;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &input, &funcNum, &mode) || mode > kModeMax)
+		return true;
+	if (auto const funcs = GetEasingFuncsFromNum<double>(funcNum);
+		funcs[mode])
+	{
+		input = std::clamp(input, 0.0, 1.0);
+		*result = funcs[mode](input);
+	}
+	return true;
+}
 
 
 template <typename T>

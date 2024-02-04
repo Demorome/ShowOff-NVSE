@@ -972,7 +972,20 @@ namespace OnPreProjectileCreate
 	CallDetour g_detour;
 	Projectile* __cdecl HandleEvent(BGSProjectile* proj, Actor* actor, CombatController* combatCtrl, TESObjectWEAP* weap, float posX, float posY, float posZ, float rotZ, float rotX, void* a10, TESObjectREFR* liveGrenadeTargetRef, char bAlwaysHit, char ignoreGravity, float angularMomentumZ, float angularMomentumX, TESObjectCELL* cell)
 	{
-		g_eventInterface->DispatchEvent(eventName, nullptr, actor, weap);
+		auto constexpr resultCallback = [](NVSEArrayVarInterface::Element& result, void* projAddr) -> bool
+			{
+				if (BGSProjectile*& proj = *static_cast<BGSProjectile**>(projAddr))
+					if (proj && result.IsValid())
+					{
+						auto* newProj = result.Form();
+						if (IS_TYPE(newProj, BGSProjectile))
+							proj = static_cast<BGSProjectile*>(newProj);
+					}
+				return true;
+			};
+
+		g_eventInterface->DispatchEventAlt(eventName, resultCallback, &proj,
+			actor, proj, weap);
 
 #if _DEBUG
 		//NiPoint3 test(posX, posY, posZ);
@@ -980,8 +993,7 @@ namespace OnPreProjectileCreate
 		// CdeclCall<Projectile*>(g_detour.GetOverwrittenAddr(), (BGSProjectile*)LookupFormByName("superhotbulletX"), actor, nullptr, weap, posX, posY, posZ, rotZ, rotX, nullptr, nullptr, false, false, angularMomentumZ, angularMomentumX, cell);
 #endif
 
-		auto projectile = CdeclCall<Projectile*>(g_detour.GetOverwrittenAddr(), proj, actor, combatCtrl, weap, posX, posY, posZ, rotZ, rotX, a10, liveGrenadeTargetRef, bAlwaysHit, ignoreGravity, angularMomentumZ, angularMomentumX, cell);
-
+		auto* projectile = CdeclCall<Projectile*>(g_detour.GetOverwrittenAddr(), proj, actor, combatCtrl, weap, posX, posY, posZ, rotZ, rotX, a10, liveGrenadeTargetRef, bAlwaysHit, ignoreGravity, angularMomentumZ, angularMomentumX, cell);
 		return projectile;
 	}
 
@@ -1703,6 +1715,26 @@ namespace OnDispositionChange
 	}
 }
 
+namespace OnPreLoadGame
+{
+	constexpr char eventName[] = "ShowOff:OnPreLoadGame";
+
+	CallDetour g_detour;
+	void __fastcall Hook(void* saveLoadReferencesMap)
+	{
+		g_eventInterface->DispatchEvent(eventName, nullptr);
+
+		// do regular code
+		ThisStdCall(g_detour.GetOverwrittenAddr(), saveLoadReferencesMap);
+	}
+
+	void WriteDelayedHook()
+	{
+		// replace "call BGSSaveLoadReferencesMap::Clear"
+		g_detour.WriteDetourCall(0x847FD9, (UInt32)Hook);
+	}
+}
+
 #if 0
 // DO NOT USE
 // Runs when actors are loading in, which will lead to buggy behavior if handlers depend on this event.
@@ -2317,12 +2349,12 @@ void RegisterEvents()
 	RegisterEvent(OnPlayerJump::eventName, nullptr);
 	RegisterEvent(OnPOVChange::eventName, kEventParams_OneInt);
 	RegisterEvent(OnChallengeProgress::eventName, kEventParams_OneBaseForm_OneInt);
-	RegisterEvent(OnPreProjectileCreate::eventName, kEventParams_OneReference_OneBaseForm);
+	RegisterEvent(OnPreProjectileCreate::eventName, kEventParams_TwoBaseForms);
 	RegisterEvent(OnMenuCreate::eventName, kEventParams_OneInt);
 	RegisterEvent(OnExplosionHit::eventNameAlt, kEventParams_TwoReferences);
 	RegisterEvent(OnWeaponHolsterUnholster::eventNameHolster, kEventParams_OneBaseForm);
 	RegisterEvent(OnWeaponHolsterUnholster::eventNameUnholster, kEventParams_OneBaseForm);
-
+	RegisterEvent(OnPreLoadGame::eventName, nullptr);
 	
 	/*
 	// For debugging the Event API
@@ -2392,6 +2424,7 @@ namespace HandleHooks
 		OnPreProjectileCreate::WriteDelayedHook();
 		OnMenuCreate::WriteDelayedHook();
 		OnWeaponHolsterUnholster::WriteDelayedHook();
+		OnPreLoadGame::WriteDelayedHook();
 #if _DEBUG
 #endif
 	}

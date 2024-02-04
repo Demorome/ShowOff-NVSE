@@ -58,23 +58,33 @@ namespace GameFixes
 
 	namespace ShowSleepWaitMenu
 	{
-		bool g_isSleep = false;
+		UInt32 g_isSleep = false;
 
-		namespace ShowSleepWaitMenu_CheckPreconditions
+		namespace ShowSleepWaitMenu_ParseParameters
 		{
-			CallDetour g_detour;
-			void __fastcall Hook(PlayerCharacter* player)
+			// Will retrieve the isSleep arg value.
+			__declspec(naked) void Hook()
 			{
-				// NOTE: this trick only works if we aren't being called as a detour ourselves!
-				auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
-				g_isSleep = *reinterpret_cast<UInt32*>(ebp - 0x8);
+				static const UInt32 retnAddr = 0x5E00E0;
 
-				ThisStdCall(g_detour.GetOverwrittenAddr(), player);
+				enum {
+					isSleepOffset = -0x8
+				};
+				_asm
+				{
+					mov		ecx, dword ptr [ebp + isSleepOffset]
+					mov		g_isSleep, ecx
+					
+					// do regular code
+					mov     ecx, g_thePlayer
+					jmp		retnAddr
+				}
 			}
 
-			void WriteDelayedHook()
+			void WriteHook()
 			{
-				g_detour.WriteDetourCall(0x5E00E0, (UInt32)Hook);
+				// Warning: xNVSE has a hook at 0x5E00E0 in Cmd_ShowSleepWaitMenu
+				WriteRelJump(0x5E00DA, (UInt32)Hook);
 			}
 		}
 
@@ -98,7 +108,7 @@ namespace GameFixes
 		{
 			// Fix for ShowSleepWaitMenu (script function)
 			// If checkPreconditions == 1, then it always opens Sleep menu, regardless of isSleep arg
-			ShowSleepWaitMenu_CheckPreconditions::WriteDelayedHook();
+			ShowSleepWaitMenu_ParseParameters::WriteHook(); // doesn't need to be delayed, but w/e
 			CreateSleepWaitMenu::WriteDelayedHook();
 		}
 	}

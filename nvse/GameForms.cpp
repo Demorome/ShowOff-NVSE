@@ -70,9 +70,9 @@ UInt8 TESForm::GetModIndex() const
 	return modIndex;
 }
 
-TESFullName *TESForm::GetFullName()
+TESFullName *TESForm::GetFullName() const
 {
-	TESForm *baseForm = this;
+	const TESForm *baseForm = this;
 	TESFullName *fullName = NULL;
 
 	if (GetIsReference())
@@ -89,7 +89,7 @@ TESFullName *TESForm::GetFullName()
 	return fullName;
 }
 
-const char *TESForm::GetTheName()
+const char *TESForm::GetTheName() const
 {
 	TESFullName *fullName = GetFullName();
 	return fullName ? fullName->name.CStr() : "";

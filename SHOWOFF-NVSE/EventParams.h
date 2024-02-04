@@ -32,6 +32,11 @@ static EventParamType kEventParams_OneBaseForm_OneInt[2] =
 	EventParamType::eParamType_BaseForm, EventParamType::eParamType_Int
 };
 
+static EventParamType kEventParams_TwoBaseForms[2] =
+{
+	EventParamType::eParamType_BaseForm, EventParamType::eParamType_BaseForm
+};
+
 static EventParamType kEventParams_OneInt_OneRef[2] =
 {
 	EventParamType::eParamType_Int, EventParamType::eParamType_AnyForm

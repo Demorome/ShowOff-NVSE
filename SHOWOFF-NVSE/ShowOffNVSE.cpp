@@ -727,6 +727,8 @@ extern "C"
 		/*3D60*/	REG_CMD(IsPlayerLookingAround);
 		/*3D61*/	REG_CMD(GetActorFadeState);
 		/*3D62*/	REG_CMD(IsActorInvisibleToPlayer);
+		/*3D63*/	REG_CMD(IsFormLoading);
+		/*3D64*/	REG_CMD(ApplyEasingAlt);
 
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
