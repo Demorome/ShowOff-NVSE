@@ -160,7 +160,22 @@ namespace JsonToNVSE
 		}, jsonArg);
 	}
 
-	Map<const char*, JsonValueVariant> g_CachedJSONFiles;
+	const char* GetTypeString(const JsonValueVariant& jsonVal)
+	{
+		return std::visit(overloaded{
+			[](const DefaultJsonValue& json) -> const char* {
+				return "DefaultJsonValue";
+			},
+			[](const ConfigJsonValue& json) -> const char* {
+				return "ConfigJsonValue";
+			},
+			[](const auto&& json) -> const char* {
+				return "Unknown";
+			}
+		}, jsonVal);
+	}
+
+	UnorderedMap<const char*, JsonValueVariant> g_CachedJSONFiles;
 	ICriticalSection g_JsonMapLock;
 
 	JsonValueVariant ReadJson_Unsafe(const Parser parser, const std::string& JSON_Path)
@@ -213,7 +228,6 @@ namespace JsonToNVSE
 			else
 				Console_Print("%s >> Could not parse JSON file, likely due to invalid formatting.", funcName.data());
 			_MESSAGE("ReadArrayFromJSONFile >> PARSE ERROR (%s)", e.what());
-	
 		}
 		catch (std::filesystem::filesystem_error& e)
 		{
@@ -364,20 +378,24 @@ namespace JsonToNVSE
 	//Assume elem and parser are valid.
 	JsonValueVariant GetJSONFromNVSE(NVSEArrayElement &elem, Parser parser)
 	{
+		JsonValueVariant retn;
 		switch (parser)
 		{
 		case kParser_JSON:
 		case kParser_JAXN:
-			return GetJSONFromNVSE_Helper<tao::json::traits>(elem);
+			retn = GetJSONFromNVSE_Helper<tao::json::traits>(elem);
+			break;
 		case kParser_TaoConfig:
-			return GetJSONFromNVSE_Helper<tao::config::traits>(elem);
+			retn = GetJSONFromNVSE_Helper<tao::config::traits>(elem);
+			break;
 		default:
 			throw std::logic_error("SHOWOFF - GetJSONFromNVSE >> Reached invalid default case");
 		}
+		return retn;
 	}
 
 
-	bool InsertValueAtJSONPointer(JsonValueVariant &baseVariant, const JsonValueVariant &insertVariant, const std::string &jsonPointer, 
+	bool InsertValueAtJSONPointer(JsonValueVariant &baseVariant, JsonValueVariant &insertVariant, const std::string &jsonPointer, 
 		const std::string_view &funcName, PluginExpressionEvaluator* eval = {})
 	{
 		return std::visit([&]<typename T0, typename T1>(T0 &&base, T1 &&insert) -> bool {
@@ -400,7 +418,11 @@ namespace JsonToNVSE
 				}
 			}
 			else
-				throw std::logic_error("SHOWOFF - InsertValueAtJSONPointer >> both visitors should be of the same type.");
+				throw std::logic_error(
+					std::string("SHOWOFF - InsertValueAtJSONPointer >> both visitors should be of the same type.\n") 
+					+ std::string(" Type #1: ") + std::string(GetTypeString(baseVariant)) + std::string("\n")
+					+ std::string(" Type #2: ") + std::string(GetTypeString(insertVariant))
+					);
 		}, baseVariant, insertVariant);
 	}
 	
@@ -535,8 +557,8 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 				{
 					if (!saveFile)	//it's all for nothing if changes aren't being cached and won't be saved to file.
 						return true;
-					//The reason this isn't checked earlier, with "cached" and "savefile", 
-					// is because the user might've cached the file earlier (which will be retrieved even if "cached" = false).
+					//The reason this isn't checked earlier, with "cached" and "savefile"... 
+					// ...is because the user might've cached the file earlier (which will be retrieved even if "cached" = false).
 				}
 				else
 				{

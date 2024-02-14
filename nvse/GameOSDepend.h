@@ -294,8 +294,8 @@ public:
 	UInt8			unk03;				// 03
 	UInt8			unk04;				// 04
 	UInt8			unk05;				// 05
-	UInt8			unk06;				// 06	This looks promising as TFC status byte
-	UInt8			disableAI;			// 07
+	UInt8			isFlyCam;			// 06
+	UInt8			freezeTime;			// 07	Credits to lStewieAl & Jazzisparis
 	HWND			window;				// 08
 	HINSTANCE		procInstance;		// 0C
 	UInt32			mainThreadID;		// 10

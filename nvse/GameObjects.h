@@ -863,8 +863,8 @@ public:
 	UInt8								byte648;				// 648
 	UInt8								byte649;				// 649
 	bool								is3rdPersonVisible;		// 64A	= not FirstPerson, credits to lStewieAl for the name.
-	bool								is3rdPerson;			// 64B
-	bool								bThirdPerson;			// 64C
+	bool								is3rdPerson;			// 64B, credits to lStewieAl
+	bool								bThirdPerson;			// 64C, credits to lStewieAl
 	UInt8								byte64D;				// 64D
 	UInt8								byte64E;				// 64E
 	bool								isUsingScope;			// 64F

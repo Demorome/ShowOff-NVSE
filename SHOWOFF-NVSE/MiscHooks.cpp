@@ -6,6 +6,7 @@
 #include "SafeWrite.h"
 #include "ShowOffNVSE.h"
 #include "StewieMagic.h"
+#include <GameOSDepend.h>
 
 namespace PickpocketEquippedItems
 {
@@ -650,6 +651,69 @@ namespace Experimental
 			// These hooks will run after a potential OnUnequip call, so it doubles as a way to ensure that blocktype gets run in time.
 			ReplaceCall(0x4C41DC, (UInt32)Hook<0xC>);
 			ReplaceCall(0x4C42B2, (UInt32)Hook<0xC>);
+		}
+	}
+
+	// Tries to fix FreezeTime function forcing stuff to not load in properly.
+	// This behavior is normally useful for making a custom menu, so this would be optionally toggled on via function.
+	namespace PatchFreezeTime
+	{
+		bool g_wroteHooks = false;
+
+		/*
+		__declspec(naked) void HookToPreventUIStuff()
+		{
+			static const UInt32 retnAddr = ;
+			_asm
+			{
+			}
+		}*/
+
+		bool IsTimeFrozen()
+		{
+			return (*g_osGlobals)->freezeTime;
+		}
+
+#if 0
+		// Runs, and does set freezetime to 0, but doesn't prevent the loading bug!
+		namespace ResetFreezeTimeOnPreLoad
+		{
+			CallDetour g_detour;
+
+			bool __fastcall LoadQuicksaveHook(void * loadSaveManager)
+			{
+				(*g_osGlobals)->freezeTime = false;
+				Console_Print("WTF??");
+
+				return ThisStdCall<bool>(g_detour.GetOverwrittenAddr(), loadSaveManager);
+			}
+
+			void WriteHook()
+			{
+				//g_detour.WriteDetourCall(0x850A11, (UInt32)StrFromIniHook);
+				g_detour.WriteDetourCall(0x947AD9, (UInt32)LoadQuicksaveHook);
+				WriteRelCall(0x942878, (UInt32)LoadQuicksaveHook);
+			}
+		}
+#endif
+
+		void WriteHooks()
+		{
+			if (!g_wroteHooks)
+			{
+				// Patch OSGlobals::UpdateCell to allow loading new cells in.
+				WriteRelJump(0x86FBFE, 0x86FC09);
+
+				//WriteRelJump(0x86E94C, 0x86E95B);
+				//WriteRelJump(0x86EC3E, 0x86EC49);	// causes time to resume, and probably fixes LOD not being replaced when moving closer (due to fade timer).
+				//WriteRelJump(0x86EE2D, 0x86EE38); // causes a freeze (???)
+				//WriteRelJump(0x86F803, 0x86F80E); // CombatManager-related
+				//WriteRelJump(0x86FC8E, 0x86FC9D);
+
+				//ResetFreezeTimeOnPreLoad::WriteHook();
+
+				g_wroteHooks = true;
+			}
 		}
 	}
 }

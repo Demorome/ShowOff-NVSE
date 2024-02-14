@@ -729,6 +729,7 @@ extern "C"
 		/*3D62*/	REG_CMD(IsActorInvisibleToPlayer);
 		/*3D63*/	REG_CMD(IsFormLoading);
 		/*3D64*/	REG_CMD(ApplyEasingAlt);
+		/*3D65*/	REG_CMD(PatchFreezeTime);
 
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		

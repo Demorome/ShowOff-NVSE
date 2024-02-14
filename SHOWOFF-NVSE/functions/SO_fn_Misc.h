@@ -1105,6 +1105,13 @@ bool Cmd_IsFormLoading_Execute(COMMAND_ARGS)
 	return true;
 }
 
+DEFINE_COMMAND_PLUGIN(PatchFreezeTime, "", false, nullptr);
+bool Cmd_PatchFreezeTime_Execute(COMMAND_ARGS)
+{
+	Experimental::PatchFreezeTime::WriteHooks();
+	return true;
+}
+
 
 #if _DEBUG
 

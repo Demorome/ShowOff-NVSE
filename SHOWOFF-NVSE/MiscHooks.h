@@ -69,3 +69,8 @@ namespace IsPlayerLookingAround
 {
 	extern bool g_isPlayerLookingAround;
 }
+
+namespace Experimental::PatchFreezeTime
+{
+	void WriteHooks();
+}

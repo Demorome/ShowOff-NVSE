@@ -138,7 +138,7 @@ struct ArrayData
 
 template <typename T, typename U>
 struct decay_equiv :
-	std::is_same<typename std::decay<T>::type, U>::type
+	std::is_same<typename std::decay<T>::type, typename std::decay<U>::type>::type
 {};
 
 
