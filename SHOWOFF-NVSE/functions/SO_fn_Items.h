@@ -526,7 +526,12 @@ bool Cmd_GetEquippedWeaponRef_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	//Copying JIP's GetEquippedItemRef
-	auto weapInfo = ((Actor*)thisObj)->baseProcess->GetWeaponInfo();
+	if (!thisObj || !IS_ACTOR(thisObj))
+		return true;
+	auto* actor = static_cast<Actor*>(thisObj);
+	if (!actor->baseProcess)
+		return true;
+	auto weapInfo = actor->baseProcess->GetWeaponInfo();
 	if (weapInfo && weapInfo->extendData)
 	{
 		if (auto const invRef = InventoryRefCreateEntry(thisObj, weapInfo->type, weapInfo->countDelta, weapInfo->extendData->GetFirstItem()))
