@@ -19,7 +19,6 @@ bool Cmd_ApplyEasing_Execute(COMMAND_ARGS)
 	if (auto const funcs = GetEasingFuncsFromStr<double>(funcNameStr);
 		funcs[mode])
 	{
-		input = std::clamp(input, 0.0, 1.0);
 		*result = funcs[mode](input);
 	}
 	return true;
@@ -36,7 +35,6 @@ bool Cmd_ApplyEasingAlt_Execute(COMMAND_ARGS)
 	if (auto const funcs = GetEasingFuncsFromNum<double>(funcNum);
 		funcs[mode])
 	{
-		input = std::clamp(input, 0.0, 1.0);
 		*result = funcs[mode](input);
 	}
 	return true;

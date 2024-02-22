@@ -106,17 +106,30 @@ struct Circ_Ease : EasingFunction_Base<T>
 
 	static T EaseIn(T x)
 	{
-		return 1 - sqrt(1 - pow(x, 2));
+		x = pow(x, 2);
+		x = std::min<T>(x, 1); // prevent returning -INF by having 1 - 1.blah = negative number in sqrt.
+		return 1 - sqrt(1 - x);
 	}
 	static T EaseOut(T x)
 	{
-		return sqrt(1 - pow(x - 1, 2));
+		--x;
+		x = pow(x, 2);
+		x = std::min<T>(x, 1); // don't want to have negative value in sqrt
+		return sqrt(1 - x);
 	}
 	static T EaseInOut(T x)
 	{
-		return x < 0.5
-			? (1 - sqrt(1 - pow(2 * x, 2))) / 2
-			: (sqrt(1 - pow(-2 * x + 2, 2)) + 1) / 2;
+		if (x < 0.5)
+		{
+			if (x < 0.0) // shouldn't ever receive negative values, but w/e
+				x = 0.0;
+			return (1 - sqrt(1 - pow(2 * x, 2))) / 2;
+		}
+		// else
+		x = -2 * x + 2;
+		x = pow(x, 2);
+		x = std::min<T>(x, 1); // don't want to have negative value in sqrt
+		return (sqrt(1 - x) + 1) / 2;
 	}
 };
 

@@ -611,9 +611,40 @@ public:
 	tList<void>							list0F4;					// 0F4
 	tList<void>							list0FC;					// 0FC
 	bool								isInCombat;					// 104
+
+	enum
+	{
+		kHookActorFlag1_CombatDisabled = 1 << 0,
+		kHookActorFlag1_ForceCombatTarget = 1 << 1,
+		kHookActorFlag1_CombatAIModified = kHookActorFlag1_CombatDisabled | kHookActorFlag1_ForceCombatTarget,
+		kHookActorFlag1_InfiniteAmmo = 1 << 2,
+		kHookActorFlag1_LockedEquipment = 1 << 3,
+		kHookActorFlag1_DetectionFix = 1 << 4,
+		kHookActorFlag1_PCTeleportWait = 1 << 5,
+		kHookActorFlag1_PCTeleportFollow = 1 << 6,
+		kHookActorFlag1_PCTeleportAI = kHookActorFlag1_PCTeleportWait | kHookActorFlag1_PCTeleportFollow,
+		kHookActorFlag1_DisableWheel = 1 << 7,
+
+		kHookActorFlag2_ForceDetectionVal = 1 << 0,
+		kHookActorFlag2_NonTargetable = 1 << 1,
+		kHookActorFlag2_TeammateKillable = 1 << 2,
+		kHookActorFlag2_NoGunWobble = 1 << 3,
+		kHookActorFlag2_CastImmediate = 1 << 4,
+
+		kHookActorFlag3_OnAnimAction = 1 << 0,
+		kHookActorFlag3_OnPlayGroup = 1 << 1,
+		kHookActorFlag3_OnHealthDamage = 1 << 2,
+		kHookActorFlag3_OnCrippledLimb = 1 << 3,
+		kHookActorFlag3_OnFireWeapon = 1 << 4,
+		kHookActorFlag3_OnHit = 1 << 5,
+
+		kHookActorFlags_DetectionModified = kHookActorFlag1_DetectionFix | (kHookActorFlag2_ForceDetectionVal << 8),
+	};
+
 	UInt8								jipActorFlags1;				// 105
 	UInt8								jipActorFlags2;				// 106
 	UInt8								jipActorFlags3;				// 107
+
 	UInt32								lifeState;					// 108	saved as byte HasHealth = 1 or 2, optionally 6, 5 = IsRestrained
 	UInt32								criticalStage;				// 10C
 	UInt32								animGroupID110;				// 110- decoded by Tweaks (?).

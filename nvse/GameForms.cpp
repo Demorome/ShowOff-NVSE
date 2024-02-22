@@ -58,6 +58,11 @@ TESLeveledList* TESForm::GetLvlList()
 	return NULL;
 }
 
+BGSDestructibleObjectForm* TESForm::GetDestructibleObjectForm()
+{
+	return CdeclCall<BGSDestructibleObjectForm*>(0x475400, this);
+}
+
 Script* TESForm::GetScript() const
 {
 	if (auto const scriptableForm = DYNAMIC_CAST(this, TESForm, TESScriptableForm))

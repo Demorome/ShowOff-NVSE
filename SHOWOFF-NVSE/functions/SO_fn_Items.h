@@ -154,7 +154,98 @@ bool Cmd_GetEquippedItemRefs_Execute(COMMAND_ARGS)
 }
 
 DEFINE_COMMAND_PLUGIN(RemoveAllItemsShowOff, "", true, kParams_TwoOptionalInts_OneOptionalContainerRef_OneOptionalList);
+bool Cmd_RemoveAllItemsShowOff_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	enum FunctionFlags
+	{
+		kFlag_None = 0,
+		kFlag_RetainOwnership = 1 << 0,  //only applies if a target is specified
+		kFlag_SuppressMessages = 1 << 1,  //only applies if a target is specified
+		kFlag_AllowRemovalOfQuestItemsFromPlayer = 1 << 2,
+		kFlag_AllowRemovalOfUnplayableBipedItems = 1 << 3,
+		kFlag_Unk1 = 1 << 4,  // todo: figure out what these two bools do for the vanilla function.
+		kFlag_Unk2 = 1 << 5,
+		kFlag_RunOnUnequipEvent = 1 << 6,
+		kFlag_IgnoreAllUnplayableItems = 1 << 7,  // Overrides kFlag_AllowRemovalOfUnplayableBipedItems. TODO: not yet implemented.
 
+		kFlag_Default = kFlag_RunOnUnequipEvent
+	};
+	UInt32 flags = kFlag_Default;
+	SInt32 typeCode = -1;  //-1 = all
+	TESObjectREFR* targetContainer = nullptr;
+	BGSListForm* exceptionFormList = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &flags, &typeCode, &targetContainer, &exceptionFormList)) return true;
+	if (!thisObj || !typeCode || !thisObj->GetContainer() || (targetContainer && !targetContainer->GetContainer()))
+		return true;
+	//ExtraContainerChanges* xChanges = (ExtraContainerChanges*)thisObj->extraDataList.GetByType(kExtraData_ContainerChanges);  //ripped from NVSE's EquipItem2
+	void* xChanges = ThisStdCall<void*>(0x418520, &thisObj->extraDataList);
+	if (!xChanges) return true;
+
+	// Extract flags
+	bool const retainOwnership = flags & kFlag_RetainOwnership;
+	bool const suppressMessages = flags & kFlag_SuppressMessages;
+	bool const removeQuestItemsIfPlayer = flags & kFlag_AllowRemovalOfQuestItemsFromPlayer;
+	bool const removeUnplayableBipedItems = flags & kFlag_AllowRemovalOfUnplayableBipedItems;
+	bool const unk1 = flags & kFlag_Unk1;
+	bool const unk2 = flags & kFlag_Unk2;
+	bool const runOnUnequipEvent = flags & kFlag_RunOnUnequipEvent;
+	bool const ignoreAllUnplayableItems = flags & kFlag_IgnoreAllUnplayableItems;
+
+	// Modify the code for RemoveAllItems
+	if (removeQuestItemsIfPlayer)
+	{
+		WriteRelJump(0x4CE4B8, 0x4CE559);  // make the long jump at 0x4CE4B8 unconditional
+		WriteRelJump(0x4CEDCE, 0x4CEE75);  // same concept
+	}
+	if (!ignoreAllUnplayableItems)
+	{
+		if (removeUnplayableBipedItems)
+		{
+			SafeWrite8(0x4CE571, 0xEB);  // make short jump unconditional
+			PatchMemoryNop(0x4CED5D, 6);  // make the long jump never happen
+		}
+	}
+	else
+	{
+		//todo: Write a jmp to extract the form mid-loop.
+
+
+		// Check the form via IsItemPlayable. If it passes, jmp back to removal, otherwise jmp to go to the next form.
+	}
+
+	if (runOnUnequipEvent)
+	{
+		//TODO
+	}
+
+	// Call RemoveAllItems with the new modifications
+	ThisStdCall<void>(0x4CE340, xChanges, thisObj, targetContainer, unk1, retainOwnership, unk2, suppressMessages, typeCode, exceptionFormList);
+
+	// Revert code modifications
+	if (removeQuestItemsIfPlayer)
+	{
+		WriteRelJe(0x4CE4B8, 0x4CE559); // revert back to long Jump if Zero
+		WriteRelJe(0x4CEDCE, 0x4CEE75); // same concept
+	}
+	if (!ignoreAllUnplayableItems)
+	{
+		if (removeUnplayableBipedItems)
+		{
+			SafeWrite8(0x4CE571, 0x74); // revert back to short Jump if Zero
+			WriteRelJe(0x4CED5D, 0x4CFBCA); // re-write long Jump if Zero
+		}
+	}
+	else
+	{
+		// TODO
+	}
+
+	// Wrap up
+	ThisStdCall<void>(0x952C30, g_thePlayer, thisObj); // ComputeShouldRecalculateQuestTargets()
+	*result = 1; //function worked as expected.
+	return true;
+}
 
 
 DEFINE_CMD_COND_PLUGIN(GetEquippedWeaponType, "", true, NULL);

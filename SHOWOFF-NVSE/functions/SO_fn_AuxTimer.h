@@ -138,7 +138,7 @@ bool Cmd_AuxTimerPaused_Execute(COMMAND_ARGS)
 			if (!value)
 				return true;
 
-			*result = value->m_flags & AuxTimerValue::kFlag_IsPaused;
+			*result = (value->m_flags & AuxTimerValue::kFlag_IsPaused) != 0;
 
 			if (setPaused >= 0 && value->m_timeRemaining > 0.0)
 			{
@@ -160,7 +160,7 @@ bool Cmd_AuxTimerPaused_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(AuxTimerTimeElapsed, "Gets how much time passed since timer started (limited by the original countdown time).",
+DEFINE_COMMAND_PLUGIN(AuxTimerTimeElapsed, "Gets how much time passed since timer started (limited by the original countdown time, and not accounting for paused time).",
 	false, kParams_OneString_OneOptionalInt_OneOptionalForm);
 bool Cmd_AuxTimerTimeElapsed_Execute(COMMAND_ARGS)
 {

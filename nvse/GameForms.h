@@ -423,6 +423,7 @@ class BGSNote;
 class TESLeveledList;
 class TESImageSpaceModifier;
 class QueuedFile;
+class BGSDestructibleObjectForm;
 
 /**** bases ****/
 
@@ -626,6 +627,8 @@ public:
 		auto const base = this->TryGetREFRParent();
 		return IS_ID(base, TESNPC) || IS_ID(base, TESCreature);
 	}
+
+	BGSDestructibleObjectForm* GetDestructibleObjectForm();
 
 	Script* GetScript() const;
 

@@ -514,222 +514,222 @@ extern "C"
 		// === TO DOCUMENT ====
 		/*3CB0*/ REG_CMD(AuxStringMapArrayGetSize)
 		/*3CB1*/ REG_CMD(AuxStringMapArrayGetValueType)
-		/*3CB3*/ REG_CMD(AuxStringMapArrayGetFloat)
-		/*3CB4*/ REG_CMD_FORM(AuxStringMapArrayGetRef)
-		/*3CB5*/ REG_CMD_STR(AuxStringMapArrayGetString)
-		/*3CB6*/ REG_CMD_ARR(AuxStringMapArrayGetFirst)
-		/*3CB7*/ REG_CMD_ARR(AuxStringMapArrayGetNext)
-		/*3CB8*/ REG_CMD_ARR(AuxStringMapArrayGetKeys)
-		/*3CB9*/ REG_CMD_ARR(AuxStringMapArrayGetAll)  //todo: test this
-		/*3CBA*/ REG_CMD_ARR(AuxStringMapArrayGetAsArray)
-		/*3CBC*/ REG_CMD(AuxStringMapArraySetFromArray)
-		/*3CBD*/ REG_CMD(AuxStringMapArraySetFloat)
-		/*3CBE*/ REG_CMD(AuxStringMapArraySetRef)
-		/*3CBF*/ REG_CMD(AuxStringMapArraySetString)
-		/*3CC0*/ REG_CMD(AuxStringMapArrayEraseKey)
-		/*3CC1*/ REG_CMD(AuxStringMapArrayValidateValues)  //todo: test
-		/*3CC2*/ REG_CMD(AuxStringMapArrayDestroy)
+		/*3CB2*/ REG_CMD(AuxStringMapArrayGetFloat)
+		/*3CB3*/ REG_CMD_FORM(AuxStringMapArrayGetRef)
+		/*3CB4*/ REG_CMD_STR(AuxStringMapArrayGetString)
+		/*3CB5*/ REG_CMD_ARR(AuxStringMapArrayGetFirst)
+		/*3CB6*/ REG_CMD_ARR(AuxStringMapArrayGetNext)
+		/*3CB7*/ REG_CMD_ARR(AuxStringMapArrayGetKeys)
+		/*3CB8*/ REG_CMD_ARR(AuxStringMapArrayGetAll)  //todo: test this
+		/*3CB9*/ REG_CMD_ARR(AuxStringMapArrayGetAsArray)
+		/*3CBA*/ REG_CMD(AuxStringMapArraySetFromArray)
+		/*3CBB*/ REG_CMD(AuxStringMapArraySetFloat)
+		/*3CBC*/ REG_CMD(AuxStringMapArraySetRef)
+		/*3CBD*/ REG_CMD(AuxStringMapArraySetString)
+		/*3CBE*/ REG_CMD(AuxStringMapArrayEraseKey)
+		/*3CBF*/ REG_CMD(AuxStringMapArrayValidateValues)  //todo: test
+		/*3CC0*/ REG_CMD(AuxStringMapArrayDestroy)
 
-		/*3CC3*/ REG_CMD(GetRadiationExtraData)
-		/*3CC4*/ REG_CMD(SetRadiationExtraData)
-		/*3CC5*/ REG_CMD(PlayerHasNightVisionActive)
-		/*3CC6*/ REG_CMD(PlayerIsDrinkingPlacedWater)
-		/*3CC7*/ REG_CMD(SetIsPCAMurderer)
-		/*3CC8*/ REG_CMD(IsNight)
-		/*3CC9*/ REG_CMD(IsLimbCrippled)
-		/*3CCA*/ REG_CMD(GetNumCrippledLimbs)
-		/*3CCB*/ REG_CMD(GetCrippledLimbsAsBitMask)
-		/*3CCC*/ REG_CMD(GetNumBrokenEquippedItems)
-		/*3CCD*/ REG_CMD(GetEquippedItemsAsBitMask)
-		/*3CCE*/ REG_CMD(GetEquippedWeaponType)
-		/*3CCF*/ REG_CMD(GetBaseEquippedWeight)
-		/*3CD0*/ REG_CMD(GetCalculatedEquippedWeight)  //NOTE: bWeightlessWorn(Power)Armor from Stewie's is not accounted for.
-		/*3CD1*/ REG_CMD(GetCalculatedMaxCarryWeight)
+		/*3CC1*/ REG_CMD(GetRadiationExtraData)
+		/*3CC2*/ REG_CMD(SetRadiationExtraData)
+		/*3CC3*/ REG_CMD(PlayerHasNightVisionActive)
+		/*3CC4*/ REG_CMD(PlayerIsDrinkingPlacedWater)
+		/*3CC5*/ REG_CMD(SetIsPCAMurderer)
+		/*3CC6*/ REG_CMD(IsNight)
+		/*3CC7*/ REG_CMD(IsLimbCrippled)
+		/*3CC8*/ REG_CMD(GetNumCrippledLimbs)
+		/*3CC9*/ REG_CMD(GetCrippledLimbsAsBitMask)
+		/*3CCA*/ REG_CMD(GetNumBrokenEquippedItems)
+		/*3CCB*/ REG_CMD(GetEquippedItemsAsBitMask)
+		/*3CCC*/ REG_CMD(GetEquippedWeaponType)
+		/*3CCD*/ REG_CMD(GetBaseEquippedWeight)
+		/*3CCE*/ REG_CMD(GetCalculatedEquippedWeight)  //NOTE: bWeightlessWorn(Power)Armor from Stewie's is not accounted for.
+		/*3CCF*/ REG_CMD(GetCalculatedMaxCarryWeight)
 
 		//========v1.10
-		/*3CD2*/ REG_CMD(GetShowOffDebugMode)
-		/*3CD3*/ REG_CMD(SetShowOffDebugMode)
-		/*3CD4*/ REG_CMD(UnequipItems)
-		/*3CD5*/ REG_CMD_ARR(GetEquippedItems)
-		/*3CD6*/ REG_CMD(IsBaseForm)
-		/*3CD7*/ REG_CMD(SetRandomizerSeed)
-		/*3CD8*/ REG_CMD(SetSeedUsingForm)
-		/*3CD9*/ REG_CMD(GetRandomizerSeed)
-		/*3CDA*/ REG_CMD(RandSeeded)
-		/*3CDB*/ REG_CMD(GetRandomPercentSeeded)
-		/*3CDC*/ REG_CMD(IsReferenceCloned)
-		/*3CDD*/ REG_CMD(AdvanceSeed)
+		/*3CD0*/ REG_CMD(GetShowOffDebugMode)
+		/*3CD1*/ REG_CMD(SetShowOffDebugMode)
+		/*3CD2*/ REG_CMD(UnequipItems)
+		/*3CD3*/ REG_CMD_ARR(GetEquippedItems)
+		/*3CD4*/ REG_CMD(IsBaseForm)
+		/*3CD5*/ REG_CMD(SetRandomizerSeed)
+		/*3CD6*/ REG_CMD(SetSeedUsingForm)
+		/*3CD7*/ REG_CMD(GetRandomizerSeed)
+		/*3CD8*/ REG_CMD(RandSeeded)
+		/*3CD9*/ REG_CMD(GetRandomPercentSeeded)
+		/*3CDA*/ REG_CMD(IsReferenceCloned)
+		/*3CDB*/ REG_CMD(AdvanceSeed)
 
 		//========v1.15
-		/*3CDE*/ REG_CMD(IsTemporaryReference)  // KEEP UNDOCUMENTED, does not behave as I expected it to.
-		/*3CDF*/ REG_CMD(GetPCHasScriptedFastTravelOverride)
-		/*3CE0*/ REG_CMD(GetPCCanFastTravel)  //CheckAllowFastTravel 0x93D660
-		/*3CE1*/ REG_CMD(GetWeaponHasFlag)
-		/*3CE2*/ REG_CMD(GetActorHasBaseFlag)
-		/*3CE3*/ REG_CMD(RemoveAllItemsShowOff)
+		/*3CDC*/ REG_CMD(IsTemporaryReference)  // KEEP UNDOCUMENTED, does not behave as I expected it to.
+		/*3CDD*/ REG_CMD(GetPCHasScriptedFastTravelOverride)
+		/*3CDE*/ REG_CMD(GetPCCanFastTravel)  //CheckAllowFastTravel 0x93D660
+		/*3CDF*/ REG_CMD(GetWeaponHasFlag)
+		/*3CE0*/ REG_CMD(GetActorHasBaseFlag)
+		/*3CE1*/ REG_CMD(RemoveAllItemsShowOff)
 
 		//========v1.17
-		/*3CE4*/ REG_CMD(ForceWeaponJamAnim)
-		/*3CE5*/ REG_CMD(DisableAlt)
-		/*3CE6*/ REG_CMD(EnableAlt)
-		/*3CE7*/ REG_CMD(GetCalculatedSkillPoints)
-		/*3CE8*/ REG_CMD(GetLevelUpMenuPoints)
-		/*3CE9*/ REG_CMD(ToggleQuestMessages)  // SuppressQuestMessages from JIP is probably way better implemented.
+		/*3CE2*/ REG_CMD(ForceWeaponJamAnim)
+		/*3CE3*/ REG_CMD(DisableAlt)
+		/*3CE4*/ REG_CMD(EnableAlt)
+		/*3CE5*/ REG_CMD(GetCalculatedSkillPoints)
+		/*3CE6*/ REG_CMD(GetLevelUpMenuPoints)
+		/*3CE7*/ REG_CMD(ToggleQuestMessages)  // SuppressQuestMessages from JIP is probably way better implemented.
 
 		//========v1.20
-		/*3CEA*/ REG_CMD(GetCalculatedPerkPoints)
-		/*3CEB*/ REG_CMD(GetLevelUpMenuCurrentPage)
-		/*3CEC*/ REG_CMD(SetLevelUpMenuCurrentPage)
-		/*3CED*/ REG_CMD(ShowPerkMenu)
+		/*3CE8*/ REG_CMD(GetCalculatedPerkPoints)
+		/*3CE9*/ REG_CMD(GetLevelUpMenuCurrentPage)
+		/*3CEA*/ REG_CMD(SetLevelUpMenuCurrentPage)
+		/*3CEB*/ REG_CMD(ShowPerkMenu)
 
 		//========v1.25
-		/*3CEE*/ REG_CMD(ShowSkillMenu)
-		/*3CEF*/ REG_CMD(GetLevelUpMenuUnspentPoints)  //todo: consider making the result serialized.
-		/*3CF0*/ REG_CMD(SetLevelUpMenuCanExitEarly)
-		/*3CF1*/ REG_CMD(SetLevelUpMenuPoints)
-		/*3CF2*/ REG_CMD(CreateFolder)
-		/*3CF3*/ REG_CMD_FORM(GetExplosionRefSource)
-		/*3CF4*/ REG_CMD(GetExplosionRefRadius)
-		/*3CF5*/ REG_CMD(SetExplosionRefRadius)
-		/*3CF6*/ REG_CMD(SetExplosionRefSource)
-		/*3CF7*/ REG_CMD(GetActorValueDamage)
-		/*3CF8*/ REG_CMD_ARR(GetPipboyRadioVoiceEntryData)  // todo: FIX CRASHING (when music plays and arg1 = 1?)
-		/*3CF9*/ REG_CMD_ARR(GetEquippedItemRefs)
-		/*3CFA*/ REG_CMD(SetNoEquipShowOff) // deprecated.
-		/*3CFB*/ REG_CMD_AMB(GetNoEquipShowOff)	// can return a form (function) or a bool. Deprecated.
-		/*3CFC*/ REG_CMD(SetShowOffOnCornerMessageEventHandler)
+		/*3CEC*/ REG_CMD(ShowSkillMenu)
+		/*3CED*/ REG_CMD(GetLevelUpMenuUnspentPoints)  //todo: consider making the result serialized.
+		/*3CEE*/ REG_CMD(SetLevelUpMenuCanExitEarly)
+		/*3CEF*/ REG_CMD(SetLevelUpMenuPoints)
+		/*3CF0*/ REG_CMD(CreateFolder)
+		/*3CF1*/ REG_CMD_FORM(GetExplosionRefSource)
+		/*3CF2*/ REG_CMD(GetExplosionRefRadius)
+		/*3CF3*/ REG_CMD(SetExplosionRefRadius)
+		/*3CF4*/ REG_CMD(SetExplosionRefSource)
+		/*3CF5*/ REG_CMD(GetActorValueDamage)
+		/*3CF6*/ REG_CMD_ARR(GetPipboyRadioVoiceEntryData)  // todo: FIX CRASHING (when music plays and arg1 = 1?)
+		/*3CF7*/ REG_CMD_ARR(GetEquippedItemRefs)
+		/*3CF8*/ REG_CMD(SetNoEquipShowOff) // deprecated.
+		/*3CF9*/ REG_CMD_AMB(GetNoEquipShowOff)	// can return a form (function) or a bool. Deprecated.
+		/*3CFA*/ REG_CMD(SetShowOffOnCornerMessageEventHandler)
 
 		//========v1.30
-		/*3CFD*/ REG_CMD_FORM(GetIngestibleConsumeSound)
-		/*3CFE*/ REG_CMD(SetIngestibleConsumeSound)
-		/*3CFF*/ REG_CMD(SetFactionCombatReactionTemp) /*A merge of SetAllyTemp and SetEnemyTemp. Now undocumented since it's clearer to use the other two.*/
-		/*3D00*/ REG_CMD_FORM(GetEquippedItemRefForItem)
-		/*3D01*/ REG_CMD(SetAllyTemp)
-		/*3D02*/ REG_CMD(SetEnemyTemp)
-		/*3D03*/ REG_CMD_ARR(TopicInfoGetResponseStrings)
-		/*3D04*/ REG_CMD(TopicInfoSetResponseStrings_OLD)
+		/*3CFB*/ REG_CMD_FORM(GetIngestibleConsumeSound)
+		/*3CFC*/ REG_CMD(SetIngestibleConsumeSound)
+		/*3CFD*/ REG_CMD(SetFactionCombatReactionTemp) /*A merge of SetAllyTemp and SetEnemyTemp. Now undocumented since it's clearer to use the other two.*/
+		/*3CFE*/ REG_CMD_FORM(GetEquippedItemRefForItem)
+		/*3CFF*/ REG_CMD(SetAllyTemp)
+		/*3D00*/ REG_CMD(SetEnemyTemp)
+		/*3D01*/ REG_CMD_ARR(TopicInfoGetResponseStrings)
+		/*3D02*/ REG_CMD(TopicInfoSetResponseStrings_OLD)
 
 		//========v1.31
-		/*3D05*/ REG_CMD(TopicInfoSetNthResponseString)
+		/*3D03*/ REG_CMD(TopicInfoSetNthResponseString)
 
 		//========v1.35
-		/*3D06*/ REG_CMD(GetItemCanHaveHealth)
-		/*3D07*/ REG_CMD_FORM(SayTo_GetSpeakingActor)	//doesn't seem to work...
-		/*3D08*/ REG_CMD_FORM(SayTo_GetTopic)
-		/*3D09*/ REG_CMD_FORM(SayTo_GetTopicInfo)
-		/*3D0A*/ REG_CMD_FORM(SayTo_GetQuest)		//doesn't seem to work...
-		/*3D0B*/ REG_CMD(FormListRemoveForm)	// known as RemoveFormFromFormList, since that's more consistent for naming.
-		/*3D0C*/ REG_CMD(GetZoneRespawns)
-		/*3D0D*/ REG_CMD(ClearCinematicTextQueue)
-		/*3D0E*/ REG_CMD_FORM(GetCellEncounterZone)
-		/*3D0F*/ REG_CMD(ShowPauseMenu)
-		/*3D10*/ REG_CMD(RemoveFormFromLeveledList)
+		/*3D04*/ REG_CMD(GetItemCanHaveHealth)
+		/*3D05*/ REG_CMD_FORM(SayTo_GetSpeakingActor)	//doesn't seem to work...
+		/*3D06*/ REG_CMD_FORM(SayTo_GetTopic)
+		/*3D07*/ REG_CMD_FORM(SayTo_GetTopicInfo)
+		/*3D08*/ REG_CMD_FORM(SayTo_GetQuest)		//doesn't seem to work...
+		/*3D09*/ REG_CMD(FormListRemoveForm)	// known as RemoveFormFromFormList, since that's more consistent for naming.
+		/*3D0A*/ REG_CMD(GetZoneRespawns)
+		/*3D0B*/ REG_CMD(ClearCinematicTextQueue)
+		/*3D0C*/ REG_CMD_FORM(GetCellEncounterZone)
+		/*3D0D*/ REG_CMD(ShowPauseMenu)
+		/*3D0E*/ REG_CMD(RemoveFormFromLeveledList)
 
 		//========v1.40
-		/*3D11*/ REG_CMD(SetWeaponFlag)
-		/*3D12*/ REG_CMD(SetOwnershipTemp)
-		/*3D13*/ REG_CMD(IsActorAlt)
-		/*3D14*/ REG_CMD(ApplyEasing)
-		/*3D15*/ REG_CMD(Matrix_IsMatrix_OLD)
-		/*3D16*/ REG_CMD_ARR(Matrix3x3_GetQuaternion_OLD)
-		/*3D17*/ REG_CMD_ARR(Quaternion_GetMatrix_OLD)
-		/*3D18*/ REG_CMD_ARR(Matrix_Transpose_OLD)
-		/*3D19*/ REG_CMD(Matrix_Dump_OLD)
-		/*3D1A*/ REG_CMD_ARR(Matrix_ApplyOperationWithScalar_OLD)
-		/*3D1B*/ REG_CMD_ARR(Matrix_ApplyOperationWithMatrix_OLD)
+		/*3D0F*/ REG_CMD(SetWeaponFlag)
+		/*3D10*/ REG_CMD(SetOwnershipTemp)
+		/*3D11*/ REG_CMD(IsActorAlt)
+		/*3D12*/ REG_CMD(ApplyEasing)
+		/*3D13*/ REG_CMD(Matrix_IsMatrix_OLD)
+		/*3D14*/ REG_CMD_ARR(Matrix3x3_GetQuaternion_OLD)
+		/*3D15*/ REG_CMD_ARR(Quaternion_GetMatrix_OLD)
+		/*3D16*/ REG_CMD_ARR(Matrix_Transpose_OLD)
+		/*3D17*/ REG_CMD(Matrix_Dump_OLD)
+		/*3D18*/ REG_CMD_ARR(Matrix_ApplyOperationWithScalar_OLD)
+		/*3D19*/ REG_CMD_ARR(Matrix_ApplyOperationWithMatrix_OLD)
 
 		//========v1.45
-		/*3D1C*/ REG_CMD_AMB(ReadFromJSONFile)
-		/*3D1D*/ REG_CMD(WriteToJSONFile)
+		/*3D1A*/ REG_CMD_AMB(ReadFromJSONFile)
+		/*3D1B*/ REG_CMD(WriteToJSONFile)
 		
 		//== Functions that used old array extraction method, improved vers. had to be redeclared for backwards compat.
-		/*3D1E*/ REG_CMD(ListAddArray)	//todo: add bCheckForDupes arg (optional)
-		/*3D1F*/ REG_CMD(Matrix_IsMatrix)
-		/*3D20*/ REG_CMD_ARR(Matrix3x3_GetQuaternion)
-		/*3D21*/ REG_CMD_ARR(Quaternion_GetMatrix)
-		/*3D22*/ REG_CMD_ARR(Matrix_Transpose)
-		/*3D23*/ REG_CMD(Matrix_Dump)
-		/*3D24*/ REG_CMD_ARR(Matrix_ApplyOperationWithScalar)
-		/*3D25*/ REG_CMD_ARR(Matrix_ApplyOperationWithMatrix)
-		/*3D26*/ REG_CMD(TopicInfoSetResponseStrings)
+		/*3D1C*/ REG_CMD(ListAddArray)	//todo: add bCheckForDupes arg (optional)
+		/*3D1D*/ REG_CMD(Matrix_IsMatrix)
+		/*3D1E*/ REG_CMD_ARR(Matrix3x3_GetQuaternion)
+		/*3D1F*/ REG_CMD_ARR(Quaternion_GetMatrix)
+		/*3D20*/ REG_CMD_ARR(Matrix_Transpose)
+		/*3D21*/ REG_CMD(Matrix_Dump)
+		/*3D22*/ REG_CMD_ARR(Matrix_ApplyOperationWithScalar)
+		/*3D23*/ REG_CMD_ARR(Matrix_ApplyOperationWithMatrix)
+		/*3D24*/ REG_CMD(TopicInfoSetResponseStrings)
 		
-		/*3D27*/	REG_CMD(GetCalculatedItemValue)
+		/*3D25*/	REG_CMD(GetCalculatedItemValue)
 
-		/*3D28*/	REG_CMD(SetINIValue_Cached)
-		/*3D29*/	REG_CMD(GetINIFloatOrCreate_Cached)
-		/*3D2A*/	REG_CMD_STR(GetINIStringOrCreate_Cached)
-		/*3D2B*/	REG_CMD(GetINIFloatOrDefault_Cached)
-		/*3D2C*/	REG_CMD_STR(GetINIStringOrDefault_Cached)
-		/*3D2D*/	REG_CMD(HasINISetting_Cached)
-		/*3D2E*/	REG_CMD(ClearFileCacheShowOff)
-		/*3D2F*/	REG_CMD(SaveCachedIniFile)
-		/*3D30*/	REG_CMD(ReloadIniCache)
-		/*3D31*/	REG_CMD(ResetInteriorAlt)
+		/*3D26*/	REG_CMD(SetINIValue_Cached)
+		/*3D27*/	REG_CMD(GetINIFloatOrCreate_Cached)
+		/*3D28*/	REG_CMD_STR(GetINIStringOrCreate_Cached)
+		/*3D29*/	REG_CMD(GetINIFloatOrDefault_Cached)
+		/*3D2A*/	REG_CMD_STR(GetINIStringOrDefault_Cached)
+		/*3D2B*/	REG_CMD(HasINISetting_Cached)
+		/*3D2C*/	REG_CMD(ClearFileCacheShowOff)
+		/*3D2D*/	REG_CMD(SaveCachedIniFile)
+		/*3D2E*/	REG_CMD(ReloadIniCache)
+		/*3D2F*/	REG_CMD(ResetInteriorAlt)
 
 		//========v1.50
-		/*3D32*/	REG_CMD(SetEnableParent)
-		/*3D33*/	REG_CMD_FORM(GetEquippedWeapon)
-		/*3D34*/	REG_CMD_FORM(GetEquippedWeaponRef)
-		/*3D35*/	REG_CMD(GetCalculatedAPCost)
-		/*3D36*/	REG_CMD_ARR(GetPosArray)
-		/*3D37*/	REG_CMD_ARR(GetCompassTargets)
-		/*3D38*/	REG_CMD(SetLiveEffectMagnitudeModifier)
-		/*3D39*/	REG_CMD(IsOutsideMainThread)
-		/*3D3A*/	REG_CMD(GetLiveEffectBaseTrait)
-		/*3D3B*/	REG_CMD_STR(GetActorValueName)
-		/*3D3C*/    REG_CMD(SetINIInteger_Cached)
-		/*3D3D*/	REG_CMD_FORM(GetAddedItemRefShowOff)
+		/*3D30*/	REG_CMD(SetEnableParent)
+		/*3D31*/	REG_CMD_FORM(GetEquippedWeapon)
+		/*3D32*/	REG_CMD_FORM(GetEquippedWeaponRef)
+		/*3D33*/	REG_CMD(GetCalculatedAPCost)
+		/*3D34*/	REG_CMD_ARR(GetPosArray)
+		/*3D35*/	REG_CMD_ARR(GetCompassTargets)
+		/*3D36*/	REG_CMD(SetLiveEffectMagnitudeModifier)
+		/*3D37*/	REG_CMD(IsOutsideMainThread)
+		/*3D38*/	REG_CMD(GetLiveEffectBaseTrait)
+		/*3D39*/	REG_CMD_STR(GetActorValueName)
+		/*3D3A*/    REG_CMD(SetINIInteger_Cached)
+		/*3D3B*/	REG_CMD_FORM(GetAddedItemRefShowOff)
 
 		//========v1.55
-		/*3D3E*/	REG_CMD(GetIsPlayerOverencumbered)
-		/*3D3F*/	REG_CMD(RefillPlayerAmmo)
-		/*3D40*/	REG_CMD(AuxTimerStart)
-		/*3D41*/	REG_CMD(AuxTimerStop)
-		/*3D42*/	REG_CMD(AuxTimerPaused)
-		/*3D43*/	REG_CMD(AuxTimerTimeElapsed)
-		/*3D44*/	REG_CMD(AuxTimerTimeToCountdown)
-		/*3D45*/	REG_CMD(AuxTimerTimeLeft)
-		/*3D46*/	REG_CMD(SetOnAuxTimerStartHandler)
-		/*3D47*/	REG_CMD(SetOnAuxTimerStopHandler)
-		/*3D48*/	REG_CMD(ClearShowoffSavedData)  //todo: fix not working for aux stringMaps.		
+		/*3D3C*/	REG_CMD(GetIsPlayerOverencumbered)
+		/*3D3D*/	REG_CMD(RefillPlayerAmmo)
+		/*3D3E*/	REG_CMD(AuxTimerStart)
+		/*3D3F*/	REG_CMD(AuxTimerStop)
+		/*3D40*/	REG_CMD(AuxTimerPaused)
+		/*3D41*/	REG_CMD(AuxTimerTimeElapsed)
+		/*3D42*/	REG_CMD(AuxTimerTimeToCountdown)
+		/*3D43*/	REG_CMD(AuxTimerTimeLeft)
+		/*3D44*/	REG_CMD(SetOnAuxTimerStartHandler)
+		/*3D45*/	REG_CMD(SetOnAuxTimerStopHandler)
+		/*3D46*/	REG_CMD(ClearShowoffSavedData)  //todo: fix not working for aux stringMaps.		
 
 		//========v1.60
-		/*3D49*/	REG_CMD(SetAmmoName)
-		/*3D4A*/	REG_CMD_STR(GetAmmoName)
-		/*3D4B*/	REG_CMD(KillAllHostiles)
+		/*3D47*/	REG_CMD(SetAmmoName)
+		/*3D48*/	REG_CMD_STR(GetAmmoName)
+		/*3D49*/	REG_CMD(KillAllHostiles)
 
 		//========v1.65
-		/*3D4C*/	REG_CMD(IsAiming)
-		/*3D4D*/	REG_CMD(IsBlockingOrAiming)
-		/*3D4E*/	REG_CMD(SetOnAuxTimerUpdateHandler)
-		/*3D4F*/	REG_CMD(SetItemHotkeyIconPath)
-		/*3D50*/	REG_CMD_STR(GetItemHotkeyIconPath)
-		/*3D51*/	REG_CMD(GetExplosionHitDamage)
-		/*3D52*/	REG_CMD(SetExplosionHitDamage)
-		/*3D53*/	REG_CMD(IsJumping_BROKEN)
-		/*3D54*/	REG_CMD(FreezeAmmoRegen)
+		/*3D4A*/	REG_CMD(IsAiming)
+		/*3D4B*/	REG_CMD(IsBlockingOrAiming)
+		/*3D4C*/	REG_CMD(SetOnAuxTimerUpdateHandler)
+		/*3D4D*/	REG_CMD(SetItemHotkeyIconPath)
+		/*3D4E*/	REG_CMD_STR(GetItemHotkeyIconPath)
+		/*3D4F*/	REG_CMD(GetExplosionHitDamage)
+		/*3D50*/	REG_CMD(SetExplosionHitDamage)
+		/*3D51*/	REG_CMD(IsJumping_BROKEN)
+		/*3D52*/	REG_CMD(FreezeAmmoRegen)
 
 		//========v1.74
-		/*3D55*/	REG_CMD(GetCalculatedActorSpread);
+		/*3D53*/	REG_CMD(GetCalculatedActorSpread);
 		
 		//========v1.80
-		/*3D56*/	REG_CMD(GetIsActivationPromptShown);
-		/*3D57*/	REG_CMD(GetHitLocationLingering);
-		/*3D58*/	REG_CMD(HighlightAdditionalReferenceAlt);
-		/*3D58*/	REG_CMD(GetVATSMaxEngageDistance);
-		/*3D59*/	REG_CMD(SetForceDrawHitscanProjectiles);
-		/*3D5A*/	REG_CMD(SetProjectileTracerChanceOverride);
-		/*3D5B*/	REG_CMD_FORM(SpawnTracingProjectile);
-		/*3D5C*/	REG_CMD(GetVATSTargetable);
-		/*3D5D*/	REG_CMD(GetProjectileRefIsStuck);
-		/*3D5E*/	REG_CMD(ForceRecoilAnim);
-		/*3D5F*/	REG_CMD(ForceHitStaggerReaction);
-		/*3D60*/	REG_CMD(IsPlayerLookingAround);
-		/*3D61*/	REG_CMD(GetActorFadeState);
-		/*3D62*/	REG_CMD(IsActorInvisibleToPlayer);
-		/*3D63*/	REG_CMD(IsFormLoading);
-		/*3D64*/	REG_CMD(ApplyEasingAlt);
-		/*3D65*/	REG_CMD(PatchFreezeTime);
+		/*3D54*/	REG_CMD(GetIsActivationPromptShown);
+		/*3D55*/	REG_CMD(GetHitLocationLingering);
+		/*3D56*/	REG_CMD(HighlightAdditionalReferenceAlt);
+		/*3D57*/	REG_CMD(GetVATSMaxEngageDistance);
+		/*3D58*/	REG_CMD(SetForceDrawHitscanProjectiles);
+		/*3D59*/	REG_CMD(SetProjectileTracerChanceOverride);
+		/*3D5A*/	REG_CMD_FORM(SpawnTracingProjectile);
+		/*3D5B*/	REG_CMD(GetVATSTargetable);
+		/*3D5C*/	REG_CMD(GetProjectileRefIsStuck);
+		/*3D5D*/	REG_CMD(ForceRecoilAnim);
+		/*3D5E*/	REG_CMD(ForceHitStaggerReaction);
+		/*3D5F*/	REG_CMD(IsPlayerLookingAround);
+		/*3D60*/	REG_CMD(GetActorFadeState);
+		/*3D61*/	REG_CMD(IsActorInvisibleToPlayer);
+		/*3D62*/	REG_CMD(IsFormLoading);
+		/*3D63*/	REG_CMD(ApplyEasingAlt);
+		/*3D64*/	REG_CMD(PatchFreezeTime);
 
 		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		

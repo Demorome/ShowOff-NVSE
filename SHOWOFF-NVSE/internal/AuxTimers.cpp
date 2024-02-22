@@ -61,7 +61,7 @@ namespace AuxTimer
 							if (timer.m_flags & AuxTimerValue::kFlag_IsPaused)
 								continue;
 
-							if (timer.m_flags & AuxTimerValue::kFlag_DontRunWhenPaused)
+							if (timer.m_flags & AuxTimerValue::kFlag_DontRunWhenGamePaused)
 							{
 								if (IsGamePaused())
 									continue;
