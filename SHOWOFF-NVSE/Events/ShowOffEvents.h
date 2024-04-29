@@ -2354,8 +2354,12 @@ void RegisterEvents()
 	RegisterEvent(OnExplosionHit::eventNameAlt, kEventParams_TwoReferences);
 	RegisterEvent(OnWeaponHolsterUnholster::eventNameHolster, kEventParams_OneBaseForm);
 	RegisterEvent(OnWeaponHolsterUnholster::eventNameUnholster, kEventParams_OneBaseForm);
+
+
+#if _DEBUG
 	RegisterEvent(OnPreLoadGame::eventName, nullptr);
-	
+#endif
+
 	/*
 	// For debugging the Event API
 	constexpr char DebugEventName[] = "ShowOff:DebugEvent";
@@ -2424,8 +2428,9 @@ namespace HandleHooks
 		OnPreProjectileCreate::WriteDelayedHook();
 		OnMenuCreate::WriteDelayedHook();
 		OnWeaponHolsterUnholster::WriteDelayedHook();
-		OnPreLoadGame::WriteDelayedHook();
+
 #if _DEBUG
+		OnPreLoadGame::WriteDelayedHook();
 #endif
 	}
 

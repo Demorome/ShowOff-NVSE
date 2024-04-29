@@ -1801,7 +1801,7 @@ TESForm* __fastcall StringToForm(const std::string& str)  //calls upon _Subrouti
 
 
 // Copies from JIP's CreateForType()
-ArrayElementR __fastcall ConvertStrToElem(std::string dataStr)
+ArrayElementR __fastcall ConvertStrToElem(const std::string &dataStr)
 {
 	ArrayElementR result;
 	switch (dataStr[0])
@@ -2145,35 +2145,31 @@ UInt32 __fastcall StringToRef(char* refStr)
 	return ResolveRefID(HexToUInt(refStr), findStr) ? *findStr : 0;
 }
 
-UnorderedMap<UInt32, const char*> s_refStrings;
+std::unordered_map<UInt32, const std::string> s_refStrings;
 
 //Code copied from JIP LN, adapted to use std::string
-std::string RefToString(TESForm* form)
+const std::string& RefToString(TESForm* form)
 {
-	std::string_view constexpr invalidRef = ":00000000";
+	static const std::string invalidRef = ":00000000";
 	if (!form)
-		return std::string(invalidRef);
+		return invalidRef;
 
-	if (auto const cachedStr = s_refStrings.GetPtr(form->refID))
-		return *cachedStr;
+	if (auto search = s_refStrings.find(form->refID); search != s_refStrings.end())
+		return search->second;
 
 	const char* modName = g_dataHandler->GetNthModName(form->modIndex);
-	std::string result;
 	if (!modName || !modName[0])
-	{
-		result = invalidRef;
-		return result;
-	}
+		return invalidRef;
 
+	std::string result;
+	result.reserve(result.size() + strlen(modName) + 9);
 	result = modName;
-	result.reserve(result.size() + 9);
 	result += ':';
 	result += std::format("{:08X}", form->refID & 0xFFFFFF);
 
-	//Cache the string
-	s_refStrings.Emplace(form->refID, result.c_str());
-
-	return result;
+	// Cache the string
+	auto emplaced = s_refStrings.emplace(form->refID, result);
+	return emplaced.first->second;
 }
 
 bool IsGamePaused()

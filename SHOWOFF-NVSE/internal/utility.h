@@ -351,7 +351,7 @@ void DebugPrint(const std::string& str)
 double TryConvertStrToDouble(std::string const& str);
 TESForm* StringToForm_Subroutine(const std::string& modName, const std::string& formIdStr);
 TESForm* __fastcall StringToForm(const std::string& str);  //calls upon _Subroutine
-ArrayElementR __fastcall ConvertStrToElem(std::string dataStr);
+ArrayElementR __fastcall ConvertStrToElem(const std::string &dataStr);
 
 //	Assign rhs to lhs, bypassing operator=
 template <typename T> __forceinline void RawAssign(const T& lhs, const T& rhs)
@@ -417,6 +417,6 @@ std::pair<const char*, const char*> SplitStringBySingleDelimiter(std::string& to
 
 //Taken from JIP LN
 UInt32 __fastcall StringToRef(char* refStr);
-std::string RefToString(TESForm* form);
+const std::string& RefToString(TESForm* form);
 
 bool IsGamePaused();

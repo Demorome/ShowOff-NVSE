@@ -160,14 +160,14 @@ bool Cmd_RemoveAllItemsShowOff_Execute(COMMAND_ARGS)
 	enum FunctionFlags
 	{
 		kFlag_None = 0,
-		kFlag_RetainOwnership = 1 << 0,  //only applies if a target is specified
-		kFlag_SuppressMessages = 1 << 1,  //only applies if a target is specified
-		kFlag_AllowRemovalOfQuestItemsFromPlayer = 1 << 2,
-		kFlag_AllowRemovalOfUnplayableBipedItems = 1 << 3,
-		kFlag_Unk1 = 1 << 4,  // todo: figure out what these two bools do for the vanilla function.
-		kFlag_Unk2 = 1 << 5,
-		kFlag_RunOnUnequipEvent = 1 << 6,
-		kFlag_IgnoreAllUnplayableItems = 1 << 7,  // Overrides kFlag_AllowRemovalOfUnplayableBipedItems. TODO: not yet implemented.
+		kFlag_RetainOwnership =						1 << 0,  //only applies if a target is specified
+		kFlag_SuppressMessages =					1 << 1,  //only applies if a target is specified
+		kFlag_AllowRemovalOfQuestItemsFromPlayer =	1 << 2,
+		kFlag_AllowRemovalOfUnplayableBipedItems =	1 << 3,
+		kFlag_Unk1 =								1 << 4,  // todo: figure out what these two bools do for the vanilla function.
+		kFlag_Unk2 =								1 << 5,
+		kFlag_RunOnUnequipEvent =					1 << 6,
+		kFlag_IgnoreAllUnplayableItems =			1 << 7,  // Overrides kFlag_AllowRemovalOfUnplayableBipedItems. TODO: not yet implemented.
 
 		kFlag_Default = kFlag_RunOnUnequipEvent
 	};
@@ -210,7 +210,7 @@ bool Cmd_RemoveAllItemsShowOff_Execute(COMMAND_ARGS)
 	{
 		//todo: Write a jmp to extract the form mid-loop.
 
-
+		
 		// Check the form via IsItemPlayable. If it passes, jmp back to removal, otherwise jmp to go to the next form.
 	}
 
@@ -240,7 +240,7 @@ bool Cmd_RemoveAllItemsShowOff_Execute(COMMAND_ARGS)
 	{
 		// TODO
 	}
-
+	
 	// Wrap up
 	ThisStdCall<void>(0x952C30, g_thePlayer, thisObj); // ComputeShouldRecalculateQuestTargets()
 	*result = 1; //function worked as expected.
