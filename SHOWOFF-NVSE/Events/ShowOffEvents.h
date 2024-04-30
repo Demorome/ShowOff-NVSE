@@ -77,8 +77,6 @@ bool Cmd_SetOnAuxTimerStopHandler_Execute(COMMAND_ARGS)
 		if (!thisObj)
 			thisObj = g_thePlayer;
 		filters[0].form = thisObj;
-		if (!filters[0].form)
-			return true;
 	}
 
 	filters[0].refID = filters[0].form->refID;
@@ -113,8 +111,6 @@ bool Cmd_SetOnAuxTimerUpdateHandler_Execute(COMMAND_ARGS)
 		if (!thisObj)
 			thisObj = g_thePlayer;
 		filters[0].form = thisObj;
-		if (!filters[0].form)
-			return true;
 	}
 
 	filters[0].refID = filters[0].form->refID;

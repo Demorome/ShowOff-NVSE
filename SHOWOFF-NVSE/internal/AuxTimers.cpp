@@ -42,8 +42,11 @@ namespace AuxTimer
 			if (auxTimers.Empty())
 				return;
 
-			const double secondsDeltaWithMult = static_cast<double>(g_timeGlobal->secondsPassed) * vatsTimeMult;
-			const double secondsDeltas[2] = { secondsDeltaWithMult, static_cast<double>(g_timeGlobal->secondsPassed) };
+			auto const secondsDelta = static_cast<double>(g_timeGlobal->secondsPassed);
+			auto const secondsDeltaWithMult = secondsDelta * vatsTimeMult;
+			double secondsDeltaWithMultNoTurbo = secondsDeltaWithMult;
+			if (g_thePlayer->isUsingTurbo)
+				secondsDeltaWithMultNoTurbo /= GetFltGameSetting(0x11D0FA8); // gs_fTurboTimeMultiplier
 
 			for (auto modMapIter = auxTimers.Begin(); !modMapIter.End(); ++modMapIter)
 			{
@@ -76,7 +79,17 @@ namespace AuxTimer
 									const bool notAffectedByTimeMult = 
 										(timer.m_flags & AuxTimerValue::kFlag_NotAffectedByTimeMult_InMenuMode)
 										&& isMenuMode;
-									timePassed = secondsDeltas[notAffectedByTimeMult ? 1 : 0];
+
+									const bool ignoreTurbo =
+										(timer.m_flags & AuxTimerValue::kFlag_IgnoreTurbo);
+
+									if (notAffectedByTimeMult)
+										timePassed = secondsDelta;
+									else if (ignoreTurbo)
+										timePassed = secondsDeltaWithMultNoTurbo;
+									else
+										timePassed = secondsDeltaWithMult;
+
 									timer.m_timeRemaining -= timePassed;
 								}
 								else {
