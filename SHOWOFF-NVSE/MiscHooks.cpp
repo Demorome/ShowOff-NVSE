@@ -572,6 +572,55 @@ namespace IsPlayerLookingAround
 	}
 }
 
+namespace PlaceAtReticleAlt
+{
+	float g_healthPercent = 1.0f;
+	TESObjectREFR* g_lastPlacedRef{};
+
+	namespace SetExtraHealth
+	{
+		CallDetour g_detour;
+		void __fastcall Hook(TESObjectREFR* ref, void* edx, float newHealth)
+		{
+			newHealth *= g_healthPercent;
+			ThisStdCall<bool>(g_detour.GetOverwrittenAddr(), ref, newHealth);
+		}
+
+		void WriteHook()
+		{
+			g_detour.WriteDetourCall(0x5DF4F6, (UInt32)Hook);
+		}
+	}
+
+	namespace GetLastPlacedRef
+	{
+		CallDetour g_detour;
+		__HOOK Hook()
+		{
+			UInt32 static const ReturnAddr = 0x5DF43C;
+			__asm
+			{
+				mov		g_lastPlacedRef, eax
+
+				// do regular code
+				mov		[ebp - 0x18C], eax
+				jmp		ReturnAddr
+			}
+		}
+
+		void WriteHook()
+		{
+			WriteRelJump(0x5DF436, (UInt32)Hook);
+		}
+	}
+
+	void WriteHooks()
+	{
+		SetExtraHealth::WriteHook();
+		GetLastPlacedRef::WriteHook();
+	}
+}
+
 
 namespace Experimental
 {
@@ -725,6 +774,7 @@ namespace HandleHooks
 		GetLevelUpMenuUnspentPoints::WriteRetrievalHook();
 		GetCompassTargets::WriteHooks();
 		SetItemHotkeyIconPath::WriteHooks();
+		PlaceAtReticleAlt::WriteHooks();
 #if 0
 		ReplaceCall(0x8B0FF0, UInt32(Actor_Spread_PerkModifier_Hook));
 

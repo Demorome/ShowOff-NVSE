@@ -29,6 +29,7 @@ namespace AuxTimer
 			kFlag_DontRunWhenGamePaused = 1 << 7, // timer pauses when game is paused (main menu, pause menu, console menu).
 			kFlag_RunOnTimerUpdateEvent = 1 << 8, // if on, OnTimerUpdate events will trigger for this timer each frame it counts down.
 			kFlag_IgnoreTurbo = 1 << 9, // if on, seconds-based timer will follow the player's turbo speed, instead of being slowed down like everything else.
+			kFlag_NotAffectedByTimeMult_InGameMode = 1 << 10, // if on, seconds-based timers won't be affected by TimeMult in GameMode.
 
 			// Off by default, hidden and undocumented, for good reason
 			kFlag_PendingRemoval = (UInt32)1 << (UInt32)31, // if on, prevent all changes to the timer, for it will be deleted soon.
@@ -127,9 +128,9 @@ namespace AuxTimer
 
 	namespace Impl
 	{
-		void DoCountdown(double vatsTimeMult, bool isMenuMode, bool isTemp);
+		void DoCountdown(double const globalTimeMult, double const vatsTimeMult, bool const isMenuMode, bool const isTemp);
 	}
-	void DoCountdown(double vatsTimeMult, bool isMenuMode);
+	void DoCountdown(double globalTimeMult, double vatsTimeMult, bool isMenuMode);
 	void HandleAutoRemoveTempTimers();
 
 	struct AuxTimerPendingRemoval

@@ -295,7 +295,6 @@ static ParamInfo kParams_OneFormList_OneOptionalObjectID[2] =
    {	"target item",	kParamType_ObjectID,	1	},
 };
 
-
 static ParamInfo kParams_OneActorValue[1] =
 {
 	{	"actor value", kParamType_ActorValue, 0},

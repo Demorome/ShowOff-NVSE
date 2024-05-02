@@ -70,6 +70,13 @@ namespace IsPlayerLookingAround
 	extern bool g_isPlayerLookingAround;
 }
 
+// NOTE: Mind the hook we write for PlaceAtReticle
+namespace PlaceAtReticleAlt
+{
+	extern float g_healthPercent;
+	extern TESObjectREFR* g_lastPlacedRef;
+}
+
 namespace Experimental::PatchFreezeTime
 {
 	void WriteHooks();

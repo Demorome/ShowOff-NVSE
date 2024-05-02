@@ -1853,6 +1853,35 @@ namespace OnPreProjectileExplode
 			{
 				g_forceSpawnCollisionEffects.insert(proj);
 			}
+			else
+			{
+				if (baseProj->projFlags & BGSProjectile::kFlags_CanBeDisabled)
+				{
+					proj->DisarmPlacedExplosive(g_thePlayer, true);
+				}
+				else if (proj->sourceWeap)
+				{
+					if (proj->sourceWeap->IsPlayable())
+					{
+						// Replace the projectile that failed to explode with its inert item version.
+						if (auto* newItem = proj->PlaceAtMe(proj->sourceWeap))
+						{
+							// Copy over the previous linear velocity to the new item.
+							if (hkpRigidBody* rigidBodyOld = proj->GetRigidBody(""); rigidBodyOld && rigidBodyOld->IsMobile())
+							{
+								// TODO: fix rigidBodyNew always being nullptr due to newItem not having a root NiNode at this point...
+								if (hkpRigidBody* rigidBodyNew = newItem->GetRigidBody(""); rigidBodyNew && rigidBodyNew->IsMobile())
+								{
+									rigidBodyNew->motion.linVelocity = rigidBodyOld->motion.linVelocity;
+								}
+							}
+						}
+					}
+
+					// No longer need the projectile to exist
+					proj->MarkForDelete();
+				}
+			}
 		}
 
 		return shouldExplode;

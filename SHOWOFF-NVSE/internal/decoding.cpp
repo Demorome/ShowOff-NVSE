@@ -149,3 +149,31 @@ void __cdecl PlayMenuSound(MenuSoundCode soundCode)
 {
 	return CdeclCall(0x717280, soundCode);
 }
+
+/*
+#include "netimmerse.h"
+#include <utility.h>*/
+
+// Taken from JohnnyGuitar NVSE
+NiNode* NiNode::GetNode(const char* nodeName)
+{
+	NiAVObject* found = GetBlock(nodeName);
+	return found ? found->GetNiNode() : NULL;
+}
+
+// Taken from JohnnyGuitar NVSE
+NiAVObject* NiNode::GetBlock(const char* blockName) {
+	if (StrEqualCI(m_blockName, blockName))
+		return this;
+	NiAVObject* found = NULL;
+	for (NiTArray<NiAVObject*>::Iterator iter(m_children); !iter.End(); ++iter) {
+		if (!*iter) continue;
+		if (iter->GetNiNode())
+			found = ((NiNode*)*iter)->GetBlock(blockName);
+		else if (StrEqualCI(iter->m_blockName, blockName))
+			found = *iter;
+		else continue;
+		if (found) break;
+	}
+	return found;
+}

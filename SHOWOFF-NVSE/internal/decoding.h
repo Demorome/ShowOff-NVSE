@@ -541,7 +541,7 @@ public:
 	virtual bool	ProcessImpact();
 	virtual bool	IsProximityTriggered();
 	virtual void	Unk_C7(void);
-	virtual bool	DisarmPlacedExplosives(TESObjectREFR *refr, bool unk);
+	virtual bool	DisarmPlacedExplosive(TESObjectREFR *refr, bool silent); // credits to lStewieAl for the "silent" arg name
 	virtual void	Unk_C9(void);
 	virtual void	Unk_CA(void);
 	virtual void	Unk_CB(void);

@@ -40,6 +40,10 @@ IDebugLog g_Log; // file will be open after NVSE plugin load
 HMODULE	g_ShowOffHandle;
 constexpr UInt32 g_PluginVersion = 180;
 
+//***Current Max OpCode (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
+const UInt32 MaxOpcode = 0x3D74;
+UInt32 CurrentOpcode = 0x3C93; // starts at Opcode base for our plugin
+
 // Allows modmakers to toggle ShowOff's debug messages for some of its functions.
 #ifdef _DEBUG
 std::atomic<bool> g_ShowFuncDebug = true;
@@ -274,6 +278,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 			g_wroteSuperDelayedHooks = true;
 		}
 
+		// Handle events
 		for (const auto& EventInfo : EventsArray)
 		{
 			EventInfo->AddQueuedEvents();
@@ -281,15 +286,24 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		}
 		EventHandling::HandleGameLoopEvents();
 
-		// Copied from xNVSE
-		const auto vatsTimeMult = ThisStdCall<double>(0x9C8CC0, reinterpret_cast<void*>(0x11F2250));
-		const auto isMenuMode = CdeclCall<bool>(0x702360);
+		// Handle Timers
+		{
+			const auto globalTimeMult = CdeclCall<double>(0x716440);
 
-		AUX_TIMER_CS;
-		AuxTimer::RemovePendingTimers();
-		if (!s_auxTimerMapArraysPerm.Empty())
-			s_dataChangedFlags |= kChangedFlag_AuxTimerMaps; // assume a timer will change
-		AuxTimer::DoCountdown(vatsTimeMult, isMenuMode);
+			// Copied from xNVSE
+			// Calls GetPlayerTimeMultWithVATSCamShots, which applies on top of SGTM's TimeMult changes.
+			// g_timeGlobal's secondsPassed only accounts for GetGlobalTimeMult, hence why we need to multiply by the VATS time mult.
+			// TODO: there is another function called VATSCameraData::GetTargetTimeUpdateMult, but we aren't using it...
+			const auto vatsTimeMult = ThisStdCall<double>(0x9C8CC0, reinterpret_cast<void*>(0x11F2250));
+			const auto isMenuMode = CdeclCall<bool>(0x702360);
+
+			AUX_TIMER_CS;
+			AuxTimer::RemovePendingTimers();
+			if (!s_auxTimerMapArraysPerm.Empty())
+				s_dataChangedFlags |= kChangedFlag_AuxTimerMaps; // assume a timer will change
+			AuxTimer::DoCountdown(globalTimeMult, vatsTimeMult, isMenuMode);
+		}
+
 		break;
 	}
 	case NVSEMessagingInterface::kMessage_RuntimeScriptError:
@@ -312,7 +326,6 @@ bool Cmd_TestDemo_Execute(COMMAND_ARGS)
 	return true;
 }
 
-//No idea why the extern "C" is there.
 extern "C"
 {
 	//This is required for the INI functionality; need to get the Handle.
@@ -475,7 +488,7 @@ extern "C"
 
 		// Register script commands
 		// https://geckwiki.com/index.php?title=NVSE_Opcode_Base
-		nvse->SetOpcodeBase(0x3C93);
+		nvse->SetOpcodeBase(CurrentOpcode);
 
 		/* ONLY COMMANDS WITH LISTED OPCODES SHOULD BE USED IN SCRIPTS */
 		/* DO NO COMMENT OUT AN ALREADY-RELEASED FUNCTION; REPLACE WITH EMPTY COMMAND INSTEAD */
@@ -730,8 +743,12 @@ extern "C"
 		/*3D62*/	REG_CMD(IsFormLoading);
 		/*3D63*/	REG_CMD(ApplyEasingAlt);
 		/*3D64*/	REG_CMD(PatchFreezeTime);
+		
+		// Create other commands using the NVSECommandBuilder, to reduce busywork.
+		CurrentOpcode = 0x3D64;
+		NVSECommandBuilder builder(nvse);
+		CreateCommands_Refs(builder);
 
-		//***Current Max OpCode: 0x3D74 (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 		
 		//========v1.??
 		//todo: always check to update/increase your opcode range when adding new functions

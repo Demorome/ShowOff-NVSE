@@ -35,18 +35,19 @@ namespace AuxTimer
 
 	namespace Impl
 	{
-		void DoCountdown(double vatsTimeMult, bool isMenuMode, bool isTemp)
+		void DoCountdown(double const globalTimeMult, double const vatsTimeMult, bool const isMenuMode, bool const isTemp)
 		{
 			AuxTimerModsMap& auxTimers = isTemp ? s_auxTimerMapArraysTemp : s_auxTimerMapArraysPerm;
 
 			if (auxTimers.Empty())
 				return;
 
-			auto const secondsDelta = static_cast<double>(g_timeGlobal->secondsPassed);
-			auto const secondsDeltaWithMult = secondsDelta * vatsTimeMult;
-			double secondsDeltaWithMultNoTurbo = secondsDeltaWithMult;
-			if (g_thePlayer->isUsingTurbo)
-				secondsDeltaWithMultNoTurbo /= GetFltGameSetting(0x11D0FA8); // gs_fTurboTimeMultiplier
+			auto const secondsDelta = static_cast<double>(g_timeGlobal->secondsPassed) / globalTimeMult; // unnaffected by TimeMult
+			// secondsPassed already accounts for GlobalTimeMult
+			auto const secondsDeltaWithMult = static_cast<double>(g_timeGlobal->secondsPassed) * vatsTimeMult;
+			double const secondsDeltaWithMultNoTurbo = (g_thePlayer->isUsingTurbo) ? 
+				  (secondsDeltaWithMult / GetFltGameSetting(0x11D0FA8)) // gs_fTurboTimeMultiplier 
+				: secondsDeltaWithMult;
 
 			for (auto modMapIter = auxTimers.Begin(); !modMapIter.End(); ++modMapIter)
 			{
@@ -74,11 +75,11 @@ namespace AuxTimer
 								|| (timer.m_flags & AuxTimerValue::kFlag_RunInGameMode && !isMenuMode))
 							{
 								float timePassed;
-								if (timer.m_flags & AuxTimerValue::kFlag_CountInSeconds)
+								if (timer.m_flags & AuxTimerValue::kFlag_CountInSeconds) [[likely]]
 								{
 									const bool notAffectedByTimeMult = 
-										(timer.m_flags & AuxTimerValue::kFlag_NotAffectedByTimeMult_InMenuMode)
-										&& isMenuMode;
+										((timer.m_flags & AuxTimerValue::kFlag_NotAffectedByTimeMult_InMenuMode) && isMenuMode)
+										|| ((timer.m_flags & AuxTimerValue::kFlag_NotAffectedByTimeMult_InGameMode) && !isMenuMode);
 
 									const bool ignoreTurbo =
 										(timer.m_flags & AuxTimerValue::kFlag_IgnoreTurbo);
@@ -112,13 +113,12 @@ namespace AuxTimer
 								}
 
 								// Timer could have stopped from inside OnAuxTimerUpdate handlers
-								if (timer.IsPendingRemoval())
+								if (timer.IsPendingRemoval()) [[unlikely]]
 									continue;
 
 								if (timer.m_timeRemaining <= 0.0)
 								{
 									// Handle end-of-timer code.
-
 									for (auto const& callback : OnAuxTimerStop->EventCallbacks) {
 										auto* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneString*>(callback.eventFilter);
 										if (filter->IsInFilter(0, ownerFormID) && filter->IsInFilter(1, auxVarNameMapIter.Key())) {
@@ -166,10 +166,10 @@ namespace AuxTimer
 		}
 	}
 
-	void DoCountdown(double vatsTimeMult, bool isMenuMode)
+	void DoCountdown(double globalTimeMult, double vatsTimeMult, bool isMenuMode)
 	{
-		Impl::DoCountdown(vatsTimeMult, isMenuMode, true);
-		Impl::DoCountdown(vatsTimeMult, isMenuMode, false);
+		Impl::DoCountdown(globalTimeMult, vatsTimeMult, isMenuMode, true);
+		Impl::DoCountdown(globalTimeMult, vatsTimeMult, isMenuMode, false);
 	}
 
 	void HandleAutoRemoveTempTimers()

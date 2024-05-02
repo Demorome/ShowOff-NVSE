@@ -1169,6 +1169,24 @@ enum kNVSEParamType {
 
 #endif
 
+/**** PluginExpressionEvaluator docs **********************************************************
+ *	This is an alternate interface to extract args for a script function, with better support for more complex tokens.
+ *	For example, it can extract arrays, slices, and strings directly.
+ *
+ *	To initialize the s_expEvalUtils global that is required for PluginExpressionEvaluator to work,
+ *	.. call InitExpressionEvaluatorUtils from the NVSEInterface after your plugin is loaded.
+ *
+ *	When used, it also subtly changes how the parsing will work for the expressions following the function call,
+ *  ..enabling the use of new NVSE expressions: https://geckwiki.com/index.php?title=NVSE_Expressions
+ *	As such, any script function using this evaluator belongs to the category of NVSE-Aware Functions:
+ *	https://geckwiki.com/index.php?title=Category:NVSE-Aware_Functions
+ *
+ *	A script function using the PluginExpressionEvaluator *MUST* use the Cmd_Expression_Plugin_Parse parser.
+ *	For example, this could mean using the premade DEFINE_COMMAND_PLUGIN_EXP or DEFINE_COMMAND_ALT_PLUGIN_EXP macro definitions.
+ *
+ *	Also, parameters for the ParamInfo *MUST* be defined using the NVSEParamType enum, NOT the regular ParamType enum.
+ *	For example, using kParamType_Integer is invalid, but kNVSEParamType_Number is valid.
+ ******************************************************************************/
 struct ExpressionEvaluatorUtils
 {
 #if RUNTIME
@@ -1374,4 +1392,66 @@ struct NVSELoggingInterface
 	// If empty string (logPath[0] == 0), use the base game folder.
 	// The returned string will never be nullptr.
 	const char* (__fastcall* GetPluginLogPath)();
+};
+
+
+/**** NVSECommandBuilder **********************************************************/
+#if _DEBUG
+extern UInt32 const MaxOpcode;
+extern UInt32 CurrentOpcode;
+#endif
+
+/**
+ *  A more straight-forward way to define commands.
+ *  Usage:
+ *	```
+ *  NVSECommandBuilder builder(nvse);
+ *  builder.Create("MyCommand", returnType, { ParamInfo{ "param1", kParamType_Integer, 0 }, ParamInfo{ "param2", kParamType_String, 0 } }, false, Cmd_MyCommand_Execute);
+ *  // or
+ *  builder.Create("MyCommand", returnType, { ParamInfo{ "param1", kParamType_Integer, 0 }, ParamInfo{ "param2", kParamType_String, 0 } }, false, [](COMMAND_ARGS)
+ *  {
+ *     return true;
+ *  });
+ *	```
+ */
+class NVSECommandBuilder
+{
+	const NVSEInterface* scriptInterface;
+
+	void Create_(const char* name, CommandReturnType returnType, const ParamInfo* params, UInt16 numParams, bool refRequired, Cmd_Execute fn, Cmd_Parse parse, const char* altName) const
+	{
+		auto commandInfo = CommandInfo{
+			name, altName, 0, "", refRequired, numParams, params, fn, parse, nullptr, 0
+		};
+		scriptInterface->RegisterTypedCommand(&commandInfo, returnType);
+
+#if _DEBUG
+		++CurrentOpcode;
+		ASSERT(CurrentOpcode <= MaxOpcode);
+#endif
+	}
+
+public:
+	explicit NVSECommandBuilder(const NVSEInterface* scriptInterface) : scriptInterface(scriptInterface) {}
+
+	template <UInt16 NumParams>
+	void Create(const char* name, CommandReturnType returnType, const ParamInfo (&params)[NumParams], bool refRequired, Cmd_Execute fn, Cmd_Parse parse = nullptr, const char* altName = "") const
+	{
+		Create_(name, returnType, params, NumParams, refRequired, fn, parse, altName);
+	}
+
+	void Create(const char* name, CommandReturnType returnType, std::initializer_list<ParamInfo> params, bool refRequired, Cmd_Execute fn, Cmd_Parse parse = nullptr, const char* altName = "") const
+	{
+		ParamInfo* paramCopy = nullptr;
+		if (params.size())
+		{
+			paramCopy = new ParamInfo[params.size()];
+			size_t index = 0;
+			for (const auto& param : params)
+			{
+				paramCopy[index++] = param;
+			}
+		}
+		Create_(name, returnType, paramCopy, static_cast<UInt16>(params.size()), refRequired, fn, parse, altName);
+	}
 };

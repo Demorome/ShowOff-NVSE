@@ -1286,6 +1286,9 @@ public:
 	UInt32							unkD0[4];		// D0
 	hkpMotion						motion;			// E0
 
+	// Copied from JIP LN NVSE.
+	bool IsMobile() const { return (motion.type & 2) != 0; }
+
 	void UpdateMotion();
 };
 

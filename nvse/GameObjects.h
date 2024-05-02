@@ -75,7 +75,7 @@ public:
 	virtual void		AnimateNiNode();
 	virtual void		GenerateNiNode(bool arg1);
 	virtual void		Set3D(NiNode* niNode, bool unloadArt);
-	virtual NiNode *	GetNiNode();
+	virtual NiNode *	GetNiNode() const;
 	virtual void		Unk_75(void);
 	virtual void		Unk_76(void);
 	virtual void		Unk_77(void);
@@ -163,6 +163,7 @@ public:
 	CoordXY *PosXY() {return (CoordXY*)&posX;}
 
 	void Update3D();
+	NiAVObject* __fastcall GetNiBlock2(const char* blockName) const;
 	TESContainer *GetContainer();
 	bool IsMapMarker();
 
@@ -179,7 +180,7 @@ public:
 	void SetPos(NiVector3 &posVector);
 	void SetAngle(NiVector3 &rotVector);
 	bool MoveToCell(TESForm *worldOrCell, NiVector3 &posVector);
-	void DeleteReference();
+	void MarkForDelete();
 	TESObjectREFR *GetMerchantContainer();
 	ContChangesEntry* GetContainerChangesEntry(TESForm* itemForm) const;
 	float GetWaterImmersionPerc();
@@ -189,9 +190,13 @@ public:
 	bool ValidForHooks();
 	NiAVObject *GetNiBlock(const char *blockName);
 	NiNode *GetNode(const char *nodeName);
-	hkpRigidBody *GetRigidBody(const char *nodeName);
+	hkpRigidBody *GetRigidBody(const char *nodeName) const;
 	bool RunScriptSource(const char *sourceStr);
-	NiNode* Get3D();
+
+	// Does the same thing as GetNiNode
+	NiNode* Get3D() const;
+
+	TESObjectREFR* PlaceAtMe(TESForm* toPlace, int count = 1, int useNodePos = 0, int direction = 0);
 
 	static TESObjectREFR* __stdcall Create(bool bTemp = false);
 

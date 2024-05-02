@@ -111,9 +111,78 @@ void TESObjectREFR::Update3D()
 	}
 }
 
-NiNode* TESObjectREFR::Get3D()
+/*
+// Code taken from JIP LN NVSE
+__declspec(naked) NiAVObject* __fastcall TESObjectREFR::GetNiBlock2(const char* blockName) const
 {
-	return ThisStdCall<NiNode*>(0x43FCD0, this);
+	__asm
+	{
+		mov		eax, [ecx + 0x64]
+		test	eax, eax
+		jz		done
+		mov		eax, [eax + 0x14]
+		test	eax, eax
+		jz		done
+		cmp[edx], 0
+		jz		done
+		mov		ecx, eax
+		call	NiNode::GetBlock
+	done :
+		retn
+	}
+}
+
+// Code taken from JIP LN NVSE
+__declspec(naked) hkpRigidBody* __fastcall TESObjectREFR::GetRigidBody(const char* blockName) const
+{
+	__asm
+	{
+		call	TESObjectREFR::GetNiBlock2
+		test	eax, eax
+		jz		done
+		mov		eax, [eax + 0x1C]
+		test	eax, eax
+		jz		done
+		mov		eax, [eax + 0x10]
+		test	eax, eax
+		jz		done
+		mov		eax, [eax + 8]
+		xor edx, edx
+		cmp		byte ptr[eax + 0x28], 1
+		cmovnz	eax, edx
+		done :
+		retn
+	}
+}*/
+
+// Copied from JohnnyGuitar NVSE
+hkpRigidBody* TESObjectREFR::GetRigidBody(const char* nodeName) const
+{
+	if (NiNode* rootNode = GetNiNode())
+	{
+		NiNode* targetNode = (nodeName[0]) ? rootNode->GetNode(nodeName) : rootNode;
+		if (targetNode && targetNode->m_collisionObject) 
+		{
+			if (bhkWorldObject* hWorldObj = targetNode->m_collisionObject->worldObj)
+			{
+				hkpRigidBody* rigidBody = (hkpRigidBody*)hWorldObj->refObject;
+				UInt8 motionType = rigidBody->motion.type;
+				if ((motionType == 2) || (motionType == 3) || (motionType == 6))
+					return rigidBody;
+			}
+		}
+	}
+	return nullptr;
+}
+
+NiNode* TESObjectREFR::Get3D() const
+{
+	return ThisStdCall<NiNode*>(0x43FCD0, const_cast<TESObjectREFR*>(this));
+}
+
+TESObjectREFR* TESObjectREFR::PlaceAtMe(TESForm* toPlace, int count, int useNodePos, int direction)
+{
+	return CdeclCall<TESObjectREFR*>(0x5C4B30, this, toPlace, count, useNodePos, direction, 1.0f);
 }
 
 TESObjectREFR *TESObjectREFR::Create(bool bTemp)
@@ -267,6 +336,40 @@ bool Actor::Detects(Actor* target)
 {
 	SInt32 const detectionLevel = this->GetDetectionLevelAlt(target, false);
 	return detectionLevel > 0;
+}
+
+// Code copied from JIP's TESObjectREFR::DeleteReference
+// This is just an ASM-optimised version of vanilla MarkForDelete.
+__declspec(naked) void TESObjectREFR::MarkForDelete()
+{
+	__asm
+	{
+		push	ebp
+		mov		ebp, esp
+		push	ecx
+		push	1
+		mov		eax, [ecx]
+		call	dword ptr[eax + 0xC4]
+		push	1
+		mov		ecx, [ebp - 4]
+		mov		eax, [ecx]
+		call	dword ptr[eax + 0xC8]
+		push	0
+		push	0
+		mov		ecx, [ebp - 4]
+		mov		eax, [ecx]
+		call	dword ptr[eax + 0x1CC]
+		mov		ecx, [ebp - 4]
+		cmp		byte ptr[ecx + 0xF], 0xFF
+		jnz		done
+		lea		eax, [ebp - 4]
+		push	eax
+		mov		ecx, 0x11CACB8
+		CALL_EAX(0x5AE3D0)
+	done:
+		leave
+		retn
+	}
 }
 
 // From JIP

@@ -103,13 +103,23 @@ namespace GameFixes
 			}
 		}
 
-
 		void WriteDelayedHooks()
 		{
 			// Fix for ShowSleepWaitMenu (script function)
 			// If checkPreconditions == 1, then it always opens Sleep menu, regardless of isSleep arg
 			ShowSleepWaitMenu_ParseParameters::WriteHook(); // doesn't need to be delayed, but w/e
 			CreateSleepWaitMenu::WriteDelayedHook();
+		}
+	}
+
+	namespace PlaceAtReticle
+	{
+		// Vanilla PlaceAtReticle spawns items in with 100x their maximum health.
+		void WriteHook()
+		{
+			// (Presumably) replace "* 100.0" with "* 1.0"
+			// Credits to lStewieAl
+			SafeWrite16(0x5DF4DC, 0x2070);
 		}
 	}
 
@@ -231,6 +241,7 @@ namespace GameFixes
 	{
 		ShowRaceMenu::WriteHooks();
 		PatchResetCell::WriteHook();
+		PlaceAtReticle::WriteHook();
 #if 0
 		PatchGetVATSValueNotWorkingForDamagePreview::WriteHook();
 
