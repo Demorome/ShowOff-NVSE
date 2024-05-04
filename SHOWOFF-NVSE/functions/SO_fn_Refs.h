@@ -69,46 +69,42 @@ static ParamInfo Cmd_PlaceAtReticle_Params[] = {
 	{ "maxDistance",	kParamType_Float,	1 },
 };
 
-void CreateCommands_Refs(const NVSECommandBuilder& builder)
+static ParamInfo Cmd_PlaceAtReticleAlt_Params[] = {
+	{ "formToPlace",	kParamType_AnyForm, 0 },
+	{ "count",			kParamType_Integer,	1 },
+	{ "minDistance",	kParamType_Float,	1 },
+	{ "maxDistance",	kParamType_Float,	1 },
+	{ "healthPercent",	kParamType_Float,	1 },
+};
+DEFINE_COMMAND_PLUGIN(PlaceAtReticleAlt, , true, Cmd_PlaceAtReticleAlt_Params);
+bool Cmd_PlaceAtReticleAlt_Execute(COMMAND_ARGS)
 {
-	builder.Create("PlaceAtReticleAlt", kRetnType_Form,
-		{	{ "formToPlace",	kParamType_AnyForm, 0 },
-			{ "count",			kParamType_Integer,	1 },
-			{ "minDistance",	kParamType_Float,	1 },
-			{ "maxDistance",	kParamType_Float,	1 },
-			{ "healthPercent",	kParamType_Float,	1 },
-		},	
-		false,
-		[](COMMAND_ARGS)
+	TESForm* formToPlace;
+	UInt32 count = 1;
+	float minDistance = 0.0f, maxDistance = 0.0f;
+	PlaceAtReticleAlt::g_healthPercent = 1.0f;
+
+	PlaceAtReticleAlt::g_lastPlacedRef = nullptr;
+	*result = 0;
+
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &formToPlace, &count, &minDistance, &maxDistance, &PlaceAtReticleAlt::g_healthPercent))
+	{
+		// Ugly hack to call the vanilla func by convincing it there's only 4 args to extract.
 		{
-			TESForm* formToPlace;
-			UInt32 count = 1;
-			float minDistance = 0.0f, maxDistance = 0.0f;
-			PlaceAtReticleAlt::g_healthPercent = 1.0f;
-
-			PlaceAtReticleAlt::g_lastPlacedRef = nullptr;
-			*result = 0;
-
-			if (ExtractArgsEx(EXTRACT_ARGS_EX, &formToPlace, &count, &minDistance, &maxDistance, &PlaceAtReticleAlt::g_healthPercent))
-			{
-				// Ugly hack to call the vanilla func by convincing it there's only 4 args to extract.
-				{
-					auto const oldNumArgs = NUM_ARGS;
-					NUM_ARGS = std::size(Cmd_PlaceAtReticle_Params);
-					Cmd_PlaceAtReticle(PASS_COMMAND_ARGS);
-					NUM_ARGS = oldNumArgs;
-				}
-
-				if (auto* refRes = PlaceAtReticleAlt::g_lastPlacedRef)
-				{
-					REFR_RES = refRes->refID;
-				}
-			}
-
-			// Reset the global, so it doesn't mess with regular PlaceAtReticle calls.
-			PlaceAtReticleAlt::g_healthPercent = 1.0f;
-
-			return true;
+			auto const oldNumArgs = NUM_ARGS;
+			NUM_ARGS = std::size(Cmd_PlaceAtReticle_Params);
+			Cmd_PlaceAtReticle(PASS_COMMAND_ARGS);
+			NUM_ARGS = oldNumArgs;
 		}
-	);
+
+		if (auto* refRes = PlaceAtReticleAlt::g_lastPlacedRef)
+		{
+			REFR_RES = refRes->refID;
+		}
+	}
+
+	// Reset the global, so it doesn't mess with regular PlaceAtReticle calls.
+	PlaceAtReticleAlt::g_healthPercent = 1.0f;
+
+	return true;
 }

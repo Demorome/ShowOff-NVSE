@@ -743,12 +743,7 @@ extern "C"
 		/*3D62*/	REG_CMD(IsFormLoading);
 		/*3D63*/	REG_CMD(ApplyEasingAlt);
 		/*3D64*/	REG_CMD(PatchFreezeTime);
-		
-		// Create other commands using the NVSECommandBuilder, to reduce busywork.
-		CurrentOpcode = 0x3D64;
-		NVSECommandBuilder builder(nvse);
-		CreateCommands_Refs(builder);
-
+		/*3D65*/	REG_CMD_FORM(PlaceAtReticleAlt);
 		
 		//========v1.??
 		//todo: always check to update/increase your opcode range when adding new functions

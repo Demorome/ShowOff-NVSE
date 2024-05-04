@@ -406,7 +406,55 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 
 //===v1.80
 
+===Vanilla Bug Fixes:
+* Fixed PlaceAtReticle always spawning items with 100x their max health (credits to lStewieAl for the code).
+* Fixed AuxTimerPaused not returning a boolean (1 or 0).
+* Fixed ShowSleepWaitMenu: if shouldCheckPreconditions == 1, then it always opened the Sleep menu regardless of isSleep arg
 
+===Bug Fixes:
+* Fixed WriteToJSON not correctly writing forms.
+* Fixed WriteToJSON crashing when specifying a JsonPointer.
+* For ApplyEasing: fixed Circ easing potentially returning weird values.
+* Added null checks for GetEquippedWeaponRef
+* Fix being able to un-prevent stuff in OnPre events
+
+===Function Improvements:
+* Two new flags for AuxTimers: "Ignore Turbo" and "Ignore TimeMult in GameMode".
+
+===Event Changes:
+* For "ShowOff:OnPreProjectileExplode": 
+** Now mines will just revert to their deactivated state if the explosion is prevented, and thrown grenades are replaced with their inert weapon variant (the projectile is deleted and replaced with an item).
+** This way the event doesn't keep trying to run for an explosion that was prevented this way.
+
+===New Functions:
+* GetIsActivationPromptShown
+* GetHitLocationLingering
+* HighlightAdditionalReferenceAlt
+* GetVATSMaxEngageDistance
+* SetForceDrawHitscanProjectiles
+* SetProjectileTracerChanceOverride
+* SpawnTracingProjectile
+* GetVATSTargetable
+* GetProjectileRefIsStuck
+* ForceRecoilAnim
+* ForceHitStaggerReaction
+* IsPlayerLookingAround
+* GetActorFadeState
+* IsActorInvisibleToPlayer
+* IsFormLoading
+* ApplyEasingAlt
+* PatchFreezeTime
+* PlaceAtReticleAlt
+
+===New Events:
+* "ShowOff:OnPlayerJump"
+* "ShowOff:OnPOVChange"
+* "ShowOff:OnChallengeProgress"
+* "ShowOff:OnPreProjectileCreate"
+* "ShowOff:OnMenuCreate"
+* "ShowOff:OnExplosionHitAnyRef"
+* "ShowOff:OnWeaponUnholster"
+* "ShowOff:OnWeaponHolster"
 
 ====== (Template:)
 
