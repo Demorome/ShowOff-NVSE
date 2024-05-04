@@ -423,7 +423,7 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 
 ===Event Changes:
 * For "ShowOff:OnPreProjectileExplode": 
-** Now mines will just revert to their deactivated state if the explosion is prevented, and thrown grenades are replaced with their inert weapon variant (the projectile is deleted and replaced with an item).
+** If the explosion is prevented, mines will now just revert to their deactivated state, and thrown grenades are replaced with their inert weapon variant (the projectile is deleted and replaced with an item).
 ** This way the event doesn't keep trying to run for an explosion that was prevented this way.
 
 ===New Functions:
