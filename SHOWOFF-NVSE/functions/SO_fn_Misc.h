@@ -51,7 +51,7 @@ DEFINE_COMMAND_ALT_PLUGIN(ClearCinematicTextQueue, ClearQuestMessageQueue, "", f
 DEFINE_COMMAND_ALT_PLUGIN(GetCellEncounterZone, GetCellZone, "", false, kParams_OneForm);
 DEFINE_COMMAND_ALT_PLUGIN(RemoveFormFromLeveledList, SorryYoureNotOnTheListAnymore, "", false, kParams_TwoForms);
 DEFINE_COMMAND_ALT_PLUGIN(ResetInteriorAlt, IWantThisRoomCleanRightNow, "", false, kParams_OneInteriorCell);
-DEFINE_COMMAND_ALT_PLUGIN(GetActorValueName, GetAVName, "", false, kParams_OneActorValue);
+DEFINE_COMMAND_ALT_PLUGIN(GetActorValueName, GetAVName, "", false, kParams_OneActorValue_OneOptionalInt);
 
 
 bool(__cdecl* Cmd_Disable)(COMMAND_ARGS) = (bool(__cdecl*)(COMMAND_ARGS)) 0x5C45E0;
@@ -931,11 +931,27 @@ bool Cmd_SetEnableParent_Execute(COMMAND_ARGS)
 
 bool Cmd_GetActorValueName_Execute(COMMAND_ARGS)
 {
-	UInt32 av;
 	*result = 0;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &av))
+	UInt32 av;
+	enum Mode {
+		kMode_GetEditorName = 0,
+		kMode_GetFullLocalizedName,
+		kMode_GetShortLocalizedName,
+	} mode = kMode_GetEditorName;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &av, &mode))
 		return true;
-	auto const name = GetActorValueName(av);
+	const char* name = "(null)";
+	if (mode == kMode_GetEditorName) {
+		name = GetActorValueEditorIDName(av);
+	}
+	else if (mode == kMode_GetFullLocalizedName) {
+		if (auto* info = GetActorValueInfo(av)) {
+			name = info->fullName.name.CStr();
+		}
+	}
+	else if (mode == kMode_GetShortLocalizedName) {
+		name = GetActorValueShortLocalizedName(av);
+	}
 	g_strInterface->Assign(PASS_COMMAND_ARGS, name);
 	return true;
 }

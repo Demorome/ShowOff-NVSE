@@ -38,7 +38,8 @@ const _ShowMessageBox_Callback ShowMessageBox_Callback = (_ShowMessageBox_Callba
 const _ShowMessageBox_pScriptRefID ShowMessageBox_pScriptRefID = (_ShowMessageBox_pScriptRefID)0x011CAC64;
 const _ShowMessageBox_button ShowMessageBox_button = (_ShowMessageBox_button)0x0118C684;
 
-const _GetActorValueName GetActorValueName = (_GetActorValueName)0x00066EAC0;	// See Cmd_GetActorValue_Eval
+const _GetActorValueEditorIDName GetActorValueEditorIDName = (_GetActorValueEditorIDName)0x66EAC0;	// See Cmd_GetActorValue_Eval
+const _GetActorValueLocalizedName GetActorValueShortLocalizedName = (_GetActorValueLocalizedName)0x66EB00;
 const UInt32 * g_TlsIndexPtr = (UInt32 *)0x0126FD98;
 const _MarkBaseExtraListScriptEvent MarkBaseExtraListScriptEvent = (_MarkBaseExtraListScriptEvent)0x005AC790;
 
@@ -1153,7 +1154,7 @@ bool ExtractFormattedString(FormatStringArgs& args, char* buffer)
 				if (!args.Arg(args.kArgType_Float, &actorVal))
 					return false;
 
-				std::string valStr(GetActorValueString(actorVal));
+				std::string valStr(GetDebugActorValueString(actorVal));
 				if (valStr.length())
 				{
 					for (UInt32 idx = 1; idx < valStr.length(); idx++)
@@ -1480,11 +1481,11 @@ bool ExtractSetStatementVar(Script* script, ScriptEventList* eventList, void* sc
 }
 
 // g_baseActorValueNames is only filled in after oblivion's global initializers run
-const char* GetActorValueString(UInt32 actorValue)
+const char* GetDebugActorValueString(UInt32 actorValue)
 {
 	const char* name = 0;
 	if (actorValue <= eActorVal_FalloutMax)
-		name = GetActorValueName(actorValue);
+		name = GetActorValueEditorIDName(actorValue);
 	if (!name)
 		name = "unknown";
 
@@ -1494,7 +1495,7 @@ const char* GetActorValueString(UInt32 actorValue)
 UInt32 GetActorValueForScript(const char* avStr) 
 {
 	for (UInt32 i = 0; i <= eActorVal_FalloutMax; i++) {
-		char* name = GetActorValueName(i);
+		char* name = GetActorValueEditorIDName(i);
 		if (_stricmp(avStr, name) == 0)
 			return i;
 	}
@@ -1508,7 +1509,7 @@ UInt32 GetActorValueForString(const char* strActorVal, bool bForScript)
 		return GetActorValueForScript(strActorVal);
 
 	for (UInt32 n = 0; n <= eActorVal_FalloutMax; n++) {
-		char* name = GetActorValueName(n);
+		char* name = GetActorValueEditorIDName(n);
 		if (_stricmp(strActorVal, name) == 0)
 			return n;
 	}

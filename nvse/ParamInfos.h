@@ -300,6 +300,14 @@ static ParamInfo kParams_OneActorValue[1] =
 	{	"actor value", kParamType_ActorValue, 0},
 };
 
+
+static ParamInfo kParams_OneActorValue_OneOptionalInt[2] =
+{
+	{	"actor value", kParamType_ActorValue, 0},
+	{	"int", kParamType_Integer, 1},
+};
+
+
 // Format String param info taken from JIP.
 
 #define FORMAT_STRING_PARAMS 	\

@@ -39,7 +39,7 @@ bool __fastcall ContainerMenuCheckIsTargetChild(ContChangesEntry* entry, void* e
 	return ref->GetIsChildSize(true);
 }
 
-__declspec(naked) void Actor::UnequipItem(TESForm* objType, UInt32 unk1, ExtraDataList* itemExtraList, UInt32 unk3, bool lockUnequip, UInt32 unk5)
+__declspec(naked) void Actor::UnequipItem(TESForm* objType, UInt32 unk1, ExtraDataList* itemExtraList, UInt32 unk3, bool lockUnequip_unused, UInt32 unk5)
 {
 	static const UInt32 procAddr = kAddr_UnequipItem;
 	__asm	jmp		procAddr

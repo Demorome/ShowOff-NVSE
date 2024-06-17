@@ -171,6 +171,7 @@ public:
 	bool GetDisabled();
 	ExtraContainerChanges *GetOrCreateContainerChanges();
 	ExtraContainerChanges::EntryDataList *GetContainerChangesList();
+	InventoryChanges *GetInventoryChanges();
 	SInt32 GetItemCount(TESForm *form);
 	void AddItemAlt(TESForm *item, UInt32 count, float condition, bool doEquip);
 	bool GetInventoryItems(UInt8 typeID);
@@ -718,7 +719,7 @@ public:
 	// OBSE: itemExtraList is NULL as the container changes entry is not resolved before the call
 	// NVSE: Default values are those used by the vanilla script functions.
 	void EquipItem(TESForm *objType, UInt32 equipCount = 1, ExtraDataList *itemExtraList = NULL, UInt32 unk3 = 1, bool lockEquip = false, UInt32 unk5 = 1);	// unk3 apply enchantment on player differently
-	void UnequipItem(TESForm *objType, UInt32 unequipCount = 1, ExtraDataList *itemExtraList = NULL, UInt32 unk3 = 1, bool lockEquip = false, UInt32 unk5 = 1);
+	void UnequipItem(TESForm *objType, UInt32 unequipCount = 1, ExtraDataList *itemExtraList = NULL, UInt32 unk3 = 1, bool lockUnequip_unused = false, UInt32 unk5 = 1);
 
 	//EquippedItemsList GetEquippedItems();
 	//ExtraContainerDataArray GetEquippedEntryDataList();

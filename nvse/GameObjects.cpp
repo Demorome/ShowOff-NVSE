@@ -53,6 +53,11 @@ bool TESObjectREFR::IsMapMarker()
 	return baseForm->refID == 0x10;
 }
 
+InventoryChanges* TESObjectREFR::GetInventoryChanges()
+{
+	return CdeclCall<InventoryChanges*>(0x4BF220, this);
+}
+
 bool PlayerCharacter::SetSkeletonPath(const char* newPath)
 {
 	if (!bThirdPerson) {

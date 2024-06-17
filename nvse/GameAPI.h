@@ -43,11 +43,13 @@ bool IsConsoleMode();
 bool GetConsoleEcho();
 void SetConsoleEcho(bool doEcho);
 const char * GetFullName(TESForm * baseForm);
-const char* GetActorValueString(UInt32 actorValue); // should work now
+const char* GetDebugActorValueString(UInt32 actorValue); // should work now
 UInt32 GetActorValueForString(const char* strActorVal, bool bForScript = false);
 
-typedef char * (* _GetActorValueName)(UInt32 actorValueCode);
-extern const _GetActorValueName GetActorValueName;
+typedef char * (* _GetActorValueEditorIDName)(UInt32 actorValueCode);
+extern const _GetActorValueEditorIDName GetActorValueEditorIDName;
+typedef char* (* _GetActorValueLocalizedName)(UInt32 actorValueCode);
+extern const _GetActorValueLocalizedName GetActorValueShortLocalizedName;
 UInt32 GetActorValueMax(UInt32 actorValueCode);
 
 typedef void (* _ShowMessageBox_Callback)(void);
