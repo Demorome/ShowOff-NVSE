@@ -34,7 +34,7 @@ namespace JsonToNVSE
 	using DefaultJsonValue = tao::json::value;
 	using ConfigJsonValue = tao::config::value;
 
-	
+
 
 	template< template< typename... > class Traits >
 	ArrayElementL BasicJsonValueToArrayElem(tao::json::basic_value<Traits> const& val)
@@ -132,7 +132,7 @@ namespace JsonToNVSE
 		{
 			return SubElementsToNVSEArray(val, scriptObj);
 		}
-		
+
 		//return single element (NOT in an array).
 		return BasicJsonValueToArrayElem(val);
 	}
@@ -156,7 +156,7 @@ namespace JsonToNVSE
 			},
 			[](JsonValueVariant& json) -> JsonValueVariant* {
 				return &json;
-			} 
+			}
 		}, jsonArg);
 	}
 
@@ -201,18 +201,18 @@ namespace JsonToNVSE
 
 	//MUST be called with valid Parser type.
 	std::optional<NewJsonValueVariant_OrRef> ReadJSONWithParser(
-		const Parser parser, 
-		const std::string &JSON_FullPath, 
-		const std::string_view relativePath, 
-		const std::string_view& funcName, 
-		const bool cache, 
+		const Parser parser,
+		const std::string &JSON_FullPath,
+		const std::string_view relativePath,
+		const std::string_view& funcName,
+		const bool cache,
 		PluginExpressionEvaluator *eval = {})
 	{
 		if (auto const cachedRef = g_CachedJSONFiles.GetPtr(relativePath.data()))
 		{
 			return std::ref(*cachedRef);
 		}
-		
+
 		try
 		{
 			auto parsedJson = ReadJson_Unsafe(parser, JSON_FullPath);
@@ -240,7 +240,7 @@ namespace JsonToNVSE
 		return {};
 	}
 
-	std::optional<JsonValueVariant_ContainsRef> GetJSONValueAtJSONPointer(const JsonValueVariant &value, 
+	std::optional<JsonValueVariant_ContainsRef> GetJSONValueAtJSONPointer(const JsonValueVariant &value,
 		const std::string& jsonPointer, const std::string_view& funcName, PluginExpressionEvaluator* eval = {})
 	{
 		try
@@ -311,7 +311,7 @@ namespace JsonToNVSE
 		}
 		throw std::logic_error("SHOWOFF - BasicArrayElemToJsonValue >> Received wrongly typed elem.");
 	}
-	
+
 	template< template< typename... > class Traits >
 	tao::json::basic_value<Traits> GetJSONFromNVSE_Helper(NVSEArrayElement& elem)
 	{
@@ -373,7 +373,7 @@ namespace JsonToNVSE
 		}
 		return value;
 	}
-	
+
 	//Parser arg determines the type of variant to return.
 	//Assume elem and parser are valid.
 	JsonValueVariant GetJSONFromNVSE(NVSEArrayElement &elem, Parser parser)
@@ -395,7 +395,7 @@ namespace JsonToNVSE
 	}
 
 
-	bool InsertValueAtJSONPointer(JsonValueVariant &baseVariant, JsonValueVariant &insertVariant, const std::string &jsonPointer, 
+	bool InsertValueAtJSONPointer(JsonValueVariant &baseVariant, JsonValueVariant &insertVariant, const std::string &jsonPointer,
 		const std::string_view &funcName, PluginExpressionEvaluator* eval = {})
 	{
 		return std::visit([&]<typename T0, typename T1>(T0 &&base, T1 &&insert) -> bool {
@@ -419,13 +419,13 @@ namespace JsonToNVSE
 			}
 			else
 				throw std::logic_error(
-					std::string("SHOWOFF - InsertValueAtJSONPointer >> both visitors should be of the same type.\n") 
+					std::string("SHOWOFF - InsertValueAtJSONPointer >> both visitors should be of the same type.\n")
 					+ std::string(" Type #1: ") + std::string(GetTypeString(baseVariant)) + std::string("\n")
 					+ std::string(" Type #2: ") + std::string(GetTypeString(insertVariant))
 					);
 		}, baseVariant, insertVariant);
 	}
-	
+
 
 	//return false in case of failure, for error reporting.
 	bool TryReadFromJSONFile(PluginExpressionEvaluator& eval, Script* scriptObj)
@@ -468,7 +468,7 @@ namespace JsonToNVSE
 				success = true;
 			}
 		}
-		
+
 		return success;
 	}
 }
@@ -481,7 +481,7 @@ bool Cmd_ReadFromJSONFile_Execute(COMMAND_ARGS)
 #if TEST_JSON_READ_PERFORMANCE
 	auto const start = std::chrono::high_resolution_clock::now();
 #endif
-	
+
 	using namespace JsonToNVSE;
 	*result = 0;
 	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
@@ -506,7 +506,7 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
 		eval.ExtractArgs())
 	{
-		ArrayElementR elem; 
+		ArrayElementR elem;
 		eval.GetNthArg(0)->GetElement(elem);
 		if (!elem.IsValid())
 			return true;
@@ -517,9 +517,13 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 		Parser parser = kParser_JSON;
 		bool cache = false;
 		bool saveFile = true;
+		bool compact = false;
 		switch (auto const numArgs = eval.NumArgs();
 			numArgs)
 		{
+        case 7:
+            compact = eval.GetNthArg(6)->GetBool();
+            [[fallthrough]];
 		case 6:
 			saveFile = eval.GetNthArg(5)->GetBool();
 			[[fallthrough]];
@@ -541,11 +545,10 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 		}
 
 		auto [JSON_FullPath, relPath] = GetFullPath(std::move(json_path_rel));
-		auto const fileExisted = std::filesystem::exists(JSON_FullPath);
 		NewJsonValueVariant_OrRef elemAsJSON = JsonToNVSE::GetJSONFromNVSE(elem, parser);
 
 		//if jsonPointer is empty, then the entire file will be replaced; no point in reading it.
-		bool const readFileAtJPointer = !jsonPointer.empty() && fileExisted;
+		bool const readFileAtJPointer = !jsonPointer.empty();
 		if (readFileAtJPointer)
 		{
 			constexpr std::string_view funcName = { "WriteToJSONFile" };
@@ -557,7 +560,7 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 				{
 					if (!saveFile)	//it's all for nothing if changes aren't being cached and won't be saved to file.
 						return true;
-					//The reason this isn't checked earlier, with "cached" and "savefile"... 
+					//The reason this isn't checked earlier, with "cached" and "savefile"...
 					// ...is because the user might've cached the file earlier (which will be retrieved even if "cached" = false).
 				}
 				else
@@ -591,12 +594,17 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 			if (std::ofstream output(JSON_FullPath);	//erase previous contents, potentially create new file.
 				output.is_open())
 			{
-				std::visit([&output](auto&& val) {
-					output << std::setw(4) << val;	//pretty-printed with tab indents
-					}, GetRef(elemAsJSON));
+                std::visit([&output, compact](auto&& val) {
+                    if (compact) {
+                        output << val; // Compact
+                    }
+                    else {
+                        output << std::setw(4) << val; // Pretty-printed with 4-space indents.
+                    }
+                }, GetRef(elemAsJSON));
 				*result = true;	//success if data was written to file
 			}
-		}			
+		}
 
 		if (!readFileAtJPointer && cache)
 		{
@@ -621,7 +629,7 @@ namespace IniToNVSE
 {
 	//Convert passed partialPath to a fullPath.
 	void GetFullINIPath(std::string &partialPath)
-	{		
+	{
 		//Make string end with ".ini" if it didn't have a file extension.
 		if (partialPath.find('.') == std::string::npos)
 		{
@@ -652,7 +660,7 @@ namespace IniToNVSE
 	std::string GetINIPath(const char* &iniRelPath, Script* const scriptObj, std::string &outModPath)
 	{
 		std::string fullIniPath;
-		
+
 		if (!iniRelPath || !iniRelPath[0])
 		{
 			if (!GetModINIPath(outModPath, scriptObj))
@@ -665,7 +673,7 @@ namespace IniToNVSE
 			fullIniPath = iniRelPath;
 			std::ranges::replace(fullIniPath, '/', '\\');
 		}
-		
+
 		GetFullINIPath(fullIniPath);
 		return fullIniPath;
 	}
@@ -685,11 +693,11 @@ namespace IniToNVSE
 	ICriticalSection g_IniMapLock;
 	Map<const char*, CSimpleIniA> g_CachedIniFiles;
 
-	
+
 	using IniArgs = std::optional<std::tuple<const char*, const char*, std::string>>;
-	
+
 	//Returns section, key, fullPath.
-	//relIniPath may be adjusted to point to defaultModPath_Out; it must not modify/outlive defaultModPath_Out. 
+	//relIniPath may be adjusted to point to defaultModPath_Out; it must not modify/outlive defaultModPath_Out.
 	[[nodiscard]] IniArgs ExtractIniArgs(std::string& sectionAndKey, std::string& defaultModPath_Out, const char*& relIniPath, Script* scriptObj)
 	{
 		auto [section, key] = SplitStringBySingleDelimiter(sectionAndKey, ":/\\");
@@ -703,11 +711,11 @@ namespace IniToNVSE
 	}
 
 	using StringOrNumber = std::variant<const char*, double>;
-		
+
 	namespace SetINIValue
 	{
 		SI_Error SetIniValue(CSimpleIniA &ini, const StringOrNumber& newValue,
-			const char* section, const char* key, 
+			const char* section, const char* key,
 			const char* comment)
 		{
 			if (auto const strVal = std::get_if<const char*>(&newValue))
@@ -729,7 +737,7 @@ namespace IniToNVSE
 			return SI_FAIL;
 		}
 
-		
+
 		void Call(std::string& sectionAndKey, StringOrNumber& newValue, const char* relIniPath,
 			const char* comment, Script* scriptObj, double* result)
 		{
@@ -808,7 +816,7 @@ namespace IniToNVSE
 
 	namespace GetINIValue
 	{
-		void GetOrDefaultIniValue(CSimpleIniA& ini, const char* section, 
+		void GetOrDefaultIniValue(CSimpleIniA& ini, const char* section,
 			const char* key, auto& result)
 		{
 			using T = decltype(result);
@@ -825,7 +833,7 @@ namespace IniToNVSE
 				static_assert(always_false_v<T>, "Invalid type for result arg.");
 			}
 		}
-		
+
 		void Call_GetOrDefault(std::string& sectionAndKey, const char* relIniPath,
 			Script* scriptObj, auto &result)
 		{
@@ -853,19 +861,19 @@ namespace IniToNVSE
 		}
 
 		// Returns true if a value has been created.
-		bool GetOrCreateIniValue(CSimpleIniA &ini, const char* comment, 
+		bool GetOrCreateIniValue(CSimpleIniA &ini, const char* comment,
 			const char* section, const char* key, auto &result)
 		{
 			using T = decltype(result);
-			static_assert(std::is_same_v<T, const char*&> || std::is_same_v<T, double&>, 
+			static_assert(std::is_same_v<T, const char*&> || std::is_same_v<T, double&>,
 				"Invalid type for result arg.");
-			
+
 			bool hasCreatedValue;
 			result = ini.GetOrCreate(section, key, result, comment, true, &hasCreatedValue);
 			return hasCreatedValue;
 		}
 
-		void Call_GetOrCreate(std::string& sectionAndKey, const char* relIniPath, 
+		void Call_GetOrCreate(std::string& sectionAndKey, const char* relIniPath,
 			const char* comment, Script* scriptObj, auto& result)
 		{
 			std::string defaultModPath;
@@ -874,7 +882,7 @@ namespace IniToNVSE
 				return;
 			auto& [section, key, fullPath] = maybe_Args.value();
 
-			if (auto const fullPathCStr = fullPath.c_str(); 
+			if (auto const fullPathCStr = fullPath.c_str();
 				auto cachedIni = g_CachedIniFiles.GetPtr(relIniPath))
 			{
 				ScopedLock lock(g_IniMapLock);
@@ -885,7 +893,7 @@ namespace IniToNVSE
 				CSimpleIniA iniLocal(true);
 				bool const existed = iniLocal.LoadFile(fullPathCStr) >= SI_OK;
 				auto const created = GetOrCreateIniValue(iniLocal, comment, section, key, result);
-				
+
 				if (existed || created)
 				{
 					ScopedLock lock(g_IniMapLock);
@@ -894,7 +902,7 @@ namespace IniToNVSE
 			}
 		}
 	};
-	
+
 }
 
 //Most code copied from JIP LN NVSE's GetINIString
@@ -920,7 +928,7 @@ bool Cmd_HasINISetting_Cached_Execute(COMMAND_ARGS)
 			auto const val = ini.GetValue(section, key, nullptr);
 			return val && val[0];
 		};
-		
+
 		if (auto const fullPathCStr = fullPath.c_str();
 			auto ini = IniToNVSE::g_CachedIniFiles.GetPtr(relIniPath))
 		{
@@ -932,7 +940,7 @@ bool Cmd_HasINISetting_Cached_Execute(COMMAND_ARGS)
 				iniLocal.LoadFile(fullPathCStr) >= SI_OK)
 			{
 				*result = HasIniValue(iniLocal);
-				
+
 				ScopedLock lock(IniToNVSE::g_IniMapLock);
 				IniToNVSE::g_CachedIniFiles.Emplace(relIniPath, std::move(iniLocal));
 			}
@@ -986,7 +994,7 @@ bool Cmd_GetINIFloatOrCreate_Cached_Execute(COMMAND_ARGS)
 		std::string sectionAndKey;
 		const char* comment = nullptr, * iniPath = nullptr;
 		EXTRACT_ALL_ARGS_EXP(GetINIFloatOrCreate_Cached, eval, std::tie(sectionAndKey), std::tie(iniPath, *result, comment));
-		
+
 		IniToNVSE::GetINIValue::Call_GetOrCreate(sectionAndKey, iniPath, comment, scriptObj, *result);
 	}
 	return true;
@@ -1003,7 +1011,7 @@ bool Cmd_GetINIStringOrCreate_Cached_Execute(COMMAND_ARGS)
 
 		IniToNVSE::GetINIValue::Call_GetOrCreate(sectionAndKey, iniPath, comment, scriptObj, res);
 	}
-	g_strInterface->Assign(PASS_COMMAND_ARGS, res); 
+	g_strInterface->Assign(PASS_COMMAND_ARGS, res);
 	return true;
 }
 
@@ -1089,7 +1097,7 @@ bool Cmd_ClearFileCacheShowOff_Execute(COMMAND_ARGS)
 		kCache_Ini = 0,
 		kCache_Json
 	};
-	
+
 	*result = false; //hasCleared
 	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
 		eval.ExtractArgs())
@@ -1098,7 +1106,7 @@ bool Cmd_ClearFileCacheShowOff_Execute(COMMAND_ARGS)
 		//This is due to json/ini/etc funcs reading at different base folders, for consistency.
 		CacheToClear toClearMode;
 		EXTRACT_ALL_ARGS_EXP(ClearFileCacheShowOff, eval, std::tie(relPath, toClearMode), g_NoArgs);
-		
+
 		if (toClearMode == kCache_Ini)
 		{
 			std::string modPath;
@@ -1135,12 +1143,12 @@ bool Cmd_DemoTestFile_Execute(COMMAND_ARGS)
 	*result = 0;
 
 	std::filesystem::path path = { "test" };
-	
+
 	auto i = tao::config::from_file(path);
 	_MESSAGE("%i", static_cast<int>(i.type()));
 
-	
-	
+
+
 	return true;
 }
 #endif
