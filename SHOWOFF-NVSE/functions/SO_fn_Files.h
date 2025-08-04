@@ -14,7 +14,7 @@ DEFINE_COMMAND_ALT_PLUGIN(CreateFolder, CreateDirectory, "", false, kParams_OneS
 // JSON API docs: https://nlohmann.github.io/json/api/basic_json/
 
 DEFINE_COMMAND_ALT_PLUGIN_EXP(ReadFromJSONFile, ReadFromJSON, "", false, kNVSEParams_OneString_OneOptionalString_OneOptionalInt_OneOptionalBool);
-DEFINE_COMMAND_ALT_PLUGIN_EXP(WriteToJSONFile, WriteToJSON, "", false, kNVSEParams_OneElem_OneString_OneOptionalString_OneOptionalInt_TwoOptionalBools);
+DEFINE_COMMAND_ALT_PLUGIN_EXP(WriteToJSONFile, WriteToJSON, "", false, kNVSEParams_OneElem_OneString_OneOptionalString_OneOptionalInt_ThreeOptionalBools);
 
 
 

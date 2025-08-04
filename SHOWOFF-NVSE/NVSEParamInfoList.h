@@ -129,12 +129,13 @@ static constexpr NVSEParamInfo kNVSEParams_OneElem_OneString_OneOptionalString_O
 	{	"string",	kNVSEParamType_String,1	},
 	{	"int",	kNVSEParamType_Number,1	},
 };
-static constexpr NVSEParamInfo kNVSEParams_OneElem_OneString_OneOptionalString_OneOptionalInt_TwoOptionalBools[6] =
+static constexpr NVSEParamInfo kNVSEParams_OneElem_OneString_OneOptionalString_OneOptionalInt_ThreeOptionalBools[7] =
 {
 	{	"elem",	kNVSEParamType_BasicType,0	},
 	{	"string",	kNVSEParamType_String,0	},
 	{	"string",	kNVSEParamType_String,1	},
 	{	"int",	kNVSEParamType_Number,1	},
+	{	"bool",	kNVSEParamType_Boolean,1	},
 	{	"bool",	kNVSEParamType_Boolean,1	},
 	{	"bool",	kNVSEParamType_Boolean,1	},
 };
