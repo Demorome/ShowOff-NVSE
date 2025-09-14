@@ -11,7 +11,7 @@
 #include "SimpleIni.h"
 
 #define TEST_JSON_READ_PERFORMANCE false
-
+#include <vector>
 
 //Made by anhatthezoo, requested by Trooper.
 bool Cmd_CreateFolder_Execute(COMMAND_ARGS)
@@ -35,6 +35,90 @@ namespace JsonToNVSE
 	using ConfigJsonValue = tao::config::value;
 
 
+	bool IsValidUtf8(const char* string)
+	{
+		if (!string) {
+			return true;
+		}
+
+		static const unsigned char utf8_char_len[256] = {
+		  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+		  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+		  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+		  1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1, 1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+		  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+		  2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2, 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+		  3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3, 4,4,4,4,4,0,0,0,0,0,0,0,0,0,0,0
+		};
+
+		const unsigned char* bytes = (const unsigned char*)string;
+		while (*bytes)
+		{
+			unsigned char len = utf8_char_len[*bytes];
+			if (len == 0) {
+				return false;
+			}
+			for (unsigned char i = 1; i < len; ++i) {
+				if ((bytes[i] & 0xC0) != 0x80) {
+					return false;
+				}
+			}
+			bytes += len;
+		}
+
+		return true;
+	}
+
+	std::string AnsiToUtf8(const char* ansiStr)
+	{
+		if (!ansiStr) {
+			return "";
+		}
+
+		int wideCharSize = MultiByteToWideChar(CP_ACP, 0, ansiStr, -1, NULL, 0);
+		if (wideCharSize == 0) {
+			return "";
+		}
+		std::vector<wchar_t> wideStr(wideCharSize);
+
+		MultiByteToWideChar(CP_ACP, 0, ansiStr, -1, &wideStr[0], wideCharSize);
+
+		int utf8Size = WideCharToMultiByte(CP_UTF8, 0, &wideStr[0], -1, NULL, 0, NULL, NULL);
+		if (utf8Size == 0) {
+			return "";
+		}
+		std::string utf8Str(utf8Size - 1, 0);
+
+		WideCharToMultiByte(CP_UTF8, 0, &wideStr[0], -1, &utf8Str[0], utf8Size, NULL, NULL);
+
+		return utf8Str;
+	}
+
+	std::string Utf8ToAnsi(const char* utf8Str)
+	{
+		if (!utf8Str) {
+			return "";
+		}
+
+		int wideCharSize = MultiByteToWideChar(CP_UTF8, 0, utf8Str, -1, NULL, 0);
+		if (wideCharSize == 0) {
+			return "";
+		}
+		std::vector<wchar_t> wideStr(wideCharSize);
+
+		MultiByteToWideChar(CP_UTF8, 0, utf8Str, -1, &wideStr[0], wideCharSize);
+
+		int ansiSize = WideCharToMultiByte(CP_ACP, 0, &wideStr[0], -1, NULL, 0, NULL, NULL);
+		if (ansiSize == 0) {
+			return "";
+		}
+		std::string ansiStr(ansiSize - 1, 0);
+
+		WideCharToMultiByte(CP_ACP, 0, &wideStr[0], -1, &ansiStr[0], ansiSize, NULL, NULL);
+
+		return ansiStr;
+	}
 
 	template< template< typename... > class Traits >
 	ArrayElementL BasicJsonValueToArrayElem(tao::json::basic_value<Traits> const& val)
@@ -50,7 +134,8 @@ namespace JsonToNVSE
 			}
 			else //assume string
 			{
-				elem = string.c_str();
+				std::string convertedStr = Utf8ToAnsi(string.c_str());
+				elem = _strdup(convertedStr.c_str());
 			}
 		}
 		else if (val.is_null())
@@ -288,7 +373,14 @@ namespace JsonToNVSE
 		}
 		else if (type == NVSEArrayVarInterface::kType_String)
 		{
-			return elem.str;
+			if (IsValidUtf8(elem.str))
+			{
+				return elem.str;
+			}
+			else
+			{
+				return AnsiToUtf8(elem.str);
+			}
 		}
 		throw std::logic_error("SHOWOFF - ConvertKeyElemToStr >> gave wrongly typed elem");
 	}
@@ -307,7 +399,14 @@ namespace JsonToNVSE
 		}
 		else if (type == NVSEArrayVarInterface::kType_String)
 		{
-			return tao::json::basic_value<Traits>(std::string(elem.str));
+			if (IsValidUtf8(elem.str))
+			{
+				return tao::json::basic_value<Traits>(std::string(elem.str));
+			}
+			else
+			{
+				return tao::json::basic_value<Traits>(AnsiToUtf8(elem.str));
+			}
 		}
 		throw std::logic_error("SHOWOFF - BasicArrayElemToJsonValue >> Received wrongly typed elem.");
 	}
@@ -521,9 +620,9 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 		switch (auto const numArgs = eval.NumArgs();
 			numArgs)
 		{
-        case 7:
-            compact = eval.GetNthArg(6)->GetBool();
-            [[fallthrough]];
+		case 7:
+			compact = eval.GetNthArg(6)->GetBool();
+			[[fallthrough]];
 		case 6:
 			saveFile = eval.GetNthArg(5)->GetBool();
 			[[fallthrough]];
@@ -591,17 +690,20 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 
 		if (saveFile)
 		{
-			if (std::ofstream output(JSON_FullPath);	//erase previous contents, potentially create new file.
+
+			const auto path = std::filesystem::u8path(JSON_FullPath);
+
+			if (std::ofstream output(path, std::ios::binary);	//erase previous contents, potentially create new file.
 				output.is_open())
 			{
-                std::visit([&output, compact](auto&& val) {
-                    if (compact) {
-                        output << val; // Compact
-                    }
-                    else {
-                        output << std::setw(4) << val; // Pretty-printed with 4-space indents.
-                    }
-                }, GetRef(elemAsJSON));
+				std::visit([&output, compact](auto&& val) {
+					if (compact) {
+						output << val; // Compact
+					}
+					else {
+						output << std::setw(4) << val; // Pretty-printed with 4-space indents.
+					}
+				}, GetRef(elemAsJSON));
 				*result = true;	//success if data was written to file
 			}
 		}
@@ -1121,8 +1223,10 @@ bool Cmd_ClearFileCacheShowOff_Execute(COMMAND_ARGS)
 			if (!relPath || !relPath[0])
 				return true;
 
+			auto [JSON_FullPath, normalizedRelPath] = GetFullPath(relPath);
+			std::string cachePath(normalizedRelPath);
 			ScopedLock lock(JsonToNVSE::g_JsonMapLock);
-			*result = JsonToNVSE::g_CachedJSONFiles.Erase(relPath);
+			*result = JsonToNVSE::g_CachedJSONFiles.Erase(cachePath.c_str());
 		}
 	}
 	return true;
