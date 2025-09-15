@@ -134,8 +134,7 @@ namespace JsonToNVSE
 			}
 			else //assume string
 			{
-				std::string convertedStr = Utf8ToAnsi(string.c_str());
-				elem = _strdup(convertedStr.c_str());
+				elem = _strdup(Utf8ToAnsi(string.c_str()).c_str());
 			}
 		}
 		else if (val.is_null())
