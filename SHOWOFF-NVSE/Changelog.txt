@@ -456,6 +456,18 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 * "ShowOff:OnWeaponUnholster"
 * "ShowOff:OnWeaponHolster"
 
+
+//===v1.81
+
+===Bug Fixes:
+* Fixed ReadFromJson cache not working if file doesn't exist on disk
+* Fixed WriteToJSON not writing multibyte characters with the correct encoding
+* ReadFromJSON will now reencode text in the games expected ansi encoding
+* Fixed CloseFileSO not using normalized file paths for JSON
+
+===Function changes:
+* Added optional WriteToJson argument to specify formatting compact/pretty
+
 ====== (Template:)
 
 //===v???
