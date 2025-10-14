@@ -744,6 +744,9 @@ extern "C"
 		/*3D63*/	REG_CMD(ApplyEasingAlt);
 		/*3D64*/	REG_CMD(PatchFreezeTime);
 		/*3D65*/	REG_CMD_FORM(PlaceAtReticleAlt);
+
+		//========v1.82
+		/*3D66*/	REG_CMD_STR(ToANSIChar)
 		
 		//========v1.??
 		//todo: always check to update/increase your opcode range when adding new functions
