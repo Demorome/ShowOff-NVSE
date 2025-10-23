@@ -115,8 +115,8 @@ bool Cmd_GetWorldOffsetPosArray_Execute(COMMAND_ARGS)
 	ArrayElementL posElems[3] = {};
 
 	if (thisObj->parentCell && thisObj->parentCell->worldSpace) {
-		posElems[0] = thisObj->posX + thisObj->parentCell->worldSpace->worldMapCellX;
-		posElems[1] = thisObj->posY + thisObj->parentCell->worldSpace->worldMapCellY;
+		posElems[0] = (thisObj->posX / thisObj->parentCell->worldSpace->worldMapScale) + thisObj->parentCell->worldSpace->worldMapCellX;
+		posElems[1] = (thisObj->posY / thisObj->parentCell->worldSpace->worldMapScale) + thisObj->parentCell->worldSpace->worldMapCellY;
 	} else {
 		posElems[0] = thisObj->posX;
 		posElems[1] = thisObj->posY;
