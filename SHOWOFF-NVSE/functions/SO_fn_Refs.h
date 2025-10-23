@@ -108,3 +108,21 @@ bool Cmd_PlaceAtReticleAlt_Execute(COMMAND_ARGS)
 
 	return true;
 }
+DEFINE_COMMAND_PLUGIN(GetWorldOffsetPosArray, "Returns an array of the 3 axis positions of a reference based on the worldspace offsets",
+	true, nullptr);
+bool Cmd_GetWorldOffsetPosArray_Execute(COMMAND_ARGS)
+{
+	ArrayElementL posElems[3] = {};
+
+	if (thisObj->parentCell && thisObj->parentCell->worldSpace) {
+		posElems[0] = (thisObj->posX / thisObj->parentCell->worldSpace->worldMapScale) + thisObj->parentCell->worldSpace->worldMapCellX;
+		posElems[1] = (thisObj->posY / thisObj->parentCell->worldSpace->worldMapScale) + thisObj->parentCell->worldSpace->worldMapCellY;
+	} else {
+		posElems[0] = thisObj->posX;
+		posElems[1] = thisObj->posY;
+	}
+	posElems[2] = thisObj->posZ;
+	auto const arr = g_arrInterface->CreateArray(posElems, 3, scriptObj);
+	g_arrInterface->AssignCommandResult(arr, result);
+	return true;
+}
