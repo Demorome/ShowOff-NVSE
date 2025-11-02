@@ -38,7 +38,7 @@
 // Plugin Stuff
 IDebugLog g_Log; // file will be open after NVSE plugin load
 HMODULE	g_ShowOffHandle;
-constexpr UInt32 g_PluginVersion = 181;
+constexpr UInt32 g_PluginVersion = 182;
 
 //***Current Max OpCode (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 const UInt32 MaxOpcode = 0x3D74;
@@ -745,8 +745,12 @@ extern "C"
 		/*3D64*/	REG_CMD(PatchFreezeTime);
 		/*3D65*/	REG_CMD_FORM(PlaceAtReticleAlt);
 		
+		//========v1.82
+		/*3D66*/ REG_CMD_ARR(GetWorldOffsetPosArray);
+		
 		//========v1.??
 		//todo: always check to update/increase your opcode range when adding new functions
+
 
 
 #if EnableSafeExtractArgsTests

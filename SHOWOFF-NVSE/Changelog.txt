@@ -468,6 +468,17 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 ===Function changes:
 * Added optional WriteToJson argument to specify formatting compact/pretty
 
+
+//===v1.82
+===Bug Fixes:
+*
+
+===New Functions:
+* GetWorldOffsetPosArray
+
+===Function changes:
+*
+
 ====== (Template:)
 
 //===v???
