@@ -746,10 +746,8 @@ extern "C"
 		/*3D65*/	REG_CMD_FORM(PlaceAtReticleAlt);
 
 		//========v1.82
-		/*3D66*/	REG_CMD_STR(ToANSIChar)
-		
-		//========v1.82
-		/*3D66*/ REG_CMD_ARR(GetWorldOffsetPosArray);
+		/*3D66*/	REG_CMD_STR(ToANSIChar);
+		/*3D67*/ 	REG_CMD_ARR(GetWorldOffsetPosArray);
 		
 		//========v1.??
 		//todo: always check to update/increase your opcode range when adding new functions
