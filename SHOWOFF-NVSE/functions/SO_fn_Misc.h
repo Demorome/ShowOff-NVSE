@@ -1128,6 +1128,48 @@ bool Cmd_PatchFreezeTime_Execute(COMMAND_ARGS)
 	return true;
 }
 
+DEFINE_COMMAND_PLUGIN(ToANSIChar, "", false, kParams_OneInt_OneOptionalInt);
+bool Cmd_ToANSIChar_Execute(COMMAND_ARGS)
+{
+	UInt32 scancode = 0;
+	bool ignoreShift = true;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &scancode, &ignoreShift))
+	{
+		g_strInterface->Assign(PASS_COMMAND_ARGS, "");
+		return true;
+	}
+
+	BYTE keyboardState[256];
+	if (!GetKeyboardState(keyboardState)) return true;
+
+	HKL layout = GetKeyboardLayout(0);
+
+	// When ignoreShift is true, we explicitly clear the Shift state instead of forcing it pressed.
+	// Some keyboard layouts (e.g. French AZERTY) use lowercase positions for special letters (é, à, etc.)
+	// and uppercase/Shifted positions for digits. Forcing Shift on such layouts would return numbers
+	// instead of letters, so Shift must remain disabled when ignoreShift = true.
+	if (ignoreShift) {
+		keyboardState[VK_SHIFT] = 0;
+		keyboardState[VK_LSHIFT] = 0;
+		keyboardState[VK_RSHIFT] = 0;
+		keyboardState[VK_CAPITAL] = 0;
+	}
+
+	UINT vk = MapVirtualKeyEx(scancode, MAPVK_VSC_TO_VK, layout);
+	if (vk == 0) return true;
+
+	WCHAR unicodeChar[16];
+	int len = ToUnicodeEx(vk, scancode, keyboardState, unicodeChar, _countof(unicodeChar), 0, layout);
+	if (len <= 0) return true;
+
+	char ansiChar[16];
+	int bytes = WideCharToMultiByte(CP_ACP, 0, unicodeChar, len, ansiChar, sizeof(ansiChar), NULL, NULL);
+	if (bytes <= 0) return true;
+	ansiChar[bytes] = '\0';
+
+	g_strInterface->Assign(PASS_COMMAND_ARGS, ansiChar);
+	return true;
+}
 
 #if _DEBUG
 

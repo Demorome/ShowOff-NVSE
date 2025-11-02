@@ -744,6 +744,9 @@ extern "C"
 		/*3D63*/	REG_CMD(ApplyEasingAlt);
 		/*3D64*/	REG_CMD(PatchFreezeTime);
 		/*3D65*/	REG_CMD_FORM(PlaceAtReticleAlt);
+
+		//========v1.82
+		/*3D66*/	REG_CMD_STR(ToANSIChar)
 		
 		//========v1.82
 		/*3D66*/ REG_CMD_ARR(GetWorldOffsetPosArray);
