@@ -570,13 +570,13 @@ bool Cmd_GetCalculatedItemValue_Eval(COMMAND_ARGS_EVAL)
 			// Count = 1, so this doesn't account for stacked item references.
 			//copied after GetCalculatedWeaponDamage from JIP, thx for the pointer c6.
 			ContChangesEntry tempEntry(NULL, 1, baseItem);
+			ExtraContainerChanges::ExtendDataList extendData;
 			if (invRef)
 			{
 				tempEntry = *invRef->data.entry;
 			}
 			else if (itemRef)
 			{
-				ExtraContainerChanges::ExtendDataList extendData;
 				extendData.Init(&itemRef->extraDataList);
 				tempEntry.extendData = &extendData;
 			}
