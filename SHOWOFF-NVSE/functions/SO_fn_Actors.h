@@ -845,6 +845,21 @@ bool Cmd_IsActorInvisibleToPlayer_Execute(COMMAND_ARGS)
 	return Cmd_IsActorInvisibleToPlayer_Eval(thisObj, nullptr, nullptr, result);
 }
 
+DEFINE_COMMAND_PLUGIN(BaseCopyFaceGenFrom, "", false, kParams_TwoActorBases);
+bool Cmd_BaseCopyFaceGenFrom_Execute(COMMAND_ARGS)
+{
+	TESNPC* srcNPC = nullptr;
+	TESNPC* destNPC = nullptr;
+	*result = 0;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &srcNPC, &destNPC) && srcNPC && IS_ID(srcNPC, TESNPC) && destNPC && IS_ID(destNPC, TESNPC))
+	{
+		destNPC->SetSex(srcNPC->baseData.flags);
+		destNPC->SetRace(srcNPC->race.race);
+		destNPC->CopyAppearance(srcNPC);
+		*result = 1;
+	}
+	return true;
+}
 
 #ifdef _DEBUG
 
