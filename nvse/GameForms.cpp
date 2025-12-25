@@ -965,3 +965,35 @@ UInt32 TESIdleForm::GetSequenceID() const
 {
 	return data.groupFlags & 0x3F; // copying code at 0x5FF160
 }
+
+void TESNPC::SetSex(UInt32 flags)
+{
+	TESActorBaseData* baseDataPtr = &this->baseData;
+
+	UInt32 currentSexBit = baseDataPtr->flags & TESActorBaseData::kFlags_Female;
+	UInt32 newSexBit = flags & TESActorBaseData::kFlags_Female;
+
+	if (currentSexBit == newSexBit) 
+		return;
+
+	ThisStdCall(0x47DD50, baseDataPtr, 1, newSexBit, 1);
+}
+
+void TESNPC::SetRace(TESRace* pRace)
+{
+	if (this->race.race == pRace)
+		return;
+
+	PlayerCharacter* player = PlayerCharacter::GetSingleton();
+	if (player && player->baseForm == this) {
+		ThisStdCall(0x60B240, this, pRace, 0);
+	}
+	else {
+		this->race.race = pRace;
+	}
+}
+
+void TESNPC::CopyAppearance(TESNPC* srcNPC)
+{
+	ThisStdCall(0x603790, this, srcNPC);
+}

@@ -748,6 +748,9 @@ extern "C"
 		//========v1.82
 		/*3D66*/	REG_CMD_STR(ToANSIChar);
 		/*3D67*/ 	REG_CMD_ARR(GetWorldOffsetPosArray);
+
+		//========v1.83
+		/*3D68*/	REG_CMD(BaseCopyFaceGenFrom);
 		
 		//========v1.??
 		//todo: always check to update/increase your opcode range when adding new functions
