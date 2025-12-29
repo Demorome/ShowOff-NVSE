@@ -14,8 +14,10 @@ bool Cmd_SetShowOffOnCornerMessageEventHandler_Execute(COMMAND_ARGS)
 	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags) || NOT_TYPE(script, Script))) return true;
 	if (OnCornerMessage)
 	{
-		if (setOrRemove)
+		if (setOrRemove) {
 			OnCornerMessage->RegisterEvent(script, NULL);
+			OnCornerMessage->AddQueuedEvents();
+		}
 		else OnCornerMessage->RemoveEvent(script, NULL);
 	}
 	return true;
@@ -132,12 +134,10 @@ void FlushJGInterfaceEvents()
 
 namespace CornerMessageHooks
 {
-	// iconPath and soundPath can be null.
 	bool __fastcall CornerMessageEventHook(HUDMainMenu* menu, void* edx, char* msgText, eEmotion IconType, char* iconPath, char* soundPath, float displayTime, bool instantEndCurrentMessage)
 	{
 		bool bFireEvent = true;
-		
-		// Avoid throwing exceptions with bad char*
+
 		std::string msgTextStr, iconPathStr, soundPathStr;
 		msgTextStr = iconPathStr = soundPathStr = "<void>";
 		if (msgText && msgText[0]) msgTextStr = msgText;
@@ -155,8 +155,8 @@ namespace CornerMessageHooks
 #endif
 		return ThisStdCall_B(0x775380, menu, msgText, IconType, iconPath, soundPath, displayTime, instantEndCurrentMessage);
 	}
-	
-	void WriteDelayedHook()
+
+	void WriteHook()
 	{
 		// SPECIAL CASE: 0x8B959B is Nop'd by Tweaks if bNoCrippleCriticalMessages = 1 && g_bPatchCripple = 1.
 		auto const tweakConflictAddr = 0x8B959B;
@@ -2417,6 +2417,7 @@ namespace HandleHooks
 		OnQueueCornerMessage::WriteHooks();
 		OnShowCornerMessage::WriteHooks();
 		OnFireWeapon::WriteHook();
+		CornerMessageHooks::WriteHook();
 #if _DEBUG
 		OnCalculateEffectEntryMagnitude::WriteHooks();
 #endif
@@ -2431,7 +2432,6 @@ namespace HandleHooks
 
 	void HandleDelayedEventHooks()
 	{
-		CornerMessageHooks::WriteDelayedHook();
 		OnCalculateSellPrice::WriteDelayedHook();
 		OnReadBook::WriteDelayedHook();
 		OnDispositionChange::WriteDelayedHooks();
