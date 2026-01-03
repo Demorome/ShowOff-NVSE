@@ -680,14 +680,42 @@ bool Cmd_GetItemHotkeyIconPath_Execute(COMMAND_ARGS)
 	return true;
 }
 
+DEFINE_COMMAND_PLUGIN(GetSpellUsageNumEx, "", true, kParams_JIP_OneMagicItem);
+bool Cmd_GetSpellUsageNumEx_Execute(COMMAND_ARGS)
+{
+	*result = 0.0;
 
+	if (!thisObj || !thisObj->IsActor())
+		return true;
 
+	MagicItem* magicItem = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &magicItem))
+		return true;
 
+	EffectItem* usageMonitorEffect = ThisStdCall<EffectItem*>(0x00406200, &magicItem->list);	// GetUsageMonitorEffect
+	if (!usageMonitorEffect)
+		return true;
 
+	float totalMagnitude = 0.0f;
+	auto* actor = static_cast<Actor*>(thisObj);
+	MagicTarget* target = &actor->magicTarget;
 
+	auto* effectList = target->GetEffectList();
+	if (!effectList)
+		return true;
 
+	for (auto* iter = effectList->Head(); iter; iter = iter->next)
+	{
+		ActiveEffect* activeEff = iter->data;
+		if (!activeEff || activeEff->effectItem != usageMonitorEffect || activeEff->magicItem != magicItem)
+			continue;
 
+		totalMagnitude += activeEff->magnitude;
+	}
+	*result = totalMagnitude;
 
+	return true;
+}
 
 #if _DEBUG
 
