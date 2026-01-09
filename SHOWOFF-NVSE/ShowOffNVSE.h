@@ -11,6 +11,7 @@
 #include "GameUI.h" 
 #include "common/ICriticalSection.h"
 #include "GameData.h"
+#include "GameEffects.h"
 #include "decoding.h"
 #include "SOTypes.h"
 #include "InventoryRef.h"
