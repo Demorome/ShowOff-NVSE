@@ -3445,7 +3445,7 @@ public:
 	static ExtraEnableStateChildren* Create();
 };
 
-// 10
+// 14
 class ExtraEnableStateParent : public BSExtraData
 {
 public:
@@ -3453,6 +3453,8 @@ public:
 	virtual ~ExtraEnableStateParent();
 
 	TESObjectREFR	*parent;	// 0C
+	UInt8			flags;		// 10
+	UInt8			pad11[3];	// 11
 	static ExtraEnableStateParent* Create(TESObjectREFR* parent = nullptr);
 };
 

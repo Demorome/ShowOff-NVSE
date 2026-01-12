@@ -75,10 +75,9 @@ ExtraEnableStateChildren* ExtraEnableStateChildren::Create()
 	dataPtr[0] = kVtbl_ExtraEnableStateChildren;
 	dataPtr[1] = kExtraData_EnableStateChildren;
 	dataPtr[2] = 0;
-	//copied after JIP's ExtraFactionChanges::Create()
-	auto* listData = (tList<TESObjectREFR>*)GameHeapAlloc(sizeof(tList<TESObjectREFR>));
-	listData->Init();
-	dataPtr[3] = (UInt32)listData;
+	//tList is inline, not a pointer - init m_listHead directly
+	dataPtr[3] = 0; //children.m_listHead.data
+	dataPtr[4] = 0; //children.m_listHead.next
 	return reinterpret_cast<ExtraEnableStateChildren*>(dataPtr);
 }
 
@@ -89,6 +88,7 @@ ExtraEnableStateParent* ExtraEnableStateParent::Create(TESObjectREFR* parent)
 	dataPtr[1] = kExtraData_EnableStateParent;
 	dataPtr[2] = 0;
 	dataPtr[3] = (UInt32)parent;
+	dataPtr[4] = 0; //flags + pad
 	return reinterpret_cast<ExtraEnableStateParent*>(dataPtr);
 }
 
