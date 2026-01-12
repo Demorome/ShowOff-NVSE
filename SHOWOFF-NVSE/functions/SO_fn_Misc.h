@@ -891,10 +891,12 @@ bool Cmd_SetEnableParent_Execute(COMMAND_ARGS)
 			parent != newParent)
 		{
 			// remove EnableChildren extraData
-			auto const xChildrenRef = GetExtraTypeJIP(&parent->extraDataList, EnableStateChildren);
-			xChildrenRef->children.Remove(thisObj);
-			if (xChildrenRef->children.Empty())
-				parent->extraDataList.Remove(xChildrenRef, true);
+			if (auto const xChildrenRef = GetExtraTypeJIP(&parent->extraDataList, EnableStateChildren))
+			{
+				xChildrenRef->children.Remove(thisObj);
+				if (xChildrenRef->children.Empty())
+					parent->extraDataList.Remove(xChildrenRef, true);
+			}
 		}
 	}
 
