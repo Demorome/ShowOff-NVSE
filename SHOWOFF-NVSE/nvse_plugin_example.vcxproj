@@ -200,7 +200,7 @@ copy "$(SolutionDir)Release\$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugi
     <ClCompile>
       <AdditionalIncludeDirectories>$(SolutionDir);$(SolutionDir)\..;$(SolutionDir)\..\nvse;$(SolutionDir)\..\nvse\nvse;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;WINVER=0x0601;_WIN32_WINNT=0x0601;_CRT_SECURE_NO_WARNINGS;NDEBUG;_WINDOWS;_USRDLL;NVSE_PLUGIN_EXAMPLE_EXPORTS;RUNTIME_VERSION=0x040020D0;RUNTIME;%(PreprocessorDefinitions);%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader />
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
