@@ -1,4 +1,0 @@
-LIBRARY	"nvse_plugin_example"
-EXPORTS
-NVSEPlugin_Query
-NVSEPlugin_Load

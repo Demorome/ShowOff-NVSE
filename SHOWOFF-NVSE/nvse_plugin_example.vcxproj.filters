@@ -2176,7 +2176,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="exports.def" />
     <None Include="Armadillo Library\armadillo_bits\config.hpp.cmake">
       <Filter>External Libraries\Armadillo Library %28Matrices%29</Filter>
     </None>

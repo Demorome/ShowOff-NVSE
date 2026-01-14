@@ -339,7 +339,7 @@ extern "C"
 		return TRUE;
 	}
 
-	bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* info)
+	__declspec(dllexport) bool NVSEPlugin_Query(const NVSEInterface* nvse, PluginInfo* info)
 	{
 		// fill out the info structure
 		info->infoVersion = PluginInfo::kInfoVersion;
@@ -388,7 +388,7 @@ extern "C"
 		return true;
 	}
 
-	bool NVSEPlugin_Load(const NVSEInterface* nvse)
+	__declspec(dllexport) bool NVSEPlugin_Load(const NVSEInterface* nvse)
 	{
 		PluginHandle const nvsePluginHandle = nvse->GetPluginHandle();  //from JiPLN
 
