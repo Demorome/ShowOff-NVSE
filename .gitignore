@@ -352,3 +352,4 @@ common/Debug VC9/common_vc9.lib
 *.lastbuildstate
 *.idb
 *.lib
+/common/Release VC9
