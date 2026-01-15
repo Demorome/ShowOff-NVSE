@@ -473,7 +473,7 @@ In order to filter those out, there is now a new flag: NoSlotlessItems
 ===Bug Fixes:
 * Fixed GetIsActivationPromptShown not working after exiting menus
 * Fixed GetCalculatedItemValue corrupting memory and crashing the game
-* Fixed BaseCopyFaceGenFrom corrupting memory and crashing the game
+* Fixed SetEnableParent corrupting memory and crashing the game
 
 ===New Functions:
 * ToANSIChar 
