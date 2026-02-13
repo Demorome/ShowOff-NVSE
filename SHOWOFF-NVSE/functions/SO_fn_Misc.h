@@ -1169,13 +1169,8 @@ bool Cmd_ToANSIChar_Execute(COMMAND_ARGS)
 	if (vk == 0) return true;
 
 	WCHAR unicodeChar[16];
-	int len = ToUnicodeEx(vk, scancode, keyboardState, unicodeChar, _countof(unicodeChar), 0, layout);
 
-	// Fix dead keys causing duplicate output
-	if (len != 0) {
-		WCHAR dummyBuffer[16];
-		while (ToUnicodeEx(VK_SPACE, scancode, keyboardState, dummyBuffer, _countof(dummyBuffer), 0, layout) < 0) {}
-	}
+	int len = ToUnicodeEx(vk, scancode, keyboardState, unicodeChar, _countof(unicodeChar), 0x4, layout);
 
 	if (len <= 0) return true;
 
