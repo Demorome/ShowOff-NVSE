@@ -256,21 +256,40 @@ namespace AuxTimer
 			for (auto& timerToRemove : timersToRemove)
 			{
 				auto* modEntry = modsMapOfAllTimers.GetPtr(timerToRemove.modIndex);
+				if (!modEntry) [[unlikely]]
+				{
+					_ERROR("AuxTimer: Null modEntry encountered!");
+					continue;
+				}
+
 				auto* modAndRefEntry = modEntry->GetPtr(timerToRemove.ownerID);
+				if (!modAndRefEntry) [[unlikely]]
+				{
+					_ERROR("AuxTimer: Null modAndRefEntry encountered!");
+					continue;
+				}
 
 				// If the AuxTimer is no longer pending removal, 
 				// ... likely because AuxTimerStart was called on it in the same frame it was stopped,
 				// ... avoid deleting the timer.
-				if (!modAndRefEntry->GetPtr(
-					const_cast<char*>(
-						timerToRemove.varName.c_str())
-					)->IsPendingRemoval())
 				{
-					continue;
+					auto* auxTimer = modAndRefEntry->GetPtr(
+						const_cast<char*>(timerToRemove.varName.c_str())
+					);
+					if (!auxTimer)
+					{
+						_ERROR("AuxTimer: Null auxTimer encountered!");
+						continue;
+					}
+					if (!auxTimer->IsPendingRemoval())
+					{
+						continue;
+					}
 				}
 
 				modAndRefEntry->Erase(const_cast<char*>(timerToRemove.varName.c_str()));
-				if (modAndRefEntry->Empty()) {
+				if (modAndRefEntry->Empty()) 
+				{
 					modEntry->Erase(timerToRemove.ownerID);
 					// modAndRefEntry is no longer valid!
 					modMapsToUpdate.insert(timerToRemove.modIndex);
