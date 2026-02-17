@@ -62,27 +62,27 @@ namespace AuxTimer
 						{
 							auto& timer = auxVarNameMapIter.Get();
 
-							if (timer.m_flags & AuxTimerValue::kFlag_IsPaused)
+							if ((timer.m_flags & AuxTimerValue::kFlag_IsPaused) != 0)
 								continue;
 
-							if (timer.m_flags & AuxTimerValue::kFlag_DontRunWhenGamePaused)
+							if ((timer.m_flags & AuxTimerValue::kFlag_DontRunWhenGamePaused) != 0)
 							{
 								if (IsGamePaused())
 									continue;
 							}
 							
-							if ((timer.m_flags & AuxTimerValue::kFlag_RunInMenuMode && isMenuMode) 
-								|| (timer.m_flags & AuxTimerValue::kFlag_RunInGameMode && !isMenuMode))
+							if (((timer.m_flags & AuxTimerValue::kFlag_RunInMenuMode) != 0 && isMenuMode) 
+								|| ((timer.m_flags & AuxTimerValue::kFlag_RunInGameMode) != 0 && !isMenuMode))
 							{
 								float timePassed;
-								if (timer.m_flags & AuxTimerValue::kFlag_CountInSeconds) [[likely]]
+								if ((timer.m_flags & AuxTimerValue::kFlag_CountInSeconds) != 0) [[likely]]
 								{
 									const bool notAffectedByTimeMult = 
-										((timer.m_flags & AuxTimerValue::kFlag_NotAffectedByTimeMult_InMenuMode) && isMenuMode)
-										|| ((timer.m_flags & AuxTimerValue::kFlag_NotAffectedByTimeMult_InGameMode) && !isMenuMode);
+										((timer.m_flags & AuxTimerValue::kFlag_NotAffectedByTimeMult_InMenuMode) != 0 && isMenuMode)
+										|| ((timer.m_flags & AuxTimerValue::kFlag_NotAffectedByTimeMult_InGameMode) != 0 && !isMenuMode);
 
 									const bool ignoreTurbo =
-										(timer.m_flags & AuxTimerValue::kFlag_IgnoreTurbo);
+										(timer.m_flags & AuxTimerValue::kFlag_IgnoreTurbo) != 0;
 
 									if (notAffectedByTimeMult)
 										timePassed = secondsDelta;
@@ -101,7 +101,7 @@ namespace AuxTimer
 								const bool isPerm = (auxVarNameMapIter.Key()[0] != '*');
 								const bool isPublic = (auxVarNameMapIter.Key()[!isPerm] == '_');
 
-								if (timer.m_flags & AuxTimerValue::kFlag_RunOnTimerUpdateEvent) 
+								if ((timer.m_flags & AuxTimerValue::kFlag_RunOnTimerUpdateEvent) != 0) 
 								{
 									for (auto const& callback : OnAuxTimerUpdate->EventCallbacks) 
 									{
@@ -156,7 +156,7 @@ namespace AuxTimer
 									if (timer.IsPendingRemoval() || timer.m_timeRemaining > 0.0)
 										continue;
 
-									if (timer.m_flags & AuxTimerValue::kFlag_AutoRestarts) {
+									if ((timer.m_flags & AuxTimerValue::kFlag_AutoRestarts) != 0) {
 										timer.m_timeRemaining = timer.m_timeToCountdown;
 
 										for (auto const& callback : OnAuxTimerStart->EventCallbacks) {
