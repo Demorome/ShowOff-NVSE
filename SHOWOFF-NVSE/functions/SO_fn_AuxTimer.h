@@ -86,6 +86,7 @@ bool Cmd_AuxTimerStop_Execute(COMMAND_ARGS)
 		AuxTimerMapInfo const varInfo(form, thisObj, scriptObj, varName);
 		if (varInfo.ownerID)
 		{
+			AUX_TIMER_CS;
 			AuxTimerValue* value = GetTimerValue(varInfo, false);
 			if (!value)
 				return true;
@@ -112,8 +113,6 @@ bool Cmd_AuxTimerStop_Execute(COMMAND_ARGS)
 					}
 				}
 			}
-
-			AUX_TIMER_CS;
 
 			std::vector<AuxTimerPendingRemoval>& timersToRemove = varInfo.isPerm 
 				? g_auxTimersToRemovePerm 
@@ -156,6 +155,7 @@ bool Cmd_AuxTimerPaused_Execute(COMMAND_ARGS)
 		AuxTimerMapInfo const varInfo(form, thisObj, scriptObj, varName);
 		if (varInfo.ownerID)
 		{
+			AUX_TIMER_CS;
 			AuxTimerValue* value = GetTimerValue(varInfo, false);
 			if (!value)
 				return true;
@@ -164,7 +164,6 @@ bool Cmd_AuxTimerPaused_Execute(COMMAND_ARGS)
 
 			if (setPaused >= 0 && value->m_timeRemaining > 0.0)
 			{
-				AUX_TIMER_CS;
 				if (!setPaused)
 					value->m_flags &= ~AuxTimerValue::kFlag_IsPaused;
 				else
@@ -202,6 +201,7 @@ bool Cmd_AuxTimerTimeElapsed_Execute(COMMAND_ARGS)
 		AuxTimerMapInfo const varInfo(form, thisObj, scriptObj, varName);
 		if (varInfo.ownerID)
 		{
+			AUX_TIMER_CS;
 			AuxTimerValue* value = GetTimerValue(varInfo, false);
 			if (!value)
 				return true;
@@ -226,6 +226,7 @@ bool Cmd_AuxTimerTimeToCountdown_Execute(COMMAND_ARGS)
 		AuxTimerMapInfo const varInfo(form, thisObj, scriptObj, varName);
 		if (varInfo.ownerID)
 		{
+			AUX_TIMER_CS;
 			AuxTimerValue* value = GetTimerValue(varInfo, false);
 			if (!value)
 				return true;
@@ -250,6 +251,7 @@ bool Cmd_AuxTimerTimeLeft_Execute(COMMAND_ARGS)
 		AuxTimerMapInfo const varInfo(form, thisObj, scriptObj, varName);
 		if (varInfo.ownerID)
 		{
+			AUX_TIMER_CS;
 			AuxTimerValue* value = GetTimerValue(varInfo, false);
 			if (!value)
 				return true;
