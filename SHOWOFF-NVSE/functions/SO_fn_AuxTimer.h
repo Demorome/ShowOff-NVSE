@@ -53,11 +53,21 @@ bool Cmd_AuxTimerStart_Execute(COMMAND_ARGS)
 				value->m_flags = flags;
 			}
 
-			for (auto const& callback : OnAuxTimerStart->EventCallbacks) {
+			for (auto const& callback : OnAuxTimerStart->EventCallbacks) 
+			{
 				auto* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneString*>(callback.eventFilter);
-				if (filter->IsInFilter(0, varInfo.ownerID) && filter->IsInFilter(1, varName)) {
-					if (varInfo.IsPublic() || callback.ScriptForEvent->GetOverridingModIdx() == varInfo.modIndex) {
-						FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStart->numMaxArgs, varName, LookupFormByRefID(varInfo.ownerID));
+				if (filter->IsInFilter(0, varInfo.ownerID) && filter->IsInFilter(1, varName)) 
+				{
+					if (varInfo.IsPublic() 
+						|| callback.ScriptForEvent->GetOverridingModIdx() == varInfo.modIndex) 
+						{
+						FunctionCallScriptAlt(
+							callback.ScriptForEvent, 
+							nullptr, 
+							OnAuxTimerStart->numMaxArgs, 
+							varName, 
+							LookupFormByRefID(varInfo.ownerID)
+						);
 					}
 				}
 			}
