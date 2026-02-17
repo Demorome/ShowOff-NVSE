@@ -101,12 +101,25 @@ namespace AuxTimer
 								const bool isPerm = (auxVarNameMapIter.Key()[0] != '*');
 								const bool isPublic = (auxVarNameMapIter.Key()[!isPerm] == '_');
 
-								if (timer.m_flags & AuxTimerValue::kFlag_RunOnTimerUpdateEvent) {
-									for (auto const& callback : OnAuxTimerUpdate->EventCallbacks) {
+								if (timer.m_flags & AuxTimerValue::kFlag_RunOnTimerUpdateEvent) 
+								{
+									for (auto const& callback : OnAuxTimerUpdate->EventCallbacks) 
+									{
 										auto* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneString*>(callback.eventFilter);
-										if (filter->IsInFilter(0, ownerFormID) && filter->IsInFilter(1, auxVarNameMapIter.Key())) {
-											if (isPublic || callback.ScriptForEvent->GetOverridingModIdx() == modMapIter.Key()) {
-												FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerUpdate->numMaxArgs, auxVarNameMapIter.Key(), ownerForm, *(UInt32*)&timePassed);
+										if (filter->IsInFilter(0, ownerFormID) 
+											&& filter->IsInFilter(1, auxVarNameMapIter.Key())) 
+										{
+											if (isPublic 
+												|| callback.ScriptForEvent->GetOverridingModIdx() == modMapIter.Key()) 
+											{
+												FunctionCallScriptAlt(
+													callback.ScriptForEvent, 
+													nullptr, 
+													OnAuxTimerUpdate->numMaxArgs, 
+													auxVarNameMapIter.Key(), 
+													ownerForm, 
+													*(UInt32*)&timePassed
+												);
 											}
 										}
 									}
@@ -119,11 +132,22 @@ namespace AuxTimer
 								if (timer.m_timeRemaining <= 0.0)
 								{
 									// Handle end-of-timer code.
-									for (auto const& callback : OnAuxTimerStop->EventCallbacks) {
+									for (auto const& callback : OnAuxTimerStop->EventCallbacks) 
+									{
 										auto* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneString*>(callback.eventFilter);
-										if (filter->IsInFilter(0, ownerFormID) && filter->IsInFilter(1, auxVarNameMapIter.Key())) {
-											if (isPublic || callback.ScriptForEvent->GetOverridingModIdx() == modMapIter.Key()) {
-												FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStop->numMaxArgs, auxVarNameMapIter.Key(), ownerForm);
+										if (filter->IsInFilter(0, ownerFormID) 
+											&& filter->IsInFilter(1, auxVarNameMapIter.Key())) 
+										{
+											if (isPublic 
+												|| callback.ScriptForEvent->GetOverridingModIdx() == modMapIter.Key()) 
+											{
+												FunctionCallScriptAlt(
+													callback.ScriptForEvent, 
+													nullptr, 
+													OnAuxTimerStop->numMaxArgs, 
+													auxVarNameMapIter.Key(), 
+													ownerForm
+												);
 											}
 										}
 									}
@@ -137,9 +161,16 @@ namespace AuxTimer
 
 										for (auto const& callback : OnAuxTimerStart->EventCallbacks) {
 											auto* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneString*>(callback.eventFilter);
-											if (filter->IsInFilter(0, ownerFormID) && filter->IsInFilter(1, auxVarNameMapIter.Key())) {
+											if (filter->IsInFilter(0, ownerFormID) 
+												&& filter->IsInFilter(1, auxVarNameMapIter.Key())) {
 												if (isPublic || callback.ScriptForEvent->GetOverridingModIdx() == modMapIter.Key()) {
-													FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStart->numMaxArgs, auxVarNameMapIter.Key(), ownerForm);
+													FunctionCallScriptAlt(
+														callback.ScriptForEvent, 
+														nullptr, 
+														OnAuxTimerStart->numMaxArgs, 
+														auxVarNameMapIter.Key(), 
+														ownerForm
+													);
 												}
 											}
 										}
@@ -198,14 +229,21 @@ namespace AuxTimer
 	{
 		void RemovePendingTimers(bool clearTemp)
 		{
-			std::vector<AuxTimerPendingRemoval>& timersToRemove = clearTemp ? g_auxTimersToRemoveTemp : g_auxTimersToRemovePerm;
+			std::vector<AuxTimerPendingRemoval>& timersToRemove = clearTemp 
+				? g_auxTimersToRemoveTemp 
+				: g_auxTimersToRemovePerm;
+
 			if (timersToRemove.empty())
 				return;
 
-			// After deleting some timers, clear out the maps the timers were contained in if they're now empty.
+			// After deleting some timers, clear out the maps 
+			// that the timers were contained in if they're now empty.
 			std::unordered_set<UInt32> modMapsToUpdate;
 
-			AuxTimerModsMap& modsMapOfAllTimers = clearTemp ? s_auxTimerMapArraysTemp : s_auxTimerMapArraysPerm;
+			AuxTimerModsMap& modsMapOfAllTimers = clearTemp 
+				? s_auxTimerMapArraysTemp 
+				: s_auxTimerMapArraysPerm;
+
 			for (auto& timerToRemove : timersToRemove)
 			{
 				auto* modEntry = modsMapOfAllTimers.GetPtr(timerToRemove.modIndex);
@@ -214,8 +252,13 @@ namespace AuxTimer
 				// If the AuxTimer is no longer pending removal, 
 				// ... likely because AuxTimerStart was called on it in the same frame it was stopped,
 				// ... avoid deleting the timer.
-				if (!modAndRefEntry->GetPtr(const_cast<char*>(timerToRemove.varName.c_str()))->IsPendingRemoval())
+				if (!modAndRefEntry->GetPtr(
+					const_cast<char*>(
+						timerToRemove.varName.c_str())
+					)->IsPendingRemoval())
+				{
 					continue;
+				}
 
 				modAndRefEntry->Erase(const_cast<char*>(timerToRemove.varName.c_str()));
 				if (modAndRefEntry->Empty()) {

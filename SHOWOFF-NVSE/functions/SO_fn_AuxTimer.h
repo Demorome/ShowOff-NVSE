@@ -10,8 +10,12 @@ using namespace AuxTimer;
 ICriticalSection g_AuxTimerLock;
 #define AUX_TIMER_CS ScopedLock lock(g_AuxTimerLock)
 
-DEFINE_COMMAND_PLUGIN(AuxTimerStart, "Starts an auxvar timer on a form, or can restart it if exists already.", 
-	false, kParams_OneString_OneOptionalDouble_OneOptionalInt_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(
+	AuxTimerStart, 
+	"Starts an auxvar timer on a form, or can restart it if exists already.", 
+	false, 
+	kParams_OneString_OneOptionalDouble_OneOptionalInt_OneOptionalForm
+);
 bool Cmd_AuxTimerStart_Execute(COMMAND_ARGS)
 {
 	*result = 0;
@@ -70,8 +74,13 @@ bool Cmd_AuxTimerStart_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_ALT_PLUGIN(AuxTimerStop, AuxTimerErase, "Stops/erases an auxvar timer on a form.",
-	false, kParams_OneString_OneOptionalInt_OneOptionalForm);
+DEFINE_COMMAND_ALT_PLUGIN(
+	AuxTimerStop, 
+	AuxTimerErase, 
+	"Stops/erases an auxvar timer on a form.",
+	false, 
+	kParams_OneString_OneOptionalInt_OneOptionalForm
+);
 bool Cmd_AuxTimerStop_Execute(COMMAND_ARGS)
 {
 	*result = 0;
