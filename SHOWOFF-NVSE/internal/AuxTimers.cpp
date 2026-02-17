@@ -237,7 +237,7 @@ namespace AuxTimer
 				return;
 
 			// After deleting some timers, clear out the maps 
-			// that the timers were contained in if they're now empty.
+			// that the timers were contained in, if they're now empty.
 			std::unordered_set<UInt32> modMapsToUpdate;
 
 			AuxTimerModsMap& modsMapOfAllTimers = clearTemp 
