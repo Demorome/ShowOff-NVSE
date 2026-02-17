@@ -185,6 +185,7 @@ namespace AuxTimer
 						else // invalid form
 						{
 							// Don't care about delaying removal here, it's just invalid garbage now
+							_MESSAGE("AuxTimer: Owner FormID couldn't be resolved: %08X. Deleting the timer.", ownerFormID);
 							auxVarNameMapIter.Remove();
 						}
 					}
