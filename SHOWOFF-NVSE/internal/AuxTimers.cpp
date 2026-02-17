@@ -213,9 +213,18 @@ namespace AuxTimer
 				for (auto auxVarNameMapIter = refOwnersMapIter.Get().Begin();
 					!auxVarNameMapIter.End(); ++auxVarNameMapIter)
 				{
-					if (auxVarNameMapIter.Get().m_flags & AuxTimerValue::kFlag_AutoRemoveOnLoadAndMainMenu)
+					auto flags = auxVarNameMapIter.Get().m_flags;
+					if ((flags & AuxTimerValue::kFlag_PendingRemoval) != 0)
+					{
+						_ERROR("AuxTimers: HandleAutoRemoveTempTimers: Should not have a timer pending removal here!");
+						continue;
+					}
+
+					if ((flags & AuxTimerValue::kFlag_AutoRemoveOnLoadAndMainMenu) != 0)
+					{
+						// intentionally not running OnTimerStop event for these
 						auxVarNameMapIter.Remove();
-					// intentionally not running OnTimerStop event for these
+					}
 				}
 				if (refOwnersMapIter.Get().Empty())
 					refOwnersMapIter.Remove();
