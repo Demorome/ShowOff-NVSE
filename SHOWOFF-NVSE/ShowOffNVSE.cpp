@@ -200,8 +200,13 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 			COPY_BYTES(s_lastLoadedPath, msg->fosPath, msg->dataLen + 1);
 			s_dataChangedFlags = kChangedFlag_All;
 		}
-		AuxTimer::RemovePendingTimers();
-		AuxTimer::HandleAutoRemoveTempTimers();
+
+		{
+			AUX_TIMER_CS;
+			AuxTimer::RemovePendingTimers();
+			AuxTimer::HandleAutoRemoveTempTimers();
+		}
+		
 		FlushJGInterfaceEvents();
 		break;
 	case NVSEMessagingInterface::kMessage_PostLoadGame:
@@ -227,8 +232,13 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		// Copied from jip_nvse.cpp
 		ProcessDataChangedFlags(kChangedFlag_All);
 		s_lastLoadedPath[0] = 0;
-		AuxTimer::RemovePendingTimers();
-		AuxTimer::HandleAutoRemoveTempTimers();
+
+		{
+			AUX_TIMER_CS;
+			AuxTimer::RemovePendingTimers();
+			AuxTimer::HandleAutoRemoveTempTimers();
+		}
+
 		FlushJGInterfaceEvents();
 		break;
 	case NVSEMessagingInterface::kMessage_Precompile:
