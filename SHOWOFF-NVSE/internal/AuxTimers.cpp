@@ -37,16 +37,24 @@ namespace AuxTimer
 	{
 		void DoCountdown(double const globalTimeMult, double const vatsTimeMult, bool const isMenuMode, bool const isTemp)
 		{
-			AuxTimerModsMap& auxTimers = isTemp ? s_auxTimerMapArraysTemp : s_auxTimerMapArraysPerm;
+			AuxTimerModsMap& auxTimers = isTemp 
+				? s_auxTimerMapArraysTemp 
+				: s_auxTimerMapArraysPerm;
 
 			if (auxTimers.Empty())
 				return;
 
-			auto const secondsDelta = static_cast<double>(g_timeGlobal->secondsPassed) / globalTimeMult; // unnaffected by TimeMult
+			auto const secondsDelta = 
+				static_cast<double>(g_timeGlobal->secondsPassed) 
+				/ globalTimeMult; // unnaffected by TimeMult
+
 			// secondsPassed already accounts for GlobalTimeMult
-			auto const secondsDeltaWithMult = static_cast<double>(g_timeGlobal->secondsPassed) * vatsTimeMult;
-			double const secondsDeltaWithMultNoTurbo = (g_thePlayer->isUsingTurbo) ? 
-				  (secondsDeltaWithMult / GetFltGameSetting(0x11D0FA8)) // gs_fTurboTimeMultiplier 
+			auto const secondsDeltaWithMult = 
+				static_cast<double>(g_timeGlobal->secondsPassed) 
+				* vatsTimeMult;
+				
+			double const secondsDeltaWithMultNoTurbo = (g_thePlayer->isUsingTurbo) 
+				? (secondsDeltaWithMult / GetFltGameSetting(0x11D0FA8)) // gs_fTurboTimeMultiplier 
 				: secondsDeltaWithMult;
 
 			for (auto modMapIter = auxTimers.Begin(); !modMapIter.End(); ++modMapIter)
@@ -65,9 +73,13 @@ namespace AuxTimer
 							if ((timer.m_flags & AuxTimerValue::kFlag_IsPaused) != 0)
 								continue;
 
+							// Timer could have stopped from scripted functions before or during this loop.
+							if (timer.IsPendingRemoval()) [[unlikely]]
+								continue;
+
 							if ((timer.m_flags & AuxTimerValue::kFlag_DontRunWhenGamePaused) != 0)
 							{
-								if (IsGamePaused())
+								if (IsGamePaused()) [[unlikely]]
 									continue;
 							}
 							
@@ -125,7 +137,7 @@ namespace AuxTimer
 									}
 								}
 
-								// Timer could have stopped from inside OnAuxTimerUpdate handlers
+								// Timer could have just stopped from inside OnAuxTimerUpdate handlers.
 								if (timer.IsPendingRemoval()) [[unlikely]]
 									continue;
 
@@ -259,14 +271,14 @@ namespace AuxTimer
 				auto* modEntry = modsMapOfAllTimers.GetPtr(timerToRemove.modIndex);
 				if (!modEntry) [[unlikely]]
 				{
-					_ERROR("AuxTimer: Null modEntry encountered!");
+					_ERROR("AuxTimer: RemovePendingTimers: Null modEntry encountered!");
 					continue;
 				}
 
 				auto* modAndRefEntry = modEntry->GetPtr(timerToRemove.ownerID);
 				if (!modAndRefEntry) [[unlikely]]
 				{
-					_ERROR("AuxTimer: Null modAndRefEntry encountered!");
+					_ERROR("AuxTimer: RemovePendingTimers: Null modAndRefEntry encountered!");
 					continue;
 				}
 
@@ -279,7 +291,7 @@ namespace AuxTimer
 					);
 					if (!auxTimer)
 					{
-						_ERROR("AuxTimer: Null auxTimer encountered!");
+						_ERROR("AuxTimer: RemovePendingTimers: Null auxTimer encountered!");
 						continue;
 					}
 					if (!auxTimer->IsPendingRemoval())
