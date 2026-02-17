@@ -56,7 +56,13 @@ void LoadGameCallback(void*)
 			{
 				nRecs--;
 				buffer1 = ReadRecord8();  //modID
-				if (!ResolveRefID(buffer1 << 24, &buffer4)) continue;  //checks if mod is still loaded(?)
+
+				//checks if mod is still loaded(?)
+				if (!ResolveRefID(buffer1 << 24, &buffer4))
+				{
+					continue;
+				}   
+				
 				AuxStringMapVarsMap* rVarsMap = NULL;
 				modIdx = buffer4 >> 24;
 				nVars = ReadRecord16();  //amount of auxStringMaps owned by the mod.
@@ -65,20 +71,26 @@ void LoadGameCallback(void*)
 					AuxStringMapIDsMap* idsMap = NULL;
 					buffer1 = ReadRecord8();  //length of char* for the name of an auxStringMap
 					ReadRecordData(varName, buffer1);  //retrieve the char*
-					varName[buffer1] = 0; //idk
+					varName[buffer1] = 0; // add null terminator at the end
 					nVals = ReadRecord16();  //amount of key/value pairs for the specific auxStringMap
 					while (nVals)
 					{  
 						loopBuffer = ReadRecord8();  //length of char*
 						ReadRecordData(keyName, loopBuffer);  //retrieve the char*
-						keyName[loopBuffer] = 0; //idk
+						keyName[loopBuffer] = 0; // add null terminator at the end
 						buffer1 = ReadRecord8();  //associated data (str/ref/flt)
 						if (keyName[0])
 						{
 							if (!idsMap)
 							{
 								ScopedLock lock(g_Lock);
-								if (!rVarsMap) rVarsMap = s_auxStringMapArraysPerm.Emplace(modIdx, nVars);
+								if (!rVarsMap) 
+								{
+									rVarsMap = s_auxStringMapArraysPerm.Emplace(
+										modIdx, 
+										nVars
+									);
+								}
 								idsMap = rVarsMap->Emplace(varName, nVals);
 							}
 							idsMap->Emplace(keyName, buffer1);
@@ -101,8 +113,11 @@ void LoadGameCallback(void*)
 		}
 		case 'TAOS':
 		{
-			if (!(changedFlags & kChangedFlag_AuxTimerMaps) || (version < AuxTimer::AuxTimerVersion))
+			if (!(changedFlags & kChangedFlag_AuxTimerMaps) 
+				|| (version < AuxTimer::AuxTimerVersion))
+			{
 				break;
+			}
 			UInt8* bufPos = GetLoadGameBuffer(length);
 			nRecs = *(UInt16*)bufPos;
 			bufPos += sizeof(UInt16);
@@ -121,10 +136,21 @@ void LoadGameCallback(void*)
 						bufPos += sizeof(UInt32);
 						nVars = *(UInt16*)bufPos;
 						bufPos += sizeof(UInt16);
-						if ((refID = GetResolvedRefID(refID)) && (LookupFormByRefID(refID) || HasChangeData(refID)))
+						if ((refID = GetResolvedRefID(refID)) 
+							&& (LookupFormByRefID(refID) || HasChangeData(refID)))
 						{
-							if (!ownersMap) ownersMap = AuxTimer::s_auxTimerMapArraysPerm.Emplace(modIdx, AlignBucketCount(nRefs));
-							AuxTimer::AuxTimerVarsMap* aVarsMap = ownersMap->Emplace(refID, AlignBucketCount(nVars));
+							if (!ownersMap)
+							{
+								ownersMap = AuxTimer::s_auxTimerMapArraysPerm.Emplace(
+									modIdx, 
+									AlignBucketCount(nRefs)
+								);
+							}
+							AuxTimer::AuxTimerVarsMap* aVarsMap = ownersMap->Emplace(
+								refID, 
+								AlignBucketCount(nVars)
+							);
+
 							while (nVars)
 							{
 								buffer1 = *bufPos++; // strLen for auxvar name

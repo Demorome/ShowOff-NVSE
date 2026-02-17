@@ -93,17 +93,39 @@ bool Cmd_AuxTimerStop_Execute(COMMAND_ARGS)
 			if (fireEvent)
 			{
 				for (auto const& callback : OnAuxTimerStop->EventCallbacks) {
-					auto* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneString*>(callback.eventFilter);
-					if (filter->IsInFilter(0, varInfo.ownerID) && filter->IsInFilter(1, varName)) {
-						if (varInfo.IsPublic() || callback.ScriptForEvent->GetOverridingModIdx() == varInfo.modIndex) {
-							FunctionCallScriptAlt(callback.ScriptForEvent, nullptr, OnAuxTimerStop->numMaxArgs, varName, LookupFormByRefID(varInfo.ownerID));
+					auto* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneString*>(
+						callback.eventFilter
+					);
+					if (filter->IsInFilter(0, varInfo.ownerID) && filter->IsInFilter(1, varName)) 
+					{
+						if (varInfo.IsPublic() 
+							|| callback.ScriptForEvent->GetOverridingModIdx() == varInfo.modIndex) 
+						{
+							FunctionCallScriptAlt(
+								callback.ScriptForEvent, 
+								nullptr, 
+								OnAuxTimerStop->numMaxArgs, 
+								varName, 
+								LookupFormByRefID(varInfo.ownerID)
+							);
 						}
 					}
 				}
 			}
+
 			AUX_TIMER_CS;
-			std::vector<AuxTimerPendingRemoval>& timersToRemove = varInfo.isPerm ? g_auxTimersToRemovePerm : g_auxTimersToRemoveTemp;
-			timersToRemove.emplace_back(AuxTimerPendingRemoval{ varInfo.modIndex, varInfo.ownerID, varName });
+
+			std::vector<AuxTimerPendingRemoval>& timersToRemove = varInfo.isPerm 
+				? g_auxTimersToRemovePerm 
+				: g_auxTimersToRemoveTemp;
+
+			timersToRemove.emplace_back(AuxTimerPendingRemoval
+				{ 
+					varInfo.modIndex, 
+					varInfo.ownerID, 
+					varName 
+				}
+			);
 			value->m_flags |= AuxTimerValue::kFlag_PendingRemoval;
 
 			if (varInfo.isPerm)
@@ -160,8 +182,12 @@ bool Cmd_AuxTimerPaused_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(AuxTimerTimeElapsed, "Gets how much time passed since timer started (limited by the original countdown time, and not accounting for paused time).",
-	false, kParams_OneString_OneOptionalInt_OneOptionalForm);
+DEFINE_COMMAND_PLUGIN(
+	AuxTimerTimeElapsed, 
+	"Gets how much time passed since timer started (limited by the original countdown time, and not accounting for paused time).",
+	false, 
+	kParams_OneString_OneOptionalInt_OneOptionalForm
+);
 bool Cmd_AuxTimerTimeElapsed_Execute(COMMAND_ARGS)
 {
 	*result = -1;
