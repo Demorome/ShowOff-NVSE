@@ -615,13 +615,13 @@ bool Cmd_ToggleQuestMessages_Execute(COMMAND_ARGS)
 	SInt32 bOn = -1;  // If -1 (default), return the toggle status.
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bOn))
 		return true;
-	
+
 	if (bOn == -1)
 	{
 		*result = questMsgEnabled;
 		return true;
 	}
-	
+
 	if (!bOn && questMsgEnabled)
 	{
 		// Kill the QuestUpdateManager::Append/PrependToQueue functions
@@ -633,7 +633,7 @@ bool Cmd_ToggleQuestMessages_Execute(COMMAND_ARGS)
 
 		WriteRelJump(0x77A5BD, 0x77A646);  // Make return jmp for HUDMainMenu::SetQuestUpdateText always true (does nothing).
 		// Was able to account for this thanks to JIP's SuppressQuestMessages function.
-		
+
 		questMsgEnabled = false;
 		*result = true;
 	}
@@ -647,7 +647,7 @@ bool Cmd_ToggleQuestMessages_Execute(COMMAND_ARGS)
 		WriteRelCall(0x76BABB, 0x83FD60);
 
 		WriteRelJe(0x77A5BD, 0x77A646);
-		
+
 		questMsgEnabled = true;
 		*result = true;
 	}
@@ -723,7 +723,7 @@ bool Cmd_GetPipboyRadioVoiceEntryData_Execute(COMMAND_ARGS)
 		{
 			GetAndAppendVoiceEntryData(voiceList->voiceEntries, outArr);
 		}
-		else 
+		else
 		{
 			//for (; voiceList; voiceList = voiceList->next)
 			do {
@@ -783,7 +783,7 @@ bool Cmd_GetCellEncounterZone_Execute(COMMAND_ARGS)
 		return true;
 	if (auto const cell = DYNAMIC_CAST(form, TESForm, TESObjectCELL)) {
 		ExtraEncounterZone* xEncZone = GetExtraTypeJIP(&cell->extraDataList, EncounterZone);
-		if (xEncZone && xEncZone->zone) 
+		if (xEncZone && xEncZone->zone)
 			REFR_RES = xEncZone->zone->refID;
 	}
 	return true;
@@ -809,7 +809,7 @@ bool Cmd_ShowPauseMenu_Execute(COMMAND_ARGS)
 	if (pauseMode != kJustPause)
 	{
 		//Make every main option disabled.
-		menu->main_options084.SetParentEnabled(false);		
+		menu->main_options084.SetParentEnabled(false);
 		UInt32 callback_addr;
 		switch (pauseMode)
 		{
@@ -828,7 +828,7 @@ bool Cmd_ShowPauseMenu_Execute(COMMAND_ARGS)
 			break;
 		}
 		CdeclCall(callback_addr);
-		
+
 		// Make the appropriate tile "selected", to make it have its opacity back.
 		auto iter = menu->main_options084.list.Head();
 		do {
@@ -1065,7 +1065,7 @@ bool Cmd_SetProjectileTracerChanceOverride_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(SpawnTracingProjectile, "Spawns a projectile following the calling projectile reference.", 
+DEFINE_COMMAND_PLUGIN(SpawnTracingProjectile, "Spawns a projectile following the calling projectile reference.",
 	true, kParams_OneForm_TwoOptionalInts);
 bool Cmd_SpawnTracingProjectile_Execute(COMMAND_ARGS)
 {
@@ -1134,7 +1134,7 @@ DEFINE_COMMAND_PLUGIN(ToANSIChar, "", false, kParams_OneInt_OneOptionalInt);
 bool Cmd_ToANSIChar_Execute(COMMAND_ARGS)
 {
 	UInt32 scancode = 0;
-	bool ignoreShift = true;
+	bool ignoreShift = false;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &scancode, &ignoreShift))
 	{
 		g_strInterface->Assign(PASS_COMMAND_ARGS, "");
@@ -1145,6 +1145,14 @@ bool Cmd_ToANSIChar_Execute(COMMAND_ARGS)
 	if (!GetKeyboardState(keyboardState)) return true;
 
 	HKL layout = GetKeyboardLayout(0);
+
+	// Ignore control keys
+	keyboardState[VK_CONTROL] = 0;
+	keyboardState[VK_LCONTROL] = 0;
+	keyboardState[VK_RCONTROL] = 0;
+	keyboardState[VK_MENU] = 0;
+	keyboardState[VK_LMENU] = 0;
+	keyboardState[VK_RMENU] = 0;
 
 	// When ignoreShift is true, we explicitly clear the Shift state instead of forcing it pressed.
 	// Some keyboard layouts (e.g. French AZERTY) use lowercase positions for special letters (é, à, etc.)
@@ -1161,7 +1169,9 @@ bool Cmd_ToANSIChar_Execute(COMMAND_ARGS)
 	if (vk == 0) return true;
 
 	WCHAR unicodeChar[16];
-	int len = ToUnicodeEx(vk, scancode, keyboardState, unicodeChar, _countof(unicodeChar), 0, layout);
+
+	int len = ToUnicodeEx(vk, scancode, keyboardState, unicodeChar, _countof(unicodeChar), 0x4, layout);
+
 	if (len <= 0) return true;
 
 	char ansiChar[16];
@@ -1204,7 +1214,7 @@ bool Cmd_CaravanDeckRemoveCard_Execute(COMMAND_ARGS)
 	*result = 0; //numRemoved
 	TESForm* deckForm;
 	TESForm* cardForm;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &deckForm, &cardForm) 
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &deckForm, &cardForm)
 		|| !IS_TYPE(deckForm, TESCaravanDeck) || !IS_TYPE(cardForm, TESCaravanCard))
 	{
 		return true;
