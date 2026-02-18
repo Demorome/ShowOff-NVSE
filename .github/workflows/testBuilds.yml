@@ -35,9 +35,15 @@ jobs:
 
     - name: Package Artifacts
       run: |
-        mkdir -p artifacts
-        Compress-Archive -Path SHOWOFF-NVSE\Release\ShowOffNVSE.dll, SHOWOFF-NVSE\Release\ShowOffNVSE.pdb -DestinationPath artifacts\ShowOffNVSE-Release-${{ env.artifact_timestamp }}.zip
-        Compress-Archive -Path SHOWOFF-NVSE\Debug\ShowOffNVSE.dll, SHOWOFF-NVSE\Debug\ShowOffNVSE.pdb -DestinationPath artifacts\ShowOffNVSE-Debug-${{ env.artifact_timestamp }}.zip
+        $releaseDir = "SHOWOFF-NVSE\Release"
+        $debugDir = "SHOWOFF-NVSE\Debug"
+        New-Item -ItemType Directory -Name artifacts -Force | Out-Null
+        New-Item -ItemType Directory -Name "nvse\plugins" -path $releaseDir -Force | Out-Null
+        New-Item -ItemType Directory -Name "nvse\plugins" -path $debugDir -Force | Out-Null
+        Copy-Item -Path "$releaseDir\ShowOffNVSE.dll", "$releaseDir\ShowOffNVSE.pdb" -Destination "$releaseDir\nvse\plugins"
+        Copy-Item -Path "$debugDir\ShowOffNVSE.dll", "$debugDir\ShowOffNVSE.pdb" -Destination "$debugDir\nvse\plugins"
+        Compress-Archive -Path "$releaseDir\nvse" -DestinationPath "artifacts\ShowOffNVSE-Release-${{ env.artifact_timestamp }}.zip"
+        Compress-Archive -Path "$debugDir\nvse" -DestinationPath "artifacts\ShowOffNVSE-Debug-${{ env.artifact_timestamp }}.zip"
       shell: pwsh
 
     - name: Publish Zipped Artifacts
