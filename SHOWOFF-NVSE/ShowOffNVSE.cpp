@@ -38,7 +38,7 @@
 // Plugin Stuff
 IDebugLog g_Log; // file will be open after NVSE plugin load
 HMODULE	g_ShowOffHandle;
-constexpr UInt32 g_PluginVersion = 182;
+constexpr UInt32 g_PluginVersion = 183;
 
 //***Current Max OpCode (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
 const UInt32 MaxOpcode = 0x3D74;
