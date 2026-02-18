@@ -100,13 +100,13 @@ DEFINE_COMMAND_PLUGIN(UnequipItems, "", true, kParams_FourOptionalInts);
 bool Cmd_UnequipItems_Execute(COMMAND_ARGS)
 {
 	UInt32 flags = 0, noEquip = 0, hideMessage = 0, triggerOnUnequip = 1;
-	
+
 	if (!ExtractArgs(EXTRACT_ARGS, &flags, &noEquip, &hideMessage, &triggerOnUnequip)
 		|| NOT_ACTOR(thisObj))
 	{
 		return true;
 	}
-	
+
 	auto eqItems = GetEquippedItems(thisObj, flags);
 	for (auto const& iter : eqItems)
 	{
@@ -210,7 +210,7 @@ bool Cmd_RemoveAllItemsShowOff_Execute(COMMAND_ARGS)
 	{
 		//todo: Write a jmp to extract the form mid-loop.
 
-		
+
 		// Check the form via IsItemPlayable. If it passes, jmp back to removal, otherwise jmp to go to the next form.
 	}
 
@@ -240,7 +240,7 @@ bool Cmd_RemoveAllItemsShowOff_Execute(COMMAND_ARGS)
 	{
 		// TODO
 	}
-	
+
 	// Wrap up
 	ThisStdCall<void>(0x952C30, g_thePlayer, thisObj); // ComputeShouldRecalculateQuestTargets()
 	*result = 1; //function worked as expected.
@@ -425,7 +425,7 @@ bool Cmd_GetIngestibleConsumeSound_Execute(COMMAND_ARGS)
 	{
 		return true;
 	}
-	
+
 	if (form = TryExtractBaseForm(form, thisObj))
 	{
 		if (auto const ingestible = DYNAMIC_CAST(form, TESForm, AlchemyItem))
@@ -442,14 +442,14 @@ bool Cmd_SetIngestibleConsumeSound_Execute(COMMAND_ARGS)
 {
 	//Returns if the change was successful or not.
 	*result = false;
-	
+
 	TESSound* newSound;
 	TESForm* form = nullptr;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &newSound, &form) || NOT_TYPE(newSound, TESSound))
 	{
 		return true;
 	}
-	
+
 	if (form = TryExtractBaseForm(form, thisObj))
 	{
 		if (auto const ingestible = DYNAMIC_CAST(form, TESForm, AlchemyItem))
@@ -486,7 +486,7 @@ TESObjectREFR* __fastcall GetEquippedItemRefForItem_Call(Actor* actor, TESForm* 
 	return nullptr;
 }
 
-DEFINE_COMMAND_PLUGIN(GetEquippedItemRefForItem, "Returns the equipped inv ref for the base item if that base item is equipped.", 
+DEFINE_COMMAND_PLUGIN(GetEquippedItemRefForItem, "Returns the equipped inv ref for the base item if that base item is equipped.",
 	true, kParams_OneForm);
 bool Cmd_GetEquippedItemRefForItem_Execute(COMMAND_ARGS)
 {
@@ -522,7 +522,7 @@ bool Cmd_GetItemCanHaveHealth_Eval(COMMAND_ARGS_EVAL)
 	*result = 0;	//canHaveHealth
 	if (auto const base_form = TryExtractBaseForm((TESForm*)arg1, thisObj))
 	{
-		if (base_form->IsItem() 
+		if (base_form->IsItem()
 			&& DYNAMIC_CAST(base_form, TESForm, TESHealthForm) // can be true for actors and armors/weapons
 			)
 		{
@@ -581,7 +581,7 @@ bool Cmd_GetCalculatedItemValue_Eval(COMMAND_ARGS_EVAL)
 				tempEntry.extendData = &extendData;
 			}
 
-			// Calculate Item Price, without barter mults. 
+			// Calculate Item Price, without barter mults.
 			// Accounts for item mods and condition as well.
 			itemVal = ThisStdCall<double>(0x4BD400, &tempEntry);
 		}
@@ -680,17 +680,15 @@ bool Cmd_GetItemHotkeyIconPath_Execute(COMMAND_ARGS)
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(GetSpellUsageNumEx, "", true, kParams_JIP_OneMagicItem);
-bool Cmd_GetSpellUsageNumEx_Execute(COMMAND_ARGS)
+DEFINE_CMD_COND_PLUGIN(GetSpellUsageNumEx, "Returns the number of times an Ingestible has been used by an actor.", true, kParams_JIP_OneMagicItem);
+bool Cmd_GetSpellUsageNumEx_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0.0;
 
 	if (!thisObj || !thisObj->IsActor())
 		return true;
 
-	MagicItem* magicItem = nullptr;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &magicItem))
-		return true;
+	MagicItem* magicItem = (MagicItem*)arg1;
 
 	EffectItem* usageMonitorEffect = ThisStdCall<EffectItem*>(0x00406200, &magicItem->list);	// GetUsageMonitorEffect
 	if (!usageMonitorEffect)
@@ -716,6 +714,16 @@ bool Cmd_GetSpellUsageNumEx_Execute(COMMAND_ARGS)
 
 	return true;
 }
+bool Cmd_GetSpellUsageNumEx_Execute(COMMAND_ARGS)
+{
+	*result = 0;
+	MagicItem* magicItem = nullptr;
+
+	if (!ExtractArgs(EXTRACT_ARGS, &magicItem))
+		return true;
+
+	return Cmd_GetSpellUsageNumEx_Eval(thisObj, magicItem, nullptr, result);
+}
 
 #if _DEBUG
 
@@ -733,7 +741,7 @@ TESObjectREFR* __fastcall CreateRefForStackWithoutCopy(TESObjectREFR* container,
 
 // Mostly copied from JIP's SetItemRefCurrentHealth, and code from 0x7B8092
 DEFINE_COMMAND_PLUGIN(SetSingleItemRefCurrentHealth,
-	"Sets the health of a single item for an inv ref. Can split off from a stack, and end up in a new stack.", 
+	"Sets the health of a single item for an inv ref. Can split off from a stack, and end up in a new stack.",
 	true, kParams_OneFloat_OneOptionalInt);
 bool Cmd_SetSingleItemRefCurrentHealth_Execute(COMMAND_ARGS)
 {
@@ -743,11 +751,11 @@ bool Cmd_SetSingleItemRefCurrentHealth_Execute(COMMAND_ARGS)
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &health, &setPercent))
 		return true;
 	InventoryRef* invRef = InventoryRefGetForID(thisObj->refID);
-	if (!invRef) 
+	if (!invRef)
 		return true;
 
 	float const baseHealth = invRef->data.entry->GetBaseHealth();
-	if (baseHealth == 0) 
+	if (baseHealth == 0)
 		return true;
 
 	if (setPercent)
@@ -775,7 +783,7 @@ bool Cmd_SetSingleItemRefCurrentHealth_Execute(COMMAND_ARGS)
 		// Copied part of xNVSE's SetRefCount
 		if (invRef->data.xData)
 		{
-			if (auto* xCount = (ExtraCount*)invRef->data.xData->GetByType(kExtraData_Count)) 
+			if (auto* xCount = (ExtraCount*)invRef->data.xData->GetByType(kExtraData_Count))
 				xCount->count = oldStackCount - 1;
 		}
 		--invRef->data.entry->countDelta;
@@ -828,10 +836,10 @@ bool Cmd_GetItemCanRepairTarget_Execute(COMMAND_ARGS)
 {
 	TESForm* repairingItem = nullptr;	// if thisObj is non-null, then this is actually itemTarget.
 	TESForm* itemTarget = nullptr;
-	
+
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &repairingItem, &itemTarget))
 		return true;
-	
+
 	return Cmd_GetItemCanRepairTarget_Eval(thisObj, repairingItem, itemTarget, result);
 }
 
@@ -874,7 +882,7 @@ bool Cmd_GetSelectedItemRefSO_Execute(COMMAND_ARGS)
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &menuID))
 		return true;
 	TESForm* itemRef = nullptr;
-	if (!menuID) 
+	if (!menuID)
 		menuID = g_interfaceManager->GetTopVisibleMenuID();
 	switch (menuID)
 	{
@@ -968,10 +976,10 @@ bool Cmd_GetCalculatedItemWeight_Eval(COMMAND_ARGS_EVAL)
 
 				// feeble attempt to fix potential multithreading issues, since code is being overwritten here.
 				ScopedLock lockCodeOverwrites(g_Lock);
-				
+
 				// Skip code which adds up the weight for each item in the owner / container.
 				ReplaceCall(0x4D09CB, (UInt32)tList_IsEmpty_ReturnFalse_Hook);
-				
+
 				//Via supreme jank, call GetInventoryWeight.
 				//Has to be done, since there is no other function that can return the modified weight,
 				//and writing a new one could get invalidated by hooks/changes from other plugins.
