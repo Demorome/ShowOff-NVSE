@@ -140,10 +140,26 @@ namespace AuxTimer
 		std::string	varName;
 	};
 
+	//deferred insertion for timers created during DoCountdown iteration
+	//inserting into UnorderedMap mid-iteration can rehash and invalidate iterators
+	struct AuxTimerPendingInsertion
+	{
+		UInt32		modIndex;
+		UInt32		ownerID;
+		std::string	varName;
+		bool		isPerm;
+		double		timeToCountdown;
+		UInt32		flags;
+	};
+
+	extern bool g_isIteratingTimers;
+	extern std::vector<AuxTimerPendingInsertion> g_auxTimersPendingInsertion;
+
 	extern std::vector<AuxTimerPendingRemoval> g_auxTimersToRemovePerm, g_auxTimersToRemoveTemp;
 	namespace Impl
 	{
 		void RemovePendingTimers(bool clearTemp);
 	}
 	void RemovePendingTimers();
+	void InsertPendingTimers();
 }

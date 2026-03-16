@@ -298,10 +298,10 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 			const auto isMenuMode = CdeclCall<bool>(0x702360);
 
 			AUX_TIMER_CS;
-			AuxTimer::RemovePendingTimers();
 			if (!s_auxTimerMapArraysPerm.Empty())
 				s_dataChangedFlags |= kChangedFlag_AuxTimerMaps; // assume a timer will change
 			AuxTimer::DoCountdown(globalTimeMult, vatsTimeMult, isMenuMode);
+			AuxTimer::RemovePendingTimers();
 		}
 
 		break;

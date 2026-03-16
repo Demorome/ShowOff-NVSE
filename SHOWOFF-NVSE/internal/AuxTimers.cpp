@@ -12,6 +12,9 @@ namespace AuxTimer
 
 	std::vector<AuxTimerPendingRemoval> g_auxTimersToRemovePerm, g_auxTimersToRemoveTemp;
 
+	bool g_isIteratingTimers = false;
+	std::vector<AuxTimerPendingInsertion> g_auxTimersPendingInsertion;
+
 	AuxTimerValue* __fastcall GetTimerValue(const AuxTimerMapInfo& varInfo, bool createIfNotFound)
 	{
 		if (createIfNotFound) {
@@ -168,8 +171,11 @@ namespace AuxTimer
 
 	void DoCountdown(double globalTimeMult, double vatsTimeMult, bool isMenuMode)
 	{
+		g_isIteratingTimers = true;
 		Impl::DoCountdown(globalTimeMult, vatsTimeMult, isMenuMode, true);
 		Impl::DoCountdown(globalTimeMult, vatsTimeMult, isMenuMode, false);
+		g_isIteratingTimers = false;
+		InsertPendingTimers();
 	}
 
 	void HandleAutoRemoveTempTimers()
@@ -238,6 +244,21 @@ namespace AuxTimer
 	{
 		Impl::RemovePendingTimers(true);
 		Impl::RemovePendingTimers(false);
+	}
+
+	void InsertPendingTimers()
+	{
+		if (g_auxTimersPendingInsertion.empty())
+			return;
+
+		for (auto& pending : g_auxTimersPendingInsertion)
+		{
+			auto& modsMap = pending.isPerm ? s_auxTimerMapArraysPerm : s_auxTimerMapArraysTemp;
+			auto& entry = modsMap[pending.modIndex][pending.ownerID][const_cast<char*>(pending.varName.c_str())];
+			entry.SetTimeToCountdown(pending.timeToCountdown);
+			entry.m_flags = pending.flags;
+		}
+		g_auxTimersPendingInsertion.clear();
 	}
 }
 
