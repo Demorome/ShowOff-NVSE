@@ -38,6 +38,24 @@ bool Cmd_AuxTimerStart_Execute(COMMAND_ARGS)
 			{
 				if (timeToCountdown == -1.0)
 					return true; //todo: dispatch xNVSE error
+
+				//can't insert into UnorderedMap mid-iteration, would invalidate iterators
+				if (g_isIteratingTimers)
+				{
+					g_auxTimersPendingInsertion.emplace_back(AuxTimerPendingInsertion{
+						varInfo.modIndex, varInfo.ownerID, varName,
+						varInfo.isPerm, timeToCountdown, flags
+					});
+					if (varInfo.isPerm)
+					{
+						s_dataChangedFlags |= kChangedFlag_AuxTimerMaps;
+						if (thisObj)
+							thisObj->MarkAsModified(0);
+					}
+					*result = 1;
+					return true;
+				}
+
 				value = GetTimerValue(varInfo, true);
 			}
 
