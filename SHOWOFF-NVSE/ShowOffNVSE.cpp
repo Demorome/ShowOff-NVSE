@@ -112,8 +112,6 @@ DWORD g_mainThreadID = 0;
 
 // Singletons
 RefID g_xMarkerFormID = 0x3B;
-BGSSaveLoadGame* g_BGSSaveLoadGame = nullptr;
-
 // Game functions
 bool (__cdecl* GetIsGodMode)() = nullptr;
 
@@ -236,9 +234,6 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		break;
 
 	case NVSEMessagingInterface::kMessage_DeferredInit:
-		// From JiP's patches_game.h
-		g_BGSSaveLoadGame = *(BGSSaveLoadGame**)0x11DDF38;
-
 		GetIsGodMode = reinterpret_cast<bool(*)()>(0x9526B0);
 
 		HandleHooks::HandleDelayedGameHooks();

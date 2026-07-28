@@ -52,9 +52,6 @@ extern NVSEEventManagerInterface* g_eventInterface;
 
 extern DWORD g_mainThreadID;
 
-// Singletons
-extern BGSSaveLoadGame* g_BGSSaveLoadGame;
-
 // Game functions
 extern bool (__cdecl *GetIsGodMode)();
 
