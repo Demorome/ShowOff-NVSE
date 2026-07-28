@@ -629,7 +629,7 @@ bool Cmd_GetCalculatedActorSpread_Execute(COMMAND_ARGS)
 			// Copying weird code starting at 0x96309E
 			const auto& unkGunWobbleDriftGlobal = *reinterpret_cast<float*>(0x11A3B2C);
 			float v60 = *result - unkGunWobbleDriftGlobal;
-			float v61 = g_timeGlobal->secondsPassed * GetFltGameSetting(0x11CF588); // fGunWobbleChaseDriftTime
+			float v61 = TimeGlobal::GetSingleton()->secondsPassed * GetFltGameSetting(0x11CF588); // fGunWobbleChaseDriftTime
 			if (v60 != 0.0)
 			{
 				if (v61 < fabs(v60))

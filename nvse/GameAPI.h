@@ -1020,6 +1020,8 @@ struct TimeGlobal : Timer
 	float unk20; // 020
 	float unk24; // 024
 	float unk28; // 028
-};
 
-extern TimeGlobal* g_timeGlobal;
+	static TimeGlobal* GetSingleton() {
+		return reinterpret_cast<TimeGlobal*>(0x11F6394);
+	}
+};

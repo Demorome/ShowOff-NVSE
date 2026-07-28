@@ -112,7 +112,6 @@ DWORD g_mainThreadID = 0;
 
 // Singletons
 RefID g_xMarkerFormID = 0x3B;
-TimeGlobal* g_timeGlobal = nullptr;
 BGSSaveLoadGame* g_BGSSaveLoadGame = nullptr;
 
 // Game functions
@@ -241,9 +240,6 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		g_BGSSaveLoadGame = *(BGSSaveLoadGame**)0x11DDF38;
 
 		GetIsGodMode = reinterpret_cast<bool(*)()>(0x9526B0);
-
-		// from xNVSE
-		g_timeGlobal = reinterpret_cast<TimeGlobal*>(0x11F6394);
 
 		HandleHooks::HandleDelayedGameHooks();
 		HandleHooks::HandleDelayedEventHooks();
