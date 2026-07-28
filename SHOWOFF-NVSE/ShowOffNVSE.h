@@ -54,7 +54,6 @@ extern DWORD g_mainThreadID;
 
 // Singletons
 extern HUDMainMenu* g_HUDMainMenu;
-extern TileMenu** g_tileMenuArray;
 extern ActorValueOwner* g_playerAVOwner;
 extern BSAudioManager* g_audioManager;
 extern TESObjectWEAP* g_fistsWeapon;
