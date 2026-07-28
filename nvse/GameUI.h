@@ -232,10 +232,6 @@ public:
 	UInt8					pad4CF;				// 4CF
 	UInt32					unk4D0;				// 4D0
 	Tutorials				help;				// 4D4
-
-	static InterfaceManager* GetSingleton() {
-		return *reinterpret_cast<InterfaceManager**>(0x11D8A80);
-	}
 };
 STATIC_ASSERT(sizeof(InterfaceManager) == 0x580);
 
