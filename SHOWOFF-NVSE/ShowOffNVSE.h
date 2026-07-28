@@ -56,7 +56,6 @@ extern DWORD g_mainThreadID;
 extern HUDMainMenu* g_HUDMainMenu;
 extern TileMenu** g_tileMenuArray;
 extern ActorValueOwner* g_playerAVOwner;
-extern ProcessManager* g_processManager;
 extern InterfaceManager* g_interfaceManager;
 extern BSAudioManager* g_audioManager;
 extern TESObjectWEAP* g_fistsWeapon;

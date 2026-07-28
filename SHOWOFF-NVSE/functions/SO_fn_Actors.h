@@ -20,9 +20,9 @@ UInt32 __fastcall GetNumActorsInRangeFromRef_Call(TESObjectREFR* const thisObj, 
 	if (g_ShowFuncDebug)
 		_MESSAGE("DebugGetNumActorsInRangeFromRef - begin dump for thisObj %s (%08x)", thisObj->GetName(), thisObj->refID);
 	
-	MobileObject** objArray = g_processManager->objects.data, ** arrEnd = objArray;
-	objArray += g_processManager->beginOffsets[0];  //Only objects in High process.
-	arrEnd += g_processManager->endOffsets[0];
+	MobileObject** objArray = ProcessLists::GetSingleton()->objects.data, ** arrEnd = objArray;
+	objArray += ProcessLists::GetSingleton()->beginOffsets[0];  //Only objects in High process.
+	arrEnd += ProcessLists::GetSingleton()->endOffsets[0];
 	UInt32 numActors = 0;  //return value
 	for (; objArray != arrEnd; objArray++)
 	{

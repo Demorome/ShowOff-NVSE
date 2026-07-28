@@ -114,7 +114,6 @@ DWORD g_mainThreadID = 0;
 HUDMainMenu* g_HUDMainMenu = nullptr;
 TileMenu** g_tileMenuArray = nullptr;
 ActorValueOwner* g_playerAVOwner = nullptr;
-ProcessManager* g_processManager = nullptr;
 InterfaceManager* g_interfaceManager = nullptr;
 BSAudioManager* g_audioManager = nullptr;
 RefID g_xMarkerFormID = 0x3B;
@@ -246,7 +245,6 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 	case NVSEMessagingInterface::kMessage_DeferredInit:
 		// From JiP's patches_game.h
 		g_playerAVOwner = &PlayerCharacter::GetSingleton()->avOwner;
-		g_processManager = (ProcessManager*)0x11E0E80;
 		g_audioManager = (BSAudioManager*)0x11F6EF0;
 		g_HUDMainMenu = *(HUDMainMenu**)0x11D96C0;  
 		g_interfaceManager = *(InterfaceManager**)0x11D8A80; 

@@ -134,7 +134,7 @@ bool Cmd_KillAllHostiles_Execute(COMMAND_ARGS)
 	Actor* killer = nullptr;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &killer))
 		return true;
-	ProcessManager* procMngr = ProcessManager::GetSingleton();
+	ProcessLists* procMngr = ProcessLists::GetSingleton();
 	MobileObject** objArray = procMngr->objects.data, ** arrEnd = objArray;
 	objArray += procMngr->beginOffsets[0];
 	arrEnd += procMngr->endOffsets[0];
