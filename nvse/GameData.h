@@ -315,6 +315,10 @@ public:
 #endif
 
 	TESQuest* GetQuestByName(const char* questName);
+
+	static TESObjectWEAP* GetDefaultWeapon() {
+		return *reinterpret_cast<TESObjectWEAP**>(0x11CA278);
+	}
 };
 
 STATIC_ASSERT(sizeof(TESDataHandler) == 0x63C);

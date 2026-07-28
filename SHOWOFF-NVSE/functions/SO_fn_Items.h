@@ -607,7 +607,7 @@ bool Cmd_GetEquippedWeapon_Execute(COMMAND_ARGS)
 {
 	auto weap = ((Actor*)thisObj)->GetEquippedWeapon();
 	if (!weap)
-		weap = g_fistsWeapon;
+		weap = TESDataHandler::GetDefaultWeapon();
 	REFR_RES = weap->refID;
 	return true;
 }

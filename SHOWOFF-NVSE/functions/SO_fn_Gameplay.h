@@ -935,7 +935,7 @@ bool Cmd_GetCalculatedAPCost_Execute(COMMAND_ARGS)
 		// Keep as nullptr if it's the fists to properly handle default unarmed AP costs.
 		// g_fistsWeapon's AP cost is never used, being replaced by fActionPointsAttackUnarmed 
 	}
-	else if (weapon == g_fistsWeapon)
+	else if (weapon == TESDataHandler::GetDefaultWeapon())
 		weapon = nullptr;
 
 	if (mode == GetDefaultAttackCost)

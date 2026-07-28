@@ -112,7 +112,6 @@ DWORD g_mainThreadID = 0;
 
 // Singletons
 RefID g_xMarkerFormID = 0x3B;
-TESObjectWEAP* g_fistsWeapon = nullptr;
 TimeGlobal* g_timeGlobal = nullptr;
 BGSSaveLoadGame* g_BGSSaveLoadGame = nullptr;
 
@@ -239,7 +238,6 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 
 	case NVSEMessagingInterface::kMessage_DeferredInit:
 		// From JiP's patches_game.h
-		g_fistsWeapon = *(TESObjectWEAP**)0x11CA278;
 		g_BGSSaveLoadGame = *(BGSSaveLoadGame**)0x11DDF38;
 
 		GetIsGodMode = reinterpret_cast<bool(*)()>(0x9526B0);
