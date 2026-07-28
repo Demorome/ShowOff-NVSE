@@ -53,7 +53,6 @@ extern NVSEEventManagerInterface* g_eventInterface;
 extern DWORD g_mainThreadID;
 
 // Singletons
-extern ActorValueOwner* g_playerAVOwner;
 extern TESObjectWEAP* g_fistsWeapon;
 extern BGSSaveLoadGame* g_BGSSaveLoadGame;
 

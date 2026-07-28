@@ -42,8 +42,8 @@ namespace PickpocketInCombat
 		// Still, it's a Sleight of Hand trick, so the target's Perception will be important, as will the player's Sneak + Agility (used as an intermediary for Sleight of Hand).
 		// If the enemy is perceptive, it'll be trickier for the player to do their trick, so also take targetPerception into account.
 
-		int const playerAgility = g_playerAVOwner->GetThresholdedActorValue(kAVCode_Agility);
-		int const playerSneak = g_playerAVOwner->GetThresholdedActorValue(kAVCode_Sneak);
+		int const playerAgility = PlayerCharacter::GetSingleton()->avOwner.GetThresholdedActorValue(kAVCode_Agility);
+		int const playerSneak = PlayerCharacter::GetSingleton()->avOwner.GetThresholdedActorValue(kAVCode_Sneak);
 		int const targetPerception = target->avOwner.GetThresholdedActorValue(kAVCode_Perception);
 		float const itemWeight = item->type->GetWeight() * count;
 
@@ -63,7 +63,7 @@ namespace PickpocketInCombat
 				// This penalty can be minimized with the player's own Strength, which will also only be taken into account if the item being stolen is equipped ON THE TARGET.
 
 				int const targetStrength = target->avOwner.GetThresholdedActorValue(kAVCode_Strength);
-				int const playerStrength = g_playerAVOwner->GetThresholdedActorValue(kAVCode_Strength);
+				int const playerStrength = PlayerCharacter::GetSingleton()->avOwner.GetThresholdedActorValue(kAVCode_Strength);
 
 				cost += std::max<float>(0, (g_fForcePickpocketTargetStrengthMult * targetStrength
 					- g_fForcePickpocketPlayerStrengthMult * playerStrength));
@@ -88,7 +88,7 @@ namespace PickpocketInCombat
 		{
 			bool isItemOwnedByTarget = menu->currentItems == &menu->rightItems;
 			int actionPointCost = CalculateCombatPickpocketAPCost(selection, actor, itemValue, count, isItemOwnedByTarget);
-			int playerActionPoints = g_playerAVOwner->GetActorValue(kAVCode_ActionPoints);
+			int playerActionPoints = PlayerCharacter::GetSingleton()->avOwner.GetActorValue(kAVCode_ActionPoints);
 			if (actionPointCost > playerActionPoints)
 			{
 				ThisStdCall(0x8C00E0, PlayerCharacter::GetSingleton(), actor, 0, 0);
@@ -150,7 +150,7 @@ namespace PickpocketInCombat
 
 		bool isItemOwnedByTarget = container->currentItems == &container->rightItems;
 		int actionPointCost = CalculateCombatPickpocketAPCost(ContainerMenu::GetSelection(), (Actor*)container->containerRef, itemValue, 1, isItemOwnedByTarget);
-		int currentAP = g_playerAVOwner->GetActorValue(kAVCode_ActionPoints);
+		int currentAP = PlayerCharacter::GetSingleton()->avOwner.GetActorValue(kAVCode_ActionPoints);
 		char buf[260];
 		sprintf(buf, "Action Point Cost: %d / %d", actionPointCost, currentAP);
 		subtitlesTile->SetString(kTileValue_string, buf, 1);
