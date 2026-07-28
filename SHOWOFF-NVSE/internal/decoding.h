@@ -398,16 +398,16 @@ struct Sound
 
 	Sound(const char* soundPath, UInt32 flags)
 	{
-		ThisStdCall(0xAD7550, BSWin32Audio::GetSingleton(), this, soundPath, flags);
+		ThisCall(0xAD7550, BSWin32Audio::GetSingleton(), this, soundPath, flags);
 	}
 	Sound(UInt32 refId, UInt32 flags)
 	{
-		ThisStdCall(0xAD73B0, BSWin32Audio::GetSingleton(), this, refId, flags);
+		ThisCall(0xAD73B0, BSWin32Audio::GetSingleton(), this, refId, flags);
 	}
 
 	void Play()
 	{
-		ThisStdCall(0xAD8830, this, 0);
+		ThisCall(0xAD8830, this, 0);
 	}
 };
 
@@ -1285,7 +1285,7 @@ public:
 	};
 	static ContainerMenu* GetSingleton() { return *(ContainerMenu**)(0x11D93F8); }
 	static ContChangesEntry* GetSelection() { return *(ContChangesEntry**)(0x11D93FC); }
-	void HandleMouseoverAlt(int a2, int a3) { ThisStdCall(0x75CF70, this, a2, a3); }
+	void HandleMouseoverAlt(int a2, int a3) { ThisCall(0x75CF70, this, a2, a3); }
 	static void SetSelection(ContChangesEntry* entry) { *(ContChangesEntry**)(0x11D93FC) = entry; }
 
 	TileImage* tile028;		// 028
@@ -1592,12 +1592,12 @@ public:
 		kCloseMenu = 2,  // (any value >= 2 could work)
 	};
 
-	void SetCurrentPage(Pages newPage) { ThisStdCall(0x785830, this, newPage); }
-	void SetCurrentPage(int newPage) { ThisStdCall(0x785830, this, newPage); }
-	void SetChooseSkillOrPerkNumberText() { ThisStdCall(0x785990, this); }
+	void SetCurrentPage(Pages newPage) { ThisCall(0x785830, this, newPage); }
+	void SetCurrentPage(int newPage) { ThisCall(0x785830, this, newPage); }
+	void SetChooseSkillOrPerkNumberText() { ThisCall(0x785990, this); }
 	
 	// Can change numSkillPointsToAssign.
-	void SetupSkillAndPerkListBoxes() { ThisStdCall(0x785540, this); }
+	void SetupSkillAndPerkListBoxes() { ThisCall(0x785540, this); }
 
 	// Capped by the max amount of available perks.
 	// Call this before calling SetCurrentPage so the initial perk count is accurate (will be 1 otherwise).
@@ -1950,7 +1950,7 @@ struct VATSQueuedAction
 	static VATSQueuedAction* Create()
 	{
 		auto targetInfo = (VATSQueuedAction*)GameHeapAlloc(sizeof(VATSQueuedAction));
-		ThisStdCall(0x9CA4A0, targetInfo); // VATSQueuedAction::VATSQueuedAction
+		ThisCall(0x9CA4A0, targetInfo); // VATSQueuedAction::VATSQueuedAction
 		return targetInfo;
 	}
 };

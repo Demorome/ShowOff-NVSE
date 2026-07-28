@@ -153,7 +153,7 @@ namespace CornerMessageHooks
 #if false
 		Console_Print("==CornerMessageEventHook==\n -msgText: %s\n -IconType: %d\n -iconPath: %s\n -soundPath: %s\n -displayTime: %f\n -instantEndCurrentMessage: %d", msgText, IconType, iconPath, soundPath, displayTime, instantEndCurrentMessage);
 #endif
-		return ThisStdCall_B(0x775380, menu, msgText, IconType, iconPath, soundPath, displayTime, instantEndCurrentMessage);
+		return ThisCall<bool>(0x775380, menu, msgText, IconType, iconPath, soundPath, displayTime, instantEndCurrentMessage);
 	}
 	
 	void WriteDelayedHook()
@@ -403,7 +403,7 @@ namespace OnPreScriptedActivate
 	CallDetour g_detourActivateFunc;
 	bool __fastcall MaybePreventScriptedActivation_Activate(TESObjectREFR* actionRef, void* edx)
 	{
-		auto isDisabled = ThisStdCall<bool>(g_detourActivateFunc.GetOverwrittenAddr(), actionRef);
+		auto isDisabled = ThisCall<bool>(g_detourActivateFunc.GetOverwrittenAddr(), actionRef);
 		if (isDisabled)
 			return true;
 
@@ -1176,7 +1176,7 @@ namespace OnQueueCornerMessage
 			OnShowCornerMessage::DispatchEvent(*msg);
 
 		// Regular code
-		ThisStdCall(0x905820, msgList, msg);
+		ThisCall(0x905820, msgList, msg);
 	}
 
 	void __fastcall tListInsertHook(tList<HUDMainMenu::QueuedMessage>* msgList, void* edx,
@@ -1186,7 +1186,7 @@ namespace OnQueueCornerMessage
 		DispatchEvent(*msg);
 
 		// Regular code
-		ThisStdCall(0x5AE3D0, msgList, msg);
+		ThisCall(0x5AE3D0, msgList, msg);
 	}
 
 	void WriteHooks()
@@ -1431,7 +1431,7 @@ namespace OnDisplayOrCompleteObjective
 			g_eventInterface->DispatchEventThreadSafe(onCompleteName, nullptr, nullptr, objective->quest, objective->objectiveId);
 		}
 
-		return ThisStdCall<TESQuest*>(g_GetQuestDetour.GetOverwrittenAddr(), objective);
+		return ThisCall<TESQuest*>(g_GetQuestDetour.GetOverwrittenAddr(), objective);
 	}
 
 	void WriteSuperDelayedHook()
@@ -1529,7 +1529,7 @@ namespace OnAddAlt
 			HandleEvent(newOwner, item, xData, count);
 
 			// Call ExtraContainerChanges_4C29A0 (which we overwrote)
-			ThisStdCall(0x4C29A0, xChanges, item, xData, count);
+			ThisCall(0x4C29A0, xChanges, item, xData, count);
 		}
 
 		void WriteHook()
@@ -1546,7 +1546,7 @@ namespace OnAddAlt
 			HandleEvent(newOwner, item, xData, count);
 
 			// Call ExtraContainerChanges__Data__EquipForRef (which we overwrote)
-			ThisStdCall(0x4BFFE0, xChanges, item, count, newOwner, xData, a6, a7);
+			ThisCall(0x4BFFE0, xChanges, item, count, newOwner, xData, a6, a7);
 		}
 
 		void WriteHook()
@@ -1721,7 +1721,7 @@ namespace OnPreLoadGame
 		g_eventInterface->DispatchEvent(eventName, nullptr);
 
 		// do regular code
-		ThisStdCall(g_detour.GetOverwrittenAddr(), saveLoadReferencesMap);
+		ThisCall(g_detour.GetOverwrittenAddr(), saveLoadReferencesMap);
 	}
 
 	void WriteDelayedHook()
@@ -1754,7 +1754,7 @@ namespace OnPreLifeStateChange
 #endif
 
 		// do regular code
-		return ThisStdCall<void**>(g_detour.GetOverwrittenAddr(), thisSetting);
+		return ThisCall<void**>(g_detour.GetOverwrittenAddr(), thisSetting);
 	}
 
 	void WriteDelayedHook()
@@ -1775,7 +1775,7 @@ namespace OnExplosionHit
 	bool __fastcall HandleEventForAllRefs(TESObjectREFR* refr)
 	{
 		// IsDestroyed check
-		auto result = ThisStdCall<bool>(g_detourForAllRefs.GetOverwrittenAddr(), refr);
+		auto result = ThisCall<bool>(g_detourForAllRefs.GetOverwrittenAddr(), refr);
 
 		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
 		auto* explosion = *reinterpret_cast<Explosion**>(ebp - 0xE4);
@@ -2094,11 +2094,11 @@ namespace OnPreRemoveItemFromMenu
 
 		bool __fastcall HandleRepairMenuEvent(Tile* tile, void* edx, UInt32 tileValue)
 		{
-			auto result = ThisStdCall<bool>(g_detour.GetOverwrittenAddr(), tile, tileValue);
+			auto result = ThisCall<bool>(g_detour.GetOverwrittenAddr(), tile, tileValue);
 			if (!result)
 				return result;
 			auto* menu = RepairMenu::Get();
-			auto* toRemove = ThisStdCall<ContChangesEntry*>(0x7A1910, &menu->repairItems); // GetSelectedListItem
+			auto* toRemove = ThisCall<ContChangesEntry*>(0x7A1910, &menu->repairItems); // GetSelectedListItem
 			return HandleEvent(toRemove, PlayerCharacter::GetSingleton(), nullptr, kContext_RepairMenu);
 		}
 
@@ -2128,7 +2128,7 @@ namespace OnPlayerJump
 	{
 		if (thisCtrler == ((HighProcess*)PlayerCharacter::GetSingleton()->baseProcess)->charCtrl)
 			g_eventInterface->DispatchEvent(eventName, PlayerCharacter::GetSingleton());
-		ThisStdCall(g_detour.GetOverwrittenAddr(), thisCtrler, arPos);
+		ThisCall(g_detour.GetOverwrittenAddr(), thisCtrler, arPos);
 	}
 
 	void WriteDelayedHook()
@@ -2192,7 +2192,7 @@ namespace OnChallengeProgress
 		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
 		auto incrementAmount = *reinterpret_cast<int*>(ebp + 0x8);
 		g_eventInterface->DispatchEvent(eventName, PlayerCharacter::GetSingleton(), challenge, incrementAmount);
-		ThisStdCall(g_detour.GetOverwrittenAddr(), challenge);
+		ThisCall(g_detour.GetOverwrittenAddr(), challenge);
 	}
 
 	void WriteDelayedHook()
@@ -2208,7 +2208,7 @@ namespace OnMenuCreate
 	CallDetour g_detour;
 	Menu* __fastcall HandleEvent(void* thisTileMenuArray, void* edx, int menuCode)
 	{
-		auto* menu = ThisStdCall<Menu*>(g_detour.GetOverwrittenAddr(), thisTileMenuArray, menuCode);
+		auto* menu = ThisCall<Menu*>(g_detour.GetOverwrittenAddr(), thisTileMenuArray, menuCode);
 		if (menu)
 		{
 			g_eventInterface->DispatchEvent(eventName, nullptr, menuCode);
@@ -2277,7 +2277,7 @@ namespace OnWeaponHolsterUnholster
 	CallDetour g_detour;
 	bool __fastcall HandleEvent(Actor* actor)
 	{
-		auto currentlyWantsWeaponOut = ThisStdCall<bool>(g_detour.GetOverwrittenAddr(), actor);
+		auto currentlyWantsWeaponOut = ThisCall<bool>(g_detour.GetOverwrittenAddr(), actor);
 
 		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
 		auto setIsOut = *reinterpret_cast<bool*>(ebp + 0x8);

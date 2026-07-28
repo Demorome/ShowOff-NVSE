@@ -269,7 +269,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 			// Calls GetPlayerTimeMultWithVATSCamShots, which applies on top of SGTM's TimeMult changes.
 			// g_timeGlobal's secondsPassed only accounts for GetGlobalTimeMult, hence why we need to multiply by the VATS time mult.
 			// TODO: there is another function called VATSCameraData::GetTargetTimeUpdateMult, but we aren't using it...
-			const auto vatsTimeMult = ThisStdCall<double>(0x9C8CC0, reinterpret_cast<void*>(0x11F2250));
+			const auto vatsTimeMult = ThisCall<double>(0x9C8CC0, reinterpret_cast<void*>(0x11F2250));
 			const auto isMenuMode = CdeclCall<bool>(0x702360);
 
 			AUX_TIMER_CS;

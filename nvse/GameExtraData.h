@@ -364,8 +364,8 @@ public:
 		float __vectorcall GetWeaponModEffectValue(UInt32 effectType) const;
 		float __vectorcall GetBaseHealth() const;
 
-		[[nodiscard]] bool HasWeaponMod(TESObjectWEAP::WeaponModEffects effectCode) const {
-			return ThisStdCall_B(0x4BDA70, const_cast<EntryData*>(this), effectCode);
+		[[nodiscard]] bool HasWeaponMod(UInt8 effectCode) const {
+			return ThisCall<bool>(0x4BDA70, this, effectCode);
 		}
 	};
 

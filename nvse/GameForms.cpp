@@ -47,7 +47,7 @@ float TESForm::GetWeight()
 
 double TESForm::GetModifiedWeight(bool isHardcore)
 {
-	return ThisStdCall<double>(0x48EBC0, this, isHardcore);
+	return ThisCall<double>(0x48EBC0, this, isHardcore);
 }
 
 //taken from JIP LN NVSE.
@@ -445,7 +445,7 @@ void BGSListForm::DumpToFile(const char* fileName, bool append)
 
 bool BGSPerk::GetActorHasRequirements(Actor* actor)
 {
-	return ThisStdCall_B(0x785150, this, actor);
+	return ThisCall<bool>(0x785150, this, actor);
 }
 
 bool BGSPerk::GetActorCanPickPerk(Actor* actor)
@@ -976,7 +976,7 @@ void TESNPC::SetSex(UInt32 flags)
 	if (currentSexBit == newSexBit) 
 		return;
 
-	ThisStdCall(0x47DD50, baseDataPtr, 1, newSexBit, 1);
+	ThisCall(0x47DD50, baseDataPtr, 1, newSexBit, 1);
 }
 
 void TESNPC::SetRace(TESRace* pRace)
@@ -986,7 +986,7 @@ void TESNPC::SetRace(TESRace* pRace)
 
 	PlayerCharacter* player = PlayerCharacter::GetSingleton();
 	if (player && player->baseForm == this) {
-		ThisStdCall(0x60B240, this, pRace, 0);
+		ThisCall(0x60B240, this, pRace, 0);
 	}
 	else {
 		this->race.race = pRace;
@@ -995,5 +995,5 @@ void TESNPC::SetRace(TESRace* pRace)
 
 void TESNPC::CopyAppearance(TESNPC* srcNPC)
 {
-	ThisStdCall(0x603790, this, srcNPC);
+	ThisCall(0x603790, this, srcNPC);
 }

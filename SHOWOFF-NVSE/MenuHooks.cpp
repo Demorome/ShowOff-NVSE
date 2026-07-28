@@ -121,7 +121,7 @@ namespace LevelUpMenuHooks
 		{
 			// Reset selected perks first, to emulate vanilla behavior,
 			// ..which is to allow swapping the sole selected perk for another by clicking on another perk.
-			ThisStdCall(0x787850, &menu->perkListBox, 1);
+			ThisCall(0x787850, &menu->perkListBox, 1);
 		}
 		return tile->GetValueFloat(key);
 	}

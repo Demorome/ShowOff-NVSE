@@ -5,7 +5,7 @@ DEFINE_COMMAND_PLUGIN(TopicInfoGetResponseStrings, "", false, kParams_OneForm);
 
 /* ==Old code that lead to my findings==
 String testStr;
-ThisStdCall<void>(0x61E2B0, tInfo, &testStr, false);
+ThisCall<void>(0x61E2B0, tInfo, &testStr, false);
 */
 bool Cmd_TopicInfoGetResponseStrings_Execute(COMMAND_ARGS)
 {
@@ -14,7 +14,7 @@ bool Cmd_TopicInfoGetResponseStrings_Execute(COMMAND_ARGS)
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &tInfo) && IS_ID(tInfo, TESTopicInfo))
 	{
 		auto responseArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
-		auto response = ThisStdCall<TESTopicInfoResponse**>(0x61E780, tInfo, nullptr);
+		auto response = ThisCall<TESTopicInfoResponse**>(0x61E780, tInfo, nullptr);
 		for (auto responseIter = *response; responseIter; responseIter = responseIter->next)
 		{
 			ArrayElementL strElem = responseIter->responseText.CStr();
@@ -33,7 +33,7 @@ void TopicInfoSetResponseStrings_Call(NVSEArrayVar *arr, TESTopicInfo* tInfo, do
 {
 	if (g_arrInterface->GetContainerType(arr) != NVSEArrayVarInterface::kArrType_Array)
 		return;
-	auto const response = ThisStdCall<TESTopicInfoResponse**>(0x61E780, tInfo, nullptr);
+	auto const response = ThisCall<TESTopicInfoResponse**>(0x61E780, tInfo, nullptr);
 	uint32_t loopCounter = 0;
 	auto const arrSize = g_arrInterface->GetArraySize(arr);
 	for (auto responseIter = *response; responseIter && loopCounter < arrSize; responseIter = responseIter->next)
@@ -87,7 +87,7 @@ bool Cmd_TopicInfoSetNthResponseString_Execute(COMMAND_ARGS)
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &tInfo, &responseIdx, &newResponseStr) && IS_ID(tInfo, TESTopicInfo)
 		&& newResponseStr[0])
 	{
-		auto const response = ThisStdCall<TESTopicInfoResponse**>(0x61E780, tInfo, nullptr);
+		auto const response = ThisCall<TESTopicInfoResponse**>(0x61E780, tInfo, nullptr);
 		uint32_t loopCounter = 0;
 		for (auto responseIter = *response; responseIter; responseIter = responseIter->next)
 		{

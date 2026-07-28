@@ -248,8 +248,8 @@ bool Cmd_GetPCCanFastTravel_Eval(COMMAND_ARGS_EVAL)
 	// Credits to Jazz for the "silence QueueUIMessage" trick (see AddNoteNS).
 	SafeWrite8((UInt32)QueueUIMessage, 0xC3);	// RETN
 	const auto canFastTravelAddr = GetRelJumpAddr(0x798026); // call the function indirectly for compatibility with Stewie tweaks, kudos to Stewie.
-	*result = ThisStdCall<bool>(canFastTravelAddr, PlayerCharacter::GetSingleton());
-	//*result = ThisStdCall<bool>((UInt32)0x93D660, PlayerCharacter::GetSingleton());
+	*result = ThisCall<bool>(canFastTravelAddr, PlayerCharacter::GetSingleton());
+	//*result = ThisCall<bool>((UInt32)0x93D660, PlayerCharacter::GetSingleton());
 	SafeWrite8((UInt32)QueueUIMessage, 0x55);	// PUSH EBP
 	return true;
 }
@@ -354,13 +354,13 @@ bool Cmd_ForceWeaponJamAnim_Execute(COMMAND_ARGS)
 		if (auto const weapn = actor->GetEquippedWeapon())
 		{
 			// Copies the code at 0x89667E for post-reload jamming.
-			const auto animGroupID = ThisStdCall<UInt32>(0x51E2A0, weapn, 0) + 23;  // TESObjectWEAP::GetReloadAnimGroup + 23
-			const auto animKey = ThisStdCall<UInt16>(0x897910, actor, animGroupID, 0, 0, 0);  //Actor__GetAnimKey
+			const auto animGroupID = ThisCall<UInt32>(0x51E2A0, weapn, 0) + 23;  // TESObjectWEAP::GetReloadAnimGroup + 23
+			const auto animKey = ThisCall<UInt16>(0x897910, actor, animGroupID, 0, 0, 0);  //Actor__GetAnimKey
 			if (CdeclCall<UInt32>(0x5F2440, animKey) == animGroupID)  // calls AnimGroupID::GetGroupID, which gets the lowers bits of animKey.
 			{
 				if (const auto animData = actor->GetAnimData())
 				{
-					ThisStdCall<void*>(0x8B28C0, actor, animGroupID, animData);  // Actor::8B28C0
+					ThisCall<void*>(0x8B28C0, actor, animGroupID, animData);  // Actor::8B28C0
 					auto const animSeqElem = animData->animSequence[4];  // 4 = kSequence_Weapon
 					actor->SetAnimActionAndSequence(HighProcess::kAnimAction_Reload, animSeqElem);
 					actor->Unk_12C(animKey, true);
@@ -382,8 +382,8 @@ bool Cmd_ForceWeaponJamAnimAlt_Execute(COMMAND_ARGS)
 		if (auto const weapn = actor->GetEquippedWeapon())
 		{
 			// Copies the code at 0x893884 for weapon condition jamming.
-			const auto animGroupID = ThisStdCall<UInt32>(0x51E2A0, weapn, 0) + 23;  // TESObjectWEAP::GetReloadAnimGroup + 23
-			const auto animKey = ThisStdCall<UInt16>(0x897910, actor, animGroupID, 0, 0, 0);  //Actor__GetAnimKey
+			const auto animGroupID = ThisCall<UInt32>(0x51E2A0, weapn, 0) + 23;  // TESObjectWEAP::GetReloadAnimGroup + 23
+			const auto animKey = ThisCall<UInt16>(0x897910, actor, animGroupID, 0, 0, 0);  //Actor__GetAnimKey
 			if (CdeclCall<UInt32>(0x5F2440, animKey) == animGroupID)  // calls AnimGroupID::GetGroupID, which gets the lowers bits of animKey.
 			{
 				if (actor->GetAnimData())
@@ -507,7 +507,7 @@ bool Cmd_SetLevelUpMenuCurrentPage_Execute(COMMAND_ARGS)
 	{
 		if (menu->currentPage != page)
 		{
-			ThisStdCall<void>(0x785830, menu, page);  // LevelUpMenu::SetCurrentPage
+			ThisCall<void>(0x785830, menu, page);  // LevelUpMenu::SetCurrentPage
 			*result = true;
 		}
 	}
@@ -904,7 +904,7 @@ bool Cmd_SetOwnershipTemp_Execute(COMMAND_ARGS)
 	}
 	if (xData)
 	{
-		ThisStdCall(0x419700, xData, newOwner); //ExtraDataList::UpdateExtraOwnership
+		ThisCall(0x419700, xData, newOwner); //ExtraDataList::UpdateExtraOwnership
 		*result = true;
 	}
 	return true;
@@ -1053,7 +1053,7 @@ DEFINE_COMMAND_PLUGIN(GetVATSMaxEngageDistance, "Accounts for Tweak's bMaxVATSDi
 bool Cmd_GetVATSMaxEngageDistance_Execute(COMMAND_ARGS)
 {
 	auto callAddr = GetRelJumpAddr(0x7F548A);
-	*result = *ThisStdCall<float*>(callAddr, (void*)0x11D45B8); // 0x11D45B8 = gs_fVATSMaxEngageDistance
+	*result = *ThisCall<float*>(callAddr, (void*)0x11D45B8); // 0x11D45B8 = gs_fVATSMaxEngageDistance
 	return true;
 }
 
@@ -1070,7 +1070,7 @@ bool Cmd_GetVATSTargetable_Eval(COMMAND_ARGS_EVAL)
 			auto* destrForm = thisObj->baseForm->GetDestructibleObjectForm();
 
 			const bool destructibleAndNotTargetable = destrForm && destrForm->data
-				&& ThisStdCall<bool>(0x576070, thisObj); // TESObjectREFR::IsDestructibleAndVATSTargettable
+				&& ThisCall<bool>(0x576070, thisObj); // TESObjectREFR::IsDestructibleAndVATSTargettable
 
 			if (actor->GetDead() || !actor->Get3D() || !actor->baseProcess || (actor->baseProcess->processLevel != 0) 
 				|| actor->GetIsChildSize(false) || destructibleAndNotTargetable)
@@ -1089,7 +1089,7 @@ bool Cmd_GetVATSTargetable_Eval(COMMAND_ARGS_EVAL)
 			// copying checks at 0x7F5CC8, 0x7F5DD1, 0x7F5F4C
 			if (thisObj->IsExplosion())
 				return true;
-			if (!ThisStdCall<bool>(0x576070, thisObj)) // TESObjectREFR::IsDestructibleAndVATSTargettable
+			if (!ThisCall<bool>(0x576070, thisObj)) // TESObjectREFR::IsDestructibleAndVATSTargettable
 				return true;
 
 			if (thisObj->IsProjectile())
@@ -1210,9 +1210,9 @@ bool Cmd_ApplyAddictionEffect_Execute(COMMAND_ARGS)
 
 	//TODO: apply addiction effect, cuz that apparently doesn't happen where I thought it would...
 	
-	if (auto const umonEffInAlchItm = ThisStdCall<EffectItem*>(0x406200, &alchItem->magicItem.list))
+	if (auto const umonEffInAlchItm = ThisCall<EffectItem*>(0x406200, &alchItem->magicItem.list))
 	{
-		ThisStdCall(0x824570, &actor->magicTarget, umonEffInAlchItm, &alchItem->magicItem, 0);
+		ThisCall(0x824570, &actor->magicTarget, umonEffInAlchItm, &alchItem->magicItem, 0);
 	}
 
 	MagicItem* withdrawalMagicItem = nullptr;
@@ -1220,10 +1220,10 @@ bool Cmd_ApplyAddictionEffect_Execute(COMMAND_ARGS)
 		withdrawalMagicItem = &alchItem->withdrawalEffect->magicItem;
 	}
 	// MagicTarget::HandleWithdrawal
-	ThisStdCall(0x824DF0, &actor->magicTarget, &alchItem->magicItem, withdrawalMagicItem);
+	ThisCall(0x824DF0, &actor->magicTarget, &alchItem->magicItem, withdrawalMagicItem);
 
 	if (const bool showAddictionEffect = actor->IsPlayerRef()
-		&& !ThisStdCall_B(0x825610, &actor->magicTarget, &alchItem->magicItem, 1))
+		&& !ThisCall<bool>(0x825610, &actor->magicTarget, &alchItem->magicItem, 1))
 	{
 		IncPCMiscStat(kMiscStat_TimesAddicted);
 
@@ -1310,7 +1310,7 @@ bool Cmd_CanBeMoved_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
 	if (!thisObj) return true;
-	*result = ThisStdCall<bool>(0x572C80, thisObj);  //just does some formType check + allows any dynamic object
+	*result = ThisCall<bool>(0x572C80, thisObj);  //just does some formType check + allows any dynamic object
 	return true;
 }
 bool Cmd_CanBeMoved_Execute(COMMAND_ARGS)
@@ -1327,7 +1327,7 @@ bool Cmd_GetActorPreferredWeapon_Execute(COMMAND_ARGS)
 	UInt32 combatWeaponType = 6;
 	if (!thisObj || NOT_ACTOR(thisObj) || !ExtractArgsEx(EXTRACT_ARGS_EX, &combatWeaponType))
 		return true;
-	const auto weapForm = ThisStdCall<TESObjectWEAP*>(0x891C80, thisObj, combatWeaponType); //Actor::GetPreferredWeapon
+	const auto weapForm = ThisCall<TESObjectWEAP*>(0x891C80, thisObj, combatWeaponType); //Actor::GetPreferredWeapon
 	if (weapForm)
 		REFR_RES = weapForm->refID;  
 	return true;
@@ -1350,7 +1350,7 @@ bool Cmd_TryDropWeapon_Execute(COMMAND_ARGS)
 	Console_Print("TryDropWeapon >> Count delta: %i", prevCount);
 #endif
 
-	ThisStdCall<void>(0x89F580, actor);  //Actor::TryDropWeapon. Triggers OnDrop blocktype.
+	ThisCall<void>(0x89F580, actor);  //Actor::TryDropWeapon. Triggers OnDrop blocktype.
 
 	// Check if a weapon has been dropped.
 	weaponInfo = actor->baseProcess->GetWeaponInfo();

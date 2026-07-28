@@ -367,7 +367,7 @@ public:
 
 	bool IsConsoleOpen()
 	{
-		return ThisStdCall<bool>(0x4A4020, this);
+		return ThisCall<bool>(0x4A4020, this);
 	}
 };
 STATIC_ASSERT(sizeof(ConsoleManager) == 0x914);

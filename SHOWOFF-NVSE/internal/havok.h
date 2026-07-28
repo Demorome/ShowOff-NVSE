@@ -1091,7 +1091,7 @@ public:
 	// WARNING: despite checking a different flag than JIP's IsInAir, it seems to perform the same.
 	bool IsNotJumping()
 	{
-		return ThisStdCall<bool>(0x944400, this);
+		return ThisCall<bool>(0x944400, this);
 	}
 };
 STATIC_ASSERT(sizeof(bhkCharacterController) == 0x660);

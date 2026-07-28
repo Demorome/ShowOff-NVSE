@@ -54,7 +54,7 @@ public:
 
 	__forceinline void Remove(bool immediate)
 	{
-		ThisStdCall(0x804210, this, immediate);
+		ThisCall(0x804210, this, immediate);
 	}
 };
 

@@ -95,7 +95,7 @@ bool Cmd_RefillPlayerAmmo_Execute(COMMAND_ARGS)
 	const auto weap = static_cast<TESObjectWEAP*>(weapInfo->type);
 
 	// Player reload code happens at 0x9497AA, copying that.
-	const auto regenRate = ThisStdCall<double>(0x709430, weap, weapInfo->HasWeaponMod(TESObjectWEAP::kWeaponModEffect_RegenerateAmmo_Seconds));
+	const auto regenRate = ThisCall<double>(0x709430, weap, weapInfo->HasWeaponMod(TESObjectWEAP::kWeaponModEffect_RegenerateAmmo_Seconds));
 	if (regenRate > 0)
 	{
 		if (IsConsoleMode())
@@ -107,11 +107,11 @@ bool Cmd_RefillPlayerAmmo_Execute(COMMAND_ARGS)
 	if (const auto ammoInfo = PlayerCharacter::GetSingleton()->baseProcess->GetAmmoInfo())
 	{
 		PlayerCharacter::GetSingleton()->AddItem(ammoInfo->type, nullptr, count);
-		auto const clipMax = ThisStdCall<SInt32>(0x4FE160, weap, hasExtendedClip);
+		auto const clipMax = ThisCall<SInt32>(0x4FE160, weap, hasExtendedClip);
 		auto const numLeftToAdd = clipMax - ammoInfo->countDelta;
 		ammoInfo->countDelta += std::min(numLeftToAdd, count);
 	}
-	else if (const auto defaultAmmo = ThisStdCall<TESAmmo*>(0x474920, &weap->ammo))
+	else if (const auto defaultAmmo = ThisCall<TESAmmo*>(0x474920, &weap->ammo))
 	{
 		PlayerCharacter::GetSingleton()->AddItem(defaultAmmo, nullptr, count);
 		// player was fully out of ammo; reload the weapon.
@@ -202,7 +202,7 @@ bool Cmd_Debug_UpdateWeather_Execute(COMMAND_ARGS)
 	*result = false;
 	if (auto const sky = Sky::GetSingleton())
 	{
-		ThisStdCall(0x63D1D0, sky);
+		ThisCall(0x63D1D0, sky);
 		*result = true;
 	}
 	return true;

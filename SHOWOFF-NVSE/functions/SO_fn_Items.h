@@ -179,7 +179,7 @@ bool Cmd_RemoveAllItemsShowOff_Execute(COMMAND_ARGS)
 	if (!thisObj || !typeCode || !thisObj->GetContainer() || (targetContainer && !targetContainer->GetContainer()))
 		return true;
 	//ExtraContainerChanges* xChanges = (ExtraContainerChanges*)thisObj->extraDataList.GetByType(kExtraData_ContainerChanges);  //ripped from NVSE's EquipItem2
-	void* xChanges = ThisStdCall<void*>(0x418520, &thisObj->extraDataList);
+	void* xChanges = ThisCall<void*>(0x418520, &thisObj->extraDataList);
 	if (!xChanges) return true;
 
 	// Extract flags
@@ -220,7 +220,7 @@ bool Cmd_RemoveAllItemsShowOff_Execute(COMMAND_ARGS)
 	}
 
 	// Call RemoveAllItems with the new modifications
-	ThisStdCall<void>(0x4CE340, xChanges, thisObj, targetContainer, unk1, retainOwnership, unk2, suppressMessages, typeCode, exceptionFormList);
+	ThisCall<void>(0x4CE340, xChanges, thisObj, targetContainer, unk1, retainOwnership, unk2, suppressMessages, typeCode, exceptionFormList);
 
 	// Revert code modifications
 	if (removeQuestItemsIfPlayer)
@@ -242,7 +242,7 @@ bool Cmd_RemoveAllItemsShowOff_Execute(COMMAND_ARGS)
 	}
 
 	// Wrap up
-	ThisStdCall<void>(0x952C30, PlayerCharacter::GetSingleton(), thisObj); // ComputeShouldRecalculateQuestTargets()
+	ThisCall<void>(0x952C30, PlayerCharacter::GetSingleton(), thisObj); // ComputeShouldRecalculateQuestTargets()
 	*result = 1; //function worked as expected.
 	return true;
 }
@@ -323,8 +323,8 @@ float __fastcall GetCalculatedEquippedWeight_Call(TESObjectREFR* const thisObj, 
 			// Gather more information about the weapon reference (weapon mods).
 			if (!(weapInfo = ((Actor*)thisObj)->baseProcess->GetWeaponInfo())) continue;
 			if (item = weapInfo->type) {
-				bool const hasDecreaseWeightMod = ThisStdCall<bool>(0x4BDA70, weapInfo, TESObjectWEAP::kWeaponModEffect_DecreaseWeight);
-				itemWeight = ThisStdCall<double>(0x4BE380, (TESObjectWEAP*)item, hasDecreaseWeightMod);  //GetWeaponModdedWeight
+				bool const hasDecreaseWeightMod = ThisCall<bool>(0x4BDA70, weapInfo, TESObjectWEAP::kWeaponModEffect_DecreaseWeight);
+				itemWeight = ThisCall<double>(0x4BE380, (TESObjectWEAP*)item, hasDecreaseWeightMod);  //GetWeaponModdedWeight
 				if (itemWeight >= 10.0) {
 					float heavyWeaponWeightMult = 1.0;
 					ApplyPerkModifiers(kPerkEntry_AdjustHeavyWeaponWeight, (Actor*)PlayerCharacter::GetSingleton(), &heavyWeaponWeightMult);
@@ -352,9 +352,9 @@ float __fastcall GetCalculatedEquippedWeight_Call(TESObjectREFR* const thisObj, 
 			{
 				//NOTE: Game does some weird jank to account for multiple DecreaseWeight effects.
 				//I just really have no idea what's going on at 0x4D0D83 .
-				bool const hasDecreaseWeightEffect = ThisStdCall<bool>(0x4BDA70, weapInfo, TESObjectWEAP::kWeaponModEffect_DecreaseWeight);
+				bool const hasDecreaseWeightEffect = ThisCall<bool>(0x4BDA70, weapInfo, TESObjectWEAP::kWeaponModEffect_DecreaseWeight);
 				if (hasDecreaseWeightEffect) {
-					itemWeight *= ThisStdCall<float>(0x4BCF60, weapInfo->type, TESObjectWEAP::kWeaponModEffect_DecreaseWeight, 1);
+					itemWeight *= ThisCall<float>(0x4BCF60, weapInfo->type, TESObjectWEAP::kWeaponModEffect_DecreaseWeight, 1);
 				}
 			}
 #endif
@@ -583,7 +583,7 @@ bool Cmd_GetCalculatedItemValue_Eval(COMMAND_ARGS_EVAL)
 
 			// Calculate Item Price, without barter mults.
 			// Accounts for item mods and condition as well.
-			itemVal = ThisStdCall<double>(0x4BD400, &tempEntry);
+			itemVal = ThisCall<double>(0x4BD400, &tempEntry);
 		}
 
 		*result = itemVal;
@@ -690,7 +690,7 @@ bool Cmd_GetSpellUsageNumEx_Eval(COMMAND_ARGS_EVAL)
 
 	MagicItem* magicItem = (MagicItem*)arg1;
 
-	EffectItem* usageMonitorEffect = ThisStdCall<EffectItem*>(0x00406200, &magicItem->list);	// GetUsageMonitorEffect
+	EffectItem* usageMonitorEffect = ThisCall<EffectItem*>(0x00406200, &magicItem->list);	// GetUsageMonitorEffect
 	if (!usageMonitorEffect)
 		return true;
 
@@ -811,7 +811,7 @@ bool Cmd_SetSingleItemRefCurrentHealth_Execute(COMMAND_ARGS)
 bool CanItemRepairTarget(TESForm* repairingItem, TESForm* itemToRepair)
 {
 	// Works even if the forms aren't guaranteed to be items, and if either are null.
-	return ThisStdCall_B(0x47BB50, (TESObjectARMO*)repairingItem, (TESObjectARMO*)itemToRepair);
+	return ThisCall<bool>(0x47BB50, (TESObjectARMO*)repairingItem, (TESObjectARMO*)itemToRepair);
 }
 
 DEFINE_CMD_COND_PLUGIN(GetItemCanRepairTarget, "", false, kParams_TwoOptionalObjects);
@@ -983,7 +983,7 @@ bool Cmd_GetCalculatedItemWeight_Eval(COMMAND_ARGS_EVAL)
 				//Via supreme jank, call GetInventoryWeight.
 				//Has to be done, since there is no other function that can return the modified weight,
 				//and writing a new one could get invalidated by hooks/changes from other plugins.
-				auto itemWeight = ThisStdCall<double>(0x4D0900, contChangesData, PlayerCharacter::GetSingleton()->isHardcore);
+				auto itemWeight = ThisCall<double>(0x4D0900, contChangesData, PlayerCharacter::GetSingleton()->isHardcore);
 
 				// Undo previous code change.
 				ReplaceCall(0x4D09CB, 0x8256D0);
@@ -1032,7 +1032,7 @@ bool Cmd_GetCalculatedItemHealth_Execute(COMMAND_ARGS)
 		tempEntry.extendData = &extendData;
 
 		//double __thiscall ContChangesEntry::GetHealthPerc(ContChangesEntry * this, int a2)
-		*result = ThisStdCall<double>(0x4BCDB0, &tempEntry, returnAsPercent != 0);
+		*result = ThisCall<double>(0x4BCDB0, &tempEntry, returnAsPercent != 0);
 	}
 	return true;
 }

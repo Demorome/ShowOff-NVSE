@@ -517,7 +517,7 @@ bool Cmd_SetSecuritronExpressionTemp_Execute(COMMAND_ARGS)
 	}
 	xFace->face.Set(faceStr);
 	xFace->expression.Set(expressionStr);
-	ThisStdCall(0x437F90, xFace, niNode);	//ExtraSecuritronFace_ApplyChangesToNiObject
+	ThisCall(0x437F90, xFace, niNode);	//ExtraSecuritronFace_ApplyChangesToNiObject
 	*result = true;
 	return true;
 }
@@ -537,7 +537,7 @@ bool Cmd_GetIsPlayerOverencumbered_Eval(COMMAND_ARGS_EVAL)
 	}
 	auto const weight = PlayerCharacter::GetSingleton()->avOwner.GetActorValueInt(kAVCode_InventoryWeight);
 	// Actor::GetMaxCarryWeightPerkModified
-	auto const maxWeight = ThisStdCall<double>(0x8A0C20, PlayerCharacter::GetSingleton());
+	auto const maxWeight = ThisCall<double>(0x8A0C20, PlayerCharacter::GetSingleton());
 	*result = maxWeight < weight;
 	return true;
 }
@@ -603,7 +603,7 @@ bool Cmd_GetCalculatedActorSpread_Execute(COMMAND_ARGS)
 				float filler = 0.0;
 				auto* weapInfo = actor->baseProcess->GetWeaponInfo();
 				if (!weap->IsDontHidePlayerWhileAiming() || 
-					(weapInfo && ThisStdCall<bool>(0x4BD8D0, weapInfo, TESObjectWEAP::kWeaponModEffect_IncreaseZoom, &filler))) 
+					(weapInfo && ThisCall<bool>(0x4BD8D0, weapInfo, TESObjectWEAP::kWeaponModEffect_IncreaseZoom, &filler))) 
 					// ApplyWeaponModModifiers
 				{
 					spreadMode = kSpreadMode_Scoped;
@@ -612,7 +612,7 @@ bool Cmd_GetCalculatedActorSpread_Execute(COMMAND_ARGS)
 		}
 	}
 
-	*result = ThisStdCall<double>(0x8B0DD0, thisObj, spreadMode);
+	*result = ThisCall<double>(0x8B0DD0, thisObj, spreadMode);
 
 	if (actor == PlayerCharacter::GetSingleton())
 	{
@@ -752,7 +752,7 @@ bool Cmd_ForceRecoilAnim_Execute(COMMAND_ARGS)
 	auto* weap = ((Actor*)thisObj)->GetEquippedWeapon();
 	if (!weap || (weap->IsMelee() && !weap->projectile))
 	{
-		ThisStdCall(0x894E90, static_cast<Actor*>(thisObj)); // Actor::SetRecoils
+		ThisCall(0x894E90, static_cast<Actor*>(thisObj)); // Actor::SetRecoils
 		// It won't do anything if stagger anim is playing.
 		*result = 1;
 	}
@@ -785,12 +785,12 @@ bool Cmd_ForceHitStaggerReaction_Execute(COMMAND_ARGS)
 		actor->forceHit = true;
 
 		constexpr UInt32 g_idleAnimsDirectoryMap_Addr = 0x11CB6A0;
-		auto* idle = ThisStdCall<TESIdleForm*>(0x600950, *(void**)g_idleAnimsDirectoryMap_Addr, actor, hitData->projectile);
+		auto* idle = ThisCall<TESIdleForm*>(0x600950, *(void**)g_idleAnimsDirectoryMap_Addr, actor, hitData->projectile);
 		if (!idle)
 			return true;
 
 		auto* animData = actor->GetAnimData();
-		if (!animData || ThisStdCall<bool>(0x498D30, animData, idle)) // checks for queued anims and VATS
+		if (!animData || ThisCall<bool>(0x498D30, animData, idle)) // checks for queued anims and VATS
 			return true;
 
 		// copying code at 0x89C2DA; credits to lStewieAl for pointing this out!
@@ -896,13 +896,13 @@ bool Cmd_HasAnyScriptPackage_Eval(COMMAND_ARGS_EVAL)
 	if (thisObj->IsActor())
 	{
 		ExtraDataList* xList = &thisObj->extraDataList;
-		//*result = ThisStdCall<UINT32>(0x41CB10, xList);
+		//*result = ThisCall<UINT32>(0x41CB10, xList);
 		ExtraPackage* xPackage = GetExtraTypeJIP(&thisObj->extraDataList, Package);
 		if (xPackage)
 		{
 			*result = xPackage->unk10[2];  //kill meh, doesn't work. 0x41CB10 is the best lead I have.
 		}
-		//bool const bTest = ThisStdCall<bool>(0x674D40, package);
+		//bool const bTest = ThisCall<bool>(0x674D40, package);
 		//Console_Print("ActorHasAnyScriptPackage TEST >> %d", bTest);
 		//*result = ?
 	} 
@@ -920,7 +920,7 @@ bool Cmd_SayTo_GetUnk_Execute(COMMAND_ARGS)
 	if (NOT_ACTOR(thisObj)) return true;
 	if (ExtraSayToTopicInfo* xSayTo = GetExtraTypeJIP(&thisObj->extraDataList, SayToTopicInfo)) 
 	{
-		//REFR_RES = ThisStdCall<Actor*>(0x8A553C, ((Actor*)thisObj))->refID;
+		//REFR_RES = ThisCall<Actor*>(0x8A553C, ((Actor*)thisObj))->refID;
 	}
 	return true;
 }

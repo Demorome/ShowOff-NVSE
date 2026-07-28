@@ -1632,7 +1632,7 @@ public:
 	virtual Actor*	GetActor(void);							// GetActorBase (= this - 0x100) or GetActorBase (= this - 0x0A4)
 	virtual UInt16	GetLevel();								// GetLevel (from ActorBase)
 
-	float GetThresholdedActorValue(UInt32 avCode) { return ThisStdCall<float>(0x66EF50, this, avCode); }
+	float GetThresholdedActorValue(UInt32 avCode) { return ThisCall<float>(0x66EF50, this, avCode); }
 	// SkillsCurrentValue[14] at index 20
 };
 
@@ -2241,7 +2241,7 @@ public:
 	void SetAllyOrEnemyTemp(TESFaction* faction2, int factionReaction)
 	{
 		// TESReactionForm::SetAllyOrEnemy
-		ThisStdCall<void>(0x48C220, &this->reaction, faction2, factionReaction);
+		ThisCall<void>(0x48C220, &this->reaction, faction2, factionReaction);
 		//this->MarkAsModified(4); 
 	}
 
@@ -4119,7 +4119,7 @@ public:
 	UInt32					inheritFlags;			// DC
 
 	bool IsInterior() { return worldSpace == NULL; }
-	bool GetCantWait() { return ThisStdCall<bool>(0x5444C0, this); }
+	bool GetCantWait() { return ThisCall<bool>(0x5444C0, this); }
 	NiNode *Get3DNode(UInt32 index);
 	void ToggleNodes(UInt32 nodeBits, UInt8 doHide);
 	void GenerateRenderedTexture(NiCamera *camera, NiRenderedTexture **outTexture);

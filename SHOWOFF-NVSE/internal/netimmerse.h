@@ -60,7 +60,7 @@ public:
 	static void Replace(NiRefObject** toReplace, NiRefObject* replacement)
 	{
 		// Copying use at 0x800C25
-		ThisStdCall(0x66B0D0, toReplace, replacement);
+		ThisCall(0x66B0D0, toReplace, replacement);
 	}
 };
 

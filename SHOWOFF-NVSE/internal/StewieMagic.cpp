@@ -95,7 +95,7 @@ ExtraDataList* ExtraContainerChanges::EntryData::GetEquippedExtra()
 
 signed int EffectItem::GetSkillCode()
 {
-	return ThisStdCall<signed int>(0x403EA0, this);
+	return ThisCall<signed int>(0x403EA0, this);
 }
 
 // Credits: 99% ripped off from Stewie's GetPlayerHealthEffectsSum() function.

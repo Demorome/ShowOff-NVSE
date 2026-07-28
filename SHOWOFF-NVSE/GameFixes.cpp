@@ -143,13 +143,13 @@ namespace GameFixes
 			{
 				// Do regular code.
 				// Cache result, because we'll be updating the CannotWear xData right after.
-				auto cannotWear = ThisStdCall<bool>(g_detourDoFix.GetOverwrittenAddr(), nthExtraDataList);
+				auto cannotWear = ThisCall<bool>(g_detourDoFix.GetOverwrittenAddr(), nthExtraDataList);
 
 				// Our addition: add "cannotWear" xData if g_NoEquip is true.
 				if (!cannotWear && g_NoEquip)
 				{
 					// ExtraDataList::UpdateCannotWear
-					ThisStdCall(0x41AB70, nthExtraDataList, true);
+					ThisCall(0x41AB70, nthExtraDataList, true);
 				}
 
 				return cannotWear;
@@ -164,7 +164,7 @@ namespace GameFixes
 				g_NoEquip = noEquip != 0;
 
 				// do regular code, which will use the global
-				bool result = ThisStdCall<bool>(g_detour1stCall.GetOverwrittenAddr(), thisActor, item, count,
+				bool result = ThisCall<bool>(g_detour1stCall.GetOverwrittenAddr(), thisActor, item, count,
 					xData, isWorn, unused);
 
 				// reset global so other stuff can work normally
@@ -182,7 +182,7 @@ namespace GameFixes
 				g_NoEquip = noEquip != 0;
 
 				// do regular code, which will use the global
-				bool result = ThisStdCall<bool>(g_detour1stCall.GetOverwrittenAddr(), thisActor, item, count,
+				bool result = ThisCall<bool>(g_detour1stCall.GetOverwrittenAddr(), thisActor, item, count,
 					xData, isWorn, unused);
 
 				// reset global so other stuff can work normally

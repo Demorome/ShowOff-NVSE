@@ -251,7 +251,7 @@ bool Cmd_SetRadiationExtraData_Execute(COMMAND_ARGS)
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &fNewVal)) return true;
 	if (thisObj)
 	{
-		ThisStdCall(0x422350, &thisObj->extraDataList, fNewVal);  //credits to c6 for pointing this address out.
+		ThisCall(0x422350, &thisObj->extraDataList, fNewVal);  //credits to c6 for pointing this address out.
 		*result = 1;
 	}
 	return true;
@@ -328,17 +328,17 @@ bool Cmd_IsNight_Eval(COMMAND_ARGS_EVAL)
 	*result = 0;
 	TESClimate* climate = (TESClimate*)arg1;
 	Sky* sky = Sky::GetSingleton();
-	float const gameHour = ThisStdCall<double>(0x966A20, sky);
+	float const gameHour = ThisCall<double>(0x966A20, sky);
 	float sunrise, sunset;
 	if (climate && IS_TYPE(climate, TESClimate))
 	{
-		sunrise = ThisStdCall<UInt8>(0x595F10, climate, 1) / 6.0F;  //sunrise begin sprinkled with adjustments.
-		sunset = ThisStdCall<UInt8>(0x595F10, climate, 2) / 6.0F;  //Second arg determines which type of time to check.
+		sunrise = ThisCall<UInt8>(0x595F10, climate, 1) / 6.0F;  //sunrise begin sprinkled with adjustments.
+		sunset = ThisCall<UInt8>(0x595F10, climate, 2) / 6.0F;  //Second arg determines which type of time to check.
 	}
 	else
 	{
-		sunrise = ThisStdCall<double>(0x595F50, sky);
-		sunset = ThisStdCall<double>(0x595FC0, sky);
+		sunrise = ThisCall<double>(0x595F50, sky);
+		sunset = ThisCall<double>(0x595FC0, sky);
 	}
 	if (sunset <= gameHour || (sunrise >= gameHour))
 		*result = 1;
@@ -470,7 +470,7 @@ bool Cmd_GetCalculatedMaxCarryWeight_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
 	if (!IS_ACTOR(thisObj)) return true;
-	*result = ThisStdCall<double>(0x8A0C20, (Actor*)thisObj);
+	*result = ThisCall<double>(0x8A0C20, (Actor*)thisObj);
 	return true;
 }
 bool Cmd_GetCalculatedMaxCarryWeight_Execute(COMMAND_ARGS)
@@ -820,7 +820,7 @@ bool Cmd_ShowPauseMenu_Execute(COMMAND_ARGS)
 			callback_addr = StartMenu::kSaveAddr;
 			break;
 		case kSettings:
-			ThisStdCall(0x7D5F80, menu);	//StartMenu::HideSubSettings
+			ThisCall(0x7D5F80, menu);	//StartMenu::HideSubSettings
 			callback_addr = StartMenu::kSettingsAddr;
 			break;
 		case kHelp:
@@ -869,7 +869,7 @@ bool Cmd_ResetInteriorAlt_Execute(COMMAND_ARGS)
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form))
 		return true;
 	if (auto const cell = DYNAMIC_CAST(form, TESForm, TESObjectCELL)) {
-		ThisStdCall_B(0x546B10, cell, -2, false);	//TESObjectCELL::updateDetachTime
+		ThisCall<bool>(0x546B10, cell, -2, false);	//TESObjectCELL::updateDetachTime
 		//(hooks are in place to handle the -2 detachTime correctly)
 		*result = true;
 	}
@@ -1406,7 +1406,7 @@ bool Cmd_SetCellFullNameAlt_Execute(COMMAND_ARGS)
 	if (!cell) return true;
 
 	TESFullName* fullName = &cell->fullName;  //wtf. Seems to work, idk why
-	ThisStdCall(0x489100, fullName, newName);  //rip, needs something more to save-bake
+	ThisCall(0x489100, fullName, newName);  //rip, needs something more to save-bake
 	//fullName->name.Set(newName); //crashes
 
 	return true;

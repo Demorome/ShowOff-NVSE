@@ -22,7 +22,7 @@ PlayerCharacter *PlayerCharacter::GetSingleton()
 bool Actor::IsSneaking()
 {
 	Actor* actor = this;
-	return (ThisStdCall<bool>(0x4997B0, actor));
+	return (ThisCall<bool>(0x4997B0, actor));
 }
 
 __declspec(naked) TESContainer *TESObjectREFR::GetContainer()
@@ -69,7 +69,7 @@ bool PlayerCharacter::SetSkeletonPath(const char* newPath)
 	//NiNode* niParent = (NiNode*)(renderState->niNode->m_parent);
 
 	//// set niNode to NULL via BASE CLASS Set3D() method
-	//ThisStdCall(s_TESObjectREFR_Set3D, this, NULL);
+	//ThisCall(s_TESObjectREFR_Set3D, this, NULL);
 
 	//// modify model path
 	//if (newPath) {
@@ -79,7 +79,7 @@ bool PlayerCharacter::SetSkeletonPath(const char* newPath)
 
 	//// create new NiNode, add to parent
 	//*(g_bUpdatePlayerModel) = 1;
-	//NiNode* newNode = (NiNode*)ThisStdCall(s_PlayerCharacter_GenerateNiNode, this);
+	//NiNode* newNode = (NiNode*)ThisCall(s_PlayerCharacter_GenerateNiNode, this);
 
 	//niParent->AddObject(newNode, 1);
 	//*(g_bUpdatePlayerModel) = 0;
@@ -89,10 +89,10 @@ bool PlayerCharacter::SetSkeletonPath(const char* newPath)
 	//// ### TODO: pretty this up
 	//UInt32 vtbl = *((UInt32*)newNode);
 	//UInt32 vfunc = *((UInt32*)(vtbl + 0x58));
-	//NiObject* cameraNode = (NiObject*)ThisStdCall(vfunc, newNode, "Camera01");
+	//NiObject* cameraNode = (NiObject*)ThisCall(vfunc, newNode, "Camera01");
 	//*g_3rdPersonCameraNode = cameraNode;
 
-	//cameraNode = (NiObject*)ThisStdCall(vfunc, (NiNode*)this->firstPersonNiNode, "Camera01");
+	//cameraNode = (NiObject*)ThisCall(vfunc, (NiNode*)this->firstPersonNiNode, "Camera01");
 	//*g_1stPersonCameraNode = cameraNode;
 
 	//Unk_52();
@@ -102,13 +102,13 @@ bool PlayerCharacter::SetSkeletonPath(const char* newPath)
 
 void PlayerCharacter::UpdateCamera(bool isCalledFromFunc21, bool _zero_skipUpdateLOD)
 {
-	ThisStdCall(0x94AE40, this, (UInt8)isCalledFromFunc21, (UInt8)_zero_skipUpdateLOD);
+	ThisCall(0x94AE40, this, (UInt8)isCalledFromFunc21, (UInt8)_zero_skipUpdateLOD);
 }
 
 void TESObjectREFR::Update3D()
 {
 	if (this == PlayerCharacter::GetSingleton())
-		ThisStdCall(kUpdateAppearanceAddr, this);
+		ThisCall(kUpdateAppearanceAddr, this);
 	else
 	{
 		Set3D(NULL, true);
@@ -182,7 +182,7 @@ hkpRigidBody* TESObjectREFR::GetRigidBody(const char* nodeName) const
 
 NiNode* TESObjectREFR::Get3D() const
 {
-	return ThisStdCall<NiNode*>(0x43FCD0, const_cast<TESObjectREFR*>(this));
+	return ThisCall<NiNode*>(0x43FCD0, const_cast<TESObjectREFR*>(this));
 }
 
 TESObjectREFR* TESObjectREFR::PlaceAtMe(TESForm* toPlace, int count, int useNodePos, int direction)
@@ -193,8 +193,8 @@ TESObjectREFR* TESObjectREFR::PlaceAtMe(TESForm* toPlace, int count, int useNode
 TESObjectREFR *TESObjectREFR::Create(bool bTemp)
 {
 	TESObjectREFR *refr = (TESObjectREFR*)GameHeapAlloc(sizeof(TESObjectREFR));
-	ThisStdCall(s_TESObject_REFR_init, refr);
-	if (bTemp) ThisStdCall(0x484490, refr);
+	ThisCall(s_TESObject_REFR_init, refr);
+	if (bTemp) ThisCall(0x484490, refr);
 	return refr;
 }
 /*
@@ -259,7 +259,7 @@ ExtraContainerExtendDataArray	Actor::GetEquippedExtendDataList()
 
 void Actor::SetAnimActionAndSequence(SInt32 animAction, BSAnimGroupSequence* animGroupSeq)
 {
-	ThisStdCall<void>(0x8A73E0, this, animAction, animGroupSeq);
+	ThisCall<void>(0x8A73E0, this, animAction, animGroupSeq);
 }
 
 // From JIP
@@ -282,7 +282,7 @@ bool Actor::IsInvisible()
 
 void Actor::Kill(Actor* killer)
 {
-	ThisStdCall<void>(0x89D900, this, killer, 0.0f);
+	ThisCall<void>(0x89D900, this, killer, 0.0f);
 }
 
 bool Actor::GetShouldAttack(Actor* target)
@@ -294,22 +294,22 @@ bool Actor::GetShouldAttack(Actor* target)
 	if (target->isInCombat && target->GetCombatController())
 	{
 		// CombatManager_992640
-		if (ThisStdCall_B(0x992640, *(void**)0x11F1958, this, target)) // 0x11F1958 = g_combatManager
+		if (ThisCall<bool>(0x992640, *(void**)0x11F1958, this, target)) // 0x11F1958 = g_combatManager
 			return false;
 	}
 	// call Actor::GetShouldAttack
 	int factionRelation_Out;
-	return ThisStdCall_B(0x8B06D0, this, target, 0, &factionRelation_Out, 0);
+	return ThisCall<bool>(0x8B06D0, this, target, 0, &factionRelation_Out, 0);
 }
 
 void Actor::SetWantsWeaponOut(bool wantsWeaponOut)
 {
-	ThisStdCall(0x8A6840, this, (UInt8)wantsWeaponOut);
+	ThisCall(0x8A6840, this, (UInt8)wantsWeaponOut);
 }
 
 bool Actor::IsInReloadAnim()
 {
-	return ThisStdCall<bool>(0x8A8870, this);
+	return ThisCall<bool>(0x8A8870, this);
 }
 
 bool Actor::IsDoingAttackAnimation() const
@@ -333,7 +333,7 @@ SInt32 Actor::GetDetectionLevelAlt(Actor* target, bool calculateSneakLevel)
 	bool out = false;  // throwaway variable to reference.
 
 	// SInt32 __thiscall Actor_GetDetected(Actor *this, bool calculateSneakLevel, Actor *toDetect, int *out, char a5, bool isTargetInCombat, int a7, int a8)
-	return ThisStdCall<SInt32>(0x8A0D10, this, calculateSneakLevel, target, &out, 0, isTargetInCombat, 0, 0);
+	return ThisCall<SInt32>(0x8A0D10, this, calculateSneakLevel, target, &out, 0, isTargetInCombat, 0, 0);
 }
 
 // Same-ish code as what's used for Cmd_GetDetected_Eval

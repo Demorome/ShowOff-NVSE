@@ -91,7 +91,7 @@ namespace PickpocketInCombat
 			int playerActionPoints = PlayerCharacter::GetSingleton()->avOwner.GetActorValue(kAVCode_ActionPoints);
 			if (actionPointCost > playerActionPoints)
 			{
-				ThisStdCall(0x8C00E0, PlayerCharacter::GetSingleton(), actor, 0, 0);
+				ThisCall(0x8C00E0, PlayerCharacter::GetSingleton(), actor, 0, 0);
 				char buf[260];
 				ScopedLock lock(g_Lock);
 				sprintf(buf, "%s", g_fForcePickpocketFailureMessage);
@@ -126,7 +126,7 @@ namespace PickpocketInCombat
 			if (stolenKarmaTier != KarmaTier::Evil && stolenKarmaTier != KarmaTier::VeryEvil)
 			{
 				int karmaMod = *(float*)0x11CDE24; // fKarmaModStealing
-				ThisStdCall(0x94FD30, PlayerCharacter::GetSingleton(), karmaMod);
+				ThisCall(0x94FD30, PlayerCharacter::GetSingleton(), karmaMod);
 			}
 		}
 		return wasSuccessful;
@@ -146,7 +146,7 @@ namespace PickpocketInCombat
 		if (!subtitlesTile) return;
 
 		bool isStealNotPlace = (container->currentItems == &container->rightItems);
-		int itemValue = isStealNotPlace ? ThisStdCall<int>(0x75E240, container, ContainerMenu::GetSelection(), 1, 1) : 1;
+		int itemValue = isStealNotPlace ? ThisCall<int>(0x75E240, container, ContainerMenu::GetSelection(), 1, 1) : 1;
 
 		bool isItemOwnedByTarget = container->currentItems == &container->rightItems;
 		int actionPointCost = CalculateCombatPickpocketAPCost(ContainerMenu::GetSelection(), (Actor*)container->containerRef, itemValue, 1, isItemOwnedByTarget);
@@ -192,7 +192,7 @@ namespace PickpocketInCombat
 	//Replaces a IsInCombat check in the NPC activation code.
 	bool __fastcall PCCanPickpocketInCombatHOOK(Actor* actor, void* edx)
 	{
-		bool const isInCombat = ThisStdCall<bool>(0x493BB0, actor);
+		bool const isInCombat = ThisCall<bool>(0x493BB0, actor);
 		if (isInCombat)
 		{
 			if (g_canPlayerPickpocketInCombat && PlayerCharacter::GetSingleton()->IsSneaking())
@@ -234,7 +234,7 @@ namespace PickpocketInCombat
 	//Replaces a "GetIsCombatTarget w/ the player" check.
 	bool __fastcall ShowPickpocketStringInCombat(Actor* actor, void* edx, char a2)
 	{
-		bool isInCombat = ThisStdCall<bool>(0x8BC700, actor, PlayerCharacter::GetSingleton());
+		bool isInCombat = ThisCall<bool>(0x8BC700, actor, PlayerCharacter::GetSingleton());
 		if (isInCombat && g_canPlayerPickpocketInCombat && PlayerCharacter::GetSingleton()->IsSneaking())
 		{
 #if _DEBUG
@@ -385,7 +385,7 @@ namespace GetCompassTargets
 
 	void __fastcall PropagateIntValue_Hook(Tile* tile, void* edx, UInt32 tileValue, int a3)
 	{
-		ThisStdCall<void>(0x700320, tile, tileValue, a3); // Regular code
+		ThisCall<void>(0x700320, tile, tileValue, a3); // Regular code
 
 		// Fill in the list.
 		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
@@ -423,7 +423,7 @@ namespace SetItemHotkeyIconPath
 			}
 		}
 		// else, return normal path string.
-		return ThisStdCall<const char*>(0x4BE200, entry, owner_alwaysNullHere);
+		return ThisCall<const char*>(0x4BE200, entry, owner_alwaysNullHere);
 	}
 
 	void WriteHooks()
@@ -440,7 +440,7 @@ namespace FreezeAmmoRegen
 	CallDetour g_detour;
 	double __fastcall Weap_GetModifiedRegenRate_Hook(TESObjectWEAP* weap, void* edx, UInt8 hasAmmoRegenWeaponMod)
 	{
-		auto result = ThisStdCall<double>(g_detour.GetOverwrittenAddr(), weap, hasAmmoRegenWeaponMod);
+		auto result = ThisCall<double>(g_detour.GetOverwrittenAddr(), weap, hasAmmoRegenWeaponMod);
 		if (g_freezeAmmoRegen)
 			return 0.0;
 		return result;
@@ -461,7 +461,7 @@ namespace SetForceDrawHitscanProjectiles
 		CallDetour g_detour;
 		bool __fastcall Hook(BGSProjectile* baseProj)
 		{
-			auto result = ThisStdCall<bool>(g_detour.GetOverwrittenAddr(), baseProj);
+			auto result = ThisCall<bool>(g_detour.GetOverwrittenAddr(), baseProj);
 			if (g_isForcingProjectilesToDraw)
 				return false; // game sets projectile to not have hitscan flag in VATS, so we copy that idea.
 			return result;
@@ -491,7 +491,7 @@ namespace SetForceDrawHitscanProjectiles
 					setFlag = false;
 				}
 			}
-			ThisStdCall(g_detour.GetOverwrittenAddr(), projRef, projRefFlag, setFlag);
+			ThisCall(g_detour.GetOverwrittenAddr(), projRef, projRefFlag, setFlag);
 		}
 
 		void WriteDelayedHook()
@@ -515,7 +515,7 @@ namespace SetForceDrawHitscanProjectiles
 				return 0.0;
 			}
 			else
-				return ThisStdCall<double>(g_detour.GetOverwrittenAddr(), baseProj);
+				return ThisCall<double>(g_detour.GetOverwrittenAddr(), baseProj);
 		}
 
 		void WriteDelayedHook()
@@ -542,7 +542,7 @@ namespace SetProjectileTracerChanceOverride
 	CallDetour g_detour;
 	bool __fastcall BGSProjectile_CalcIsTracer_Hook(BGSProjectile* baseProj)
 	{
-		auto result = ThisStdCall<bool>(g_detour.GetOverwrittenAddr(), baseProj);
+		auto result = ThisCall<bool>(g_detour.GetOverwrittenAddr(), baseProj);
 		if (g_tracerChanceOverride != -1 && baseProj->tracerChance > 0)
 			return g_tracerChanceOverride != 0;
 		return result;
@@ -561,7 +561,7 @@ namespace IsPlayerLookingAround
 	CallDetour g_detour;
 	bool __fastcall Player_HandleLookingAround(PlayerCharacter* player, void* edx, float timeSinceLastLastFrame, char a3, int* movFlags, int unused)
 	{
-		auto result = ThisStdCall<bool>(g_detour.GetOverwrittenAddr(), player, timeSinceLastLastFrame, a3, movFlags, unused);
+		auto result = ThisCall<bool>(g_detour.GetOverwrittenAddr(), player, timeSinceLastLastFrame, a3, movFlags, unused);
 		g_isPlayerLookingAround = result;
 		return result;
 	}
@@ -583,7 +583,7 @@ namespace PlaceAtReticleAlt
 		void __fastcall Hook(TESObjectREFR* ref, void* edx, float newHealth)
 		{
 			newHealth *= g_healthPercent;
-			ThisStdCall<bool>(g_detour.GetOverwrittenAddr(), ref, newHealth);
+			ThisCall<bool>(g_detour.GetOverwrittenAddr(), ref, newHealth);
 		}
 
 		void WriteHook()
@@ -629,7 +629,7 @@ namespace Experimental
 		void __fastcall Hook(ExtraDataList* xDataList, void* edx, ScriptEventList* eventList)
 		{
 			// Call BaseExtraList__ExtraScript__SetEventList (which we overwrote).
-			ThisStdCall(0x419F80, xDataList, eventList);
+			ThisCall(0x419F80, xDataList, eventList);
 
 			auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
 			auto* script = *reinterpret_cast<Script**>(ebp - 0x30);
@@ -663,12 +663,12 @@ namespace Experimental
 				if (!extraList->HasType(kExtraData_Script))
 				{
 					// ExtraDataList__SetExtraScript_Script
-					ThisStdCall(0x419ED0, extraList, script);
+					ThisCall(0x419ED0, extraList, script);
 				}
 				auto const extraScript = GetExtraTypeJIP(extraList, Script);
 				if (!extraScript->eventList)
 				{
-					auto const eventList = ThisStdCall<ScriptEventList*>(0x5ABF60, script);
+					auto const eventList = ThisCall<ScriptEventList*>(0x5ABF60, script);
 					extraScript->eventList = eventList;
 				}
 
@@ -734,7 +734,7 @@ namespace Experimental
 				(*g_osGlobals)->freezeTime = false;
 				Console_Print("WTF??");
 
-				return ThisStdCall<bool>(g_detour.GetOverwrittenAddr(), loadSaveManager);
+				return ThisCall<bool>(g_detour.GetOverwrittenAddr(), loadSaveManager);
 			}
 
 			void WriteHook()
