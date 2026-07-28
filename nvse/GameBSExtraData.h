@@ -25,17 +25,16 @@ public:
 // 020
 struct BaseExtraList
 {
-	virtual void	Destroy(bool doFree);
+	virtual ~BaseExtraList();
 
 	BSExtraData		*m_data;					// 004
 	UInt8			m_presenceBitfield[0x15];	// 008 - if a bit is set, then the extralist should contain that extradata
 	UInt8			pad1D[3];					// 01D
 
-	bool HasType(UInt32 type) const;
-	BSExtraData *GetByType(UInt32 type) const;
-	void MarkType(UInt32 type, bool bCleared);
+	bool HasType(UInt8 type) const;
+	BSExtraData *GetByType(UInt8 type) const;
 	void Remove(BSExtraData *toRemove, bool doFree = false);
-	void RemoveByType(UInt32 type);
+	void RemoveByType(UInt8 type);
 	BSExtraData *Add(BSExtraData *xData);
 	void RemoveAll(bool doFree = true);
 	bool MarkScriptEvent(UInt32 eventMask, TESForm *eventTarget);

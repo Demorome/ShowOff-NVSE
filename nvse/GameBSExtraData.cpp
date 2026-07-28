@@ -10,98 +10,47 @@ const _RemoveExtraType RemoveExtraType = (_RemoveExtraType)0x410140;
 const _ClearExtraDataList ClearExtraDataList = (_ClearExtraDataList)0x40FAE0;
 const _CopyExtraDataList CopyExtraDataList = (_CopyExtraDataList)0x411EC0;
 
-bool BaseExtraList::HasType(UInt32 type) const
+bool BaseExtraList::HasType(UInt8 type) const
 {
-	UInt32 index = (type >> 3);
-	UInt8 bitMask = 1 << (type % 8);
-	return (m_presenceBitfield[index] & bitMask) != 0;
+	return ThisCall<bool>(0x40FE80, this, type);
 }
 
-__declspec(naked) BSExtraData* BaseExtraList::GetByType(UInt32 type) const
+BSExtraData* BaseExtraList::GetByType(UInt8 type) const
 {
-	__asm
-	{
-		cmp		dword ptr[ecx + 4], 0
-		jz		retnNULL
-		mov		edx, [esp + 4]
-		shr		edx, 3
-		movzx	eax, byte ptr[ecx + edx + 8]
-		mov		edx, [esp + 4]
-		and edx, 7
-		bt		eax, edx
-		jnc		retnNULL
-		push	ecx
-		mov		ecx, 0x11C3920
-		call	LightCS::EnterSleep
-		pop		ecx
-		mov		eax, [ecx + 4]
-		mov		edx, [esp + 4]
-		ALIGN	16
-	iterHead:
-		cmp[eax + 4], dl
-		jz		lockLeave
-		mov		eax, [eax + 8]
-		test	eax, eax
-		jnz		iterHead
-	lockLeave :
-		mov		edx, 0x11C3920
-		dec		dword ptr[edx + 4]
-		jnz		done
-		mov		dword ptr[edx], 0
-		done :
-		retn	4
-	retnNULL :
-		xor eax, eax
-		retn	4
-	}
+	return ThisCall<BSExtraData*>(0x410220, this, type);
 }
 
-void BaseExtraList::MarkType(UInt32 type, bool bCleared)
+void BaseExtraList::Remove(BSExtraData *toRemove, bool doFree)
 {
-	UInt32 index = (type >> 3);
-	UInt8 bitMask = 1 << (type % 8);
-	UInt8 &flag = m_presenceBitfield[index];
-	if (bCleared) flag &= ~bitMask;
-	else flag |= bitMask;
+	ThisCall(0x410020, this, toRemove, doFree);
 }
 
-__declspec(naked) void BaseExtraList::Remove(BSExtraData *toRemove, bool doFree)
+BSExtraData *BaseExtraList::Add(BSExtraData *xData)
 {
-	static const UInt32 procAddr = 0x410020;
-	__asm	jmp		procAddr
-}
-
-__declspec(naked) BSExtraData *BaseExtraList::Add(BSExtraData *xData)
-{
-	static const UInt32 procAddr = 0x40FF60;
-	__asm	jmp		procAddr
+	return ThisCall<BSExtraData*>(0x40FF60, this, xData);
 }
 
 ExtraDataList *ExtraDataList::Create(BSExtraData *xBSData)
 {
 	ExtraDataList *xData = (ExtraDataList*)GameHeapAlloc(sizeof(ExtraDataList));
-	MemZero(xData, sizeof(ExtraDataList));
-	*(UInt32*)xData = 0x10143E8;
+	ThisCall(0x410360, xData);
 	if (xBSData) xData->Add(xBSData);
 	return xData;
 }
 
-__declspec(naked) void BaseExtraList::RemoveByType(UInt32 type)
+void BaseExtraList::RemoveByType(UInt8 type)
 {
-	static const UInt32 procAddr = 0x410140;
-	__asm	jmp		procAddr
+	ThisCall(0x410140, this, type);
 }
 
-__declspec(naked) void BaseExtraList::RemoveAll(bool doFree)
+void BaseExtraList::RemoveAll(bool doFree)
 {
-	static const UInt32 procAddr = 0x411FD0;
-	__asm	jmp		procAddr
+	ThisCall(0x411FD0, this, doFree);
 }
 
-__declspec(naked) void BaseExtraList::Copy(BaseExtraList *sourceList)
+void BaseExtraList::Copy(BaseExtraList *sourceList)
 {
-	static const UInt32 procAddr = 0x411EC0;
-	__asm	jmp		procAddr
+	ThisCall(0x411EC0, this, sourceList);
 }
 
 bool BaseExtraList::IsWorn()
@@ -155,8 +104,6 @@ bool BaseExtraList::MarkScriptEvent(UInt32 eventMask, TESForm* eventTarget)
 }
 
 
-SInt32 BaseExtraList::GetCount() const
-{
-	ExtraCount* xCount = GetExtraTypeJIP(this, Count);
-	return xCount ? xCount->count : 1;
+SInt32 BaseExtraList::GetCount() const {
+	return ThisCall<int16_t>(0x418770, this);
 }
