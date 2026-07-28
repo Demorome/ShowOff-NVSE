@@ -102,7 +102,7 @@ const char *TESForm::GetTheName() const
 
 void TESForm::DoAddForm(TESForm* newForm, bool persist, bool record) const
 {
-	CALL_MEMBER_FN(DataHandler::Get(), DoAddForm)(newForm);
+	CALL_MEMBER_FN(TESDataHandler::GetSingleton(), DoAddForm)(newForm);
 
 	if(persist)
 	{

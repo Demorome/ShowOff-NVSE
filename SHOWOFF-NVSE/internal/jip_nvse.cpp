@@ -183,7 +183,7 @@ __declspec(naked) bool __fastcall GetResolvedModIndex(UInt8* pModIdx)
 		movzx	edx, byte ptr[ecx]
 		cmp		dl, 0xFF
 		jz		retn1
-		mov		eax, g_BGSSaveLoadGame
+		mov		eax, dword ptr ds:[0x11DDF38] // BGSSaveLoadGame::pSingleton
 		mov		al, [eax + edx + 0x44]
 		cmp		al, 0xFF
 		jz		retn0
@@ -201,7 +201,7 @@ __declspec(naked) bool __stdcall HasChangeData(UInt32 refID)
 {
 	__asm
 	{
-		mov		eax, g_BGSSaveLoadGame
+		mov		eax, dword ptr ds : [0x11DDF38] // BGSSaveLoadGame::pSingleton
 		mov		ecx, [eax]
 		mov		eax, [esp + 4]
 		xor edx, edx
@@ -234,7 +234,7 @@ __declspec(naked) UInt32 __fastcall GetResolvedRefID(UInt32 refID)
 		movzx	edx, byte ptr[esp + 3]
 		cmp		dl, 0xFF
 		jz		retnArg
-		mov		ecx, g_BGSSaveLoadGame
+		mov		ecx, dword ptr ds : [0x11DDF38] // BGSSaveLoadGame::pSingleton
 		mov		al, [ecx + edx + 0x44]
 		cmp		al, 0xFF
 		jz		retn0

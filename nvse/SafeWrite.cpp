@@ -215,7 +215,7 @@ void ShowHookConflictErrorMsg()
 	if (!g_showedRuntimeHookConflictError)
 	{
 		std::string msg = "Showoff xNVSE: Detected conflict with another plugin detected while trying to hook the game; please report what you see in ShowOffNVSE.log, or check if there is an update available.";
-		if (g_thePlayer != nullptr) // if plugin init is complete
+		if (PlayerCharacter::GetSingleton() != nullptr) // if plugin init is complete
 			Console_Print(msg.c_str());
 		else
 			g_deferredPrints.emplace_back(std::move(msg));

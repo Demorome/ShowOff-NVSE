@@ -111,23 +111,7 @@ NVSEEventManagerInterface* g_eventInterface = nullptr;
 DWORD g_mainThreadID = 0;
 
 // Singletons
-HUDMainMenu* g_HUDMainMenu = nullptr;
-TileMenu** g_tileMenuArray = nullptr;
-UInt32 g_screenWidth = 0;
-UInt32 g_screenHeight = 0;
-PlayerCharacter* g_thePlayer = nullptr;
-ActorValueOwner* g_playerAVOwner = nullptr;
-ProcessManager* g_processManager = nullptr;
-InterfaceManager* g_interfaceManager = nullptr;
-BSWin32Audio* g_bsWin32Audio = nullptr;
-DataHandler* g_dataHandler = nullptr;
-BSAudioManager* g_audioManager = nullptr;
-Sky** g_currentSky = nullptr;
 RefID g_xMarkerFormID = 0x3B;
-TESObjectWEAP* g_fistsWeapon = nullptr;
-TimeGlobal* g_timeGlobal = nullptr;
-BGSSaveLoadGame* g_BGSSaveLoadGame = nullptr;
-
 // Game functions
 bool (__cdecl* GetIsGodMode)() = nullptr;
 
@@ -250,26 +234,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		break;
 
 	case NVSEMessagingInterface::kMessage_DeferredInit:
-		// From JiP's patches_game.h
-		g_thePlayer = PlayerCharacter::GetSingleton();
-		g_playerAVOwner = &g_thePlayer->avOwner;
-		g_processManager = (ProcessManager*)0x11E0E80;
-		g_bsWin32Audio = BSWin32Audio::GetSingleton();
-		g_dataHandler = DataHandler::Get();
-		g_audioManager = (BSAudioManager*)0x11F6EF0;
-		g_currentSky = (Sky**)0x11DEA20;
-		g_HUDMainMenu = *(HUDMainMenu**)0x11D96C0;  
-		g_interfaceManager = *(InterfaceManager**)0x11D8A80; 
-		g_tileMenuArray = *(TileMenu***)0x11F350C; 
-		g_screenWidth = *(UInt32*)0x11C73E0;
-		g_screenHeight = *(UInt32*)0x11C7190;
-		g_fistsWeapon = *(TESObjectWEAP**)0x11CA278;
-		g_BGSSaveLoadGame = *(BGSSaveLoadGame**)0x11DDF38;
-
 		GetIsGodMode = reinterpret_cast<bool(*)()>(0x9526B0);
-
-		// from xNVSE
-		g_timeGlobal = reinterpret_cast<TimeGlobal*>(0x11F6394);
 
 		HandleHooks::HandleDelayedGameHooks();
 		HandleHooks::HandleDelayedEventHooks();

@@ -749,7 +749,7 @@ namespace IniToNVSE
 			return false;
 		}
 		//replace .esm/p ending with .ini
-		outModPath = g_dataHandler->GetNthModName(modIdx);
+		outModPath = TESDataHandler::GetSingleton()->GetNthModName(modIdx);
 		outModPath.replace(outModPath.size() - 3, 3, "ini");
 		return true;
 	}

@@ -207,11 +207,11 @@ struct ModList
 STATIC_ASSERT(sizeof(ModList) == 0x408);
 
 // 5B8
-class DataHandler
+class TESDataHandler
 {
 public:
-	DataHandler();
-	~DataHandler();
+	TESDataHandler();
+	~TESDataHandler();
 
 	UInt32							unk00;					// 000
 	BoundObjectListHead				*boundObjectList;		// 004
@@ -297,14 +297,14 @@ public:
 	UInt32							unk634;					// 634
 	UInt32							unk638;					// 638
 
-	static DataHandler* Get();
+	static TESDataHandler* GetSingleton();
 	const ModInfo ** GetActiveModList();		// returns array of modEntry* corresponding to loaded mods sorted by mod index
 	const ModInfo* LookupModByName(const char* modName);
 	UInt8 GetModIndex(const char* modName);
 	UInt8 GetActiveModCount() const;
 	const char* GetNthModName(UInt32 modIndex);
 
-	MEMBER_FN_PREFIX(DataHandler);
+	MEMBER_FN_PREFIX(TESDataHandler);
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 	DEFINE_MEMBER_FN(DoAddForm, UInt32, 0x004603B0, TESForm * pForm);	// stupid name is because AddForm is redefined in windows header files
 #elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
@@ -315,6 +315,10 @@ public:
 #endif
 
 	TESQuest* GetQuestByName(const char* questName);
+
+	static TESObjectWEAP* GetDefaultWeapon() {
+		return *reinterpret_cast<TESObjectWEAP**>(0x11CA278);
+	}
 };
 
-STATIC_ASSERT(sizeof(DataHandler) == 0x63C);
+STATIC_ASSERT(sizeof(TESDataHandler) == 0x63C);

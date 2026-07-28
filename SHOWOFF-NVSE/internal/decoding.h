@@ -484,7 +484,7 @@ public:
 STATIC_ASSERT(sizeof(MagicShaderHitEffect) == 0x6C);
 
 // 160
-struct ProcessManager
+struct ProcessLists
 {
 	UInt32					unk000;				// 000
 	NiTArray<MobileObject*>	objects;			// 004
@@ -497,7 +497,7 @@ struct ProcessManager
 	UInt32					unk088[54];			// 088
 
 	int GetTotalDetectionValue(Actor *actor, bool arg2 = false);
-	static ProcessManager* GetSingleton() { {return (ProcessManager*)0x11E0E80; } } // copied from JIP
+	static ProcessLists* GetSingleton() { {return (ProcessLists*)0x11E0E80; } } // copied from JIP
 };
 
 struct DetectionData
@@ -1191,6 +1191,10 @@ public:
 	tList<UInt32>					list264;		// 264
 	tList<UInt32>					list26C;		// 26C
 	float							flt274;			// 274
+
+	static HUDMainMenu* GetSingleton() {
+		return *reinterpret_cast<HUDMainMenu**>(0x11D96C0);
+	}
 };
 STATIC_ASSERT(sizeof(HUDMainMenu) == 0x278);
 

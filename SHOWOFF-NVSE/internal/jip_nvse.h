@@ -274,10 +274,6 @@ DebugLog s_log, s_debug, s_missingTextures;
 
 
 bool (*CallFunction)(Script* funcScript, TESObjectREFR* callingObj, TESObjectREFR* container, NVSEArrayElement* result, UInt8 numArgs, ...);
-
-DataHandler* g_dataHandler = NULL;
-
-
 struct TempArrayElements
 {
 	UInt32			size;

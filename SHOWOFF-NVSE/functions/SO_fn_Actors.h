@@ -20,9 +20,9 @@ UInt32 __fastcall GetNumActorsInRangeFromRef_Call(TESObjectREFR* const thisObj, 
 	if (g_ShowFuncDebug)
 		_MESSAGE("DebugGetNumActorsInRangeFromRef - begin dump for thisObj %s (%08x)", thisObj->GetName(), thisObj->refID);
 	
-	MobileObject** objArray = g_processManager->objects.data, ** arrEnd = objArray;
-	objArray += g_processManager->beginOffsets[0];  //Only objects in High process.
-	arrEnd += g_processManager->endOffsets[0];
+	MobileObject** objArray = ProcessLists::GetSingleton()->objects.data, ** arrEnd = objArray;
+	objArray += ProcessLists::GetSingleton()->beginOffsets[0];  //Only objects in High process.
+	arrEnd += ProcessLists::GetSingleton()->endOffsets[0];
 	UInt32 numActors = 0;  //return value
 	for (; objArray != arrEnd; objArray++)
 	{
@@ -44,11 +44,11 @@ UInt32 __fastcall GetNumActorsInRangeFromRef_Call(TESObjectREFR* const thisObj, 
 	}
 
 	// Player is not included in the looped array, so we need to check for it outside the loop.
-	if (thisObj != g_thePlayer)
+	if (thisObj != PlayerCharacter::GetSingleton())
 	{
-		if (noDeadActors && g_thePlayer->GetDead())
+		if (noDeadActors && PlayerCharacter::GetSingleton()->GetDead())
 			return numActors;
-		if (GetDistance3D(thisObj, g_thePlayer) <= range)
+		if (GetDistance3D(thisObj, PlayerCharacter::GetSingleton()) <= range)
 			numActors++;
 	}
 
@@ -125,9 +125,9 @@ UInt32 __fastcall GetNumCombatActorsFromActorCALL(TESObjectREFR* thisObj, float 
 	};
 	
 	Actor* actor;
-	if (thisObj == g_thePlayer)
+	if (thisObj == PlayerCharacter::GetSingleton())
 	{
-		CombatActors* cmbActors = g_thePlayer->combatActors;
+		CombatActors* cmbActors = PlayerCharacter::GetSingleton()->combatActors;
 		if (!cmbActors) return 0;
 		if (getAllies)
 		{
@@ -342,13 +342,13 @@ UInt32 __fastcall GetNumCompassHostiles_Call(TESObjectREFR* const thisObj, float
 	//todo: learn why this stuff is checked!
 	float fSneakMaxDistance = *(float*)(0x11CD7D8 + 4);
 	float fSneakExteriorDistanceMult = *(float*)(0x11CDCBC + 4);
-	bool isInterior = g_thePlayer->GetParentCell()->IsInterior();
+	bool isInterior = PlayerCharacter::GetSingleton()->GetParentCell()->IsInterior();
 	float interiorDistanceSquared = fSneakMaxDistance * fSneakMaxDistance;
 	float exteriorDistanceSquared = (fSneakMaxDistance * fSneakExteriorDistanceMult) * (fSneakMaxDistance * fSneakExteriorDistanceMult);
 	float maxDist = isInterior ? interiorDistanceSquared : exteriorDistanceSquared;
 
-	NiPoint3* playerPos = g_thePlayer->GetPos();
-	auto iter = g_thePlayer->compassTargets->Begin();
+	NiPoint3* playerPos = PlayerCharacter::GetSingleton()->GetPos();
+	auto iter = PlayerCharacter::GetSingleton()->compassTargets->Begin();
 	for (; !iter.End(); ++iter)
 	{
 		PlayerCharacter::CompassTarget* target = iter.Get();
@@ -535,9 +535,9 @@ bool Cmd_GetIsPlayerOverencumbered_Eval(COMMAND_ARGS_EVAL)
 			return true;
 		}
 	}
-	auto const weight = g_thePlayer->avOwner.GetActorValueInt(kAVCode_InventoryWeight);
+	auto const weight = PlayerCharacter::GetSingleton()->avOwner.GetActorValueInt(kAVCode_InventoryWeight);
 	// Actor::GetMaxCarryWeightPerkModified
-	auto const maxWeight = ThisStdCall<double>(0x8A0C20, g_thePlayer);
+	auto const maxWeight = ThisStdCall<double>(0x8A0C20, PlayerCharacter::GetSingleton());
 	*result = maxWeight < weight;
 	return true;
 }
@@ -589,7 +589,7 @@ bool Cmd_GetCalculatedActorSpread_Execute(COMMAND_ARGS)
 		// Determine proper spread mode to check given current game context
 		spreadMode = kSpreadMode_2; // most commonly used
 
-		if (actor == g_thePlayer)
+		if (actor == PlayerCharacter::GetSingleton())
 		{
 			/*
 			auto* vatsMenu = VATSMenu::GetSingleton();
@@ -614,7 +614,7 @@ bool Cmd_GetCalculatedActorSpread_Execute(COMMAND_ARGS)
 
 	*result = ThisStdCall<double>(0x8B0DD0, thisObj, spreadMode);
 
-	if (actor == g_thePlayer)
+	if (actor == PlayerCharacter::GetSingleton())
 	{
 		if (spreadMode == kSpreadMode_Scoped)
 		{
@@ -629,7 +629,7 @@ bool Cmd_GetCalculatedActorSpread_Execute(COMMAND_ARGS)
 			// Copying weird code starting at 0x96309E
 			const auto& unkGunWobbleDriftGlobal = *reinterpret_cast<float*>(0x11A3B2C);
 			float v60 = *result - unkGunWobbleDriftGlobal;
-			float v61 = g_timeGlobal->secondsPassed * GetFltGameSetting(0x11CF588); // fGunWobbleChaseDriftTime
+			float v61 = TimeGlobal::GetSingleton()->secondsPassed * GetFltGameSetting(0x11CF588); // fGunWobbleChaseDriftTime
 			if (v60 != 0.0)
 			{
 				if (v61 < fabs(v60))
@@ -672,7 +672,7 @@ bool Cmd_HighlightAdditionalReferenceAlt_Execute(COMMAND_ARGS)
 		if (actor->avOwner.GetActorValue(kAVCode_Invisibility) > 0 || actor->avOwner.GetActorValue(kAVCode_Chameleon) > 0)
 		{
 			float hasPerk = 0.0;
-			ApplyPerkModifiers(kPerkEntry_HasImprovedDetection, g_thePlayer, &hasPerk);
+			ApplyPerkModifiers(kPerkEntry_HasImprovedDetection, PlayerCharacter::GetSingleton(), &hasPerk);
 			if (!hasPerk)
 				return true;
 		}
@@ -731,8 +731,8 @@ bool Cmd_HighlightAdditionalReferenceAlt_Execute(COMMAND_ARGS)
 		// This was likely because the game was storing the target.ref of the now-deleted projectile reference, and attempting to check stuff on it.
 		// Target has no visual effect outside of VATS, so we don't lose anything.
 		auto& vatsHighlightData = InterfaceManager::GetSingleton()->vatsHighlightData;
-		vatsHighlightData.target.ref = g_thePlayer;
-		NiRefObject::Replace((NiRefObject**)&vatsHighlightData.target.node, g_thePlayer->Get3D());
+		vatsHighlightData.target.ref = PlayerCharacter::GetSingleton();
+		NiRefObject::Replace((NiRefObject**)&vatsHighlightData.target.node, PlayerCharacter::GetSingleton()->Get3D());
 
 		// NOTE: still highly recommended to flush the VATS highlight targets and re-create the list every frame.
 		// Especially since having the player stay as a target for VATS would be weird...
@@ -794,7 +794,7 @@ bool Cmd_ForceHitStaggerReaction_Execute(COMMAND_ARGS)
 			return true;
 
 		// copying code at 0x89C2DA; credits to lStewieAl for pointing this out!
-		if (actor == g_thePlayer)
+		if (actor == PlayerCharacter::GetSingleton())
 		{
 			animData->CreateForcedIdle(idle, actor, idle->GetSequenceID(), 2);
 			// todo: maybe destroy VATS camera structs like how 0x89C370 does it.
@@ -836,7 +836,7 @@ bool Cmd_IsActorInvisibleToPlayer_Eval(COMMAND_ARGS_EVAL)
 	if (!actor->IsInvisible())
 		return true;
 	float hasImprovedDetection = 0.0f;
-	ApplyPerkModifiers(kPerkEntry_HasImprovedDetection, g_thePlayer, &hasImprovedDetection);
+	ApplyPerkModifiers(kPerkEntry_HasImprovedDetection, PlayerCharacter::GetSingleton(), &hasImprovedDetection);
 	*result = !hasImprovedDetection;
 	return true;
 }

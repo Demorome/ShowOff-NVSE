@@ -1,9 +1,8 @@
 #include "GameData.h"
 
 
-DataHandler* DataHandler::Get() {
-	DataHandler** g_dataHandler = (DataHandler**)0x011C3F2C;
-	return *g_dataHandler;
+TESDataHandler* TESDataHandler::GetSingleton() {
+	return *reinterpret_cast<TESDataHandler**>(0x11C3F2C);
 }
 
 class LoadedModFinder
@@ -19,22 +18,22 @@ public:
 	}
 };
 
-const ModInfo * DataHandler::LookupModByName(const char * modName)
+const ModInfo * TESDataHandler::LookupModByName(const char * modName)
 {
 	LoadedModFinder tmp(modName);
 	return modList.modInfoList.Find(tmp);
 }
 
-const ModInfo ** DataHandler::GetActiveModList()
+const ModInfo ** TESDataHandler::GetActiveModList()
 {
 	static const ModInfo* activeModList[0x100] = { 0 };
 
 	if (!(*activeModList))
 	{
 		UInt16 index = 0;
-		for (index = 0  ; index < DataHandler::Get()->modList.modInfoList.Count() ; index++)
+		for (index = 0  ; index < TESDataHandler::GetSingleton()->modList.modInfoList.Count() ; index++)
 		{
-			ModInfo* entry = DataHandler::Get()->modList.modInfoList.GetNthItem(index);
+			ModInfo* entry = TESDataHandler::GetSingleton()->modList.modInfoList.GetNthItem(index);
 			if (entry->IsLoaded())
 				activeModList[index] = entry;
 		}
@@ -43,7 +42,7 @@ const ModInfo ** DataHandler::GetActiveModList()
 	return activeModList;
 }
 
-UInt8 DataHandler::GetModIndex(const char *modName)
+UInt8 TESDataHandler::GetModIndex(const char *modName)
 {
 	ListNode<ModInfo> *iter = modList.modInfoList.Head();
 	ModInfo *modInfo;
@@ -57,7 +56,7 @@ UInt8 DataHandler::GetModIndex(const char *modName)
 	return 0xFF;
 }
 
-const char* DataHandler::GetNthModName(UInt32 modIndex)
+const char* TESDataHandler::GetNthModName(UInt32 modIndex)
 {
 	const ModInfo** activeModList = GetActiveModList();
 	if (modIndex < GetActiveModCount() && activeModList[modIndex])
@@ -73,7 +72,7 @@ struct IsModLoaded
 	}
 };
 
-UInt8 DataHandler::GetActiveModCount() const
+UInt8 TESDataHandler::GetActiveModCount() const
 {
 	return modList.modInfoList.Count();
 }

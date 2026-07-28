@@ -595,13 +595,13 @@ struct NVSEScriptInterface
 	//   Script* script = g_scriptInterface->CompileScript(R"(Begin Function{ }
 	//		PlaceAtMe Explosion
 	//	 end)");
-	//   g_scriptInterface->CallFunctionAlt(script, *g_thePlayer, 0);
+	//   g_scriptInterface->CallFunctionAlt(script, *PlayerCharacter::GetSingleton(), 0);
 	Script* (*CompileScript)(const char* scriptText);
 
 	// Compile one line* script that returns a result utilizing the NVSE expression evaluator
 	// Example:
 	//   Script* condition = g_scriptInterface->CompileExpression("GetAV Health > 10");
-	//   g_scriptInterface->CallFunction(condition, *g_thePlayer, nullptr, &result, 0);
+	//   g_scriptInterface->CallFunction(condition, *PlayerCharacter::GetSingleton(), nullptr, &result, 0);
 	//   if (!result.GetNumber()) return;
 	// Script can then be passed to CallFunction which will set the passed Element* result with the result of the script function call
 	//

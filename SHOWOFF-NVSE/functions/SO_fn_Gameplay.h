@@ -84,7 +84,7 @@ DEFINE_CMD_COND_PLUGIN(GetPCHasSleepWaitOverride, "Returns whether or not the pl
 	false, nullptr);
 bool Cmd_GetPCHasSleepWaitOverride_Eval(COMMAND_ARGS_EVAL)
 {
-	*result = !g_thePlayer->canSleepWait;
+	*result = !PlayerCharacter::GetSingleton()->canSleepWait;
 	return true;
 }
 bool Cmd_GetPCHasSleepWaitOverride_Execute(COMMAND_ARGS)
@@ -100,7 +100,7 @@ bool Cmd_SetPCHasSleepWaitOverride_Execute(COMMAND_ARGS)
 	UInt32 bOn;
 	if (ExtractArgs(EXTRACT_ARGS, &bOn))
 	{
-		g_thePlayer->canSleepWait = !bOn;
+		PlayerCharacter::GetSingleton()->canSleepWait = !bOn;
 	}
 	return true;
 }
@@ -234,12 +234,12 @@ bool Cmd_GetChallengeProgress_Eval(COMMAND_ARGS_EVAL)
 
 bool Cmd_GetPCHasScriptedFastTravelOverride_Eval(COMMAND_ARGS_EVAL)
 {
-	*result = (g_thePlayer->byte66D & 1) == 0;
+	*result = (PlayerCharacter::GetSingleton()->byte66D & 1) == 0;
 	return true;
 }
 bool Cmd_GetPCHasScriptedFastTravelOverride_Execute(COMMAND_ARGS)
 {
-	*result = (g_thePlayer->byte66D & 1) == 0;
+	*result = (PlayerCharacter::GetSingleton()->byte66D & 1) == 0;
 	return true;
 }
 
@@ -248,8 +248,8 @@ bool Cmd_GetPCCanFastTravel_Eval(COMMAND_ARGS_EVAL)
 	// Credits to Jazz for the "silence QueueUIMessage" trick (see AddNoteNS).
 	SafeWrite8((UInt32)QueueUIMessage, 0xC3);	// RETN
 	const auto canFastTravelAddr = GetRelJumpAddr(0x798026); // call the function indirectly for compatibility with Stewie tweaks, kudos to Stewie.
-	*result = ThisStdCall<bool>(canFastTravelAddr, g_thePlayer);
-	//*result = ThisStdCall<bool>((UInt32)0x93D660, g_thePlayer);
+	*result = ThisStdCall<bool>(canFastTravelAddr, PlayerCharacter::GetSingleton());
+	//*result = ThisStdCall<bool>((UInt32)0x93D660, PlayerCharacter::GetSingleton());
 	SafeWrite8((UInt32)QueueUIMessage, 0x55);	// PUSH EBP
 	return true;
 }
@@ -405,7 +405,7 @@ bool Cmd_GetCalculatedSkillPoints_Eval(COMMAND_ARGS_EVAL)
 	UInt32 levelOverride = 0;
 	if (arg1) levelOverride = (UInt32)arg1;
 
-	const auto avOwner = &g_thePlayer->avOwner;
+	const auto avOwner = &PlayerCharacter::GetSingleton()->avOwner;
 	auto level = levelOverride ? levelOverride : avOwner->GetLevel();
 	level += LevelUpMenu::GetSingleton() ? 0 : 1;  // Add +1 level to accurately predict the outcome for the next level up, if not in levelup menu.
 	auto intelligence = avOwner->GetNormalizedPermanentAV(kAVCode_Intelligence);
@@ -413,7 +413,7 @@ bool Cmd_GetCalculatedSkillPoints_Eval(COMMAND_ARGS_EVAL)
 
 	auto const calculateSkillPointsAddr = GetRelJumpAddr(0x648BF0); // get the function address indirectly for compatibility with lStewieAl's tweaks (see patchCustomSkillPointFormula())
 	float skillPoints = CdeclCall<int>(calculateSkillPointsAddr, intelligence, level);
-	ApplyPerkModifiers(kPerkEntry_AdjustGainedSkillPoints, g_thePlayer, &skillPoints);
+	ApplyPerkModifiers(kPerkEntry_AdjustGainedSkillPoints, PlayerCharacter::GetSingleton(), &skillPoints);
 	*result = skillPoints;
 	return true;
 }
@@ -464,7 +464,7 @@ bool Cmd_GetCalculatedPerkPoints_Eval(COMMAND_ARGS_EVAL)
 	UInt32 levelOverride = 0;
 	if (arg1) levelOverride = (UInt32)arg1;
 
-	const auto avOwner = &g_thePlayer->avOwner;
+	const auto avOwner = &PlayerCharacter::GetSingleton()->avOwner;
 	auto level = levelOverride ? levelOverride : avOwner->GetLevel();
 	level += LevelUpMenu::GetSingleton() ? 0 : 1;  // Add +1 level to accurately predict the outcome for the next level up, if not in levelup menu.
 	auto const gs_iLevelsPerPerk = GetIntGameSetting(0x11CD074);
@@ -517,7 +517,7 @@ bool Cmd_SetLevelUpMenuCurrentPage_Execute(COMMAND_ARGS)
 class AcceptPerkIfPlayerCanPick
 {
 public:
-	bool Accept(BGSPerk* item) { return item->GetActorCanPickPerk(g_thePlayer); }
+	bool Accept(BGSPerk* item) { return item->GetActorCanPickPerk(PlayerCharacter::GetSingleton()); }
 };
 
 bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
@@ -886,7 +886,7 @@ bool Cmd_GetNoEquipShowOff_Execute(COMMAND_ARGS)
 bool Cmd_SetOwnershipTemp_Execute(COMMAND_ARGS)
 {
 	*result = false; //bSuccess
-	TESForm* newOwner = g_thePlayer->baseForm;
+	TESForm* newOwner = PlayerCharacter::GetSingleton()->baseForm;
 	TESForm* baseForm = nullptr;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &newOwner, &baseForm) || !newOwner)
 		return true;
@@ -928,14 +928,14 @@ bool Cmd_GetCalculatedAPCost_Execute(COMMAND_ARGS)
 	if (GetIsGodMode())
 		return true; //every action is 0 AP.
 
-	thisObj = g_thePlayer;
+	thisObj = PlayerCharacter::GetSingleton();
 	if (!weapon)
 	{
 		weapon = ((Actor*)thisObj)->GetEquippedWeapon();
 		// Keep as nullptr if it's the fists to properly handle default unarmed AP costs.
 		// g_fistsWeapon's AP cost is never used, being replaced by fActionPointsAttackUnarmed 
 	}
-	else if (weapon == g_fistsWeapon)
+	else if (weapon == TESDataHandler::GetDefaultWeapon())
 		weapon = nullptr;
 
 	if (mode == GetDefaultAttackCost)
@@ -1095,7 +1095,7 @@ bool Cmd_GetVATSTargetable_Eval(COMMAND_ARGS_EVAL)
 			if (thisObj->IsProjectile())
 			{
 				auto* proj = static_cast<Projectile*>(thisObj);
-				if (proj->sourceRef == g_thePlayer)
+				if (proj->sourceRef == PlayerCharacter::GetSingleton())
 					return true;
 				if (proj->sourceWeap)
 				{
@@ -1144,7 +1144,7 @@ namespace SetShouldShowSleepWaitOverrideMessage
 		float time,
 		char instantEndCurrentMessage)
 	{
-		if (g_thePlayer->parentCell->GetCantWait())
+		if (PlayerCharacter::GetSingleton()->parentCell->GetCantWait())
 		{
 			// Our sleep wait override shouldn't prevent this message from being displayed.
 			CdeclCall(m_storedFuncAddr, msg, emotion, imagePath, soundName, time, instantEndCurrentMessage);
@@ -1386,12 +1386,12 @@ DEFINE_CMD_COND_PLUGIN(GetPCCanSleepWait, "", false, NULL);
 bool Cmd_GetPCCanSleepWait_Eval(COMMAND_ARGS_EVAL)
 {
 	//todo: verify if it works with script overrides and stewie features.
-	*result = g_thePlayer->canSleepWait;
+	*result = PlayerCharacter::GetSingleton()->canSleepWait;
 	return true;
 }
 bool Cmd_GetPCCanSleepWait_Execute(COMMAND_ARGS)
 {
-	*result = g_thePlayer->canSleepWait;
+	*result = PlayerCharacter::GetSingleton()->canSleepWait;
 	return true;
 }
 
@@ -1485,7 +1485,7 @@ DEFINE_COMMAND_PLUGIN(GetProjectileRefFlag, "", false, NULL);
 bool Cmd_GetProjectileRefFlag_Execute(COMMAND_ARGS)
 {
 	GrenadeProjectile* projectile = (GrenadeProjectile*)thisObj;
-	//if (!(projectile->projFlags & 0x200) && (projectile->sourceRef != g_thePlayer) && ((((BGSProjectile*)thisObj->baseForm)->projFlags & 0x426) == 0x26))
+	//if (!(projectile->projFlags & 0x200) && (projectile->sourceRef != PlayerCharacter::GetSingleton()) && ((((BGSProjectile*)thisObj->baseForm)->projFlags & 0x426) == 0x26))
 	//if (!(projectile->projFlags & 0x200) && ((((BGSProjectile*)thisObj->baseForm)->projFlags & 0x426) == 0x26))
 	//if (!(projectile->projFlags & 0x200))
 	*result = ((Projectile*)thisObj)->projFlags;
@@ -1550,7 +1550,7 @@ bool Cmd_SetNoEquip_Execute(COMMAND_ARGS)
 DEFINE_COMMAND_PLUGIN(GetFastTravelFlags, , 0, 0, NULL);
 bool Cmd_GetFastTravelFlags_Execute(COMMAND_ARGS)
 {
-	*result = (g_thePlayer->byte66D & 1) != 0;
+	*result = (PlayerCharacter::GetSingleton()->byte66D & 1) != 0;
 	return true;
 }
 */

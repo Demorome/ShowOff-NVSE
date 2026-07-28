@@ -174,25 +174,25 @@ bool Cmd_MessageExAltShowoff_Execute(COMMAND_ARGS)
 // Inspired by JIP's "ClearMessageQueue"
 bool Cmd_IsCornerMessageDisplayed_Execute(COMMAND_ARGS)
 {
-	*result = !g_HUDMainMenu->queuedMessages.Empty();
-	//*result = (bool)g_HUDMainMenu->currMsgKey;
+	*result = !HUDMainMenu::GetSingleton()->queuedMessages.Empty();
+	//*result = (bool)HUDMainMenu::GetSingleton()->currMsgKey;
 	//another way to check. Seems to be a bit slower to update when initially adding a message to the queue.
 	return true;
 }
 bool Cmd_IsCornerMessageDisplayed_Eval(COMMAND_ARGS_EVAL)
 {
-	*result = !g_HUDMainMenu->queuedMessages.Empty();
+	*result = !HUDMainMenu::GetSingleton()->queuedMessages.Empty();
 	return true;
 }
 
 bool Cmd_GetNumQueuedCornerMessages_Execute(COMMAND_ARGS)
 {
-	*result = g_HUDMainMenu->queuedMessages.Count();
+	*result = HUDMainMenu::GetSingleton()->queuedMessages.Count();
 	return true;
 }
 bool Cmd_GetNumQueuedCornerMessages_Eval(COMMAND_ARGS_EVAL)
 {
-	*result = g_HUDMainMenu->queuedMessages.Count();
+	*result = HUDMainMenu::GetSingleton()->queuedMessages.Count();
 	return true;
 }
 
@@ -260,57 +260,57 @@ bool Cmd_SetRadiationExtraData_Execute(COMMAND_ARGS)
 
 bool Cmd_PlayerHasNightVisionActive_Execute(COMMAND_ARGS)
 {
-	*result = g_thePlayer->hasNightVisionApplied;
+	*result = PlayerCharacter::GetSingleton()->hasNightVisionApplied;
 	return true;
 }
 bool Cmd_PlayerHasNightVisionActive_Eval(COMMAND_ARGS_EVAL)
 {
-	*result = g_thePlayer->hasNightVisionApplied;
+	*result = PlayerCharacter::GetSingleton()->hasNightVisionApplied;
 	return true;
 }
 
 
 bool Cmd_PlayerIsUsingTurbo_Execute(COMMAND_ARGS)
 {
-	*result = g_thePlayer->isUsingTurbo;
+	*result = PlayerCharacter::GetSingleton()->isUsingTurbo;
 	return true;
 }
 bool Cmd_PlayerIsUsingTurbo_Eval(COMMAND_ARGS_EVAL)
 {
-	*result = g_thePlayer->isUsingTurbo;
+	*result = PlayerCharacter::GetSingleton()->isUsingTurbo;
 	return true;
 }
 
 bool Cmd_PlayerHasCateyeEnabled_Execute(COMMAND_ARGS)
 {
-	*result = g_thePlayer->isCateyeEnabled;
+	*result = PlayerCharacter::GetSingleton()->isCateyeEnabled;
 	return true;
 }
 bool Cmd_PlayerHasCateyeEnabled_Eval(COMMAND_ARGS_EVAL)
 {
-	*result = g_thePlayer->isCateyeEnabled;
+	*result = PlayerCharacter::GetSingleton()->isCateyeEnabled;
 	return true;
 }
 
 bool Cmd_PlayerHasImprovedSpottingActive_Execute(COMMAND_ARGS)
 {
-	*result = g_thePlayer->isSpottingImprovedActive;
+	*result = PlayerCharacter::GetSingleton()->isSpottingImprovedActive;
 	return true;
 }
 bool Cmd_PlayerHasImprovedSpottingActive_Eval(COMMAND_ARGS_EVAL)
 {
-	*result = g_thePlayer->isSpottingImprovedActive;
+	*result = PlayerCharacter::GetSingleton()->isSpottingImprovedActive;
 	return true;
 }
 
 bool Cmd_PlayerIsDrinkingPlacedWater_Execute(COMMAND_ARGS)
 {
-	*result = g_thePlayer->isDrinkingPlacedWater;
+	*result = PlayerCharacter::GetSingleton()->isDrinkingPlacedWater;
 	return true;
 }
 bool Cmd_PlayerIsDrinkingPlacedWater_Eval(COMMAND_ARGS_EVAL)
 {
-	*result = g_thePlayer->isDrinkingPlacedWater;
+	*result = PlayerCharacter::GetSingleton()->isDrinkingPlacedWater;
 	return true;
 }
 
@@ -318,7 +318,7 @@ bool Cmd_SetIsPCAMurderer_Execute(COMMAND_ARGS)
 {
 	UInt32 bIsMurderer = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bIsMurderer)) return true;
-	g_thePlayer->bIsAMurderer = (bIsMurderer != 0);
+	PlayerCharacter::GetSingleton()->bIsAMurderer = (bIsMurderer != 0);
 	return true;
 }
 
@@ -327,7 +327,7 @@ bool Cmd_IsNight_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
 	TESClimate* climate = (TESClimate*)arg1;
-	Sky* sky = *g_currentSky;
+	Sky* sky = Sky::GetSingleton();
 	float const gameHour = ThisStdCall<double>(0x966A20, sky);
 	float sunrise, sunset;
 	if (climate && IS_TYPE(climate, TESClimate))
@@ -1418,10 +1418,10 @@ bool Cmd_GetQueuedCornerMessages_Execute(COMMAND_ARGS)
 {
 	NVSEArrayVar* msgArr = g_arrInterface->CreateArray(NULL, 0, scriptObj);
 
-	for (UINT32 iIndex = g_HUDMainMenu->queuedMessages.Count() + 1; ; --iIndex)
+	for (UINT32 iIndex = HUDMainMenu::GetSingleton()->queuedMessages.Count() + 1; ; --iIndex)
 	{
 		if (iIndex == 0) break;
-		g_HUDMainMenu->queuedMessages.GetNthItem(iIndex);
+		HUDMainMenu::GetSingleton()->queuedMessages.GetNthItem(iIndex);
 		//no idea what to do with this :snig:
 	}
 

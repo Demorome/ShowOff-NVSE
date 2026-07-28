@@ -89,7 +89,7 @@ bool Cmd_RefillPlayerAmmo_Execute(COMMAND_ARGS)
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &count))
 		return true;
 
-	const auto weapInfo = g_thePlayer->baseProcess->GetWeaponInfo();
+	const auto weapInfo = PlayerCharacter::GetSingleton()->baseProcess->GetWeaponInfo();
 	if (!weapInfo)
 		return true;
 	const auto weap = static_cast<TESObjectWEAP*>(weapInfo->type);
@@ -104,18 +104,18 @@ bool Cmd_RefillPlayerAmmo_Execute(COMMAND_ARGS)
 	}
 
 	const auto hasExtendedClip = weapInfo->HasWeaponMod(TESObjectWEAP::kWeaponModEffect_IncreaseClipCapacity);
-	if (const auto ammoInfo = g_thePlayer->baseProcess->GetAmmoInfo())
+	if (const auto ammoInfo = PlayerCharacter::GetSingleton()->baseProcess->GetAmmoInfo())
 	{
-		g_thePlayer->AddItem(ammoInfo->type, nullptr, count);
+		PlayerCharacter::GetSingleton()->AddItem(ammoInfo->type, nullptr, count);
 		auto const clipMax = ThisStdCall<SInt32>(0x4FE160, weap, hasExtendedClip);
 		auto const numLeftToAdd = clipMax - ammoInfo->countDelta;
 		ammoInfo->countDelta += std::min(numLeftToAdd, count);
 	}
 	else if (const auto defaultAmmo = ThisStdCall<TESAmmo*>(0x474920, &weap->ammo))
 	{
-		g_thePlayer->AddItem(defaultAmmo, nullptr, count);
+		PlayerCharacter::GetSingleton()->AddItem(defaultAmmo, nullptr, count);
 		// player was fully out of ammo; reload the weapon.
-		g_thePlayer->Reload2(weap, 2, hasExtendedClip, false); // 0x95D3F0
+		PlayerCharacter::GetSingleton()->Reload2(weap, 2, hasExtendedClip, false); // 0x95D3F0
 	}
 	else
 	{
@@ -134,7 +134,7 @@ bool Cmd_KillAllHostiles_Execute(COMMAND_ARGS)
 	Actor* killer = nullptr;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &killer))
 		return true;
-	ProcessManager* procMngr = ProcessManager::GetSingleton();
+	ProcessLists* procMngr = ProcessLists::GetSingleton();
 	MobileObject** objArray = procMngr->objects.data, ** arrEnd = objArray;
 	objArray += procMngr->beginOffsets[0];
 	arrEnd += procMngr->endOffsets[0];
@@ -143,8 +143,8 @@ bool Cmd_KillAllHostiles_Execute(COMMAND_ARGS)
 		auto actor = static_cast<Actor*>(*objArray);
 		if (actor && IS_ACTOR(actor))
 		{
-			if (actor->IsInCombatWith(g_thePlayer)
-				|| actor->GetShouldAttack(g_thePlayer))
+			if (actor->IsInCombatWith(PlayerCharacter::GetSingleton())
+				|| actor->GetShouldAttack(PlayerCharacter::GetSingleton()))
 			{
 				actor->Kill(killer);
 			}
@@ -177,14 +177,14 @@ bool Cmd_SetFlyCamera_Execute(COMMAND_ARGS)
 
 	Modes mode;
 	/*
-	double pos[3] = { g_thePlayer->posX, g_thePlayer->posY,
-		g_thePlayer->posZ + (g_thePlayer->GetScaledHeight() * g_thePlayer->eyeHeight) };
-	double rot[2] = { g_thePlayer->rotZ, g_thePlayer->rotX };
+	double pos[3] = { PlayerCharacter::GetSingleton()->posX, PlayerCharacter::GetSingleton()->posY,
+		PlayerCharacter::GetSingleton()->posZ + (PlayerCharacter::GetSingleton()->GetScaledHeight() * PlayerCharacter::GetSingleton()->eyeHeight) };
+	double rot[2] = { PlayerCharacter::GetSingleton()->rotZ, PlayerCharacter::GetSingleton()->rotX };
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &mode, &pos, &rot))
 		return true;
 	*/
 
-	//g_thePlayer->cam
+	//PlayerCharacter::GetSingleton()->cam
 
 	return true;
 }
@@ -225,7 +225,7 @@ bool Cmd_Debug_DispatchEvent_Execute(COMMAND_ARGS)
 		EXTRACT_ALL_ARGS_EXP(Debug_DispatchEvent, eval, std::tie(num1, num2, arr, str, anyForm, reference, baseForm),
 			g_NoArgs);
 		void* num2Formatted = *(void**)&num2;
-		g_eventInterface->DispatchEvent("ShowOff:DebugEvent", g_thePlayer, num1, num2Formatted, arr, str, anyForm, reference, baseForm);
+		g_eventInterface->DispatchEvent("ShowOff:DebugEvent", PlayerCharacter::GetSingleton(), num1, num2Formatted, arr, str, anyForm, reference, baseForm);
 		*result = true;
 	}
 	return true;
