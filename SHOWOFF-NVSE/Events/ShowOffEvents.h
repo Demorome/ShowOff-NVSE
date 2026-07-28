@@ -291,7 +291,7 @@ namespace OnPreActivate
 			if (PlayerCharacter::GetSingleton()->is3rdPersonVisible != PlayerCharacter::GetSingleton()->bThirdPerson)
 				return false; // sneakily patches NVSE's OnActivate to not run in this instance
 
-			if (PlayerCharacter::GetSingleton()->GetIsChildSize(0) && StdCall<bool>(0x8859E0, activated)) // TESObjectREFR::CanChildUse
+			if (PlayerCharacter::GetSingleton()->GetIsChildSize(0) && ThisCall<bool>(0x8859E0, PlayerCharacter::GetSingleton(), activated)) // Actor::CanChildUseObject
 				return true; // whatever, let NVSE's OnActivate run here, as a treat
 
 			if (activated->IsDestroyed() && !activated->IsActor())
