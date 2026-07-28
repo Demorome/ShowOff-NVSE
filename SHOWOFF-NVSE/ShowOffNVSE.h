@@ -59,7 +59,6 @@ extern ActorValueOwner* g_playerAVOwner;
 extern ProcessManager* g_processManager;
 extern InterfaceManager* g_interfaceManager;
 extern BSAudioManager* g_audioManager;
-extern Sky** g_currentSky;
 extern TESObjectWEAP* g_fistsWeapon;
 extern BGSSaveLoadGame* g_BGSSaveLoadGame;
 

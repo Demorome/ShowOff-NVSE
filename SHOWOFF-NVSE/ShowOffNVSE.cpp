@@ -117,7 +117,6 @@ ActorValueOwner* g_playerAVOwner = nullptr;
 ProcessManager* g_processManager = nullptr;
 InterfaceManager* g_interfaceManager = nullptr;
 BSAudioManager* g_audioManager = nullptr;
-Sky** g_currentSky = nullptr;
 RefID g_xMarkerFormID = 0x3B;
 TESObjectWEAP* g_fistsWeapon = nullptr;
 TimeGlobal* g_timeGlobal = nullptr;
@@ -249,7 +248,6 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		g_playerAVOwner = &PlayerCharacter::GetSingleton()->avOwner;
 		g_processManager = (ProcessManager*)0x11E0E80;
 		g_audioManager = (BSAudioManager*)0x11F6EF0;
-		g_currentSky = (Sky**)0x11DEA20;
 		g_HUDMainMenu = *(HUDMainMenu**)0x11D96C0;  
 		g_interfaceManager = *(InterfaceManager**)0x11D8A80; 
 		g_tileMenuArray = *(TileMenu***)0x11F350C; 

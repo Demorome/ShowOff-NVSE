@@ -327,7 +327,7 @@ bool Cmd_IsNight_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
 	TESClimate* climate = (TESClimate*)arg1;
-	Sky* sky = *g_currentSky;
+	Sky* sky = Sky::GetSingleton();
 	float const gameHour = ThisStdCall<double>(0x966A20, sky);
 	float sunrise, sunset;
 	if (climate && IS_TYPE(climate, TESClimate))
