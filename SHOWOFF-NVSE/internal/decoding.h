@@ -1191,6 +1191,10 @@ public:
 	tList<UInt32>					list264;		// 264
 	tList<UInt32>					list26C;		// 26C
 	float							flt274;			// 274
+
+	static HUDMainMenu* GetSingleton() {
+		return *reinterpret_cast<HUDMainMenu**>(0x11D96C0);
+	}
 };
 STATIC_ASSERT(sizeof(HUDMainMenu) == 0x278);
 
