@@ -883,7 +883,7 @@ bool Cmd_GetSelectedItemRefSO_Execute(COMMAND_ARGS)
 		return true;
 	TESForm* itemRef = nullptr;
 	if (!menuID)
-		menuID = g_interfaceManager->GetTopVisibleMenuID();
+		menuID = InterfaceManager::GetSingleton()->GetTopVisibleMenuID();
 	switch (menuID)
 	{
 	case kMenuType_Inventory:
