@@ -55,8 +55,6 @@ extern DWORD g_mainThreadID;
 // Singletons
 extern HUDMainMenu* g_HUDMainMenu;
 extern TileMenu** g_tileMenuArray;
-extern UInt32 g_screenWidth;
-extern UInt32 g_screenHeight;
 extern ActorValueOwner* g_playerAVOwner;
 extern ProcessManager* g_processManager;
 extern InterfaceManager* g_interfaceManager;

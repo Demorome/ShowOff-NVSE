@@ -113,8 +113,6 @@ DWORD g_mainThreadID = 0;
 // Singletons
 HUDMainMenu* g_HUDMainMenu = nullptr;
 TileMenu** g_tileMenuArray = nullptr;
-UInt32 g_screenWidth = 0;
-UInt32 g_screenHeight = 0;
 ActorValueOwner* g_playerAVOwner = nullptr;
 ProcessManager* g_processManager = nullptr;
 InterfaceManager* g_interfaceManager = nullptr;
@@ -255,8 +253,6 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		g_HUDMainMenu = *(HUDMainMenu**)0x11D96C0;  
 		g_interfaceManager = *(InterfaceManager**)0x11D8A80; 
 		g_tileMenuArray = *(TileMenu***)0x11F350C; 
-		g_screenWidth = *(UInt32*)0x11C73E0;
-		g_screenHeight = *(UInt32*)0x11C7190;
 		g_fistsWeapon = *(TESObjectWEAP**)0x11CA278;
 		g_BGSSaveLoadGame = *(BGSSaveLoadGame**)0x11DDF38;
 
