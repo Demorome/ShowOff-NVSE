@@ -55,7 +55,6 @@ extern DWORD g_mainThreadID;
 // Singletons
 extern HUDMainMenu* g_HUDMainMenu;
 extern ActorValueOwner* g_playerAVOwner;
-extern BSAudioManager* g_audioManager;
 extern TESObjectWEAP* g_fistsWeapon;
 extern BGSSaveLoadGame* g_BGSSaveLoadGame;
 

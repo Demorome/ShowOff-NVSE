@@ -113,7 +113,6 @@ DWORD g_mainThreadID = 0;
 // Singletons
 HUDMainMenu* g_HUDMainMenu = nullptr;
 ActorValueOwner* g_playerAVOwner = nullptr;
-BSAudioManager* g_audioManager = nullptr;
 RefID g_xMarkerFormID = 0x3B;
 TESObjectWEAP* g_fistsWeapon = nullptr;
 TimeGlobal* g_timeGlobal = nullptr;
@@ -243,7 +242,6 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 	case NVSEMessagingInterface::kMessage_DeferredInit:
 		// From JiP's patches_game.h
 		g_playerAVOwner = &PlayerCharacter::GetSingleton()->avOwner;
-		g_audioManager = (BSAudioManager*)0x11F6EF0;
 		g_HUDMainMenu = *(HUDMainMenu**)0x11D96C0;  
 		g_fistsWeapon = *(TESObjectWEAP**)0x11CA278;
 		g_BGSSaveLoadGame = *(BGSSaveLoadGame**)0x11DDF38;
