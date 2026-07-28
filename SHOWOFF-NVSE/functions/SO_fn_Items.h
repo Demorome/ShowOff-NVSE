@@ -242,7 +242,7 @@ bool Cmd_RemoveAllItemsShowOff_Execute(COMMAND_ARGS)
 	}
 
 	// Wrap up
-	ThisStdCall<void>(0x952C30, g_thePlayer, thisObj); // ComputeShouldRecalculateQuestTargets()
+	ThisStdCall<void>(0x952C30, PlayerCharacter::GetSingleton(), thisObj); // ComputeShouldRecalculateQuestTargets()
 	*result = 1; //function worked as expected.
 	return true;
 }
@@ -308,7 +308,7 @@ bool Cmd_GetBaseEquippedWeight_Execute(COMMAND_ARGS)
 float __fastcall GetCalculatedEquippedWeight_Call(TESObjectREFR* const thisObj, UInt32 const flags, float const minWeight)
 {
 	float totalWeight = 0;  //return val.
-	bool isHardcore = g_thePlayer->isHardcore;
+	bool isHardcore = PlayerCharacter::GetSingleton()->isHardcore;
 	if (!thisObj || !((Actor*)thisObj)->baseProcess) return 0.0F;
 	auto eqItems = GetEquippedItems(thisObj, flags);
 	for (auto const& iter : eqItems)
@@ -327,7 +327,7 @@ float __fastcall GetCalculatedEquippedWeight_Call(TESObjectREFR* const thisObj, 
 				itemWeight = ThisStdCall<double>(0x4BE380, (TESObjectWEAP*)item, hasDecreaseWeightMod);  //GetWeaponModdedWeight
 				if (itemWeight >= 10.0) {
 					float heavyWeaponWeightMult = 1.0;
-					ApplyPerkModifiers(kPerkEntry_AdjustHeavyWeaponWeight, (Actor*)g_thePlayer, &heavyWeaponWeightMult);
+					ApplyPerkModifiers(kPerkEntry_AdjustHeavyWeaponWeight, (Actor*)PlayerCharacter::GetSingleton(), &heavyWeaponWeightMult);
 					itemWeight = itemWeight * heavyWeaponWeightMult;
 				}
 			}
@@ -891,7 +891,7 @@ bool Cmd_GetSelectedItemRefSO_Execute(COMMAND_ARGS)
 		if (auto const invMenu = InventoryMenu::Get())
 		{
 			if (invMenu->itemList.selected)
-				itemRef = CreateRefForStackWithoutCopy(g_thePlayer, InventoryMenu::Selection());
+				itemRef = CreateRefForStackWithoutCopy(PlayerCharacter::GetSingleton(), InventoryMenu::Selection());
 		}
 		break;
 	}
@@ -900,7 +900,7 @@ bool Cmd_GetSelectedItemRefSO_Execute(COMMAND_ARGS)
 		if (auto const cntMenu = ContainerMenu::GetSingleton())
 		{
 			if (cntMenu->leftItems.selected || cntMenu->rightItems.selected)
-				itemRef = CreateRefForStackWithoutCopy(cntMenu->leftItems.selected ? g_thePlayer : cntMenu->containerRef, ContainerMenu::GetSelection());
+				itemRef = CreateRefForStackWithoutCopy(cntMenu->leftItems.selected ? PlayerCharacter::GetSingleton() : cntMenu->containerRef, ContainerMenu::GetSelection());
 		}
 		break;
 	}
@@ -909,7 +909,7 @@ bool Cmd_GetSelectedItemRefSO_Execute(COMMAND_ARGS)
 		if (auto const rprMenu = RepairMenu::Get())
 		{
 			if (rprMenu->repairItems.selected)
-				itemRef = CreateRefForStackWithoutCopy(g_thePlayer, rprMenu->repairItems.GetSelected());
+				itemRef = CreateRefForStackWithoutCopy(PlayerCharacter::GetSingleton(), rprMenu->repairItems.GetSelected());
 		}
 		break;
 	}
@@ -918,7 +918,7 @@ bool Cmd_GetSelectedItemRefSO_Execute(COMMAND_ARGS)
 		if (auto const brtMenu = BarterMenu::Get())
 		{
 			if (brtMenu->leftItems.selected || brtMenu->rightItems.selected)
-				itemRef = CreateRefForStackWithoutCopy(brtMenu->leftItems.selected ? g_thePlayer : brtMenu->merchantRef->GetMerchantContainer(), BarterMenu::Selection());
+				itemRef = CreateRefForStackWithoutCopy(brtMenu->leftItems.selected ? PlayerCharacter::GetSingleton() : brtMenu->merchantRef->GetMerchantContainer(), BarterMenu::Selection());
 		}
 		break;
 	}
@@ -927,7 +927,7 @@ bool Cmd_GetSelectedItemRefSO_Execute(COMMAND_ARGS)
 		if (auto const rpsMenu = RepairServicesMenu::Get())
 		{
 			if (rpsMenu->itemList.selected)
-				itemRef = CreateRefForStackWithoutCopy(g_thePlayer, rpsMenu->itemList.GetSelected());
+				itemRef = CreateRefForStackWithoutCopy(PlayerCharacter::GetSingleton(), rpsMenu->itemList.GetSelected());
 		}
 		break;
 	}
@@ -936,7 +936,7 @@ bool Cmd_GetSelectedItemRefSO_Execute(COMMAND_ARGS)
 		if (auto const modMenu = ItemModMenu::Get())
 		{
 			if (modMenu->itemModList.selected)
-				itemRef = CreateRefForStackWithoutCopy(g_thePlayer, modMenu->itemModList.GetSelected());
+				itemRef = CreateRefForStackWithoutCopy(PlayerCharacter::GetSingleton(), modMenu->itemModList.GetSelected());
 		}
 		break;
 	}
@@ -983,7 +983,7 @@ bool Cmd_GetCalculatedItemWeight_Eval(COMMAND_ARGS_EVAL)
 				//Via supreme jank, call GetInventoryWeight.
 				//Has to be done, since there is no other function that can return the modified weight,
 				//and writing a new one could get invalidated by hooks/changes from other plugins.
-				auto itemWeight = ThisStdCall<double>(0x4D0900, contChangesData, g_thePlayer->isHardcore);
+				auto itemWeight = ThisStdCall<double>(0x4D0900, contChangesData, PlayerCharacter::GetSingleton()->isHardcore);
 
 				// Undo previous code change.
 				ReplaceCall(0x4D09CB, 0x8256D0);
@@ -998,7 +998,7 @@ bool Cmd_GetCalculatedItemWeight_Eval(COMMAND_ARGS_EVAL)
 	}
 	else if (auto const baseItem = (TESForm*)arg1)
 	{
-		*result = baseItem->GetModifiedWeight(g_thePlayer->isHardcore);
+		*result = baseItem->GetModifiedWeight(PlayerCharacter::GetSingleton()->isHardcore);
 	}
 
 	return true;

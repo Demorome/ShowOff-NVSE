@@ -27,7 +27,7 @@ bool Cmd_AuxTimerStart_Execute(COMMAND_ARGS)
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &timeToCountdown, &flags, &form))
 	{
 		if (!thisObj)
-			thisObj = g_thePlayer;
+			thisObj = PlayerCharacter::GetSingleton();
 
 		AuxTimerMapInfo const varInfo(form, thisObj, scriptObj, varName);
 		if (varInfo.ownerID)
@@ -119,7 +119,7 @@ bool Cmd_AuxTimerStop_Execute(COMMAND_ARGS)
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &fireEvent, &form))
 	{
 		if (!thisObj)
-			thisObj = g_thePlayer;
+			thisObj = PlayerCharacter::GetSingleton();
 		AuxTimerMapInfo const varInfo(form, thisObj, scriptObj, varName);
 		if (varInfo.ownerID)
 		{
@@ -188,7 +188,7 @@ bool Cmd_AuxTimerPaused_Execute(COMMAND_ARGS)
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &setPaused, &form))
 	{
 		if (!thisObj)
-			thisObj = g_thePlayer;
+			thisObj = PlayerCharacter::GetSingleton();
 		AuxTimerMapInfo const varInfo(form, thisObj, scriptObj, varName);
 		if (varInfo.ownerID)
 		{
@@ -234,7 +234,7 @@ bool Cmd_AuxTimerTimeElapsed_Execute(COMMAND_ARGS)
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &unused, &form))
 	{
 		if (!thisObj)
-			thisObj = g_thePlayer;
+			thisObj = PlayerCharacter::GetSingleton();
 		AuxTimerMapInfo const varInfo(form, thisObj, scriptObj, varName);
 		if (varInfo.ownerID)
 		{
@@ -259,7 +259,7 @@ bool Cmd_AuxTimerTimeToCountdown_Execute(COMMAND_ARGS)
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &form))
 	{
 		if (!thisObj)
-			thisObj = g_thePlayer;
+			thisObj = PlayerCharacter::GetSingleton();
 		AuxTimerMapInfo const varInfo(form, thisObj, scriptObj, varName);
 		if (varInfo.ownerID)
 		{
@@ -284,7 +284,7 @@ bool Cmd_AuxTimerTimeLeft_Execute(COMMAND_ARGS)
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &form))
 	{
 		if (!thisObj)
-			thisObj = g_thePlayer;
+			thisObj = PlayerCharacter::GetSingleton();
 		AuxTimerMapInfo const varInfo(form, thisObj, scriptObj, varName);
 		if (varInfo.ownerID)
 		{

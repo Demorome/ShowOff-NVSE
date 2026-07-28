@@ -141,7 +141,7 @@ namespace Radio
 	tList<TESObjectREFR>* GetFoundStations() { return (tList<TESObjectREFR>*)0x11DD59C; };
 	void GetNearbyStations(tList<TESObjectREFR>* dst)
 	{
-		CdeclCall(0x4FF1A0, g_thePlayer, dst, nullptr);
+		CdeclCall(0x4FF1A0, PlayerCharacter::GetSingleton(), dst, nullptr);
 	}
 
 	void SetActiveStation(TESObjectREFR* station)

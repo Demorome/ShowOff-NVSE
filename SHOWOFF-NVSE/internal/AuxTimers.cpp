@@ -56,7 +56,7 @@ namespace AuxTimer
 				static_cast<double>(g_timeGlobal->secondsPassed) 
 				* vatsTimeMult;
 				
-			double const secondsDeltaWithMultNoTurbo = (g_thePlayer->isUsingTurbo) 
+			double const secondsDeltaWithMultNoTurbo = (PlayerCharacter::GetSingleton()->isUsingTurbo) 
 				? (secondsDeltaWithMult / GetFltGameSetting(0x11D0FA8)) // gs_fTurboTimeMultiplier 
 				: secondsDeltaWithMult;
 

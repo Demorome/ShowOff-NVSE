@@ -115,7 +115,6 @@ HUDMainMenu* g_HUDMainMenu = nullptr;
 TileMenu** g_tileMenuArray = nullptr;
 UInt32 g_screenWidth = 0;
 UInt32 g_screenHeight = 0;
-PlayerCharacter* g_thePlayer = nullptr;
 ActorValueOwner* g_playerAVOwner = nullptr;
 ProcessManager* g_processManager = nullptr;
 InterfaceManager* g_interfaceManager = nullptr;
@@ -249,8 +248,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 
 	case NVSEMessagingInterface::kMessage_DeferredInit:
 		// From JiP's patches_game.h
-		g_thePlayer = PlayerCharacter::GetSingleton();
-		g_playerAVOwner = &g_thePlayer->avOwner;
+		g_playerAVOwner = &PlayerCharacter::GetSingleton()->avOwner;
 		g_processManager = (ProcessManager*)0x11E0E80;
 		g_audioManager = (BSAudioManager*)0x11F6EF0;
 		g_currentSky = (Sky**)0x11DEA20;

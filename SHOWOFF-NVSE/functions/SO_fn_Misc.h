@@ -260,57 +260,57 @@ bool Cmd_SetRadiationExtraData_Execute(COMMAND_ARGS)
 
 bool Cmd_PlayerHasNightVisionActive_Execute(COMMAND_ARGS)
 {
-	*result = g_thePlayer->hasNightVisionApplied;
+	*result = PlayerCharacter::GetSingleton()->hasNightVisionApplied;
 	return true;
 }
 bool Cmd_PlayerHasNightVisionActive_Eval(COMMAND_ARGS_EVAL)
 {
-	*result = g_thePlayer->hasNightVisionApplied;
+	*result = PlayerCharacter::GetSingleton()->hasNightVisionApplied;
 	return true;
 }
 
 
 bool Cmd_PlayerIsUsingTurbo_Execute(COMMAND_ARGS)
 {
-	*result = g_thePlayer->isUsingTurbo;
+	*result = PlayerCharacter::GetSingleton()->isUsingTurbo;
 	return true;
 }
 bool Cmd_PlayerIsUsingTurbo_Eval(COMMAND_ARGS_EVAL)
 {
-	*result = g_thePlayer->isUsingTurbo;
+	*result = PlayerCharacter::GetSingleton()->isUsingTurbo;
 	return true;
 }
 
 bool Cmd_PlayerHasCateyeEnabled_Execute(COMMAND_ARGS)
 {
-	*result = g_thePlayer->isCateyeEnabled;
+	*result = PlayerCharacter::GetSingleton()->isCateyeEnabled;
 	return true;
 }
 bool Cmd_PlayerHasCateyeEnabled_Eval(COMMAND_ARGS_EVAL)
 {
-	*result = g_thePlayer->isCateyeEnabled;
+	*result = PlayerCharacter::GetSingleton()->isCateyeEnabled;
 	return true;
 }
 
 bool Cmd_PlayerHasImprovedSpottingActive_Execute(COMMAND_ARGS)
 {
-	*result = g_thePlayer->isSpottingImprovedActive;
+	*result = PlayerCharacter::GetSingleton()->isSpottingImprovedActive;
 	return true;
 }
 bool Cmd_PlayerHasImprovedSpottingActive_Eval(COMMAND_ARGS_EVAL)
 {
-	*result = g_thePlayer->isSpottingImprovedActive;
+	*result = PlayerCharacter::GetSingleton()->isSpottingImprovedActive;
 	return true;
 }
 
 bool Cmd_PlayerIsDrinkingPlacedWater_Execute(COMMAND_ARGS)
 {
-	*result = g_thePlayer->isDrinkingPlacedWater;
+	*result = PlayerCharacter::GetSingleton()->isDrinkingPlacedWater;
 	return true;
 }
 bool Cmd_PlayerIsDrinkingPlacedWater_Eval(COMMAND_ARGS_EVAL)
 {
-	*result = g_thePlayer->isDrinkingPlacedWater;
+	*result = PlayerCharacter::GetSingleton()->isDrinkingPlacedWater;
 	return true;
 }
 
@@ -318,7 +318,7 @@ bool Cmd_SetIsPCAMurderer_Execute(COMMAND_ARGS)
 {
 	UInt32 bIsMurderer = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bIsMurderer)) return true;
-	g_thePlayer->bIsAMurderer = (bIsMurderer != 0);
+	PlayerCharacter::GetSingleton()->bIsAMurderer = (bIsMurderer != 0);
 	return true;
 }
 

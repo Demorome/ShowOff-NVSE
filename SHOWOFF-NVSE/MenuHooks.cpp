@@ -102,7 +102,7 @@ namespace LevelUpMenuHooks
 	UInt32 IsPlayerAtPerkLevel()
 	{
 		UInt32 iLevelsPerPerk = *(UInt32*)0x11CD078;
-		return (g_thePlayer->GetLevel() % iLevelsPerPerk) == 0;
+		return (PlayerCharacter::GetSingleton()->GetLevel() % iLevelsPerPerk) == 0;
 	}
 
 	// Taken from Tweaks.

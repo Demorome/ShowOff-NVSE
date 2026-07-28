@@ -76,7 +76,7 @@ namespace GameFixes
 					mov		g_isSleep, ecx
 					
 					// do regular code
-					mov     ecx, g_thePlayer
+					mov     ecx, dword ptr ds:[0x11DEA3C] // PlayerCharacter::pSingleton
 					jmp		retnAddr
 				}
 			}

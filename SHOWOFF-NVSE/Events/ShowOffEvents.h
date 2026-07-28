@@ -41,7 +41,7 @@ bool Cmd_SetOnAuxTimerStartHandler_Execute(COMMAND_ARGS)
 	if (!filters[0].form)
 	{
 		if (!thisObj)
-			thisObj = g_thePlayer;
+			thisObj = PlayerCharacter::GetSingleton();
 		filters[0].form = thisObj;
 	}
 
@@ -75,7 +75,7 @@ bool Cmd_SetOnAuxTimerStopHandler_Execute(COMMAND_ARGS)
 	if (!filters[0].form)
 	{
 		if (!thisObj)
-			thisObj = g_thePlayer;
+			thisObj = PlayerCharacter::GetSingleton();
 		filters[0].form = thisObj;
 	}
 
@@ -109,7 +109,7 @@ bool Cmd_SetOnAuxTimerUpdateHandler_Execute(COMMAND_ARGS)
 	if (!filters[0].form)
 	{
 		if (!thisObj)
-			thisObj = g_thePlayer;
+			thisObj = PlayerCharacter::GetSingleton();
 		filters[0].form = thisObj;
 	}
 
@@ -282,16 +282,16 @@ namespace OnPreActivate
 			return true;
 		}
 
-		if (activator == g_thePlayer)
+		if (activator == PlayerCharacter::GetSingleton())
 		{
 			if (InterfaceManager::GetSingleton()->pipBoyMode == 2)
 				return 2;  // sneakily patches NVSE's OnActivate to not run in this instance
 			// Magic number 2 = will be handled in my ASM as 1, but will still early-exit the func.
 
-			if (g_thePlayer->is3rdPersonVisible != g_thePlayer->bThirdPerson)
+			if (PlayerCharacter::GetSingleton()->is3rdPersonVisible != PlayerCharacter::GetSingleton()->bThirdPerson)
 				return false; // sneakily patches NVSE's OnActivate to not run in this instance
 
-			if (g_thePlayer->GetIsChildSize(0) && StdCall<bool>(0x8859E0, activated)) // TESObjectREFR::CanChildUse
+			if (PlayerCharacter::GetSingleton()->GetIsChildSize(0) && StdCall<bool>(0x8859E0, activated)) // TESObjectREFR::CanChildUse
 				return true; // whatever, let NVSE's OnActivate run here, as a treat
 
 			if (activated->IsDestroyed() && !activated->IsActor())
@@ -456,12 +456,12 @@ namespace PreActivateInventoryItem
 		}
 
 		g_eventInterface->DispatchEventAlt(eventName, resultCallback, &shouldActivate, 
-			g_thePlayer, invRef->baseForm, invRef, &shouldActivate, selectedHotkey);
+			PlayerCharacter::GetSingleton(), invRef->baseForm, invRef, &shouldActivate, selectedHotkey);
 
 		// Since we're inside this function, we can assume no special activation is going on.
 		UInt32 isSpecialActivation = false;
 		g_eventInterface->DispatchEventAlt(eventNameAlt, resultCallback, &shouldActivate,
-			g_thePlayer, invRef->baseForm, invRef, &shouldActivate, selectedHotkey, isSpecialActivation);
+			PlayerCharacter::GetSingleton(), invRef->baseForm, invRef, &shouldActivate, selectedHotkey, isSpecialActivation);
 
 		if (g_ShowFuncDebug)
 			Console_Print("CanActivateItemHook: CanActivate: %i, Item: [%08X], %s, type: %u", 
@@ -474,7 +474,7 @@ namespace PreActivateInventoryItem
 	{
 		if (!itemEntry)
 			return false;
-		auto* invRef = CreateRefForStack(g_thePlayer, itemEntry);
+		auto* invRef = CreateRefForStack(PlayerCharacter::GetSingleton(), itemEntry);
 		return CanUseItemRef(invRef, isHotkeyUse);
 	}
 
@@ -576,7 +576,7 @@ namespace PreActivateInventoryItem
 			// (Don't dispatch regular event, to maintain backwards compatibility)
 			UInt32 isSpecialActivation = true;
 			g_eventInterface->DispatchEventAlt(eventNameAlt, resultCallback, &shouldActivate,
-				g_thePlayer, invRef->baseForm, invRef, &shouldActivate, selectedHotkey, isSpecialActivation);
+				PlayerCharacter::GetSingleton(), invRef->baseForm, invRef, &shouldActivate, selectedHotkey, isSpecialActivation);
 
 			if (g_ShowFuncDebug)
 				Console_Print("Can(Special)UseItemRef hook: CanActivate: %i, Item: [%08X], %s, type: %u",
@@ -591,7 +591,7 @@ namespace PreActivateInventoryItem
 				int count, ExtraDataList* xData)
 			{
 				// We only care about preventing activation for the player
-				if (!itemForm_EDX || this_ECX != g_thePlayer)
+				if (!itemForm_EDX || this_ECX != PlayerCharacter::GetSingleton())
 					return true;
 				auto* invRef = InventoryRefCreateEntry(this_ECX, itemForm_EDX, count, xData);
 				return CanSpecialUseItemRef(invRef);
@@ -659,7 +659,7 @@ namespace PreActivateInventoryItem
 				{
 
 					// We only care about preventing activation for the player
-					if (actor != g_thePlayer)
+					if (actor != PlayerCharacter::GetSingleton())
 						return true;
 
 					auto* xData = *reinterpret_cast<ExtraDataList**>(ebp + 0x10);
@@ -749,10 +749,10 @@ namespace PreDropInventoryItem
 
 		auto const itemEntry = *reinterpret_cast<ContChangesEntry**>(g_inventoryMenuSelectionAddr);
 		auto const itemForm = itemEntry->type;
-		auto* invRef = CreateRefForStack(g_thePlayer, itemEntry);
+		auto* invRef = CreateRefForStack(PlayerCharacter::GetSingleton(), itemEntry);
 
 		g_eventInterface->DispatchEventAlt(eventName, resultCallback, &shouldDrop,
-			g_thePlayer, itemForm, invRef, &shouldDrop);
+			PlayerCharacter::GetSingleton(), itemForm, invRef, &shouldDrop);
 
 		return shouldDrop;
 	}
@@ -815,7 +815,7 @@ namespace OnCalculateSellPrice
 	void HandleEvent(float& newPrice, ContChangesEntry* itemEntry)
 	{
 		auto* baseItem = itemEntry->type;
-		auto* invRef = CreateRefForStack(g_thePlayer, itemEntry);
+		auto* invRef = CreateRefForStack(PlayerCharacter::GetSingleton(), itemEntry);
 
 		auto constexpr multCallback = [](NVSEArrayVarInterface::Element& result, void* newPriceAddr) -> bool
 		{
@@ -825,7 +825,7 @@ namespace OnCalculateSellPrice
 			newPrice *= result.Number();
 			return true;
 		};
-		g_eventInterface->DispatchEventAlt(eventNameMult, multCallback, &newPrice, g_thePlayer, baseItem, invRef);
+		g_eventInterface->DispatchEventAlt(eventNameMult, multCallback, &newPrice, PlayerCharacter::GetSingleton(), baseItem, invRef);
 
 		auto constexpr addCallback = [](NVSEArrayVarInterface::Element& result, void* newPriceAddr) -> bool
 		{
@@ -835,7 +835,7 @@ namespace OnCalculateSellPrice
 			newPrice += result.Number();
 			return true;
 		};
-		g_eventInterface->DispatchEventAlt(eventNameAdd, addCallback, &newPrice, g_thePlayer, baseItem, invRef);
+		g_eventInterface->DispatchEventAlt(eventNameAdd, addCallback, &newPrice, PlayerCharacter::GetSingleton(), baseItem, invRef);
 
 		auto constexpr subCallback = [](NVSEArrayVarInterface::Element& result, void* newPriceAddr) -> bool
 		{
@@ -845,7 +845,7 @@ namespace OnCalculateSellPrice
 			newPrice -= result.Number();
 			return true;
 		};
-		g_eventInterface->DispatchEventAlt(eventNameSub, subCallback, &newPrice, g_thePlayer, baseItem, invRef);
+		g_eventInterface->DispatchEventAlt(eventNameSub, subCallback, &newPrice, PlayerCharacter::GetSingleton(), baseItem, invRef);
 
 #if _DEBUG && 0
 		Console_Print("== ShowOff:OnCalculateSellPrice - newPrice: %f, itemEditorID: %s ==", 
@@ -1397,7 +1397,7 @@ namespace OnPCMiscStatChange
 		auto const statCode = *reinterpret_cast<MiscStatCode*>(ebp + 0x8);
 		auto const modVal = *reinterpret_cast<int*>(ebp + 0xC);
 		auto const newVal = CdeclCall<int>(0x5A3370, statCode); // GetPCMiscStat
-		g_eventInterface->DispatchEventThreadSafe(eventName, nullptr, g_thePlayer, statCode, modVal, newVal);
+		g_eventInterface->DispatchEventThreadSafe(eventName, nullptr, PlayerCharacter::GetSingleton(), statCode, modVal, newVal);
 
 		// Do regular code
 		return 1003; // StatsMenu::GetMenuID
@@ -1857,7 +1857,7 @@ namespace OnPreProjectileExplode
 			{
 				if (baseProj->projFlags & BGSProjectile::kFlags_CanBeDisabled)
 				{
-					proj->DisarmPlacedExplosive(g_thePlayer, true);
+					proj->DisarmPlacedExplosive(PlayerCharacter::GetSingleton(), true);
 				}
 				else if (proj->sourceWeap)
 				{
@@ -1980,9 +1980,9 @@ namespace OnPreRemoveItemFromMenu
 			auto* menu = BarterMenu::Get();
 			bool isSelling = menu->currentItems == &menu->leftItems;
 			if (isSelling)
-				return HandleEvent(toRemove, g_thePlayer, menu->merchantRef, kContext_BarterMenu);
+				return HandleEvent(toRemove, PlayerCharacter::GetSingleton(), menu->merchantRef, kContext_BarterMenu);
 			else
-				return HandleEvent(toRemove, menu->merchantRef, g_thePlayer, kContext_BarterMenu);
+				return HandleEvent(toRemove, menu->merchantRef, PlayerCharacter::GetSingleton(), kContext_BarterMenu);
 		}
 
 		__HOOK MaybePreventBarterMenuTransfer()
@@ -2020,9 +2020,9 @@ namespace OnPreRemoveItemFromMenu
 			auto* menu = ContainerMenu::GetSingleton();
 			bool isPlayerDropping = menu->currentItems == &menu->leftItems;
 			if (isPlayerDropping)
-				return HandleEvent(toRemove, g_thePlayer, menu->containerRef, static_cast<RemovalContext>(menu->mode));
+				return HandleEvent(toRemove, PlayerCharacter::GetSingleton(), menu->containerRef, static_cast<RemovalContext>(menu->mode));
 			else
-				return HandleEvent(toRemove, menu->containerRef, g_thePlayer, static_cast<RemovalContext>(menu->mode));
+				return HandleEvent(toRemove, menu->containerRef, PlayerCharacter::GetSingleton(), static_cast<RemovalContext>(menu->mode));
 		}
 
 		__HOOK MaybePreventContainerMenuTransfer()
@@ -2057,7 +2057,7 @@ namespace OnPreRemoveItemFromMenu
 	{
 		bool __fastcall HandleInventoryMenuEvent(ContChangesEntry* toRemove, void* edx)
 		{
-			return HandleEvent(toRemove, g_thePlayer, nullptr, kContext_InventoryMenu);
+			return HandleEvent(toRemove, PlayerCharacter::GetSingleton(), nullptr, kContext_InventoryMenu);
 		}
 
 		__HOOK MaybePreventContainerMenuTransfer()
@@ -2099,7 +2099,7 @@ namespace OnPreRemoveItemFromMenu
 				return result;
 			auto* menu = RepairMenu::Get();
 			auto* toRemove = ThisStdCall<ContChangesEntry*>(0x7A1910, &menu->repairItems); // GetSelectedListItem
-			return HandleEvent(toRemove, g_thePlayer, nullptr, kContext_RepairMenu);
+			return HandleEvent(toRemove, PlayerCharacter::GetSingleton(), nullptr, kContext_RepairMenu);
 		}
 
 		void WriteDelayedHook()
@@ -2126,8 +2126,8 @@ namespace OnPlayerJump
 
 	void __fastcall HandleEvent(bhkCharacterController* thisCtrler, void* edx, void* arPos)
 	{
-		if (thisCtrler == ((HighProcess*)g_thePlayer->baseProcess)->charCtrl)
-			g_eventInterface->DispatchEvent(eventName, g_thePlayer);
+		if (thisCtrler == ((HighProcess*)PlayerCharacter::GetSingleton()->baseProcess)->charCtrl)
+			g_eventInterface->DispatchEvent(eventName, PlayerCharacter::GetSingleton());
 		ThisStdCall(g_detour.GetOverwrittenAddr(), thisCtrler, arPos);
 	}
 
@@ -2145,7 +2145,7 @@ namespace OnPOVChange
 
 	void __fastcall HandleEvent(UInt32 isFirstPerson)
 	{
-		g_eventInterface->DispatchEvent(eventName, g_thePlayer, isFirstPerson);
+		g_eventInterface->DispatchEvent(eventName, PlayerCharacter::GetSingleton(), isFirstPerson);
 	}
 
 	// Credits to lStewieAl for this hooks
@@ -2191,7 +2191,7 @@ namespace OnChallengeProgress
 	{
 		auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
 		auto incrementAmount = *reinterpret_cast<int*>(ebp + 0x8);
-		g_eventInterface->DispatchEvent(eventName, g_thePlayer, challenge, incrementAmount);
+		g_eventInterface->DispatchEvent(eventName, PlayerCharacter::GetSingleton(), challenge, incrementAmount);
 		ThisStdCall(g_detour.GetOverwrittenAddr(), challenge);
 	}
 

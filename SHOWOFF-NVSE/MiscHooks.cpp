@@ -91,7 +91,7 @@ namespace PickpocketInCombat
 			int playerActionPoints = g_playerAVOwner->GetActorValue(kAVCode_ActionPoints);
 			if (actionPointCost > playerActionPoints)
 			{
-				ThisStdCall(0x8C00E0, g_thePlayer, actor, 0, 0);
+				ThisStdCall(0x8C00E0, PlayerCharacter::GetSingleton(), actor, 0, 0);
 				char buf[260];
 				ScopedLock lock(g_Lock);
 				sprintf(buf, "%s", g_fForcePickpocketFailureMessage);
@@ -102,7 +102,7 @@ namespace PickpocketInCombat
 			}
 			else
 			{
-				g_thePlayer->DamageActionPoints(actionPointCost);
+				PlayerCharacter::GetSingleton()->DamageActionPoints(actionPointCost);
 
 				/*
 				if (menu->currentItems == &menu->rightItems && !menu->hasPickedPocket)
@@ -114,7 +114,7 @@ namespace PickpocketInCombat
 					{
 						float itemWeight = selection->type->GetWeight() * count;
 						int targetPerception = actor->avOwner.GetThresholdedActorValue(kAVCode_Perception);
-						g_thePlayer->RewardXP(itemWeight * g_fPickpocketItemWeightMult + (itemValue * g_fPickpocketItemValueMult) + targetPerception);
+						PlayerCharacter::GetSingleton()->RewardXP(itemWeight * g_fPickpocketItemWeightMult + (itemValue * g_fPickpocketItemValueMult) + targetPerception);
 					}
 
 				}*/
@@ -126,7 +126,7 @@ namespace PickpocketInCombat
 			if (stolenKarmaTier != KarmaTier::Evil && stolenKarmaTier != KarmaTier::VeryEvil)
 			{
 				int karmaMod = *(float*)0x11CDE24; // fKarmaModStealing
-				ThisStdCall(0x94FD30, g_thePlayer, karmaMod);
+				ThisStdCall(0x94FD30, PlayerCharacter::GetSingleton(), karmaMod);
 			}
 		}
 		return wasSuccessful;
@@ -195,7 +195,7 @@ namespace PickpocketInCombat
 		bool const isInCombat = ThisStdCall<bool>(0x493BB0, actor);
 		if (isInCombat)
 		{
-			if (g_canPlayerPickpocketInCombat && g_thePlayer->IsSneaking())
+			if (g_canPlayerPickpocketInCombat && PlayerCharacter::GetSingleton()->IsSneaking())
 			{
 				if (!IsPickpocketHookSet)
 				{
@@ -234,8 +234,8 @@ namespace PickpocketInCombat
 	//Replaces a "GetIsCombatTarget w/ the player" check.
 	bool __fastcall ShowPickpocketStringInCombat(Actor* actor, void* edx, char a2)
 	{
-		bool isInCombat = ThisStdCall<bool>(0x8BC700, actor, g_thePlayer);
-		if (isInCombat && g_canPlayerPickpocketInCombat && g_thePlayer->IsSneaking())
+		bool isInCombat = ThisStdCall<bool>(0x8BC700, actor, PlayerCharacter::GetSingleton());
+		if (isInCombat && g_canPlayerPickpocketInCombat && PlayerCharacter::GetSingleton()->IsSneaking())
 		{
 #if _DEBUG
 			Console_Print("I made a difference!"); //seems like we're failing before this even happens...
@@ -255,7 +255,7 @@ namespace PickpocketInCombat
 			tList<PlayerCharacter::CompassTarget>* nope = NULL;
 			return nope;
 		}
-		return g_thePlayer->compassTargets;
+		return PlayerCharacter::GetSingleton()->compassTargets;
 	}
 }
 
