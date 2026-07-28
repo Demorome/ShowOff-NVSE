@@ -61,7 +61,6 @@ extern PlayerCharacter* g_thePlayer;
 extern ActorValueOwner* g_playerAVOwner;
 extern ProcessManager* g_processManager;
 extern InterfaceManager* g_interfaceManager;
-extern BSWin32Audio* g_bsWin32Audio;
 extern BSAudioManager* g_audioManager;
 extern Sky** g_currentSky;
 extern TESObjectWEAP* g_fistsWeapon;
