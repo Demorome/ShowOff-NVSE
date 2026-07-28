@@ -120,7 +120,6 @@ ActorValueOwner* g_playerAVOwner = nullptr;
 ProcessManager* g_processManager = nullptr;
 InterfaceManager* g_interfaceManager = nullptr;
 BSWin32Audio* g_bsWin32Audio = nullptr;
-DataHandler* g_dataHandler = nullptr;
 BSAudioManager* g_audioManager = nullptr;
 Sky** g_currentSky = nullptr;
 RefID g_xMarkerFormID = 0x3B;
@@ -255,7 +254,6 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		g_playerAVOwner = &g_thePlayer->avOwner;
 		g_processManager = (ProcessManager*)0x11E0E80;
 		g_bsWin32Audio = BSWin32Audio::GetSingleton();
-		g_dataHandler = DataHandler::Get();
 		g_audioManager = (BSAudioManager*)0x11F6EF0;
 		g_currentSky = (Sky**)0x11DEA20;
 		g_HUDMainMenu = *(HUDMainMenu**)0x11D96C0;  

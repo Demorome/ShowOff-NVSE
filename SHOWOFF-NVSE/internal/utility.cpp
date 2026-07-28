@@ -1746,7 +1746,7 @@ void Log(const std::string& msg)
 // Copied from kNVSE (https://github.com/korri123/kNVSE/blob/master/nvse_plugin_example/commands_animation.cpp).
 TESForm* StringToForm_Subroutine(const std::string& modName, const std::string& formIdStr)
 {
-	const auto* mod = DataHandler::Get()->LookupModByName(modName.c_str());
+	const auto* mod = TESDataHandler::GetSingleton()->LookupModByName(modName.c_str());
 #if _DEBUG
 	if (!mod)
 	{
@@ -2130,7 +2130,7 @@ UInt32 __fastcall StringToRef(char* refStr)
 		if (colon != refStr)
 		{
 			*colon = 0;
-			modIdx = g_dataHandler->GetModIndex(refStr);
+			modIdx = TESDataHandler::GetSingleton()->GetModIndex(refStr);
 			*colon = ':';
 			if (modIdx == 0xFF) 
 				return 0;
@@ -2157,7 +2157,7 @@ const std::string& RefToString(TESForm* form)
 	if (auto search = s_refStrings.find(form->refID); search != s_refStrings.end())
 		return search->second;
 
-	const char* modName = g_dataHandler->GetNthModName(form->modIndex);
+	const char* modName = TESDataHandler::GetSingleton()->GetNthModName(form->modIndex);
 	if (!modName || !modName[0])
 		return invalidRef;
 
