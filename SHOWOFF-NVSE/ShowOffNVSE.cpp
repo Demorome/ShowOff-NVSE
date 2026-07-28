@@ -114,7 +114,6 @@ DWORD g_mainThreadID = 0;
 HUDMainMenu* g_HUDMainMenu = nullptr;
 TileMenu** g_tileMenuArray = nullptr;
 ActorValueOwner* g_playerAVOwner = nullptr;
-InterfaceManager* g_interfaceManager = nullptr;
 BSAudioManager* g_audioManager = nullptr;
 RefID g_xMarkerFormID = 0x3B;
 TESObjectWEAP* g_fistsWeapon = nullptr;
@@ -247,7 +246,6 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		g_playerAVOwner = &PlayerCharacter::GetSingleton()->avOwner;
 		g_audioManager = (BSAudioManager*)0x11F6EF0;
 		g_HUDMainMenu = *(HUDMainMenu**)0x11D96C0;  
-		g_interfaceManager = *(InterfaceManager**)0x11D8A80; 
 		g_tileMenuArray = *(TileMenu***)0x11F350C; 
 		g_fistsWeapon = *(TESObjectWEAP**)0x11CA278;
 		g_BGSSaveLoadGame = *(BGSSaveLoadGame**)0x11DDF38;
