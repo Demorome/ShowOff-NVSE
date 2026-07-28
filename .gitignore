@@ -353,3 +353,4 @@ common/Debug VC9/common_vc9.lib
 *.idb
 *.lib
 /common/Release VC9
+/common/Release VC9

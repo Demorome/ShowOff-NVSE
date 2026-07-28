@@ -459,16 +459,16 @@ void ExtractMandatoryArgs_IntoTuple(PluginExpressionEvaluator& eval, std::tuple<
 	auto constexpr numMandatoryArgs = GetNumMandatoryArgs(params);
 	if constexpr (!numMandatoryArgs)
 	{
-		static_assert(always_false_v<ArgTypes>, "Attempting to extract mandatory args when there are none.");
+		static_assert(always_false_v<ArgTypes...>, "Attempting to extract mandatory args when there are none.");
 	}
 	else if constexpr (numMandatoryArgs != std::tuple_size_v<ArgsTupleBasic>)
 	{
-		static_assert(always_false_v<ArgTypes>, "Provided number of optional args to extract does not match established count");
+		static_assert(always_false_v<ArgTypes...>, "Provided number of optional args to extract does not match established count");
 	}
 
 	if constexpr (!ValidateMandatoryArgs<size, params, numMandatoryArgs, ArgsTupleBasic>())
 	{
-		static_assert(always_false_v<ArgTypes>, "ExtractMandatoryArgs_IntoTuple >> Invalid types for mandatory args provided.");
+		static_assert(always_false_v<ArgTypes...>, "ExtractMandatoryArgs_IntoTuple >> Invalid types for mandatory args provided.");
 	}
 
 	using ArgsTupleWithRefs = std::tuple<ArgTypes&...>;
@@ -520,16 +520,16 @@ void ExtractOptionalArgsFromPack(PluginExpressionEvaluator& eval, std::tuple<Arg
 	auto constexpr numOptArgs = GetNumOptionalArgs(params);
 	if constexpr (numOptArgs <= 0)
 	{
-		static_assert(always_false_v<ArgTypes>, "Cannot extract any optional args; all are mandatory.");
+		static_assert(always_false_v<ArgTypes...>, "Cannot extract any optional args; all are mandatory.");
 	}
 	else if constexpr (numOptArgs != std::tuple_size_v<ArgsTupleBasic>)
 	{
-		static_assert(always_false_v<ArgTypes>, "Provided number of optional args to extract does not match established count");
+		static_assert(always_false_v<ArgTypes...>, "Provided number of optional args to extract does not match established count");
 	}
 	
 	if constexpr (!ValidateOptionalArgs<size, params, numOptArgs, ArgsTupleBasic>())
 	{
-		static_assert(always_false_v<ArgTypes>, "ExtractOptionalArgsFromPack >> Invalid types for optional args provided.");
+		static_assert(always_false_v<ArgTypes...>, "ExtractOptionalArgsFromPack >> Invalid types for optional args provided.");
 	}
 
 	using ArgsTupleWithRefs = std::tuple<ArgTypes&...>;
