@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <ctime>
-#include <format>
 #include <stdexcept>
 
 #include "GameData.h"
@@ -2148,9 +2147,9 @@ UInt32 __fastcall StringToRef(char* refStr)
 std::unordered_map<UInt32, const std::string> s_refStrings;
 
 //Code copied from JIP LN, adapted to use std::string
+static const std::string invalidRef = ":00000000";
 const std::string& RefToString(TESForm* form)
 {
-	static const std::string invalidRef = ":00000000";
 	if (!form)
 		return invalidRef;
 
@@ -2161,11 +2160,13 @@ const std::string& RefToString(TESForm* form)
 	if (!modName || !modName[0])
 		return invalidRef;
 
+	char cHexString[10];
+	snprintf(cHexString, sizeof(cHexString), ":%08X", form->refID & 0xFFFFFF);
+
 	std::string result;
 	result.reserve(result.size() + strlen(modName) + 9);
 	result = modName;
-	result += ':';
-	result += std::format("{:08X}", form->refID & 0xFFFFFF);
+	result += cHexString;
 
 	// Cache the string
 	auto emplaced = s_refStrings.emplace(form->refID, result);
