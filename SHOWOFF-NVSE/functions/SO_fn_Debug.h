@@ -86,7 +86,7 @@ bool Cmd_RefillPlayerAmmo_Execute(COMMAND_ARGS)
 {
 	*result = 0; // bSuccess
 	int32_t count;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &count))
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &count) || count <= 0)
 		return true;
 
 	const auto weapInfo = PlayerCharacter::GetSingleton()->baseProcess->GetWeaponInfo();
