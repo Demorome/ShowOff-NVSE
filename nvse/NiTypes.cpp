@@ -44,7 +44,7 @@ __declspec(naked) NiVector3* __fastcall NiVector3::MultiplyMatrix(const NiMatrix
 	}
 }
 
-__declspec(naked) NiVector3* __fastcall NiVector3::MultiplyMatrixRow(const NiMatrix33& rotMatrix, UInt32 whichRow)
+__declspec(naked) NiVector3* __fastcall NiVector3::MultiplyMatrixRow(const NiMatrix33& rotMatrix, uint32_t whichRow)
 {
 	__asm
 	{

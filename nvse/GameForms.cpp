@@ -70,7 +70,7 @@ Script* TESForm::GetScript() const
 	return nullptr;
 }
 
-UInt8 TESForm::GetModIndex() const
+uint8_t TESForm::GetModIndex() const
 {
 	return modIndex;
 }
@@ -131,7 +131,7 @@ TESForm * TESForm::CloneForm(bool persist) const
 			TESBoundObject* boundSource = DYNAMIC_CAST(this, TESForm, TESBoundObject);
 			if (boundSource)
 			{
-				for (UInt8 i=0; i<6; i++)
+				for (uint8_t i=0; i<6; i++)
 					boundObject->bounds[i] = boundSource->bounds[i];
 			}
 		}
@@ -147,7 +147,7 @@ bool TESForm::IsCloned() const
 }
 
 // static
-UInt32 TESBipedModelForm::MaskForSlot(UInt32 slot)
+uint32_t TESBipedModelForm::MaskForSlot(uint32_t slot)
 {
 	switch(slot) {
 		case ePart_Head:		return eSlot_Head;
@@ -175,7 +175,7 @@ UInt32 TESBipedModelForm::MaskForSlot(UInt32 slot)
 }
 
 // static
-UInt32 TESBipedModelForm::SlotForMask(UInt32 slot)
+uint32_t TESBipedModelForm::SlotForMask(uint32_t slot)
 {
 	switch (slot) {
 	case eSlot_Head:		return ePart_Head;
@@ -202,25 +202,25 @@ UInt32 TESBipedModelForm::SlotForMask(UInt32 slot)
 	}
 }
 
-UInt32 TESBipedModelForm::GetSlotsMask() const {
+uint32_t TESBipedModelForm::GetSlotsMask() const {
 	return partMask;
 }
 
-void TESBipedModelForm::SetSlotsMask(UInt32 mask)
+void TESBipedModelForm::SetSlotsMask(uint32_t mask)
 {
 	partMask = (mask & ePartBitMask_Full);
 }
 
-UInt32 TESBipedModelForm::GetBipedMask() const {
+uint32_t TESBipedModelForm::GetBipedMask() const {
 	return bipedFlags;
 }
 
-void TESBipedModelForm::SetBipedMask(UInt32 mask)
+void TESBipedModelForm::SetBipedMask(uint32_t mask)
 {
 	bipedFlags = mask & 0xFF;
 }
 
-void  TESBipedModelForm::SetPath(const char* newPath, UInt32 whichPath, bool bFemalePath)
+void  TESBipedModelForm::SetPath(const char* newPath, uint32_t whichPath, bool bFemalePath)
 {
 	String* toSet = NULL;
 
@@ -241,7 +241,7 @@ void  TESBipedModelForm::SetPath(const char* newPath, UInt32 whichPath, bool bFe
 		toSet->Set(newPath);
 }
 
-const char* TESBipedModelForm::GetPath(UInt32 whichPath, bool bFemalePath)
+const char* TESBipedModelForm::GetPath(uint32_t whichPath, bool bFemalePath)
 {
 	String* pathStr = NULL;
 
@@ -278,7 +278,7 @@ char TESActorBaseData::GetFactionRank(TESFaction *faction)
 	return -1;
 }
 
-static const UInt8 kHandGripTable[] =
+static const uint8_t kHandGripTable[] =
 {
 	TESObjectWEAP::eHandGrip_Default,
 	TESObjectWEAP::eHandGrip_1,
@@ -289,22 +289,22 @@ static const UInt8 kHandGripTable[] =
 	TESObjectWEAP::eHandGrip_6,
 };
 
-UInt8 TESObjectWEAP::HandGrip() const
+uint8_t TESObjectWEAP::HandGrip() const
 {
-	for(UInt32 i = 0; i < sizeof(kHandGripTable) / sizeof(kHandGripTable[0]); i++)
+	for(uint32_t i = 0; i < sizeof(kHandGripTable) / sizeof(kHandGripTable[0]); i++)
 		if(handGrip == kHandGripTable[i])
 			return i;
 
 	return 0;
 }
 
-void TESObjectWEAP::SetHandGrip(UInt8 _handGrip)
+void TESObjectWEAP::SetHandGrip(uint8_t _handGrip)
 {
 	if(_handGrip < sizeof(kHandGripTable) / sizeof(kHandGripTable[0]))
 		handGrip = kHandGripTable[_handGrip];
 }
 
-UInt8 TESObjectWEAP::AttackAnimation() const
+uint8_t TESObjectWEAP::AttackAnimation() const
 {
 	switch(attackAnim)
 	{
@@ -335,14 +335,14 @@ UInt8 TESObjectWEAP::AttackAnimation() const
 	}
 }
 
-const UInt8 kAttackAnims[] = {255, 38, 44, 50, 56, 62, 68, 26, 74, 32, 80, 86, 114, 120, 126, 132, 138, 102, 108, 144, 150, 156, 162};
+const uint8_t kAttackAnims[] = {255, 38, 44, 50, 56, 62, 68, 26, 74, 32, 80, 86, 114, 120, 126, 132, 138, 102, 108, 144, 150, 156, 162};
 
-void TESObjectWEAP::SetAttackAnimation(UInt32 _attackAnim)
+void TESObjectWEAP::SetAttackAnimation(uint32_t _attackAnim)
 {
 	attackAnim = kAttackAnims[_attackAnim];
 }
 
-TESObjectIMOD* TESObjectWEAP::GetItemMod(UInt8 which)
+TESObjectIMOD* TESObjectWEAP::GetItemMod(uint8_t which)
 {
 	if ((which < 1) || (which > 3)) return NULL;
 	return itemMod[which - 1];
@@ -365,24 +365,24 @@ public:
 	}
 };
 
-SInt32 BGSListForm::GetIndexOf(TESForm* pForm)
+int32_t BGSListForm::GetIndexOf(TESForm* pForm)
 {
 	FindByForm tmp(pForm);
 	return list.GetIndexOf(tmp);
 }
 
-SInt32 BGSListForm::RemoveForm(TESForm* pForm)
+int32_t BGSListForm::RemoveForm(TESForm* pForm)
 {
-	SInt32 index = GetIndexOf(pForm);
+	int32_t index = GetIndexOf(pForm);
 	if (index >= 0) {
 		RemoveNthForm(index);
 	}
 	return index;
 }
 
-SInt32 BGSListForm::ReplaceForm(TESForm* pForm, TESForm* pReplaceWith)
+int32_t BGSListForm::ReplaceForm(TESForm* pForm, TESForm* pReplaceWith)
 {
-	SInt32 index = GetIndexOf(pForm);
+	int32_t index = GetIndexOf(pForm);
 	if (index >= 0) {
 		list.ReplaceNth(index, pReplaceWith);
 	}
@@ -456,7 +456,7 @@ bool BGSPerk::GetActorCanPickPerk(Actor* actor)
 
 bool TESForm::IsInventoryObject() const
 {
-	typedef bool (*_IsInventoryObjectType)(UInt32 formType);
+	typedef bool (*_IsInventoryObjectType)(uint32_t formType);
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 	static _IsInventoryObjectType IsInventoryObjectType = (_IsInventoryObjectType)0x481F30;
 #elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
@@ -469,7 +469,7 @@ bool TESForm::IsInventoryObject() const
 	return IsInventoryObjectType(typeID);
 }
 
-const char* TESPackage::TargetData::StringForTargetCode(UInt8 targetCode)
+const char* TESPackage::TargetData::StringForTargetCode(uint8_t targetCode)
 {
 	switch (targetCode) {
 		case TESPackage::kTargetType_Refr:
@@ -483,7 +483,7 @@ const char* TESPackage::TargetData::StringForTargetCode(UInt8 targetCode)
 	}
 }
 
-UInt8 TESPackage::TargetData::TargetCodeForString(const char* targetStr)
+uint8_t TESPackage::TargetData::TargetCodeForString(const char* targetStr)
 {
 	if (!_stricmp(targetStr, "REFERENCE"))
 		return TESPackage::kTargetType_Refr;
@@ -523,7 +523,7 @@ void TESPackage::SetTarget(TESObjectREFR* refr)
 	tdata->count = 150;	//DefaultDistance
 }
 
-void TESPackage::SetCount(UInt32 aCount)
+void TESPackage::SetCount(uint32_t aCount)
 {
 	if (target) {
 		TargetData* tdata = GetTargetData();
@@ -531,7 +531,7 @@ void TESPackage::SetCount(UInt32 aCount)
 	}
 }
 
-void TESPackage::SetTarget(TESForm* baseForm, UInt32 count)
+void TESPackage::SetTarget(TESForm* baseForm, uint32_t count)
 {
 	TargetData* tdata = GetTargetData();
 	tdata->targetType = kTargetType_BaseObject;
@@ -539,7 +539,7 @@ void TESPackage::SetTarget(TESForm* baseForm, UInt32 count)
 	tdata->target.form = baseForm;
 }
 
-void TESPackage::SetTarget(UInt8 typeCode, UInt32 count)
+void TESPackage::SetTarget(uint8_t typeCode, uint32_t count)
 {
 	if (typeCode > 0 && typeCode < kObjectType_Max)
 	{
@@ -569,12 +569,12 @@ TESPackage::LocationData* TESPackage::GetLocationData()
 	return location;
 }
 
-bool TESPackage::IsFlagSet(UInt32 flag)
+bool TESPackage::IsFlagSet(uint32_t flag)
 {
 	return (packageFlags & flag) == flag;
 }
 
-void TESPackage::SetFlag(UInt32 flag, bool bSet)
+void TESPackage::SetFlag(uint32_t flag, bool bSet)
 {
 	if (bSet)
 		packageFlags |= flag;
@@ -648,7 +648,7 @@ static const char* TESPackage_ProcedureStrings[] = {
 	"SITTING", "MOVEMENT BLOCKED", "CANIBAL FEED", 
 };
 
-const char* TESPackage::StringForPackageType(UInt32 pkgType)
+const char* TESPackage::StringForPackageType(uint32_t pkgType)
 {
 	if (pkgType < kPackType_MAX) {
 		return TESPackage_TypeStrings[pkgType];
@@ -658,7 +658,7 @@ const char* TESPackage::StringForPackageType(UInt32 pkgType)
 	}
 }
 
-const char* TESPackage::StringForObjectCode(UInt8 objCode)
+const char* TESPackage::StringForObjectCode(uint8_t objCode)
 {
 	if (objCode < kObjectType_Max)
 		return TESPackage_ObjectTypeStrings[objCode];
@@ -666,9 +666,9 @@ const char* TESPackage::StringForObjectCode(UInt8 objCode)
 	return "";
 }
 
-UInt8 TESPackage::ObjectCodeForString(const char* objString)
+uint8_t TESPackage::ObjectCodeForString(const char* objString)
 {
-	for (UInt32 i = 0; i < kObjectType_Max; i++) {
+	for (uint32_t i = 0; i < kObjectType_Max; i++) {
 		if (!_stricmp(objString, TESPackage_ObjectTypeStrings[i]))
 			return i;
 	}
@@ -711,7 +711,7 @@ const char* TESPackage::StringForProcedureCode(eProcedure proc)
 //	return name;
 //}
 
-const char* TESPackage::PackageTime::DayForCode(UInt8 dayCode)
+const char* TESPackage::PackageTime::DayForCode(uint8_t dayCode)
 {
 	dayCode += 1;
 	if (dayCode >= sizeof(TESPackage_DayStrings))
@@ -719,7 +719,7 @@ const char* TESPackage::PackageTime::DayForCode(UInt8 dayCode)
 	return TESPackage_DayStrings[dayCode];
 }
 
-const char* TESPackage::PackageTime::MonthForCode(UInt8 monthCode)
+const char* TESPackage::PackageTime::MonthForCode(uint8_t monthCode)
 {
 	monthCode += 1;
 	if (monthCode >= sizeof(TESPackage_MonthString))
@@ -727,9 +727,9 @@ const char* TESPackage::PackageTime::MonthForCode(UInt8 monthCode)
 	return TESPackage_MonthString[monthCode];
 }
 
-UInt8 TESPackage::PackageTime::CodeForDay(const char* dayStr)
+uint8_t TESPackage::PackageTime::CodeForDay(const char* dayStr)
 {
-	for (UInt8 i = 0; i < sizeof(TESPackage_DayStrings); i++) {
+	for (uint8_t i = 0; i < sizeof(TESPackage_DayStrings); i++) {
 		if (!_stricmp(dayStr, TESPackage_DayStrings[i])) {
 			return i-1;
 		}
@@ -738,9 +738,9 @@ UInt8 TESPackage::PackageTime::CodeForDay(const char* dayStr)
 	return kWeekday_Any;
 }
 
-UInt8 TESPackage::PackageTime::CodeForMonth(const char* monthStr)
+uint8_t TESPackage::PackageTime::CodeForMonth(const char* monthStr)
 {
-	for (UInt8 i = 0; i < sizeof(TESPackage_MonthString); i++) {
+	for (uint8_t i = 0; i < sizeof(TESPackage_MonthString); i++) {
 		if (!_stricmp(monthStr, TESPackage_MonthString[i])) {
 			return i-1;
 		}
@@ -749,7 +749,7 @@ UInt8 TESPackage::PackageTime::CodeForMonth(const char* monthStr)
 	return kMonth_Any;
 }
 
-const char* TESPackage::LocationData::StringForLocationCode(UInt8 locCode)
+const char* TESPackage::LocationData::StringForLocationCode(uint8_t locCode)
 {
 	if (locCode < kPackLocation_Max)
 		return TESPackage_LocationStrings[locCode];
@@ -816,15 +816,15 @@ const char* TESPackage::TargetData::StringForTargetCodeAndData(void)
 	return "";
 }
 
-UInt8 TESPackage::LocationData::LocationCodeForString(const char* locStr)
+uint8_t TESPackage::LocationData::LocationCodeForString(const char* locStr)
 {
-	for (UInt32 i = 0; i < kPackLocation_Max; i++)
+	for (uint32_t i = 0; i < kPackLocation_Max; i++)
 		if (!_stricmp(locStr, TESPackage_LocationStrings[i]))
 			return i;
 	return kPackLocation_Max;
 }
 
-const char* TESFaction::GetNthRankName(UInt32 whichRank, bool bFemale)
+const char* TESFaction::GetNthRankName(uint32_t whichRank, bool bFemale)
 {
 	TESFaction::Rank* rank = ranks.GetNthItem(whichRank);
 	if (!rank)
@@ -833,7 +833,7 @@ const char* TESFaction::GetNthRankName(UInt32 whichRank, bool bFemale)
 		return bFemale ? rank->femaleName.CStr() : rank->name.CStr();
 }
 
-void TESFaction::SetNthRankName(const char* newName, UInt32 whichRank, bool bFemale)
+void TESFaction::SetNthRankName(const char* newName, uint32_t whichRank, bool bFemale)
 {
 	TESFaction::Rank* rank = ranks.GetNthItem(whichRank);
 	if (rank)
@@ -911,17 +911,17 @@ void TESFaction::SetFactionCombatReactionTemp(TESFaction* faction2, bool setAlly
 }
 
 #if 0
-UInt32 EffectItemList::CountItems() const
+uint32_t EffectItemList::CountItems() const
 {
 	return list.Count();
 }
 
-EffectItem* EffectItemList::ItemAt(UInt32 whichItem)
+EffectItem* EffectItemList::ItemAt(uint32_t whichItem)
 {
 	return list.GetNthItem(whichItem);
 }
 
-const char* EffectItemList::GetNthEIName(UInt32 whichEffect) const
+const char* EffectItemList::GetNthEIName(uint32_t whichEffect) const
 {
 	EffectItem* effItem = list.GetNthItem(whichEffect);
 	if (effItem->setting)
@@ -937,9 +937,9 @@ BGSDefaultObjectManager* BGSDefaultObjectManager::GetSingleton()
 }
 
 //Copied from JIP LN NVSE.
-UInt32 TESLeveledList::RemoveItem(TESForm* form)
+uint32_t TESLeveledList::RemoveItem(TESForm* form)
 {
-	UInt32 numRemoved = 0;
+	uint32_t numRemoved = 0;
 	ListNode<ListData>* iter = list.Head(), * prev = NULL;
 	ListData* data;
 	do
@@ -961,17 +961,17 @@ UInt32 TESLeveledList::RemoveItem(TESForm* form)
 	return numRemoved;
 }
 
-UInt32 TESIdleForm::GetSequenceID() const
+uint32_t TESIdleForm::GetSequenceID() const
 {
 	return data.groupFlags & 0x3F; // copying code at 0x5FF160
 }
 
-void TESNPC::SetSex(UInt32 flags)
+void TESNPC::SetSex(uint32_t flags)
 {
 	TESActorBaseData* baseDataPtr = &this->baseData;
 
-	UInt32 currentSexBit = baseDataPtr->flags & TESActorBaseData::kFlags_Female;
-	UInt32 newSexBit = flags & TESActorBaseData::kFlags_Female;
+	uint32_t currentSexBit = baseDataPtr->flags & TESActorBaseData::kFlags_Female;
+	uint32_t newSexBit = flags & TESActorBaseData::kFlags_Female;
 
 	if (currentSexBit == newSexBit) 
 		return;

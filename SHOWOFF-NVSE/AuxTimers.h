@@ -6,14 +6,14 @@ namespace AuxTimer
 {
 	// Code structure copied from JIP's jip_core.h
 
-	constexpr UInt8 AuxTimerVersion = 1;
+	constexpr uint8_t AuxTimerVersion = 1;
 
 	struct AuxTimerValue
 	{
 		double m_timeToCountdown; //original value of time to start counting down.
 		double m_timeRemaining; //counts down to 0. If below or at 0, timer is stopped/not running.
 
-		enum Flags : UInt32
+		enum Flags : uint32_t
 		{
 			// On by default
 			kFlag_RunInMenuMode = 1 << 0,
@@ -32,14 +32,14 @@ namespace AuxTimer
 			kFlag_NotAffectedByTimeMult_InGameMode = 1 << 10, // if on, seconds-based timers won't be affected by TimeMult in GameMode.
 
 			// Off by default, hidden and undocumented, for good reason
-			kFlag_PendingRemoval = (UInt32)1 << (UInt32)31, // if on, prevent all changes to the timer, for it will be deleted soon.
+			kFlag_PendingRemoval = (uint32_t)1 << (uint32_t)31, // if on, prevent all changes to the timer, for it will be deleted soon.
 		};
-		UInt32 m_flags;
+		uint32_t m_flags;
 
 		AuxTimerValue() : m_timeToCountdown(0.0), m_timeRemaining(0.0), m_flags(kFlag_Defaults) { }
-		AuxTimerValue(double timeToCountdown, UInt32 flags = kFlag_Defaults) :
+		AuxTimerValue(double timeToCountdown, uint32_t flags = kFlag_Defaults) :
 			m_timeToCountdown(timeToCountdown), m_timeRemaining(timeToCountdown), m_flags(flags) { }
-		AuxTimerValue(double timeToCountdown, double timeRemaining, UInt32 flags = kFlag_Defaults) :
+		AuxTimerValue(double timeToCountdown, double timeRemaining, uint32_t flags = kFlag_Defaults) :
 			m_timeToCountdown(timeToCountdown), m_timeRemaining(timeRemaining), m_flags(flags) { }
 
 		[[nodiscard]] double GetTimeLeft() const { return m_timeRemaining; }
@@ -83,8 +83,8 @@ namespace AuxTimer
 
 	struct AuxTimerMapInfo
 	{
-		UInt32		ownerID;
-		UInt32		modIndex;
+		uint32_t		ownerID;
+		uint32_t		modIndex;
 		char		*varName;
 		bool		isPerm;
 
@@ -105,7 +105,7 @@ namespace AuxTimer
 			}
 		}
 
-		AuxTimerMapInfo(TESForm* form, TESObjectREFR* thisObj, const Script* scriptObj, UInt8 type) :
+		AuxTimerMapInfo(TESForm* form, TESObjectREFR* thisObj, const Script* scriptObj, uint8_t type) :
 			ownerID(GetSubjectID(form, thisObj)), varName(nullptr)
 		{
 			if (ownerID)
@@ -135,8 +135,8 @@ namespace AuxTimer
 
 	struct AuxTimerPendingRemoval
 	{
-		UInt32		modIndex;
-		UInt32		ownerID;
+		uint32_t		modIndex;
+		uint32_t		ownerID;
 		std::string	varName;
 	};
 
@@ -144,12 +144,12 @@ namespace AuxTimer
 	//inserting into UnorderedMap mid-iteration can rehash and invalidate iterators
 	struct AuxTimerPendingInsertion
 	{
-		UInt32		modIndex;
-		UInt32		ownerID;
+		uint32_t		modIndex;
+		uint32_t		ownerID;
 		std::string	varName;
 		bool		isPerm;
 		double		timeToCountdown;
-		UInt32		flags;
+		uint32_t		flags;
 	};
 
 	extern bool g_isIteratingTimers;

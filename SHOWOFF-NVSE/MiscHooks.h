@@ -27,7 +27,7 @@ namespace PickpocketInCombat
 {
 	void __fastcall ContainerMenuHandleMouseoverAlt(ContainerMenu* menu, void* edx, int a2, int a3);
 	int CalculateCombatPickpocketAPCost(ContChangesEntry* item, Actor* target, signed int itemValue, signed int count, bool isItemOwnedByTarget);
-	bool __fastcall TryCombatPickpocket(ContChangesEntry* selection, SInt32 count, Actor* actor, signed int itemValue);
+	bool __fastcall TryCombatPickpocket(ContChangesEntry* selection, int32_t count, Actor* actor, signed int itemValue);
 	void SetContainerSubtitleStringToPickpocketAPCost();
 	void ContainerHoverItemHook();
 	void ResetPickpocketHooks();

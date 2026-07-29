@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 //Code ripped from both JIP (GetActorsByProcessingLevel) and SUP (FindClosestActorFromRef).
-UInt32 __fastcall GetNumActorsInRangeFromRef_Call(TESObjectREFR* const thisObj, float const range, UInt32 const flags)
+uint32_t __fastcall GetNumActorsInRangeFromRef_Call(TESObjectREFR* const thisObj, float const range, uint32_t const flags)
 {
 	if (range <= 0) return 0;
 	if (!thisObj) return 0;
@@ -23,7 +23,7 @@ UInt32 __fastcall GetNumActorsInRangeFromRef_Call(TESObjectREFR* const thisObj, 
 	MobileObject** objArray = ProcessLists::GetSingleton()->objects.data, ** arrEnd = objArray;
 	objArray += ProcessLists::GetSingleton()->beginOffsets[0];  //Only objects in High process.
 	arrEnd += ProcessLists::GetSingleton()->endOffsets[0];
-	UInt32 numActors = 0;  //return value
+	uint32_t numActors = 0;  //return value
 	for (; objArray != arrEnd; objArray++)
 	{
 		auto actor = (Actor*)*objArray;
@@ -59,7 +59,7 @@ DEFINE_CMD_COND_PLUGIN(GetNumActorsInRangeFromRef, "Returns the amount of actors
 	true, kParams_OneFloat_OneOptionalInt);
 bool Cmd_GetNumActorsInRangeFromRef_Eval(COMMAND_ARGS_EVAL)
 {
-	*result = GetNumActorsInRangeFromRef_Call(thisObj, *(float*)&arg1, (UInt32)arg2);
+	*result = GetNumActorsInRangeFromRef_Call(thisObj, *(float*)&arg1, (uint32_t)arg2);
 	return true;
 }
 bool Cmd_GetNumActorsInRangeFromRef_Execute(COMMAND_ARGS)
@@ -77,7 +77,7 @@ bool Cmd_GetNumActorsInRangeFromRef_Execute(COMMAND_ARGS)
 // todo: enforce Avoid Repeating Code principle.
 // Figure out how to merge all these for loops.
 
-UInt32 __fastcall GetNumCombatActorsFromActorCALL(TESObjectREFR* thisObj, float range, UInt32 flags)
+uint32_t __fastcall GetNumCombatActorsFromActorCALL(TESObjectREFR* thisObj, float range, uint32_t flags)
 {
 	if (!thisObj) return 0;
 	if (!thisObj->IsActor()) return 0;
@@ -132,7 +132,7 @@ UInt32 __fastcall GetNumCombatActorsFromActorCALL(TESObjectREFR* thisObj, float 
 		if (getAllies)
 		{
 			CombatAlly* allies = cmbActors->allies.data;
-			for (UInt32 count = cmbActors->allies.size; count; count--, allies++)
+			for (uint32_t count = cmbActors->allies.size; count; count--, allies++)
 			{
 				actor = allies->ally;
 				IncrementNumActorsIfChecksPass(actor);
@@ -141,7 +141,7 @@ UInt32 __fastcall GetNumCombatActorsFromActorCALL(TESObjectREFR* thisObj, float 
 		if (getTargets)
 		{
 			CombatTarget* targets = cmbActors->targets.data;
-			for (UInt32 count = cmbActors->targets.size; count; count--, targets++)
+			for (uint32_t count = cmbActors->targets.size; count; count--, targets++)
 			{
 				actor = targets->target;
 				IncrementNumActorsIfChecksPass(actor);
@@ -157,7 +157,7 @@ UInt32 __fastcall GetNumCombatActorsFromActorCALL(TESObjectREFR* thisObj, float 
 			actorsArr = actor->combatAllies->data; 
 			if (actorsArr)
 			{
-				for (UInt32 count = actor->combatAllies->size; count; count--, actorsArr++)
+				for (uint32_t count = actor->combatAllies->size; count; count--, actorsArr++)
 				{
 					actor = *actorsArr;  // actor is redefined, so be careful! It is no longer thisObj in the loop.
 					IncrementNumActorsIfChecksPass(actor);
@@ -169,7 +169,7 @@ UInt32 __fastcall GetNumCombatActorsFromActorCALL(TESObjectREFR* thisObj, float 
 			actorsArr = actor->combatTargets->data;
 			if (actorsArr)
 			{
-				for (UInt32 count = actor->combatTargets->size; count; count--, actorsArr++)
+				for (uint32_t count = actor->combatTargets->size; count; count--, actorsArr++)
 				{
 					actor = *actorsArr;
 					IncrementNumActorsIfChecksPass(actor);
@@ -185,13 +185,13 @@ DEFINE_CMD_COND_PLUGIN(GetNumCombatActorsFromActor, "Returns the amount of actor
 	true, kParams_OneOptionalFloat_OneOptionalInt);
 bool Cmd_GetNumCombatActorsFromActor_Eval(COMMAND_ARGS_EVAL)
 {
-	*result = GetNumCombatActorsFromActorCALL(thisObj, *(float*)&arg1, (UInt32)arg2);
+	*result = GetNumCombatActorsFromActorCALL(thisObj, *(float*)&arg1, (uint32_t)arg2);
 	return true;
 }
 bool Cmd_GetNumCombatActorsFromActor_Execute(COMMAND_ARGS)
 {
 	float range = 0.0F;
-	UInt32 flags = 0;
+	uint32_t flags = 0;
 	if (ExtractArgs(EXTRACT_ARGS, &range, &flags))
 		*result = GetNumCombatActorsFromActorCALL(thisObj, range, flags);
 	else
@@ -290,7 +290,7 @@ bool Cmd_SetCreatureReach_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	TESCreature* creature = NULL;
-	UInt32 reach = 0;
+	uint32_t reach = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &reach, &creature) || reach < 0) return true;
 	if (!creature)
 	{
@@ -326,7 +326,7 @@ bool Cmd_SetCreatureBaseScale_Execute(COMMAND_ARGS)
 }
 
 //Copied JG's GetNearestCompassHostile code.
-UInt32 __fastcall GetNumCompassHostiles_Call(TESObjectREFR* const thisObj, float const maxRange, UInt32 flags)
+uint32_t __fastcall GetNumCompassHostiles_Call(TESObjectREFR* const thisObj, float const maxRange, uint32_t flags)
 {
 	enum FunctionFlags
 	{
@@ -336,7 +336,7 @@ UInt32 __fastcall GetNumCompassHostiles_Call(TESObjectREFR* const thisObj, float
 	if (!flags) flags = kFlag_Max;
 
 	bool const skipInvisible = flags & kFlag_SkipInvisible;
-	UInt32 numHostiles = 0;  //result
+	uint32_t numHostiles = 0;  //result
 
 	//To avoid counting "compass targets" that are super far away and can't even be seen on compass (I assume).
 	//todo: learn why this stuff is checked!
@@ -380,14 +380,14 @@ DEFINE_CMD_COND_PLUGIN(GetNumCompassHostiles, "Returns the amount of hostile act
 bool Cmd_GetNumCompassHostiles_Eval(COMMAND_ARGS_EVAL)
 {
 	float const max_range = *(float*)&arg1;
-	auto const flags = (UInt32)arg2;
+	auto const flags = (uint32_t)arg2;
 	*result = GetNumCompassHostiles_Call(thisObj, max_range, flags);
 	return true;
 }
 bool Cmd_GetNumCompassHostiles_Execute(COMMAND_ARGS)
 {
 	float max_range = 0;
-	UInt32 flags = 0;
+	uint32_t flags = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &max_range, &flags))
 		*result = GetNumCompassHostiles_Call(thisObj, max_range, flags);
 	else
@@ -400,7 +400,7 @@ DEFINE_CMD_ALT_COND_PLUGIN(GetActorValueDamage, GetAVDamage,
 bool Cmd_GetActorValueDamage_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = -1;
-	UInt32 avCode = (UInt32)arg1;
+	uint32_t avCode = (uint32_t)arg1;
 	if (auto const actor = DYNAMIC_CAST(thisObj, TESObjectREFR, Actor))
 	{
 		auto damage = actor->avOwner.GetActorValueDamage(avCode);
@@ -413,7 +413,7 @@ bool Cmd_GetActorValueDamage_Eval(COMMAND_ARGS_EVAL)
 bool Cmd_GetActorValueDamage_Execute(COMMAND_ARGS)
 {
 	*result = -1;
-	UInt32 avCode;
+	uint32_t avCode;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &avCode))
 		return true;
 	return Cmd_GetActorValueDamage_Eval(thisObj, (void*)avCode, 0, result);
@@ -527,7 +527,7 @@ DEFINE_CMD_ALT_COND_PLUGIN(GetIsPlayerOverencumbered, IsPCOverencumbered,
 bool Cmd_GetIsPlayerOverencumbered_Eval(COMMAND_ARGS_EVAL)
 {
 	// Imitate PlayerCharacter::GetIsOverencumbered at 0x954CC0.
-	if (bool const ignoreGodMode = reinterpret_cast<UInt32>(arg1) != 0; 
+	if (bool const ignoreGodMode = reinterpret_cast<uint32_t>(arg1) != 0; 
 		!ignoreGodMode)
 	{
 		if (GetIsGodMode()) {
@@ -543,7 +543,7 @@ bool Cmd_GetIsPlayerOverencumbered_Eval(COMMAND_ARGS_EVAL)
 }
 bool Cmd_GetIsPlayerOverencumbered_Execute(COMMAND_ARGS)
 {
-	UInt32 ignoreGodMode = false;
+	uint32_t ignoreGodMode = false;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &ignoreGodMode);
 	return Cmd_GetIsPlayerOverencumbered_Eval(nullptr, reinterpret_cast<void*>(ignoreGodMode), nullptr, result);
 }
@@ -563,7 +563,7 @@ bool Cmd_GetCalculatedActorSpread_Execute(COMMAND_ARGS)
 {
 	*result = -1.0;
 
-	UInt32 spreadMode = kSpreadMode_INVALID;
+	uint32_t spreadMode = kSpreadMode_INVALID;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &spreadMode);
 
 	if (!thisObj || !IS_ACTOR(thisObj))
@@ -764,7 +764,7 @@ DEFINE_COMMAND_ALT_PLUGIN(ForceHitStaggerReaction, ForceHitReaction, "Only works
 bool Cmd_ForceHitStaggerReaction_Execute(COMMAND_ARGS)
 {
 	*result = 0; // bSuccess
-	UInt32 checkForIgnoreCrippledLimbsAV = 0;
+	uint32_t checkForIgnoreCrippledLimbsAV = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &checkForIgnoreCrippledLimbsAV))
 		return true;
 	if (!thisObj || !IS_ACTOR(thisObj))
@@ -784,7 +784,7 @@ bool Cmd_ForceHitStaggerReaction_Execute(COMMAND_ARGS)
 		// Needed so that the idle anims with conditions for GetForceHitReaction will play.
 		actor->forceHit = true;
 
-		constexpr UInt32 g_idleAnimsDirectoryMap_Addr = 0x11CB6A0;
+		constexpr uint32_t g_idleAnimsDirectoryMap_Addr = 0x11CB6A0;
 		auto* idle = ThisCall<TESIdleForm*>(0x600950, *(void**)g_idleAnimsDirectoryMap_Addr, actor, hitData->projectile);
 		if (!idle)
 			return true;

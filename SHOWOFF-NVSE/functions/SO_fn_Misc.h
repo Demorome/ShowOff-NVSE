@@ -95,14 +95,14 @@ bool Cmd_ListAddList_Execute(COMMAND_ARGS)
 	*result = 1;
 	BGSListForm* pListForm = nullptr;
 	BGSListForm* pToAppendList = nullptr;
-	UInt32 addAtIndex = eListEnd;
+	uint32_t addAtIndex = eListEnd;
 
 	ExtractArgsEx(EXTRACT_ARGS_EX, &pListForm, &pToAppendList, &addAtIndex);
 	if (!pListForm || !pToAppendList) return true;
 
 	auto Try_Adding_Form_From_FormList = [&](TESForm* form)
 	{
-		UInt32 const addedAtIndex = pListForm->AddAt(form, addAtIndex);
+		uint32_t const addedAtIndex = pListForm->AddAt(form, addAtIndex);
 		if (addedAtIndex == eListInvalid)
 		{
 			*result = 0; //error
@@ -147,7 +147,7 @@ bool Cmd_ListAddList_Execute(COMMAND_ARGS)
 	return true;
 }
 
-const UInt32 kMsgIconsPathAddr[] = { 0x10208A0, 0x10208E0, 0x1025CDC, 0x1030E78, 0x103A830, 0x1049638, 0x104BFE8 };
+const uint32_t kMsgIconsPathAddr[] = { 0x10208A0, 0x10208E0, 0x1025CDC, 0x1030E78, 0x103A830, 0x1049638, 0x104BFE8 };
 
 //99% ripped from JIP's MessageExAlt.
 bool Cmd_MessageExAltShowoff_Execute(COMMAND_ARGS)
@@ -201,8 +201,8 @@ bool Cmd_GetNumQueuedCornerMessages_Eval(COMMAND_ARGS_EVAL)
 bool Cmd_IsAnimPlayingExCond_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
-	auto const category = (UInt32)arg1;
-	auto const subType = (UInt32)arg2;  //optional
+	auto const category = (uint32_t)arg1;
+	auto const subType = (uint32_t)arg2;  //optional
 
 	if (!thisObj) return true;
 	if (category > 5 || category < 1) return true;
@@ -211,9 +211,9 @@ bool Cmd_IsAnimPlayingExCond_Eval(COMMAND_ARGS_EVAL)
 	AnimData* animData = thisObj->GetAnimData();
 	if (!animData) return true;
 	const AnimGroupClassify* classify;
-	for (UInt16 groupID : animData->animGroupIDs)
+	for (uint16_t groupID : animData->animGroupIDs)
 	{
-		UInt32 const animID = groupID & 0xFF;
+		uint32_t const animID = groupID & 0xFF;
 		if (animID >= 245) continue;
 		classify = &s_animGroupClassify[animID];
 		if (classify->category == category && (category >= 4 || (!subType || classify->subType == subType)))
@@ -228,7 +228,7 @@ bool Cmd_IsAnimPlayingExCond_Eval(COMMAND_ARGS_EVAL)
 bool Cmd_IsAnimPlayingExCond_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	UInt32 category, subType = 0;
+	uint32_t category, subType = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &category, &subType)) return true;
 
 	return Cmd_IsAnimPlayingExCond_Eval(thisObj, (void*)category, (void*)subType, result);
@@ -316,7 +316,7 @@ bool Cmd_PlayerIsDrinkingPlacedWater_Eval(COMMAND_ARGS_EVAL)
 
 bool Cmd_SetIsPCAMurderer_Execute(COMMAND_ARGS)
 {
-	UInt32 bIsMurderer = 0;
+	uint32_t bIsMurderer = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bIsMurderer)) return true;
 	PlayerCharacter::GetSingleton()->bIsAMurderer = (bIsMurderer != 0);
 	return true;
@@ -332,8 +332,8 @@ bool Cmd_IsNight_Eval(COMMAND_ARGS_EVAL)
 	float sunrise, sunset;
 	if (climate && IS_TYPE(climate, TESClimate))
 	{
-		sunrise = ThisCall<UInt8>(0x595F10, climate, 1) / 6.0F;  //sunrise begin sprinkled with adjustments.
-		sunset = ThisCall<UInt8>(0x595F10, climate, 2) / 6.0F;  //Second arg determines which type of time to check.
+		sunrise = ThisCall<uint8_t>(0x595F10, climate, 1) / 6.0F;  //sunrise begin sprinkled with adjustments.
+		sunset = ThisCall<uint8_t>(0x595F10, climate, 2) / 6.0F;  //Second arg determines which type of time to check.
 	}
 	else
 	{
@@ -358,8 +358,8 @@ bool Cmd_IsLimbCrippled_Eval(COMMAND_ARGS_EVAL)
 	*result = 0;
 	if (!IS_ACTOR(thisObj)) return true;
 	Actor* const actor = (Actor*)thisObj;
-	UInt32 limbID = (UInt32)arg1;
-	UInt32 const threshold = (UInt32)arg2;
+	uint32_t limbID = (uint32_t)arg1;
+	uint32_t const threshold = (uint32_t)arg2;
 	if (limbID == -1)
 	{
 		//loop through all limb health AVs and break if a single one is at 0 health (or below threshold).
@@ -383,8 +383,8 @@ bool Cmd_IsLimbCrippled_Eval(COMMAND_ARGS_EVAL)
 bool Cmd_IsLimbCrippled_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	UInt32 limbID = -1;
-	UInt32 threshold = 0;
+	uint32_t limbID = -1;
+	uint32_t threshold = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &limbID, &threshold)) return true;
 	return Cmd_IsLimbCrippled_Eval(thisObj, (void*)limbID, (void*)threshold, result);
 }
@@ -394,9 +394,9 @@ bool Cmd_GetNumCrippledLimbs_Eval(COMMAND_ARGS_EVAL)
 	*result = 0;
 	if (!IS_ACTOR(thisObj)) return true;
 	Actor* const actor = (Actor*)thisObj;
-	UInt32 const threshold = (UInt32)arg1;
-	UInt32 numCrippledLimbs = 0;
-	for (UInt32 limbID = kAVCode_PerceptionCondition; limbID <= kAVCode_BrainCondition; limbID++)
+	uint32_t const threshold = (uint32_t)arg1;
+	uint32_t numCrippledLimbs = 0;
+	for (uint32_t limbID = kAVCode_PerceptionCondition; limbID <= kAVCode_BrainCondition; limbID++)
 	{
 		if (actor->avOwner.GetActorValue(limbID) <= threshold)
 		{
@@ -409,7 +409,7 @@ bool Cmd_GetNumCrippledLimbs_Eval(COMMAND_ARGS_EVAL)
 bool Cmd_GetNumCrippledLimbs_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	UInt32 threshold = 0;
+	uint32_t threshold = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &threshold)) return true;
 	return Cmd_GetNumCrippledLimbs_Eval(thisObj, (void*)threshold, 0, result);
 }
@@ -420,7 +420,7 @@ bool Cmd_GetCrippledLimbsAsBitMask_Eval(COMMAND_ARGS_EVAL)
 	*result = 0;
 	if (!IS_ACTOR(thisObj)) return true;
 	Actor* const actor = (Actor*)thisObj;
-	UInt32 const threshold = (UInt32)arg1;
+	uint32_t const threshold = (uint32_t)arg1;
 
 	enum LimbGoneFlags
 	{
@@ -432,10 +432,10 @@ bool Cmd_GetCrippledLimbsAsBitMask_Eval(COMMAND_ARGS_EVAL)
 		kFlag_RightLeg = 0x20,
 		kFlag_Brain = 0x40,
 	};
-	UInt32 flagsArr[7] = { kFlag_Head, kFlag_Torso, kFlag_LeftArm, kFlag_RightArm, kFlag_LeftLeg, kFlag_RightLeg, kFlag_Brain };
+	uint32_t flagsArr[7] = { kFlag_Head, kFlag_Torso, kFlag_LeftArm, kFlag_RightArm, kFlag_LeftLeg, kFlag_RightLeg, kFlag_Brain };
 
-	UInt32 CrippledLimbsMask = 0;
-	for (UInt32 limbID = kAVCode_PerceptionCondition; limbID <= kAVCode_BrainCondition; limbID++)
+	uint32_t CrippledLimbsMask = 0;
+	for (uint32_t limbID = kAVCode_PerceptionCondition; limbID <= kAVCode_BrainCondition; limbID++)
 	{
 		if (actor->avOwner.GetActorValue(limbID) <= threshold)
 		{
@@ -448,7 +448,7 @@ bool Cmd_GetCrippledLimbsAsBitMask_Eval(COMMAND_ARGS_EVAL)
 bool Cmd_GetCrippledLimbsAsBitMask_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	UInt32 threshold = 0;
+	uint32_t threshold = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &threshold)) return true;
 	return Cmd_GetCrippledLimbsAsBitMask_Eval(thisObj, (void*)threshold, 0, result);
 }
@@ -456,9 +456,9 @@ bool Cmd_GetCrippledLimbsAsBitMask_Execute(COMMAND_ARGS)
 // Copied ClearJIPSavedData
 bool Cmd_ClearShowoffSavedData_Execute(COMMAND_ARGS)
 {
-	UInt32 auxStringMaps, auxTimerMaps;
+	uint32_t auxStringMaps, auxTimerMaps;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &auxStringMaps, &auxTimerMaps)) return true;
-	UInt8 modIdx = scriptObj->GetOverridingModIdx();
+	uint8_t modIdx = scriptObj->GetOverridingModIdx();
 	if (auxStringMaps && s_auxStringMapArraysPerm.Erase((auxStringMaps == 2) ? 0xFF : modIdx))  //todo: fix .Erase not doing anything!
 		s_dataChangedFlags |= kChangedFlag_AuxStringMaps;
 	if (auxTimerMaps && AuxTimer::s_auxTimerMapArraysPerm.Erase((auxTimerMaps == 2) ? 0xFF : modIdx))
@@ -489,18 +489,18 @@ public:
 		kInvalid_Seed = -1,
 	};
 
-	UInt32 seed;
+	uint32_t seed;
 	// constructor that sets seed
-	Random_Engine(UInt32 newSeed) : std::default_random_engine(newSeed), seed(newSeed)
+	Random_Engine(uint32_t newSeed) : std::default_random_engine(newSeed), seed(newSeed)
 	{}
 };
 
-UnorderedMap<UInt32, Random_Engine*> g_ModsAndSeedsMap;
+UnorderedMap<uint32_t, Random_Engine*> g_ModsAndSeedsMap;
 
-void SetSeedForMod(UInt32 seed, Script* scriptObj)
+void SetSeedForMod(uint32_t seed, Script* scriptObj)
 {
 	if (!seed) seed = std::default_random_engine::default_seed;
-	UInt8 const modIdx = scriptObj->GetOverridingModIdx();
+	uint8_t const modIdx = scriptObj->GetOverridingModIdx();
 	ScopedLock lock(g_Lock);
 	// Change the engine's seed by just deleting the old engine and creating a new one.
 	auto const oldGen = g_ModsAndSeedsMap.Get(modIdx);
@@ -512,7 +512,7 @@ void SetSeedForMod(UInt32 seed, Script* scriptObj)
 
 bool Cmd_SetRandomizerSeed_Execute(COMMAND_ARGS)
 {
-	UInt32 seed = 0;
+	uint32_t seed = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &seed)) return true;
 	SetSeedForMod(seed, scriptObj);
 	return true;
@@ -522,7 +522,7 @@ bool Cmd_SetSeedUsingForm_Execute(COMMAND_ARGS)
 {
 	TESForm* seedForm = nullptr;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &seedForm)) return true;
-	UInt32 const seed = seedForm ? seedForm->refID : 0;
+	uint32_t const seed = seedForm ? seedForm->refID : 0;
 	SetSeedForMod(seed, scriptObj);
 	return true;
 }
@@ -530,7 +530,7 @@ bool Cmd_SetSeedUsingForm_Execute(COMMAND_ARGS)
 bool Cmd_GetRandomizerSeed_Execute(COMMAND_ARGS)
 {
 	*result = Random_Engine::kInvalid_Seed;
-	UInt8 const modIdx = scriptObj->GetOverridingModIdx();
+	uint8_t const modIdx = scriptObj->GetOverridingModIdx();
 	if (auto const currGen = g_ModsAndSeedsMap.Get(modIdx))
 	{
 		*result = currGen->seed;
@@ -538,9 +538,9 @@ bool Cmd_GetRandomizerSeed_Execute(COMMAND_ARGS)
 	return true;
 }
 
-UInt32 RandSeeded_Call(UInt32 min, UInt32 max, Script* scriptObj)
+uint32_t RandSeeded_Call(uint32_t min, uint32_t max, Script* scriptObj)
 {
-	UInt8 const modIdx = scriptObj->GetOverridingModIdx();
+	uint8_t const modIdx = scriptObj->GetOverridingModIdx();
 	ScopedLock lock(g_Lock);
 	Random_Engine* generator = g_ModsAndSeedsMap.Get(modIdx);
 	if (!generator)
@@ -556,7 +556,7 @@ UInt32 RandSeeded_Call(UInt32 min, UInt32 max, Script* scriptObj)
 bool Cmd_RandSeeded_Execute(COMMAND_ARGS)
 {
 	*result = Random_Engine::kInvalid_Seed;
-	UInt32 min, max;
+	uint32_t min, max;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &min, &max) || min > max) return true;
 	*result = RandSeeded_Call(min, max, scriptObj);
 	return true;
@@ -572,9 +572,9 @@ bool Cmd_GetRandomPercentSeeded_Execute(COMMAND_ARGS)
 bool Cmd_AdvanceSeed_Execute(COMMAND_ARGS)
 {
 	*result = false;
-	UInt32 discardAmount;
+	uint32_t discardAmount;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &discardAmount)) return true;
-	UInt8 const modIdx = scriptObj->GetOverridingModIdx();
+	uint8_t const modIdx = scriptObj->GetOverridingModIdx();
 	if (auto currGen = g_ModsAndSeedsMap.Get(modIdx))
 	{
 		ScopedLock lock(g_Lock);
@@ -612,7 +612,7 @@ std::atomic<bool> questMsgEnabled = true;
 bool Cmd_ToggleQuestMessages_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	SInt32 bOn = -1;  // If -1 (default), return the toggle status.
+	int32_t bOn = -1;  // If -1 (default), return the toggle status.
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bOn))
 		return true;
 
@@ -672,8 +672,8 @@ bool Cmd_GetPipboyRadioVoiceEntryData_Execute(COMMAND_ARGS)
 {
 	using namespace PipboyRadioFunctions;
 	*result = 0;
-	UInt32 info;
-	UInt32 bGetDeep = 0;  // if true, return a multidimensional array with the info for each individual VoiceEntryList that is queued.
+	uint32_t info;
+	uint32_t bGetDeep = 0;  // if true, return a multidimensional array with the info for each individual VoiceEntryList that is queued.
 	if (!ExtractArgs(EXTRACT_ARGS, &info, &bGetDeep))
 		return true;
 
@@ -748,7 +748,7 @@ bool Cmd_FormListRemoveForm_Execute(COMMAND_ARGS)
 	TESForm* pForm;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pListForm, &pForm))
 		return true;
-	SInt32 const index = pListForm->RemoveForm(pForm);
+	int32_t const index = pListForm->RemoveForm(pForm);
 	pListForm->MarkAsModified(0x80000000);
 	*result = index;
 	return true;
@@ -792,7 +792,7 @@ bool Cmd_GetCellEncounterZone_Execute(COMMAND_ARGS)
 DEFINE_COMMAND_PLUGIN(ShowPauseMenu, "", false, kParams_OneOptionalInt);
 bool Cmd_ShowPauseMenu_Execute(COMMAND_ARGS)
 {
-	enum PauseMode : UInt32
+	enum PauseMode : uint32_t
 	{
 		kJustPause = 0,
 		kLoad, kSave, kSettings, kHelp
@@ -810,7 +810,7 @@ bool Cmd_ShowPauseMenu_Execute(COMMAND_ARGS)
 	{
 		//Make every main option disabled.
 		menu->main_options084.SetParentEnabled(false);
-		UInt32 callback_addr;
+		uint32_t callback_addr;
 		switch (pauseMode)
 		{
 		case kLoad:
@@ -834,7 +834,7 @@ bool Cmd_ShowPauseMenu_Execute(COMMAND_ARGS)
 		do {
 			if (auto item = iter->data)
 			{
-				if ((UInt32)item->object->followupOption_callback == callback_addr)
+				if ((uint32_t)item->object->followupOption_callback == callback_addr)
 				{
 					item->tile->SetFloat(TraitNameToID("_selected"), 1, true);
 					break;
@@ -934,7 +934,7 @@ bool Cmd_SetEnableParent_Execute(COMMAND_ARGS)
 bool Cmd_GetActorValueName_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	UInt32 av;
+	uint32_t av;
 	enum Mode {
 		kMode_GetEditorName = 0,
 		kMode_GetFullLocalizedName,
@@ -971,7 +971,7 @@ bool Cmd_SetAmmoName_Execute(COMMAND_ARGS)
 {
 	*result = 0; // success
 	char string[256];
-	UInt32 nameTypeToChange = 0;
+	uint32_t nameTypeToChange = 0;
 	TESForm* form = nullptr;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &string, &nameTypeToChange, &form))
 		return true;
@@ -1007,7 +1007,7 @@ bool Cmd_GetAmmoName_Execute(COMMAND_ARGS)
 {
 	const char* name = ""; // result
 
-	UInt32 nameTypeToChange = 0;
+	uint32_t nameTypeToChange = 0;
 	TESForm* form = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &nameTypeToChange, &form))
 	{
@@ -1071,8 +1071,8 @@ bool Cmd_SpawnTracingProjectile_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	TESForm* baseProjToSpawn;
-	UInt32 ignoreGravity = 1;
-	UInt32 bCopyData = false;
+	uint32_t ignoreGravity = 1;
+	uint32_t bCopyData = false;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &baseProjToSpawn, &ignoreGravity, &bCopyData))
 		return true;
 	if (!thisObj || !IS_PROJECTILE(thisObj) || !IS_TYPE(baseProjToSpawn, BGSProjectile))
@@ -1133,7 +1133,7 @@ bool Cmd_PatchFreezeTime_Execute(COMMAND_ARGS)
 DEFINE_COMMAND_PLUGIN(ToANSIChar, "", false, kParams_OneInt_OneOptionalInt);
 bool Cmd_ToANSIChar_Execute(COMMAND_ARGS)
 {
-	UInt32 scancode = 0;
+	uint32_t scancode = 0;
 	bool ignoreShift = false;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &scancode, &ignoreShift))
 	{
@@ -1234,7 +1234,7 @@ bool Cmd_CaravanDeckAddCard_Execute(COMMAND_ARGS)
 	*result = eListInvalid;
 	TESForm* deckForm;
 	TESForm* cardForm;
-	SInt32 n = eListEnd;
+	int32_t n = eListEnd;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &deckForm, &cardForm, &n)
 		|| !IS_TYPE(deckForm, TESCaravanDeck) || !IS_TYPE(cardForm, TESCaravanCard))
 	{
@@ -1433,7 +1433,7 @@ bool Cmd_GetQueuedCornerMessages_Execute(COMMAND_ARGS)
 DEFINE_COMMAND_ALT_PLUGIN(SetBaseActorValue, SetBaseAV, "", false, kParams_JIP_OneActorValue_OneFloat_OneOptionalActorBase);
 bool Cmd_SetBaseActorValue_Execute(COMMAND_ARGS)
 {
-	UInt32 actorVal;
+	uint32_t actorVal;
 	float valueToSet;
 	TESActorBase* actorBase = NULL;
 	if (!ExtractArgs(EXTRACT_ARGS, &actorVal, &valueToSet, &actorBase)) return true;
@@ -1442,7 +1442,7 @@ bool Cmd_SetBaseActorValue_Execute(COMMAND_ARGS)
 		if (!thisObj || !thisObj->IsActor()) return true;
 		actorBase = (TESActorBase*)thisObj->baseForm;
 	}
-	UInt32 currentValue = *result = actorBase->avOwner.GetActorValue(actorVal);
+	uint32_t currentValue = *result = actorBase->avOwner.GetActorValue(actorVal);
 	actorBase->ModActorValue(actorVal, (valueToSet - currentValue));
 	return true;
 }

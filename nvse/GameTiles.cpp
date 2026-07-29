@@ -8,24 +8,24 @@
 typedef NiTMapBase<const char*, int> TraitNameMap;
 TraitNameMap *g_traitNameMap = (TraitNameMap*)0x11F32F4;
 const _TraitNameToID TraitNameToID = (_TraitNameToID)0xA01860;
-UInt32 (*TraitNameToIDAdd)(const char*, UInt32) = (UInt32 (*)(const char*, UInt32))0xA00940;
+uint32_t (*TraitNameToIDAdd)(const char*, uint32_t) = (uint32_t (*)(const char*, uint32_t))0xA00940;
 
 enum
 {
 	kAddr_TileGetFloat = 0xA011B0,
 };
 
-UInt32 Tile::TraitNameToID(const char *traitName)
+uint32_t Tile::TraitNameToID(const char *traitName)
 {
 	return ::TraitNameToID(traitName);
 }
 
-UInt32 Tile::TraitNameToIDAdd(const char *traitName)
+uint32_t Tile::TraitNameToIDAdd(const char *traitName)
 {
 	return ::TraitNameToIDAdd(traitName, 0xFFFFFFFF);
 }
 
-Tile::Value *Tile::GetValue(UInt32 typeID)
+Tile::Value *Tile::GetValue(uint32_t typeID)
 {
 	Value *value;
 	for (BSSimpleArray<Value*>::Iterator iter(values); !iter.End(); ++iter)
@@ -42,13 +42,13 @@ Tile::Value *Tile::GetValueName(const char *valueName)
 	return GetValue(TraitNameToID(valueName));
 }
 
-__declspec(naked) float Tile::GetValueFloat(UInt32 id)
+__declspec(naked) float Tile::GetValueFloat(uint32_t id)
 {
-	static const UInt32 procAddr = kAddr_TileGetFloat;
+	static const uint32_t procAddr = kAddr_TileGetFloat;
 	__asm	jmp		procAddr
 }
 
-DListNode<Tile> *Tile::GetNthChild(UInt32 index)
+DListNode<Tile> *Tile::GetNthChild(uint32_t index)
 {
 	return children.Tail()->Regress(index);
 }
@@ -86,7 +86,7 @@ Menu *Tile::GetParentMenu()
 	return NULL;
 }
 
-__declspec(naked) void Tile::PokeValue(UInt32 valueID)
+__declspec(naked) void Tile::PokeValue(uint32_t valueID)
 {
 	__asm
 	{
@@ -241,7 +241,7 @@ void Tile::Dump()
 
 void Debug_DumpTraits(void)
 {
-	for(UInt32 i = 0; i < g_traitNameMap->numBuckets; i++)
+	for(uint32_t i = 0; i < g_traitNameMap->numBuckets; i++)
 	{
 		for (TraitNameMap::Entry * bucket = g_traitNameMap->buckets[i]; bucket; bucket = bucket->next)
 		{
@@ -254,7 +254,7 @@ void Debug_DumpTraits(void)
 // also this is slow and sucks
 const char *TraitIDToName(int id)
 {
-	for (UInt32 i = 0; i < g_traitNameMap->numBuckets; i++)
+	for (uint32_t i = 0; i < g_traitNameMap->numBuckets; i++)
 		for (TraitNameMap::Entry * bucket = g_traitNameMap->buckets[i]; bucket; bucket = bucket->next)
 			if(bucket->data == id)
 				return bucket->key;

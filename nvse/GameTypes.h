@@ -13,15 +13,15 @@ public:
 	~String();
 
 	char		*m_data;
-	UInt16		m_dataLen;
-	UInt16		m_bufLen;
+	uint16_t		m_dataLen;
+	uint16_t		m_bufLen;
 
-	void Init(UInt32 bufSize);
+	void Init(uint32_t bufSize);
 	bool Set(const char *src);
 	bool Append(const char *toAppend);
 	void AppendChar(char toAppend);
-	void InsertChar(char toInsert, UInt32 index);
-	void EraseAt(UInt32 index);
+	void InsertChar(char toInsert, uint32_t index);
+	void EraseAt(uint32_t index);
 	const char *CStr();
 	size_t GetLength();
 };
@@ -34,13 +34,13 @@ enum
 };
 
 // These decls were taken from JIP
-typedef void* (*_FormHeap_Allocate)(UInt32 size);
+typedef void* (*_FormHeap_Allocate)(uint32_t size);
 extern const _FormHeap_Allocate FormHeap_Allocate;
 
 typedef void (*_FormHeap_Free)(void *ptr);
 extern const _FormHeap_Free FormHeap_Free;
 
-typedef TESForm* (*_LookupFormByID)(UInt32 id);
+typedef TESForm* (*_LookupFormByID)(uint32_t id);
 extern const _LookupFormByID LookupFormByID;
 
 template <typename T_Data> struct ListNode
@@ -106,9 +106,9 @@ private:
 	Node	m_listHead;
 
 	template <class Op>
-	UInt32 FreeNodes(Node *node, Op &compareOp) const
+	uint32_t FreeNodes(Node *node, Op &compareOp) const
 	{
-		static UInt32 nodeCount = 0, numFreed = 0, lastNumFreed = 0;
+		static uint32_t nodeCount = 0, numFreed = 0, lastNumFreed = 0;
 		if (node->next)
 		{
 			nodeCount++;
@@ -128,9 +128,9 @@ private:
 		return lastNumFreed;
 	}
 
-	Node *GetLastNode(SInt32 *outIdx = NULL) const
+	Node *GetLastNode(int32_t *outIdx = NULL) const
 	{
-		SInt32 index = 0;
+		int32_t index = 0;
 		Node *node = Head();
 		while (node->next)
 		{
@@ -141,7 +141,7 @@ private:
 		return node;
 	}
 
-	Node *GetNthNode(SInt32 index) const
+	Node *GetNthNode(int32_t index) const
 	{
 		if (index >= 0)
 		{
@@ -205,11 +205,11 @@ public:
 	
 	const Iterator Begin() const {return Iterator(Head());}
 
-	UInt32 Count() const
+	uint32_t Count() const
 	{
 		if (!m_listHead.data) return 0;
 		Node *node = Head();
-		UInt32 count = 1;
+		uint32_t count = 1;
 		while (node = node->next) count++;
 		return count;
 	};
@@ -236,7 +236,7 @@ public:
 		return GetLastNode()->data;
 	}
 
-	Item *GetNthItem(SInt32 index) const
+	Item *GetNthItem(int32_t index) const
 	{
 		if (eListEnd == index)
 			return GetLastNode()->data;
@@ -244,7 +244,7 @@ public:
 		return node ? node->data : NULL;
 	}
 
-	SInt32 AddAt(Item *item, SInt32 index)
+	int32_t AddAt(Item *item, int32_t index)
 	{
 		if (!item) return eListInvalid;
 		Node *node;
@@ -268,9 +268,9 @@ public:
 		return index;
 	}
 
-	SInt32 Append(Item *item)
+	int32_t Append(Item *item)
 	{
-		SInt32 index = eListInvalid;
+		int32_t index = eListInvalid;
 		if (item)
 		{
 			Node *node = GetLastNode(&index);
@@ -347,9 +347,9 @@ public:
 	}
 
 	template <class Op>
-	UInt32 CountIf(Op &op) const
+	uint32_t CountIf(Op &op) const
 	{
-		UInt32 count = 0;
+		uint32_t count = 0;
 		Node *curr = Head();
 		do
 		{
@@ -394,7 +394,7 @@ public:
 		}
 	}
 
-	Item *RemoveNth(SInt32 idx)
+	Item *RemoveNth(int32_t idx)
 	{
 		Item *removed = NULL;
 		if (idx <= 0)
@@ -416,9 +416,9 @@ public:
 		return removed;
 	};
 
-	UInt32 Remove(Item *item)
+	uint32_t Remove(Item *item)
 	{
-		UInt32 removed = 0;
+		uint32_t removed = 0;
 		Node *curr = Head(), *prev = NULL;
 		do
 		{
@@ -437,7 +437,7 @@ public:
 		return removed;
 	}
 
-	Item *ReplaceNth(SInt32 index, Item *item)
+	Item *ReplaceNth(int32_t index, Item *item)
 	{
 		Item *replaced = NULL;
 		if (item)
@@ -456,9 +456,9 @@ public:
 		return replaced;
 	}
 
-	UInt32 Replace(Item *item, Item *replace)
+	uint32_t Replace(Item *item, Item *replace)
 	{
-		UInt32 replaced = 0;
+		uint32_t replaced = 0;
 		Node *curr = Head();
 		do
 		{
@@ -474,14 +474,14 @@ public:
 	}
 
 	template <class Op>
-	UInt32 RemoveIf(Op &op)
+	uint32_t RemoveIf(Op &op)
 	{
 		return FreeNodes(Head(), op);
 	}
 
-	SInt32 GetIndexOf(Item *item)
+	int32_t GetIndexOf(Item *item)
 	{
-		SInt32 idx = 0;
+		int32_t idx = 0;
 		Node *curr = Head();
 		do
 		{
@@ -494,9 +494,9 @@ public:
 	}
 
 	template <class Op>
-	SInt32 GetIndexOf(Op &op)
+	int32_t GetIndexOf(Op &op)
 	{
-		SInt32 idx = 0;
+		int32_t idx = 0;
 		Node *curr = Head();
 		do
 		{
@@ -516,7 +516,7 @@ template <typename T_Data> struct DListNode
 	DListNode	*prev;
 	T_Data		*data;
 
-	DListNode *Advance(UInt32 times)
+	DListNode *Advance(uint32_t times)
 	{
 		DListNode *result = this;
 		while (result && times)
@@ -527,7 +527,7 @@ template <typename T_Data> struct DListNode
 		return result;
 	}
 
-	DListNode *Regress(UInt32 times)
+	DListNode *Regress(uint32_t times)
 	{
 		DListNode *result = this;
 		while (result && times)
@@ -547,13 +547,13 @@ public:
 private:
 	Node		*first;
 	Node		*last;
-	UInt32		count;
+	uint32_t		count;
 
 public:
 	bool Empty() const {return !first;}
 	Node *Head() {return first;}
 	Node *Tail() {return last;}
-	UInt32 Size() const {return count;}
+	uint32_t Size() const {return count;}
 };
 
 // 010
@@ -564,15 +564,15 @@ public:
 	BSSimpleList<T>();
 	~BSSimpleList<T>();
 
-	virtual void	Unk_00(UInt32 arg);
+	virtual void	Unk_00(uint32_t arg);
 	virtual void	Unk_01(void);
-	virtual void	Unk_02(UInt32 arg);
-	virtual void	Unk_03(UInt32 arg);
+	virtual void	Unk_02(uint32_t arg);
+	virtual void	Unk_03(uint32_t arg);
 	virtual void	Unk_04(void);
-	virtual UInt32	Unk_05(UInt32 arg1, UInt32 arg2);
-	virtual void	Unk_06(UInt32 arg);
+	virtual uint32_t	Unk_05(uint32_t arg1, uint32_t arg2);
+	virtual void	Unk_06(uint32_t arg);
 	virtual void	Unk_07(void);
-	virtual void	Unk_08(UInt32 arg);
+	virtual void	Unk_08(uint32_t arg);
 
 	tList<T>	list;
 };
@@ -581,15 +581,15 @@ static_assert(sizeof(BSSimpleList<void *>) == 0xC);
 //#if RUNTIME
 //
 //#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
-//const UInt32 _NiTMap_Lookup = 0x00853130;
+//const uint32_t _NiTMap_Lookup = 0x00853130;
 //#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-//const UInt32 _NiTMap_Lookup = 0x00844740;
+//const uint32_t _NiTMap_Lookup = 0x00844740;
 //#else
 //#error
 //#endif
 //
 //#else
-//const UInt32 _NiTMap_Lookup = 0;
+//const uint32_t _NiTMap_Lookup = 0;
 //#endif
 
 //// 10
@@ -600,7 +600,7 @@ static_assert(sizeof(BSSimpleList<void *>) == 0xC);
 //	NiTMapBase();
 //	virtual ~NiTMapBase();
 //
-//	virtual UInt32	CalcBucket(T_Key data);
+//	virtual uint32_t	CalcBucket(T_Key data);
 //	virtual bool	CompareKey(T_Key lhs, T_Key rhs);
 //	virtual void	Unk_03(void);
 //	virtual void	Unk_04(void);
@@ -617,9 +617,9 @@ static_assert(sizeof(BSSimpleList<void *>) == 0xC);
 //	};
 //
 //	// void		** vtbl				// 00
-//	UInt32		m_numBuckets;		// 04
+//	uint32_t		m_numBuckets;		// 04
 //	Bucket		** m_buckets;		// 08
-//	UInt32		m_numItems;			// 0C
+//	uint32_t		m_numItems;			// 0C
 //};
 
 //template <typename T>
@@ -627,18 +627,18 @@ static_assert(sizeof(BSSimpleList<void *>) == 0xC);
 //{
 //	void	* _vtbl;	// 00
 //	T		* data;		// 04
-//	UInt16	unk08;		// 08 - current size init'd to size of preallocation
-//	UInt16	length;		// 0A - init'd to 0
-//	UInt16	unk0C;		// 0C - count of not null elements init'd to 0
-//	UInt16	unk0E;		// 0E - available size init'd to size of preallocation
+//	uint16_t	unk08;		// 08 - current size init'd to size of preallocation
+//	uint16_t	length;		// 0A - init'd to 0
+//	uint16_t	unk0C;		// 0C - count of not null elements init'd to 0
+//	uint16_t	unk0E;		// 0E - available size init'd to size of preallocation
 //
-//	T operator[](UInt32 idx) {
+//	T operator[](uint32_t idx) {
 //		if (idx < length)
 //			return data[idx];
 //		return NULL;
 //	}
 //
-//	T Get(UInt32 idx) { return (*this)[idx]; }
+//	T Get(uint32_t idx) { return (*this)[idx]; }
 //};
 
 template <typename T_Data>
@@ -647,10 +647,10 @@ struct BSSimpleArray
 	virtual void	Destroy(bool doFree);
 
 	T_Data		*data;			// 04
-	UInt32		size;			// 08
-	UInt32		alloc;			// 0C
+	uint32_t		size;			// 08
+	uint32_t		alloc;			// 0C
 
-	T_Data operator[](UInt32 idx)
+	T_Data operator[](uint32_t idx)
 	{
 		return (idx < size) ? data[idx] : NULL;
 	}
@@ -661,7 +661,7 @@ struct BSSimpleArray
 		friend BSSimpleArray;
 
 		T_Data		*pData;
-		UInt32		count;
+		uint32_t		count;
 
 	public:
 		bool End() const {return !count;}
@@ -680,7 +680,7 @@ struct BSSimpleArray
 	};
 };
 
-//// this is a NiTPointerMap <UInt32, T_Data>
+//// this is a NiTPointerMap <uint32_t, T_Data>
 //// todo: generalize key
 //template <typename T_Data>
 //class NiTPointerMap
@@ -692,7 +692,7 @@ struct BSSimpleArray
 //	struct Entry
 //	{
 //		Entry	* next;
-//		UInt32	key;
+//		uint32_t	key;
 //		T_Data	* data;
 //	};
 //
@@ -702,12 +702,12 @@ struct BSSimpleArray
 //		friend NiTPointerMap;
 //
 //	public:
-//		Iterator(NiTPointerMap * table, Entry * entry = NULL, UInt32 bucket = 0)
+//		Iterator(NiTPointerMap * table, Entry * entry = NULL, uint32_t bucket = 0)
 //			:m_table(table), m_entry(entry), m_bucket(bucket) { FindValid(); }
 //		~Iterator() { }
 //
 //		T_Data *	Get(void);
-//		UInt32		GetKey(void);
+//		uint32_t		GetKey(void);
 //		bool		Next(void);
 //		bool		Done(void);
 //
@@ -716,25 +716,25 @@ struct BSSimpleArray
 //
 //		NiTPointerMap	* m_table;
 //		Entry		* m_entry;
-//		UInt32		m_bucket;
+//		uint32_t		m_bucket;
 //	};
 //
-//	virtual UInt32	CalculateBucket(UInt32 key);
-//	virtual bool	CompareKey(UInt32 lhs, UInt32 rhs);
+//	virtual uint32_t	CalculateBucket(uint32_t key);
+//	virtual bool	CompareKey(uint32_t lhs, uint32_t rhs);
 //	virtual void	Fn_03(void);
 //	virtual void	Fn_04(void);
 //	virtual void	Fn_05(void);
 //	virtual void	Fn_06(void);
 //
-//	T_Data *	Lookup(UInt32 key);
+//	T_Data *	Lookup(uint32_t key);
 //
-//	UInt32	m_numBuckets;
+//	uint32_t	m_numBuckets;
 //	Entry	** m_buckets;
-//	UInt32	m_numItems;
+//	uint32_t	m_numItems;
 //};
 
 //template <typename T_Data>
-//T_Data * NiTPointerMap <T_Data>::Lookup(UInt32 key)
+//T_Data * NiTPointerMap <T_Data>::Lookup(uint32_t key)
 //{
 //	for(Entry * traverse = m_buckets[key % m_numBuckets]; traverse; traverse = traverse->next)
 //		if(traverse->key == key)
@@ -753,7 +753,7 @@ struct BSSimpleArray
 //}
 //
 //template <typename T_Data>
-//UInt32 NiTPointerMap <T_Data>::Iterator::GetKey(void)
+//uint32_t NiTPointerMap <T_Data>::Iterator::GetKey(void)
 //{
 //	if(m_entry)
 //		return m_entry->key;
@@ -807,14 +807,14 @@ class Visitor
 	const Node* m_pHead;
 
 	template <class Op>
-	UInt32 FreeNodes(Node* node, Op &compareOp) const
+	uint32_t FreeNodes(Node* node, Op &compareOp) const
 	{
-		static UInt32 nodeCount = 0;
-		static UInt32 numFreed = 0;
+		static uint32_t nodeCount = 0;
+		static uint32_t numFreed = 0;
 		static Node* lastNode = NULL;
 		static bool bRemovedNext = false;
 		
-		UInt32 returnCount;
+		uint32_t returnCount;
 
 		if (node->Next())
 		{
@@ -881,8 +881,8 @@ class Visitor
 public:
 	Visitor(const Node* pHead) : m_pHead(pHead) { }
 	
-	UInt32 Count() const {
-		UInt32 count = 0;
+	uint32_t Count() const {
+		uint32_t count = 0;
 		const Node* pCur = m_pHead;
 		while (pCur && pCur->Info() != NULL) {
 			++count;
@@ -891,8 +891,8 @@ public:
 		return count;
 	}
 
-	Info* GetNthInfo(UInt32 n) const {
-		UInt32 count = 0;
+	Info* GetNthInfo(uint32_t n) const {
+		uint32_t count = 0;
 		const Node* pCur = m_pHead;
 		while (pCur && count < n && pCur->Info() != NULL) {
 			++count;
@@ -949,9 +949,9 @@ public:
 	*/
 
 	template <class Op>
-	UInt32 CountIf(Op& op) const
+	uint32_t CountIf(Op& op) const
 	{
-		UInt32 count = 0;
+		uint32_t count = 0;
 		const Node* pCur = m_pHead;
 		while (pCur)
 		{
@@ -976,7 +976,7 @@ public:
 	}
 
 	template <class Op>
-	UInt32 RemoveIf(Op& op)
+	uint32_t RemoveIf(Op& op)
 	{
 		return FreeNodes(const_cast<Node*>(m_pHead), op);
 	}
@@ -1001,9 +1001,9 @@ public:
 	}
 
 	template <class Op>
-	UInt32 GetIndexOf(Op& op)
+	uint32_t GetIndexOf(Op& op)
 	{
-		UInt32 idx = 0;
+		uint32_t idx = 0;
 		const Node* pCur = m_pHead;
 		while (pCur && pCur->Info() && !op.Accept(pCur->Info()))
 		{

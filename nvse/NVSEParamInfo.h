@@ -7,5 +7,5 @@ struct NVSEParamInfo
 {
 	const char* typeStr;
 	kNVSEParamType	typeID;		// ParamType
-	UInt32	isOptional;	// do other bits do things?
+	uint32_t	isOptional;	// do other bits do things?
 };

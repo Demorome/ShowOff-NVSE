@@ -13,12 +13,12 @@ struct InventoryRef
 	} data;
 	TESObjectREFR* containerRef;	// 0C
 	TESObjectREFR* tempRef;		// 10
-	UInt8				pad14[24];		// 14
+	uint8_t				pad14[24];		// 14
 	bool				doValidation;	// 2C
 	bool				removed;		// 2D
-	UInt8				pad2E[2];		// 2E
+	uint8_t				pad2E[2];		// 2E
 
-	SInt32 GetCount() const { return data.entry->countDelta; }
+	int32_t GetCount() const { return data.entry->countDelta; }
 	ExtraDataList* CreateExtraData();
 	// Returns the copied-to ContChangesEntry*, if it exists.
 	ContChangesEntry* CopyWithNewExtraData(ExtraDataList* newDataList);

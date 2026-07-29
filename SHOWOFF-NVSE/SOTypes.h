@@ -8,17 +8,17 @@
 #include "LambdaVarContext.h"
 #include "PluginAPI.h"
 
-typedef UInt32 RefID;
+typedef uint32_t RefID;
 typedef RefID ActorRefID;
 typedef RefID ItemRefID;
-enum class StrongFormID : UInt32 {};
+enum class StrongFormID : uint32_t {};
 
 typedef std::pair<ActorRefID, ItemRefID> ActorAndItemPair;
 typedef std::set<ActorAndItemPair> ActorAndItemPairs;
 
 
 // Retrived via scriptObj->GetOverridingModIdx() in functions.
-typedef UInt8 ModID;
+typedef uint8_t ModID;
 
 typedef std::map<ModID, Function> mod_and_function_map;
 

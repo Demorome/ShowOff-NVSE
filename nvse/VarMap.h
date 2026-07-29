@@ -5,17 +5,17 @@
 
 // simple template class used to support NVSE custom data types (strings, arrays, etc)
 
-struct _VarIDs : Set<UInt32>
+struct _VarIDs : Set<uint32_t>
 {
-	UInt32 PopFirst()
+	uint32_t PopFirst()
 	{
-		UInt32* keys = Keys(), first = *keys;
+		uint32_t* keys = Keys(), first = *keys;
 		if (--numKeys)
 			memmove(keys, keys + 1, numKeys * 4);
 		return first;
 	}
 
-	UInt32 LastKey() { return Keys()[numKeys - 1]; }
+	uint32_t LastKey() { return Keys()[numKeys - 1]; }
 };
 
 template <class Var>
@@ -23,14 +23,14 @@ class VarMap
 {
 protected:
 #if _DEBUG
-	typedef Map<UInt32, Var> _VarMap;
+	typedef Map<uint32_t, Var> _VarMap;
 #else
-	typedef UnorderedMap<UInt32, Var> _VarMap;
+	typedef UnorderedMap<uint32_t, Var> _VarMap;
 #endif
 	class VarCache
 	{
 		// if desired this can be replaced with an impl that caches more than one var without changing client code
-		UInt32		varID;
+		uint32_t		varID;
 		Var* var;
 
 	public:
@@ -41,7 +41,7 @@ protected:
 			Reset();
 		}
 
-		void Insert(UInt32 id, Var* v)
+		void Insert(uint32_t id, Var* v)
 		{
 			varID = id;
 			var = v;
@@ -54,7 +54,7 @@ protected:
 			var = NULL;
 		}
 
-		void Remove(UInt32 id)
+		void Remove(uint32_t id)
 		{
 			if (id == varID)
 			{
@@ -62,7 +62,7 @@ protected:
 			}
 		}
 
-		Var* Get(UInt32 id)
+		Var* Get(uint32_t id)
 		{
 			return (varID == id) ? var : NULL;
 		}
@@ -76,14 +76,14 @@ protected:
 	ICriticalSection	cs;				// trying to avoid what looks like concurrency issues
 	ICriticalSection    tempIdsCs;
 
-	void SetIDAvailable(UInt32 id)
+	void SetIDAvailable(uint32_t id)
 	{
 		if (id) availableIDs.Insert(id);
 	}
 
-	UInt32 GetUnusedID()
+	uint32_t GetUnusedID()
 	{
-		UInt32 id = 1;
+		uint32_t id = 1;
 		cs.Enter();
 
 		if (!availableIDs.Empty())
@@ -104,7 +104,7 @@ public:
 		Reset();
 	}
 
-	Var* Get(UInt32 varID)
+	Var* Get(uint32_t varID)
 	{
 		if (!varID) return NULL;
 		Var* var = cache.Get(varID);
@@ -117,13 +117,13 @@ public:
 		return var;
 	}
 
-	bool VarExists(UInt32 varID)
+	bool VarExists(uint32_t varID)
 	{
 		return Get(varID) ? true : false;
 	}
 
 	template <typename ...Args>
-	Var* Insert(UInt32 varID, Args&& ...args)
+	Var* Insert(uint32_t varID, Args&& ...args)
 	{
 		cs.Enter();
 		usedIDs.Insert(varID);
@@ -132,7 +132,7 @@ public:
 		return var;
 	}
 
-	void Delete(UInt32 varID)
+	void Delete(uint32_t varID)
 	{
 		cs.Enter();
 		cache.Remove(varID);
@@ -143,7 +143,7 @@ public:
 		cs.Leave();
 	}
 
-	static void DeleteBySelf(VarMap* self, UInt32 varID)
+	static void DeleteBySelf(VarMap* self, uint32_t varID)
 	{
 		if (self)
 			self->Delete(varID);
@@ -166,7 +166,7 @@ public:
 		availableIDs.Clear();
 	}
 
-	void MarkTemporary(UInt32 varID, bool bTemporary)
+	void MarkTemporary(uint32_t varID, bool bTemporary)
 	{
 		ScopedLock lock(tempIdsCs);
 		if (bTemporary)
@@ -179,7 +179,7 @@ public:
 		}
 	}
 
-	bool IsTemporary(UInt32 varID)
+	bool IsTemporary(uint32_t varID)
 	{
 		return tempIDs.HasKey(varID);
 	}

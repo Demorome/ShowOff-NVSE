@@ -1,36 +1,27 @@
 #pragma once
 
+#include <stdint.h>
+
 #pragma warning(disable: 4221)
 #include <cmath>
 
-typedef unsigned char		UInt8;		//!< An unsigned 8-bit integer value
-typedef unsigned short		UInt16;		//!< An unsigned 16-bit integer value
-typedef unsigned long		UInt32;		//!< An unsigned 32-bit integer value
-typedef unsigned long long	UInt64;		//!< An unsigned 64-bit integer value
-typedef signed char			SInt8;		//!< A signed 8-bit integer value
-typedef signed short		SInt16;		//!< A signed 16-bit integer value
-typedef signed long			SInt32;		//!< A signed 32-bit integer value
-typedef signed long long	SInt64;		//!< A signed 64-bit integer value
-typedef float				Float32;	//!< A 32-bit floating point value
-typedef double				Float64;	//!< A 64-bit floating point value
-
-inline UInt32 Extend16(UInt32 in)
+inline uint32_t Extend16(uint32_t in)
 {
 	return (in & 0x8000) ? (0xFFFF0000 | in) : in;
 }
 
-inline UInt32 Extend8(UInt32 in)
+inline uint32_t Extend8(uint32_t in)
 {
 	return (in & 0x80) ? (0xFFFFFF00 | in) : in;
 }
 
-inline UInt16 Swap16(UInt16 in)
+inline uint16_t Swap16(uint16_t in)
 {
 	return	((in >> 8) & 0x00FF) |
 			((in << 8) & 0xFF00);
 }
 
-inline UInt32 Swap32(UInt32 in)
+inline uint32_t Swap32(uint32_t in)
 {
 	return	((in >> 24) & 0x000000FF) |
 			((in >>  8) & 0x0000FF00) |
@@ -38,9 +29,9 @@ inline UInt32 Swap32(UInt32 in)
 			((in << 24) & 0xFF000000);
 }
 
-inline UInt64 Swap64(UInt64 in)
+inline uint64_t Swap64(uint64_t in)
 {
-	UInt64	temp;
+	uint64_t	temp;
 
 	temp = Swap32(in);
 	temp <<= 32;
@@ -51,14 +42,14 @@ inline UInt64 Swap64(UInt64 in)
 
 inline void SwapFloat(float * in)
 {
-	UInt32	* temp = (UInt32 *)in;
+	uint32_t	* temp = (uint32_t *)in;
 
 	*temp = Swap32(*temp);
 }
 
 inline void SwapDouble(double * in)
 {
-	UInt64	* temp = (UInt64 *)in;
+	uint64_t	* temp = (uint64_t *)in;
 
 	*temp = Swap64(*temp);
 }
@@ -67,8 +58,8 @@ inline bool IsBigEndian(void)
 {
 	union
 	{
-		UInt16	u16;
-		UInt8	u8[2];
+		uint16_t	u16;
+		uint8_t	u8[2];
 	} temp;
 
 	temp.u16 = 0x1234;
@@ -103,18 +94,18 @@ inline bool IsLittleEndian(void)
  */
 union VarCombiner
 {
-	UInt64	u64;
-	SInt64	s64;
+	uint64_t	u64;
+	int64_t	s64;
 	double	f64;
-	struct { UInt32 b; UInt32 a; } u32;
-	struct { SInt32 b; SInt32 a; } s32;
+	struct { uint32_t b; uint32_t a; } u32;
+	struct { int32_t b; int32_t a; } s32;
 	struct { float  b; float  a; } f32;
-	struct { UInt16 d; UInt16 c; UInt16 b; UInt16 a; } u16;
-	struct { SInt16 d; SInt16 c; SInt16 b; SInt16 a; } s16;
-	struct { UInt8  h; UInt8  g; UInt8  f; UInt8  e;
-			 UInt8  d; UInt8  c; UInt8  b; UInt8  a; } u8;
-	struct { SInt8  h; SInt8  g; SInt8  f; SInt8  e;
-			 SInt8  d; SInt8  c; SInt8  b; SInt8  a; } s8;
+	struct { uint16_t d; uint16_t c; uint16_t b; uint16_t a; } u16;
+	struct { int16_t d; int16_t c; int16_t b; int16_t a; } s16;
+	struct { uint8_t  h; uint8_t  g; uint8_t  f; uint8_t  e;
+			 uint8_t  d; uint8_t  c; uint8_t  b; uint8_t  a; } u8;
+	struct { int8_t  h; int8_t  g; int8_t  f; int8_t  e;
+			 int8_t  d; int8_t  c; int8_t  b; int8_t  a; } s8;
 };
 
 /**
@@ -128,34 +119,34 @@ class Bitfield
 				~Bitfield()					{ }
 		
 		void	Clear(void)					{ field = 0; }						//!< Clears all bits
-		void	RawSet(UInt32 data)			{ field = data; }					//!< Modifies all bits
+		void	RawSet(uint32_t data)			{ field = data; }					//!< Modifies all bits
 		
-		void	Set(UInt32 data)			{ field |= data; }					//!< Sets individual bits
-		void	Clear(UInt32 data)			{ field &= ~data; }					//!< Clears individual bits
-		void	UnSet(UInt32 data)			{ Clear(data); }					//!< Clears individual bits
-		void	Mask(UInt32 data)			{ field &= data; }					//!< Masks individual bits
-		void	Toggle(UInt32 data)			{ field ^= data; }					//!< Toggles individual bits
-		void	Write(UInt32 data, bool state)
+		void	Set(uint32_t data)			{ field |= data; }					//!< Sets individual bits
+		void	Clear(uint32_t data)			{ field &= ~data; }					//!< Clears individual bits
+		void	UnSet(uint32_t data)			{ Clear(data); }					//!< Clears individual bits
+		void	Mask(uint32_t data)			{ field &= data; }					//!< Masks individual bits
+		void	Toggle(uint32_t data)			{ field ^= data; }					//!< Toggles individual bits
+		void	Write(uint32_t data, bool state)
 											{ if(state) Set(data); else Clear(data); }
-		void	WriteBit(UInt32 bit, bool state)	{ Write(1 << bit, state); }		//!< May not work for non-UInt8 bitfields.
+		void	WriteBit(uint32_t bit, bool state)	{ Write(1 << bit, state); }		//!< May not work for non-uint8_t bitfields.
 		
 		T		Get(void) const				{ return field; }					//!< Gets all bits
-		T		Get(UInt32 data) const		{ return field & data; }			//!< Gets individual bits
-		T		Extract(UInt32 bit) const	{ return (field >> bit) & 1; }		//!< Extracts a bit
-		T		ExtractField(UInt32 shift, UInt32 length)					//!< Extracts a series of bits
+		T		Get(uint32_t data) const		{ return field & data; }			//!< Gets individual bits
+		T		Extract(uint32_t bit) const	{ return (field >> bit) & 1; }		//!< Extracts a bit
+		T		ExtractField(uint32_t shift, uint32_t length)					//!< Extracts a series of bits
 											{ return (field >> shift) & (0xFFFFFFFF >> (32 - length)); }
 		
-		bool	IsSet(UInt32 data) const	{ return ((field & data) == data) ? true : false; }	//!< Are all these bits set?
-		bool	IsUnSet(UInt32 data) const	{ return (field & data) ? false : true; }			//!< Are all these bits clear?
-		bool	IsClear(UInt32 data) const	{ return IsUnSet(data); }							//!< Are all these bits clear?
+		bool	IsSet(uint32_t data) const	{ return ((field & data) == data) ? true : false; }	//!< Are all these bits set?
+		bool	IsUnSet(uint32_t data) const	{ return (field & data) ? false : true; }			//!< Are all these bits clear?
+		bool	IsClear(uint32_t data) const	{ return IsUnSet(data); }							//!< Are all these bits clear?
 	
 	private:
 		T		field;	//!< bitfield data
 };
 
-typedef Bitfield <UInt8>	Bitfield8;		//!< An 8-bit bitfield
-typedef Bitfield <UInt16>	Bitfield16;		//!< A 16-bit bitfield
-typedef Bitfield <UInt32>	Bitfield32;		//!< A 32-bit bitfield
+typedef Bitfield <uint8_t>	Bitfield8;		//!< An 8-bit bitfield
+typedef Bitfield <uint16_t>	Bitfield16;		//!< A 16-bit bitfield
+typedef Bitfield <uint32_t>	Bitfield32;		//!< A 32-bit bitfield
 
 static_assert(sizeof(Bitfield8) == 1);
 static_assert(sizeof(Bitfield16) == 2);
@@ -170,22 +161,22 @@ class Bitstring
 {
 	public:
 				Bitstring();
-				Bitstring(UInt32 inLength);
+				Bitstring(uint32_t inLength);
 				~Bitstring();
 
-		void	Alloc(UInt32 inLength);
+		void	Alloc(uint32_t inLength);
 		void	Dispose(void);
 
 		void	Clear(void);
-		void	Clear(UInt32 idx);
-		void	Set(UInt32 idx);
+		void	Clear(uint32_t idx);
+		void	Set(uint32_t idx);
 
-		bool	IsSet(UInt32 idx);
-		bool	IsClear(UInt32 idx);
+		bool	IsSet(uint32_t idx);
+		bool	IsClear(uint32_t idx);
 
 	private:
-		UInt8	* data;
-		UInt32	length;	//!< length in bytes
+		uint8_t	* data;
+		uint32_t	length;	//!< length in bytes
 };
 
 /**
@@ -204,18 +195,18 @@ class Time
 		void	SetToNow(void)		{ Set(1, 2, 3); }
 		
 		//! Sets the class to the specified time
-		void	Set(UInt8 inS, UInt8 inM, UInt8 inH)
+		void	Set(uint8_t inS, uint8_t inM, uint8_t inH)
 									{ seconds = inS; minutes = inM; hours = inH; hasData = true; }
 		
 		//! Gets whether the class has been initialized or not
 		bool	IsSet(void)			{ return hasData; }
 		
-		UInt8	GetSeconds(void)	{ return seconds; }	//!< return the seconds portion of the time
-		UInt8	GetMinutes(void)	{ return minutes; }	//!< return the minutes portion of the time
-		UInt8	GetHours(void)		{ return hours; }	//!< return the hours portion of the time
+		uint8_t	GetSeconds(void)	{ return seconds; }	//!< return the seconds portion of the time
+		uint8_t	GetMinutes(void)	{ return minutes; }	//!< return the minutes portion of the time
+		uint8_t	GetHours(void)		{ return hours; }	//!< return the hours portion of the time
 	
 	private:
-		UInt8	seconds, minutes, hours;
+		uint8_t	seconds, minutes, hours;
 		bool	hasData;
 };
 
@@ -276,13 +267,13 @@ inline Vector2 operator/(const Vector2 & lhs, float rhs)
 	return Vector2(lhs.x / rhs, lhs.y / rhs);
 };
 
-inline bool MaskCompare(void * lhs, void * rhs, void * mask, UInt32 size)
+inline bool MaskCompare(void * lhs, void * rhs, void * mask, uint32_t size)
 {
-	UInt8	* lhs8 = (UInt8 *)lhs;
-	UInt8	* rhs8 = (UInt8 *)rhs;
-	UInt8	* mask8 = (UInt8 *)mask;
+	uint8_t	* lhs8 = (uint8_t *)lhs;
+	uint8_t	* rhs8 = (uint8_t *)rhs;
+	uint8_t	* mask8 = (uint8_t *)mask;
 
-	for(UInt32 i = 0; i < size; i++)
+	for(uint32_t i = 0; i < size; i++)
 		if((lhs8[i] & mask8[i]) != (rhs8[i] & mask8[i]))
 			return false;
 

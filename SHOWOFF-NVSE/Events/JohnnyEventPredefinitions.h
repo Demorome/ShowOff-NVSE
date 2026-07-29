@@ -8,7 +8,7 @@
 #include "GameObjects.h"
 
 class EventInformation;
-void* __fastcall GenericCreateFilter(void** maxFilters, UInt32 numFilters);
+void* __fastcall GenericCreateFilter(void** maxFilters, uint32_t numFilters);
 
 #if 0 // todo: make it compatible with my changes to how void** filters are passed/handled
 class JohnnyEventFiltersForm : EventHandlerInterface
@@ -18,13 +18,13 @@ class JohnnyEventFiltersForm : EventHandlerInterface
 private:
 	RefUnorderedSet* Filters = 0;
 
-	RefUnorderedSet* GetFilter(UInt32 filter)
+	RefUnorderedSet* GetFilter(uint32_t filter)
 	{
 		if (filter >= numFilters) return NULL;
 		return &(Filters[filter]);
 	}
 public:
-	JohnnyEventFiltersForm(void** filters, UInt32 nuFilters)
+	JohnnyEventFiltersForm(void** filters, uint32_t nuFilters)
 	{
 		numFilters = nuFilters;
 		Filters = new RefUnorderedSet[numFilters];
@@ -38,7 +38,7 @@ public:
 		delete[] GenFilters;
 	}
 
-	virtual bool IsInFilter(UInt32 filterNum, GenericFilters toSearch)
+	virtual bool IsInFilter(uint32_t filterNum, GenericFilters toSearch)
 	{
 		RefUnorderedSet* FilterSet;
 		if (!(FilterSet = GetFilter(filterNum))) return false;
@@ -47,26 +47,26 @@ public:
 	}
 
 
-	virtual void InsertToFilter(UInt32 filterNum, GenericFilters toInsert)
+	virtual void InsertToFilter(uint32_t filterNum, GenericFilters toInsert)
 	{
 		RefUnorderedSet* FilterSet;
 		if (!(FilterSet = GetFilter(filterNum))) return;
 		FilterSet->insert(toInsert.refID);
 	}
-	virtual void DeleteFromFilter(UInt32 filterNum, GenericFilters toDelete)
+	virtual void DeleteFromFilter(uint32_t filterNum, GenericFilters toDelete)
 	{
 		RefUnorderedSet* FilterSet;
 		if (!(FilterSet = GetFilter(filterNum))) return;
 		FilterSet->erase(toDelete.refID);
 
 	}
-	virtual bool IsFilterEmpty(UInt32 filterNum)
+	virtual bool IsFilterEmpty(uint32_t filterNum)
 	{
 		RefUnorderedSet* FilterSet = GetFilter(filterNum);
 		if (!FilterSet) return true;
 		return FilterSet->empty();
 	}
-	virtual bool IsFilterEqual(GenericFilters Filter, UInt32 nuFilter)
+	virtual bool IsFilterEqual(GenericFilters Filter, uint32_t nuFilter)
 	{
 		return (Filter.ptr == GenFilters[nuFilter].ptr);
 	}
@@ -105,14 +105,14 @@ public:
 		}
 	}
 
-	__forceinline bool IsBaseInFilter(UInt32 filterNum, TESForm* form)
+	__forceinline bool IsBaseInFilter(uint32_t filterNum, TESForm* form)
 	{
 		if (!form) return false;
 		if (form->GetIsReference()) return IsInFilter(filterNum, ((TESObjectREFR*)form)->baseForm->refID);
 		return IsInFilter(filterNum, form->refID);
 	}
 
-	void insertFormList(BGSListForm* List, UInt32 filter)
+	void insertFormList(BGSListForm* List, uint32_t filter)
 	{
 		ListNode<TESForm>* iterator = ((BGSListForm*)List)->list.Head();
 		do {
@@ -125,15 +125,15 @@ public:
 class EventInformation
 {
 private:
-	void* (__fastcall* CreateFilter)(void**, UInt32); // supposed to be passing itself
+	void* (__fastcall* CreateFilter)(void**, uint32_t); // supposed to be passing itself
 	std::vector<BaseEventClass> EventQueueAdd;
 	std::shared_mutex QueueRWLock; //need a readers writer lock to protect from multiple users registering an event in the same frame (very rare, but can happen)
 public:
 	const char* EventName;
-	UInt8 numMaxArgs; // dispatched args #
-	UInt8 numMaxFilters;
+	uint8_t numMaxArgs; // dispatched args #
+	uint8_t numMaxFilters;
 	std::vector<BaseEventClass> EventCallbacks;
-	EventInformation(const char* EventName, UInt8& numMaxArgs, UInt8& numMaxFilters, void* (__fastcall* CreatorFunction)(void**, UInt32) = GenericCreateFilter)
+	EventInformation(const char* EventName, uint8_t& numMaxArgs, uint8_t& numMaxFilters, void* (__fastcall* CreatorFunction)(void**, uint32_t) = GenericCreateFilter)
 	{
 		this->EventName = EventName;
 		this->numMaxArgs = numMaxArgs;
@@ -161,7 +161,7 @@ public:
 		// workaround karut's hackiness
 		const auto* filtersArr = reinterpret_cast<GenericFilters*>(filters);
 
-		UInt32 maxFilters = this->numMaxFilters;
+		uint32_t maxFilters = this->numMaxFilters;
 		for (auto it = this->EventCallbacks.begin(); it != this->EventCallbacks.end(); ++it)
 		{
 			if (script == it->ScriptForEvent)
@@ -216,7 +216,7 @@ public:
 			{
 				if (auto eventFilters = it->eventFilter)
 				{
-					UInt32 maxFilters = eventFilters->GetNumFilters();
+					uint32_t maxFilters = eventFilters->GetNumFilters();
 					for (int i = 0; i < maxFilters; i++)
 					{
 						if (!(it->eventFilter->IsFilterEqual(filters[i], i))) goto NotFound;
@@ -261,7 +261,7 @@ typedef EventInformation* EventInfo;
 extern std::mutex EventsArrayMutex;
 extern std::vector<EventInfo> EventsArray;
 
-void* __fastcall GenericCreateFilter(void** Filters, UInt32 numFilters);
+void* __fastcall GenericCreateFilter(void** Filters, uint32_t numFilters);
 EventInfo FindHandlerInfoByChar(const char* nameToFind);
-EventInfo __cdecl JGCreateEvent(const char* EventName, UInt8 maxArgs, UInt8 maxFilters, void* (__fastcall* CreatorFunction)(void**, UInt32));
+EventInfo __cdecl JGCreateEvent(const char* EventName, uint8_t maxArgs, uint8_t maxFilters, void* (__fastcall* CreatorFunction)(void**, uint32_t));
 void __cdecl JGFreeEvent(EventInfo& toRemove);

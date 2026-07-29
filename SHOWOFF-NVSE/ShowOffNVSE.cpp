@@ -38,11 +38,11 @@
 // Plugin Stuff
 IDebugLog g_Log; // file will be open after NVSE plugin load
 HMODULE	g_ShowOffHandle;
-constexpr UInt32 g_PluginVersion = 184;
+constexpr uint32_t g_PluginVersion = 184;
 
 //***Current Max OpCode (https://geckwiki.com/index.php?title=NVSE_Opcode_Base)
-const UInt32 MaxOpcode = 0x3D74;
-UInt32 CurrentOpcode = 0x3C93; // starts at Opcode base for our plugin
+const uint32_t MaxOpcode = 0x3D74;
+uint32_t CurrentOpcode = 0x3C93; // starts at Opcode base for our plugin
 
 // Allows modmakers to toggle ShowOff's debug messages for some of its functions.
 #ifdef _DEBUG
@@ -80,28 +80,28 @@ ICriticalSection g_Lock;
 
 // NVSE Globals
 bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
-bool (*ExtractFormatStringArgs)(UInt32 fmtStringPos, char* buffer, COMMAND_ARGS_EX, UInt32 maxParams, ...);  // From JIP_NVSE.H
+bool (*ExtractFormatStringArgs)(uint32_t fmtStringPos, char* buffer, COMMAND_ARGS_EX, uint32_t maxParams, ...);  // From JIP_NVSE.H
 NVSEArrayVarInterface* g_arrInterface = nullptr;
-NVSEArrayVar* (*CreateArray)(const NVSEArrayElement* data, UInt32 size, Script* callingScript);
-NVSEArrayVar* (*CreateStringMap)(const char** keys, const NVSEArrayElement* values, UInt32 size, Script* callingScript);
-NVSEArrayVar* (*CreateMap)(const double* keys, const NVSEArrayElement* values, UInt32 size, Script* callingScript);
+NVSEArrayVar* (*CreateArray)(const NVSEArrayElement* data, uint32_t size, Script* callingScript);
+NVSEArrayVar* (*CreateStringMap)(const char** keys, const NVSEArrayElement* values, uint32_t size, Script* callingScript);
+NVSEArrayVar* (*CreateMap)(const double* keys, const NVSEArrayElement* values, uint32_t size, Script* callingScript);
 bool (*AssignArrayResult)(NVSEArrayVar* arr, double* dest);
 void (*SetElement)(NVSEArrayVar* arr, const NVSEArrayElement& key, const NVSEArrayElement& value);
 void (*AppendElement)(NVSEArrayVar* arr, const NVSEArrayElement& value);
-UInt32(*GetArraySize)(NVSEArrayVar* arr);
-NVSEArrayVar* (*LookupArrayByID)(UInt32 id);
+uint32_t(*GetArraySize)(NVSEArrayVar* arr);
+NVSEArrayVar* (*LookupArrayByID)(uint32_t id);
 bool (*GetElement)(NVSEArrayVar* arr, const NVSEArrayElement& key, NVSEArrayElement& outElement);
 bool (*GetArrayElements)(NVSEArrayVar* arr, NVSEArrayElement* elements, NVSEArrayElement* keys);
 NVSEStringVarInterface* g_strInterface = nullptr;
 bool (*AssignString)(COMMAND_ARGS, const char* newValue);
-const char* (*GetStringVar)(UInt32 stringID);
+const char* (*GetStringVar)(uint32_t stringID);
 NVSEMessagingInterface* g_msg = nullptr;
 NVSEScriptInterface* g_scriptInterface = nullptr;
 NVSECommandTableInterface* g_commandInterface = nullptr;
 const CommandInfo* (*GetCmdByName)(const char* name);
-bool (*FunctionCallScript)(Script* funcScript, TESObjectREFR* callingObj, TESObjectREFR* container, NVSEArrayElement* result, UInt8 numArgs, ...);
-bool (*FunctionCallScriptAlt)(Script* funcScript, TESObjectREFR* callingObj, UInt8 numArgs, ...);
-TESObjectREFR* (__stdcall *InventoryRefCreateEntry)(TESObjectREFR* container, TESForm* itemForm, SInt32 countDelta, ExtraDataList* xData);
+bool (*FunctionCallScript)(Script* funcScript, TESObjectREFR* callingObj, TESObjectREFR* container, NVSEArrayElement* result, uint8_t numArgs, ...);
+bool (*FunctionCallScriptAlt)(Script* funcScript, TESObjectREFR* callingObj, uint8_t numArgs, ...);
+TESObjectREFR* (__stdcall *InventoryRefCreateEntry)(TESObjectREFR* container, TESForm* itemForm, int32_t countDelta, ExtraDataList* xData);
 _InventoryRefCreate InventoryRefCreate;
 _CaptureLambdaVars CaptureLambdaVars;
 _UncaptureLambdaVars UncaptureLambdaVars;
@@ -296,9 +296,9 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 DEFINE_COMMAND_PLUGIN(TestDemo, "", false, NULL);
 bool Cmd_TestDemo_Execute(COMMAND_ARGS)
 {
-	UInt32 bInt = 5 || 1;
+	uint32_t bInt = 5 || 1;
 	//if (!ExtractArgsEx(EXTRACT_ARGS_EX)) return true;
-	//Console_Print("[%12X]", *(UInt32*)0x8B959B);
+	//Console_Print("[%12X]", *(uint32_t*)0x8B959B);
 	Console_Print("%u", bInt);
 	return true;
 }
@@ -394,9 +394,9 @@ extern "C"
 			g_mainThreadID = GetCurrentThreadId();
 
 			auto const nvseData = (NVSEDataInterface*)nvse->QueryInterface(kInterface_Data);
-			InventoryRefGetForID = (InventoryRef * (*)(UInt32 refID))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID);
+			InventoryRefGetForID = (InventoryRef * (*)(uint32_t refID))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceGetForRefID);
 			InventoryRefCreate = (_InventoryRefCreate)nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceCreate);
-			InventoryRefCreateEntry = (TESObjectREFR * (__stdcall*)(TESObjectREFR* container, TESForm *itemForm, SInt32 countDelta, ExtraDataList *xData))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceCreateEntry);
+			InventoryRefCreateEntry = (TESObjectREFR * (__stdcall*)(TESObjectREFR* container, TESForm *itemForm, int32_t countDelta, ExtraDataList *xData))nvseData->GetFunc(NVSEDataInterface::kNVSEData_InventoryReferenceCreateEntry);
 			CaptureLambdaVars = (_CaptureLambdaVars)nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaSaveVariableList);
 			UncaptureLambdaVars = (_UncaptureLambdaVars)nvseData->GetFunc(NVSEDataInterface::kNVSEData_LambdaUnsaveVariableList);
 

@@ -11,11 +11,11 @@
 #define MAP_MAX_BUCKET_COUNT		0x40000
 #define VECTOR_DEFAULT_ALLOC		8
 
-void* __fastcall Pool_Alloc(UInt32 size);
-void __fastcall Pool_Free(void* pBlock, UInt32 size);
-void* __fastcall Pool_Realloc(void* pBlock, UInt32 curSize, UInt32 reqSize);
-void* __fastcall Pool_Alloc_Buckets(UInt32 numBuckets);	//from xNVSE
-UInt32 __fastcall AlignBucketCount(UInt32 count);
+void* __fastcall Pool_Alloc(uint32_t size);
+void __fastcall Pool_Free(void* pBlock, uint32_t size);
+void* __fastcall Pool_Realloc(void* pBlock, uint32_t curSize, uint32_t reqSize);
+void* __fastcall Pool_Alloc_Buckets(uint32_t numBuckets);	//from xNVSE
+uint32_t __fastcall AlignBucketCount(uint32_t count);
 
 #define POOL_ALLOC(count, type) (type*)Pool_Alloc(count * sizeof(type))
 #define POOL_FREE(block, count, type) Pool_Free(block, count * sizeof(type))

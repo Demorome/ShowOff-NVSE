@@ -14,11 +14,11 @@ public:
 
 	virtual void	Fn_01(void);
 
-	static BSExtraData* Create(UInt8 xType, UInt32 size, UInt32 vtbl);
+	static BSExtraData* Create(uint8_t xType, uint32_t size, uint32_t vtbl);
 
 //	void		** _vtbl;	// 000
-	UInt8		type;		// 004
-	UInt8		pad[3];		// 005
+	uint8_t		type;		// 004
+	uint8_t		pad[3];		// 005
 	BSExtraData	* next;		// 008
 };
 
@@ -28,21 +28,21 @@ struct BaseExtraList
 	virtual ~BaseExtraList();
 
 	BSExtraData		*m_data;					// 004
-	UInt8			m_presenceBitfield[0x15];	// 008 - if a bit is set, then the extralist should contain that extradata
-	UInt8			pad1D[3];					// 01D
+	uint8_t			m_presenceBitfield[0x15];	// 008 - if a bit is set, then the extralist should contain that extradata
+	uint8_t			pad1D[3];					// 01D
 
-	bool HasType(UInt8 type) const;
-	BSExtraData *GetByType(UInt8 type) const;
+	bool HasType(uint8_t type) const;
+	BSExtraData *GetByType(uint8_t type) const;
 	void Remove(BSExtraData *toRemove, bool doFree = false);
-	void RemoveByType(UInt8 type);
+	void RemoveByType(uint8_t type);
 	BSExtraData *Add(BSExtraData *xData);
 	void RemoveAll(bool doFree = true);
-	bool MarkScriptEvent(UInt32 eventMask, TESForm *eventTarget);
+	bool MarkScriptEvent(uint32_t eventMask, TESForm *eventTarget);
 	void Copy(BaseExtraList *sourceList); // safe even if copying a nullptr list
 	void DebugDump() const;
 	bool IsWorn();
 	char GetExtraFactionRank(TESFaction *faction);
-	SInt32 GetCount() const;
+	int32_t GetCount() const;
 };
 
 struct ExtraDataList : public BaseExtraList
@@ -54,7 +54,7 @@ struct ExtraDataList : public BaseExtraList
 static_assert(sizeof(ExtraDataList) == 0x020);
 
 
-typedef BSExtraData* (__thiscall* _GetExtraData)(const BaseExtraList*, UInt8);
+typedef BSExtraData* (__thiscall* _GetExtraData)(const BaseExtraList*, uint8_t);
 extern const _GetExtraData GetExtraData;
 
 typedef BSExtraData* (__thiscall* _AddExtraData)(BaseExtraList*, BSExtraData*);
@@ -63,7 +63,7 @@ extern const _AddExtraData AddExtraData;
 typedef void(__thiscall* _RemoveExtraData)(BaseExtraList*, BSExtraData*, bool);
 extern const _RemoveExtraData RemoveExtraData;
 
-typedef void(__thiscall* _RemoveExtraType)(BaseExtraList*, UInt8);
+typedef void(__thiscall* _RemoveExtraType)(BaseExtraList*, uint8_t);
 extern const _RemoveExtraType RemoveExtraType;
 
 typedef void(__thiscall* _ClearExtraDataList)(BaseExtraList*, bool);

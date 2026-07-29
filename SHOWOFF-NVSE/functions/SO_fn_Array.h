@@ -3,9 +3,9 @@
 
 
 //ripped code from FOSE's ListAddForm
-void ListAddArray_Call(BGSListForm* pListForm, NVSEArrayVar* inArr, SInt32 index, double *result/*, const bool checkForDupes = false*/)
+void ListAddArray_Call(BGSListForm* pListForm, NVSEArrayVar* inArr, int32_t index, double *result/*, const bool checkForDupes = false*/)
 {
-	UInt32 const size = g_arrInterface->GetArraySize(inArr);
+	uint32_t const size = g_arrInterface->GetArraySize(inArr);
 	auto elements = std::make_unique<ArrayElementR[]>(size);
 	g_arrInterface->GetElements(inArr, elements.get(), nullptr);
 
@@ -14,7 +14,7 @@ void ListAddArray_Call(BGSListForm* pListForm, NVSEArrayVar* inArr, SInt32 index
 		auto const form = elements[elemIndex].Form();
 		if (form == nullptr) 
 			return true;  //acts as a continue.
-		if (UInt32 const addedAtIndex = pListForm->AddAt(form, index);
+		if (uint32_t const addedAtIndex = pListForm->AddAt(form, index);
 			addedAtIndex == eListInvalid)
 		{
 			*result = 0;	//error!
@@ -43,8 +43,8 @@ bool Cmd_ListAddArray_OLD_Execute(COMMAND_ARGS)
 {
 	*result = 1;	//bSuccess
 	BGSListForm* pListForm;
-	UInt32 arrID;
-	SInt32 index = eListEnd;
+	uint32_t arrID;
+	int32_t index = eListEnd;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pListForm, &arrID, &index))
 		return true;
 	NVSEArrayVar* inArr = g_arrInterface->LookupArrayByID(arrID);
@@ -64,7 +64,7 @@ bool Cmd_ListAddArray_Execute(COMMAND_ARGS)
 	{
 		auto const pListForm = DYNAMIC_CAST(eval.GetNthArg(0)->GetTESForm(), TESForm, BGSListForm);
 		NVSEArrayVar* inArr = eval.GetNthArg(1)->GetArrayVar();
-		SInt32 index = eListEnd;
+		int32_t index = eListEnd;
 		if (eval.NumArgs() == 3)
 			index = eval.GetNthArg(2)->GetInt();
 		if (!pListForm || !inArr) 

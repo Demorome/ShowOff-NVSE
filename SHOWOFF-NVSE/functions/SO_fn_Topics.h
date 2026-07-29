@@ -53,7 +53,7 @@ bool Cmd_TopicInfoSetResponseStrings_OLD_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	TESTopicInfo* tInfo;
-	UInt32 arrID;
+	uint32_t arrID;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &tInfo, &arrID) && IS_ID(tInfo, TESTopicInfo))
 	{
 		if (const auto inArr = g_arrInterface->LookupArrayByID(arrID))
@@ -82,7 +82,7 @@ bool Cmd_TopicInfoSetNthResponseString_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	TESTopicInfo* tInfo;
-	UInt32 responseIdx;
+	uint32_t responseIdx;
 	char newResponseStr[0x10000];
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &tInfo, &responseIdx, &newResponseStr) && IS_ID(tInfo, TESTopicInfo)
 		&& newResponseStr[0])

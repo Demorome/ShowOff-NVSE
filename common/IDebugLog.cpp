@@ -39,7 +39,7 @@ void IDebugLog::Open(const char * path)
 
 	if(!logFile)
 	{
-		UInt32	id = 0;
+		uint32_t	id = 0;
 		char	name[1024];
 
 		do

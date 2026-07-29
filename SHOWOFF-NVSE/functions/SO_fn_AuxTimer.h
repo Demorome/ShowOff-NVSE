@@ -21,7 +21,7 @@ bool Cmd_AuxTimerStart_Execute(COMMAND_ARGS)
 	*result = 0;
 	char varName[0x50];
 	double timeToCountdown = -1.0; // if -1.0, will restart the timer while keeping the old flags if not specifying them, assuming it was set up before. 
-	UInt32 flags = AuxTimerValue::kFlag_Defaults;
+	uint32_t flags = AuxTimerValue::kFlag_Defaults;
 	TESForm* form = nullptr;
 
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &timeToCountdown, &flags, &form))
@@ -113,7 +113,7 @@ bool Cmd_AuxTimerStop_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	char varName[0x50];
-	UInt32 fireEvent = false;
+	uint32_t fireEvent = false;
 	TESForm* form = nullptr;
 
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &fireEvent, &form))

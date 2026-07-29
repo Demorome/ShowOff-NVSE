@@ -10,12 +10,12 @@ const _RemoveExtraType RemoveExtraType = (_RemoveExtraType)0x410140;
 const _ClearExtraDataList ClearExtraDataList = (_ClearExtraDataList)0x40FAE0;
 const _CopyExtraDataList CopyExtraDataList = (_CopyExtraDataList)0x411EC0;
 
-bool BaseExtraList::HasType(UInt8 type) const
+bool BaseExtraList::HasType(uint8_t type) const
 {
 	return ThisCall<bool>(0x40FE80, this, type);
 }
 
-BSExtraData* BaseExtraList::GetByType(UInt8 type) const
+BSExtraData* BaseExtraList::GetByType(uint8_t type) const
 {
 	return ThisCall<BSExtraData*>(0x410220, this, type);
 }
@@ -38,7 +38,7 @@ ExtraDataList *ExtraDataList::Create(BSExtraData *xBSData)
 	return xData;
 }
 
-void BaseExtraList::RemoveByType(UInt8 type)
+void BaseExtraList::RemoveByType(uint8_t type)
 {
 	ThisCall(0x410140, this, type);
 }
@@ -85,8 +85,8 @@ void BaseExtraList::DebugDump() const
 	{
 		for (BSExtraData *traverse = m_data; traverse; traverse = traverse->next)
 		{
-			_MESSAGE("%08X\t%02X\t%s\t%08X", traverse, traverse->type, GetExtraDataName(traverse->type), ((UInt32*)traverse)[3]);
-			Console_Print("%08X  %02X  %s  %08X", traverse, traverse->type, GetExtraDataName(traverse->type), ((UInt32*)traverse)[3]);
+			_MESSAGE("%08X\t%02X\t%s\t%08X", traverse, traverse->type, GetExtraDataName(traverse->type), ((uint32_t*)traverse)[3]);
+			Console_Print("%08X  %02X  %s  %08X", traverse, traverse->type, GetExtraDataName(traverse->type), ((uint32_t*)traverse)[3]);
 		}
 		Console_Print(" ");
 	}
@@ -98,12 +98,12 @@ void BaseExtraList::DebugDump() const
 	g_Log.Outdent();
 }
 
-bool BaseExtraList::MarkScriptEvent(UInt32 eventMask, TESForm* eventTarget)
+bool BaseExtraList::MarkScriptEvent(uint32_t eventMask, TESForm* eventTarget)
 {
 	return MarkBaseExtraListScriptEvent(eventTarget, this, eventMask);
 }
 
 
-SInt32 BaseExtraList::GetCount() const {
+int32_t BaseExtraList::GetCount() const {
 	return ThisCall<int16_t>(0x418770, this);
 }

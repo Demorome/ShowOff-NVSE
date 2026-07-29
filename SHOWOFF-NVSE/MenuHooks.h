@@ -10,7 +10,7 @@ namespace PreventRepairs
 
 namespace GetLevelUpMenuUnspentPoints
 {
-	extern UInt32 g_LvlUpMenuUnspentPoints[2];
+	extern uint32_t g_LvlUpMenuUnspentPoints[2];
 	void __fastcall CloseMenu_Hook();
 	void WriteRetrievalHook();
 }

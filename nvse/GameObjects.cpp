@@ -87,8 +87,8 @@ bool PlayerCharacter::SetSkeletonPath(const char* newPath)
 
 	//// get and store camera node
 	//// ### TODO: pretty this up
-	//UInt32 vtbl = *((UInt32*)newNode);
-	//UInt32 vfunc = *((UInt32*)(vtbl + 0x58));
+	//uint32_t vtbl = *((uint32_t*)newNode);
+	//uint32_t vfunc = *((uint32_t*)(vtbl + 0x58));
 	//NiObject* cameraNode = (NiObject*)ThisCall(vfunc, newNode, "Camera01");
 	//*g_3rdPersonCameraNode = cameraNode;
 
@@ -102,7 +102,7 @@ bool PlayerCharacter::SetSkeletonPath(const char* newPath)
 
 void PlayerCharacter::UpdateCamera(bool isCalledFromFunc21, bool _zero_skipUpdateLOD)
 {
-	ThisCall(0x94AE40, this, (UInt8)isCalledFromFunc21, (UInt8)_zero_skipUpdateLOD);
+	ThisCall(0x94AE40, this, (uint8_t)isCalledFromFunc21, (uint8_t)_zero_skipUpdateLOD);
 }
 
 void TESObjectREFR::Update3D()
@@ -171,7 +171,7 @@ hkpRigidBody* TESObjectREFR::GetRigidBody(const char* nodeName) const
 			if (bhkWorldObject* hWorldObj = targetNode->m_collisionObject->worldObj)
 			{
 				hkpRigidBody* rigidBody = (hkpRigidBody*)hWorldObj->refObject;
-				UInt8 motionType = rigidBody->motion.type;
+				uint8_t motionType = rigidBody->motion.type;
 				if ((motionType == 2) || (motionType == 3) || (motionType == 6))
 					return rigidBody;
 			}
@@ -222,8 +222,8 @@ EquippedItemsList Actor::GetEquippedItems()
 
 	ExtraContainerChanges	* xChanges = static_cast <ExtraContainerChanges *>(extraDataList.GetByType(kExtraData_ContainerChanges));
 	if(xChanges) {
-		UInt32 count = xChanges->GetAllEquipped(outEntryData, outExtendData);
-		for (UInt32 i = 0; i < count ; i++)
+		uint32_t count = xChanges->GetAllEquipped(outEntryData, outExtendData);
+		for (uint32_t i = 0; i < count ; i++)
 			itemList.push_back(outEntryData[i]->type);
 
 	}
@@ -257,13 +257,13 @@ ExtraContainerExtendDataArray	Actor::GetEquippedExtendDataList()
 */
 
 
-void Actor::SetAnimActionAndSequence(SInt32 animAction, BSAnimGroupSequence* animGroupSeq)
+void Actor::SetAnimActionAndSequence(int32_t animAction, BSAnimGroupSequence* animGroupSeq)
 {
 	ThisCall<void>(0x8A73E0, this, animAction, animGroupSeq);
 }
 
 // From JIP
-__declspec(naked) UInt32 Actor::GetLevel()
+__declspec(naked) uint32_t Actor::GetLevel()
 {
 	__asm
 	{
@@ -304,7 +304,7 @@ bool Actor::GetShouldAttack(Actor* target)
 
 void Actor::SetWantsWeaponOut(bool wantsWeaponOut)
 {
-	ThisCall(0x8A6840, this, (UInt8)wantsWeaponOut);
+	ThisCall(0x8A6840, this, (uint8_t)wantsWeaponOut);
 }
 
 bool Actor::IsInReloadAnim()
@@ -322,7 +322,7 @@ bool Actor::IsDoingAttackAnimation() const
 	return false;
 }
 
-SInt32 Actor::GetDetectionLevelAlt(Actor* target, bool calculateSneakLevel)
+int32_t Actor::GetDetectionLevelAlt(Actor* target, bool calculateSneakLevel)
 {
 	bool isTargetInCombat;
 	if (target->IsPlayerRef())
@@ -332,14 +332,14 @@ SInt32 Actor::GetDetectionLevelAlt(Actor* target, bool calculateSneakLevel)
 
 	bool out = false;  // throwaway variable to reference.
 
-	// SInt32 __thiscall Actor_GetDetected(Actor *this, bool calculateSneakLevel, Actor *toDetect, int *out, char a5, bool isTargetInCombat, int a7, int a8)
-	return ThisCall<SInt32>(0x8A0D10, this, calculateSneakLevel, target, &out, 0, isTargetInCombat, 0, 0);
+	// int32_t __thiscall Actor_GetDetected(Actor *this, bool calculateSneakLevel, Actor *toDetect, int *out, char a5, bool isTargetInCombat, int a7, int a8)
+	return ThisCall<int32_t>(0x8A0D10, this, calculateSneakLevel, target, &out, 0, isTargetInCombat, 0, 0);
 }
 
 // Same-ish code as what's used for Cmd_GetDetected_Eval
 bool Actor::Detects(Actor* target)
 {
-	SInt32 const detectionLevel = this->GetDetectionLevelAlt(target, false);
+	int32_t const detectionLevel = this->GetDetectionLevelAlt(target, false);
 	return detectionLevel > 0;
 }
 

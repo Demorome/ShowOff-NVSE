@@ -1,24 +1,24 @@
 ﻿#include "jip_nvse.h"
 
 
-bool (*WriteRecord)(UInt32 type, UInt32 version, const void* buffer, UInt32 length);
-bool (*WriteRecordData)(const void* buffer, UInt32 length);
-bool (*GetNextRecordInfo)(UInt32* type, UInt32* version, UInt32* length);
-UInt32(*ReadRecordData)(void* buffer, UInt32 length);
-bool (*ResolveRefID)(UInt32 refID, UInt32* outRefID);
+bool (*WriteRecord)(uint32_t type, uint32_t version, const void* buffer, uint32_t length);
+bool (*WriteRecordData)(const void* buffer, uint32_t length);
+bool (*GetNextRecordInfo)(uint32_t* type, uint32_t* version, uint32_t* length);
+uint32_t(*ReadRecordData)(void* buffer, uint32_t length);
+bool (*ResolveRefID)(uint32_t refID, uint32_t* outRefID);
 const char* (*GetSavePath)(void);
-void (*WriteRecord8)(UInt8 inData);
-void (*WriteRecord16)(UInt16 inData);
-void (*WriteRecord32)(UInt32 inData);
+void (*WriteRecord8)(uint8_t inData);
+void (*WriteRecord16)(uint16_t inData);
+void (*WriteRecord32)(uint32_t inData);
 void (*WriteRecord64)(const void* inData);
-UInt8(*ReadRecord8)();
-UInt16(*ReadRecord16)();
-UInt32(*ReadRecord32)();
+uint8_t(*ReadRecord8)();
+uint16_t(*ReadRecord16)();
+uint32_t(*ReadRecord32)();
 void (*ReadRecord64)(void* outData);
-void (*SkipNBytes)(UInt32 byteNum);
-InventoryRef* (*InventoryRefGetForID)(UInt32 refID);
+void (*SkipNBytes)(uint32_t byteNum);
+InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
 
-UInt8 TESForm::GetOverridingModIdx() const
+uint8_t TESForm::GetOverridingModIdx() const
 {
 	ModInfo* info = mods.GetLastItem();
 	return info ? info->modIndex : 0xFF;
@@ -30,7 +30,7 @@ TESObjectREFR* __fastcall CreateRefForStack(TESObjectREFR* container, ContChange
 	return (container && menuEntry) ? InventoryRefCreateEntry(container, menuEntry->type, menuEntry->countDelta, menuEntry->extendData ? menuEntry->extendData->GetFirstItem() : NULL) : NULL;
 }
 
-__declspec(naked) float __fastcall GetAxisDistance(TESObjectREFR* ref1, TESObjectREFR* ref2, UInt8 axis)
+__declspec(naked) float __fastcall GetAxisDistance(TESObjectREFR* ref1, TESObjectREFR* ref2, uint8_t axis)
 {
 	__asm
 	{
@@ -95,7 +95,7 @@ __declspec(naked) bool __fastcall Actor::IsInCombatWith(Actor* target) const
 	}
 }
 
-__declspec(naked) TESForm* __stdcall LookupFormByRefID(UInt32 refID)
+__declspec(naked) TESForm* __stdcall LookupFormByRefID(uint32_t refID)
 {
 	__asm
 	{
@@ -136,14 +136,14 @@ TESObjectWEAP* Actor::GetEquippedWeapon() const
 //Ensure thread safety when modifying these globals!
 AuxStringMapModsMap s_auxStringMapArraysPerm, s_auxStringMapArraysTemp;
 
-UInt32 __fastcall GetSubjectID(TESForm* form, TESObjectREFR* thisObj)
+uint32_t __fastcall GetSubjectID(TESForm* form, TESObjectREFR* thisObj)
 {
 	if (form) return IS_REFERENCE(form) ? ((TESObjectREFR*)form)->baseForm->refID : form->refID;
 	if (thisObj) return thisObj->refID;
 	return 0;
 }
 
-std::atomic<UInt8> s_dataChangedFlags = kChangedFlag_None; // For AuxVar serialization.
+std::atomic<uint8_t> s_dataChangedFlags = kChangedFlag_None; // For AuxVar serialization.
 
 
 __declspec(naked) ExtraContainerChanges::EntryDataList* TESObjectREFR::GetContainerChangesList()
@@ -176,7 +176,7 @@ bool TESForm::IsItem() const
 	return kInventoryType[this->typeID];
 }
 
-__declspec(naked) bool __fastcall GetResolvedModIndex(UInt8* pModIdx)
+__declspec(naked) bool __fastcall GetResolvedModIndex(uint8_t* pModIdx)
 {
 	__asm
 	{
@@ -197,7 +197,7 @@ __declspec(naked) bool __fastcall GetResolvedModIndex(UInt8* pModIdx)
 	}
 }
 
-__declspec(naked) bool __stdcall HasChangeData(UInt32 refID)
+__declspec(naked) bool __stdcall HasChangeData(uint32_t refID)
 {
 	__asm
 	{
@@ -226,7 +226,7 @@ __declspec(naked) bool __stdcall HasChangeData(UInt32 refID)
 	}
 }
 
-__declspec(naked) UInt32 __fastcall GetResolvedRefID(UInt32 refID)
+__declspec(naked) uint32_t __fastcall GetResolvedRefID(uint32_t refID)
 {
 	__asm
 	{

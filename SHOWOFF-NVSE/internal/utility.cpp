@@ -51,14 +51,14 @@ kFlt1000 = 1000.0F,
 kFltMax = FLT_MAX;
 
 // From JIP
-alignas(16) const UInt32
+alignas(16) const uint32_t
 kSSERemoveSignMaskPS[] = { 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF, 0x7FFFFFFF },
 kSSEChangeSignMaskPS[] = { 0x80000000, 0x80000000, 0x80000000, 0x80000000 },
 kSSEChangeSignMaskPS0[] = { 0x80000000, 0, 0, 0 },
 kSSEDiscard4thPS[] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0x00000000 };
 
 // From JIP
-alignas(16) const UInt64
+alignas(16) const uint64_t
 kSSERemoveSignMaskPD[] = { 0x7FFFFFFFFFFFFFFF, 0x7FFFFFFFFFFFFFFF },
 kSSEChangeSignMaskPD[] = { 0x8000000000000000, 0x8000000000000000 };
 
@@ -87,7 +87,7 @@ kLwrCaseConverter[] =
 // From JG
 void LightCS::Enter()
 {
-	UInt32 threadID = GetCurrentThreadId();
+	uint32_t threadID = GetCurrentThreadId();
 	if (owningThread == threadID)
 	{
 		enterCount++;
@@ -101,13 +101,13 @@ void LightCS::Enter()
 
 void LightCS::EnterSleep()
 {
-	UInt32 threadID = GetCurrentThreadId();
+	uint32_t threadID = GetCurrentThreadId();
 	if (owningThread == threadID)
 	{
 		enterCount++;
 		return;
 	}
-	UInt32 fastIdx = FAST_SLEEP_COUNT;
+	uint32_t fastIdx = FAST_SLEEP_COUNT;
 	while (InterlockedCompareExchange(&owningThread, threadID, 0))
 	{
 		if (fastIdx)
@@ -132,7 +132,7 @@ bool fCompare(float lval, float rval)
 	return fabs(lval - rval) < FLT_EPSILON;
 }
 
-__declspec(naked) UInt32 __vectorcall cvtd2ui(double value)
+__declspec(naked) uint32_t __vectorcall cvtd2ui(double value)
 {
 	__asm
 	{
@@ -145,7 +145,7 @@ __declspec(naked) UInt32 __vectorcall cvtd2ui(double value)
 	}
 }
 
-__declspec(naked) double __vectorcall cvtui2d(UInt32 value)
+__declspec(naked) double __vectorcall cvtui2d(uint32_t value)
 {
 	__asm
 	{
@@ -159,7 +159,7 @@ __declspec(naked) double __vectorcall cvtui2d(UInt32 value)
 	}
 }
 
-__declspec(naked) void __fastcall cvtui2d(UInt32 value, double* result)
+__declspec(naked) void __fastcall cvtui2d(uint32_t value, double* result)
 {
 	__asm
 	{
@@ -438,7 +438,7 @@ __declspec(naked) float __vectorcall ATan2(float y, float x)
 	}
 }
 
-__declspec(naked) UInt32 __fastcall RGBHexToDec(UInt32 rgb)
+__declspec(naked) uint32_t __fastcall RGBHexToDec(uint32_t rgb)
 {
 	__asm
 	{
@@ -453,7 +453,7 @@ __declspec(naked) UInt32 __fastcall RGBHexToDec(UInt32 rgb)
 	}
 }
 
-__declspec(naked) UInt32 __fastcall RGBDecToHex(UInt32 rgb)
+__declspec(naked) uint32_t __fastcall RGBDecToHex(uint32_t rgb)
 {
 	__asm
 	{
@@ -476,7 +476,7 @@ __declspec(naked) UInt32 __fastcall RGBDecToHex(UInt32 rgb)
 	}
 }
 
-__declspec(naked) UInt32 __fastcall StrLen(const char *str)
+__declspec(naked) uint32_t __fastcall StrLen(const char *str)
 {
 	__asm
 	{
@@ -511,7 +511,7 @@ __declspec(naked) char* __fastcall StrEnd(const char *str)
 	}
 }
 
-__declspec(naked) bool __fastcall MemCmp(const void *ptr1, const void *ptr2, UInt32 bsize)
+__declspec(naked) bool __fastcall MemCmp(const void *ptr1, const void *ptr2, uint32_t bsize)
 {
 	__asm
 	{
@@ -535,7 +535,7 @@ __declspec(naked) bool __fastcall MemCmp(const void *ptr1, const void *ptr2, UIn
 	}
 }
 
-__declspec(naked) void __fastcall MemZero(void *dest, UInt32 bsize)
+__declspec(naked) void __fastcall MemZero(void *dest, uint32_t bsize)
 {
 	__asm
 	{
@@ -599,7 +599,7 @@ __declspec(naked) char* __fastcall StrCopy(char *dest, const char *src)
 	}
 }
 
-__declspec(naked) char* __fastcall StrNCopy(char *dest, const char *src, UInt32 length)
+__declspec(naked) char* __fastcall StrNCopy(char *dest, const char *src, uint32_t length)
 {
 	__asm
 	{
@@ -643,7 +643,7 @@ __declspec(naked) char* __fastcall StrCat(char *dest, const char *src)
 	}
 }
 
-__declspec(naked) UInt32 __fastcall StrHash(const char *inKey)
+__declspec(naked) uint32_t __fastcall StrHash(const char *inKey)
 {
 	__asm
 	{
@@ -670,7 +670,7 @@ __declspec(naked) UInt32 __fastcall StrHash(const char *inKey)
 	}
 }
 
-__declspec(naked) UInt32 __fastcall StrHashCI(const char* inKey)
+__declspec(naked) uint32_t __fastcall StrHashCI(const char* inKey)
 {
 	__asm
 	{
@@ -1121,7 +1121,7 @@ __declspec(naked) char* __fastcall FindChr(const char *str, char chr)
 	}
 }
 
-__declspec(naked) char* __fastcall FindChrR(const char *str, UInt32 length, char chr)
+__declspec(naked) char* __fastcall FindChrR(const char *str, uint32_t length, char chr)
 {
 	__asm
 	{
@@ -1308,7 +1308,7 @@ __declspec(noinline) char* __fastcall GetNextToken(char *str, const char *delims
 	if (!str) return NULL;
 	bool table[0x100];
 	MemZero(table, 0x100);
-	UInt8 curr;
+	uint8_t curr;
 	while (curr = *delims)
 	{
 		table[curr] = true;
@@ -1413,7 +1413,7 @@ double __fastcall StrToDbl(const char *str)
 {
 	if (!str) return 0;
 	double result = 0;
-	UInt32 intPart = 0, divisor = 1;
+	uint32_t intPart = 0, divisor = 1;
 	bool neg = *str == '-', point = false;
 	if (neg) str++;
 	char chr;
@@ -1438,10 +1438,10 @@ double __fastcall StrToDbl(const char *str)
 	return neg ? -result : result;
 }
 
-char* __fastcall UIntToHex(UInt32 num, char *str)
+char* __fastcall UIntToHex(uint32_t num, char *str)
 {
 	char res[8];
-	UInt8 size = 0, temp;
+	uint8_t size = 0, temp;
 	do
 	{
 		temp = num % 0x10;
@@ -1457,11 +1457,11 @@ char* __fastcall UIntToHex(UInt32 num, char *str)
 	return str;
 }
 
-UInt32 __fastcall HexToUInt(const char *str)
+uint32_t __fastcall HexToUInt(const char *str)
 {
 	if (!str || !*str) return 0;
 	char size = 0, chr;
-	UInt32 result = 0, mult = 1;
+	uint32_t result = 0, mult = 1;
 	do
 	{
 		str++;
@@ -1486,7 +1486,7 @@ UInt32 __fastcall HexToUInt(const char *str)
 
 //===Begin JIP string / char stuff
 
-__declspec(align(16)) const UInt8 kCaseConverter[] =
+__declspec(align(16)) const uint8_t kCaseConverter[] =
 {
 	0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
 	0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F,
@@ -1532,7 +1532,7 @@ bool FileStreamJIP::Open(const char* filePath)
 	return theFile ? true : false;
 }
 
-bool FileStreamJIP::OpenAt(const char* filePath, UInt32 inOffset)
+bool FileStreamJIP::OpenAt(const char* filePath, uint32_t inOffset)
 {
 	if (theFile) fclose(theFile);
 	theFile = _fsopen(filePath, "rb", 0x20);
@@ -1573,15 +1573,15 @@ bool FileStreamJIP::Create(const char* filePath)
 	return theFile ? true : false;
 }
 
-UInt32 FileStreamJIP::GetLength()
+uint32_t FileStreamJIP::GetLength()
 {
 	fseek(theFile, 0, SEEK_END);
-	UInt32 result = ftell(theFile);
+	uint32_t result = ftell(theFile);
 	rewind(theFile);
 	return result;
 }
 
-void FileStreamJIP::SetOffset(UInt32 inOffset)
+void FileStreamJIP::SetOffset(uint32_t inOffset)
 {
 	fseek(theFile, 0, SEEK_END);
 	if (ftell(theFile) > inOffset)
@@ -1593,7 +1593,7 @@ char FileStreamJIP::ReadChar()
 	return (char)fgetc(theFile);
 }
 
-void FileStreamJIP::ReadBuf(void* outData, UInt32 inLength)
+void FileStreamJIP::ReadBuf(void* outData, uint32_t inLength)
 {
 	fread(outData, inLength, 1, theFile);
 }
@@ -1610,7 +1610,7 @@ void FileStreamJIP::WriteStr(const char* inStr)
 	fflush(theFile);
 }
 
-void FileStreamJIP::WriteBuf(const void* inData, UInt32 inLength)
+void FileStreamJIP::WriteBuf(const void* inData, uint32_t inLength)
 {
 	fwrite(inData, inLength, 1, theFile);
 	fflush(theFile);
@@ -1641,7 +1641,7 @@ void __fastcall GetTimeStamp(char *buffer)
 	sprintf_s(buffer, 0x10, "%02d:%02d:%02d", timeInfo.tm_hour, timeInfo.tm_min, timeInfo.tm_sec);
 }
 
-__declspec(naked) UInt32 __fastcall ByteSwap(UInt32 dword)
+__declspec(naked) uint32_t __fastcall ByteSwap(uint32_t dword)
 {
 	__asm
 	{
@@ -1651,21 +1651,21 @@ __declspec(naked) UInt32 __fastcall ByteSwap(UInt32 dword)
 	}
 }
 
-void DumpMemImg(void *data, UInt32 size, UInt8 extra)
+void DumpMemImg(void *data, uint32_t size, uint8_t extra)
 {
-	UInt32 *ptr = (UInt32*)data;
+	uint32_t *ptr = (uint32_t*)data;
 	//Console_Print("Output");
 	_MESSAGE("\nDumping  %08X\n", ptr);
-	for (UInt32 iter = 0; iter < size; iter += 4, ptr++)
+	for (uint32_t iter = 0; iter < size; iter += 4, ptr++)
 	{
 		if (!extra) _MESSAGE("%03X\t\t%08X\t", iter, *ptr);
 		else if (extra == 1) _MESSAGE("%03X\t\t%08X\t[%08X]\t", iter, *ptr, ByteSwap(*ptr));
 		else if (extra == 2) _MESSAGE("%03X\t\t%08X\t%f", iter, *ptr, *(float*)ptr);
 		/*else
 		{
-			UInt32 addr = *ptr;
+			uint32_t addr = *ptr;
 			if (!(addr & 3) && (addr > 0x08000000) && (addr < 0x34000000))
-				_MESSAGE("%03X\t\t%08X\t%08X\t", iter, *ptr, *(UInt32*)addr);
+				_MESSAGE("%03X\t\t%08X\t%08X\t", iter, *ptr, *(uint32_t*)addr);
 			else _MESSAGE("%03X\t\t%08X\t", iter, *ptr);
 		}*/
 	}
@@ -1674,8 +1674,8 @@ void DumpMemImg(void *data, UInt32 size, UInt8 extra)
 //From NVSE
 void Console_Print_Long(const std::string& str)
 {
-	UInt32 numLines = str.length() / 500;
-	for (UInt32 i = 0; i < numLines; i++)
+	uint32_t numLines = str.length() / 500;
+	for (uint32_t i = 0; i < numLines; i++)
 		Console_Print("%s ...", str.substr(i * 500, 500).c_str());
 
 	Console_Print("%s", str.substr(numLines * 500, str.length() - numLines * 500).c_str());
@@ -1684,7 +1684,7 @@ void Console_Print_Long(const std::string& str)
 
 AuxBuffer s_auxBuffers[3];
 
-__declspec(naked) UInt8* __fastcall GetAuxBuffer(AuxBuffer& buffer, UInt32 reqSize)
+__declspec(naked) uint8_t* __fastcall GetAuxBuffer(AuxBuffer& buffer, uint32_t reqSize)
 {
 	__asm
 	{
@@ -1948,9 +1948,9 @@ bool IsEquipableItemPlayable(TESForm* form)  // Ammo is not equip-able in the sa
 }
 
 // Inspired by FOSE's MatchBySlot
-UInt32 GetFormEquipSlotMask(TESForm* form)
+uint32_t GetFormEquipSlotMask(TESForm* form)
 {
-	UInt32 equipSlotMask = 0;  // return value
+	uint32_t equipSlotMask = 0;  // return value
 	if (IS_TYPE(form, TESObjectWEAP)) {
 		equipSlotMask = TESBipedModelForm::eSlot_Weapon;
 	}
@@ -1964,28 +1964,28 @@ UInt32 GetFormEquipSlotMask(TESForm* form)
 }
 
 // If any slot bits from slotMask match with the slot bits from the form, returns true.
-bool MatchAnySlotForForm(TESForm* form, UInt32 slotMask)
+bool MatchAnySlotForForm(TESForm* form, uint32_t slotMask)
 {
 	auto const formSlotMask = GetFormEquipSlotMask(form);
 	return (formSlotMask & slotMask) != 0;
 }
 
-bool MatchAnyEquipSlots(UInt32 slotMask1, UInt32 slotMask2)
+bool MatchAnyEquipSlots(uint32_t slotMask1, uint32_t slotMask2)
 {
 	return (slotMask1 & slotMask2) != 0;
 }
 
-float GetFltGameSetting(UInt32 addr)
+float GetFltGameSetting(uint32_t addr)
 {
 	return *(float*)(addr + 4);  // "the value of the gamesetting is always at +4" -c6
 }
 
-SInt32 GetIntGameSetting(UInt32 addr)
+int32_t GetIntGameSetting(uint32_t addr)
 {
-	return *(SInt32*)(addr + 4);
+	return *(int32_t*)(addr + 4);
 }
 
-char* GetStrGameSetting(UInt32 addr)
+char* GetStrGameSetting(uint32_t addr)
 {
 	return *(char**)(addr + 4);
 }
@@ -2063,7 +2063,7 @@ void AssignScriptValueResult(const NVSEArrayElement* val, PluginExpressionEvalua
 	}
 }
 
-__declspec(noinline) UInt8* AuxBuffer::Get(UInt32 bufIdx, UInt32 reqSize)
+__declspec(noinline) uint8_t* AuxBuffer::Get(uint32_t bufIdx, uint32_t reqSize)
 {
 	thread_local AuxBuffer s_auxBuffers[3];
 	AuxBuffer* auxBuf = &s_auxBuffers[bufIdx];
@@ -2072,10 +2072,10 @@ __declspec(noinline) UInt8* AuxBuffer::Get(UInt32 bufIdx, UInt32 reqSize)
 		auxBuf->size = reqSize;
 		if (auxBuf->ptr)
 			_aligned_free(auxBuf->ptr);
-		auxBuf->ptr = (UInt8*)_aligned_malloc(reqSize, 0x10);
+		auxBuf->ptr = (uint8_t*)_aligned_malloc(reqSize, 0x10);
 	}
 	else if (!auxBuf->ptr)
-		auxBuf->ptr = (UInt8*)_aligned_malloc(auxBuf->size, 0x10);
+		auxBuf->ptr = (uint8_t*)_aligned_malloc(auxBuf->size, 0x10);
 	return auxBuf->ptr;
 }
 
@@ -2114,18 +2114,18 @@ std::pair<const char*, const char*> SplitStringBySingleDelimiter(std::string& to
 	return { lh, rh };
 }
 
-UnorderedMap<const char*, UInt32> s_strRefs;
+UnorderedMap<const char*, uint32_t> s_strRefs;
 
-UInt32 __fastcall StringToRef(char* refStr)
+uint32_t __fastcall StringToRef(char* refStr)
 {
-	UInt32* findStr;
+	uint32_t* findStr;
 	if (!s_strRefs.Insert(refStr, &findStr)) 
 		return *findStr;
 	*findStr = 0;
 	if (char* colon = FindChr(refStr, ':');
 		colon)
 	{
-		UInt8 modIdx;
+		uint8_t modIdx;
 		if (colon != refStr)
 		{
 			*colon = 0;
@@ -2144,7 +2144,7 @@ UInt32 __fastcall StringToRef(char* refStr)
 	return ResolveRefID(HexToUInt(refStr), findStr) ? *findStr : 0;
 }
 
-std::unordered_map<UInt32, const std::string> s_refStrings;
+std::unordered_map<uint32_t, const std::string> s_refStrings;
 
 //Code copied from JIP LN, adapted to use std::string
 static const std::string invalidRef = ":00000000";

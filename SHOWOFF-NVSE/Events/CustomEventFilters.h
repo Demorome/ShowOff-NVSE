@@ -8,7 +8,7 @@ class JohnnyEventFiltersOneFormOneInt : EventHandlerInterface
 
 	RefUnorderedSet* Filters = 0;
 
-	RefUnorderedSet* GetFilter(UInt32 filter)
+	RefUnorderedSet* GetFilter(uint32_t filter)
 	{
 		if (filter >= numFilters) return NULL;
 		return &(Filters[filter]);
@@ -16,7 +16,7 @@ class JohnnyEventFiltersOneFormOneInt : EventHandlerInterface
 public:
 
 
-	JohnnyEventFiltersOneFormOneInt(void** filters, UInt32 nuFilters)
+	JohnnyEventFiltersOneFormOneInt(void** filters, uint32_t nuFilters)
 	{
 		numFilters = nuFilters;
 		Filters = new RefUnorderedSet[numFilters];
@@ -30,7 +30,7 @@ public:
 		delete[] GenFilters;
 	}
 
-	virtual bool IsInFilter(UInt32 filterNum, GenericFilters toSearch)
+	virtual bool IsInFilter(uint32_t filterNum, GenericFilters toSearch)
 	{
 		RefUnorderedSet* FilterSet;
 		if (!(FilterSet = GetFilter(filterNum))) return false;
@@ -38,26 +38,26 @@ public:
 	}
 
 
-	virtual void InsertToFilter(UInt32 filterNum, GenericFilters toInsert)
+	virtual void InsertToFilter(uint32_t filterNum, GenericFilters toInsert)
 	{
 		RefUnorderedSet* FilterSet;
 		if (!(FilterSet = GetFilter(filterNum))) return;
 		FilterSet->insert(toInsert.refID);
 	}
-	virtual void DeleteFromFilter(UInt32 filterNum, GenericFilters toDelete)
+	virtual void DeleteFromFilter(uint32_t filterNum, GenericFilters toDelete)
 	{
 		RefUnorderedSet* FilterSet;
 		if (!(FilterSet = GetFilter(filterNum))) return;
 		FilterSet->erase(toDelete.refID);
 
 	}
-	virtual bool IsFilterEmpty(UInt32 filterNum)
+	virtual bool IsFilterEmpty(uint32_t filterNum)
 	{
 		RefUnorderedSet* FilterSet = GetFilter(filterNum);
 		if (!FilterSet) return true;
 		return FilterSet->empty();
 	}
-	virtual bool IsFilterEqual(GenericFilters Filter, UInt32 nuFilter)
+	virtual bool IsFilterEqual(GenericFilters Filter, uint32_t nuFilter)
 	{
 		return (Filter.ptr == GenFilters[nuFilter].ptr);
 	}
@@ -87,7 +87,7 @@ public:
 	}
 
 };
-void* __fastcall CreateOneFormOneIntFilter(void** Filters, UInt32 numFilters) {
+void* __fastcall CreateOneFormOneIntFilter(void** Filters, uint32_t numFilters) {
 	return new JohnnyEventFiltersOneFormOneInt(Filters, numFilters);
 }
 
@@ -103,7 +103,7 @@ struct EventFilterStructOneFormOneInt {
 // Filters are non-optional
 struct JohnnyEventFiltersOneFormOneString : EventHandlerInterface
 {
-	static constexpr UInt8 NumFilters = 2;
+	static constexpr uint8_t NumFilters = 2;
 
 	JohnnyEventFiltersOneFormOneString(void** filters)
 	{
@@ -120,7 +120,7 @@ struct JohnnyEventFiltersOneFormOneString : EventHandlerInterface
 		GenFilters = nullptr;
 	}
 
-	bool IsInFilter(UInt32 filterNum, GenericFilters toSearch) override
+	bool IsInFilter(uint32_t filterNum, GenericFilters toSearch) override
 	{
 		if (filterNum == 0)
 			return toSearch.refID == GenFilters[0].refID;
@@ -128,15 +128,15 @@ struct JohnnyEventFiltersOneFormOneString : EventHandlerInterface
 			return StrEqualCI(toSearch.str, GenFilters[1].str);
 		return false;
 	}
-	void InsertToFilter(UInt32 filterNum, GenericFilters toInsert) override
+	void InsertToFilter(uint32_t filterNum, GenericFilters toInsert) override
 	{}
-	void DeleteFromFilter(UInt32 filterNum, GenericFilters toDelete) override
+	void DeleteFromFilter(uint32_t filterNum, GenericFilters toDelete) override
 	{}
-	bool IsFilterEmpty(UInt32 filterNum) override
+	bool IsFilterEmpty(uint32_t filterNum) override
 	{
 		return false; // should never be empty (non-optional filters)
 	}
-	bool IsFilterEqual(GenericFilters filter, UInt32 nuFilter) override
+	bool IsFilterEqual(GenericFilters filter, uint32_t nuFilter) override
 	{
 		return IsInFilter(nuFilter, filter);
 	}
@@ -147,4 +147,4 @@ struct JohnnyEventFiltersOneFormOneString : EventHandlerInterface
 	void SetUpFiltering() override
 	{}
 };
-void* __fastcall CreateOneFormOneStringFilter(void** Filters, UInt32 numFilters_unused);
+void* __fastcall CreateOneFormOneStringFilter(void** Filters, uint32_t numFilters_unused);

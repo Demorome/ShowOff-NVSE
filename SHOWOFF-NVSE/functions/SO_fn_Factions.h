@@ -18,14 +18,14 @@ bool Cmd_SetFactionCombatReactionTemp_Execute(COMMAND_ARGS)
 {
 	*result = 0; //bSuccess
 	TESFaction* faction1, * faction2;
-	UInt32 setAllyOrEnemy;	// emulate SetAlly or SetEnemy
+	uint32_t setAllyOrEnemy;	// emulate SetAlly or SetEnemy
 
 	// If setAlly, and if true, then faction1 will react as a Friend to F2, otherwise Ally.
 	// If setEnemy, and if true, then F2 will react as Neutral to F1, otherwise Enemy.
-	UInt32 F1toF2Flag = 0;
+	uint32_t F1toF2Flag = 0;
 
 	// (inverse faction1 with F2)
-	UInt32 F2toF1Flag = 0;
+	uint32_t F2toF1Flag = 0;
 
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &faction1, &faction2, &setAllyOrEnemy, &F1toF2Flag, &F2toF1Flag)
 		&& faction1 && faction2)
@@ -51,10 +51,10 @@ bool Cmd_SetAllyTemp_Execute(COMMAND_ARGS)
 	TESFaction* faction1, *faction2;
 	
 	// If true, then faction1 will react as a Friend to faction2, otherwise Ally (default).
-	UInt32 F1toF2Flag = 0;
+	uint32_t F1toF2Flag = 0;
 
 	// If true, then faction2 will react as a Friend to faction1, otherwise Ally (default).
-	UInt32 F2toF1Flag = 0;
+	uint32_t F2toF1Flag = 0;
 
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &faction1, &faction2, &F1toF2Flag, &F2toF1Flag)
 		&& faction1 && faction2)
@@ -72,10 +72,10 @@ bool Cmd_SetEnemyTemp_Execute(COMMAND_ARGS)
 	TESFaction* faction1, * faction2;
 
 	// If true, then faction1 will react as a Neutral to faction2, otherwise Enemy (default).
-	UInt32 F1toF2Flag = 0;
+	uint32_t F1toF2Flag = 0;
 
 	// If true, then faction2 will react as Neutral to faction1, otherwise Enemy (default).
-	UInt32 F2toF1Flag = 0;
+	uint32_t F2toF1Flag = 0;
 
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &faction1, &faction2, &F1toF2Flag, &F2toF1Flag)
 		&& faction1 && faction2)
@@ -98,7 +98,7 @@ DEFINE_COMMAND_ALT_PLUGIN(ClearReputation, ResetReputation, , false, kParams_One
 bool Cmd_ClearReputation_Execute(COMMAND_ARGS)
 {
 	TESFaction* faction;
-	UInt32 bFame = -1; // -1 = clear both reps. 0 = clear infamy. 1 = clear fame
+	uint32_t bFame = -1; // -1 = clear both reps. 0 = clear infamy. 1 = clear fame
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &faction, &bFame) && faction)
 	{
 		

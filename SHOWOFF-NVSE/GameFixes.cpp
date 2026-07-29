@@ -21,7 +21,7 @@ namespace GameFixes
 	{
 		__declspec(naked) void GetShouldRespawnHook()
 		{
-			static const UInt32 retnAddr = 0x54E1CD,
+			static const uint32_t retnAddr = 0x54E1CD,
 				getShouldRespawnAddr = 0x881C90;
 
 			enum {
@@ -52,20 +52,20 @@ namespace GameFixes
 
 			//Replace Actor::GetShouldRespawn call in Cell::HandleResets
 			//...Cuz it checks for time even though ResetInterior was called.
-			WriteRelJump(0x54E1C8, (UInt32)GetShouldRespawnHook);
+			WriteRelJump(0x54E1C8, (uint32_t)GetShouldRespawnHook);
 		}
 	}
 
 	namespace ShowSleepWaitMenu
 	{
-		UInt32 g_isSleep = false;
+		uint32_t g_isSleep = false;
 
 		namespace ShowSleepWaitMenu_ParseParameters
 		{
 			// Will retrieve the isSleep arg value.
 			__declspec(naked) void Hook()
 			{
-				static const UInt32 retnAddr = 0x5E00E0;
+				static const uint32_t retnAddr = 0x5E00E0;
 
 				enum {
 					isSleepOffset = -0x8
@@ -84,7 +84,7 @@ namespace GameFixes
 			void WriteHook()
 			{
 				// Warning: xNVSE has a hook at 0x5E00E0 in Cmd_ShowSleepWaitMenu
-				WriteRelJump(0x5E00DA, (UInt32)Hook);
+				WriteRelJump(0x5E00DA, (uint32_t)Hook);
 			}
 		}
 
@@ -99,7 +99,7 @@ namespace GameFixes
 
 			void WriteDelayedHook()
 			{
-				g_detour.WriteDetourCall(0x96A269, (UInt32)Hook);
+				g_detour.WriteDetourCall(0x96A269, (uint32_t)Hook);
 			}
 		}
 
@@ -156,11 +156,11 @@ namespace GameFixes
 			}
 
 			bool __fastcall FirstHook(TESForm* thisActor, void* edx, TESForm* item,
-				SInt32 count, ExtraDataList* xData, bool isWorn, bool unused)
+				int32_t count, ExtraDataList* xData, bool isWorn, bool unused)
 			{
 				// NOTE: this trick assumes that we aren't being called by a detour!!
 				auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
-				auto noEquip = *reinterpret_cast<UInt32*>(ebp + 0x18);
+				auto noEquip = *reinterpret_cast<uint32_t*>(ebp + 0x18);
 				g_NoEquip = noEquip != 0;
 
 				// do regular code, which will use the global
@@ -174,11 +174,11 @@ namespace GameFixes
 			}
 
 			bool __fastcall SecondHook(TESForm* thisActor, void* edx, TESForm* item,
-				SInt32 count, ExtraDataList* xData, bool isWorn, bool unused)
+				int32_t count, ExtraDataList* xData, bool isWorn, bool unused)
 			{
 				// NOTE: this trick assumes that we aren't being called by a detour!!
 				auto* ebp = GetParentBasePtr(_AddressOfReturnAddress());
-				auto noEquip = *reinterpret_cast<UInt32*>(ebp + 0x18);
+				auto noEquip = *reinterpret_cast<uint32_t*>(ebp + 0x18);
 				g_NoEquip = noEquip != 0;
 
 				// do regular code, which will use the global
@@ -194,11 +194,11 @@ namespace GameFixes
 			void WriteDelayedHooks()
 			{
 				// These two hooks will set the g_NoEquip global.
-				g_detour1stCall.WriteDetourCall(0x88D98A, (UInt32)FirstHook);
-				g_detour2ndCall.WriteDetourCall(0x88D964, (UInt32)SecondHook);
+				g_detour1stCall.WriteDetourCall(0x88D98A, (uint32_t)FirstHook);
+				g_detour2ndCall.WriteDetourCall(0x88D964, (uint32_t)SecondHook);
 
 				// Uses the g_NoEquip global set up by the hooks above.
-				g_detourDoFix.WriteDetourCall(0x4C0DC8, (UInt32)DoFix);
+				g_detourDoFix.WriteDetourCall(0x4C0DC8, (uint32_t)DoFix);
 			}
 		}
 	}
@@ -231,8 +231,8 @@ namespace GameFixes
 
 		void WriteHook()
 		{
-			//g_detour.WriteDetourCall(0x7F4A72, (UInt32)HookGetHealthDamage);
-			g_detour.WriteDetourCall(0x594E9A, (UInt32)HookGetCurrentQueuedAction);
+			//g_detour.WriteDetourCall(0x7F4A72, (uint32_t)HookGetHealthDamage);
+			g_detour.WriteDetourCall(0x594E9A, (uint32_t)HookGetCurrentQueuedAction);
 		}
 	}
 	*/

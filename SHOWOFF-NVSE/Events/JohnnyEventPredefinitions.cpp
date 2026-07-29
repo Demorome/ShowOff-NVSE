@@ -4,7 +4,7 @@ std::mutex EventsArrayMutex;
 std::vector<EventInfo> EventsArray;
 
 #if 0
-void* __fastcall GenericCreateFilter(void** Filters, UInt32 numFilters) {
+void* __fastcall GenericCreateFilter(void** Filters, uint32_t numFilters) {
 	return new JohnnyEventFiltersForm(Filters, numFilters);
 }
 #endif
@@ -21,7 +21,7 @@ EventInfo FindHandlerInfoByChar(const char* nameToFind)
 	return NULL;
 }
 
-EventInfo __cdecl JGCreateEvent(const char* EventName, UInt8 maxArgs, UInt8 maxFilters, void* (__fastcall* CreatorFunction)(void**, UInt32))
+EventInfo __cdecl JGCreateEvent(const char* EventName, uint8_t maxArgs, uint8_t maxFilters, void* (__fastcall* CreatorFunction)(void**, uint32_t))
 {
 	std::lock_guard<std::mutex> lock(EventsArrayMutex);
 	EventInfo eventinfo = new EventInformation(EventName, maxArgs, maxFilters, CreatorFunction);

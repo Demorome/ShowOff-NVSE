@@ -17,7 +17,7 @@ bool Cmd_GetCompassTargets_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 
-	enum TargetFlag : UInt32
+	enum TargetFlag : uint32_t
 	{
 		IncludeAll = 0,
 		IncludeNonHostiles = 1,
@@ -80,7 +80,7 @@ DEFINE_COMMAND_PLUGIN(PlaceAtReticleAlt, , true, Cmd_PlaceAtReticleAlt_Params);
 bool Cmd_PlaceAtReticleAlt_Execute(COMMAND_ARGS)
 {
 	TESForm* formToPlace;
-	UInt32 count = 1;
+	uint32_t count = 1;
 	float minDistance = 0.0f, maxDistance = 0.0f;
 	PlaceAtReticleAlt::g_healthPercent = 1.0f;
 

@@ -31,32 +31,32 @@ enum  //Memory Addresses
 	kAddr_InitFontInfo = 0xA12020,
 };
 
-#define IS_REFERENCE(form) ((*(UInt32**)form)[0x3C] == kAddr_ReturnTrue)
-#define NOT_REFERENCE(form) ((*(UInt32**)form)[0x3C] != kAddr_ReturnTrue)
-#define IS_ACTOR(form) ((*(UInt32**)form)[0x40] == kAddr_ReturnTrue)	//only works on references
-#define NOT_ACTOR(form) ((*(UInt32**)form)[0x40] != kAddr_ReturnTrue)	//only works on references
-#define IS_NODE(object) ((*(UInt32**)object)[3] == kAddr_ReturnThis)
+#define IS_REFERENCE(form) ((*(uint32_t**)form)[0x3C] == kAddr_ReturnTrue)
+#define NOT_REFERENCE(form) ((*(uint32_t**)form)[0x3C] != kAddr_ReturnTrue)
+#define IS_ACTOR(form) ((*(uint32_t**)form)[0x40] == kAddr_ReturnTrue)	//only works on references
+#define NOT_ACTOR(form) ((*(uint32_t**)form)[0x40] != kAddr_ReturnTrue)	//only works on references
+#define IS_NODE(object) ((*(uint32_t**)object)[3] == kAddr_ReturnThis)
 
-extern bool (*WriteRecord)(UInt32 type, UInt32 version, const void* buffer, UInt32 length);
-extern bool (*WriteRecordData)(const void* buffer, UInt32 length);
-extern bool (*GetNextRecordInfo)(UInt32* type, UInt32* version, UInt32* length);
-extern UInt32(*ReadRecordData)(void* buffer, UInt32 length);
-extern bool (*ResolveRefID)(UInt32 refID, UInt32* outRefID);
+extern bool (*WriteRecord)(uint32_t type, uint32_t version, const void* buffer, uint32_t length);
+extern bool (*WriteRecordData)(const void* buffer, uint32_t length);
+extern bool (*GetNextRecordInfo)(uint32_t* type, uint32_t* version, uint32_t* length);
+extern uint32_t(*ReadRecordData)(void* buffer, uint32_t length);
+extern bool (*ResolveRefID)(uint32_t refID, uint32_t* outRefID);
 extern const char* (*GetSavePath)(void);
-extern void (*WriteRecord8)(UInt8 inData);
-extern void (*WriteRecord16)(UInt16 inData);
-extern void (*WriteRecord32)(UInt32 inData);
+extern void (*WriteRecord8)(uint8_t inData);
+extern void (*WriteRecord16)(uint16_t inData);
+extern void (*WriteRecord32)(uint32_t inData);
 extern void (*WriteRecord64)(const void* inData);
-extern UInt8(*ReadRecord8)();
-extern UInt16(*ReadRecord16)();
-extern UInt32(*ReadRecord32)();
+extern uint8_t(*ReadRecord8)();
+extern uint16_t(*ReadRecord16)();
+extern uint32_t(*ReadRecord32)();
 extern void (*ReadRecord64)(void* outData);
-extern void (*SkipNBytes)(UInt32 byteNum);
+extern void (*SkipNBytes)(uint32_t byteNum);
 
 //todo: fix bug where second element in a 2D array is somehow nullptr, and not an inner array.
 struct ArrayData_JIP
 {
-	UInt32			size;
+	uint32_t			size;
 	ArrayElementR* vals;
 	ArrayElementR* keys;
 
@@ -65,7 +65,7 @@ struct ArrayData_JIP
 		size = GetArraySize(srcArr);
 		if (size)
 		{
-			UInt32 alloc = size * sizeof(ArrayElementR);
+			uint32_t alloc = size * sizeof(ArrayElementR);
 			if (!isPacked) alloc *= 2;
 			vals = (ArrayElementR*)AuxBuffer::Get(2, alloc);
 			keys = isPacked ? nullptr : (vals + size);
@@ -79,7 +79,7 @@ struct ArrayData_JIP
 	{
 		if (size)
 		{
-			UInt32 count = keys ? (size * 2) : size;
+			uint32_t count = keys ? (size * 2) : size;
 			ArrayElementR* elems = vals;
 			do
 			{
@@ -92,23 +92,23 @@ struct ArrayData_JIP
 
 TESObjectREFR* __fastcall CreateRefForStack(TESObjectREFR* container, ContChangesEntry* menuEntry);
 
-float __fastcall GetAxisDistance(TESObjectREFR* ref1, TESObjectREFR* ref2, UInt8 axis);
+float __fastcall GetAxisDistance(TESObjectREFR* ref1, TESObjectREFR* ref2, uint8_t axis);
 
 //If ref1 and ref2 are the same, distance = 0.
 float GetDistance3D(TESObjectREFR* ref1, TESObjectREFR* ref2);
 
-TESForm* __stdcall LookupFormByRefID(UInt32 refID);
+TESForm* __stdcall LookupFormByRefID(uint32_t refID);
 
 class AuxVariableValue
 {
-	UInt8		type;
-	UInt8		pad01[3];
-	UInt16		alloc;
-	UInt16		length;
+	uint8_t		type;
+	uint8_t		pad01[3];
+	uint16_t		alloc;
+	uint16_t		length;
 	union
 	{
 		double	num;
-		UInt32	refID;
+		uint32_t	refID;
 		char* str;
 	};
 
@@ -147,14 +147,14 @@ class AuxVariableValue
 
 public:
 	AuxVariableValue() : alloc(0) {}
-	AuxVariableValue(UInt8 _type) : type(_type), alloc(0) { ReadValData(); }
+	AuxVariableValue(uint8_t _type) : type(_type), alloc(0) { ReadValData(); }
 	AuxVariableValue(NVSEArrayElement& elem) : alloc(0) { SetElem(elem); }
 
 	~AuxVariableValue() { Clear(); }
 
-	UInt8 GetType() const { return type; }
+	uint8_t GetType() const { return type; }
 	double GetFlt() const { return (type == 1) ? num : 0; }
-	UInt32 GetRef() const { return (type == 2) ? refID : 0; }
+	uint32_t GetRef() const { return (type == 2) ? refID : 0; }
 	const char* GetStr() const { return alloc ? str : NULL; }
 
 	void SetFlt(double value)
@@ -180,7 +180,7 @@ public:
 		length = StrLen(value);
 		if (length)
 		{
-			UInt16 size = length + 1;
+			uint16_t size = length + 1;
 			if (alloc < size)
 			{
 				if (alloc) Pool_Free(str, alloc);
@@ -226,14 +226,14 @@ static_assert(sizeof(AuxVariableValue) == 0x10);
 
 typedef UnorderedMap<char*, AuxVariableValue> AuxStringMapIDsMap;
 typedef UnorderedMap<char*, AuxStringMapIDsMap> AuxStringMapVarsMap;
-typedef UnorderedMap<UInt32, AuxStringMapVarsMap> AuxStringMapModsMap;
+typedef UnorderedMap<uint32_t, AuxStringMapVarsMap> AuxStringMapModsMap;
 extern AuxStringMapModsMap s_auxStringMapArraysPerm, s_auxStringMapArraysTemp;  //Ensure thread safety when modifying these globals!!
 
-UInt32 __fastcall GetSubjectID(TESForm* form, TESObjectREFR* thisObj);
+uint32_t __fastcall GetSubjectID(TESForm* form, TESObjectREFR* thisObj);
 
 struct AuxStringMapInfo
 {
-	UInt32		modIndex;
+	uint32_t		modIndex;
 	bool		isPerm;
 
 	AuxStringMapInfo(Script* scriptObj, char* varName)
@@ -242,7 +242,7 @@ struct AuxStringMapInfo
 		modIndex = (varName[!isPerm] == '_') ? 0xFF : scriptObj->GetOverridingModIdx();
 	}
 
-	AuxStringMapInfo(Script* scriptObj, UInt8 type)
+	AuxStringMapInfo(Script* scriptObj, uint8_t type)
 	{
 		isPerm = !(type & 1);
 		modIndex = (type > 1) ? 0xFF : scriptObj->GetOverridingModIdx();
@@ -251,7 +251,7 @@ struct AuxStringMapInfo
 	AuxStringMapModsMap& ModsMap() { return isPerm ? s_auxStringMapArraysPerm : s_auxStringMapArraysTemp; }
 };
 
-enum DataChangedFlags : UInt8
+enum DataChangedFlags : uint8_t
 {
 	kChangedFlag_None = 0,
 	kChangedFlag_AuxStringMaps = 1 << 0,
@@ -260,11 +260,11 @@ enum DataChangedFlags : UInt8
 	kChangedFlag_All = kChangedFlag_AuxStringMaps | kChangedFlag_AuxTimerMaps
 };
 
-extern std::atomic<UInt8> s_dataChangedFlags; // For AuxVar serialization.
+extern std::atomic<uint8_t> s_dataChangedFlags; // For AuxVar serialization.
 
-bool __fastcall GetResolvedModIndex(UInt8* pModIdx);
-bool __stdcall HasChangeData(UInt32 refID);
-UInt32 __fastcall GetResolvedRefID(UInt32 refID);
+bool __fastcall GetResolvedModIndex(uint8_t* pModIdx);
+bool __stdcall HasChangeData(uint32_t refID);
+uint32_t __fastcall GetResolvedRefID(uint32_t refID);
 
 
 
@@ -273,10 +273,10 @@ UInt32 __fastcall GetResolvedRefID(UInt32 refID);
 DebugLog s_log, s_debug, s_missingTextures;
 
 
-bool (*CallFunction)(Script* funcScript, TESObjectREFR* callingObj, TESObjectREFR* container, NVSEArrayElement* result, UInt8 numArgs, ...);
+bool (*CallFunction)(Script* funcScript, TESObjectREFR* callingObj, TESObjectREFR* container, NVSEArrayElement* result, uint8_t numArgs, ...);
 struct TempArrayElements
 {
-	UInt32			size;
+	uint32_t			size;
 	ArrayElementR* elements;
 	bool			doFree;
 
@@ -305,7 +305,7 @@ struct TempArrayElements
 	}
 };
 
-ArrayElementR* __fastcall GetArrayData(NVSEArrayVar* srcArr, UInt32* size)
+ArrayElementR* __fastcall GetArrayData(NVSEArrayVar* srcArr, uint32_t* size)
 {
 	*size = GetArraySize(srcArr);
 	if (!*size) return NULL;
@@ -316,7 +316,7 @@ ArrayElementR* __fastcall GetArrayData(NVSEArrayVar* srcArr, UInt32* size)
 }
 
 const char kDumpLvlListIndentStr[] = "                                                  ";
-UInt8 s_dumpLvlListIndent = 50;
+uint8_t s_dumpLvlListIndent = 50;
 
 void BGSLevL::Dump() 
 {

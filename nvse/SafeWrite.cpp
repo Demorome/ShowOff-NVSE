@@ -4,51 +4,51 @@
 
 #include "ShowOffNVSE.h" // to delay error prints until console manager is fully loaded
 
-void __stdcall SafeWrite8(UInt32 addr, UInt32 data)
+void __stdcall SafeWrite8(uint32_t addr, uint32_t data)
 {
-	UInt32 oldProtect;
+	DWORD oldProtect;
 	VirtualProtect((void*)addr, 4, PAGE_EXECUTE_READWRITE, &oldProtect);
-	*(UInt8*)addr = data;
+	*(uint8_t*)addr = data;
 	VirtualProtect((void*)addr, 4, oldProtect, &oldProtect);
 }
 
-void __stdcall SafeWrite16(UInt32 addr, UInt32 data)
+void __stdcall SafeWrite16(uint32_t addr, uint32_t data)
 {
-	UInt32 oldProtect;
+	DWORD oldProtect;
 	VirtualProtect((void*)addr, 4, PAGE_EXECUTE_READWRITE, &oldProtect);
-	*(UInt16*)addr = data;
+	*(uint16_t*)addr = data;
 	VirtualProtect((void*)addr, 4, oldProtect, &oldProtect);
 }
 
-void __stdcall SafeWrite32(UInt32 addr, UInt32 data)
+void __stdcall SafeWrite32(uint32_t addr, uint32_t data)
 {
-	UInt32 oldProtect;
+	DWORD oldProtect;
 	VirtualProtect((void*)addr, 4, PAGE_EXECUTE_READWRITE, &oldProtect);
-	*(UInt32*)addr = data;
+	*(uint32_t*)addr = data;
 	VirtualProtect((void*)addr, 4, oldProtect, &oldProtect);
 }
 
-void __stdcall SafeWriteBuf(UInt32 addr, const void* data, UInt32 len)
+void __stdcall SafeWriteBuf(uint32_t addr, const void* data, uint32_t len)
 {
-	UInt32 oldProtect;
+	DWORD oldProtect;
 	VirtualProtect((void*)addr, len, PAGE_EXECUTE_READWRITE, &oldProtect);
 	memcpy((void*)addr, data, len);
 	VirtualProtect((void*)addr, len, oldProtect, &oldProtect);
 }
 
 // Use if it's not a 2 byte jz
-bool __stdcall WriteRelJump(UInt32 jumpSrc, UInt32 jumpTgt, std::optional<std::array<UInt8, 5>> originalBytes)
+bool __stdcall WriteRelJump(uint32_t jumpSrc, uint32_t jumpTgt, std::optional<std::array<uint8_t, 5>> originalBytes)
 {
 	if (originalBytes.has_value())
 	{
 		auto& oldBytes = originalBytes.value();
 		for (int i = 0; i < oldBytes.size(); ++i)
 		{
-			if (*reinterpret_cast<UInt8*>(jumpSrc + i) != oldBytes[i])
+			if (*reinterpret_cast<uint8_t*>(jumpSrc + i) != oldBytes[i])
 			{
 				_ERROR("Cannot write jump hook at address 0x%X; another plugin's hook already overwrote that code with %X %X %X %X %X.", 
-					jumpSrc, *reinterpret_cast<UInt8*>(jumpSrc), *reinterpret_cast<UInt8*>(jumpSrc + 1), *reinterpret_cast<UInt8*>(jumpSrc + 2),
-					*reinterpret_cast<UInt8*>(jumpSrc + 3), *reinterpret_cast<UInt8*>(jumpSrc + 4));
+					jumpSrc, *reinterpret_cast<uint8_t*>(jumpSrc), *reinterpret_cast<uint8_t*>(jumpSrc + 1), *reinterpret_cast<uint8_t*>(jumpSrc + 2),
+					*reinterpret_cast<uint8_t*>(jumpSrc + 3), *reinterpret_cast<uint8_t*>(jumpSrc + 4));
 				ShowHookConflictErrorMsg();
 				return false;
 			}
@@ -56,31 +56,31 @@ bool __stdcall WriteRelJump(UInt32 jumpSrc, UInt32 jumpTgt, std::optional<std::a
 	}
 
 	// ask to be able to modify the desired region of code (normally programs prevent code being modified by other code to prevent exploits)
-	UInt32 oldProtect;
+	DWORD oldProtect;
 	VirtualProtect((void*)jumpSrc, 5, PAGE_EXECUTE_READWRITE, &oldProtect);
 	
-	*(UInt8*)jumpSrc = 0xE9;  // write the 'long jump' instruction
-	*(UInt32*)(jumpSrc + 1) = jumpTgt - jumpSrc - 5;  // write the relative offset 
+	*(uint8_t*)jumpSrc = 0xE9;  // write the 'long jump' instruction
+	*(uint32_t*)(jumpSrc + 1) = jumpTgt - jumpSrc - 5;  // write the relative offset 
 
 	// restore old protection of code
 	VirtualProtect((void*)jumpSrc, 5, oldProtect, &oldProtect);
 	return true;
 }
 
-void __stdcall WriteRelCall(UInt32 jumpSrc, UInt32 jumpTgt)
+void __stdcall WriteRelCall(uint32_t jumpSrc, uint32_t jumpTgt)
 {
 	// ask to be able to modify the desired region of code (normally programs prevent code being modified by other code to prevent exploits)
-	UInt32 oldProtect;
+	DWORD oldProtect;
 	VirtualProtect((void*)jumpSrc, 5, PAGE_EXECUTE_READWRITE, &oldProtect);
 
-	*(UInt8*)(jumpSrc) = 0xE8; // write call instruction
-	*(UInt32*)(jumpSrc + 1) = jumpTgt - jumpSrc - 5;  // replace the relative offset for the existing call
+	*(uint8_t*)(jumpSrc) = 0xE8; // write call instruction
+	*(uint32_t*)(jumpSrc + 1) = jumpTgt - jumpSrc - 5;  // replace the relative offset for the existing call
 
 	// restore old protection of code
 	VirtualProtect((void*)jumpSrc, 5, oldProtect, &oldProtect);
 }
 
-bool __stdcall ReplaceCall(UInt32 jumpSrc, UInt32 jumpTgt, std::optional<std::array<UInt8, 4>> originalBytes, bool acceptOverwrite)
+bool __stdcall ReplaceCall(uint32_t jumpSrc, uint32_t jumpTgt, std::optional<std::array<uint8_t, 4>> originalBytes, bool acceptOverwrite)
 {
 	if (!AddrIsCall(jumpSrc)) {
 		if (!acceptOverwrite)
@@ -97,7 +97,7 @@ bool __stdcall ReplaceCall(UInt32 jumpSrc, UInt32 jumpTgt, std::optional<std::ar
 		for (int i = 0; i < oldBytes.size(); ++i)
 		{
 			// +1 due to already having checked the first byte for call instruction (0xE8)
-			if (*reinterpret_cast<UInt8*>(jumpSrc + i + 1) != oldBytes[i])
+			if (*reinterpret_cast<uint8_t*>(jumpSrc + i + 1) != oldBytes[i])
 			{
 				if (!acceptOverwrite)
 				{
@@ -110,31 +110,31 @@ bool __stdcall ReplaceCall(UInt32 jumpSrc, UInt32 jumpTgt, std::optional<std::ar
 	}
 
 	// ask to be able to modify the desired region of code (normally programs prevent code being modified by other code to prevent exploits)
-	UInt32 oldProtect;
+	DWORD oldProtect;
 	VirtualProtect((void*)jumpSrc, 5, PAGE_EXECUTE_READWRITE, &oldProtect);
 	
-	*(UInt32*)(jumpSrc + 1) = jumpTgt - jumpSrc - 5;  // replace the relative offset for the existing call
+	*(uint32_t*)(jumpSrc + 1) = jumpTgt - jumpSrc - 5;  // replace the relative offset for the existing call
 
 	// restore old protection of code
 	VirtualProtect((void*)jumpSrc, 5, oldProtect, &oldProtect);
 	return true;
 }
 
-void WriteRelJnz(UInt32 jumpSrc, UInt32 jumpTgt)
+void WriteRelJnz(uint32_t jumpSrc, uint32_t jumpTgt)
 {
 	// jnz rel32, same as jne
 	SafeWrite16(jumpSrc, 0x850F);
 	SafeWrite32(jumpSrc + 2, jumpTgt - jumpSrc - 2 - 4);
 }
 
-__declspec(noinline) void WriteRelJe(UInt32 jumpSrc, UInt32 jumpTgt)
+__declspec(noinline) void WriteRelJe(uint32_t jumpSrc, uint32_t jumpTgt)
 {
 	// je rel32, same as jz
 	SafeWrite16(jumpSrc, 0x840F);
 	SafeWrite32(jumpSrc + 2, jumpTgt - jumpSrc - 2 - 4);
 }
 
-void WriteRelJle(UInt32 jumpSrc, UInt32 jumpTgt)
+void WriteRelJle(uint32_t jumpSrc, uint32_t jumpTgt)
 {
 	// jle rel32
 	SafeWrite16(jumpSrc, 0x8E0F);
@@ -143,7 +143,7 @@ void WriteRelJle(UInt32 jumpSrc, UInt32 jumpTgt)
 
 // numArgs does not factor in *this objects.
 // Taken from lStewieAl.
-void NopFunctionCall(UInt32 addr, UInt32 numArgs)
+void NopFunctionCall(uint32_t addr, uint32_t numArgs)
 {
 	if (numArgs == 0)
 	{
@@ -152,60 +152,60 @@ void NopFunctionCall(UInt32 addr, UInt32 numArgs)
 	}
 	else
 	{
-		UInt32 oldProtect;
+		DWORD oldProtect;
 		VirtualProtect((void*)addr, 4, PAGE_EXECUTE_READWRITE, &oldProtect);
-		*(UInt16*)addr = 0xC483; // add esp, X
-		*(UInt8*)(addr + 2) = numArgs * 4;
-		*(UInt16*)(addr + 3) = 0xFF89; // mov edi, edi (nop)
+		*(uint16_t*)addr = 0xC483; // add esp, X
+		*(uint8_t*)(addr + 2) = numArgs * 4;
+		*(uint16_t*)(addr + 3) = 0xFF89; // mov edi, edi (nop)
 		VirtualProtect((void*)addr, 4, oldProtect, &oldProtect);
 	}
 }
 
 // Taken from lStewieAl.
-void NopFunctionCall(UInt32 addr)
+void NopFunctionCall(uint32_t addr)
 {
 	NopFunctionCall(addr, 0);
 }
 
 // Taken from lStewieAl.
-void NopIndirectCall(UInt32 addr, UInt32 numArgs)
+void NopIndirectCall(uint32_t addr, uint32_t numArgs)
 {
 	NopFunctionCall(addr, numArgs);
 	SafeWrite8(addr + 5, 0x90);
 }
 
 // Taken from lStewieAl.
-void NopIndirectCall(UInt32 addr)
+void NopIndirectCall(uint32_t addr)
 {
 	NopIndirectCall(addr, 0);
 }
 
-UInt32 GetRelJumpAddr(UInt32 jumpSrc)
+uint32_t GetRelJumpAddr(uint32_t jumpSrc)
 {
 	// Gets the relative part *(jmpSrc + 1), adds the address of jumpSrc to make it an absolute address instead of relative, 
 	// ...and adds 5 (since the relative address ignores the 5 bytes of the jump/call)
-	return *(UInt32*)(jumpSrc + 1) + jumpSrc + 5;
+	return *(uint32_t*)(jumpSrc + 1) + jumpSrc + 5;
 }
 
-bool AddrIsCall(UInt32 addr)
+bool AddrIsCall(uint32_t addr)
 {
-	return *reinterpret_cast<UInt8*>(addr) == 0xE8;
+	return *reinterpret_cast<uint8_t*>(addr) == 0xE8;
 }
 
-bool AddrIsRelJump(UInt32 addr)
+bool AddrIsRelJump(uint32_t addr)
 {
-	return *reinterpret_cast<UInt8*>(addr) == 0xE9; // long jump
+	return *reinterpret_cast<uint8_t*>(addr) == 0xE9; // long jump
 }
 
 // Taken from xNVSE
-UInt8* GetParentBasePtr(void* addressOfReturnAddress, bool lambda)
+uint8_t* GetParentBasePtr(void* addressOfReturnAddress, bool lambda)
 {
-	auto* basePtr = static_cast<UInt8*>(addressOfReturnAddress) - 4;
+	auto* basePtr = static_cast<uint8_t*>(addressOfReturnAddress) - 4;
 #if _DEBUG
 	if (lambda) // in debug mode, lambdas are wrapped inside a closure wrapper function, so one more step needed
-		basePtr = *reinterpret_cast<UInt8**>(basePtr);
+		basePtr = *reinterpret_cast<uint8_t**>(basePtr);
 #endif
-	return *reinterpret_cast<UInt8**>(basePtr);
+	return *reinterpret_cast<uint8_t**>(basePtr);
 }
 
 bool g_showedRuntimeHookConflictError = false;

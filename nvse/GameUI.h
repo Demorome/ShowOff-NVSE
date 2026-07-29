@@ -15,7 +15,7 @@ class ShadowSceneNode;
 class NiSourceTexture;
 class NiRefObject;
 
-typedef Menu* (*_TempMenuByType)(UInt32 menuType);
+typedef Menu* (*_TempMenuByType)(uint32_t menuType);
 extern const _TempMenuByType TempMenuByType;
 #define MENU_VISIBILITY ((bool*)0x11F308F)	//by JIP
 
@@ -28,14 +28,14 @@ public:
 	~InterfaceManager();
 
 	static InterfaceManager *	GetSingleton(void);
-	static bool					IsMenuVisible(UInt32 menuType);
-	static Menu *				GetMenuByType(UInt32 menuType);
-	static Menu *				TempMenuByType(UInt32 menuType);
+	static bool					IsMenuVisible(uint32_t menuType);
+	static Menu *				GetMenuByType(uint32_t menuType);
+	static Menu *				TempMenuByType(uint32_t menuType);
 	//static TileMenu *			GetMenuByPath(const char * componentPath, const char ** slashPos);
 	//static Tile::Value *		GetMenuComponentValue(const char * componentPath);
 	//static Tile *				GetMenuComponentTile(const char * componentPath);
 
-	UInt32 GetTopVisibleMenuID();
+	uint32_t GetTopVisibleMenuID();
 	Tile *GetActiveTile();
 
 	// Taken from Tweaks
@@ -48,66 +48,66 @@ public:
 	// Tweaks
 	struct VATSHighlightData
 	{
-		UInt32 mode;						// 000
+		uint32_t mode;						// 000
 		RefAndNiNode target;				// 004
-		UInt32 numHighlightedRefs;			// 00C
-		UInt32 flashingRefIndex;			// 010
+		uint32_t numHighlightedRefs;			// 00C
+		uint32_t flashingRefIndex;			// 010
 		RefAndNiNode highlightedRefs[32];	// 014
-		UInt32 unk114;						// 114
-		UInt8 isOcclusionEnabled;			// 118
-		UInt8 unused119[16];				// 119
-		UInt8 byte12B;						// 12B
+		uint32_t unk114;						// 114
+		uint8_t isOcclusionEnabled;			// 118
+		uint8_t unused119[16];				// 119
+		uint8_t byte12B;						// 12B
 		void* pPartialLimbQuery[16]; // IDirect3DQuery9
 		void* pEntireLimbQuery[16]; // IDirect3DQuery9
-		UInt8 hasExecutedQuery[16];
-		UInt32 totalArea[16];
-		UInt32 visibleArea[16];
-		UInt32 selectedLimbID;
-		UInt32 numHighlightedBodyParts;
-		UInt32 highLightedBodyParts[16];
-		UInt8 byte284;
-		UInt8 pad285[3];
+		uint8_t hasExecutedQuery[16];
+		uint32_t totalArea[16];
+		uint32_t visibleArea[16];
+		uint32_t selectedLimbID;
+		uint32_t numHighlightedBodyParts;
+		uint32_t highLightedBodyParts[16];
+		uint8_t byte284;
+		uint8_t pad285[3];
 		float time288;
 		float distortVertical;
-		UInt32 distortDuration;
+		uint32_t distortDuration;
 		float vatsDistortTime;
-		UInt8 byte298;
-		UInt8 pad299[3];
+		uint8_t byte298;
+		uint8_t pad299[3];
 		float time29C;
 		float burstDuration;
 		float burstIntensity2;
 		float burstIntensity;
 		float pulseIntensity;
 		float pulseRadius;
-		UInt8 byte2B4;
-		UInt8 byte2B5;
-		UInt8 pad2B6[2];
+		uint8_t byte2B4;
+		uint8_t byte2B5;
+		uint8_t pad2B6[2];
 		float unk2B8;
 		float unk2BC;
 		float fVATSTargetPulseRate;
 		NiRefObject* unk2C4;
-		UInt32 visibleAreaScale_alwaysOne;
+		uint32_t visibleAreaScale_alwaysOne;
 		NiRefObject* unk2CC;
 	};
 
 	// From Tweaks
 	struct Tutorials
 	{
-		SInt32 tutorialFlags[41];
-		UInt32 currentShownHelpID;
-		UInt32 timeA8;
+		int32_t tutorialFlags[41];
+		uint32_t currentShownHelpID;
+		uint32_t timeA8;
 	};
 
 	// Tweaks
 	struct Struct0178
 	{
-		UInt32 unk00;
-		UInt32 NiTPrimitiveArray[9];
-		UInt8 byte28;
-		UInt8 byte29;
-		UInt8 byte2A;
-		UInt8 byte2B;
-		UInt32 startTime;
+		uint32_t unk00;
+		uint32_t NiTPrimitiveArray[9];
+		uint8_t byte28;
+		uint8_t byte29;
+		uint8_t byte2A;
+		uint8_t byte2B;
+		uint32_t startTime;
 		float durationX;
 		float durationY;
 		float intensityX;
@@ -116,29 +116,29 @@ public:
 		float frequencyY;
 		float unk48;
 		float unk4C;
-		UInt32 imageSpaceEffectParam;
-		UInt8 isFlycamEnabled;
-		UInt8 byte55;
-		UInt8 byte56;
-		UInt8 byte57;
+		uint32_t imageSpaceEffectParam;
+		uint8_t isFlycamEnabled;
+		uint8_t byte55;
+		uint8_t byte56;
+		uint8_t byte57;
 		float fBlurRadiusHUD;
 		float fScanlineFrequencyHUD;
 		float fBlurIntensityHUD;
 	};
 
-	UInt32					flags;				// 000
+	uint32_t					flags;				// 000
 	SceneGraph				*sceneGraph004;		// 004
 	SceneGraph				*sceneGraph008;		// 008
-	UInt32					currentMode;		// 00C	1 = GameMode; 2 = MenuMode
-	UInt32					unk010;				// 010
-	UInt32					unk014;				// 014
-	UInt32					pickLength;			// 018
-	UInt32					unk01C;				// 01C
-	UInt8					byte020;			// 020
-	UInt8					byte021;			// 021
-	UInt8					byte022;			// 022
-	UInt8					byte023;			// 023
-	UInt32					unk024;				// 024
+	uint32_t					currentMode;		// 00C	1 = GameMode; 2 = MenuMode
+	uint32_t					unk010;				// 010
+	uint32_t					unk014;				// 014
+	uint32_t					pickLength;			// 018
+	uint32_t					unk01C;				// 01C
+	uint8_t					byte020;			// 020
+	uint8_t					byte021;			// 021
+	uint8_t					byte022;			// 022
+	uint8_t					byte023;			// 023
+	uint32_t					unk024;				// 024
 	TileImage				*cursor;			// 028
 	float					flt02C;				// 02C
 	float					flt030;				// 030
@@ -155,16 +155,16 @@ public:
 	int						unk05C;				// 05C
 	int						unk060;				// 060
 	int						unk064;				// 064
-	UInt32					unk068[2];			// 068
+	uint32_t					unk068[2];			// 068
 	tList<TESObjectREFR>	selectableRefs;		// 070
-	UInt32					unk078;				// 078
+	uint32_t					unk078;				// 078
 	bool					debugText;			// 07C
-	UInt8					byte07D;			// 07D
-	UInt8					byte07E;			// 07E
-	UInt8					byte07F;			// 07F
+	uint8_t					byte07D;			// 07D
+	uint8_t					byte07E;			// 07E
+	uint8_t					byte07F;			// 07F
 	NiNode					*niNode080;			// 080
 	NiNode					*niNode084;			// 084
-	UInt32					unk088;				// 088
+	uint32_t					unk088;				// 088
 	BSShaderAccumulator		*shaderAccum08C;	// 08C
 	BSShaderAccumulator		*shaderAccum090;	// 090
 	ShadowSceneNode			*shadowScene094;	// 094
@@ -172,65 +172,65 @@ public:
 	Tile					*menuRoot;			// 09C
 	Tile					*globalsTile;		// 0A0	globals.xml
 	NiNode					*unk0A4;			// 0A4 saw Tile? seen NiNode
-	UInt32					unk0A8;				// 0A8
+	uint32_t					unk0A8;				// 0A8
 	NiObject				*unk0AC;			// 0AC seen NiAlphaProperty
-	UInt32					unk0B0[3];			// 0B0
+	uint32_t					unk0B0[3];			// 0B0
 	Tile					*activeTileAlt;		// 0BC
-	UInt32					unk0C0;				// 0C0
-	UInt32					unk0C4;				// 0C4
-	UInt8					byte0C8;			// 0C8
-	UInt8					byte0C9;			// 0C9
-	UInt8					byte0CA;			// 0CA
-	UInt8					byte0CB;			// 0CB
+	uint32_t					unk0C0;				// 0C0
+	uint32_t					unk0C4;				// 0C4
+	uint8_t					byte0C8;			// 0C8
+	uint8_t					byte0C9;			// 0C9
+	uint8_t					byte0CA;			// 0CA
+	uint8_t					byte0CB;			// 0CB
 	Tile					*activeTile;		// 0CC
 	Menu					*activeMenu;		// 0D0
 	Tile					*tile0D4;			// 0D4
 	Menu					*menu0D8;			// 0D8
-	UInt32					unk0DC[2];			// 0DC
-	UInt8					msgBoxButton;		// 0E4 -1 if no button pressed
-	UInt8					byte0E5;			// 0E5
-	UInt8					byte0E6;			// 0E6
-	UInt8					byte0E7;			// 0E7
-	UInt32					unk0E8;				// 0E8
-	UInt8					byte0EC;			// 0EC
-	UInt8					byte0ED;			// 0ED
-	UInt8					byte0EE;			// 0EE
-	UInt8					byte0EF;			// 0EF
+	uint32_t					unk0DC[2];			// 0DC
+	uint8_t					msgBoxButton;		// 0E4 -1 if no button pressed
+	uint8_t					byte0E5;			// 0E5
+	uint8_t					byte0E6;			// 0E6
+	uint8_t					byte0E7;			// 0E7
+	uint32_t					unk0E8;				// 0E8
+	uint8_t					byte0EC;			// 0EC
+	uint8_t					byte0ED;			// 0ED
+	uint8_t					byte0EE;			// 0EE
+	uint8_t					byte0EF;			// 0EF
 	TESObjectREFR			*debugSelection;	// 0F0	compared to activated object during Activate
-	UInt32					unk0F4;				// 0F4
-	UInt32					unk0F8;				// 0F8
+	uint32_t					unk0F4;				// 0F4
+	uint32_t					unk0F8;				// 0F8
 	TESObjectREFR			*crosshairRef;		// 0FC
-	UInt32					unk100[4];			// 100
-	UInt8					byte110;			// 110
-	UInt8					pad111[3];			// 111
-	UInt32					menuStack[10];		// 114
+	uint32_t					unk100[4];			// 100
+	uint8_t					byte110;			// 110
+	uint8_t					pad111[3];			// 111
+	uint32_t					menuStack[10];		// 114
 	void					*ptr13C;			// 13C	Points to a struct, possibly. First member is *bhkSimpleShapePhantom
-	UInt32					unk140[5];			// 140
-	UInt32					unk154;				// 154
-	UInt32					unk158;				// 158
-	UInt32					unk15C[5];			// 15C
-	UInt8					byte170;			// 170
-	UInt8					byte171;			// 171
-	UInt8					byte172;			// 172
-	UInt8					byte173;			// 173
+	uint32_t					unk140[5];			// 140
+	uint32_t					unk154;				// 154
+	uint32_t					unk158;				// 158
+	uint32_t					unk15C[5];			// 15C
+	uint8_t					byte170;			// 170
+	uint8_t					byte171;			// 171
+	uint8_t					byte172;			// 172
+	uint8_t					byte173;			// 173
 	FOPipboyManager			*pipboyManager;		// 174
 	Struct0178				unk178;				// 178
 	VATSHighlightData		vatsHighlightData;	// 1DC
 	float					scale4AC;			// 4AC
 	float					unk4B0;				// 4B0
-	UInt8					isRenderedMenuOrPipboyManager;		// 4B4
-	UInt8					byte4B5;			// 4B5
-	UInt8					byte4B6;			// 4B6
-	UInt8					byte4B7;			// 4B7
-	UInt32					queuedPipboyTabToSwitchTo;	// 4B8
-	UInt32					pipBoyMode;			// 4BC
+	uint8_t					isRenderedMenuOrPipboyManager;		// 4B4
+	uint8_t					byte4B5;			// 4B5
+	uint8_t					byte4B6;			// 4B6
+	uint8_t					byte4B7;			// 4B7
+	uint32_t					queuedPipboyTabToSwitchTo;	// 4B8
+	uint32_t					pipBoyMode;			// 4BC
 	void (*onPipboyOpenCallback)(void);			// 4C0
-	UInt32					unk4C4[2];			// 4C4
-	UInt8					byte4CC;			// 4CC
-	UInt8					byte4CD;			// 4CD
-	UInt8					pad4CE;				// 4CE
-	UInt8					pad4CF;				// 4CF
-	UInt32					unk4D0;				// 4D0
+	uint32_t					unk4C4[2];			// 4C4
+	uint8_t					byte4CC;			// 4CC
+	uint8_t					byte4CD;			// 4CD
+	uint8_t					pad4CE;				// 4CE
+	uint8_t					pad4CF;				// 4CF
+	uint32_t					unk4D0;				// 4D0
 	Tutorials				help;				// 4D4
 };
 static_assert(sizeof(InterfaceManager) == 0x580);
@@ -289,36 +289,36 @@ public:
 	~Menu();
 
 	virtual Menu	*Destructor(bool doFree);
-	virtual void	SetField(UInt32 idx, Tile *value);
-	virtual void	Unk_02(UInt32 arg0, UInt32 arg1);
-	virtual void	HandleClick(SInt32 tileID, Tile *clickedTile);
-	virtual void	HandleMouseover(UInt32 arg0, Tile *activeTile);	//	Called on mouseover, activeTile is moused-over Tile
-	virtual void	Unk_05(UInt32 arg0, UInt32 arg1);
-	virtual void	Unk_06(UInt32 arg0, UInt32 arg1, UInt32 arg2);
-	virtual void	Unk_07(UInt32 arg0, UInt32 arg1, UInt32 arg2);
-	virtual void	Unk_08(UInt32 arg0, UInt32 arg1);
-	virtual void	Unk_09(UInt32 arg0, UInt32 arg1);
-	virtual void	Unk_0A(UInt32 arg0, UInt32 arg1);
+	virtual void	SetField(uint32_t idx, Tile *value);
+	virtual void	Unk_02(uint32_t arg0, uint32_t arg1);
+	virtual void	HandleClick(int32_t tileID, Tile *clickedTile);
+	virtual void	HandleMouseover(uint32_t arg0, Tile *activeTile);	//	Called on mouseover, activeTile is moused-over Tile
+	virtual void	Unk_05(uint32_t arg0, uint32_t arg1);
+	virtual void	Unk_06(uint32_t arg0, uint32_t arg1, uint32_t arg2);
+	virtual void	Unk_07(uint32_t arg0, uint32_t arg1, uint32_t arg2);
+	virtual void	Unk_08(uint32_t arg0, uint32_t arg1);
+	virtual void	Unk_09(uint32_t arg0, uint32_t arg1);
+	virtual void	Unk_0A(uint32_t arg0, uint32_t arg1);
 	virtual void	Unk_0B(void);	// Called every frame while the menu is active
-	virtual bool	HandleKeyboardInput(UInt32 inputChar);	// Return false for handling keyboard shortcuts
-	virtual UInt32	GetID(void);
-	virtual bool	Unk_0E(UInt32 arg0, UInt32 arg1);
+	virtual bool	HandleKeyboardInput(uint32_t inputChar);	// Return false for handling keyboard shortcuts
+	virtual uint32_t	GetID(void);
+	virtual bool	Unk_0E(uint32_t arg0, uint32_t arg1);
 	virtual void	Unk_0F(void);
 	virtual void	Unk_10(void);
 	virtual void	Unk_11(void);
 
 	TileMenu		*tile;		// 04
-	UInt32			unk08;		// 08
-	UInt32			unk0C;		// 0C
-	UInt32			unk10;		// 10
-	UInt32			unk14;		// 14
-	UInt32			unk18;		// 18
-	UInt32			unk1C;		// 1C
-	UInt32			id;			// 20
-	UInt32			unk24;		// 24
+	uint32_t			unk08;		// 08
+	uint32_t			unk0C;		// 0C
+	uint32_t			unk10;		// 10
+	uint32_t			unk14;		// 14
+	uint32_t			unk18;		// 18
+	uint32_t			unk1C;		// 1C
+	uint32_t			id;			// 20
+	uint32_t			unk24;		// 24
 
 	Menu *HandleMenuInput(int tileID, Tile *clickedTile);
-	Tile *AddTileFromTemplate(Tile *destTile, const char *templateName, UInt32 arg3);
+	Tile *AddTileFromTemplate(Tile *destTile, const char *templateName, uint32_t arg3);
 };
 
 // Taken from Tweaks
@@ -326,11 +326,11 @@ struct HotKeyWheel
 {
 	TileRect* parent;
 	TileRect* hotkeys[8];
-	UInt8 byte24;
-	UInt8 gap25[3];
-	UInt32 selectedHotkey;
-	UInt32 selectedHotkeyTrait;
-	UInt32 selectedTextTrait;
+	uint8_t byte24;
+	uint8_t gap25[3];
+	uint32_t selectedHotkey;
+	uint32_t selectedHotkeyTrait;
+	uint32_t selectedTextTrait;
 
 	void SetVisible(bool isVisible) { ThisCall(0x701760, this, isVisible); }
 };
@@ -342,9 +342,9 @@ public:
 	RaceSexMenu();
 	~RaceSexMenu();
 
-	UInt32				unk028[44];		// 028
+	uint32_t				unk028[44];		// 028
 	TESNPC				*npc;			// 0D8
-	UInt32				unk0DC[37];		// 0DC
+	uint32_t				unk0DC[37];		// 0DC
 
 	void UpdatePlayerHead(void);
 };

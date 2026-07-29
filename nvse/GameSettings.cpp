@@ -5,7 +5,7 @@ GameSettingCollection** g_GameSettingCollection = (GameSettingCollection**)0x011
 IniSettingCollection** g_IniSettingCollection = (IniSettingCollection**)0x011F96A0;
 IniSettingCollection** g_IniPrefCollection = (IniSettingCollection**)0x011F35A0;
 
-UInt32 Setting::GetType()
+uint32_t Setting::GetType()
 {
 	if (!name) return kSetting_Other;
 

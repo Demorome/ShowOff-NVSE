@@ -217,7 +217,7 @@ bool Cmd_AuxStringMapArrayGetKeys_Execute(COMMAND_ARGS)
 bool Cmd_AuxStringMapArrayGetAll_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	UInt32 type;
+	uint32_t type;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &type)) return true;
 	AuxStringMapInfo varInfo(scriptObj, type);
 	AuxStringMapVarsMap* findMod = varInfo.ModsMap().GetPtr(varInfo.modIndex);
@@ -310,7 +310,7 @@ bool Cmd_AuxStringMapArraySetFromArray_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	char varName[0x50];
-	UInt32 arrID = NULL;
+	uint32_t arrID = NULL;
 	UINT32 bAppend = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &arrID, &bAppend)) return true;
 	AuxStringMapInfo varInfo(scriptObj, varName);
@@ -330,7 +330,7 @@ bool Cmd_AuxStringMapArraySetFromArray_Execute(COMMAND_ARGS)
 	}
 	NVSEArrayVar* inArr = LookupArrayByID(arrID);
 	if (!inArr) return true;
-	UInt32 const size = GetArraySize(inArr);
+	uint32_t const size = GetArraySize(inArr);
 	auto const elements = std::make_unique<ArrayElementR[]>(size);
 	auto const keys = std::make_unique<ArrayElementR[]>(size);
 	GetArrayElements(inArr, elements.get(), keys.get());
@@ -353,7 +353,7 @@ bool Cmd_AuxStringMapArraySetFromArray_Execute(COMMAND_ARGS)
 bool Cmd_AuxStringMapArraySetValue_Execute(COMMAND_ARGS)  //a bit unwieldy having to use the array middleman
 {
 	char varName[0x50];
-	UInt32 arrID;
+	uint32_t arrID;
 	TESForm* form = NULL;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &arrID, &form))
 	{

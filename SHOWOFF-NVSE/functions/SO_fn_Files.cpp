@@ -221,7 +221,7 @@ namespace JsonToNVSE
 		return BasicJsonValueToArrayElem(val);
 	}
 
-	enum Parser : UInt32
+	enum Parser : uint32_t
 	{
 		kParser_JSON = 0, kParser_JAXN, kParser_TaoConfig,
 		kParser_Invalid
@@ -743,7 +743,7 @@ namespace IniToNVSE
 
 	bool GetModINIPath(std::string &outModPath, Script* const scriptObj)
 	{
-		UInt8 const modIdx = scriptObj->GetOverridingModIdx();
+		uint8_t const modIdx = scriptObj->GetOverridingModIdx();
 		if (modIdx == 0xFF)
 		{
 			return false;
@@ -1193,7 +1193,7 @@ bool Cmd_ReloadIniCache_Execute(COMMAND_ARGS)
 }
 bool Cmd_ClearFileCacheShowOff_Execute(COMMAND_ARGS)
 {
-	enum CacheToClear : UInt8
+	enum CacheToClear : uint8_t
 	{
 		kCache_Ini = 0,
 		kCache_Json

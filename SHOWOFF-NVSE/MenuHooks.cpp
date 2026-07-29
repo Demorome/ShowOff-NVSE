@@ -8,7 +8,7 @@ namespace PreventRepairs
 {
 	__declspec(naked) void PreventRepairingBrokenItemsInPipboy()
 	{
-		static UInt32 const GetHealthPerc = 0x4BCDB0,
+		static uint32_t const GetHealthPerc = 0x4BCDB0,
 			retnAddr = 0x781919,
 			retnFalse = 0x781AF1;
 		_asm
@@ -30,7 +30,7 @@ namespace PreventRepairs
 
 	__declspec(naked) void PreventRepairingBrokenItemsByVendor()
 	{
-		static UInt32 const rtnAddr = 0x7B7BD9,
+		static uint32_t const rtnAddr = 0x7B7BD9,
 			GameSettings_GetFloatValueAddr = 0x403E20,
 			rtnFalse = 0x7B7C35;
 		enum
@@ -57,7 +57,7 @@ namespace PreventRepairs
 
 namespace GetLevelUpMenuUnspentPoints
 {
-	UInt32 g_LvlUpMenuUnspentPoints[2] = { 0, 0 }; // Skill points, followed by Perks.
+	uint32_t g_LvlUpMenuUnspentPoints[2] = { 0, 0 }; // Skill points, followed by Perks.
 
 	void __fastcall CloseMenu_Hook()
 	{
@@ -69,7 +69,7 @@ namespace GetLevelUpMenuUnspentPoints
 		CdeclCall(0x7851D0);  // LevelUpMenu::Close()
 	}
 
-	void WriteRetrievalHook() { ReplaceCall(0x785866, (UInt32)CloseMenu_Hook); }
+	void WriteRetrievalHook() { ReplaceCall(0x785866, (uint32_t)CloseMenu_Hook); }
 }
 
 namespace LevelUpMenuHooks
@@ -99,9 +99,9 @@ namespace LevelUpMenuHooks
 	}
 
 	// Taken from Tweaks.
-	UInt32 IsPlayerAtPerkLevel()
+	uint32_t IsPlayerAtPerkLevel()
 	{
-		UInt32 iLevelsPerPerk = *(UInt32*)0x11CD078;
+		uint32_t iLevelsPerPerk = *(uint32_t*)0x11CD078;
 		return (PlayerCharacter::GetSingleton()->GetLevel() % iLevelsPerPerk) == 0;
 	}
 
@@ -135,11 +135,11 @@ namespace LevelUpMenuHooks
 			// Prevent clicking on perks if there are none to assign.
 			// Needed to prevent jank for ShowPerkMenu.
 			// While this does overwrite a hook for Tweaks, it should make no difference who wrote this hook.
-			WriteRelJump(0x785ACC, UInt32(LevelUpMenuClickPerkHook));
+			WriteRelJump(0x785ACC, uint32_t(LevelUpMenuClickPerkHook));
 
 			// init number of perks to assign to be 0 if not on a perk level
 			SafeWriteBuf(0x78508C, "\x8B\x0D\xDC\x9F\x1D\x01\x89\x41\x60\x0F\x1F\x40", 12); // fine if Tweaks wrote this instead.
-			WriteRelCall(0x785087, UInt32(IsPlayerAtPerkLevel)); // it's 100% OK if Tweaks writes this hook for us instead.
+			WriteRelCall(0x785087, uint32_t(IsPlayerAtPerkLevel)); // it's 100% OK if Tweaks writes this hook for us instead.
 
 			// == Hooks below taken from Tweaks, from CustomPerksPerLevel::InitHooks
 
@@ -151,7 +151,7 @@ namespace LevelUpMenuHooks
 			// If there was only 1 perk to assign to start with, won't prevent vanilla behavior,
 			//	..which is to allow clicking on another perk and just have the selection swap.
 			// Note: This hook must be delayed so it can overwrite Tweak's.
-			ReplaceCall(0x785B0F, UInt32(PerkMenuCheckNumSelectedPerks));
+			ReplaceCall(0x785B0F, uint32_t(PerkMenuCheckNumSelectedPerks));
 		}
 	}
 

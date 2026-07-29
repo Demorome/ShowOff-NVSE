@@ -5,7 +5,7 @@ String::String() {}
 
 String::~String() {}
 
-void String::Init(UInt32 bufSize)
+void String::Init(uint32_t bufSize)
 {
 	if (m_data) GameHeapFree(m_data);
 	m_bufLen = bufSize;
@@ -44,9 +44,9 @@ bool String::Set(const char *src)
 
 bool String::Append(const char *toAppend)
 {
-	UInt16 length = StrLen(toAppend);
+	uint16_t length = StrLen(toAppend);
 	if (!length) return true;
-	UInt16 newLen = m_dataLen + length;
+	uint16_t newLen = m_dataLen + length;
 	if (m_bufLen < newLen)
 	{
 		m_bufLen = newLen;
@@ -81,7 +81,7 @@ void String::AppendChar(char toAppend)
 	m_data[m_dataLen] = 0;
 }
 
-void String::InsertChar(char toInsert, UInt32 index)
+void String::InsertChar(char toInsert, uint32_t index)
 {
 	if (index > m_dataLen) return;
 	if (m_bufLen == m_dataLen)
@@ -102,13 +102,13 @@ void String::InsertChar(char toInsert, UInt32 index)
 	m_data[m_dataLen] = 0;
 }
 
-void String::EraseAt(UInt32 index)
+void String::EraseAt(uint32_t index)
 {
 	if (!m_data || (index >= m_dataLen)) return;
 	m_dataLen--;
 	if (m_dataLen)
 	{
-		UInt32 length = m_dataLen - index;
+		uint32_t length = m_dataLen - index;
 		if (!length)
 			m_data[m_dataLen] = 0;
 		else

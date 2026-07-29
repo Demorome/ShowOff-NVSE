@@ -6,12 +6,12 @@
 
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 	// IOManager** g_ioManager = (IOManager**)0x00B33A10;
-	UInt32 kModelLoader_QueueReference = 0x00444850;
-	UInt32 * kBSTaskCounter = (UInt32*) 0x0011C3B38;
+	uint32_t kModelLoader_QueueReference = 0x00444850;
+	uint32_t * kBSTaskCounter = (uint32_t*) 0x0011C3B38;
 #elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
 	// IOManager** g_ioManager = (IOManager**)0x00B33A10;
-	UInt32 kModelLoader_QueueReference = 0x004446D0;
-	UInt32 * kBSTaskCounter = (UInt32*)0x0011C3B38;
+	uint32_t kModelLoader_QueueReference = 0x004446D0;
+	uint32_t * kBSTaskCounter = (uint32_t*)0x0011C3B38;
 #else
 #error unsupported Oblivion version
 #endif
@@ -64,13 +64,13 @@ ModelLoader *ModelLoader::GetSingleton()
 	return *(ModelLoader**)0x011C3B3C;
 }
 
-__declspec(naked) void ModelLoader::QueueReference(TESObjectREFR *refr, UInt32 arg2, UInt32 arg3)
+__declspec(naked) void ModelLoader::QueueReference(TESObjectREFR *refr, uint32_t arg2, uint32_t arg3)
 // arg2 is encoded based on the parent cell and arg3 is most likely a boolean
 {
 	__asm	jmp		kModelLoader_QueueReference
 }
 
-UInt32 *BSTask::GetCounterSingleton()
+uint32_t *BSTask::GetCounterSingleton()
 {
 	return kBSTaskCounter;
 }

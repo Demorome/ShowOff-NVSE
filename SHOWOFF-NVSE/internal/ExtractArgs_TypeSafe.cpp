@@ -101,7 +101,7 @@ bool Cmd_TestSafeExtract_OneArray_Execute(COMMAND_ARGS)
 		auto& [arg1] = arg_tuple;
 		static_assert(std::is_same_v<decltype(arg1), ArgTypes::ArrayType>);
 
-		Console_Print("TestSafeExtract_OneArray >> ArrayID: %u", reinterpret_cast<UInt32>(arg1));
+		Console_Print("TestSafeExtract_OneArray >> ArrayID: %u", reinterpret_cast<uint32_t>(arg1));
 	}
 	return true;
 }

@@ -38,8 +38,8 @@ kDblRad2Deg; //from Tweaks
 extern const float kFlt1d100K, kFlt1d1K, kFlt1d200, kFlt1d100, kFltPId180, kFlt1d10, kFltHalf, kFltOne, kFltPId2, kFltPI, kFltPIx2, kFlt10, kFlt180dPI, kFlt100, kFlt200, kFlt1000, kFltMax;
 
 //From JIP
-extern const UInt32 kSSERemoveSignMaskPS[], kSSEChangeSignMaskPS[], kSSEChangeSignMaskPS0[], kSSEDiscard4thPS[];
-extern const UInt64 kSSERemoveSignMaskPD[], kSSEChangeSignMaskPD[];
+extern const uint32_t kSSERemoveSignMaskPS[], kSSEChangeSignMaskPS[], kSSEChangeSignMaskPS0[], kSSEDiscard4thPS[];
+extern const uint64_t kSSERemoveSignMaskPD[], kSSEChangeSignMaskPD[];
 
 // JIP assembly definitions.
 #define CALL_EAX(addr) __asm mov eax, addr __asm call eax
@@ -81,8 +81,8 @@ extern const char kLwrCaseConverter[];
 // LightCS definitions taken from JG
 class LightCS
 {
-	UInt32	owningThread;
-	UInt32	enterCount;
+	uint32_t	owningThread;
+	uint32_t	enterCount;
 
 public:
 	LightCS() : owningThread(0), enterCount(0) {}
@@ -97,27 +97,27 @@ typedef void* (__cdecl* memcpy_t)(void*, const void*, size_t);
 extern memcpy_t MemCopy, MemMove;
 
 // JIP again
-#define COPY_BYTES(dest, src, count) __movsb((UInt8*)(dest), (const UInt8*)(src), count)
+#define COPY_BYTES(dest, src, count) __movsb((uint8_t*)(dest), (const uint8_t*)(src), count)
 
 // More JIP
 union Coordinate
 {
-	UInt32		xy;
+	uint32_t		xy;
 	struct
 	{
-		SInt16	y;
-		SInt16	x;
+		int16_t	y;
+		int16_t	x;
 	};
 
 	Coordinate() {}
-	Coordinate(SInt16 _x, SInt16 _y) : x(_x), y(_y) {}
+	Coordinate(int16_t _x, int16_t _y) : x(_x), y(_y) {}
 
 	inline Coordinate& operator =(const Coordinate &rhs)
 	{
 		xy = rhs.xy;
 		return *this;
 	}
-	inline Coordinate& operator =(const UInt32 &rhs)
+	inline Coordinate& operator =(const uint32_t &rhs)
 	{
 		xy = rhs;
 		return *this;
@@ -151,10 +151,10 @@ template <typename T> inline T sqr(T value)
 	return value * value;
 }
 
-UInt32 __vectorcall cvtd2ui(double value);
+uint32_t __vectorcall cvtd2ui(double value);
 
-double __vectorcall cvtui2d(UInt32 value);
-void __fastcall cvtui2d(UInt32 value, double* result);
+double __vectorcall cvtui2d(uint32_t value);
+void __fastcall cvtui2d(uint32_t value, double* result);
 
 int __vectorcall ifloor(float value);
 
@@ -182,27 +182,27 @@ float __vectorcall ATan2(float y, float x);
 
 // Below is from JIP's utility.h/cpp
 
-UInt32 __fastcall RGBHexToDec(UInt32 rgb);
+uint32_t __fastcall RGBHexToDec(uint32_t rgb);
 
-UInt32 __fastcall RGBDecToHex(UInt32 rgb);
+uint32_t __fastcall RGBDecToHex(uint32_t rgb);
 
-UInt32 __fastcall StrLen(const char *str);
+uint32_t __fastcall StrLen(const char *str);
 
 char* __fastcall StrEnd(const char *str);
 
-bool __fastcall MemCmp(const void *ptr1, const void *ptr2, UInt32 bsize);
+bool __fastcall MemCmp(const void *ptr1, const void *ptr2, uint32_t bsize);
 
-void __fastcall MemZero(void *dest, UInt32 bsize);
+void __fastcall MemZero(void *dest, uint32_t bsize);
 
 char* __fastcall StrCopy(char *dest, const char *src);
 
-char* __fastcall StrNCopy(char *dest, const char *src, UInt32 length);
+char* __fastcall StrNCopy(char *dest, const char *src, uint32_t length);
 
 char* __fastcall StrCat(char *dest, const char *src);
 
-UInt32 __fastcall StrHash(const char *inKey);
+uint32_t __fastcall StrHash(const char *inKey);
 
-UInt32 __fastcall StrHashCI(const char* inKey);	//from xNVSE
+uint32_t __fastcall StrHashCI(const char* inKey);	//from xNVSE
 
 bool __fastcall CmprLetters(const char *lstr, const char *rstr);
 
@@ -226,7 +226,7 @@ void __fastcall ReplaceChr(char *str, char from, char to);
 
 char* __fastcall FindChr(const char *str, char chr);
 
-char* __fastcall FindChrR(const char *str, UInt32 length, char chr);
+char* __fastcall FindChrR(const char *str, uint32_t length, char chr);
 
 char* __fastcall SubStr(const char *srcStr, const char *subStr);
 
@@ -250,13 +250,13 @@ int __fastcall StrToInt(const char *str);
 
 double __fastcall StrToDbl(const char *str);
 
-char* __fastcall UIntToHex(UInt32 num, char *str);
+char* __fastcall UIntToHex(uint32_t num, char *str);
 
-UInt32 __fastcall HexToUInt(const char *str);
+uint32_t __fastcall HexToUInt(const char *str);
 
 //===Begin JIP string / char stuff
 
-extern const UInt8 kCaseConverter[];
+extern const uint8_t kCaseConverter[];
 extern char* GetStrArgBuffer();
 
 //===End JIP string / char stuff
@@ -275,10 +275,10 @@ public:
 	~FileStreamJIP() { if (theFile) fclose(theFile); }
 
 	bool Open(const char* filePath);
-	bool OpenAt(const char* filePath, UInt32 inOffset);
+	bool OpenAt(const char* filePath, uint32_t inOffset);
 	bool OpenWrite(char* filePath, bool append);
 	bool Create(const char* filePath);
-	void SetOffset(UInt32 inOffset);
+	void SetOffset(uint32_t inOffset);
 
 	void Close()
 	{
@@ -286,12 +286,12 @@ public:
 		theFile = NULL;
 	}
 
-	UInt32 GetLength();
+	uint32_t GetLength();
 	char ReadChar();
-	void ReadBuf(void* outData, UInt32 inLength);
+	void ReadBuf(void* outData, uint32_t inLength);
 	void WriteChar(char chr);
 	void WriteStr(const char* inStr);
-	void WriteBuf(const void* inData, UInt32 inLength);
+	void WriteBuf(const void* inData, uint32_t inLength);
 
 	static void MakeAllDirs(char* fullPath);
 };
@@ -305,9 +305,9 @@ void __fastcall GetTimeStamp(char *buffer);
 // ConsolePrint() limited to 512 chars; use this to print longer strings to console
 void Console_Print_Long(const std::string& str);
 
-UInt32 __fastcall ByteSwap(UInt32 dword);
+uint32_t __fastcall ByteSwap(uint32_t dword);
 
-void DumpMemImg(void *data, UInt32 size, UInt8 extra = 0);
+void DumpMemImg(void *data, uint32_t size, uint8_t extra = 0);
 
 
 //===Begin JIP AuxBuffer stuff
@@ -316,18 +316,18 @@ void DumpMemImg(void *data, UInt32 size, UInt8 extra = 0);
 
 class AuxBuffer
 {
-	UInt8	*ptr;
-	UInt32	size;
+	uint8_t	*ptr;
+	uint32_t	size;
 
 public:
 	AuxBuffer() : ptr(NULL), size(AUX_BUFFER_INIT_SIZE) {}
 
-	static UInt8* Get(UInt32 bufIdx, UInt32 reqSize);
+	static uint8_t* Get(uint32_t bufIdx, uint32_t reqSize);
 };
 
 extern AuxBuffer s_auxBuffers[3];
 
-UInt8* __fastcall GetAuxBuffer(AuxBuffer& buffer, UInt32 reqSize);
+uint8_t* __fastcall GetAuxBuffer(AuxBuffer& buffer, uint32_t reqSize);
 
 //===End JIP AuxBuffer stuff
 
@@ -358,7 +358,7 @@ template <typename T> __forceinline void RawAssign(const T& lhs, const T& rhs)
 {
 	struct Helper
 	{
-		UInt8	bytes[sizeof(T)];
+		uint8_t	bytes[sizeof(T)];
 	};
 	*(Helper*)&lhs = *(Helper*)&rhs;
 }
@@ -368,7 +368,7 @@ template <typename T> __forceinline void RawSwap(const T& lhs, const T& rhs)
 {
 	struct Helper
 	{
-		UInt8	bytes[sizeof(T)];
+		uint8_t	bytes[sizeof(T)];
 	}
 	temp = *(Helper*)&lhs;
 	*(Helper*)&lhs = *(Helper*)&rhs;
@@ -386,13 +386,13 @@ enum EquipableObjects
 short GetEquipType(TESForm* form);
 bool IsEquipableItemPlayable(TESForm* form);
 
-UInt32 GetFormEquipSlotMask(TESForm* form);
-bool MatchAnySlotForForm(TESForm* form, UInt32 slotMask);
-bool MatchAnyEquipSlots(UInt32 slotMask1, UInt32 slotMask2);
+uint32_t GetFormEquipSlotMask(TESForm* form);
+bool MatchAnySlotForForm(TESForm* form, uint32_t slotMask);
+bool MatchAnyEquipSlots(uint32_t slotMask1, uint32_t slotMask2);
 
-float GetFltGameSetting(UInt32 addr);
-SInt32 GetIntGameSetting(UInt32 addr);
-char* GetStrGameSetting(UInt32 addr);
+float GetFltGameSetting(uint32_t addr);
+int32_t GetIntGameSetting(uint32_t addr);
+char* GetStrGameSetting(uint32_t addr);
 
 bool IsDllRunning(const char* dll);
 
@@ -416,7 +416,7 @@ std::pair<std::string, std::string_view> GetFullPath(std::string&& relativePath)
 std::pair<const char*, const char*> SplitStringBySingleDelimiter(std::string& toSplit, const char* delims);
 
 //Taken from JIP LN
-UInt32 __fastcall StringToRef(char* refStr);
+uint32_t __fastcall StringToRef(char* refStr);
 const std::string& RefToString(TESForm* form);
 
 bool IsGamePaused();

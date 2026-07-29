@@ -10,7 +10,7 @@ static EquipData FindEquipped(TESObjectREFR* thisObj, FormMatcher& matcher) {
 }
 #endif
 
-static EquipDataSet GetEquippedItems(TESObjectREFR* actorRef, UInt32 const filterFlags = 0) {
+static EquipDataSet GetEquippedItems(TESObjectREFR* actorRef, uint32_t const filterFlags = 0) {
 	auto const pContainerChanges = dynamic_cast<ExtraContainerChanges*>(actorRef->extraDataList.GetByType(kExtraData_ContainerChanges));
 	return pContainerChanges ? FindEquippedItems(pContainerChanges, filterFlags) : EquipDataSet();
 }
@@ -18,11 +18,11 @@ static EquipDataSet GetEquippedItems(TESObjectREFR* actorRef, UInt32 const filte
 typedef TESBipedModelForm::EPartBit EquippedItemIndex;
 typedef TESBipedModelForm::ESlot EquippedItemSlot;
 
-UInt32 __fastcall GetNumBrokenEquippedItems_Call(TESObjectREFR* const thisObj, float threshold, UInt32 const flags)
+uint32_t __fastcall GetNumBrokenEquippedItems_Call(TESObjectREFR* const thisObj, float threshold, uint32_t const flags)
 {
 	if (!IS_ACTOR(thisObj)) return 0;
 	threshold /= 100.0F;  //expecting a number like 35, reduce to 0.35
-	UInt32 numBrokenItems = 0;  //return value.
+	uint32_t numBrokenItems = 0;  //return value.
 	auto eqItems = GetEquippedItems(thisObj, flags);
 	for (auto iter : eqItems)
 	{
@@ -55,7 +55,7 @@ DEFINE_CMD_ALT_COND_PLUGIN(GetNumBrokenEquippedItems, GetNumBrokenEq, "", true, 
 bool Cmd_GetNumBrokenEquippedItems_Eval(COMMAND_ARGS_EVAL)
 {
 	float const threshold = *(float*)&arg1;
-	auto const flags = (UInt32)arg2;
+	auto const flags = (uint32_t)arg2;
 	*result = GetNumBrokenEquippedItems_Call(thisObj, threshold, flags);
 	return true;
 }
@@ -63,7 +63,7 @@ bool Cmd_GetNumBrokenEquippedItems_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	float threshold = 0;
-	UInt32 flags = 0;
+	uint32_t flags = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &threshold, &flags)) return true;
 	*result = GetNumBrokenEquippedItems_Call(thisObj, threshold, flags);
 	return true;
@@ -75,7 +75,7 @@ bool Cmd_GetEquippedItemsAsBitMask_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
 	if (!IS_ACTOR(thisObj)) return true;
-	UInt32 equipSlotMask = 0;  //return value.
+	uint32_t equipSlotMask = 0;  //return value.
 	auto eqItems = GetEquippedItems(thisObj, FindEquipped::iFilter_AllSlotsNoSlotless);
 	for (auto const& iter : eqItems)
 	{
@@ -99,7 +99,7 @@ DEFINE_COMMAND_PLUGIN(UnequipItems, "", true, kParams_FourOptionalInts);
 //todo: Could use a lot more testing
 bool Cmd_UnequipItems_Execute(COMMAND_ARGS)
 {
-	UInt32 flags = 0, noEquip = 0, hideMessage = 0, triggerOnUnequip = 1;
+	uint32_t flags = 0, noEquip = 0, hideMessage = 0, triggerOnUnequip = 1;
 
 	if (!ExtractArgs(EXTRACT_ARGS, &flags, &noEquip, &hideMessage, &triggerOnUnequip)
 		|| NOT_ACTOR(thisObj))
@@ -119,7 +119,7 @@ bool Cmd_UnequipItems_Execute(COMMAND_ARGS)
 DEFINE_COMMAND_PLUGIN(GetEquippedItems, "", true, kParams_OneOptionalInt);
 bool Cmd_GetEquippedItems_Execute(COMMAND_ARGS)
 {
-	UInt32 flags = 0;
+	uint32_t flags = 0;
 	*result = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &flags) || NOT_ACTOR(thisObj)) return true;
 	Vector<ArrayElementR> elems;
@@ -137,7 +137,7 @@ bool Cmd_GetEquippedItems_Execute(COMMAND_ARGS)
 DEFINE_COMMAND_PLUGIN(GetEquippedItemRefs, "", true, kParams_OneOptionalInt);
 bool Cmd_GetEquippedItemRefs_Execute(COMMAND_ARGS)
 {
-	UInt32 flags = 0;
+	uint32_t flags = 0;
 	*result = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &flags) || NOT_ACTOR(thisObj)) return true;
 	Vector<ArrayElementR> elems;
@@ -171,8 +171,8 @@ bool Cmd_RemoveAllItemsShowOff_Execute(COMMAND_ARGS)
 
 		kFlag_Default = kFlag_RunOnUnequipEvent
 	};
-	UInt32 flags = kFlag_Default;
-	SInt32 typeCode = -1;  //-1 = all
+	uint32_t flags = kFlag_Default;
+	int32_t typeCode = -1;  //-1 = all
 	TESObjectREFR* targetContainer = nullptr;
 	BGSListForm* exceptionFormList = nullptr;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &flags, &typeCode, &targetContainer, &exceptionFormList)) return true;
@@ -263,7 +263,7 @@ bool Cmd_GetEquippedWeaponType_Execute(COMMAND_ARGS)
 	return Cmd_GetEquippedWeaponType_Eval(thisObj, 0, 0, result);
 }
 
-float __fastcall GetBaseEquippedWeight_Call(TESObjectREFR* const thisObj, UInt32 const flags, float const minWeight)
+float __fastcall GetBaseEquippedWeight_Call(TESObjectREFR* const thisObj, uint32_t const flags, float const minWeight)
 {
 	float totalWeight = 0;  //return val.
 	auto eqItems = GetEquippedItems(thisObj, flags);
@@ -290,7 +290,7 @@ bool Cmd_GetBaseEquippedWeight_Eval(COMMAND_ARGS_EVAL)
 	*result = 0;
 	if (!IS_ACTOR(thisObj)) return true;
 	float const minWeight = *(float*)&arg1;
-	UInt32 const flags = (UInt32)arg2;
+	uint32_t const flags = (uint32_t)arg2;
 	*result = GetBaseEquippedWeight_Call(thisObj, flags, minWeight);
 	return true;
 }
@@ -298,14 +298,14 @@ bool Cmd_GetBaseEquippedWeight_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	float minWeight = 0;
-	UInt32 flags = 0;
+	uint32_t flags = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &minWeight, &flags)) return true;
 	*result = GetBaseEquippedWeight_Call(thisObj, flags, minWeight);
 	return true;
 }
 
 // Code structure lifted from 0x4D0900 (GetInventoryWeight)
-float __fastcall GetCalculatedEquippedWeight_Call(TESObjectREFR* const thisObj, UInt32 const flags, float const minWeight)
+float __fastcall GetCalculatedEquippedWeight_Call(TESObjectREFR* const thisObj, uint32_t const flags, float const minWeight)
 {
 	float totalWeight = 0;  //return val.
 	bool isHardcore = PlayerCharacter::GetSingleton()->isHardcore;
@@ -376,7 +376,7 @@ bool Cmd_GetCalculatedEquippedWeight_Eval(COMMAND_ARGS_EVAL)
 	*result = 0;
 	if (!IS_ACTOR(thisObj)) return true;
 	float const minWeight = *(float*)&arg1;
-	UInt32 const flags = (UInt32)arg2;
+	uint32_t const flags = (uint32_t)arg2;
 	*result = GetCalculatedEquippedWeight_Call(thisObj, flags, minWeight);
 	return true;
 }
@@ -384,7 +384,7 @@ bool Cmd_GetCalculatedEquippedWeight_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	float minWeight = 0;
-	UInt32 flags = 0;
+	uint32_t flags = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &minWeight, &flags)) return true;
 	*result = GetCalculatedEquippedWeight_Call(thisObj, flags, minWeight);
 	return true;
@@ -394,11 +394,11 @@ bool Cmd_GetCalculatedEquippedWeight_Execute(COMMAND_ARGS)
 DEFINE_COMMAND_PLUGIN(UnequipItemsFromBitMask, , 1, 1, kParams_OneInt);
 bool Cmd_UnequipItemsFromBitMask_Execute(COMMAND_ARGS)
 {
-	UInt32 flags = 0, noEquip = 0, noMessage = 1;
+	uint32_t flags = 0, noEquip = 0, noMessage = 1;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &flags, &noEquip, &noMessage)) return true;
 	if (!IS_ACTOR(thisObj)) return true;
 	Actor* actor = (Actor*)thisObj;
-	for (UInt32 slotIdx = EquippedItemIndex::ePart_Head; slotIdx <= EquippedItemIndex::ePart_BodyAddon3; slotIdx++)
+	for (uint32_t slotIdx = EquippedItemIndex::ePart_Head; slotIdx <= EquippedItemIndex::ePart_BodyAddon3; slotIdx++)
 	{
 		MatchBySlot matcher(slotIdx);
 		EquipData equipD = FindEquipped(thisObj, matcher);
@@ -557,7 +557,7 @@ bool Cmd_GetCalculatedItemValue_Eval(COMMAND_ARGS_EVAL)
 		auto const invRef = InventoryRefGetForID(thisObj->refID);
 
 		auto itemVal = -1.0;
-		if (auto const bAccountForBarterChanges = (UInt32)arg1;
+		if (auto const bAccountForBarterChanges = (uint32_t)arg1;
 			bAccountForBarterChanges && BarterMenu::Get() && invRef)
 		{
 			auto const brtMenu = BarterMenu::Get();
@@ -594,7 +594,7 @@ bool Cmd_GetCalculatedItemValue_Eval(COMMAND_ARGS_EVAL)
 bool Cmd_GetCalculatedItemValue_Execute(COMMAND_ARGS)
 {
 	*result = -1;
-	UInt32 bAccountForBarterChanges = 0;
+	uint32_t bAccountForBarterChanges = 0;
 	TESForm* item = nullptr;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bAccountForBarterChanges, &item))
 		return true;
@@ -661,7 +661,7 @@ bool Cmd_GetItemHotkeyIconPath_Execute(COMMAND_ARGS)
 	using namespace SetItemHotkeyIconPath;
 	const char* path = "";
 	TESForm* item;
-	UInt32 bOnlyReturnOverride = 0;
+	uint32_t bOnlyReturnOverride = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &item, &bOnlyReturnOverride) && item && item->IsItem())
 	{
 		if (auto iter = g_hotkeyIconOverrides.find(item->refID);
@@ -747,7 +747,7 @@ bool Cmd_SetSingleItemRefCurrentHealth_Execute(COMMAND_ARGS)
 {
 	*result = 0; // modified invRef refID (could be placed in a new stack, or stay in the same old if no changes were made).
 	float health;
-	UInt32 setPercent = 0;
+	uint32_t setPercent = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &health, &setPercent))
 		return true;
 	InventoryRef* invRef = InventoryRefGetForID(thisObj->refID);
@@ -878,7 +878,7 @@ DEFINE_COMMAND_PLUGIN(GetSelectedItemRefSO, "", false, kParams_OneOptionalInt);
 bool Cmd_GetSelectedItemRefSO_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	UInt32 menuID = 0;
+	uint32_t menuID = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &menuID))
 		return true;
 	TESForm* itemRef = nullptr;
@@ -978,7 +978,7 @@ bool Cmd_GetCalculatedItemWeight_Eval(COMMAND_ARGS_EVAL)
 				ScopedLock lockCodeOverwrites(g_Lock);
 
 				// Skip code which adds up the weight for each item in the owner / container.
-				ReplaceCall(0x4D09CB, (UInt32)tList_IsEmpty_ReturnFalse_Hook);
+				ReplaceCall(0x4D09CB, (uint32_t)tList_IsEmpty_ReturnFalse_Hook);
 
 				//Via supreme jank, call GetInventoryWeight.
 				//Has to be done, since there is no other function that can return the modified weight,

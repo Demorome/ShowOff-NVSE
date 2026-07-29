@@ -55,7 +55,7 @@ public:
 	virtual void	Destructor(bool freeThis);
 	virtual void	Free(void);
 
-	UInt32		m_uiRefCount;	// 04
+	uint32_t		m_uiRefCount;	// 04
 
 	static void Replace(NiRefObject** toReplace, NiRefObject* replacement)
 	{
@@ -87,22 +87,22 @@ public:
 	virtual void	Unk_0F(void);
 	virtual void	Unk_10(void);
 	virtual void	Unk_11(void);
-	virtual void	Unk_12(UInt32 arg);
-	virtual void	Unk_13(UInt32 arg);
-	virtual void	Unk_14(UInt32 arg);
-	virtual void	Unk_15(UInt32 arg);
-	virtual void	Unk_16(UInt32 arg);
-	virtual void	Unk_17(UInt32 arg);
-	virtual void	Unk_18(UInt32 arg);
-	virtual void	Unk_19(UInt32 arg);
-	virtual void	Unk_1A(UInt32 arg);
-	virtual void	Unk_1B(UInt32 arg);
+	virtual void	Unk_12(uint32_t arg);
+	virtual void	Unk_13(uint32_t arg);
+	virtual void	Unk_14(uint32_t arg);
+	virtual void	Unk_15(uint32_t arg);
+	virtual void	Unk_16(uint32_t arg);
+	virtual void	Unk_17(uint32_t arg);
+	virtual void	Unk_18(uint32_t arg);
+	virtual void	Unk_19(uint32_t arg);
+	virtual void	Unk_1A(uint32_t arg);
+	virtual void	Unk_1B(uint32_t arg);
 	virtual void	Unk_1C(void);
 	virtual void	Unk_1D(void);
-	virtual void	Unk_1E(UInt32 arg);
-	virtual UInt32	Unk_1F(void);
+	virtual void	Unk_1E(uint32_t arg);
+	virtual uint32_t	Unk_1F(void);
 	virtual void	Unk_20(void);
-	virtual void	Unk_21(UInt32 arg);
+	virtual void	Unk_21(uint32_t arg);
 	virtual void	Unk_22(void);
 };
 
@@ -133,17 +133,17 @@ public:
 		kKeyType_Const,
 	};
 
-	UInt16		numRotationKeys;	// 08
-	UInt16		numTranslationKeys;	// 0A
-	UInt16		numScaleKeys;		// 0C
-	UInt16		pad0E;				// 0E
-	UInt32		rotationKeyType;	// 10
-	UInt32		translationKeyType;	// 14
-	UInt32		scaleKeyType;		// 18
-	UInt8		rotationKeySize;	// 1C
-	UInt8		translationKeySize;	// 1D
-	UInt8		scaleKeySize;		// 1E
-	UInt8		pad1F;				// 1F
+	uint16_t		numRotationKeys;	// 08
+	uint16_t		numTranslationKeys;	// 0A
+	uint16_t		numScaleKeys;		// 0C
+	uint16_t		pad0E;				// 0E
+	uint32_t		rotationKeyType;	// 10
+	uint32_t		translationKeyType;	// 14
+	uint32_t		scaleKeyType;		// 18
+	uint8_t		rotationKeySize;	// 1C
+	uint8_t		translationKeySize;	// 1D
+	uint8_t		scaleKeySize;		// 1E
+	uint8_t		pad1F;				// 1F
 	void		*rotationKeys;		// 20
 	void		*translationKeys;	// 24
 	void		*scaleKeys;			// 28
@@ -153,7 +153,7 @@ static_assert(sizeof(NiTransformData) == 0x2C);
 // 08
 struct FloatData
 {
-	UInt32		unk00;
+	uint32_t		unk00;
 	float		value;
 };
 
@@ -164,17 +164,17 @@ public:
 	NiFloatData();
 	~NiFloatData();
 
-	UInt32			unk08;		// 08
+	uint32_t			unk08;		// 08
 	FloatData		*fltData;	// 0C
-	UInt32			unk10;		// 10
-	UInt8			byte14;		// 14
-	UInt8			pad15[3];	// 15
+	uint32_t			unk10;		// 10
+	uint8_t			byte14;		// 14
+	uint8_t			pad15[3];	// 15
 };
 
 // 14
 struct ColorData
 {
-	UInt32		unk00;
+	uint32_t		unk00;
 	float		value[4];
 };
 
@@ -185,10 +185,10 @@ public:
 	NiColorData();
 	~NiColorData();
 
-	UInt32			unk08;		// 08
+	uint32_t			unk08;		// 08
 	ColorData		*clrData;	// 0C
-	UInt32			unk10;		// 10
-	UInt32			unk14;		// 14
+	uint32_t			unk10;		// 10
+	uint32_t			unk14;		// 14
 };
 
 // 0C
@@ -247,7 +247,7 @@ public:
 
 	float				value;		// 0C
 	NiFloatData			*data;		// 10
-	UInt32				unk14;		// 14
+	uint32_t				unk14;		// 14
 };
 
 // 24
@@ -259,7 +259,7 @@ public:
 
 	float				value[4];	// 0C
 	NiColorData			*data;		// 1C
-	UInt32				unk20;		// 20
+	uint32_t				unk20;		// 20
 };
 
 // 48
@@ -280,15 +280,15 @@ public:
 	float			flt24;		// 24
 	float			flt28;		// 28
 	NiTransformData	*transData;	// 2C
-	UInt16			unk30;		// 30
-	UInt16			unk32;		// 32
-	UInt16			unk34;		// 34
-	UInt8			pad36[2];	// 36
+	uint16_t			unk30;		// 30
+	uint16_t			unk32;		// 32
+	uint16_t			unk34;		// 34
+	uint8_t			pad36[2];	// 36
 	float			flt38;		// 38
 	float			flt3C;		// 3C
 	float			flt40;		// 40
-	UInt8			byte44;		// 44
-	UInt8			pad45[3];	// 45
+	uint8_t			byte44;		// 44
+	uint8_t			pad45[3];	// 45
 
 	static NiTransformInterpolator *Create();
 };
@@ -311,13 +311,13 @@ public:
 	};
 
 	const char			*sequenceName;			// 08
-	UInt32				numControlledBlocks;	// 0C
-	UInt32				arrayGrowBy;			// 10
+	uint32_t				numControlledBlocks;	// 0C
+	uint32_t				arrayGrowBy;			// 10
 	ControlledBlock		**controlledBlocks;		// 14
 	const char			**unkNodeName;			// 18
 	float				weight;					// 1C
 	NiTextKeyExtraData	*textKeyData;			// 20
-	UInt32				cycleType;				// 24
+	uint32_t				cycleType;				// 24
 	float				frequency;				// 28
 	float				startTime;				// 2C
 	float				stopTime;				// 30
@@ -325,14 +325,14 @@ public:
 	float				flt38;					// 38
 	float				flt3C;					// 3C
 	NiControllerManager	*manager;				// 40
-	UInt32				unk44;					// 44
-	UInt32				unk48;					// 48
+	uint32_t				unk44;					// 44
+	uint32_t				unk48;					// 48
 	float				flt4C;					// 4C
 	float				flt50;					// 50
 	float				flt54;					// 54
-	UInt32				unk58;					// 58
+	uint32_t				unk58;					// 58
 	const char			*rootNodeName;			// 5C
-	UInt32				unk60[5];				// 60
+	uint32_t				unk60[5];				// 60
 };
 static_assert(sizeof(NiControllerSequence) == 0x74);
 
@@ -354,8 +354,8 @@ public:
 	virtual void	Unk_2B(void);
 	virtual void	Unk_2C(void);
 
-	UInt16								flags;				// 08
-	UInt16								unk0A;				// 0A
+	uint16_t								flags;				// 08
+	uint16_t								unk0A;				// 0A
 	float								frequency;			// 0C
 	float								phaseTime;			// 10
 	float								flt14;				// 14
@@ -379,15 +379,15 @@ public:
 
 	NiTArray<NiControllerSequence*>					sequences;		// 34
 	void											*ptr44;			// 44
-	UInt32											unk48;			// 48
-	UInt32											unk4C;			// 4C
+	uint32_t											unk48;			// 48
+	uint32_t											unk4C;			// 4C
 	NiTMapBase<const char*, NiControllerSequence*>	seqStrMap;		// 50
-	UInt32											unk60;			// 60
+	uint32_t											unk60;			// 60
 	NiTArray<void*>									*arr64;			// 64
-	UInt32											unk68;			// 68
-	UInt32											unk6C;			// 6C
-	UInt32											unk70;			// 70
-	UInt32											unk74;			// 74
+	uint32_t											unk68;			// 68
+	uint32_t											unk6C;			// 6C
+	uint32_t											unk70;			// 70
+	uint32_t											unk74;			// 74
 	NiDefaultAVObjectPalette						*defObjPlt;		// 78
 };
 static_assert(sizeof(NiControllerManager) == 0x7C);
@@ -404,7 +404,7 @@ public:
 	virtual void	Unk_2F(void);
 	virtual void	Unk_30(void);
 	virtual void	Unk_31(void);
-	virtual void	SetInterpolator(NiInterpolator *pInterpolator, UInt32 arg2);
+	virtual void	SetInterpolator(NiInterpolator *pInterpolator, uint32_t arg2);
 	virtual void	Unk_33(void);
 	virtual void	Unk_34(void);
 	virtual void	Unk_35(void);
@@ -447,7 +447,7 @@ public:
 	virtual void	Unk_23(void);
 	virtual void	Unk_24(void);
 
-	UInt32			unk08;		// 08
+	uint32_t			unk08;		// 08
 };
 
 // 10
@@ -471,7 +471,7 @@ public:
 		kBSXFlag_ExternalEmit =				1 << 9,
 	};
 
-	UInt32			flags;		// 0C
+	uint32_t			flags;		// 0C
 };
 
 // 14
@@ -495,8 +495,8 @@ public:
 	const char			*m_blockName;				// 08
 	NiTimeController	*m_controller;				// 0C
 	NiExtraData			**m_extraDataList;			// 10
-	UInt16				m_extraDataListLen;			// 14
-	UInt16				m_extraDataListCapacity;	// 16
+	uint16_t				m_extraDataListLen;			// 14
+	uint16_t				m_extraDataListCapacity;	// 16
 
 	void DumpExtraData();
 };
@@ -508,7 +508,7 @@ public:
 	NiProperty();
 	~NiProperty();
 
-	virtual UInt32	GetPropertyType();
+	virtual uint32_t	GetPropertyType();
 	virtual void	UpdateController(float arg);
 
 	enum
@@ -535,14 +535,14 @@ public:
 	NiMaterialProperty();
 	~NiMaterialProperty();
 
-	UInt32				unk18;			// 18
+	uint32_t				unk18;			// 18
 	float				specularRGB[3];	// 1C
 	float				emissiveRGB[3];	// 28
-	UInt32				unk34;			// 34
+	uint32_t				unk34;			// 34
 	float				glossiness;		// 38
 	float				alpha;			// 3C
 	float				emitMult;		// 40
-	UInt32				unk44[2];		// 44
+	uint32_t				unk44[2];		// 44
 };
 
 // 1C
@@ -558,9 +558,9 @@ public:
 
 	};
 
-	UInt16				flags;		// 18
-	UInt8				threshold;	// 1A
-	UInt8				byte1B;		// 1B
+	uint16_t				flags;		// 18
+	uint8_t				threshold;	// 1A
+	uint8_t				byte1B;		// 1B
 };
 
 // 30
@@ -570,7 +570,7 @@ public:
 	NiTexturingProperty();
 	~NiTexturingProperty();
 
-	UInt32				unk18[6];	// 18
+	uint32_t				unk18[6];	// 18
 };
 
 // 24
@@ -580,10 +580,10 @@ public:
 	NiStencilProperty();
 	~NiStencilProperty();
 
-	UInt16				flags;		// 18
-	UInt16				word1A;		// 1A
-	UInt32				unk1C;		// 1C
-	UInt32				mask;		// 20
+	uint16_t				flags;		// 18
+	uint16_t				word1A;		// 1A
+	uint32_t				unk1C;		// 1C
+	uint32_t				mask;		// 20
 };
 static_assert(sizeof(NiStencilProperty) == 0x24);
 
@@ -594,7 +594,7 @@ public:
 	NiCullingProperty();
 	~NiCullingProperty();
 
-	UInt32				unk18;		// 18
+	uint32_t				unk18;		// 18
 };
 
 // 60
@@ -605,38 +605,38 @@ public:
 	~BSShaderProperty();
 
 	virtual void	Unk_23(void);
-	virtual void	Unk_24(UInt32 arg1);
+	virtual void	Unk_24(uint32_t arg1);
 	virtual void	Unk_25(void);
-	virtual void	Unk_26(UInt32 arg1);
-	virtual void	Unk_27(UInt32 arg1);
-	virtual void	Unk_28(UInt32 arg1, UInt32 arg2, UInt32 arg3, UInt32 arg4, UInt32 arg5, UInt32 arg6);
-	virtual void	Unk_29(UInt32 arg1);
+	virtual void	Unk_26(uint32_t arg1);
+	virtual void	Unk_27(uint32_t arg1);
+	virtual void	Unk_28(uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4, uint32_t arg5, uint32_t arg6);
+	virtual void	Unk_29(uint32_t arg1);
 	virtual void	Unk_2A(void);
-	virtual void	Unk_2B(UInt32 arg1);
-	virtual void	Unk_2C(UInt32 arg1, UInt32 arg2, UInt32 arg3);
+	virtual void	Unk_2B(uint32_t arg1);
+	virtual void	Unk_2C(uint32_t arg1, uint32_t arg2, uint32_t arg3);
 	virtual void	Unk_2D(void);
-	virtual void	Unk_2E(UInt32 arg1);
-	virtual void	Unk_2F(UInt32 arg1, UInt32 arg2);
+	virtual void	Unk_2E(uint32_t arg1);
+	virtual void	Unk_2F(uint32_t arg1, uint32_t arg2);
 	virtual void	Unk_30(void);
 
-	UInt16			unk18;		// 18
-	UInt16			unk1A;		// 1A
-	UInt32			unk1C;		// 1C
-	UInt32			unk20;		// 20
-	UInt32			unk24;		// 24
+	uint16_t			unk18;		// 18
+	uint16_t			unk1A;		// 1A
+	uint32_t			unk1C;		// 1C
+	uint32_t			unk20;		// 20
+	uint32_t			unk24;		// 24
 	float			flt28;		// 28
 	float			flt2C;		// 2C
 	float			flt30;		// 30
 	float			flt34;		// 34
-	UInt32			unk38;		// 38
+	uint32_t			unk38;		// 38
 	void			*ptr03C;	// 3C	Seen 010B8480
-	UInt32			unk40;		// 40
-	UInt32			unk44;		// 44
-	UInt32			unk48;		// 48
-	UInt32			unk4C;		// 4C
-	UInt32			unk50;		// 50
-	UInt32			unk54;		// 54
-	UInt32			unk58;		// 58
+	uint32_t			unk40;		// 40
+	uint32_t			unk44;		// 44
+	uint32_t			unk48;		// 48
+	uint32_t			unk4C;		// 4C
+	uint32_t			unk50;		// 50
+	uint32_t			unk54;		// 54
+	uint32_t			unk58;		// 58
 	float			flt5C;		// 5C
 };
 static_assert(sizeof(BSShaderProperty) == 0x60);
@@ -648,34 +648,34 @@ public:
 	WaterShaderProperty();
 	~WaterShaderProperty();
 
-	UInt8				byte060;		// 060
-	UInt8				byte061;		// 061
-	UInt8				byte062;		// 062
-	UInt8				byte063;		// 063
-	UInt32				unk064;			// 064
-	UInt32				unk068;			// 068
+	uint8_t				byte060;		// 060
+	uint8_t				byte061;		// 061
+	uint8_t				byte062;		// 062
+	uint8_t				byte063;		// 063
+	uint32_t				unk064;			// 064
+	uint32_t				unk068;			// 068
 	float				flt06C;			// 06C
 	float				flt070;			// 070
-	UInt32				unk074;			// 074
-	UInt32				unk078;			// 078
-	UInt8				byte07C;		// 07C
-	UInt8				byte07D;		// 07D
-	UInt8				byte07E;		// 07E
-	UInt8				byte07F;		// 07F
-	UInt8				byte080;		// 080
-	UInt8				byte081;		// 081
-	UInt8				byte082;		// 082
-	UInt8				byte083;		// 083
-	UInt32				unk084;			// 084
+	uint32_t				unk074;			// 074
+	uint32_t				unk078;			// 078
+	uint8_t				byte07C;		// 07C
+	uint8_t				byte07D;		// 07D
+	uint8_t				byte07E;		// 07E
+	uint8_t				byte07F;		// 07F
+	uint8_t				byte080;		// 080
+	uint8_t				byte081;		// 081
+	uint8_t				byte082;		// 082
+	uint8_t				byte083;		// 083
+	uint32_t				unk084;			// 084
 	float				flt088[40];		// 088
-	UInt32				unk128[3];		// 128
+	uint32_t				unk128[3];		// 128
 	NiSourceTexture		*srcTexture;	// 134
 	NiObject			*noDepth;		// 138	Seen 010AE500
 	NiObject			*reflections;	// 13C		"
 	NiObject			*refractions;	// 140
 	NiObject			*depth;			// 144		"
-	UInt32				unk148;			// 148
-	UInt32				unk14C;			// 14C
+	uint32_t				unk148;			// 148
+	uint32_t				unk14C;			// 14C
 };
 static_assert(sizeof(WaterShaderProperty) == 0x150);
 
@@ -686,32 +686,32 @@ public:
 	NiAVObject();
 	~NiAVObject();
 
-	virtual void	Unk_23(UInt32 arg1);
+	virtual void	Unk_23(uint32_t arg1);
 	virtual void	Unk_24(NiMatrix33 *arg1, NiVector3 *arg2, bool arg3);
-	virtual void	Unk_25(UInt32 arg1);
-	virtual void	Unk_26(UInt32 arg1);
-	virtual void	Unk_27(UInt32 arg1);
-	virtual void	Unk_28(UInt32 arg1, UInt32 arg2, UInt32 arg3);
-	virtual void	Unk_29(UInt32 arg1, UInt32 arg2);
-	virtual void	Unk_2A(UInt32 arg1, UInt32 arg2);
-	virtual void	Unk_2B(UInt32 arg1, UInt32 arg2);
-	virtual void	Unk_2C(UInt32 arg1);
-	virtual void	Unk_2D(UInt32 arg1);
-	virtual void	UpdateTransform(UInt32 arg1);
+	virtual void	Unk_25(uint32_t arg1);
+	virtual void	Unk_26(uint32_t arg1);
+	virtual void	Unk_27(uint32_t arg1);
+	virtual void	Unk_28(uint32_t arg1, uint32_t arg2, uint32_t arg3);
+	virtual void	Unk_29(uint32_t arg1, uint32_t arg2);
+	virtual void	Unk_2A(uint32_t arg1, uint32_t arg2);
+	virtual void	Unk_2B(uint32_t arg1, uint32_t arg2);
+	virtual void	Unk_2C(uint32_t arg1);
+	virtual void	Unk_2D(uint32_t arg1);
+	virtual void	UpdateTransform(uint32_t arg1);
 	virtual void	Unk_2F(void);
-	virtual void	UpdateBounds(UInt32 arg1);
-	virtual void	Unk_31(UInt32 arg1, UInt32 arg2);
-	virtual void	Unk_32(UInt32 arg1);
-	virtual void	Unk_33(UInt32 arg1);
+	virtual void	UpdateBounds(uint32_t arg1);
+	virtual void	Unk_31(uint32_t arg1, uint32_t arg2);
+	virtual void	Unk_32(uint32_t arg1);
+	virtual void	Unk_33(uint32_t arg1);
 	virtual void	Unk_34(void);
 	virtual void	Unk_35(void);
-	virtual void	Unk_36(UInt32 arg1);
+	virtual void	Unk_36(uint32_t arg1);
 
 	NiAVObject				*m_parent;				// 18
 	bhkNiCollisionObject	*m_collisionObject;		// 1C
 	NiSphere				*m_kWorldBound;			// 20
 	DList<NiProperty>		m_propertyList;			// 24
-	UInt32					m_flags;				// 30
+	uint32_t					m_flags;				// 30
 	NiMatrix33				m_localRotate;			// 34
 	NiVector3				m_localTranslate;		// 58
 	float					m_localScale;			// 64
@@ -719,7 +719,7 @@ public:
 	NiVector3				m_worldTranslate;		// 8C
 	float					m_worldScale;			// 98
 
-	NiProperty *GetProperty(UInt32 propID);
+	NiProperty *GetProperty(uint32_t propID);
 
 	void DumpProperties();
 	void DumpParents();
@@ -751,7 +751,7 @@ public:
 	bool IsMovable();
 	void ToggleCollision(bool enable);
 	void RemoveCollision();
-	void BulkSetMaterialPropertyTraitValue(UInt32 traitID, float value);
+	void BulkSetMaterialPropertyTraitValue(uint32_t traitID, float value);
 	void GetContactObjects(ContactObjects *contactObjs);
 	bool HasPhantom();
 	void GetBodyMass(float *totalMass);
@@ -768,11 +768,11 @@ public:
 	~BSFadeNode();
 
 	float			fltAC[4];		// AC
-	UInt32			unkBC[2];		// BC
-	UInt32			fadeType;			// C4
-	UInt32			unkC8;			// C8
+	uint32_t			unkBC[2];		// BC
+	uint32_t			fadeType;			// C4
+	uint32_t			unkC8;			// C8
 	TESObjectREFR	*linkedObj;		// CC
-	UInt32			unkD0[5];		// D0
+	uint32_t			unkD0[5];		// D0
 };
 
 // B4
@@ -782,13 +782,13 @@ public:
 	BSMultiBoundNode();
 	~BSMultiBoundNode();
 
-	virtual void	Unk_40(UInt32 arg1, UInt32 arg2);
+	virtual void	Unk_40(uint32_t arg1, uint32_t arg2);
 	virtual void	Unk_41(void);
-	virtual void	Unk_42(UInt32 arg1);
-	virtual void	Unk_43(UInt32 arg1);
-	virtual void	Unk_44(UInt32 arg1);
+	virtual void	Unk_42(uint32_t arg1);
+	virtual void	Unk_43(uint32_t arg1);
+	virtual void	Unk_44(uint32_t arg1);
 
-	UInt32			unkAC[2];		// AC
+	uint32_t			unkAC[2];		// AC
 };
 
 // B8
@@ -800,7 +800,7 @@ public:
 
 	virtual void	Unk_40(void);
 
-	UInt32			unkAC[3];		// AC
+	uint32_t			unkAC[3];		// AC
 };
 
 // B4
@@ -812,7 +812,7 @@ public:
 
 	virtual void	Unk_40(void);
 
-	UInt32			unkAC[2];		// AC
+	uint32_t			unkAC[2];		// AC
 };
 
 // 64
@@ -822,20 +822,20 @@ public:
 	BSFogProperty();
 	~BSFogProperty();
 
-	UInt16				unk18;		// 18
-	UInt16				unk1A;		// 1A
+	uint16_t				unk18;		// 18
+	uint16_t				unk1A;		// 1A
 	float				flt1C;		// 1C
 	NiColor				color;		// 20
 	float				distNear;	// 2C
 	float				distFar;	// 30
-	UInt32				unk34;		// 34
-	UInt32				unk38;		// 38
+	uint32_t				unk34;		// 34
+	uint32_t				unk38;		// 38
 	float				flt3C;		// 3C
 	float				flt40;		// 40
 	float				flt44;		// 44
 	float				flt48;		// 48
-	UInt32				unk4C;		// 4C
-	UInt32				unk50;		// 50
+	uint32_t				unk4C;		// 4C
+	uint32_t				unk50;		// 50
 	float				flt54;		// 54
 	float				flt58;		// 58
 	float				flt5C;		// 5C
@@ -850,13 +850,13 @@ public:
 	BSPortalGraph();
 	~BSPortalGraph();
 
-	UInt32					unk08[10];	// 08
+	uint32_t					unk08[10];	// 08
 	void					*ptr30;		// 30
 	void					*ptr34;		// 34
-	UInt32					unk38;		// 38
+	uint32_t					unk38;		// 38
 	NiTArray<NiAVObject*>	array3C;	// 3C
 	NiNode					*node4C;	// 4C
-	UInt32					unk50[6];	// 50
+	uint32_t					unk50[6];	// 50
 	BSSimpleArray<NiNode>	array68;	// 68
 };
 static_assert(sizeof(BSPortalGraph) == 0x78);
@@ -868,27 +868,27 @@ public:
 	LightingData();
 	~LightingData();
 
-	UInt32					unk008;			// 008
+	uint32_t					unk008;			// 008
 	float					flt00C[53];		// 00C
 	DList<NiTriStrips>		lgtList0E0;		// 0E0
-	UInt8					byte0EC;		// 0EC
-	UInt8					byte0ED;		// 0ED
-	UInt8					byte0EE[2];		// 0EE
-	UInt32					unk0F0;			// 0F0
-	UInt32					unk0F4;			// 0F4
+	uint8_t					byte0EC;		// 0EC
+	uint8_t					byte0ED;		// 0ED
+	uint8_t					byte0EE[2];		// 0EE
+	uint32_t					unk0F0;			// 0F0
+	uint32_t					unk0F4;			// 0F4
 	NiLight					*light;			// 0F8
-	UInt32					unk0FC;			// 0FC
-	UInt32					unk100[6];		// 100
-	UInt8					byte118;		// 118
-	UInt8					pad119[3];		// 119
+	uint32_t					unk0FC;			// 0FC
+	uint32_t					unk100[6];		// 100
+	uint8_t					byte118;		// 118
+	uint8_t					pad119[3];		// 119
 	float					flt11C;			// 11C
 	float					flt120;			// 120
-	UInt8					byte124;		// 124
-	UInt8					pad125[3];		// 125
-	UInt32					unk128[66];		// 128
+	uint8_t					byte124;		// 124
+	uint8_t					pad125[3];		// 125
+	uint32_t					unk128[66];		// 128
 	BSSimpleArray<NiNode>	array230;		// 230
 	BSPortalGraph			*portalGraph;	// 240
-	UInt32					unk244[3];		// 244
+	uint32_t					unk244[3];		// 244
 };
 static_assert(sizeof(LightingData) == 0x250);
 
@@ -899,51 +899,51 @@ public:
 	ShadowSceneNode();
 	~ShadowSceneNode();
 
-	UInt32							unk0AC[2];		// 0AC
+	uint32_t							unk0AC[2];		// 0AC
 	DList<LightingData>				lgtList0B4;		// 0B4
 	DList<LightingData>				lgtList0C0;		// 0C0
-	UInt32							unk0CC;			// 0CC
+	uint32_t							unk0CC;			// 0CC
 	DListNode<LightingData>			*node0D0;		// 0D0
 	DListNode<LightingData>			*node0D4;		// 0D4
 	LightingData					*data0D8;		// 0D8
 	LightingData					*data0DC;		// 0DC
 	LightingData					*data0E0;		// 0E0
-	UInt32							unk0E4[6];		// 0E4
+	uint32_t							unk0E4[6];		// 0E4
 	void							*ptr0FC;		// 0FC
 	void							*ptr100;		// 100
-	UInt32							unk104;			// 104
-	UInt32							unk108[3];		// 108
+	uint32_t							unk104;			// 104
+	uint32_t							unk108[3];		// 108
 	void							*ptr114;		// 114
 	void							*ptr118;		// 118
-	UInt32							unk11C;			// 11C
-	UInt32							unk120;			// 120
-	UInt32							unk124;			// 124
+	uint32_t							unk11C;			// 11C
+	uint32_t							unk120;			// 120
+	uint32_t							unk124;			// 124
 	BSCubeMapCamera					*cubeMapCam;	// 128
-	UInt32							unk12C;			// 12C
-	UInt8							byte130;		// 130
-	UInt8							byte131;		// 131
-	UInt8							pad132[2];		// 132
+	uint32_t							unk12C;			// 12C
+	uint8_t							byte130;		// 130
+	uint8_t							byte131;		// 131
+	uint8_t							pad132[2];		// 132
 	BSFogProperty					*fogProperty;	// 134
-	UInt32							unk138;			// 138
+	uint32_t							unk138;			// 138
 	BSSimpleArray<NiFrustumPlanes>	array13C;		// 13C
 	BSSimpleArray<void>				array14C;		// 14C	010C1E9C
-	UInt32							unk15C[3];		// 15C
+	uint32_t							unk15C[3];		// 15C
 	NiVector4						unk168;			// 168
 	NiVector4						unk178;			// 178
 	NiVector4						unk188;			// 188
 	NiVector4						unk198;			// 198
 	NiVector4						unk1A8;			// 1A8
 	NiVector4						unk1B8;			// 1B8
-	UInt32							lightingPasses;	// 1C8
+	uint32_t							lightingPasses;	// 1C8
 	float							flt1CC[3];		// 1CC
-	UInt32							unk1D8;			// 1D8
-	UInt8							byte1DC;		// 1DC
-	UInt8							pad1DD[3];		// 1DD
+	uint32_t							unk1D8;			// 1D8
+	uint8_t							byte1DC;		// 1DC
+	uint8_t							pad1DD[3];		// 1DD
 	BSPortalGraph					*portalGraph;	// 1E0
-	UInt32							unk1E4[3];		// 1E4
+	uint32_t							unk1E4[3];		// 1E4
 	float							flt1F0[3];		// 1F0
-	UInt8							byte1FC;		// 1FC
-	UInt8							pad1FD[3];		// 1FD
+	uint8_t							byte1FC;		// 1FC
+	uint8_t							pad1FD[3];		// 1FD
 };
 static_assert(sizeof(ShadowSceneNode) == 0x200);
 
@@ -970,19 +970,19 @@ public:
 	NiDynamicEffect();
 	~NiDynamicEffect();
 
-	UInt8			byte9C;			// 9C
-	UInt8			byte9D;			// 9D
-	UInt8			byte9E;			// 9E
-	UInt8			byte9F;			// 9F
-	UInt32			unkA0;			// A0
-	UInt32			unkA4;			// A4
-	UInt32			unkA8;			// A8
-	UInt32			unkAC;			// AC
-	UInt32			unkB0;			// B0
-	UInt32			unkB4;			// B4
-	UInt32			unkB8;			// B8
-	UInt32			unkBC;			// BC
-	UInt32			unkC0;			// C0
+	uint8_t			byte9C;			// 9C
+	uint8_t			byte9D;			// 9D
+	uint8_t			byte9E;			// 9E
+	uint8_t			byte9F;			// 9F
+	uint32_t			unkA0;			// A0
+	uint32_t			unkA4;			// A4
+	uint32_t			unkA8;			// A8
+	uint32_t			unkAC;			// AC
+	uint32_t			unkB0;			// B0
+	uint32_t			unkB4;			// B4
+	uint32_t			unkB8;			// B8
+	uint32_t			unkBC;			// BC
+	uint32_t			unkC0;			// C0
 };
 
 // F0
@@ -1007,7 +1007,7 @@ public:
 	float			radius;				// E0
 	float			fltE4;				// E4
 	float			fltE8;				// E8
-	UInt32			unkEC;				// EC
+	uint32_t			unkEC;				// EC
 	float			attenuation1;		// F0
 	float			attenuation2;		// F4
 	float			attenuation3;		// F8
@@ -1021,7 +1021,7 @@ public:
 	~NiDirectionalLight();
 
 	NiColor			fogColor;			// E0
-	UInt32			unkEC;				// EC
+	uint32_t			unkEC;				// EC
 	NiVector3		direction;			// F0
 };
 
@@ -1043,9 +1043,9 @@ public:
 	~SceneGraph();
 
 	NiCamera			*camera;			// AC
-	UInt32				unkB0;				// B0
+	uint32_t				unkB0;				// B0
 	NiCullingProcess	*cullingProc;		// B4
-	UInt32				isMinFarPlaneDist;	// B8 The farplane is set to 20480.0 when the flag is true. Probably used for interiors.
+	uint32_t				isMinFarPlaneDist;	// B8 The farplane is set to 20480.0 when the flag is true. Probably used for interiors.
 	float				cameraFOV;			// BC
 };
 
@@ -1306,21 +1306,21 @@ public:
 		kAnimGroup_Max = 0xF5
 	};
 
-	UInt8 byte08[8];
-	UInt16 groupID;
-	UInt8 unk12[1];
-	UInt32 maxID;
+	uint8_t byte08[8];
+	uint16_t groupID;
+	uint8_t unk12[1];
+	uint32_t maxID;
 	float* actionTimes;
 	float pt1C[3];
-	UInt8 leftOrRight_whichFootToSwitch;
-	UInt8 blend;
-	UInt8 blendIn;
-	UInt8 blendOut;
-	UInt8 decal;
-	UInt8 gap2D[3];
+	uint8_t leftOrRight_whichFootToSwitch;
+	uint8_t blend;
+	uint8_t blendIn;
+	uint8_t blendOut;
+	uint8_t decal;
+	uint8_t gap2D[3];
 	char* parentRootNode;
-	UInt32 unk34;
-	UInt32 unk38;
+	uint32_t unk34;
+	uint32_t unk38;
 };
 
 // 78
@@ -1342,11 +1342,11 @@ public:
 
 	virtual void	Unk_23(void);
 
-	UInt32			unk008[126];	// 008
-	UInt32			sceneState;		// 200
-	UInt32			unk204;			// 204
-	UInt32			unk208;			// 208
-	UInt32			unk20C;			// 20C
+	uint32_t			unk008[126];	// 008
+	uint32_t			sceneState;		// 200
+	uint32_t			unk204;			// 204
+	uint32_t			unk208;			// 208
+	uint32_t			unk20C;			// 20C
 };
 static_assert(sizeof(NiRenderer) == 0x210);
 
@@ -1398,15 +1398,15 @@ public:
 	virtual void		Unk_42(void);
 	virtual bool		Unk_43(void);
 	virtual void		Unk_44(void);
-	virtual bool		FastCopy(void *src, void *dst, RECT *srcRect, SInt32 xOffset, SInt32 yOffset);
-	virtual bool		Copy(void *src, void *dst, RECT *srcRect, RECT *dstRect, UInt32 filterMode);
+	virtual bool		FastCopy(void *src, void *dst, RECT *srcRect, int32_t xOffset, int32_t yOffset);
+	virtual bool		Copy(void *src, void *dst, RECT *srcRect, RECT *dstRect, uint32_t filterMode);
 	virtual void		Unk_47(void);
 	virtual bool		Unk_48(void *arg);
 	virtual void		Unk_49(void);
 	virtual void		Unk_4A(float arg);
-	virtual void 		Unk_4B(UInt32 size);
-	virtual void		Unk_4C(UInt32 arg0, UInt32 arg1);
-	virtual void		Unk_4D(UInt32 arg0, UInt32 arg1);
+	virtual void 		Unk_4B(uint32_t size);
+	virtual void		Unk_4C(uint32_t arg0, uint32_t arg1);
+	virtual void		Unk_4D(uint32_t arg0, uint32_t arg1);
 	virtual void		Unk_4E(void *buf);
 	virtual void		CreateSourceTexture(NiSourceTexture *texture);
 	virtual bool		CreateRenderedTexture(NiRenderedTexture *arg);
@@ -1427,12 +1427,12 @@ public:
 	virtual bool		BeginScene();
 	virtual bool		EndScene();
 	virtual void		DisplayScene();
-	virtual void		Clear(float *rect, UInt32 flags);
+	virtual void		Clear(float *rect, uint32_t flags);
 	virtual void		SetupCamera(NiVector3 * pos, NiVector3 * at, NiVector3 * up, NiVector3 * right, NiFrustum * frustum, float * viewport);
 	virtual void		SetupScreenSpaceCamera(float* viewport);
 	virtual bool		BeginUsingRenderTargetGroup(NiRenderTargetGroup* renderTarget, ClearFlags clearFlags);
 	virtual bool		EndUsingRenderTargetGroup();
-	virtual void		BeginBatch(UInt32 arg0, UInt32 arg1);
+	virtual void		BeginBatch(uint32_t arg0, uint32_t arg1);
 	virtual void		EndBatch();
 	virtual void		BatchRenderShape(void *arg);
 	virtual void		BatchRenderStrips(void *arg);
@@ -1529,47 +1529,47 @@ public:
 		REFRESHRATE_DEFAULT = 0
 	};
 
-	UInt32								unk210[30];					// 210
+	uint32_t								unk210[30];					// 210
 	IDirect3DDevice9					*device;					// 288
-	UInt32								unk28C[76];					// 28C
+	uint32_t								unk28C[76];					// 28C
 	HANDLE								deviceWindow;				// 3BC
 	HANDLE								focusWindow;				// 3C0
 	char								rendererInfo[0x200];		// 3C4
-	UInt32								adapterIdx;					// 5C4
-	UInt32								d3dDevType;					// 5C8 - D3DDEVTYPE
-	UInt32								d3dDevFlags;				// 5CC - D3DCREATE
-	UInt8								softwareVertexProcessing;	// 5D0 - !D3DCREATE_HARDWARE_VERTEXPROCESSING
-	UInt8								mixedVertexProcessing;		// 5D1 - D3DCREATE_MIXED_VERTEXPROCESSING
-	UInt8								pad5D2[2];					// 5D2
-	UInt32								unk5D4[3];					// 5D4
-	UInt32								backgroundColor;			// 5E0	ARGB
-	UInt32								unk5E4[11];					// 5E4
+	uint32_t								adapterIdx;					// 5C4
+	uint32_t								d3dDevType;					// 5C8 - D3DDEVTYPE
+	uint32_t								d3dDevFlags;				// 5CC - D3DCREATE
+	uint8_t								softwareVertexProcessing;	// 5D0 - !D3DCREATE_HARDWARE_VERTEXPROCESSING
+	uint8_t								mixedVertexProcessing;		// 5D1 - D3DCREATE_MIXED_VERTEXPROCESSING
+	uint8_t								pad5D2[2];					// 5D2
+	uint32_t								unk5D4[3];					// 5D4
+	uint32_t								backgroundColor;			// 5E0	ARGB
+	uint32_t								unk5E4[11];					// 5E4
 	NiTPointerMap<PrePackObject*>		prePackObjects;				// 610 - NiTPointerMap <NiVBBlock *, NiDX9Renderer::PrePackObject *>
-	UInt32								unk620[153];				// 620
+	uint32_t								unk620[153];				// 620
 	NiRenderTargetGroup					*defaultRTGroup;			// 884 - back buffer
 	NiRenderTargetGroup					*currentRTGroup;			// 888
 	NiRenderTargetGroup					*currentscreenRTGroup;		// 88C
 	NiTPointerMap<NiRenderTargetGroup*>	screenRTGroups;				// 890 - NiTPointerMap <HWND *, NiPointer <NiRenderTargetGroup> >
-	UInt32								unk8A0[6];					// 8A0
+	uint32_t								unk8A0[6];					// 8A0
 	NiDX9RenderState					*renderState;				// 8B8
-	UInt32								unk8BC[3];					// 8BC
+	uint32_t								unk8BC[3];					// 8BC
 	NiTMapBase<NiLight*, void*>			*lightsMap;					// 8C8
-	UInt32								unk8CC[115];				// 8CC
-	UInt32								width;						// A98
-	UInt32								height;						// A9C
-	UInt32								flags;						// AA0
-	UInt32								windowDevice;				// AA4
-	UInt32								windowFocus;				// AA8
-	UInt32								adapterType;				// AAC
-	UInt32								deviceType;					// AB0
+	uint32_t								unk8CC[115];				// 8CC
+	uint32_t								width;						// A98
+	uint32_t								height;						// A9C
+	uint32_t								flags;						// AA0
+	uint32_t								windowDevice;				// AA4
+	uint32_t								windowFocus;				// AA8
+	uint32_t								adapterType;				// AAC
+	uint32_t								deviceType;					// AB0
 	FrameBufferFormat					frameBufferFormat;			// AB4
 	DepthStencilFormat					depthStencilFormat;			// AB8
 	PresentationInterval				presentationInterval;		// ABC
 	SwapEffect							swapEffect;					// AC0
 	FrameBufferMode						frameBufferMode;			// AC4
-	UInt32								backBufferCount;			// AC8
+	uint32_t								backBufferCount;			// AC8
 	RefreshRate							refreshRate;				// ACC
-	UInt32								unkAD0[44];					// AD0
+	uint32_t								unkAD0[44];					// AD0
 };
 static_assert(sizeof(NiDX9Renderer) == 0xB80);
 
@@ -1592,13 +1592,13 @@ public:
 	virtual void	Unk_2C(void);
 
 	NiTexture			*owningTexture;	// 08
-	UInt32				unk0C[6];		// 0C
-	UInt32				unk24;			// 24
-	UInt32				unk28[14];		// 28
+	uint32_t				unk0C[6];		// 0C
+	uint32_t				unk24;			// 24
+	uint32_t				unk28[14];		// 28
 	NiDX9Renderer		*renderer;		// 60
-	UInt32				unk64;			// 64
-	UInt32				unk68;			// 68
-	UInt32				unk6C;			// 6C
+	uint32_t				unk64;			// 64
+	uint32_t				unk68;			// 68
+	uint32_t				unk6C;			// 6C
 };
 
 // 30
@@ -1635,9 +1635,9 @@ public:
 		kMipMapFmt_Default,
 	};
 
-	UInt32				pixelLayout;	// 18
-	UInt32				alphaFormat;	// 1C
-	UInt32				mipmapFormat;	// 20
+	uint32_t				pixelLayout;	// 18
+	uint32_t				alphaFormat;	// 1C
+	uint32_t				mipmapFormat;	// 20
 	NiDX9TextureData	*textureData;	// 24
 	NiTexture			*prev;			// 28
 	NiTexture			*next;			// 2C
@@ -1656,13 +1656,13 @@ public:
 
 	char			*ddsPath1;		// 30
 	char			*ddsPath2;		// 34
-	UInt32			unk38;			// 38
-	UInt32			unk3C;			// 3C
-	UInt8			byte40;			// 40
-	UInt8			byte41;			// 41
-	UInt8			byte42;			// 42
-	UInt8			byte43;			// 43
-	UInt32			unk44;			// 44
+	uint32_t			unk38;			// 38
+	uint32_t			unk3C;			// 3C
+	uint8_t			byte40;			// 40
+	uint8_t			byte41;			// 41
+	uint8_t			byte42;			// 42
+	uint8_t			byte43;			// 43
+	uint32_t			unk44;			// 44
 };
 
 // 14
@@ -1676,7 +1676,7 @@ public:
 	virtual void	Unk_24(void);
 	virtual void	Unk_25(void);
 
-	UInt32		unk08[3];		// 08
+	uint32_t		unk08[3];		// 08
 };
 
 // 48
@@ -1689,11 +1689,11 @@ public:
 	virtual void	Unk_29(void);
 
 	Ni2DBuffer			*buffer;	// 30
-	UInt32				unk34;		// 34
-	UInt32				unk38;		// 38
-	UInt32				unk3C;		// 3C
-	UInt32				unk40;		// 40
-	UInt32				unk44;		// 44
+	uint32_t				unk34;		// 34
+	uint32_t				unk38;		// 38
+	uint32_t				unk3C;		// 3C
+	uint32_t				unk40;		// 40
+	uint32_t				unk44;		// 44
 };
 
 // B0
@@ -1704,19 +1704,19 @@ public:
 	~TileShaderProperty();
 
 	NiTexture			*srcTexture;	// 60
-	UInt32				unk64;			// 64
+	uint32_t				unk64;			// 64
 	NiColorAlpha		overlayColor;	// 68
 	float				alpha;			// 78
-	UInt32				unk7C;			// 7C
-	UInt32				unk80;			// 80
+	uint32_t				unk7C;			// 7C
+	uint32_t				unk80;			// 80
 	float				flt84;			// 84
 	float				flt88;			// 88
-	UInt32				unk8C;			// 8C
-	UInt8				byte90;			// 90
-	UInt8				byte91;			// 91
-	UInt8				hasVtxColors;	// 92
-	UInt8				byte93;			// 93
-	UInt32				unk94[7];		// 94
+	uint32_t				unk8C;			// 8C
+	uint8_t				byte90;			// 90
+	uint8_t				byte91;			// 91
+	uint8_t				hasVtxColors;	// 92
+	uint8_t				byte93;			// 93
+	uint32_t				unk94[7];		// 94
 };
 static_assert(sizeof(TileShaderProperty) == 0xB0);
 
@@ -1729,7 +1729,7 @@ public:
 	virtual void	Unk_23(void);
 	virtual void	Unk_24(void);
 	virtual void	Unk_25(void);
-	virtual void	Unk_26(UInt32 arg);
+	virtual void	Unk_26(uint32_t arg);
 	virtual void	Unk_27(void);
 	virtual void	Unk_28(void);
 };
@@ -1750,7 +1750,7 @@ public:
 	NiAlphaAccumulator();
 	~NiAlphaAccumulator();
 
-	UInt32			unk08[11];		// 08
+	uint32_t			unk08[11];		// 08
 };
 
 // 98
@@ -1763,7 +1763,7 @@ public:
 	virtual void	Unk_23(void);
 	virtual void	Unk_24(void);
 
-	UInt32			unk08[36];		// 08
+	uint32_t			unk08[36];		// 08
 };
 static_assert(sizeof(BSBatchRenderer) == 0x98);
 
@@ -1776,20 +1776,20 @@ public:
 
 	virtual void	Unk_2A(void);
 	virtual void	Unk_2B(void);
-	virtual void	Unk_2C(UInt32 arg1, UInt32 arg2);
+	virtual void	Unk_2C(uint32_t arg1, uint32_t arg2);
 
 	struct AccumStruct	//	Temp name
 	{
 		void		*_vtbl;	// 0x10B7DC0
-		UInt32		unk04;
-		UInt32		unk08;
-		UInt32		unk0C;
-		UInt32		unk10;
+		uint32_t		unk04;
+		uint32_t		unk08;
+		uint32_t		unk0C;
+		uint32_t		unk10;
 	};
 
-	UInt32				unk034[4];		// 034
+	uint32_t				unk034[4];		// 034
 	float				flt044;			// 044
-	UInt32				unk048[21];		// 048
+	uint32_t				unk048[21];		// 048
 	AccumStruct			accum09C;		// 09C
 	AccumStruct			accum0B0;		// 0B0
 	AccumStruct			accum0C4;		// 0C4
@@ -1798,18 +1798,18 @@ public:
 	AccumStruct			accum100;		// 100
 	AccumStruct			accum114;		// 114
 	AccumStruct			accum128;		// 128
-	UInt32				unk13C[6];		// 13C
+	uint32_t				unk13C[6];		// 13C
 	float				flt154;			// 154
 	float				flt158;			// 158
 	float				flt15C;			// 15C
 	float				flt160;			// 160
-	UInt32				unk164[4];		// 164
+	uint32_t				unk164[4];		// 164
 	BSBatchRenderer		*batchRenderer;	// 174
-	UInt32				unk178[7];		// 178
+	uint32_t				unk178[7];		// 178
 	ShadowSceneNode		*shadowScene;	// 194
-	UInt32				unk198;			// 198
-	UInt32				unk19C;			// 19C
-	UInt32				unk1A0[56];		// 1A0
+	uint32_t				unk198;			// 198
+	uint32_t				unk19C;			// 19C
+	uint32_t				unk1A0[56];		// 1A0
 };
 static_assert(sizeof(BSShaderAccumulator) == 0x280);
 
@@ -1824,9 +1824,9 @@ struct UVCoord
 
 struct NiTriangle
 {
-	UInt16		point1;
-	UInt16		point2;
-	UInt16		point3;
+	uint16_t		point1;
+	uint16_t		point2;
+	uint16_t		point3;
 };
 
 // 54
@@ -1837,27 +1837,27 @@ public:
 	~RendererData();
 
 	virtual RendererData	*Destructor(bool doFree);
-	virtual bool			Unk_01(UInt32 arg1);
+	virtual bool			Unk_01(uint32_t arg1);
 
-	UInt32						flags;			// 04
+	uint32_t						flags;			// 04
 	NiUnsharedGeometryGroup		*unsharedGeom;	// 08
-	UInt32						unk0C;			// 0C
+	uint32_t						unk0C;			// 0C
 	void						*ptr10;			// 10
-	UInt32						unk14;			// 14
-	UInt32						unk18;			// 18	Vertices/Normals count
-	UInt32						unk1C;			// 1C		"			"
-	UInt32						finished;		// 20
+	uint32_t						unk14;			// 14
+	uint32_t						unk18;			// 18	Vertices/Normals count
+	uint32_t						unk1C;			// 1C		"			"
+	uint32_t						finished;		// 20
 	void						*ptr24;			// 24
 	void						*ptr28;			// 28
-	UInt32						trianglePoints;	// 2C
-	UInt32						unk30;			// 30	Byte size of triangles array
+	uint32_t						trianglePoints;	// 2C
+	uint32_t						unk30;			// 30	Byte size of triangles array
 	void						*ptr34;			// 34
-	UInt32						unk38;			// 38
-	UInt32						unk3C;			// 3C
-	UInt32						unk40;			// 40	Triangle count
-	UInt32						unk44;			// 44		"
-	UInt32						unk48;			// 48
-	UInt32						unk4C;			// 4C
+	uint32_t						unk38;			// 38
+	uint32_t						unk3C;			// 3C
+	uint32_t						unk40;			// 40	Triangle count
+	uint32_t						unk44;			// 44		"
+	uint32_t						unk48;			// 48
+	uint32_t						unk4C;			// 4C
 	NiTriangle					*triangles;		// 50	Same ptr as in NiTriShapeData
 };
 static_assert(sizeof(RendererData) == 0x54);
@@ -1869,29 +1869,29 @@ public:
 	NiGeometryData();
 	~NiGeometryData();
 
-	virtual void	Unk_23(UInt32 arg);
+	virtual void	Unk_23(uint32_t arg);
 	virtual void	Unk_24(void);
 	virtual void	Unk_25(void);
 	virtual void	Unk_26(void);
-	virtual bool	Unk_27(UInt32 arg);
+	virtual bool	Unk_27(uint32_t arg);
 	virtual void	Unk_28(void);
 
-	UInt16			numVertices;	// 08
-	UInt16			word0A;			// 0A
-	UInt16			word0C;			// 0C
-	UInt16			word0E;			// 0E
+	uint16_t			numVertices;	// 08
+	uint16_t			word0A;			// 0A
+	uint16_t			word0C;			// 0C
+	uint16_t			word0E;			// 0E
 	NiSphere		bounds;			// 10
 	NiVector3		*vertices;		// 20
 	NiVector3		*normals;		// 24
 	NiColorAlpha	*vertexColors;	// 28
 	UVCoord			*uvCoords;		// 2C
-	UInt32			unk30;			// 30
+	uint32_t			unk30;			// 30
 	RendererData	*rendererData;	// 34
-	UInt8			byte38;			// 38
-	UInt8			byte39;			// 39
-	UInt8			byte3A;			// 3A
-	UInt8			byte3B;			// 3B
-	UInt32			unk3C;			// 3C
+	uint8_t			byte38;			// 38
+	uint8_t			byte39;			// 39
+	uint8_t			byte3A;			// 3A
+	uint8_t			byte3B;			// 3B
+	uint32_t			unk3C;			// 3C
 };
 static_assert(sizeof(NiGeometryData) == 0x40);
 
@@ -1902,13 +1902,13 @@ public:
 	NiTriBasedGeomData();
 	~NiTriBasedGeomData();
 
-	virtual void	Unk_29(UInt32 arg);
+	virtual void	Unk_29(uint32_t arg);
 	virtual void	Unk_2A(void);
-	virtual void	Unk_2B(UInt32 arg1, UInt32 arg2, UInt32 arg3, UInt32 arg4);
-	virtual void	Unk_2C(UInt32 arg1, UInt32 arg2, UInt32 arg3, UInt32 arg4);
+	virtual void	Unk_2B(uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4);
+	virtual void	Unk_2C(uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4);
 
-	UInt16			numTriangles;		// 40
-	UInt8			pad42[2];			// 42
+	uint16_t			numTriangles;		// 40
+	uint8_t			pad42[2];			// 42
 };
 
 // 58
@@ -1918,11 +1918,11 @@ public:
 	NiTriShapeData();
 	~NiTriShapeData();
 
-	UInt32			trianglePoints;	// 44
+	uint32_t			trianglePoints;	// 44
 	NiTriangle		*triangles;		// 48
-	UInt16			*points;		// 4C
-	UInt32			unk50;			// 50
-	UInt32			unk54;			// 54
+	uint16_t			*points;		// 4C
+	uint32_t			unk50;			// 50
+	uint32_t			unk54;			// 54
 };
 static_assert(sizeof(NiTriShapeData) == 0x58);
 
@@ -1979,9 +1979,9 @@ public:
 	virtual void	Unk_2D(void);
 	virtual void	Unk_2E(void);
 
-	UInt32			unk08;		// 08
-	UInt32			unk0C;		// 0C
-	UInt32			unk10;		// 10
+	uint32_t			unk08;		// 08
+	uint32_t			unk0C;		// 0C
+	uint32_t			unk10;		// 10
 };
 
 // 90
@@ -2029,7 +2029,7 @@ public:
 	virtual void	Unk_52(void);
 	virtual void	Unk_53(void);
 
-	UInt32			unk14[31];		// 14
+	uint32_t			unk14[31];		// 14
 };
 static_assert(sizeof(TileShader) == 0x90);
 
@@ -2040,11 +2040,11 @@ public:
 	NiGeometry();
 	~NiGeometry();
 
-	virtual void	Unk_37(UInt32 arg1);
-	virtual void	Unk_38(UInt32 arg1);
+	virtual void	Unk_37(uint32_t arg1);
+	virtual void	Unk_38(uint32_t arg1);
 	virtual void	Unk_39(void);
 	virtual void	Unk_3A(void);
-	virtual void	Unk_3B(UInt32 arg1);
+	virtual void	Unk_3B(uint32_t arg1);
 
 	NiAlphaProperty		*alphaProp;		// 9C	Seen NiAlphaProperty
 	NiProperty			*niPropA0;		// A0	Seen NiCullingProperty
@@ -2052,9 +2052,9 @@ public:
 	NiProperty			*niPropA8;		// A8	Seen TileShaderProperty
 	NiProperty			*niPropAC;		// AC	Seen NiStencilProperty
 	NiProperty			*niPropB0;		// B0	Seen NiTexturingProperty
-	UInt32				unkB4;			// B4
+	uint32_t				unkB4;			// B4
 	NiGeometryData		*geometryData;	// B8	Seen NiTriShapeData
-	UInt32				unkBC;			// BC
+	uint32_t				unkBC;			// BC
 	NiShader			*shader;		// C0
 };
 static_assert(sizeof(NiGeometry) == 0xC4);
@@ -2066,7 +2066,7 @@ public:
 	NiTriBasedGeom();
 	~NiTriBasedGeom();
 
-	virtual void	Unk_3C(UInt32 arg1, UInt32 arg2, UInt32 arg3, UInt32 arg4);
+	virtual void	Unk_3C(uint32_t arg1, uint32_t arg2, uint32_t arg3, uint32_t arg4);
 };
 
 // C4
@@ -2084,10 +2084,10 @@ public:
 	BSScissorTriShape();
 	~BSScissorTriShape();
 
-	UInt32			unkC4;			// C4
-	UInt32			unkC8;			// C8
-	UInt32			width;			// CC
-	UInt32			height;			// D0
+	uint32_t			unkC4;			// C4
+	uint32_t			unkC8;			// C8
+	uint32_t			width;			// CC
+	uint32_t			height;			// D0
 };
 static_assert(sizeof(BSScissorTriShape) == 0xD4);
 
@@ -2098,16 +2098,16 @@ public:
 	ParticleShaderProperty();
 	~ParticleShaderProperty();
 
-	UInt32			unk060[59];		// 060
+	uint32_t			unk060[59];		// 060
 };
 static_assert(sizeof(ParticleShaderProperty) == 0x14C);
 
 struct NiCulledGeoList
 {
 	NiGeometry		**m_geo;		// 00
-	UInt32			m_numItems;		// 04
-	UInt32			m_bufLen;		// 08
-	UInt32			m_bufGrowSize;	// 0C
+	uint32_t			m_numItems;		// 04
+	uint32_t			m_bufLen;		// 08
+	uint32_t			m_bufGrowSize;	// 0C
 };
 
 // 90
@@ -2138,10 +2138,10 @@ public:
 	virtual void	Cull(NiCamera *camera, ShadowSceneNode *scene, NiCulledGeoList *culledGeo);
 	virtual void	AddGeo(NiGeometry *arg);
 
-	UInt8				m_useAddGeoFn;	// 04 - call AddGeo when true, else just add to the list
-	UInt8				pad05[3];		// 05
+	uint8_t				m_useAddGeoFn;	// 04 - call AddGeo when true, else just add to the list
+	uint8_t				pad05[3];		// 05
 	NiCulledGeoList		*m_culledGeo;	// 08
-	UInt32				unk0C[33];		// 0C
+	uint32_t				unk0C[33];		// 0C
 };
 static_assert(sizeof(NiCullingProcess) == 0x90);
 
@@ -2152,11 +2152,11 @@ public:
 	BSCullingProcess();
 	~BSCullingProcess();
 
-	UInt32					unk90;			// 90
-	UInt32					unk94[10];		// 94
-	UInt32					unkBC;			// BC
-	UInt32					unkC0;			// C0
+	uint32_t					unk90;			// 90
+	uint32_t					unk94[10];		// 94
+	uint32_t					unkBC;			// BC
+	uint32_t					unkC0;			// C0
 	BSShaderAccumulator		*shaderAccum;	// C4
-	UInt32					unkC8;			// C8
+	uint32_t					unkC8;			// C8
 };
 static_assert(sizeof(BSCullingProcess) == 0xCC);

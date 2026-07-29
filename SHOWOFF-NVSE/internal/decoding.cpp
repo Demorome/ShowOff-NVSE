@@ -44,9 +44,9 @@ Projectile* __cdecl Projectile::Spawn(BGSProjectile* projectile, Actor* source, 
 	return CdeclCall<Projectile*>(0x9BCA60, projectile, source, combatCtrl, sourceWeap, pos, rotZ, rotX, 0, 0, 0, ignoreGravity, angularMomentumZ, angularMomentumX, cell);
 }
 
-__declspec(naked) NiVector3* FontManager::GetStringDimensions(NiVector3* outDims, const char* srcString, UInt32 fontID, UInt32 maxFlt, UInt32 startIdx)
+__declspec(naked) NiVector3* FontManager::GetStringDimensions(NiVector3* outDims, const char* srcString, uint32_t fontID, uint32_t maxFlt, uint32_t startIdx)
 {
-	static const UInt32 procAddr = 0xA1B020;
+	static const uint32_t procAddr = 0xA1B020;
 	__asm	jmp		procAddr
 }
 
@@ -58,7 +58,7 @@ DebugText* DebugText::GetSingleton()
 DebugText::DebugLine* DebugText::GetDebugInput()
 {
 	DebugLine* linesPtr = lines, * result = lines;
-	UInt32 counter = 200;
+	uint32_t counter = 200;
 	do
 	{
 		linesPtr++;
@@ -71,7 +71,7 @@ DebugText::DebugLine* DebugText::GetDebugInput()
 
 ExtraEnableStateChildren* ExtraEnableStateChildren::Create()
 {
-	UInt32* dataPtr = (UInt32*)GameHeapAlloc(sizeof(ExtraEnableStateChildren));
+	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraEnableStateChildren));
 	dataPtr[0] = kVtbl_ExtraEnableStateChildren;
 	dataPtr[1] = kExtraData_EnableStateChildren;
 	dataPtr[2] = 0;
@@ -83,16 +83,16 @@ ExtraEnableStateChildren* ExtraEnableStateChildren::Create()
 
 ExtraEnableStateParent* ExtraEnableStateParent::Create(TESObjectREFR* parent)
 {
-	UInt32* dataPtr = (UInt32*)GameHeapAlloc(sizeof(ExtraEnableStateParent));
+	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraEnableStateParent));
 	dataPtr[0] = kVtbl_ExtraEnableStateParent;
 	dataPtr[1] = kExtraData_EnableStateParent;
 	dataPtr[2] = 0;
-	dataPtr[3] = (UInt32)parent;
+	dataPtr[3] = (uint32_t)parent;
 	dataPtr[4] = 0; //flags + pad
 	return reinterpret_cast<ExtraEnableStateParent*>(dataPtr);
 }
 
-__declspec(naked) void SystemColorManager::SystemColor::SetColorRGB(UInt32 r, UInt32 g, UInt32 b)
+__declspec(naked) void SystemColorManager::SystemColor::SetColorRGB(uint32_t r, uint32_t g, uint32_t b)
 {
 	__asm
 	{

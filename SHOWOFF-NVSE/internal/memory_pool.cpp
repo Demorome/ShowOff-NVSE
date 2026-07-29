@@ -5,7 +5,7 @@
 
 alignas(16) void* s_availableCachedBlocks[(MAX_CACHED_BLOCK_SIZE >> 4) + 1] = { NULL };
 
-__declspec(naked) void* __fastcall Pool_Alloc(UInt32 size)
+__declspec(naked) void* __fastcall Pool_Alloc(uint32_t size)
 {
 	__asm
 	{
@@ -78,7 +78,7 @@ __declspec(naked) void* __fastcall Pool_Alloc(UInt32 size)
 	}
 }
 
-__declspec(naked) void __fastcall Pool_Free(void* pBlock, UInt32 size)
+__declspec(naked) void __fastcall Pool_Free(void* pBlock, uint32_t size)
 {
 	__asm
 	{
@@ -118,7 +118,7 @@ __declspec(naked) void __fastcall Pool_Free(void* pBlock, UInt32 size)
 	}
 }
 
-__declspec(naked) void* __fastcall Pool_Realloc(void* pBlock, UInt32 curSize, UInt32 reqSize)
+__declspec(naked) void* __fastcall Pool_Realloc(void* pBlock, uint32_t curSize, uint32_t reqSize)
 {
 	__asm
 	{
@@ -157,7 +157,7 @@ __declspec(naked) void* __fastcall Pool_Realloc(void* pBlock, UInt32 curSize, UI
 	}
 }
 
-__declspec(naked) void* __fastcall Pool_Alloc_Buckets(UInt32 numBuckets)
+__declspec(naked) void* __fastcall Pool_Alloc_Buckets(uint32_t numBuckets)
 {
 	__asm
 	{
@@ -176,7 +176,7 @@ __declspec(naked) void* __fastcall Pool_Alloc_Buckets(UInt32 numBuckets)
 	}
 }
 
-__declspec(naked) UInt32 __fastcall AlignBucketCount(UInt32 count)
+__declspec(naked) uint32_t __fastcall AlignBucketCount(uint32_t count)
 {
 	__asm
 	{

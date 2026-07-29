@@ -9,7 +9,7 @@ union GenericFilters
 {
 	void* ptr;
 	TESForm* form;
-	UInt32        refID;
+	uint32_t        refID;
 	int            intVal;
 	float        fltVal;
 	char* str;
@@ -25,7 +25,7 @@ union GenericFilters
 	{
 		this->form = form;
 	}
-	GenericFilters(UInt32 refID)
+	GenericFilters(uint32_t refID)
 	{
 		this->refID = refID;
 	}
@@ -50,7 +50,7 @@ public:
 	//Framework passes the objects to add to filter here
 	GenericFilters* GenFilters = 0;
 	//Used to know how many filters in total (aka the size of the GenericFilters array) the filter uses
-	UInt32 numFilters = 0;
+	uint32_t numFilters = 0;
 	//Default destructor
 	virtual ~EventHandlerInterface() {};
 	//When the framework passes filters, it passes them to the GenFilters array pointer, specifying the number of filters in the numFilters member
@@ -58,18 +58,18 @@ public:
 	virtual void SetUpFiltering() = 0;
 
 	//Checks if an object is in the filter, recommended to use a fast lookup data structure
-	virtual bool IsInFilter(UInt32 filterNum, GenericFilters toSearch) = 0;
+	virtual bool IsInFilter(uint32_t filterNum, GenericFilters toSearch) = 0;
 	//Inserts the desired element to the Nth filter.
-	virtual void InsertToFilter(UInt32 filterNum, GenericFilters toInsert) = 0;
+	virtual void InsertToFilter(uint32_t filterNum, GenericFilters toInsert) = 0;
 	//Deletes an object from the Nth filter
-	virtual void DeleteFromFilter(UInt32 filterNum, GenericFilters toDelete) = 0;
+	virtual void DeleteFromFilter(uint32_t filterNum, GenericFilters toDelete) = 0;
 	//Returns if the filter is empty
-	virtual bool IsFilterEmpty(UInt32 filterNum) = 0;
+	virtual bool IsFilterEmpty(uint32_t filterNum) = 0;
 	//Used by the framework to check if the Nth filter equals the passed value. Useful to avoid adding the same event repeatedly
-	virtual bool IsFilterEqual(GenericFilters Filter, UInt32 filterNum) = 0;
+	virtual bool IsFilterEqual(GenericFilters Filter, uint32_t filterNum) = 0;
 	//Function used by the filter to check if the object passed is an accepted parameter
 	virtual bool IsAcceptedParameter(GenericFilters toCheck) = 0;
-	virtual UInt32 GetNumFilters() { return numFilters; }
+	virtual uint32_t GetNumFilters() { return numFilters; }
 };
 
 
@@ -81,7 +81,7 @@ public:
 };
 
 /* UNUSED
-EventContainerInterface* (_cdecl* CreateScriptEvent)(const char* EventName, UInt8 maxArgs, UInt8 maxFilters, void* (__fastcall* CustomConstructor)(void**, UInt32));
+EventContainerInterface* (_cdecl* CreateScriptEvent)(const char* EventName, uint8_t maxArgs, uint8_t maxFilters, void* (__fastcall* CustomConstructor)(void**, uint32_t));
 void(__cdecl* FreeScriptEvent)(EventContainerInterface*& toRemove);
 */
 

@@ -133,7 +133,7 @@ namespace AuxTimer
 													OnAuxTimerUpdate->numMaxArgs, 
 													auxVarNameMapIter.Key(), 
 													ownerForm, 
-													*(UInt32*)&timePassed
+													*(uint32_t*)&timePassed
 												);
 											}
 										}
@@ -266,7 +266,7 @@ namespace AuxTimer
 
 			// After deleting some timers, clear out the maps 
 			// that the timers were contained in, if they're now empty.
-			std::unordered_set<UInt32> modMapsToUpdate;
+			std::unordered_set<uint32_t> modMapsToUpdate;
 
 			AuxTimerModsMap& modsMapOfAllTimers = clearTemp 
 				? s_auxTimerMapArraysTemp 

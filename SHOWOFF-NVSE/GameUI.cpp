@@ -7,7 +7,7 @@ InterfaceManager* InterfaceManager::GetSingleton(void)
 	return *reinterpret_cast<InterfaceManager**>(0x11D8A80);
 }
 
-__declspec(naked) UInt32 InterfaceManager::GetTopVisibleMenuID()
+__declspec(naked) uint32_t InterfaceManager::GetTopVisibleMenuID()
 {
 	__asm
 	{

@@ -50,7 +50,7 @@ DEFINE_COMMAND_ALT_PLUGIN(GetCalculatedAPCost, GetCalculatedWeaponAttackAPCost, 
 
 bool Cmd_SetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
 {
-	UInt32 bOn;
+	uint32_t bOn;
 	if (NUM_ARGS && ExtractArgsEx(EXTRACT_ARGS_EX, &bOn))
 	{
 		const bool bCheck = PickpocketEquippedItems::CanPlayerPickpocketEqItems();
@@ -58,7 +58,7 @@ bool Cmd_SetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
 		{
 			// replace check in ContainerMenu::ShouldHideItem while pickpocketting for item being worn, with a check the target is a child
 			//Courtesy of lStewieAl!
-			ReplaceCall(0x75E87A, UInt32(ContainerMenuCheckIsTargetChild));
+			ReplaceCall(0x75E87A, uint32_t(ContainerMenuCheckIsTargetChild));
 		}
 		else if (!bOn && bCheck)
 		{
@@ -97,7 +97,7 @@ DEFINE_COMMAND_PLUGIN(SetPCHasSleepWaitOverride, "Sets whether or not the player
 	false, kParams_OneInt);
 bool Cmd_SetPCHasSleepWaitOverride_Execute(COMMAND_ARGS)
 {
-	UInt32 bOn;
+	uint32_t bOn;
 	if (ExtractArgs(EXTRACT_ARGS, &bOn))
 	{
 		PlayerCharacter::GetSingleton()->canSleepWait = !bOn;
@@ -246,11 +246,11 @@ bool Cmd_GetPCHasScriptedFastTravelOverride_Execute(COMMAND_ARGS)
 bool Cmd_GetPCCanFastTravel_Eval(COMMAND_ARGS_EVAL)
 {
 	// Credits to Jazz for the "silence QueueUIMessage" trick (see AddNoteNS).
-	SafeWrite8((UInt32)QueueUIMessage, 0xC3);	// RETN
+	SafeWrite8((uint32_t)QueueUIMessage, 0xC3);	// RETN
 	const auto canFastTravelAddr = GetRelJumpAddr(0x798026); // call the function indirectly for compatibility with Stewie tweaks, kudos to Stewie.
 	*result = ThisCall<bool>(canFastTravelAddr, PlayerCharacter::GetSingleton());
-	//*result = ThisCall<bool>((UInt32)0x93D660, PlayerCharacter::GetSingleton());
-	SafeWrite8((UInt32)QueueUIMessage, 0x55);	// PUSH EBP
+	//*result = ThisCall<bool>((uint32_t)0x93D660, PlayerCharacter::GetSingleton());
+	SafeWrite8((uint32_t)QueueUIMessage, 0x55);	// PUSH EBP
 	return true;
 }
 bool Cmd_GetPCCanFastTravel_Execute(COMMAND_ARGS)
@@ -261,7 +261,7 @@ bool Cmd_GetPCCanFastTravel_Execute(COMMAND_ARGS)
 bool Cmd_GetWeaponHasFlag_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
-	UInt32 flagToCheck = (UInt32)arg1;
+	uint32_t flagToCheck = (uint32_t)arg1;
 	if (flagToCheck > 21) return true;
 	TESForm* form;
 	if (arg2) form = (TESForm*)arg2;
@@ -283,7 +283,7 @@ bool Cmd_GetWeaponHasFlag_Eval(COMMAND_ARGS_EVAL)
 bool Cmd_GetWeaponHasFlag_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	UInt32 flagToCheck;
+	uint32_t flagToCheck;
 	TESObjectWEAP* weapon = NULL;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &flagToCheck, &weapon)) return true;
 	return Cmd_GetWeaponHasFlag_Eval(thisObj, (void*)flagToCheck, weapon, result);
@@ -292,7 +292,7 @@ bool Cmd_GetWeaponHasFlag_Execute(COMMAND_ARGS)
 bool Cmd_SetWeaponFlag_Execute(COMMAND_ARGS)
 {
 	*result = false; //bSuccess
-	UInt32 flag, bOn;
+	uint32_t flag, bOn;
 	TESObjectWEAP* weapon = nullptr;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &flag, &bOn, &weapon) || flag > 21)
 		return true;
@@ -315,7 +315,7 @@ bool Cmd_SetWeaponFlag_Execute(COMMAND_ARGS)
 bool Cmd_GetActorHasBaseFlag_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
-	UInt32 flagToCheck = (UInt32)arg1;
+	uint32_t flagToCheck = (uint32_t)arg1;
 	if (flagToCheck > 31) return true;
 	TESForm* form;
 	if (arg2) form = (TESForm*)arg2;
@@ -325,13 +325,13 @@ bool Cmd_GetActorHasBaseFlag_Eval(COMMAND_ARGS_EVAL)
 	if (!actor) return true;
 	if (flagToCheck < 16)  //check FlagsLow (0-15)
 	{
-		const UInt32 lowFlags = actor->baseData.flags & 0xFFFF;  //copied from NVSE's GetActorBaseFlagsLow
+		const uint32_t lowFlags = actor->baseData.flags & 0xFFFF;  //copied from NVSE's GetActorBaseFlagsLow
 		*result = (lowFlags >> flagToCheck) & 1;
 	}
 	else  //check FlagsHigh (0-15)
 	{
 		flagToCheck -= 16;  //set the base to 0. At flagToCheck == 16, this equals 0.
-		const UInt32 highFlags = (actor->baseData.flags >> 16) & 0xFFFF;  //copied from NVSE's GetActorBaseFlagsHigh
+		const uint32_t highFlags = (actor->baseData.flags >> 16) & 0xFFFF;  //copied from NVSE's GetActorBaseFlagsHigh
 		*result = (highFlags >> flagToCheck) & 1;
 	}
 	return true;
@@ -339,7 +339,7 @@ bool Cmd_GetActorHasBaseFlag_Eval(COMMAND_ARGS_EVAL)
 bool Cmd_GetActorHasBaseFlag_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	UInt32 flagToCheck;
+	uint32_t flagToCheck;
 	TESActorBase* actor = NULL;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &flagToCheck, &actor)) return true;
 	return Cmd_GetActorHasBaseFlag_Eval(thisObj, (void*)flagToCheck, actor, result);
@@ -354,9 +354,9 @@ bool Cmd_ForceWeaponJamAnim_Execute(COMMAND_ARGS)
 		if (auto const weapn = actor->GetEquippedWeapon())
 		{
 			// Copies the code at 0x89667E for post-reload jamming.
-			const auto animGroupID = ThisCall<UInt32>(0x51E2A0, weapn, 0) + 23;  // TESObjectWEAP::GetReloadAnimGroup + 23
-			const auto animKey = ThisCall<UInt16>(0x897910, actor, animGroupID, 0, 0, 0);  //Actor__GetAnimKey
-			if (CdeclCall<UInt32>(0x5F2440, animKey) == animGroupID)  // calls AnimGroupID::GetGroupID, which gets the lowers bits of animKey.
+			const auto animGroupID = ThisCall<uint32_t>(0x51E2A0, weapn, 0) + 23;  // TESObjectWEAP::GetReloadAnimGroup + 23
+			const auto animKey = ThisCall<uint16_t>(0x897910, actor, animGroupID, 0, 0, 0);  //Actor__GetAnimKey
+			if (CdeclCall<uint32_t>(0x5F2440, animKey) == animGroupID)  // calls AnimGroupID::GetGroupID, which gets the lowers bits of animKey.
 			{
 				if (const auto animData = actor->GetAnimData())
 				{
@@ -382,9 +382,9 @@ bool Cmd_ForceWeaponJamAnimAlt_Execute(COMMAND_ARGS)
 		if (auto const weapn = actor->GetEquippedWeapon())
 		{
 			// Copies the code at 0x893884 for weapon condition jamming.
-			const auto animGroupID = ThisCall<UInt32>(0x51E2A0, weapn, 0) + 23;  // TESObjectWEAP::GetReloadAnimGroup + 23
-			const auto animKey = ThisCall<UInt16>(0x897910, actor, animGroupID, 0, 0, 0);  //Actor__GetAnimKey
-			if (CdeclCall<UInt32>(0x5F2440, animKey) == animGroupID)  // calls AnimGroupID::GetGroupID, which gets the lowers bits of animKey.
+			const auto animGroupID = ThisCall<uint32_t>(0x51E2A0, weapn, 0) + 23;  // TESObjectWEAP::GetReloadAnimGroup + 23
+			const auto animKey = ThisCall<uint16_t>(0x897910, actor, animGroupID, 0, 0, 0);  //Actor__GetAnimKey
+			if (CdeclCall<uint32_t>(0x5F2440, animKey) == animGroupID)  // calls AnimGroupID::GetGroupID, which gets the lowers bits of animKey.
 			{
 				if (actor->GetAnimData())
 				{
@@ -402,8 +402,8 @@ bool Cmd_ForceWeaponJamAnimAlt_Execute(COMMAND_ARGS)
 bool Cmd_GetCalculatedSkillPoints_Eval(COMMAND_ARGS_EVAL)
 {
 	// Vanilla code at 0x648BC0 replicated thanks to Nukem and lStewieAl's efforts (which I slightly tweaked).
-	UInt32 levelOverride = 0;
-	if (arg1) levelOverride = (UInt32)arg1;
+	uint32_t levelOverride = 0;
+	if (arg1) levelOverride = (uint32_t)arg1;
 
 	const auto avOwner = &PlayerCharacter::GetSingleton()->avOwner;
 	auto level = levelOverride ? levelOverride : avOwner->GetLevel();
@@ -420,7 +420,7 @@ bool Cmd_GetCalculatedSkillPoints_Eval(COMMAND_ARGS_EVAL)
 bool Cmd_GetCalculatedSkillPoints_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	UInt32 levelOverride = 0;
+	uint32_t levelOverride = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &levelOverride))
 		return true;
 	return Cmd_GetCalculatedSkillPoints_Eval(thisObj, (void*)levelOverride, 0, result);
@@ -430,8 +430,8 @@ bool Cmd_GetCalculatedSkillPoints_Execute(COMMAND_ARGS)
 bool Cmd_GetLevelUpMenuPoints_Execute(COMMAND_ARGS)
 {
 	*result = -1;
-	UInt32 bCheckPerks = false;  // if false, will check for Skills instead.
-	UInt32 bCheckAssigned = false;
+	uint32_t bCheckPerks = false;  // if false, will check for Skills instead.
+	uint32_t bCheckAssigned = false;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bCheckPerks, &bCheckAssigned))
 		return true;
 
@@ -461,8 +461,8 @@ bool Cmd_GetLevelUpMenuPoints_Execute(COMMAND_ARGS)
 
 bool Cmd_GetCalculatedPerkPoints_Eval(COMMAND_ARGS_EVAL)
 {
-	UInt32 levelOverride = 0;
-	if (arg1) levelOverride = (UInt32)arg1;
+	uint32_t levelOverride = 0;
+	if (arg1) levelOverride = (uint32_t)arg1;
 
 	const auto avOwner = &PlayerCharacter::GetSingleton()->avOwner;
 	auto level = levelOverride ? levelOverride : avOwner->GetLevel();
@@ -479,7 +479,7 @@ bool Cmd_GetCalculatedPerkPoints_Eval(COMMAND_ARGS_EVAL)
 bool Cmd_GetCalculatedPerkPoints_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	UInt32 levelOverride = 0;
+	uint32_t levelOverride = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &levelOverride))
 		return true;
 	return Cmd_GetCalculatedPerkPoints_Eval(thisObj, (void*)levelOverride, 0, result);
@@ -499,7 +499,7 @@ bool Cmd_GetLevelUpMenuCurrentPage_Execute(COMMAND_ARGS)
 bool Cmd_SetLevelUpMenuCurrentPage_Execute(COMMAND_ARGS)
 {
 	*result = false;
-	SInt32 page;
+	int32_t page;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &page) || page > 2)  // Allow going to page = 2 in order to close the menu.
 		return true;
 
@@ -523,13 +523,13 @@ public:
 bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
 {
 	*result = false;  // result = hasShownPerks
-	SInt32 numPerks = -1;
+	int32_t numPerks = -1;
 	char menuTitleBuf[0x1000];  // allows changing the title of the Lvl-Up Menu to something more fitting.
 	menuTitleBuf[0] = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &numPerks, &menuTitleBuf))
 		return true;
 
-	const UInt16 oldCode = *(UInt16*)0x784F26;
+	const uint16_t oldCode = *(uint16_t*)0x784F26;
 
 	// Credits to Stewie for this piece of code (from bLevelUpAlwaysShowsPerks).
 	// Create the perk list even if not on a perk level
@@ -543,7 +543,7 @@ bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
 			{
 				AcceptPerkIfPlayerCanPick op;
 				auto const numSelectablePerks = menu->perksList.CountIf(op);
-				menu->SetNumPerksToAssign(std::min((UInt32)numPerks, numSelectablePerks));
+				menu->SetNumPerksToAssign(std::min((uint32_t)numPerks, numSelectablePerks));
 			}
 			
 			menu->SetCurrentPage(LevelUpMenu::kPerkSelection);
@@ -574,7 +574,7 @@ bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
 }
 
 
-SInt32 g_NumSkillsOverride = -1;
+int32_t g_NumSkillsOverride = -1;
 
 // Skills override must be done at this call addr or before, in order to take advantage of the numSkillPointsToAssign cap that occurs mid-func (0x7856CA).
 void __fastcall SetupSkillAndPerkListBoxesHook(LevelUpMenu* menu, void* edx)
@@ -607,8 +607,8 @@ void __fastcall LevelUpMenuSetInitialPageHook(LevelUpMenu* menu, void* edx, int 
 bool Cmd_ShowSkillMenu_Execute(COMMAND_ARGS)
 {
 	*result = false;  // result = hasShownSkillMenu
-	SInt32 numSkills = -1;
-	UInt32 showMenuDespiteNoPoints = true;
+	int32_t numSkills = -1;
+	uint32_t showMenuDespiteNoPoints = true;
 	char menuTitleBuf[0x1000];  // allows changing the title of the Lvl-Up Menu to something more fitting.
 	menuTitleBuf[0] = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &numSkills, &showMenuDespiteNoPoints, &menuTitleBuf))
@@ -619,10 +619,10 @@ bool Cmd_ShowSkillMenu_Execute(COMMAND_ARGS)
 	if (numSkills > -1)
 	{
 		g_NumSkillsOverride = numSkills;
-		ReplaceCall(0x7850D0, (UInt32)SetupSkillAndPerkListBoxesHook);
+		ReplaceCall(0x7850D0, (uint32_t)SetupSkillAndPerkListBoxesHook);
 	}
 	auto const setupPageAddr = GetRelJumpAddr(0x7850DD);  // retain compatibility with Tweaks' bSkipSkillMenuIfNoPointsToAssign.
-	ReplaceCall(0x7850DD, (UInt32)LevelUpMenuSetInitialPageHook);
+	ReplaceCall(0x7850DD, (uint32_t)LevelUpMenuSetInitialPageHook);
 	g_ShowMenuDespiteNoPoints = showMenuDespiteNoPoints != 0;
 
 	if (auto const menu = LevelUpMenu::Create())
@@ -649,7 +649,7 @@ bool Cmd_ShowSkillMenu_Execute(COMMAND_ARGS)
 bool Cmd_GetLevelUpMenuUnspentPoints_Execute(COMMAND_ARGS)
 {
 	*result = -1;
-	UInt32 showSkills;
+	uint32_t showSkills;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &showSkills))
 		return true;
 	if (showSkills)
@@ -662,7 +662,7 @@ bool Cmd_GetLevelUpMenuUnspentPoints_Execute(COMMAND_ARGS)
 bool Cmd_SetLevelUpMenuCanExitEarly_Execute(COMMAND_ARGS)
 {
 	*result = false;  // result = setSuccess
-	UInt32 canExitEarly;
+	uint32_t canExitEarly;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &canExitEarly))
 		return true;
 	if (auto const menu = LevelUpMenu::GetSingleton())
@@ -684,8 +684,8 @@ bool Cmd_SetLevelUpMenuCanExitEarly_Execute(COMMAND_ARGS)
 bool Cmd_SetLevelUpMenuPoints_Execute(COMMAND_ARGS)
 {
 	*result = false;  // result = bSuccessfulChange
-	UInt32 bChangeAssignedPoints;  // if false, change maxPoints
-	UInt32 iNewPoints;
+	uint32_t bChangeAssignedPoints;  // if false, change maxPoints
+	uint32_t iNewPoints;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bChangeAssignedPoints, &iNewPoints))
 		return true;
 
@@ -716,7 +716,7 @@ bool Cmd_SetLevelUpMenuPoints_Execute(COMMAND_ARGS)
 				return true;
 
 			// Change UI Traits.
-			auto const g_CurrPoints = *(UInt32*)0x11D9FD8;  // g_levelUpMenu_Trait_CurrPoints
+			auto const g_CurrPoints = *(uint32_t*)0x11D9FD8;  // g_levelUpMenu_Trait_CurrPoints
 			menu->tile->SetFloat(g_CurrPoints, iNewPoints);  // changes whether or not the player can go to the next page.
 			*result = true;
 		}
@@ -736,7 +736,7 @@ bool Cmd_SetLevelUpMenuPoints_Execute(COMMAND_ARGS)
 				return true;
 
 			// Change UI Traits.
-			auto const g_MaxPoints = *(UInt32*)0x11D9FD4;  // g_levelUpMenu_Trait_MaxPoints
+			auto const g_MaxPoints = *(uint32_t*)0x11D9FD4;  // g_levelUpMenu_Trait_MaxPoints
 			menu->tile->SetFloat(g_MaxPoints, iNewPoints);
 			*result = true;
 		}
@@ -816,7 +816,7 @@ bool Cmd_SetNoEquipShowOff_Execute(COMMAND_ARGS)
 
 #if 0 //deprecated
 	TESForm* item;
-	UInt32 bNoEquip;
+	uint32_t bNoEquip;
 	Script* function = nullptr;	// UDF event script which passes "this" = actor and 1 arg: baseItem. todo: ItemInvRef if possible!
 	// This function is called whenever "NoEquip" is being checked.
 	// If any functions that are called return false (SetFunctionValue), then the item cannot be equipped.
@@ -861,7 +861,7 @@ bool Cmd_GetNoEquipShowOff_Execute(COMMAND_ARGS)
 	*result = 0;
 #if 0
 	TESForm* item;
-	UInt32 bGetFunction = false;
+	uint32_t bGetFunction = false;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &item, &bGetFunction))
 		return true;
 
@@ -914,7 +914,7 @@ bool Cmd_GetCalculatedAPCost_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 
-	enum eMode : UInt32
+	enum eMode : uint32_t
 	{
 		GetDefaultAttackCost = 0,
 		GetSpecialAttack1Cost,
@@ -1030,7 +1030,7 @@ bool Cmd_FreezeAmmoRegen_Execute(COMMAND_ARGS)
 {
 	using namespace FreezeAmmoRegen;
 	*result = g_freezeAmmoRegen != 0;
-	UInt32 bFreeze = g_freezeAmmoRegen;
+	uint32_t bFreeze = g_freezeAmmoRegen;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bFreeze))
 		return true;
 	g_freezeAmmoRegen = bFreeze;
@@ -1041,7 +1041,7 @@ DEFINE_CMD_COND_ONLY_PLUGIN(GetHitLocationLingering, "Unlike GetHitLocation_Eval
 bool Cmd_GetHitLocationLingering_Eval(COMMAND_ARGS_EVAL)
 {
 	// Code from JIP LN NVSE's Hook_GetHitLocation_Eval
-	SInt32 hitLoc = -1;
+	int32_t hitLoc = -1;
 	if (IS_ACTOR(thisObj) && ((Actor*)thisObj)->baseProcess)
 		if (ActorHitData* hitData = ((Actor*)thisObj)->baseProcess->GetHitData())
 			hitLoc = hitData->unk60; // JIP stores the hit location here so it can linger.
@@ -1135,10 +1135,10 @@ bool Cmd_GetVATSTargetable_Execute(COMMAND_ARGS)
 // This works, but I decided it'd be better just to make a new flag for DisablePlayerControlsAltEx (better compatibility with other mods).
 namespace SetShouldShowSleepWaitOverrideMessage
 {
-	UInt32 m_storedFuncAddr = 0;
+	uint32_t m_storedFuncAddr = 0;
 
 	void __cdecl QueueUIMessage_Hook(char* msg,
-		UInt32 emotion,
+		uint32_t emotion,
 		char* imagePath,
 		char* soundName,
 		float time,
@@ -1158,8 +1158,8 @@ namespace SetShouldShowSleepWaitOverrideMessage
 		if (!m_storedFuncAddr)
 		{
 			m_storedFuncAddr = GetRelJumpAddr(0x96A17C);
-			WriteRelCall(0x96A17C, (UInt32)QueueUIMessage_Hook);
-			WriteRelCall(0x94257F, (UInt32)QueueUIMessage_Hook);
+			WriteRelCall(0x96A17C, (uint32_t)QueueUIMessage_Hook);
+			WriteRelCall(0x94257F, (uint32_t)QueueUIMessage_Hook);
 		}
 	}
 
@@ -1179,7 +1179,7 @@ DEFINE_COMMAND_PLUGIN(SetShouldShowSleepWaitOverrideMessage, "",
 	false, kParams_OneOptionalInt);
 bool Cmd_SetShouldShowSleepWaitOverrideMessage_Execute(COMMAND_ARGS)
 {
-	UInt32 bShouldShow = -1;
+	uint32_t bShouldShow = -1;
 	if (ExtractArgs(EXTRACT_ARGS, &bShouldShow))
 	{
 		*result = SetShouldShowSleepWaitOverrideMessage::m_storedFuncAddr == 0;
@@ -1201,7 +1201,7 @@ bool Cmd_ApplyAddictionEffect_Execute(COMMAND_ARGS)
 {
 	auto const actor = DYNAMIC_CAST(thisObj, TESObjectREFR, Actor);
 	AlchemyItem* alchItem;
-	UInt32 bShowMsg = true;
+	uint32_t bShowMsg = true;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &alchItem, &bShowMsg)
 		|| !actor || !alchItem || !IS_TYPE(alchItem, AlchemyItem))
 	{
@@ -1249,7 +1249,7 @@ DEFINE_COMMAND_PLUGIN(SetPlantedExplosive, "", true, kParams_OneInt_OneOptionalF
 bool Cmd_SetPlantedExplosive_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	UInt32 bPlanted;
+	uint32_t bPlanted;
 	TESForm* itemToPlant = nullptr;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bPlanted, &itemToPlant))
 		return true;
@@ -1324,7 +1324,7 @@ bool Cmd_GetActorPreferredWeapon_Execute(COMMAND_ARGS)
 {
 	//todo: current configuration gives garbage forms, need to fix that. Perhaps not calling it right?
 	*result = 0;
-	UInt32 combatWeaponType = 6;
+	uint32_t combatWeaponType = 6;
 	if (!thisObj || NOT_ACTOR(thisObj) || !ExtractArgsEx(EXTRACT_ARGS_EX, &combatWeaponType))
 		return true;
 	const auto weapForm = ThisCall<TESObjectWEAP*>(0x891C80, thisObj, combatWeaponType); //Actor::GetPreferredWeapon
@@ -1345,7 +1345,7 @@ bool Cmd_TryDropWeapon_Execute(COMMAND_ARGS)
 	// Retrieve info about actor's weapon, for comparison later.
 	ContChangesEntry* weaponInfo = actor->baseProcess->GetWeaponInfo();
 	if (!weaponInfo || !weaponInfo->type) return true;  //actor has no weapon to unequip
-	const SInt32 prevCount = weaponInfo->countDelta;
+	const int32_t prevCount = weaponInfo->countDelta;
 #if _DEBUG
 	Console_Print("TryDropWeapon >> Count delta: %i", prevCount);
 #endif
@@ -1411,7 +1411,7 @@ bool Cmd_GetPCCanSleepInOwnedBeds_Execute(COMMAND_ARGS)
 DEFINE_COMMAND_PLUGIN(SetPCCanSleepInOwnedBeds, "", false, kParams_OneInt);
 bool Cmd_SetPCCanSleepInOwnedBeds_Execute(COMMAND_ARGS)
 {
-	UInt32 bOn;
+	uint32_t bOn;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bOn)) return true;
 	//SetCanSleepInOwnedBeds(bOn);
 	return true;
@@ -1440,7 +1440,7 @@ DEFINE_COMMAND_PLUGIN(ModChallengeProgress, "Modifies the progress made on a cha
 bool Cmd_SetChallengeProgress_Execute(COMMAND_ARGS)
 {
 	TESChallenge* challenge;
-	UInt32 value;
+	uint32_t value;
 	if (ExtractArgs(EXTRACT_ARGS, &challenge, &value) && IS_TYPE(challenge, TESChallenge))
 	{
 		//if (value > challenge->threshold )
@@ -1454,10 +1454,10 @@ bool Cmd_SetChallengeProgress_Execute(COMMAND_ARGS)
 bool Cmd_ModChallengeProgress_Execute(COMMAND_ARGS)
 {
 	TESChallenge* challenge;
-	UInt32 value;
+	uint32_t value;
 	if (ExtractArgs(EXTRACT_ARGS, &challenge, &value) && IS_TYPE(challenge, TESChallenge))
 	{
-		//UInt32 const test_amount = challenge->amount + value;
+		//uint32_t const test_amount = challenge->amount + value;
 		challenge->progress += value;
 		*result = 1;
 	}
@@ -1469,7 +1469,7 @@ DEFINE_COMMAND_PLUGIN(CompleteChallenge, "Completes a challenge.", false, kParam
 bool Cmd_CompleteChallenge_Execute(COMMAND_ARGS)
 {
 	TESChallenge* challenge;
-	UInt32 value;
+	uint32_t value;
 	if (ExtractArgs(EXTRACT_ARGS, &challenge, &value) && IS_TYPE(challenge, TESChallenge))
 	{
 		challenge->challengeflags |= 2;
@@ -1496,7 +1496,7 @@ bool Cmd_GetProjectileRefFlag_Execute(COMMAND_ARGS)
 DEFINE_COMMAND_PLUGIN(SetProjectileRefFlag, "", true, kParams_OneInt);
 bool Cmd_SetProjectileRefFlag_Execute(COMMAND_ARGS)
 {
-	UInt32 flag;
+	uint32_t flag;
 	if (ExtractArgs(EXTRACT_ARGS, &flag))
 		((Projectile*)thisObj)->projFlags = flag;
 
@@ -1510,7 +1510,7 @@ bool Cmd_SetProjectileRefFlag_Execute(COMMAND_ARGS)
 DEFINE_COMMAND_PLUGIN(SetPCCanPickpocketInCombat, "", false, kParams_OneInt);
 bool Cmd_SetPCCanPickpocketInCombat_Execute(COMMAND_ARGS)
 {
-	UInt32 bOn;
+	uint32_t bOn;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bOn)) return true;
 	g_canPlayerPickpocketInCombat = bOn;
 	return true;
@@ -1521,7 +1521,7 @@ DEFINE_COMMAND_PLUGIN(SetNoEquip, "Returns 1 if the inventory ref was sucessfull
 bool Cmd_SetNoEquip_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	UInt32 noEquip;
+	uint32_t noEquip;
 	if (ExtractArgs(EXTRACT_ARGS, &noEquip))
 	{
 		InventoryRef* invRef = InventoryRefGetForID(thisObj->refID);
@@ -1581,7 +1581,7 @@ bool Cmd_SetParentRef_Execute(COMMAND_ARGS)
 */
 
 //DEFINE_CMD_ALT_COND_PLUGIN(GetEquippedWeaponType,, "Returns the type of weapon equipped by the calling actor, 0 if the calling ref isn't an actor.", 0, 1, kParams_OneOptionalObjectID);
-bool GetEquippedWeaponInfo(TESObjectREFR* thisObj, float range, UInt32 flags)
+bool GetEquippedWeaponInfo(TESObjectREFR* thisObj, float range, uint32_t flags)
 {
 	return true;
 }

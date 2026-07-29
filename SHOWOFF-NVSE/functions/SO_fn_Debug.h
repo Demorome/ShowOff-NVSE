@@ -5,7 +5,7 @@ bool Cmd_DumpFormList_Execute(COMMAND_ARGS)
 {
 	BGSListForm* FList = nullptr;
 	char fileName[MAX_PATH] = "default";
-	UInt32 bAppend = 1;
+	uint32_t bAppend = 1;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &FList, &fileName, &bAppend)
 		|| !IS_TYPE(FList, BGSListForm)) return true;
 
@@ -55,7 +55,7 @@ DEFINE_COMMAND_PLUGIN(SetShowOffDebugMode, "Set to 1 to enable debug prints for 
 	false, kParams_OneInt);
 bool Cmd_SetShowOffDebugMode_Execute(COMMAND_ARGS)
 {
-	UInt32 bOn = false;
+	uint32_t bOn = false;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bOn)) return true;
 	g_ShowFuncDebug = bOn;
 	return true;
@@ -85,7 +85,7 @@ DEFINE_COMMAND_PLUGIN(RefillPlayerAmmo, "", false, kParams_OneInt);
 bool Cmd_RefillPlayerAmmo_Execute(COMMAND_ARGS)
 {
 	*result = 0; // bSuccess
-	SInt32 count;
+	int32_t count;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &count))
 		return true;
 
@@ -107,7 +107,7 @@ bool Cmd_RefillPlayerAmmo_Execute(COMMAND_ARGS)
 	if (const auto ammoInfo = PlayerCharacter::GetSingleton()->baseProcess->GetAmmoInfo())
 	{
 		PlayerCharacter::GetSingleton()->AddItem(ammoInfo->type, nullptr, count);
-		auto const clipMax = ThisCall<SInt32>(0x4FE160, weap, hasExtendedClip);
+		auto const clipMax = ThisCall<int32_t>(0x4FE160, weap, hasExtendedClip);
 		auto const numLeftToAdd = clipMax - ammoInfo->countDelta;
 		ammoInfo->countDelta += std::min(numLeftToAdd, count);
 	}
@@ -158,7 +158,7 @@ bool Cmd_KillAllHostiles_Execute(COMMAND_ARGS)
 DEFINE_COMMAND_ALT_PLUGIN(SetFlyCamera, SetFC, "", false, kParams_OneInt_FiveOptionalFloats);
 bool Cmd_SetFlyCamera_Execute(COMMAND_ARGS)
 {
-	enum Modes : SInt32
+	enum Modes : int32_t
 	{
 		kMode_Off = 0,
 		// These are the modes from TFC, offset by +1.

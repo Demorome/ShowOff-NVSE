@@ -13,20 +13,20 @@ void ProcessDataChangedFlags(DataChangedFlags changedFlags)
 
 char s_lastLoadedPath[MAX_PATH];
 
-UInt8* s_loadGameBuffer = nullptr;
-UInt32 s_loadGameBufferSize = 0x10000;
+uint8_t* s_loadGameBuffer = nullptr;
+uint32_t s_loadGameBufferSize = 0x10000;
 
-__declspec(noinline) UInt8* __fastcall GetLoadGameBuffer(UInt32 length)
+__declspec(noinline) uint8_t* __fastcall GetLoadGameBuffer(uint32_t length)
 {
 	if (s_loadGameBufferSize < length)
 	{
 		s_loadGameBufferSize = length;
 		if (s_loadGameBuffer)
 			_aligned_free(s_loadGameBuffer);
-		s_loadGameBuffer = (UInt8*)_aligned_malloc(length, 0x10);
+		s_loadGameBuffer = (uint8_t*)_aligned_malloc(length, 0x10);
 	}
 	else if (!s_loadGameBuffer)
-		s_loadGameBuffer = (UInt8*)_aligned_malloc(s_loadGameBufferSize, 0x10);
+		s_loadGameBuffer = (uint8_t*)_aligned_malloc(s_loadGameBufferSize, 0x10);
 	ReadRecordData(s_loadGameBuffer, length);
 	return s_loadGameBuffer;
 }
@@ -34,13 +34,13 @@ __declspec(noinline) UInt8* __fastcall GetLoadGameBuffer(UInt32 length)
 void LoadGameCallback(void*)
 {
 	// loaded path is checked in message handler.
-	UInt8 const changedFlags = s_dataChangedFlags;
+	uint8_t const changedFlags = s_dataChangedFlags;
 	ProcessDataChangedFlags(static_cast<DataChangedFlags>(changedFlags));
 	// s_dataChangedFlags is reset @ PostLoadGame msg handler.
 
-	UInt32 type, version, length, nRefs, buffer4;
-	UInt8 buffer1, modIdx, loopBuffer;
-	UInt16 nRecs, nVals, nVars;
+	uint32_t type, version, length, nRefs, buffer4;
+	uint8_t buffer1, modIdx, loopBuffer;
+	uint16_t nRecs, nVals, nVars;
 	char varName[0x50];
 	char keyName[0x50];
 
@@ -96,7 +96,7 @@ void LoadGameCallback(void*)
 							idsMap->Emplace(keyName, buffer1);
 						}
 						//idk if I should keep the stuff below here. What does it do?
-						//Doesn't seem to run. The original if was "if LookupFormByID(UInt32:Key)" (if ID is a valid form)
+						//Doesn't seem to run. The original if was "if LookupFormByID(uint32_t:Key)" (if ID is a valid form)
 						//I'll keep it for now, but I doubt it'll get used.
 						//Who knows, maybe I need to skip bytes myself, for whatever reason.
 						else if (buffer1 == 1)
@@ -118,9 +118,9 @@ void LoadGameCallback(void*)
 			{
 				break;
 			}
-			UInt8* bufPos = GetLoadGameBuffer(length);
-			nRecs = *(UInt16*)bufPos;
-			bufPos += sizeof(UInt16);
+			uint8_t* bufPos = GetLoadGameBuffer(length);
+			nRecs = *(uint16_t*)bufPos;
+			bufPos += sizeof(uint16_t);
 			while (nRecs)
 			{
 				modIdx = *bufPos++;
@@ -128,14 +128,14 @@ void LoadGameCallback(void*)
 				if (modIdx > 5 && GetResolvedModIndex(&modIdx))
 				{
 					AuxTimer::AuxTimerOwnersMap* ownersMap = nullptr;
-					nRefs = *(UInt16*)bufPos;
-					bufPos += sizeof(UInt16);
+					nRefs = *(uint16_t*)bufPos;
+					bufPos += sizeof(uint16_t);
 					while (nRefs)
 					{
-						UInt32 refID = *(UInt32*)bufPos;
-						bufPos += sizeof(UInt32);
-						nVars = *(UInt16*)bufPos;
-						bufPos += sizeof(UInt16);
+						uint32_t refID = *(uint32_t*)bufPos;
+						bufPos += sizeof(uint32_t);
+						nVars = *(uint16_t*)bufPos;
+						bufPos += sizeof(uint16_t);
 						if ((refID = GetResolvedRefID(refID)) 
 							&& (LookupFormByRefID(refID) || HasChangeData(refID)))
 						{
@@ -156,7 +156,7 @@ void LoadGameCallback(void*)
 								buffer1 = *bufPos++; // strLen for auxvar name
 								if (!buffer1)
 									goto avSkipVars;
-								UInt8* namePos = bufPos;
+								uint8_t* namePos = bufPos;
 								bufPos += buffer1; // skip to after auxvar name
 
 								auto timeToCountdown = *(double*)bufPos;
@@ -166,8 +166,8 @@ void LoadGameCallback(void*)
 								auto timeLeft = *(double*)bufPos;
 								bufPos += sizeof(double);
 
-								auto flags = *(UInt32*)bufPos;
-								bufPos += sizeof(UInt32);
+								auto flags = *(uint32_t*)bufPos;
+								bufPos += sizeof(uint32_t);
 
 								// emplace AuxTimerValue
 								aVarsMap->Emplace((char*)namePos, timeToCountdown, timeLeft, flags); 
@@ -181,7 +181,7 @@ void LoadGameCallback(void*)
 								buffer1 = *bufPos++; // strLen for auxvar name
 								bufPos += buffer1; // skip to after auxvar name
 							avSkipVars:
-								bufPos += sizeof(double) + sizeof(double) + sizeof(UInt32);
+								bufPos += sizeof(double) + sizeof(double) + sizeof(uint32_t);
 								nVars--;
 							}
 						}
@@ -192,18 +192,18 @@ void LoadGameCallback(void*)
 				{
 					// Skip over invalid saved data (invalid modID).
 					// Unsure if needed, but JIP has it, so...
-					nRefs = *(UInt16*)bufPos;
+					nRefs = *(uint16_t*)bufPos;
 					bufPos += 2;
 					while (nRefs)
 					{
 						bufPos += 4;
-						nVars = *(UInt16*)bufPos;
+						nVars = *(uint16_t*)bufPos;
 						bufPos += 2;
 						while (nVars)
 						{
 							buffer1 = *bufPos++; // strLen for auxvar name
 							bufPos += buffer1; // skip to after auxvar name
-							bufPos += sizeof(double) + sizeof(double) + sizeof(UInt32);
+							bufPos += sizeof(double) + sizeof(double) + sizeof(uint32_t);
 							nVars--;
 						}
 						nRefs--;
@@ -221,8 +221,8 @@ void LoadGameCallback(void*)
 
 void SaveGameCallback(void*)
 {
-	UInt8 buffer1, loopBuffer;
-	UInt16 buffer2;
+	uint8_t buffer1, loopBuffer;
+	uint16_t buffer2;
 
 	// s_dataChangedFlags gets set to 0 in NVSE OnLoad message handler.
 

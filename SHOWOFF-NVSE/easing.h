@@ -7,7 +7,7 @@
 
 constexpr auto PI = std::numbers::pi;
 
-enum EasingMode : UInt32
+enum EasingMode : uint32_t
 {
 	kMode_EaseIn = 0, kMode_EaseOut, kMode_EaseInOut,
 	kModeMax = kMode_EaseInOut, kNumEasingModes
@@ -354,7 +354,7 @@ std::array<std::function<T(T)>, kNumEasingModes> GetEasingFuncsFromStr(const std
 	return { nullptr, nullptr, nullptr };
 }
 
-enum EasingFuncs : UInt32
+enum EasingFuncs : uint32_t
 {
 	Sine = 0,
 	Quad,

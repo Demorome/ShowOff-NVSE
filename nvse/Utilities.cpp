@@ -10,18 +10,18 @@
 
 //#include "utility.h"
 
-void DumpClass(void * theClassPtr, UInt32 nIntsToDump)
+void DumpClass(void * theClassPtr, uint32_t nIntsToDump)
 {
 	_MESSAGE("DumpClass:");
-	UInt32* basePtr = (UInt32*)theClassPtr;
+	uint32_t* basePtr = (uint32_t*)theClassPtr;
 
 	g_Log.Indent();
 
 	if (!theClassPtr) return;
-	for (UInt32 ix = 0; ix < nIntsToDump; ix++ ) {
-		UInt32* curPtr = basePtr+ix;
+	for (uint32_t ix = 0; ix < nIntsToDump; ix++ ) {
+		uint32_t* curPtr = basePtr+ix;
 		const char* curPtrName = NULL;
-		UInt32 otherPtr = 0;
+		uint32_t otherPtr = 0;
 		float otherFloat = 0.0;
 		const char* otherPtrName = NULL;
 		if (curPtr) {
@@ -53,13 +53,13 @@ void DumpClass(void * theClassPtr, UInt32 nIntsToDump)
 struct RTTIType
 {
 	void	* typeInfo;
-	UInt32	pad;
+	uint32_t	pad;
 	char	name[0];
 };
 
 struct RTTILocator
 {
-	UInt32		sig, offset, cdOffset;
+	uint32_t		sig, offset, cdOffset;
 	RTTIType	* type;
 };
 #pragma warning (pop)
@@ -80,7 +80,7 @@ const char * GetObjectClassName(void * objBase)
 		if((type->name[0] == '.') && (type->name[1] == '?'))
 		{
 			// is at most 100 chars long
-			for(UInt32 i = 0; i < 100; i++)
+			for(uint32_t i = 0; i < 100; i++)
 			{
 				if(type->name[i] == 0)
 				{
@@ -107,7 +107,7 @@ const std::string & GetFalloutDirectory(void)
 	{
 		// can't determine how many bytes we'll need, hope it's not more than MAX_PATH
 		char	falloutPathBuf[MAX_PATH];
-		UInt32	falloutPathLength = GetModuleFileName(GetModuleHandle(NULL), falloutPathBuf, sizeof(falloutPathBuf));
+		uint32_t	falloutPathLength = GetModuleFileName(GetModuleHandle(NULL), falloutPathBuf, sizeof(falloutPathBuf));
 
 		if(falloutPathLength && (falloutPathLength < sizeof(falloutPathBuf)))
 		{
@@ -163,7 +163,7 @@ const std::string & GetFalloutDirectory(void)
 //		char	resultBuf[256];
 //		resultBuf[0] = 0;
 //
-//		UInt32	resultLen = GetPrivateProfileString(section, key, NULL, resultBuf, 255, configPath.c_str());
+//		uint32_t	resultLen = GetPrivateProfileString(section, key, NULL, resultBuf, 255, configPath.c_str());
 //
 //		result = resultBuf;
 //	}
@@ -171,7 +171,7 @@ const std::string & GetFalloutDirectory(void)
 //	return result;
 //}
 
-//bool GetNVSEConfigOption_UInt32(const char * section, const char * key, UInt32 * dataOut)
+//bool GetNVSEConfigOption_UInt32(const char * section, const char * key, uint32_t * dataOut)
 //{
 //	std::string	data = GetNVSEConfigOption(section, key);
 //	if(data.empty())
@@ -366,7 +366,7 @@ double genrand_res53(void)
 
 //Tokenizer::~Tokenizer() {}
 
-//UInt32 Tokenizer::NextToken(std::string& outStr)
+//uint32_t Tokenizer::NextToken(std::string& outStr)
 //{
 //	if (m_offset == m_data.length())
 //		return -1;
@@ -386,7 +386,7 @@ double genrand_res53(void)
 //	return -1;
 //}
 
-//UInt32 Tokenizer::PrevToken(std::string& outStr)
+//uint32_t Tokenizer::PrevToken(std::string& outStr)
 //{
 //	if (m_offset == 0)
 //		return -1;
@@ -436,8 +436,8 @@ const char * GetSeparatorChars(Script * script)
 
 //void Console_Print_Long(const std::string& str)
 //{
-//	UInt32 numLines = str.length() / 500;
-//	for (UInt32 i = 0; i < numLines; i++)
+//	uint32_t numLines = str.length() / 500;
+//	for (uint32_t i = 0; i < numLines; i++)
 //		Console_Print("%s ...", str.substr(i*500, 500).c_str());
 //
 //	Console_Print("%s", str.substr(numLines*500, str.length() - numLines*500).c_str());
@@ -447,16 +447,16 @@ const char * GetSeparatorChars(Script * script)
 
 struct ControlName
 {
-	UInt32		unk0;
+	uint32_t		unk0;
 	const char	* name;
-	UInt32		unkC;
+	uint32_t		unkC;
 };
 
 ControlName ** g_keyNames = (ControlName **)0x011D52F0;
 ControlName ** g_mouseButtonNames = (ControlName **)0x011D5240;
 ControlName ** g_joystickNames = (ControlName **)0x011D51B0;
 
-const char * GetDXDescription(UInt32 keycode)
+const char * GetDXDescription(uint32_t keycode)
 {
 	const char * keyName = "<no key>";
 
@@ -518,7 +518,7 @@ const char * GetDXDescription(UInt32 keycode)
 
 char *CopyCString(const char *src)
 {
-	UInt32 length = StrLen(src);
+	uint32_t length = StrLen(src);
 	if (!length) return NULL;
 	char *result = (char*)GameHeapAlloc(length + 1);
 	StrCopy(result, src);
@@ -533,7 +533,7 @@ char *CopyCString(const char *src)
 //void MakeUpper(char* str)
 //{
 //	if (str) {
-//		UInt32 len = strlen(str);
+//		uint32_t len = strlen(str);
 //		std::transform(str, str + len, str, toupper);
 //	}
 //}
@@ -541,7 +541,7 @@ char *CopyCString(const char *src)
 //void MakeLower(char* str)
 //{
 //	if (str) {
-//		UInt32 len = strlen(str);
+//		uint32_t len = strlen(str);
 //		std::transform(str, str + len, str, tolower);
 //	}
 //}

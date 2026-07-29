@@ -14,7 +14,7 @@ namespace PickpocketEquippedItems
 	//If the address was changed by something else, uh... Well I don't take that into account.
 	bool CanPlayerPickpocketEqItems()
 	{
-		return *(UInt32*)0x75E87B != 0xFFD5F551;
+		return *(uint32_t*)0x75E87B != 0xFFD5F551;
 	}
 }
 
@@ -79,7 +79,7 @@ namespace PickpocketInCombat
 
 	// custom pickpocket code, for ripping items straight out of an opponent's hands/pockets.
 	// Code ripped from lStewieAl's Tweaks (TryPickpocket)
-	bool __fastcall TryCombatPickpocket(ContChangesEntry* selection, SInt32 count, Actor* actor, signed int itemValue)
+	bool __fastcall TryCombatPickpocket(ContChangesEntry* selection, int32_t count, Actor* actor, signed int itemValue)
 	{
 		bool wasSuccessful = true;
 		ContainerMenu* menu = ContainerMenu::GetSingleton();
@@ -158,7 +158,7 @@ namespace PickpocketInCombat
 
 	__declspec(naked) void ContainerHoverItemHook()
 	{
-		static const UInt32 retnAddr = 0x75CEDA;
+		static const uint32_t retnAddr = 0x75CEDA;
 		_asm
 		{
 			call	SetContainerSubtitleStringToPickpocketAPCost
@@ -207,14 +207,14 @@ namespace PickpocketInCombat
 					//PickpocketFuncAddr4
 
 					//Replace the pickpocket calculation code with an AP cost system.
-					ReplaceCall(0x75DBDA, UInt32(TryCombatPickpocket));
-					ReplaceCall(0x75DFA7, UInt32(TryCombatPickpocket));
+					ReplaceCall(0x75DBDA, uint32_t(TryCombatPickpocket));
+					ReplaceCall(0x75DFA7, uint32_t(TryCombatPickpocket));
 
 					// Set the pickpocket AP Cost when hovered
-					WriteRelJump(0x75CED4, UInt32(ContainerHoverItemHook));
+					WriteRelJump(0x75CED4, uint32_t(ContainerHoverItemHook));
 
 					// Clear the string when unhovered
-					SafeWrite32(0x10721C0, UInt32(ContainerMenuHandleMouseoverAlt)); //don't bother changing this back, Stewie does the exact same thing anyways.
+					SafeWrite32(0x10721C0, uint32_t(ContainerMenuHandleMouseoverAlt)); //don't bother changing this back, Stewie does the exact same thing anyways.
 																							//Could make this a default hook
 					// Jump over the "was player caught by this NPC" check
 					SafeWrite8(0x608200, 0xEB);
@@ -270,7 +270,7 @@ namespace PatchFistDamageMult
 {
 	__declspec(naked) void fMulHook()
 	{
-		static const UInt32 retnAddr = 0x64634D;
+		static const uint32_t retnAddr = 0x64634D;
 		_asm
 		{
 			fmul dword ptr ds : [gs_fHandFatigueDamageMult + 4]	//result in st(0)
@@ -281,7 +281,7 @@ namespace PatchFistDamageMult
 
 	void WriteHook()
 	{
-		WriteRelJump(0x646347, (UInt32)fMulHook);
+		WriteRelJump(0x646347, (uint32_t)fMulHook);
 		PatchMemoryNop(0x646347 + 5, 1);
 	}
 }
@@ -290,7 +290,7 @@ namespace AllowCreaturesToDealUnarmedFatigueDmg
 {
 	__declspec(naked) void Hook()
 	{
-		static const UInt32 retnAddr = 0x9B556C;
+		static const uint32_t retnAddr = 0x9B556C;
 		enum
 		{
 			healthDmg = 0x14, fatigueDmg = 0x1C
@@ -307,7 +307,7 @@ namespace AllowCreaturesToDealUnarmedFatigueDmg
 
 	void WriteHook()
 	{
-		WriteRelJump(0x9B54AC, (UInt32)Hook);
+		WriteRelJump(0x9B54AC, (uint32_t)Hook);
 	}
 }
 
@@ -315,7 +315,7 @@ namespace MakeUnarmedWeaponsDealFatigueDmg
 {
 	__declspec(naked) void Hook()
 	{
-		static const UInt32 retnAddr = 0x9B556C;
+		static const uint32_t retnAddr = 0x9B556C;
 		enum
 		{
 			gs_fFatigueAttackWeaponBase = 0x11CEE84,
@@ -351,7 +351,7 @@ namespace MakeUnarmedWeaponsDealFatigueDmg
 
 	void WriteHook()
 	{
-		WriteRelJump(0x9B5474, (UInt32)Hook);
+		WriteRelJump(0x9B5474, (uint32_t)Hook);
 	}
 }
 
@@ -383,7 +383,7 @@ namespace GetCompassTargets
 		return compassTargets ? compassTargets->Count() : 0;
 	}
 
-	void __fastcall PropagateIntValue_Hook(Tile* tile, void* edx, UInt32 tileValue, int a3)
+	void __fastcall PropagateIntValue_Hook(Tile* tile, void* edx, uint32_t tileValue, int a3)
 	{
 		ThisCall<void>(0x700320, tile, tileValue, a3); // Regular code
 
@@ -397,14 +397,14 @@ namespace GetCompassTargets
 	{
 		// Will empty the list.
 		// Replace "call TList__GetSize"
-		ReplaceCall(0x779F6F, (UInt32)GetSize_Hook);
+		ReplaceCall(0x779F6F, (uint32_t)GetSize_Hook);
 
 		// Optimize the code by removing a duplicate "call TList__GetSize" call.
 		// Credits to Stewie for the idea.
 		NopFunctionCall(0x779F7A);
 		
 		// Will fill the list.
-		ReplaceCall(0x77A2FA, (UInt32)PropagateIntValue_Hook);
+		ReplaceCall(0x77A2FA, (uint32_t)PropagateIntValue_Hook);
 	}
 }
 
@@ -428,8 +428,8 @@ namespace SetItemHotkeyIconPath
 
 	void WriteHooks()
 	{
-		ReplaceCall(0x77DFD4, (UInt32)ContChangesEntry_GetImageFilename_Hook);
-		ReplaceCall(0x77DCE0, (UInt32)ContChangesEntry_GetImageFilename_Hook);
+		ReplaceCall(0x77DFD4, (uint32_t)ContChangesEntry_GetImageFilename_Hook);
+		ReplaceCall(0x77DCE0, (uint32_t)ContChangesEntry_GetImageFilename_Hook);
 	}
 }
 
@@ -438,7 +438,7 @@ namespace FreezeAmmoRegen
 	bool g_freezeAmmoRegen = false;
 
 	CallDetour g_detour;
-	double __fastcall Weap_GetModifiedRegenRate_Hook(TESObjectWEAP* weap, void* edx, UInt8 hasAmmoRegenWeaponMod)
+	double __fastcall Weap_GetModifiedRegenRate_Hook(TESObjectWEAP* weap, void* edx, uint8_t hasAmmoRegenWeaponMod)
 	{
 		auto result = ThisCall<double>(g_detour.GetOverwrittenAddr(), weap, hasAmmoRegenWeaponMod);
 		if (g_freezeAmmoRegen)
@@ -448,7 +448,7 @@ namespace FreezeAmmoRegen
 
 	void WriteDelayedHooks()
 	{
-		g_detour.WriteDetourCall(0x943C5C, (UInt32)Weap_GetModifiedRegenRate_Hook);
+		g_detour.WriteDetourCall(0x943C5C, (uint32_t)Weap_GetModifiedRegenRate_Hook);
 	}
 }
 
@@ -469,7 +469,7 @@ namespace SetForceDrawHitscanProjectiles
 
 		void WriteDelayedHook()
 		{
-			g_detour.WriteDetourCall(0x9B7D08, (UInt32)Hook);
+			g_detour.WriteDetourCall(0x9B7D08, (uint32_t)Hook);
 		}
 	}
 
@@ -478,7 +478,7 @@ namespace SetForceDrawHitscanProjectiles
 		CallDetour g_detour;
 
 		// projRefFlag arg will always be kProjFlag_HasGravity
-		void __fastcall Hook(Projectile* projRef, void* edx, UInt32 projRefFlag, bool setFlag)
+		void __fastcall Hook(Projectile* projRef, void* edx, uint32_t projRefFlag, bool setFlag)
 		{
 			// Force gravity to not be applied to previously hitscan projectiles that are now being drawn...
 			//	...unless VATS is on since that's the only time gravity matters for hitscan projectiles (for visual flair).
@@ -496,7 +496,7 @@ namespace SetForceDrawHitscanProjectiles
 
 		void WriteDelayedHook()
 		{
-			g_detour.WriteDetourCall(0x9B7DEB, (UInt32)Hook);
+			g_detour.WriteDetourCall(0x9B7DEB, (uint32_t)Hook);
 		}
 	}
 
@@ -520,7 +520,7 @@ namespace SetForceDrawHitscanProjectiles
 
 		void WriteDelayedHook()
 		{
-			g_detour.WriteDetourCall(0x9BE6F0, (UInt32)Hook);
+			g_detour.WriteDetourCall(0x9BE6F0, (uint32_t)Hook);
 		}
 	}
 
@@ -550,7 +550,7 @@ namespace SetProjectileTracerChanceOverride
 
 	void WriteDelayedHooks()
 	{
-		g_detour.WriteDetourCall(0x9B7CE8, (UInt32)BGSProjectile_CalcIsTracer_Hook);
+		g_detour.WriteDetourCall(0x9B7CE8, (uint32_t)BGSProjectile_CalcIsTracer_Hook);
 	}
 }
 
@@ -568,7 +568,7 @@ namespace IsPlayerLookingAround
 
 	void WriteDelayedHooks()
 	{
-		g_detour.WriteDetourCall(0x93F8D9, (UInt32)Player_HandleLookingAround);
+		g_detour.WriteDetourCall(0x93F8D9, (uint32_t)Player_HandleLookingAround);
 	}
 }
 
@@ -588,7 +588,7 @@ namespace PlaceAtReticleAlt
 
 		void WriteHook()
 		{
-			g_detour.WriteDetourCall(0x5DF4F6, (UInt32)Hook);
+			g_detour.WriteDetourCall(0x5DF4F6, (uint32_t)Hook);
 		}
 	}
 
@@ -597,7 +597,7 @@ namespace PlaceAtReticleAlt
 		CallDetour g_detour;
 		__HOOK Hook()
 		{
-			UInt32 static const ReturnAddr = 0x5DF43C;
+			uint32_t static const ReturnAddr = 0x5DF43C;
 			__asm
 			{
 				mov		g_lastPlacedRef, eax
@@ -610,7 +610,7 @@ namespace PlaceAtReticleAlt
 
 		void WriteHook()
 		{
-			WriteRelJump(0x5DF436, (UInt32)Hook);
+			WriteRelJump(0x5DF436, (uint32_t)Hook);
 		}
 	}
 
@@ -643,7 +643,7 @@ namespace Experimental
 
 		void WriteHook()
 		{
-			ReplaceCall(0x87F0A9, (UInt32)Hook);
+			ReplaceCall(0x87F0A9, (uint32_t)Hook);
 		}
 	}
 
@@ -679,8 +679,8 @@ namespace Experimental
 			}
 		}
 
-		template <UInt8 itemEBPOffset>
-		void __cdecl Hook(TESObjectREFR* container, BaseExtraList* extraList, UInt32 eventID)
+		template <uint8_t itemEBPOffset>
+		void __cdecl Hook(TESObjectREFR* container, BaseExtraList* extraList, uint32_t eventID)
 		{
 			// do regular code
 			CdeclCall(MergeScriptEventAddr, container, extraList, eventID);
@@ -698,8 +698,8 @@ namespace Experimental
 			// BUG: The calls below may not trigger during a RemoveItem script function call, esp. if the item is unequipped (cuz no xData gets passed).
 			// Solution: use RemoveItemTarget or some other alternative.
 			// These hooks will run after a potential OnUnequip call, so it doubles as a way to ensure that blocktype gets run in time.
-			ReplaceCall(0x4C41DC, (UInt32)Hook<0xC>);
-			ReplaceCall(0x4C42B2, (UInt32)Hook<0xC>);
+			ReplaceCall(0x4C41DC, (uint32_t)Hook<0xC>);
+			ReplaceCall(0x4C42B2, (uint32_t)Hook<0xC>);
 		}
 	}
 
@@ -712,7 +712,7 @@ namespace Experimental
 		/*
 		__declspec(naked) void HookToPreventUIStuff()
 		{
-			static const UInt32 retnAddr = ;
+			static const uint32_t retnAddr = ;
 			_asm
 			{
 			}
@@ -739,9 +739,9 @@ namespace Experimental
 
 			void WriteHook()
 			{
-				//g_detour.WriteDetourCall(0x850A11, (UInt32)StrFromIniHook);
-				g_detour.WriteDetourCall(0x947AD9, (UInt32)LoadQuicksaveHook);
-				WriteRelCall(0x942878, (UInt32)LoadQuicksaveHook);
+				//g_detour.WriteDetourCall(0x850A11, (uint32_t)StrFromIniHook);
+				g_detour.WriteDetourCall(0x947AD9, (uint32_t)LoadQuicksaveHook);
+				WriteRelCall(0x942878, (uint32_t)LoadQuicksaveHook);
 			}
 		}
 #endif
@@ -776,7 +776,7 @@ namespace HandleHooks
 		SetItemHotkeyIconPath::WriteHooks();
 		PlaceAtReticleAlt::WriteHooks();
 #if 0
-		ReplaceCall(0x8B0FF0, UInt32(Actor_Spread_PerkModifier_Hook));
+		ReplaceCall(0x8B0FF0, uint32_t(Actor_Spread_PerkModifier_Hook));
 
 
 		// Modify a "IsInCombat" check to allow NPC activation even if they are in combat.

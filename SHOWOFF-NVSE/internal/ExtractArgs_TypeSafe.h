@@ -480,7 +480,7 @@ namespace ExtractOptionalArgsFromPack_Impl
 {
 	//inspired by https://artificial-mind.net/blog/2020/10/31/constexpr-for
 	template<size_t size, const NVSEParamInfo(&params)[size], size_t nthArg, size_t argEnd, size_t numMandatoryArgs, class ArgsTuple>
-	void Extract_Recursive(PluginExpressionEvaluator& eval, ArgsTuple&& args, UInt8& numOptArgsToExtract)
+	void Extract_Recursive(PluginExpressionEvaluator& eval, ArgsTuple&& args, uint8_t& numOptArgsToExtract)
 	{
 		if constexpr (nthArg < argEnd)
 		{
@@ -501,7 +501,7 @@ namespace ExtractOptionalArgsFromPack_Impl
 	void Handler(PluginExpressionEvaluator& eval, ArgsTuple&& args)
 	{
 		auto constexpr numMandatoryArgs = GetNumMandatoryArgs(params);
-		UInt8 numOptArgsToExtract = eval.NumArgs() - numMandatoryArgs;
+		uint8_t numOptArgsToExtract = eval.NumArgs() - numMandatoryArgs;
 		Extract_Recursive<size, params, numMandatoryArgs, size, numMandatoryArgs>(eval, std::forward<ArgsTuple>(args), numOptArgsToExtract);
 	}
 }
