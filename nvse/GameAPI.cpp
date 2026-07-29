@@ -102,19 +102,13 @@ struct TLSData
 	// 25C is used as do not head track the player , 2B8 is used to init QueudFile::unk0018
 };
 
-static TLSData * GetTLSData()
-{
-	uint32_t TlsIndex = *g_TlsIndexPtr;
-	TLSData * data = NULL;
+struct _TEB {
+	uint32_t		 padding[0x2C / 4];
+	struct TLSData** ThreadLocalStoragePointer;
+};
 
-	__asm {
-		mov		ecx,	[TlsIndex]
-		mov		edx,	fs:[2Ch]	// linear address of thread local storage array
-		mov		eax,	[edx+ecx*4]
-		mov		[data], eax
-	}
-
-	return data;
+TLSData* GetTLSData() {
+	return NtCurrentTeb()->ThreadLocalStoragePointer[*reinterpret_cast<uint32_t*>(0x126FD98)];
 }
 
 bool IsConsoleMode()
