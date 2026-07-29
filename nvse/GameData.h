@@ -298,8 +298,9 @@ public:
 	UInt32							unk638;					// 638
 
 	static TESDataHandler* GetSingleton();
-	const ModInfo ** GetActiveModList();		// returns array of modEntry* corresponding to loaded mods sorted by mod index
-	const ModInfo* LookupModByName(const char* modName);
+
+	const ModInfo* GetFile(uint32_t auiIndex) const;
+	const ModInfo* GetListFile(const char* modName);
 	UInt8 GetModIndex(const char* modName);
 	UInt8 GetActiveModCount() const;
 	const char* GetNthModName(UInt32 modIndex);

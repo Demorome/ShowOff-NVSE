@@ -1746,7 +1746,7 @@ void Log(const std::string& msg)
 // Copied from kNVSE (https://github.com/korri123/kNVSE/blob/master/nvse_plugin_example/commands_animation.cpp).
 TESForm* StringToForm_Subroutine(const std::string& modName, const std::string& formIdStr)
 {
-	const auto* mod = TESDataHandler::GetSingleton()->LookupModByName(modName.c_str());
+	const auto* mod = TESDataHandler::GetSingleton()->GetListFile(modName.c_str());
 #if _DEBUG
 	if (!mod)
 	{
