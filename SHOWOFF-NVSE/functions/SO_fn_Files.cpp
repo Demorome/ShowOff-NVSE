@@ -690,7 +690,7 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 		if (saveFile)
 		{
 
-			const auto path = std::filesystem::u8path(JSON_FullPath);
+			const auto path = std::filesystem::path(JSON_FullPath);
 
 			if (std::ofstream output(path, std::ios::binary);	//erase previous contents, potentially create new file.
 				output.is_open())
