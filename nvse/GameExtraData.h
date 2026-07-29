@@ -814,7 +814,7 @@ public:
 	static ExtraFactionChanges* Create();
 };
 
-STATIC_ASSERT(sizeof(ExtraFactionChanges) == 0x10);
+static_assert(sizeof(ExtraFactionChanges) == 0x10);
 
 class ExtraFactionChangesMatcher
 {
@@ -840,7 +840,7 @@ public:
 	TESForm	* form;		// 010
 };
 
-STATIC_ASSERT(sizeof(ExtraLeveledCreature) == 0x14);
+static_assert(sizeof(ExtraLeveledCreature) == 0x14);
 
 // PackageStartLocation = Worldspace or Cell / PosX / PosY / PosZ / and 4 bytes
 

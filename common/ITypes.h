@@ -1,7 +1,5 @@
 #pragma once
 
-#include "common/IErrors.h"
-
 #pragma warning(disable: 4221)
 #include <cmath>
 
@@ -159,9 +157,9 @@ typedef Bitfield <UInt8>	Bitfield8;		//!< An 8-bit bitfield
 typedef Bitfield <UInt16>	Bitfield16;		//!< A 16-bit bitfield
 typedef Bitfield <UInt32>	Bitfield32;		//!< A 32-bit bitfield
 
-STATIC_ASSERT(sizeof(Bitfield8) == 1);
-STATIC_ASSERT(sizeof(Bitfield16) == 2);
-STATIC_ASSERT(sizeof(Bitfield32) == 4);
+static_assert(sizeof(Bitfield8) == 1);
+static_assert(sizeof(Bitfield16) == 2);
+static_assert(sizeof(Bitfield32) == 4);
 
 /**
  *	A bitstring

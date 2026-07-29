@@ -233,7 +233,7 @@ public:
 	UInt32					unk4D0;				// 4D0
 	Tutorials				help;				// 4D4
 };
-STATIC_ASSERT(sizeof(InterfaceManager) == 0x580);
+static_assert(sizeof(InterfaceManager) == 0x580);
 
 void Debug_DumpMenus(void);
 

@@ -137,7 +137,7 @@ public:
 	hkpCachingShapePhantom	*shapePhantom;		// 30
 	UInt32					unk34[39];			// 34
 };
-STATIC_ASSERT(sizeof(hkpCharacterProxy) == 0xD0);
+static_assert(sizeof(hkpCharacterProxy) == 0xD0);
 
 // D0
 class ahkpCharacterProxy : public hkpCharacterProxy
@@ -212,7 +212,7 @@ public:
 	hkArray<CdParentObj>	parentObjs;		// 78
 	UInt32					unk84[2];		// 84
 };
-STATIC_ASSERT(sizeof(hkpWorldObject) == 0x8C);
+static_assert(sizeof(hkpWorldObject) == 0x8C);
 
 // 10
 class hkpShape : public hkReferencedObject
@@ -388,7 +388,7 @@ public:
 
 	hkpCdBodyPair			cdPairsLoc[16];	// 14
 };
-STATIC_ASSERT(sizeof(hkpAllCdBodyPairCollector) == 0x114);
+static_assert(sizeof(hkpAllCdBodyPairCollector) == 0x114);
 
 // A4
 class hkpPhantom : public hkpWorldObject
@@ -409,7 +409,7 @@ public:
 
 	UInt32			unk8C[6];		// 8C
 };
-STATIC_ASSERT(sizeof(hkpPhantom) == 0xA4);
+static_assert(sizeof(hkpPhantom) == 0xA4);
 
 // E0
 class hkpAabbPhantom : public hkpPhantom
@@ -422,7 +422,7 @@ public:
 	hkArray<hkCdBody*>		cdBodies;	// D0
 	UInt32					unkDC;		// DC
 };
-STATIC_ASSERT(sizeof(hkpAabbPhantom) == 0xE0);
+static_assert(sizeof(hkpAabbPhantom) == 0xE0);
 
 // 160
 class hkpShapePhantom : public hkpPhantom
@@ -438,7 +438,7 @@ public:
 
 	UInt32				unk0A4[47];		// 0A4
 };
-STATIC_ASSERT(sizeof(hkpShapePhantom) == 0x160);
+static_assert(sizeof(hkpShapePhantom) == 0x160);
 
 // 170
 class hkpSimpleShapePhantom : public hkpShapePhantom
@@ -450,7 +450,7 @@ public:
 	hkArray<hkCdBody*>		cdBodies;	// 160
 	UInt32					unk16C;		// 16C
 };
-STATIC_ASSERT(sizeof(hkpSimpleShapePhantom) == 0x170);
+static_assert(sizeof(hkpSimpleShapePhantom) == 0x170);
 
 // 170
 class hkpCachingShapePhantom : public hkpShapePhantom
@@ -462,7 +462,7 @@ public:
 	hkArray<CdBodyLinker>	cdBodies;	// 160
 	UInt32					unk16C;		// 16C
 };
-STATIC_ASSERT(sizeof(hkpCachingShapePhantom) == 0x170);
+static_assert(sizeof(hkpCachingShapePhantom) == 0x170);
 
 class hkpConstraintOwner : public hkReferencedObject
 {
@@ -537,7 +537,7 @@ public:
 	hkArray<hkpContactListener*>		collisionListeners;			// 1A0
 	UInt32								unk1AC[3];					// 1AC
 };
-STATIC_ASSERT(sizeof(hkpWorld) == 0x1B8);
+static_assert(sizeof(hkpWorld) == 0x1B8);
 
 // 354
 class ahkpWorld : public hkpWorld
@@ -553,7 +553,7 @@ public:
 	UInt8			byte307;			// 307
 	UInt32			unk308[19];			// 308
 };
-STATIC_ASSERT(sizeof(ahkpWorld) == 0x354);
+static_assert(sizeof(ahkpWorld) == 0x354);
 
 // 94
 class bhkWorld : public bhkSerializable
@@ -586,7 +586,7 @@ public:
 	void				*unk6C;		// 6C
 	UInt32				unk70[9];	// 70
 };
-STATIC_ASSERT(sizeof(bhkWorld) == 0x94);
+static_assert(sizeof(bhkWorld) == 0x94);
 
 // E0
 class bhkWorldM : public bhkWorld
@@ -603,7 +603,7 @@ public:
 	NiVector4		vectorC0;		// C0
 	UInt32			unkD0[4];		// D0
 };
-STATIC_ASSERT(sizeof(bhkWorldM) == 0xE0);
+static_assert(sizeof(bhkWorldM) == 0xE0);
 
 // 0C
 class NiCollisionObject : public NiObject
@@ -713,7 +713,7 @@ public:
 	UInt32					unk01C;			// 01C
 	hkCdPoint				cdPointsLoc[8];	// 020
 };
-STATIC_ASSERT(sizeof(hkpAllCdPointCollector) == 0x3A0);
+static_assert(sizeof(hkpAllCdPointCollector) == 0x3A0);
 
 // 3C8
 class bhkCharacterPointCollector : public hkpAllCdPointCollector
@@ -727,7 +727,7 @@ public:
 	hkArray<UInt32>				arr3B0;			// 3B0
 	hkArray<float>				arr3BC;			// 3BC
 };
-STATIC_ASSERT(sizeof(bhkCharacterPointCollector) == 0x3C8);
+static_assert(sizeof(bhkCharacterPointCollector) == 0x3C8);
 
 // 3E0
 class bhkCharacterProxy : public bhkSerializable
@@ -739,7 +739,7 @@ public:
 	bhkCharacterPointCollector	pointCollecter;		// 10
 	UInt32						unk3D8[2];
 };
-STATIC_ASSERT(sizeof(bhkCharacterProxy) == 0x3E0);
+static_assert(sizeof(bhkCharacterProxy) == 0x3E0);
 
 // 08
 class hkpCharacterState : public hkReferencedObject
@@ -914,7 +914,7 @@ public:
 	float			flt28;		// 28
 	float			flt2C;		// 2C
 };
-STATIC_ASSERT(sizeof(hkpBoxShape) == 0x30);
+static_assert(sizeof(hkpBoxShape) == 0x30);
 
 struct VerticesBlock
 {
@@ -962,7 +962,7 @@ public:
 	UInt32			unk68;			// 68
 	float			flt6C;			// 6C
 };
-STATIC_ASSERT(sizeof(hkpConvexVerticesShape) == 0x70);
+static_assert(sizeof(hkpConvexVerticesShape) == 0x70);
 
 // 70
 class hkCharControllerShape : public hkpConvexVerticesShape
@@ -1001,7 +1001,7 @@ public:
 	float			flt38;		// 38
 	float			flt3C;		// 3C
 };
-STATIC_ASSERT(sizeof(hkpCapsuleShape) == 0x40);
+static_assert(sizeof(hkpCapsuleShape) == 0x40);
 
 // 14
 class bhkSphereRepShape : public bhkShape
@@ -1094,7 +1094,7 @@ public:
 		return ThisCall<bool>(0x944400, this);
 	}
 };
-STATIC_ASSERT(sizeof(bhkCharacterController) == 0x660);
+static_assert(sizeof(bhkCharacterController) == 0x660);
 
 class hkpEntity : public hkpWorldObject
 {
@@ -1224,7 +1224,7 @@ public:
 
 	float GetBodyMass();
 };
-STATIC_ASSERT(sizeof(hkpMotion) == 0x140);
+static_assert(sizeof(hkpMotion) == 0x140);
 
 class hkpSphereMotion : public hkpMotion
 {

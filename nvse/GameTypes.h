@@ -508,7 +508,7 @@ public:
 		return -1;
 	}
 };
-STATIC_ASSERT(sizeof(tList<void *>) == 0x8);
+static_assert(sizeof(tList<void *>) == 0x8);
 
 template <typename T_Data> struct DListNode
 {
@@ -576,7 +576,7 @@ public:
 
 	tList<T>	list;
 };
-STATIC_ASSERT(sizeof(BSSimpleList<void *>) == 0xC);
+static_assert(sizeof(BSSimpleList<void *>) == 0xC);
 
 //#if RUNTIME
 //

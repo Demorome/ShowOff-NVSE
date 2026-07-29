@@ -1286,7 +1286,7 @@ Operator s_operators[] =
 
 };
 
-STATIC_ASSERT(SIZEOF_ARRAY(s_operators, Operator) == kOpType_Max);
+static_assert(SIZEOF_ARRAY(s_operators, Operator) == kOpType_Max);
 
 const char* OpTypeToSymbol(OperatorType op)
 {

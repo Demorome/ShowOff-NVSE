@@ -568,7 +568,6 @@ static bool v_ExtractArgsEx(SInt16 numArgs, ParamInfo * paramInfo, UInt8* &scrip
 			default:
 				_ERROR("Unhandled type encountered. Arg #%d numArgs = %d paramType = %d paramStr = %s",
 					i, numArgs, info->typeID, info->typeStr);
-				HALT("unhandled type");
 				break;
 		}
 	}
@@ -763,7 +762,7 @@ bool ExtractArgsRaw(ParamInfo * paramInfo, void * scriptDataIn, UInt32 * scriptD
 						scriptData += 2;
 
 						Script::RefVariable	* var = scriptObj->GetVariable(varIdx);
-						ASSERT(var);
+						assert(var);
 
 						var->Resolve(eventList);
 
@@ -796,7 +795,6 @@ bool ExtractArgsRaw(ParamInfo * paramInfo, void * scriptDataIn, UInt32 * scriptD
 
 			default:
 				_ERROR("ExtractArgsRaw: unhandled type encountered, arg %d type %02X", i, info->typeID);
-				HALT("unhandled type");
 				break;
 		}
 	}

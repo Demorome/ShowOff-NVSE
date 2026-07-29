@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <map>
 
 class TESObjectREFR;
 class Script;

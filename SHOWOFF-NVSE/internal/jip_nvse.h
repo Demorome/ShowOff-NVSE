@@ -222,7 +222,7 @@ public:
 		}
 	}
 };
-STATIC_ASSERT(sizeof(AuxVariableValue) == 0x10);
+static_assert(sizeof(AuxVariableValue) == 0x10);
 
 typedef UnorderedMap<char*, AuxVariableValue> AuxStringMapIDsMap;
 typedef UnorderedMap<char*, AuxStringMapIDsMap> AuxStringMapVarsMap;

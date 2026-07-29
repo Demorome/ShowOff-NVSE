@@ -10,13 +10,11 @@
 #pragma warning(disable: 4018 4244 4267 4305 4288 4312 4311)
 
 #define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
 #include <cstdlib>
-#include <cstdio>
-#include <cstring>
+#include <stdint.h>
+#include <stdio.h>
 #include "common/ITypes.h"
-#include "common/IErrors.h"
-#include "common/IDynamicCreate.h"
 #include "common/IDebugLog.h"
-#include "common/ISingleton.h"
-#include <winsock2.h>
 #include <Windows.h>
+#include <assert.h>

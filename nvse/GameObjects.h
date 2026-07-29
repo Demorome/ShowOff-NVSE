@@ -212,7 +212,7 @@ public:
 #endif
 };
 
-STATIC_ASSERT(sizeof(TESObjectREFR) == 0x068);
+static_assert(sizeof(TESObjectREFR) == 0x068);
 
 class BaseProcess;
 struct NiPoint3;
@@ -293,7 +293,7 @@ public:
 	UInt8			unk87;			// 87	Init'd to the inverse of NoLowLevelProcessing
 };
 
-STATIC_ASSERT(sizeof(MobileObject) == 0x88);
+static_assert(sizeof(MobileObject) == 0x88);
 
 class MagicTarget;
 typedef tList<ActiveEffect> ActiveEffectList;
@@ -328,7 +328,7 @@ public:
 
 	UInt32	unk04[2];	// 04
 };
-STATIC_ASSERT(sizeof(MagicCaster) == 0xC);
+static_assert(sizeof(MagicCaster) == 0xC);
 
 // 10
 class MagicTarget
@@ -354,7 +354,7 @@ public:
 
 	void RemoveEffect(EffectItem *effItem);
 };
-STATIC_ASSERT(sizeof(MagicTarget) == 0x10);
+static_assert(sizeof(MagicTarget) == 0x10);
 
 class bhkRagdollController;
 class bhkRagdollPenetrationUtil;
@@ -1081,4 +1081,4 @@ public:
 	// Credits to lStewieAl
 	void UpdateCamera(bool isCalledFromFunc21, bool _zero_skipUpdateLOD);
 };
-STATIC_ASSERT(sizeof(PlayerCharacter) == 0xE50);
+static_assert(sizeof(PlayerCharacter) == 0xE50);

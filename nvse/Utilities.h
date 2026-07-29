@@ -81,8 +81,8 @@ const std::string & GetFalloutDirectory(void);
 #define DEBUG_PRINT(x, ...) { }
 #define DEBUG_MESSAGE(x, ...) { }
 // This is so we don't have to handle size change with EditorData :)
-#undef STATIC_ASSERT
-#define STATIC_ASSERT(a)
+#undef static_assert
+#define static_assert(a)
 #endif	// RUNTIME
 
 class TESForm;

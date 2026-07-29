@@ -370,7 +370,7 @@ public:
 		return ThisCall<bool>(0x4A4020, this);
 	}
 };
-STATIC_ASSERT(sizeof(ConsoleManager) == 0x914);
+static_assert(sizeof(ConsoleManager) == 0x914);
 
 // A plugin author requested the ability to use OBSE format specifiers to format strings with the args
 // coming from a source other than script.
@@ -1009,10 +1009,10 @@ struct Timer
 	float lastSecondsPassed;	 // 10
 	UInt32 msPassed;			 // 14
 	UInt32 unk18;				 // 18
-	byte isChangeTimeMultSlowly; // 1C
-	byte unk1D;					 // 1D
-	byte unk1E;					 // 1E
-	byte unk1F;					 // 1F
+	bool isChangeTimeMultSlowly; // 1C
+	bool unk1D;					 // 1D
+	bool unk1E;					 // 1E
+	bool unk1F;					 // 1F
 };
 
 struct TimeGlobal : Timer

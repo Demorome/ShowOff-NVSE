@@ -753,7 +753,7 @@ Token_Type ScriptToken::ReadFrom(ExpressionEvaluator* context)
 static char TokenCodes[kTokenType_Max] =
 { 'Z', '!', 'S', '!', 'R', 'G', '!', '!', '!', 'X', 'V', 'V', 'V', 'V', 'V', '!', 'O', '!', 'B', 'I', 'L' };
 
-STATIC_ASSERT(SIZEOF_ARRAY(TokenCodes, char) == kTokenType_Max);
+static_assert(SIZEOF_ARRAY(TokenCodes, char) == kTokenType_Max);
 
 inline char TokenTypeToCode(Token_Type type)
 {
@@ -1087,7 +1087,7 @@ static Operand s_operands[] =
 	{	OPERAND(AssignableString)	},
 };
 
-STATIC_ASSERT(SIZEOF_ARRAY(s_operands, Operand) == kTokenType_Max);
+static_assert(SIZEOF_ARRAY(s_operands, Operand) == kTokenType_Max);
 
 bool CanConvertOperand(Token_Type from, Token_Type to)
 {

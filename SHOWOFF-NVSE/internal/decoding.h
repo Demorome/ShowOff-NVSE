@@ -481,7 +481,7 @@ public:
 	float									flt64;			// 64
 	NiProperty								*prop68;		// 68	Seen 0x10AE0C8
 };
-STATIC_ASSERT(sizeof(MagicShaderHitEffect) == 0x6C);
+static_assert(sizeof(MagicShaderHitEffect) == 0x6C);
 
 // 160
 struct ProcessLists
@@ -636,7 +636,7 @@ public:
 		NiPoint3 pos, float rotZ, float rotX, float angularMomentumZ, float angularMomentumX, TESObjectCELL* cell,
 		bool ignoreGravity = false);
 };
-STATIC_ASSERT(sizeof(Projectile) == 0x150);
+static_assert(sizeof(Projectile) == 0x150);
 
 // 154
 class BeamProjectile : public Projectile
@@ -726,7 +726,7 @@ public:
 	UInt32			unk0D4[11];		// 0D4
 	float			unk100;			// 100
 };
-STATIC_ASSERT(sizeof(Explosion) == 0x104);
+static_assert(sizeof(Explosion) == 0x104);
 
 template <typename Item> struct ListBoxItem
 {
@@ -1196,7 +1196,7 @@ public:
 		return *reinterpret_cast<HUDMainMenu**>(0x11D96C0);
 	}
 };
-STATIC_ASSERT(sizeof(HUDMainMenu) == 0x278);
+static_assert(sizeof(HUDMainMenu) == 0x278);
 
 // 5C0
 class LoadingMenu : public Menu			// 1007
@@ -1267,7 +1267,7 @@ public:
 	UInt16				flags;			// 222
 	UInt32				unk224[231];	// 224
 };
-STATIC_ASSERT(sizeof(LoadingMenu) == 0x5C0);
+static_assert(sizeof(LoadingMenu) == 0x5C0);
 
 // 10C
 class ContainerMenu : public Menu		// 1008
@@ -1324,7 +1324,7 @@ public:
 	UInt32				unk0FC;			// 0FC
 	Sound				menuSound;		// 100
 };
-STATIC_ASSERT(sizeof(ContainerMenu) == 0x10C);
+static_assert(sizeof(ContainerMenu) == 0x10C);
 
 // 13C
 class DialogMenu : public Menu			// 1009
@@ -1375,7 +1375,7 @@ public:
 	float				flt44;			// 44
 	float				selectedHours;	// 48
 };
-STATIC_ASSERT(sizeof(SleepWaitMenu) == 0x4C);
+static_assert(sizeof(SleepWaitMenu) == 0x4C);
 
 // 1D4
 class StartMenu : public Menu			// 1013
@@ -1514,7 +1514,7 @@ public:
 	UInt32							unk1CC;			// 1CC
 	UInt32							unk1D0;			// 1D0
 };
-STATIC_ASSERT(sizeof(StartMenu) == 0x1D4);
+static_assert(sizeof(StartMenu) == 0x1D4);
 
 // E4
 class LockPickMenu : public Menu		// 1014
@@ -1566,7 +1566,7 @@ public:
 
 	static LockPickMenu* GetSingleton() { return *(LockPickMenu**)0x11DA204; }; //copied from Tweaks
 };
-STATIC_ASSERT(sizeof(LockPickMenu) == 0xE4);
+static_assert(sizeof(LockPickMenu) == 0xE4);
 
 // Code stolen from lStewieAl
 class LevelUpMenu : public Menu
@@ -1643,7 +1643,7 @@ public:
 	ListBox<BGSPerk> perkListBox;
 	tList<BGSPerk> perksList; // perks to show in the perk listBox (including non-selectable ones, if gs_bHideUnavailablePerks = 1)
 };
-STATIC_ASSERT(sizeof(LevelUpMenu) == 0xCC);
+static_assert(sizeof(LevelUpMenu) == 0xCC);
 
 // 44
 class QuantityMenu : public Menu		// 1016
@@ -1724,7 +1724,7 @@ public:
 	ListBox<TESChallenge>			challengeList;	// 1F0
 	BSSimpleArray<Tile>				arr220;			// 220
 };
-STATIC_ASSERT(sizeof(MapMenu) == 0x230);
+static_assert(sizeof(MapMenu) == 0x230);
 // 8C
 class RepairMenu : public Menu			// 1035
 {
@@ -1792,7 +1792,7 @@ public:
 		Script			*scriptCallback;		// 58
 	};
 };
-STATIC_ASSERT(sizeof(TextEditMenu) == 0x5C);
+static_assert(sizeof(TextEditMenu) == 0x5C);
 
 typedef tList<ContChangesEntry> BarterItemList;
 
@@ -1880,7 +1880,7 @@ public:
 	TESObjectREFR		*targetRef;		// 198
 	UInt32				unk19C[16];		// 19C
 };
-STATIC_ASSERT(sizeof(HackingMenu) == 0x1DC);
+static_assert(sizeof(HackingMenu) == 0x1DC);
 /*
 struct VATSTargetInfo
 {
@@ -1901,7 +1901,7 @@ struct VATSTargetInfo
 	UInt8 isMissFortuneVisit;
 	UInt8 gap25[3];
 };
-STATIC_ASSERT(sizeof(VATSTargetInfo) == 0x28);
+static_assert(sizeof(VATSTargetInfo) == 0x28);
 */
 
 // From Tweaks
@@ -1954,7 +1954,7 @@ struct VATSQueuedAction
 		return targetInfo;
 	}
 };
-STATIC_ASSERT(sizeof(VATSQueuedAction) == 0x28);
+static_assert(sizeof(VATSQueuedAction) == 0x28);
 
 // From Tweaks
 struct VATSTargetBodyPartData
@@ -2052,7 +2052,7 @@ public:
 	static VATSMenu* GetSingleton() { return *(VATSMenu**)0x11DB0D4; };
 	static TESObjectREFR* GetTarget() { return *(TESObjectREFR**)0x11F21CC; };
 };
-STATIC_ASSERT(sizeof(VATSMenu) == 0x144);
+static_assert(sizeof(VATSMenu) == 0x144);
 
 // FC
 class ComputersMenu : public Menu		// 1057
@@ -2491,7 +2491,7 @@ public:
 		return *reinterpret_cast<Sky**>(0x11CCB78);
 	}
 };
-STATIC_ASSERT(sizeof(Sky) == 0x138);
+static_assert(sizeof(Sky) == 0x138);
 
 // 04
 class GridArray
@@ -2547,7 +2547,7 @@ public:
 	float								flt3C;			// 3C
 	float								flt40;			// 40
 };
-STATIC_ASSERT(sizeof(LoadedAreaBound) == 0x44);
+static_assert(sizeof(LoadedAreaBound) == 0x44);
 
 // A0
 struct WaterSurfaceManager
@@ -2599,7 +2599,7 @@ struct WaterSurfaceManager
 	float								flt98;			// 98
 	UInt32								unk9C;			// 9C
 };
-STATIC_ASSERT(sizeof(WaterSurfaceManager) == 0xA0);
+static_assert(sizeof(WaterSurfaceManager) == 0xA0);
 
 // C4
 class TES
@@ -2646,7 +2646,7 @@ public:
 
 	bool GetTerrainHeight(float *posXY, float *result);
 };
-STATIC_ASSERT(sizeof(TES) == 0xC4);
+static_assert(sizeof(TES) == 0xC4);
 
 // 188
 class CombatController : public TESPackage
@@ -2713,7 +2713,7 @@ public:
 	float							flt148;				// 148
 	UInt32							unk14C[15];			// 14C
 };
-STATIC_ASSERT(sizeof(CombatController) == 0x188);
+static_assert(sizeof(CombatController) == 0x188);
 
 struct FontHeightData
 {
@@ -2751,7 +2751,7 @@ struct FontInfo
 	UInt32						unk3C[2];	// 3C
 	BSSimpleArray<ButtonIcon>	arr44;		// 44
 };
-STATIC_ASSERT(sizeof(FontInfo) == 0x54);
+static_assert(sizeof(FontInfo) == 0x54);
 
 // 164 (24)
 class FontManager
@@ -2837,7 +2837,7 @@ public:
 	static DebugText *GetSingleton();
 	DebugLine *GetDebugInput();
 };
-STATIC_ASSERT(sizeof(DebugText) == 0x229C);
+static_assert(sizeof(DebugText) == 0x229C);
 
 // 254
 class BSSoundInfo
@@ -2926,7 +2926,7 @@ public:
 	UInt32			priority;				// 188
 	UInt32			unk18C[3];				// 18C
 };
-STATIC_ASSERT(sizeof(BSGameSound) == 0x198);
+static_assert(sizeof(BSGameSound) == 0x198);
 
 enum AudioRequestTypes
 {
@@ -3063,7 +3063,7 @@ public:
 	UInt8						byte184;			// 184
 	UInt8						pad185[3];			// 185
 };
-STATIC_ASSERT(sizeof(BSAudioManager) == 0x188);
+static_assert(sizeof(BSAudioManager) == 0x188);
 
 
 // D8
@@ -3154,7 +3154,7 @@ public:
 	float lightEffectFadeDuration;
 	UInt32 unk16C;
 };
-STATIC_ASSERT(sizeof(FOPipboyManager) == 0x170);
+static_assert(sizeof(FOPipboyManager) == 0x170);
 
 enum
 {
@@ -3190,7 +3190,7 @@ struct PlayingMusic
 	UInt32					unk280;					// 280
 	MediaLocationController	*medLocCtrl;			// 284
 };
-STATIC_ASSERT(sizeof(PlayingMusic) == 0x288);
+static_assert(sizeof(PlayingMusic) == 0x288);
 
 // 34
 struct GameTimeGlobals
@@ -3843,7 +3843,7 @@ struct VATSCameraData
 		return (VATSCameraData*)0x011F2250;
 	}
 };
-STATIC_ASSERT(sizeof(VATSCameraData) == 0x48);
+static_assert(sizeof(VATSCameraData) == 0x48);
 
 bool IsInVATS();
 
@@ -3937,7 +3937,7 @@ public:
 	BSSimpleArray<NavMeshStaticAvoidNode>		avoidNodeArr;		// 0F4
 	UInt32										*ptr104;			// 104
 };
-STATIC_ASSERT(sizeof(NavMesh) == 0x108);
+static_assert(sizeof(NavMesh) == 0x108);
 
 class BSArchiveHeader
 {
@@ -3965,7 +3965,7 @@ public:
 	UInt16		word22;			// 22	182
 	UInt32		unk24[19];		// 24	184
 };
-STATIC_ASSERT(sizeof(BSArchive) == 0x70);
+static_assert(sizeof(BSArchive) == 0x70);
 
 // 1D0
 class Archive : public BSFile
@@ -3977,7 +3977,7 @@ public:
 	NiRefObject			refObject;		// 158
 	BSArchive			archive;		// 160
 };
-STATIC_ASSERT(sizeof(Archive) == 0x1D0);
+static_assert(sizeof(Archive) == 0x1D0);
 
 // 160
 class ArchiveFile : public BSFile
@@ -3989,7 +3989,7 @@ public:
 	UInt32			unk158;		// 158
 	UInt32			unk15C;		// 15C
 };
-STATIC_ASSERT(sizeof(ArchiveFile) == 0x160);
+static_assert(sizeof(ArchiveFile) == 0x160);
 
 // 178
 class CompressedArchiveFile : public ArchiveFile
@@ -4005,7 +4005,7 @@ public:
 	UInt32			streamOffset;	// 170
 	UInt32			unk174;			// 174
 };
-STATIC_ASSERT(sizeof(CompressedArchiveFile) == 0x178);
+static_assert(sizeof(CompressedArchiveFile) == 0x178);
 
 // 58
 class BGSDistantObjectBlockLoadTask : public QueuedFileEntry
@@ -4033,7 +4033,7 @@ public:
 	UInt8			byte53;			// 53
 	UInt32			unk54;			// 54
 };
-STATIC_ASSERT(sizeof(BGSDistantObjectBlockLoadTask) == 0x58);
+static_assert(sizeof(BGSDistantObjectBlockLoadTask) == 0x58);
 
 struct AnimGroupClassify
 {
@@ -4054,7 +4054,7 @@ public:
 	tList<TESCaravanCard>* cards;
 	UInt32 count;
 };
-STATIC_ASSERT(sizeof(TESCaravanDeck) == 0x2C);
+static_assert(sizeof(TESCaravanDeck) == 0x2C);
 
 // From lStewieAl's decoding
 enum MenuSoundCode : UInt32

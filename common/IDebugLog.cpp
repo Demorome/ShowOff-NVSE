@@ -1,9 +1,10 @@
 #include "common/IDebugLog.h"
-#include <share.h>
-#include "common/IFileStream.h"
-#include <shlobj.h>
+#include "cassert"
+#include "direct.h"
+#include "share.h"
+#include "shlobj.h"
 
-std::FILE			* IDebugLog::logFile = NULL;
+FILE			*	IDebugLog::logFile = NULL;
 char				IDebugLog::sourceBuf[16] = { 0 };
 char				IDebugLog::headerText[16] = { 0 };
 char				IDebugLog::formatBuf[8192] = { 0 };
@@ -33,6 +34,7 @@ IDebugLog::~IDebugLog()
 
 void IDebugLog::Open(const char * path)
 {
+	MakeAllDirs(path);
 	logFile = _fsopen(path, "w", _SH_DENYWR);
 
 	if(!logFile)
@@ -56,11 +58,11 @@ void IDebugLog::OpenRelative(int folderID, const char * relPath)
 {
 	char	path[MAX_PATH];
 
-	ASSERT(SUCCEEDED(SHGetFolderPath(NULL, folderID, NULL, SHGFP_TYPE_CURRENT, path)));
+	assert(SUCCEEDED(SHGetFolderPath(NULL, folderID, NULL, SHGFP_TYPE_CURRENT, path)));
 
 	strcat_s(path, sizeof(path), relPath);
 
-	IFileStream::MakeAllDirs(path);
+	MakeAllDirs(path);
 
 	Open(path);
 }
@@ -202,6 +204,25 @@ void IDebugLog::CloseBlock(void)
 void IDebugLog::SetAutoFlush(bool inAutoFlush)
 {
 	autoFlush = inAutoFlush;
+}
+
+void IDebugLog::MakeAllDirs(const char* path) {
+	char	buf[1024];
+	char* traverse = buf;
+
+	while (1) {
+		char	data = *path++;
+
+		if (!data)
+			break;
+
+		if ((data == '\\') || (data == '/')) {
+			*traverse = 0;
+			_mkdir(buf);
+		}
+
+		*traverse++ = data;
+	}
 }
 
 /**

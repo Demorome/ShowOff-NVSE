@@ -487,7 +487,7 @@ const char * GetDXDescription(UInt32 keycode)
 
 //bool ci_less(const char* lh, const char* rh)
 //{
-//	ASSERT(lh && rh);
+//	assert(lh && rh);
 //	while (*lh && *rh) {
 //		char l = toupper(*lh);
 //		char r = toupper(*rh);

@@ -1427,7 +1427,7 @@ class NVSECommandBuilder
 
 #if _DEBUG
 		++CurrentOpcode;
-		ASSERT(CurrentOpcode <= MaxOpcode);
+		assert(CurrentOpcode <= MaxOpcode);
 #endif
 	}
 

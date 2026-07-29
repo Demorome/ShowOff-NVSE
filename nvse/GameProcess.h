@@ -818,7 +818,7 @@ struct AnimData
 
 	void CreateForcedIdle(TESIdleForm* idleForm, Actor* actor, UInt32 sequenceID, int a5);
 };
-STATIC_ASSERT(sizeof(AnimData) == 0x13C);
+static_assert(sizeof(AnimData) == 0x13C);
 
 class QueuedFile;
 class BSFaceGenAnimationData;
@@ -919,7 +919,7 @@ public:
 	ActorHitData* hitData254;		// 254
 	UInt32								unk258;				// 258
 };
-STATIC_ASSERT(sizeof(MiddleHighProcess) == 0x25C);
+static_assert(sizeof(MiddleHighProcess) == 0x25C);
 
 // 68
 struct CombatTarget
@@ -1076,4 +1076,4 @@ public:
 	float								flt450;				// 450
 	UInt32								unk454[6];			// 454
 };
-STATIC_ASSERT(sizeof(HighProcess) == 0x46C);
+static_assert(sizeof(HighProcess) == 0x46C);
