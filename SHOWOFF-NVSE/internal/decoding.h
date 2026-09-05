@@ -635,6 +635,10 @@ public:
 	static Projectile* __cdecl Spawn(BGSProjectile* projectile, Actor* source, CombatController* combatCtrl, TESObjectWEAP* sourceWeap,
 		NiPoint3 pos, float rotZ, float rotX, float angularMomentumZ, float angularMomentumX, TESObjectCELL* cell,
 		bool ignoreGravity = false);
+
+	void Kill() {
+		ThisCall(0x9BC8F0, this);
+	}
 };
 static_assert(sizeof(Projectile) == 0x150);
 

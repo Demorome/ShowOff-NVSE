@@ -181,7 +181,6 @@ public:
 	void SetPos(NiVector3 &posVector);
 	void SetAngle(NiVector3 &rotVector);
 	bool MoveToCell(TESForm *worldOrCell, NiVector3 &posVector);
-	void MarkForDelete();
 	TESObjectREFR *GetMerchantContainer();
 	ContChangesEntry* GetContainerChangesEntry(TESForm* itemForm) const;
 	float GetWaterImmersionPerc();

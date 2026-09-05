@@ -343,40 +343,6 @@ bool Actor::Detects(Actor* target)
 	return detectionLevel > 0;
 }
 
-// Code copied from JIP's TESObjectREFR::DeleteReference
-// This is just an ASM-optimised version of vanilla MarkForDelete.
-__declspec(naked) void TESObjectREFR::MarkForDelete()
-{
-	__asm
-	{
-		push	ebp
-		mov		ebp, esp
-		push	ecx
-		push	1
-		mov		eax, [ecx]
-		call	dword ptr[eax + 0xC4]
-		push	1
-		mov		ecx, [ebp - 4]
-		mov		eax, [ecx]
-		call	dword ptr[eax + 0xC8]
-		push	0
-		push	0
-		mov		ecx, [ebp - 4]
-		mov		eax, [ecx]
-		call	dword ptr[eax + 0x1CC]
-		mov		ecx, [ebp - 4]
-		cmp		byte ptr[ecx + 0xF], 0xFF
-		jnz		done
-		lea		eax, [ebp - 4]
-		push	eax
-		mov		ecx, 0x11CACB8
-		CALL_EAX(0x5AE3D0)
-	done:
-		leave
-		retn
-	}
-}
-
 // From JIP
 TESObjectREFR* TESObjectREFR::GetMerchantContainer()
 {

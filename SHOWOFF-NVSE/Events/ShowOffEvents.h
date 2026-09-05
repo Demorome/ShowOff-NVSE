@@ -1879,7 +1879,7 @@ namespace OnPreProjectileExplode
 					}
 
 					// No longer need the projectile to exist
-					proj->MarkForDelete();
+					proj->Kill();
 				}
 			}
 		}
