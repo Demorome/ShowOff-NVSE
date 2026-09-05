@@ -431,7 +431,7 @@ bool Cmd_GetIngestibleConsumeSound_Execute(COMMAND_ARGS)
 		if (auto const ingestible = DYNAMIC_CAST(form, TESForm, AlchemyItem))
 		{
 			if (ingestible->consumeSound)
-				REFR_RES = ingestible->consumeSound->refID;
+				REFR_RES = ingestible->consumeSound->GetFormID();
 		}
 	}
 	return true;
@@ -502,14 +502,14 @@ bool Cmd_GetEquippedItemRefForItem_Execute(COMMAND_ARGS)
 			{
 				if (auto const itemRef = GetEquippedItemRefForItem_Call((Actor*)thisObj, iter.Get()))
 				{
-					REFR_RES = itemRef->refID;
+					REFR_RES = itemRef->GetFormID();
 					break;
 				}
 			}
 		}
 		else {
 			if (auto const itemRef = GetEquippedItemRefForItem_Call((Actor*)thisObj, itemForm_OrList))
-				REFR_RES = itemRef->refID;
+				REFR_RES = itemRef->GetFormID();
 		}
 	}
 	return true;
@@ -554,7 +554,7 @@ bool Cmd_GetCalculatedItemValue_Eval(COMMAND_ARGS_EVAL)
 	if (baseItem = TryExtractBaseForm(baseItem, thisObj);
 		baseItem && baseItem->IsItem())
 	{
-		auto const invRef = InventoryRefGetForID(thisObj->refID);
+		auto const invRef = InventoryRefGetForID(thisObj->GetFormID());
 
 		auto itemVal = -1.0;
 		if (auto const bAccountForBarterChanges = (uint32_t)arg1;
@@ -608,7 +608,7 @@ bool Cmd_GetEquippedWeapon_Execute(COMMAND_ARGS)
 	auto weap = ((Actor*)thisObj)->GetEquippedWeapon();
 	if (!weap)
 		weap = TESDataHandler::GetDefaultWeapon();
-	REFR_RES = weap->refID;
+	REFR_RES = weap->GetFormID();
 	return true;
 }
 
@@ -626,7 +626,7 @@ bool Cmd_GetEquippedWeaponRef_Execute(COMMAND_ARGS)
 	if (weapInfo && weapInfo->extendData)
 	{
 		if (auto const invRef = InventoryRefCreateEntry(thisObj, weapInfo->type, weapInfo->countDelta, weapInfo->extendData->GetFirstItem()))
-			REFR_RES = invRef->refID;
+			REFR_RES = invRef->GetFormID();
 	}
 	return true;
 }
@@ -645,11 +645,11 @@ bool Cmd_SetItemHotkeyIconPath_Execute(COMMAND_ARGS)
 		if (!newIconPath || !newIconPath[0]) // empty string
 		{
 			// Remove hotkey icon override if it exists.
-			g_hotkeyIconOverrides.erase(item->refID);
+			g_hotkeyIconOverrides.erase(item->GetFormID());
 		}
 		else
 		{
-			g_hotkeyIconOverrides[item->refID] = std::string(newIconPath);
+			g_hotkeyIconOverrides[item->GetFormID()] = std::string(newIconPath);
 		}
 	}
 	return true;
@@ -664,7 +664,7 @@ bool Cmd_GetItemHotkeyIconPath_Execute(COMMAND_ARGS)
 	uint32_t bOnlyReturnOverride = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &item, &bOnlyReturnOverride) && item && item->IsItem())
 	{
-		if (auto iter = g_hotkeyIconOverrides.find(item->refID);
+		if (auto iter = g_hotkeyIconOverrides.find(item->GetFormID());
 			iter != g_hotkeyIconOverrides.end())
 		{
 			path = iter->second.c_str();
@@ -750,7 +750,7 @@ bool Cmd_SetSingleItemRefCurrentHealth_Execute(COMMAND_ARGS)
 	uint32_t setPercent = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &health, &setPercent))
 		return true;
-	InventoryRef* invRef = InventoryRefGetForID(thisObj->refID);
+	InventoryRef* invRef = InventoryRefGetForID(thisObj->GetFormID());
 	if (!invRef)
 		return true;
 
@@ -776,7 +776,7 @@ bool Cmd_SetSingleItemRefCurrentHealth_Execute(COMMAND_ARGS)
 		else if (xData = invRef->CreateExtraData()) {
 			xData->Add(ExtraHealth::Create(health));
 		}
-		REFR_RES = invRef->tempRef->refID;
+		REFR_RES = invRef->tempRef->GetFormID();
 	}
 	else // create a new single stack, separating it from its old stack xDataList.
 	{
@@ -796,7 +796,7 @@ bool Cmd_SetSingleItemRefCurrentHealth_Execute(COMMAND_ARGS)
 		newDataList->Add(ExtraHealth::Create(health));
 		auto* entry = invRef->CopyWithNewExtraData(newDataList);
 		auto* newRefr = CreateRefForStackWithoutCopy(invRef->containerRef, entry);
-		REFR_RES = newRefr ? newRefr->refID : 0;
+		REFR_RES = newRefr ? newRefr->GetFormID() : 0;
 	}
 
 	//### todo: copy the cleanup loop at 0x7B8160 to put the changed invRef inside a new stack,
@@ -944,7 +944,7 @@ bool Cmd_GetSelectedItemRefSO_Execute(COMMAND_ARGS)
 		return true;
 	}
 	if (itemRef)
-		REFR_RES = itemRef->refID;
+		REFR_RES = itemRef->GetFormID();
 	return true;
 }
 
@@ -968,7 +968,7 @@ bool Cmd_GetCalculatedItemWeight_Eval(COMMAND_ARGS_EVAL)
 	//todo: Check 0x57728A, call GetInventoryWeight with a pseudo ExtraContainerChanges::Data (?).
 	if (thisObj)
 	{
-		if (auto const invRef = InventoryRefGetForID(thisObj->refID))
+		if (auto const invRef = InventoryRefGetForID(thisObj->GetFormID()))
 		{
 			if (auto contChangesData = ExtraContainerChanges::Data::Create(invRef->containerRef))
 			{

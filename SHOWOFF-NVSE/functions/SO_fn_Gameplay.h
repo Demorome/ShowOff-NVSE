@@ -800,8 +800,8 @@ ActorAndItemPairs g_noEquipMap;
 bool TryExtractActorItemPair(TESObjectREFR* thisObj, TESForm* item, ActorAndItemPair& actorAndItemOut)
 {
 	if (IS_REFERENCE(item)) item = ((TESObjectREFR*)item)->baseForm;
-	ActorRefID const actorID = IS_ACTOR(thisObj) ? thisObj->refID : NULL;
-	ItemRefID const itemID = (item && item->IsItem()) ? item->refID : NULL;
+	ActorRefID const actorID = IS_ACTOR(thisObj) ? thisObj->GetFormID() : NULL;
+	ItemRefID const itemID = (item && item->IsItem()) ? item->GetFormID() : NULL;
 	if (!itemID && !actorID)  // at least one must be there for filtering, otherwise useless/dangerous.
 		return false;
 	actorAndItemOut = { actorID, itemID };
@@ -869,7 +869,7 @@ bool Cmd_GetNoEquipShowOff_Execute(COMMAND_ARGS)
 	{
 		if (auto const &iter = g_NoEquipFunctions.find(scriptObj->GetOverridingModIdx()); iter != g_NoEquipFunctions.end())
 		{
-			REFR_RES = iter->second.Get()->refID;
+			REFR_RES = iter->second.Get()->GetFormID();
 		}
 	}
 	else
@@ -1329,7 +1329,7 @@ bool Cmd_GetActorPreferredWeapon_Execute(COMMAND_ARGS)
 		return true;
 	const auto weapForm = ThisCall<TESObjectWEAP*>(0x891C80, thisObj, combatWeaponType); //Actor::GetPreferredWeapon
 	if (weapForm)
-		REFR_RES = weapForm->refID;  
+		REFR_RES = weapForm->GetFormID();  
 	return true;
 }
 
@@ -1524,7 +1524,7 @@ bool Cmd_SetNoEquip_Execute(COMMAND_ARGS)
 	uint32_t noEquip;
 	if (ExtractArgs(EXTRACT_ARGS, &noEquip))
 	{
-		InventoryRef* invRef = InventoryRefGetForID(thisObj->refID);
+		InventoryRef* invRef = InventoryRefGetForID(thisObj->GetFormID());
 		if (!invRef) return true;
 		ExtraDataList* xData = invRef ? invRef->data.xData : NULL;
 		if (xData)

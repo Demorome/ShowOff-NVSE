@@ -138,8 +138,8 @@ AuxStringMapModsMap s_auxStringMapArraysPerm, s_auxStringMapArraysTemp;
 
 uint32_t __fastcall GetSubjectID(TESForm* form, TESObjectREFR* thisObj)
 {
-	if (form) return IS_REFERENCE(form) ? ((TESObjectREFR*)form)->baseForm->refID : form->refID;
-	if (thisObj) return thisObj->refID;
+	if (form) return IS_REFERENCE(form) ? ((TESObjectREFR*)form)->baseForm->GetFormID() : form->GetFormID();
+	if (thisObj) return thisObj->GetFormID();
 	return 0;
 }
 

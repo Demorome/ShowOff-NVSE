@@ -361,7 +361,7 @@ class FindByForm {
 public:
 	FindByForm(TESForm* pForm) : m_pForm(pForm) {}
 	bool Accept(TESForm* pForm) const {
-		return pForm && (pForm->refID == m_pForm->refID) ? true : false;
+		return pForm && (pForm->GetFormID() == m_pForm->GetFormID()) ? true : false;
 	}
 };
 
@@ -401,7 +401,7 @@ void BGSListForm::Dump(const std::function<void(const std::string&)>& output)
 		TESForm* form = iter.Get();
 		if (form)
 		{
-			std::string elementInfo = FormatString("%d: %s (%s) [%08X]", iIndex, ::GetFullName(form), form->GetName(), form->refID);
+			std::string elementInfo = FormatString("%d: %s (%s) [%08X]", iIndex, ::GetFullName(form), form->GetName(), form->GetFormID());
 			output(elementInfo);
 			_MESSAGE("%s", elementInfo.c_str());
 		}
@@ -767,7 +767,7 @@ const char* TESPackage::LocationData::StringForLocationCodeAndData(void)
 			case kPackLocation_ObjectID:
 				if (object.form)
 					sprintf_s(result, resultSize, "%s \"%s\" [%08X] with a radius of %u", TESPackage_LocationStrings[locationType], object.form->GetTheName(), 
-						object.form->refID, radius);
+						object.form->GetFormID(), radius);
 				else
 					sprintf_s(result, resultSize, "%s \"\" [%08X] with a radius of %u", TESPackage_LocationStrings[locationType], 0, radius);
 				break;
@@ -793,13 +793,13 @@ const char* TESPackage::TargetData::StringForTargetCodeAndData(void)
 			case kTargetType_Refr:
 				if (target.refr)
 					sprintf_s(result, resultSize, "%s \"%s\" [%08X] with a distance of %u", StringForTargetCode(targetType), target.refr->GetTheName(),
-						target.refr->refID, count);
+						target.refr->GetFormID(), count);
 				else
 					sprintf_s(result, resultSize, "%s [%08X] with a distance of %u", StringForTargetCode(targetType), 0, count);
 				break;
 			case kTargetType_BaseObject:
 				if (target.form)
-					sprintf_s(result, resultSize, "%s \"%s\" [%08X] with a count of %u", StringForTargetCode(targetType), target.form->GetTheName(), target.form->refID, count);
+					sprintf_s(result, resultSize, "%s \"%s\" [%08X] with a count of %u", StringForTargetCode(targetType), target.form->GetTheName(), target.form->GetFormID(), count);
 				else
 					sprintf_s(result, resultSize, "%s [%08X] with a count of %u", StringForTargetCode(targetType), 0, count);
 				break;

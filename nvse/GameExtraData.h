@@ -578,7 +578,7 @@ public:
 
 	bool Accept(ExtraContainerChanges::EntryData* match) const
 	{
-		return (match && match->type && m_toMatch == match->type->refID);
+		return (match && match->type && m_toMatch == match->type->GetFormID());
 	}
 };
 
@@ -591,7 +591,7 @@ public:
 
 	bool Accept(ExtraContainerChanges::EntryData* match) const
 	{
-		return (match && match->type && match->type->TryGetREFRParent() && m_toMatch == match->type->TryGetREFRParent()->refID);
+		return (match && match->type && match->type->TryGetREFRParent() && m_toMatch == match->type->TryGetREFRParent()->GetFormID());
 	}
 };
 

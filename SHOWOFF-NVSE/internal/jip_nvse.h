@@ -170,7 +170,7 @@ public:
 		ScopedLock lock(g_Lock);
 		Clear();
 		type = 2;
-		refID = value ? value->refID : 0;
+		refID = value ? value->GetFormID() : 0;
 	}
 
 	void SetStr(const char* value)
@@ -330,7 +330,7 @@ void BGSLevL::Dump()
 		form = data->form;
 		lvlList = form->GetLvlList();
 		Console_Print("%s%s [%08X] Level: %d Count: %d Health: %.2f", kDumpLvlListIndentStr + s_dumpLvlListIndent,
-			lvlList ? "(LeveledList)" : form->GetTheName(), form->refID, data->level, data->count, data->extra ? data->extra->health : 0);
+			lvlList ? "(LeveledList)" : form->GetTheName(), form->GetFormID(), data->level, data->count, data->extra ? data->extra->health : 0);
 		if (lvlList)
 		{
 			s_dumpLvlListIndent -= 5;

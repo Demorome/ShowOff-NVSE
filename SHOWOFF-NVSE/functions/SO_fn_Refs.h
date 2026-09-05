@@ -99,7 +99,7 @@ bool Cmd_PlaceAtReticleAlt_Execute(COMMAND_ARGS)
 
 		if (auto* refRes = PlaceAtReticleAlt::g_lastPlacedRef)
 		{
-			REFR_RES = refRes->refID;
+			REFR_RES = refRes->GetFormID();
 		}
 	}
 

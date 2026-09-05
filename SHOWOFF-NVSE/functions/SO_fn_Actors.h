@@ -18,7 +18,7 @@ uint32_t __fastcall GetNumActorsInRangeFromRef_Call(TESObjectREFR* const thisObj
 	bool const onlyDetectedActors = (flags & kFlag_onlyDetectedActors) && isThisObjActor;
 
 	if (g_ShowFuncDebug)
-		_MESSAGE("DebugGetNumActorsInRangeFromRef - begin dump for thisObj %s (%08x)", thisObj->GetName(), thisObj->refID);
+		_MESSAGE("DebugGetNumActorsInRangeFromRef - begin dump for thisObj %s (%08x)", thisObj->GetName(), thisObj->GetFormID());
 	
 	MobileObject** objArray = ProcessLists::GetSingleton()->objects.data, ** arrEnd = objArray;
 	objArray += ProcessLists::GetSingleton()->beginOffsets[0];  //Only objects in High process.
@@ -30,7 +30,7 @@ uint32_t __fastcall GetNumActorsInRangeFromRef_Call(TESObjectREFR* const thisObj
 		if (actor && actor->IsActor() && actor != thisObj)
 		{
 			if (g_ShowFuncDebug)
-				_MESSAGE("Current actor >>> %08x (%s). isDead: %d, distance: %f", actor->refID, actor->GetName(), actor->GetDead(), GetDistance3D(thisObj, actor));
+				_MESSAGE("Current actor >>> %08x (%s). isDead: %d, distance: %f", actor->GetFormID(), actor->GetName(), actor->GetDead(), GetDistance3D(thisObj, actor));
 		
 			if (noDeadActors && actor->GetDead())
 				continue;
@@ -84,7 +84,7 @@ uint32_t __fastcall GetNumCombatActorsFromActorCALL(TESObjectREFR* thisObj, floa
 	//Even if the calling actor is dead, they could still have combat targets, so we don't filter that out.
 
 	if (g_ShowFuncDebug)
-		_MESSAGE("DebugGetNumActorsInRangeFromRef - begin dump for thisObj %s (%08x)", thisObj->GetName(), thisObj->refID);
+		_MESSAGE("DebugGetNumActorsInRangeFromRef - begin dump for thisObj %s (%08x)", thisObj->GetName(), thisObj->GetFormID());
 
 	enum functionFlags
 	{
@@ -106,7 +106,7 @@ uint32_t __fastcall GetNumCombatActorsFromActorCALL(TESObjectREFR* thisObj, floa
 		if (actor && (actor != thisObj))  
 		{
 			if (g_ShowFuncDebug)
-				_MESSAGE("Current actor >>> %08x (%s). isDead: %d, distance: %f", actor->refID, actor->GetName(), actor->GetDead(), GetDistance3D(thisObj, actor));
+				_MESSAGE("Current actor >>> %08x (%s). isDead: %d, distance: %f", actor->GetFormID(), actor->GetName(), actor->GetDead(), GetDistance3D(thisObj, actor));
 
 			if (noInvisibleActors && actor->IsInvisible())
 				return;
@@ -439,16 +439,16 @@ namespace SayTo	//functions related to SayTo
 			switch (request)
 			{
 			case kData_Speaker:
-				REFR_RES = xSayTo->speaker->refID;
+				REFR_RES = xSayTo->speaker->GetFormID();
 				break;
 			case kData_Topic:
-				REFR_RES = xSayTo->topic->refID;
+				REFR_RES = xSayTo->topic->GetFormID();
 				break;
 			case kData_TopicInfo:
-				REFR_RES = xSayTo->info->refID;
+				REFR_RES = xSayTo->info->GetFormID();
 				break;
 			case kData_Quest:
-				REFR_RES = xSayTo->quest->refID;
+				REFR_RES = xSayTo->quest->GetFormID();
 				break;
 			}
 		}

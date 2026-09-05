@@ -50,7 +50,7 @@ __declspec(naked) TESContainer *TESObjectREFR::GetContainer()
 
 bool TESObjectREFR::IsMapMarker()
 {
-	return baseForm->refID == 0x10;
+	return baseForm->GetFormID() == 0x10;
 }
 
 InventoryChanges* TESObjectREFR::GetInventoryChanges()

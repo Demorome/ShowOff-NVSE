@@ -596,6 +596,10 @@ public:
 	const char *GetTheName() const;
 	bool IsCloned() const;
 
+	uint32_t GetFormID() const {
+		return refID;
+	}
+
 	// adds a new form to the game (from CloneForm or LoadForm)
 	void DoAddForm(TESForm* newForm, bool bPersist = true, bool record = true) const;
 	// return a new base form which is the clone of this form

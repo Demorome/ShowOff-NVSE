@@ -45,7 +45,7 @@ bool Cmd_SetOnAuxTimerStartHandler_Execute(COMMAND_ARGS)
 		filters[0].form = thisObj;
 	}
 
-	filters[0].refID = filters[0].form->refID;
+	filters[0].refID = filters[0].form->GetFormID();
 	if (OnAuxTimerStart)
 	{
 		if (setOrRemove)
@@ -79,7 +79,7 @@ bool Cmd_SetOnAuxTimerStopHandler_Execute(COMMAND_ARGS)
 		filters[0].form = thisObj;
 	}
 
-	filters[0].refID = filters[0].form->refID;
+	filters[0].refID = filters[0].form->GetFormID();
 	if (OnAuxTimerStop)
 	{
 		if (setOrRemove)
@@ -113,7 +113,7 @@ bool Cmd_SetOnAuxTimerUpdateHandler_Execute(COMMAND_ARGS)
 		filters[0].form = thisObj;
 	}
 
-	filters[0].refID = filters[0].form->refID;
+	filters[0].refID = filters[0].form->GetFormID();
 	if (OnAuxTimerUpdate)
 	{
 		if (setOrRemove)
@@ -465,7 +465,7 @@ namespace PreActivateInventoryItem
 
 		if (g_ShowFuncDebug)
 			Console_Print("CanActivateItemHook: CanActivate: %i, Item: [%08X], %s, type: %u", 
-				shouldActivate, invRef->baseForm->refID, invRef->baseForm->GetName(), invRef->baseForm->typeID);
+				shouldActivate, invRef->baseForm->GetFormID(), invRef->baseForm->GetName(), invRef->baseForm->typeID);
 
 		return shouldActivate;
 	}
@@ -580,7 +580,7 @@ namespace PreActivateInventoryItem
 
 			if (g_ShowFuncDebug)
 				Console_Print("Can(Special)UseItemRef hook: CanActivate: %i, Item: [%08X], %s, type: %u",
-					shouldActivate, invRef->baseForm->refID, invRef->baseForm->GetName(), invRef->baseForm->typeID);
+					shouldActivate, invRef->baseForm->GetFormID(), invRef->baseForm->GetName(), invRef->baseForm->typeID);
 
 			return shouldActivate;
 		}
@@ -1634,7 +1634,7 @@ bool Cmd_GetAddedItemRefShowOff_Execute(COMMAND_ARGS)
 {
 	if (auto const itemRef = OnAddAlt::GetItemRef())
 	{
-		REFR_RES = itemRef->refID;
+		REFR_RES = itemRef->GetFormID();
 	}
 	else *result = 0;
 	return true;

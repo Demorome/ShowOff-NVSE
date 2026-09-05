@@ -1020,7 +1020,7 @@ bool ExtractFormattedString(FormatStringArgs& args, char* buffer)
 				else
 				{			
 					char formID[9];
-					sprintf_s(formID, 9, "%08X", form->refID);
+					sprintf_s(formID, 9, "%08X", form->GetFormID());
 					fmtString.insert(strIdx, formID);
 				}
 			}
@@ -1405,7 +1405,7 @@ bool ExtractSetStatementVar(Script* script, ScriptEventList* eventList, void* sc
 			{
 				*outVarData = globalVar->data;
 				if (outModIndex)
-					*outModIndex = (globalVar->refID >> 24);
+					*outModIndex = (globalVar->GetFormID() >> 24);
 				bExtracted = true;
 			}
 		}
@@ -1460,7 +1460,7 @@ bool ExtractSetStatementVar(Script* script, ScriptEventList* eventList, void* sc
 			{
 				*outVarData = var->data;
 				if (outModIndex)
-					*outModIndex = (script->refID >> 24);
+					*outModIndex = (script->GetFormID() >> 24);
 				bExtracted = true;
 			}
 		}
@@ -1572,7 +1572,7 @@ bool SCRIPT_ASSERT(bool expr, Script* script, const char * errorMsg, ...)
 	//	static bool bAlerted = false;			//only alert user on first error
 	//	static std::set<uint32_t> naughtyScripts;	//one error per script to avoid thrashing
 	//
-	//	if (!expr && naughtyScripts.find(script->refID) == naughtyScripts.end())
+	//	if (!expr && naughtyScripts.find(script->GetFormID()) == naughtyScripts.end())
 	//	{
 	//		const ModEntry ** activeMods = (*g_dataHandler)->GetActiveModList();
 	//		uint8_t modIndex = script->GetModIndex();
@@ -1584,9 +1584,9 @@ bool SCRIPT_ASSERT(bool expr, Script* script, const char * errorMsg, ...)
 	//		else
 	//			modName = "Unknown";
 	//
-	////		sprintf_s(errorHeader, sizeof(errorHeader) - 1, "** Error: Script %08X in file \"%s\" **", script->refID, modName);
+	////		sprintf_s(errorHeader, sizeof(errorHeader) - 1, "** Error: Script %08X in file \"%s\" **", script->GetFormID(), modName);
 	////		_MESSAGE("%s", errorHeader);
-	//		_MESSAGE("** Script Error: Script %08x in file \"%s\" **", script->refID, modName);
+	//		_MESSAGE("** Script Error: Script %08x in file \"%s\" **", script->GetFormID(), modName);
 	//
 	//		va_list args;
 	//		va_start(args, errorMsg);
@@ -1605,7 +1605,7 @@ bool SCRIPT_ASSERT(bool expr, Script* script, const char * errorMsg, ...)
 	//			bAlerted = true;
 	//		}
 	//
-	//		naughtyScripts.insert(script->refID);
+	//		naughtyScripts.insert(script->GetFormID());
 	//	}
 	return expr;
 }

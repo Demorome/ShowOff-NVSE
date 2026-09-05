@@ -63,7 +63,7 @@ public:
 	}
 	virtual bool IsAcceptedParameter(GenericFilters parameter)
 	{
-		return parameter.form->refID != 0x3B; // xMarker
+		return parameter.form->GetFormID() != 0x3B; // xMarker
 
 	}
 
@@ -78,11 +78,11 @@ public:
 			do {
 				TESForm* it = iterator->data;
 				if (IsAcceptedParameter(it))
-					InsertToFilter(0, it->refID);
+					InsertToFilter(0, it->GetFormID());
 			} while (iterator = iterator->next);
 
 		}
-		else if (IsAcceptedParameter(currentFilter)) InsertToFilter(0, currentFilter->refID);
+		else if (IsAcceptedParameter(currentFilter)) InsertToFilter(0, currentFilter->GetFormID());
 
 	}
 

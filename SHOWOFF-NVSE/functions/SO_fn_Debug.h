@@ -38,7 +38,7 @@ bool Cmd_ConditionPrint_Eval(COMMAND_ARGS_EVAL)
 	const char* edID = NULL;
 	if (thisObj)
 	{
-		refID = thisObj->refID;
+		refID = thisObj->GetFormID();
 		edID = thisObj->GetName();  //Only works with JG's bLoadEditorIDs = 1, otherwise returns an empty string.
 	}
 	Console_Print("TestCondition >> 1. thisObj: [%08X] (%s)", refID, edID);

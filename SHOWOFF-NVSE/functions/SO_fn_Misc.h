@@ -522,7 +522,7 @@ bool Cmd_SetSeedUsingForm_Execute(COMMAND_ARGS)
 {
 	TESForm* seedForm = nullptr;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &seedForm)) return true;
-	uint32_t const seed = seedForm ? seedForm->refID : 0;
+	uint32_t const seed = seedForm ? seedForm->GetFormID() : 0;
 	SetSeedForMod(seed, scriptObj);
 	return true;
 }
@@ -1095,7 +1095,7 @@ bool Cmd_SpawnTracingProjectile_Execute(COMMAND_ARGS)
 		weap, *projectileToTrail->GetPos(), projectileToTrail->rotZ, projectileToTrail->rotX,
 		0, 0, projectileToTrail->parentCell, ignoreGravity);
 
-	REFR_RES = newProj->refID;
+	REFR_RES = newProj->GetFormID();
 	return true;
 }
 

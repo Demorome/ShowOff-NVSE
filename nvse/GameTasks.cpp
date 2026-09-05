@@ -43,8 +43,8 @@ void IOManager::DumpQueuedTasks()
 			continue;
 		else if (qr->refr)
 		{
-			Console_Print("\t%s (%08x)", GetFullName(qr->refr), qr->refr->refID);
-			_MESSAGE("\t%s (%08x)", GetFullName(qr->refr), qr->refr->refID);
+			Console_Print("\t%s (%08x)", GetFullName(qr->refr), qr->refr->GetFormID());
+			_MESSAGE("\t%s (%08x)", GetFullName(qr->refr), qr->refr->GetFormID());
 		}
 		else
 			_MESSAGE("NULL reference");
