@@ -52,13 +52,16 @@ bool Cmd_GetIsActivationPromptShown_Execute(COMMAND_ARGS)
 	return Cmd_GetIsActivationPromptShown_Eval(nullptr, nullptr, nullptr, result);
 }
 
-DEFINE_COMMAND_PLUGIN(GetProjectileRefIsStuck, , true, nullptr);
-bool Cmd_GetProjectileRefIsStuck_Execute(COMMAND_ARGS)
-{
+DEFINE_CMD_COND_PLUGIN(GetProjectileRefIsStuck, , true, nullptr);
+bool Cmd_GetProjectileRefIsStuck_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
 	if (thisObj && thisObj->IsProjectile())
 		*result = (static_cast<Projectile*>(thisObj)->projFlags & Projectile::kProjFlag_IsStuck) != 0;
 	return true;
+}
+
+bool Cmd_GetProjectileRefIsStuck_Execute(COMMAND_ARGS) {
+	return Cmd_GetProjectileRefIsStuck_Eval(thisObj, nullptr, nullptr, result);
 }
 
 auto Cmd_PlaceAtReticle = (bool(__cdecl*)(COMMAND_ARGS)) 0x5DF040;
