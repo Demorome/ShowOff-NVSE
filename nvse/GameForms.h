@@ -6056,6 +6056,10 @@ public:
 	ZoneFlags	zoneFlags;					// 01E
 	uint8_t		pad01C;						// 01F
 	uint32_t		unk020[4];					// 020
+
+	bool GetNeverReset() const {
+		return zoneFlags & kEncounterZone_NoRespawns;
+	}
 };
 
 // 40

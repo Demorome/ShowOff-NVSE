@@ -754,15 +754,12 @@ bool Cmd_FormListRemoveForm_Execute(COMMAND_ARGS)
 	return true;
 }
 
-bool Cmd_GetZoneRespawns_Execute(COMMAND_ARGS)
-{
+bool Cmd_GetZoneRespawns_Execute(COMMAND_ARGS) {
 	*result = -1;	//bRespawns. -1 if could not extract the form.
-	TESForm* form;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form))
-		return true;
-	if (auto const zone = DYNAMIC_CAST(form, TESForm, BGSEncounterZone))
-	{
-		*result = (zone->zoneFlags & BGSEncounterZone::kEncounterZone_NoRespawns) == 0;
+	TESForm* pForm;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm) && IS_ID(pForm, BGSEncounterZone)) {
+		BGSEncounterZone* pZone = static_cast<BGSEncounterZone*>(pForm);
+		*result = !pZone->GetNeverReset();
 	}
 	return true;
 }
@@ -775,17 +772,17 @@ bool Cmd_ClearCinematicTextQueue_Execute(COMMAND_ARGS)
 }
 
 //Credits to LN's GetZone function for most of the code here.
-bool Cmd_GetCellEncounterZone_Execute(COMMAND_ARGS)
-{
-	*result = 0;	//zone form
-	TESForm* form;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form))
+bool Cmd_GetCellEncounterZone_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESForm* pForm;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pForm) || !IS_ID(pForm, TESObjectCELL))
 		return true;
-	if (auto const cell = DYNAMIC_CAST(form, TESForm, TESObjectCELL)) {
-		ExtraEncounterZone* xEncZone = GetExtraTypeJIP(&cell->extraDataList, EncounterZone);
-		if (xEncZone && xEncZone->zone)
-			REFR_RES = xEncZone->zone->refID;
-	}
+
+	const TESObjectCELL* pCell = static_cast<TESObjectCELL*>(pForm);
+	const BGSEncounterZone* pZone = pCell->extraDataList.GetEncounterZone();
+	if (pZone)
+		REFR_RES = pZone->GetFormID();
+
 	return true;
 }
 

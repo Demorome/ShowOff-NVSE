@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Utilities.h>
+
 // Added to remove a cyclic dependency between GameForms.h and GameExtraData.h
 
 class TESForm;
@@ -45,10 +47,16 @@ struct BaseExtraList
 	int32_t GetCount() const;
 };
 
+class BGSEncounterZone;
+
 struct ExtraDataList : public BaseExtraList
 {
 	ExtraDataList *CreateCopy();
 	static ExtraDataList* __stdcall Create(BSExtraData *xBSData = NULL);
+
+	BGSEncounterZone* GetEncounterZone() const {
+		return ThisCall<BGSEncounterZone*>(0x421C30, this);
+	}
 };
 
 static_assert(sizeof(ExtraDataList) == 0x020);
