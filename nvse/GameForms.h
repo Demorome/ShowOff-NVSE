@@ -1325,6 +1325,10 @@ public:
 
 	uint32_t GetBipedMask() const;
 	void SetBipedMask(uint32_t mask);
+
+	static TESBipedModelForm* GetFormAsBipedModel(const TESForm* apForm) {
+		return CdeclCall<TESBipedModelForm*>(0x480DB0, apForm);
+	}
 };
 
 static_assert(sizeof(TESBipedModelForm) == 0x0DC);

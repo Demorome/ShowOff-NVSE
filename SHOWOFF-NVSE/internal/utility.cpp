@@ -1853,31 +1853,6 @@ __declspec(naked) TESObjectCELL* TESObjectREFR::GetParentCell()
 	}
 }
 
-
-TESBipedModelForm* CastFormToBipedModel(TESForm* form)
-{
-	if (!form) return nullptr;
-	switch (form->typeID)
-	{
-		case kFormType_TESObjectARMO:
-		{
-			auto armo = (TESObjectARMO*)form;
-			return &armo->bipedModel;
-		}
-		case kFormType_TESObjectARMA:
-		{
-			auto arma = (TESObjectARMA*)form;
-			return &arma->bipedModel;
-		}
-		case kFormType_TESObjectCLOT:
-		{
-			auto clot = (TESObjectCLOT*)form;
-			return &clot->bipedModel;
-		}
-	}
-	return nullptr;
-}
-
 TESRace* CastFormToRace(TESForm* form)
 {
 	if (!form) return nullptr;
@@ -1896,7 +1871,7 @@ TESRace* CastFormToRace(TESForm* form)
 // Copied after NVSE's IsPlayable
 bool IsFormPlayable(TESForm* form)
 {
-	TESBipedModelForm* biped = CastFormToBipedModel(form);
+	TESBipedModelForm* biped = TESBipedModelForm::GetFormAsBipedModel(form);
 	if (biped)
 		return biped->IsPlayable();
 
@@ -1914,7 +1889,7 @@ bool IsFormPlayable(TESForm* form)
 
 bool IsItemPlayable(TESForm* form)
 {
-	if (auto biped = CastFormToBipedModel(form))
+	if (auto biped = TESBipedModelForm::GetFormAsBipedModel(form))
 		return biped->IsPlayable();
 
 	if (IS_TYPE(form, TESObjectWEAP))
@@ -1931,7 +1906,7 @@ short GetEquipType(TESForm* form)  // Ammo is not equip-able in the same sense a
 	if (IS_TYPE(form, TESObjectWEAP)) {
 		return kEquipType_Weapon;
 	}
-	if (CastFormToBipedModel(form)) {
+	if (TESBipedModelForm::GetFormAsBipedModel(form)) {
 		return kEquipType_Armor;
 	}
 	return false;
@@ -1939,7 +1914,7 @@ short GetEquipType(TESForm* form)  // Ammo is not equip-able in the same sense a
 
 bool IsEquipableItemPlayable(TESForm* form)  // Ammo is not equip-able in the same sense.
 {
-	TESBipedModelForm* biped = CastFormToBipedModel(form);
+	TESBipedModelForm* biped = TESBipedModelForm::GetFormAsBipedModel(form);
 	if (biped)
 		return biped->IsPlayable();
 	if (IS_TYPE(form, TESObjectWEAP))
@@ -1956,7 +1931,7 @@ uint32_t GetFormEquipSlotMask(TESForm* form)
 	}
 	else
 	{
-		TESBipedModelForm* pBip = CastFormToBipedModel(form);
+		TESBipedModelForm* pBip = TESBipedModelForm::GetFormAsBipedModel(form);
 		if (pBip)
 			equipSlotMask = pBip->partMask;
 	}
