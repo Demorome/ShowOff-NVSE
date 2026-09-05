@@ -40,7 +40,7 @@ DEFINE_COMMAND_PLUGIN(SetLevelUpMenuCanExitEarly, "", false, kParams_OneInt);  /
 DEFINE_COMMAND_PLUGIN(SetLevelUpMenuPoints, "", false, kParams_TwoInts);
 DEFINE_COMMAND_PLUGIN(GetExplosionRefSource, "", true, NULL);
 DEFINE_COMMAND_PLUGIN(SetExplosionRefSource, "", true, kParams_OneActorRef);
-DEFINE_COMMAND_PLUGIN(GetExplosionRefRadius, "Accounts for AdjustExplosionRadius perk entry point.", true, NULL);
+DEFINE_CMD_COND_PLUGIN(GetExplosionRefRadius, "Accounts for AdjustExplosionRadius perk entry point.", true, NULL);
 DEFINE_COMMAND_PLUGIN(SetExplosionRefRadius, "", true, kParams_OneFloat);
 DEFINE_COMMAND_ALT_PLUGIN(SetNoEquipShowOff, SetNoEquipSO, "Sets whether or not there's a prevention for an item baseform from being activated from an actor's inventory.", false, kParams_OneForm_OneInt_OneOptionalScript);
 DEFINE_COMMAND_ALT_PLUGIN(GetNoEquipShowOff, GetNoEquipSO, "Returns whether or not there's a prevention for an item baseform from being activated from an actor's inventory.", false, kParams_OneForm_OneInt);
@@ -747,49 +747,57 @@ bool Cmd_SetLevelUpMenuPoints_Execute(COMMAND_ARGS)
 }
 
 
-bool Cmd_GetExplosionRefSource_Execute(COMMAND_ARGS)
-{
+bool Cmd_GetExplosionRefSource_Execute(COMMAND_ARGS) {
 	*result = 0;
-	if (auto const explosion = DYNAMIC_CAST(thisObj, TESObjectREFR, Explosion))
-	{
-		if (explosion->source)
-			REFR_RES = explosion->source->refID;
-	}
+	if (!thisObj->IsExplosion())
+		return true;
+
+	Explosion* pExplosion = static_cast<Explosion*>(thisObj);
+	if (pExplosion->source)
+		REFR_RES = pExplosion->source->GetFormID();
 	return true;
 }
-bool Cmd_SetExplosionRefSource_Execute(COMMAND_ARGS)
-{
-	*result = false;
-	Actor* newSource;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &newSource) || !IS_ACTOR(newSource))
+
+bool Cmd_SetExplosionRefSource_Execute(COMMAND_ARGS) {
+	*result = 0;
+	if (!thisObj->IsExplosion())
 		return true;
-	if (auto const explosion = DYNAMIC_CAST(thisObj, TESObjectREFR, Explosion))
-	{
-		explosion->source = newSource;
-		*result = true;
+
+	Explosion* pExplosion = static_cast<Explosion*>(thisObj);
+
+	TESObjectREFR* pSource;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pSource) && pSource->IsReference()) {
+		pExplosion->source = pSource;
+		*result = 1;
 	}
 	return true;
 }
 
-bool Cmd_GetExplosionRefRadius_Execute(COMMAND_ARGS)
-{
+bool Cmd_GetExplosionRefRadius_Eval(COMMAND_ARGS_EVAL) {
 	*result = -1;
-	if (auto const explosion = DYNAMIC_CAST(thisObj, TESObjectREFR, Explosion))
-	{
-		*result = explosion->radius;
-	}
+	if (!thisObj || !thisObj->IsExplosion())
+		return true;
+
+	Explosion* pExplosion = static_cast<Explosion*>(thisObj);
+	*result = pExplosion->radius;
 	return true;
 }
-bool Cmd_SetExplosionRefRadius_Execute(COMMAND_ARGS)
-{
-	*result = false;
-	float newRadius;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &newRadius))
+
+bool Cmd_GetExplosionRefRadius_Execute(COMMAND_ARGS) {
+	return Cmd_GetExplosionRefRadius_Eval(thisObj, nullptr, nullptr, result);
+}
+
+bool Cmd_SetExplosionRefRadius_Execute(COMMAND_ARGS) {
+	*result = 0;
+	if (!thisObj->IsExplosion())
 		return true;
-	if (auto const explosion = DYNAMIC_CAST(thisObj, TESObjectREFR, Explosion))
-	{
-		explosion->radius = newRadius;
-		*result = true;
+
+	Explosion* pExplosion = static_cast<Explosion*>(thisObj);
+
+	float fRadius;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &fRadius)) {
+		pExplosion->radius = fRadius;
+		*result = 1;
 	}
 	return true;
 }
