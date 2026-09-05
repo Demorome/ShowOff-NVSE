@@ -808,7 +808,6 @@ public:
 class bhkRigidBody;
 struct ParentSpaceNode;
 struct TeleportLink;
-struct ItemChange;
 class NiObject;
 struct MusicMarker;
 

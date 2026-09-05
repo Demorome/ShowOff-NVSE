@@ -433,6 +433,8 @@ typedef ExtraContainerChanges::FoundEquipData EquipData;
 typedef	ExtraContainerChanges::Data InventoryChanges;
 typedef	ExtraContainerChanges::EntryData EntryData;
 
+using ItemChange = EntryData;
+
 // https://stackoverflow.com/questions/50888127/how-can-i-use-an-unordered-set-with-a-custom-struct
 class EquipDataHashFunction {
 public:
