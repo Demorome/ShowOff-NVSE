@@ -365,6 +365,14 @@ public:
 		[[nodiscard]] bool HasWeaponMod(uint8_t effectCode) const {
 			return ThisCall<bool>(0x4BDA70, this, effectCode);
 		}
+
+		[[nodiscard]] bool GetWorn(bool abLeftOnly = false) const {
+			return ThisCall<bool>(0x4BDDD0, this, abLeftOnly);
+		}
+
+		[[nodiscard]] float GetItemHealth(bool abPercent) const {
+			return ThisCall<float>(0x4BCDB0, this, abPercent);
+		}
 	};
 
 	struct EntryDataList : tList<EntryData>
@@ -743,6 +751,18 @@ public:
 	String face, expression;
 
 	static ExtraSecuritronFace* Create();
+
+	void SetPersonality(const char* apPersonality) {
+		ThisCall(0x438260, this, apPersonality);
+	}
+
+	void SetMood(const char* apMood) {
+		ThisCall(0x438280, this, apMood);
+	}
+
+	void ApplyFace(NiAVObject* apScene) {
+		ThisCall(0x437F90, this, apScene);
+	}
 };
 
 // 010

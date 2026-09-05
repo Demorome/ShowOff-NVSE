@@ -5,7 +5,7 @@ uint32_t __fastcall GetNumActorsInRangeFromRef_Call(TESObjectREFR* const thisObj
 {
 	if (range <= 0) return 0;
 	if (!thisObj) return 0;
-	bool const isThisObjActor = IS_ACTOR(thisObj);
+	bool const isThisObjActor = thisObj->IsActor();
 	
 	enum functionFlags
 	{
@@ -201,125 +201,123 @@ bool Cmd_GetNumCombatActorsFromActor_Execute(COMMAND_ARGS)
 
 //copied after GetCreatureCombatSkill from JG
 DEFINE_CMD_COND_PLUGIN(GetCreatureTurningSpeed, "", false, kParams_OneOptionalActorBase); 
-bool Cmd_GetCreatureTurningSpeed_Eval(COMMAND_ARGS_EVAL)
-{
+bool Cmd_GetCreatureTurningSpeed_Eval(COMMAND_ARGS_EVAL) {
 	*result = -1;
-	TESForm* form;
+
+	TESForm* pForm = nullptr;
 	if (arg1)
-		form = (TESForm*)arg1;
+		pForm = (TESForm*)arg1;
 	else if (thisObj)
-		form = thisObj->baseForm;
-	else return true;
-	if (auto const creature = DYNAMIC_CAST(form, TESForm, TESCreature))
-		*result = creature->turningSpeed;
+		pForm = thisObj->baseForm;
+
+	if (pForm && IS_ID(pForm, TESCreature))
+		*result = static_cast<TESCreature*>(pForm)->turningSpeed;
+
 	return true;
 }
-bool Cmd_GetCreatureTurningSpeed_Execute(COMMAND_ARGS)
-{
+
+bool Cmd_GetCreatureTurningSpeed_Execute(COMMAND_ARGS) {
 	*result = -1;
-	TESCreature* creature = NULL;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &creature)) return true;
-	return Cmd_GetCreatureTurningSpeed_Eval(thisObj, creature, 0, result);
+	TESCreature* pCreature = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pCreature)) 
+		return true;
+
+	return Cmd_GetCreatureTurningSpeed_Eval(thisObj, pCreature, nullptr, result);
 }
 
 // Credits to JIP LN for the SetCreature__ code format.
 DEFINE_COMMAND_PLUGIN(SetCreatureTurningSpeed, "", false, kParams_OneFloat_OneOptionalActorBase);
-bool Cmd_SetCreatureTurningSpeed_Execute(COMMAND_ARGS)
-{
-	*result = false;
-	TESCreature* creature = NULL;
-	float turningSpeed = 0;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &turningSpeed, &creature) || turningSpeed < 0) return true;
-	if (!creature)
-	{
-		if (!thisObj || !thisObj->IsActor()) return true;
-		creature = (TESCreature*)((Actor*)thisObj)->GetActorBase();
-	}
-	if IS_TYPE(creature, TESCreature)
-	{
-		creature->turningSpeed = turningSpeed;
-		*result = true;
+bool Cmd_SetCreatureTurningSpeed_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESCreature* pCreature = nullptr;
+	float fTurningSpeed = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &fTurningSpeed, &pCreature) || fTurningSpeed < 0) 
+		return true;
+
+	if (!pCreature && thisObj && thisObj->IsCreature())
+		pCreature = static_cast<TESCreature*>(static_cast<Creature*>(thisObj)->GetActorBase());
+
+	if (pCreature && IS_ID(pCreature, TESCreature)) {
+		pCreature->turningSpeed = fTurningSpeed;
+		*result = 1;
 	}
 	return true;
 }
 
 DEFINE_CMD_COND_PLUGIN(GetCreatureFootWeight, "", false, kParams_OneOptionalActorBase);
-bool Cmd_GetCreatureFootWeight_Eval(COMMAND_ARGS_EVAL)
-{
+bool Cmd_GetCreatureFootWeight_Eval(COMMAND_ARGS_EVAL) {
 	*result = -1;
-	TESForm* form;
+
+	TESForm* pForm = nullptr;
 	if (arg1)
-		form = (TESForm*)arg1;
+		pForm = (TESForm*)arg1;
 	else if (thisObj)
-		form = thisObj->baseForm;
-	else return true;
-	if (auto const creature = DYNAMIC_CAST(form, TESForm, TESCreature))
-		*result = creature->footWeight;
+		pForm = thisObj->baseForm;
+
+	if (pForm && IS_ID(pForm, TESCreature))
+		*result = static_cast<TESCreature*>(pForm)->footWeight;
+
 	return true;
 }
-bool Cmd_GetCreatureFootWeight_Execute(COMMAND_ARGS)
-{
+
+bool Cmd_GetCreatureFootWeight_Execute(COMMAND_ARGS) {
 	*result = -1;
-	TESCreature* creature = NULL;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &creature)) return true;
-	return Cmd_GetCreatureFootWeight_Eval(thisObj, creature, 0, result);
+	TESCreature* pCreature = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pCreature)) 
+		return true;
+
+	return Cmd_GetCreatureFootWeight_Eval(thisObj, pCreature, nullptr, result);
 }
 
 DEFINE_COMMAND_PLUGIN(SetCreatureFootWeight, "", false, kParams_OneFloat_OneOptionalActorBase);
-bool Cmd_SetCreatureFootWeight_Execute(COMMAND_ARGS)
-{
+bool Cmd_SetCreatureFootWeight_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESCreature* creature = NULL;
-	float footWeight = 0;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &footWeight, &creature) || footWeight < 0) return true;
-	if (!creature)
-	{
-		if (!thisObj || !thisObj->IsActor()) return true;
-		creature = (TESCreature*)((Actor*)thisObj)->GetActorBase();
-	}
-	if IS_TYPE(creature, TESCreature)
-	{
-		creature->footWeight = footWeight;
+	TESCreature* pCreature = nullptr;
+	float fFootWeight = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &fFootWeight, &pCreature) || fFootWeight < 0) 
+		return true;
+
+	if (!pCreature && thisObj && thisObj->IsCreature())
+		pCreature = static_cast<TESCreature*>(static_cast<Creature*>(thisObj)->GetActorBase());
+
+	if (pCreature && IS_ID(pCreature, TESCreature)) {
+		pCreature->footWeight = fFootWeight;
 		*result = 1;
 	}
 	return true;
 }
 
 DEFINE_COMMAND_PLUGIN(SetCreatureReach, "", false, kParams_OneInt_OneOptionalActorBase);
-bool Cmd_SetCreatureReach_Execute(COMMAND_ARGS)
-{
+bool Cmd_SetCreatureReach_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESCreature* creature = NULL;
-	uint32_t reach = 0;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &reach, &creature) || reach < 0) return true;
-	if (!creature)
-	{
-		if (!thisObj || !thisObj->IsActor()) return true;
-		creature = (TESCreature*)((Actor*)thisObj)->GetActorBase();
-	}
-	if IS_TYPE(creature, TESCreature)
-	{
-		creature->attackReach = reach;
+	TESCreature* pCreature = nullptr;
+	uint32_t uiReach = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &uiReach, &pCreature) || uiReach < 0) 
+		return true;
+
+	if (!pCreature && thisObj && thisObj->IsCreature())
+		pCreature = static_cast<TESCreature*>(static_cast<Creature*>(thisObj)->GetActorBase());
+
+	if (pCreature && IS_ID(pCreature, TESCreature)) {
+		pCreature->attackReach = uiReach;
 		*result = 1;
 	}
 	return true;
 }
 
 DEFINE_COMMAND_PLUGIN(SetCreatureBaseScale, "", false, kParams_OneFloat_OneOptionalActorBase);
-bool Cmd_SetCreatureBaseScale_Execute(COMMAND_ARGS)
-{
+bool Cmd_SetCreatureBaseScale_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESCreature* creature = NULL;
-	float newVal = 0;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &newVal, &creature) || newVal < 0) return true;
-	if (!creature)
-	{
-		if (!thisObj || !thisObj->IsActor()) return true;
-		creature = (TESCreature*)((Actor*)thisObj)->GetActorBase();
-	}
-	if IS_TYPE(creature, TESCreature)
-	{
-		creature->baseScale = newVal;
+	TESCreature* pCreature = nullptr;
+	float fScale = 0;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &fScale, &pCreature) || fScale < 0)
+		return true;
+
+	if (!pCreature && thisObj && thisObj->IsCreature())
+		pCreature = static_cast<TESCreature*>(static_cast<Creature*>(thisObj)->GetActorBase());
+
+	if (pCreature && IS_ID(pCreature, TESCreature)) {
+		pCreature->baseScale = fScale;
 		*result = 1;
 	}
 	return true;
@@ -400,13 +398,13 @@ DEFINE_CMD_ALT_COND_PLUGIN(GetActorValueDamage, GetAVDamage,
 bool Cmd_GetActorValueDamage_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = -1;
-	uint32_t avCode = (uint32_t)arg1;
-	if (auto const actor = DYNAMIC_CAST(thisObj, TESObjectREFR, Actor))
-	{
-		auto damage = actor->avOwner.GetActorValueDamage(avCode);
-		if (damage != 0.0F)  // avoid having -0.0
-			damage *= -1; // multiply by -1 to invert the sign, since it otherwise gives the negative damage modifier.
-		*result = damage;  
+	if (thisObj && thisObj->IsActor()) {
+		Actor* pActor = static_cast<Actor*>(thisObj);
+		uint32_t avCode = (uint32_t)arg1;
+		float fDamage = pActor->avOwner.GetActorValueDamage(avCode);
+		if (fDamage != 0.0F)  // avoid having -0.0
+			fDamage *= -1; // multiply by -1 to invert the sign, since it otherwise gives the negative damage modifier.
+		*result = fDamage;  
 	}
 	return true;
 }
@@ -433,7 +431,9 @@ namespace SayTo	//functions related to SayTo
 	bool GetExtraData_Call(COMMAND_ARGS, GetExtraData_Request request)
 	{
 		*result = 0;
-		if (NOT_ACTOR(thisObj)) return true;
+		if (!thisObj->IsActor()) 
+			return true;
+		
 		ExtraSayToTopicInfo* xSayTo = GetExtraTypeJIP(&thisObj->extraDataList, SayToTopicInfo);
 		if (xSayTo) {
 			switch (request)
@@ -484,10 +484,10 @@ DEFINE_COMMAND_PLUGIN(IsActorAlt, "Same as IsActor but accepts an optional basef
 bool Cmd_IsActorAlt_Execute(COMMAND_ARGS)
 {
 	*result = false;
-	TESForm* baseForm = nullptr;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &baseForm)) 
+	TESForm* pBase = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pBase)) 
 		return true;
-	if (auto const form = TryGetBaseFormOrREFR(baseForm, thisObj))
+	if (auto const form = TryGetBaseFormOrREFR(pBase, thisObj))
 	{
 		*result = form->IsActorAlt();
 	}
@@ -495,30 +495,29 @@ bool Cmd_IsActorAlt_Execute(COMMAND_ARGS)
 }
 
 //bug: despite not calling the savebake function, this is how being savebaked still.
-DEFINE_COMMAND_ALT_PLUGIN(SetSecuritronExpressionTemp, SetSecExpTemp, "", true, kParams_OneReference_TwoStrings);
+DEFINE_COMMAND_ALT_PLUGIN(SetSecuritronExpressionTemp, SetSecExpTemp, "", false, kParams_OneReference_TwoStrings);
 bool Cmd_SetSecuritronExpressionTemp_Execute(COMMAND_ARGS)
 {
-	*result = false;	//bSuccess
-	Actor* actor;
-	char faceStr[516];
-	char expressionStr[516];
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &actor, faceStr, expressionStr)
-		|| !thisObj || NOT_ACTOR(thisObj))
-	{
+	*result = 0;
+	Actor* pActor = nullptr;
+	char cPersonality[512];
+	char cMood[512];
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pActor, cPersonality, cMood) || !pActor->IsActor())
 		return true;
+
+	NiNode* pRoot = pActor->GetNiNode();
+	if (!pRoot)
+		return true;
+
+	ExtraSecuritronFace* pFaceData = GetExtraTypeJIP(&pActor->extraDataList, SecuritronFace);
+	if (!pFaceData) {
+		pFaceData = ExtraSecuritronFace::Create();
+		pActor->extraDataList.Add(pFaceData);
 	}
-	auto const niNode = actor->GetNiNode();
-	if (!niNode) return true;
-	ExtraSecuritronFace* xFace = GetExtraTypeJIP(&thisObj->extraDataList, SecuritronFace);
-	if (!xFace)
-	{
-		xFace = ExtraSecuritronFace::Create();
-		thisObj->extraDataList.Add(xFace);
-	}
-	xFace->face.Set(faceStr);
-	xFace->expression.Set(expressionStr);
-	ThisCall(0x437F90, xFace, niNode);	//ExtraSecuritronFace_ApplyChangesToNiObject
-	*result = true;
+	pFaceData->SetPersonality(cPersonality);
+	pFaceData->SetMood(cMood);
+	pFaceData->ApplyFace(pRoot);
+	*result = 1;
 	return true;
 }
 
@@ -537,7 +536,7 @@ bool Cmd_GetIsPlayerOverencumbered_Eval(COMMAND_ARGS_EVAL)
 	}
 	auto const weight = PlayerCharacter::GetSingleton()->avOwner.GetActorValueInt(kAVCode_InventoryWeight);
 	// Actor::GetMaxCarryWeightPerkModified
-	auto const maxWeight = ThisCall<double>(0x8A0C20, PlayerCharacter::GetSingleton());
+	auto const maxWeight = PlayerCharacter::GetSingleton()->GetMaxCarryWeight();
 	*result = maxWeight < weight;
 	return true;
 }
@@ -566,7 +565,7 @@ bool Cmd_GetCalculatedActorSpread_Execute(COMMAND_ARGS)
 	uint32_t spreadMode = kSpreadMode_INVALID;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &spreadMode);
 
-	if (!thisObj || !IS_ACTOR(thisObj))
+	if (!thisObj || !thisObj->IsActor())
 		return true;
 
 	auto* actor = static_cast<Actor*>(thisObj);
@@ -622,7 +621,7 @@ bool Cmd_GetCalculatedActorSpread_Execute(COMMAND_ARGS)
 		}
 		else
 		{
-			if (!actor->IsDoingAttackAnimation())
+			if (!actor->IsAttacking())
 			{
 				*result *= GetFltGameSetting(0x11CEC34); // gs_fNonAttackGunWobbleMult
 			}
@@ -636,7 +635,7 @@ bool Cmd_GetCalculatedActorSpread_Execute(COMMAND_ARGS)
 				{
 					if (v60 <= 0.0)
 						*result = unkGunWobbleDriftGlobal - v61;
-					else if (!actor->IsDoingAttackAnimation())
+					else if (!actor->IsAttacking())
 						*result = unkGunWobbleDriftGlobal + v61;
 				}
 			}
@@ -666,7 +665,7 @@ bool Cmd_HighlightAdditionalReferenceAlt_Execute(COMMAND_ARGS)
 	if (!thisObj)
 		return true;
 
-	if (IS_ACTOR(thisObj) && checkInvisibility)
+	if (thisObj->IsActor() && checkInvisibility)
 	{
 		auto* actor = static_cast<Actor*>(thisObj);
 		if (actor->avOwner.GetActorValue(kAVCode_Invisibility) > 0 || actor->avOwner.GetActorValue(kAVCode_Chameleon) > 0)
@@ -709,7 +708,7 @@ bool Cmd_HighlightAdditionalReferenceAlt_Execute(COMMAND_ARGS)
 		}
 	}
 
-	*result = thisObj->Get3D() != nullptr;
+	*result = thisObj->Get3DSimple() != nullptr;
 	Cmd_HighlightAdditionalReference(PASS_COMMAND_ARGS);
 
 	if (!setFlashing)
@@ -732,7 +731,7 @@ bool Cmd_HighlightAdditionalReferenceAlt_Execute(COMMAND_ARGS)
 		// Target has no visual effect outside of VATS, so we don't lose anything.
 		auto& vatsHighlightData = InterfaceManager::GetSingleton()->vatsHighlightData;
 		vatsHighlightData.target.ref = PlayerCharacter::GetSingleton();
-		NiRefObject::Replace((NiRefObject**)&vatsHighlightData.target.node, PlayerCharacter::GetSingleton()->Get3D());
+		NiRefObject::Replace((NiRefObject**)&vatsHighlightData.target.node, PlayerCharacter::GetSingleton()->Get3DSimple());
 
 		// NOTE: still highly recommended to flush the VATS highlight targets and re-create the list every frame.
 		// Especially since having the player stay as a target for VATS would be weird...
@@ -746,14 +745,13 @@ DEFINE_COMMAND_PLUGIN(ForceRecoilAnim, "", true, nullptr);
 bool Cmd_ForceRecoilAnim_Execute(COMMAND_ARGS)
 {
 	*result = 0; // bSuccess
-	if (!thisObj || !IS_ACTOR(thisObj))
+	if (!thisObj || !thisObj->IsActor())
 		return true;
 
 	auto* weap = ((Actor*)thisObj)->GetEquippedWeapon();
 	if (!weap || (weap->IsMelee() && !weap->projectile))
 	{
-		ThisCall(0x894E90, static_cast<Actor*>(thisObj)); // Actor::SetRecoils
-		// It won't do anything if stagger anim is playing.
+		static_cast<Actor*>(thisObj)->Recoil();
 		*result = 1;
 	}
 	return true;
@@ -764,10 +762,12 @@ DEFINE_COMMAND_ALT_PLUGIN(ForceHitStaggerReaction, ForceHitReaction, "Only works
 bool Cmd_ForceHitStaggerReaction_Execute(COMMAND_ARGS)
 {
 	*result = 0; // bSuccess
+
+	if (!thisObj || !thisObj->IsActor())
+		return true;
+
 	uint32_t checkForIgnoreCrippledLimbsAV = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &checkForIgnoreCrippledLimbsAV))
-		return true;
-	if (!thisObj || !IS_ACTOR(thisObj))
 		return true;
 	auto* actor = static_cast<Actor*>(thisObj);
 	if (!actor->baseProcess)
@@ -776,7 +776,7 @@ bool Cmd_ForceHitStaggerReaction_Execute(COMMAND_ARGS)
 	if (auto* hitData = actor->baseProcess->GetHitData();
 		hitData && hitData->hitLocation != -1)
 	{
-		if (actor->baseProcess->GetKnockedState())
+		if (actor->baseProcess->GetKnockState())
 			return true;
 		if (checkForIgnoreCrippledLimbsAV && actor->avOwner.GetActorValueInt(eActorVal_IgnoreCrippledLimbs))
 			return true;
@@ -796,13 +796,13 @@ bool Cmd_ForceHitStaggerReaction_Execute(COMMAND_ARGS)
 		// copying code at 0x89C2DA; credits to lStewieAl for pointing this out!
 		if (actor == PlayerCharacter::GetSingleton())
 		{
-			animData->CreateForcedIdle(idle, actor, idle->GetSequenceID(), 2);
+			animData->SpecialIdleAuto(idle, actor, idle->GetSequenceID(), 2);
 			// todo: maybe destroy VATS camera structs like how 0x89C370 does it.
 		}
 		else
 		{
-			actor->baseProcess->SetIdleForm(idle);
-			actor->baseProcess->SetQueuedIdleFlags(0x10); // kIdleFlag_CrippledLimb
+			actor->baseProcess->SetCurrentProcessIdle(idle);
+			actor->baseProcess->AddPostAnimationAction(0x10); // kIdleFlag_CrippledLimb
 		}
 		actor->forceHit = false;
 		*result = 1;
@@ -814,7 +814,7 @@ DEFINE_COMMAND_PLUGIN(GetActorFadeState, "", true, nullptr);
 bool Cmd_GetActorFadeState_Execute(COMMAND_ARGS)
 {
 	*result = -1;
-	if (!thisObj || !IS_ACTOR(thisObj))
+	if (!thisObj || !thisObj->IsActor())
 		return true;
 
 	auto* actor = static_cast<Actor*>(thisObj);
@@ -830,7 +830,7 @@ DEFINE_CMD_COND_PLUGIN(IsActorInvisibleToPlayer, "", true, nullptr);
 bool Cmd_IsActorInvisibleToPlayer_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
-	if (!thisObj || !IS_ACTOR(thisObj))
+	if (!thisObj || !thisObj->IsActor())
 		return true;
 	auto* actor = static_cast<Actor*>(thisObj);
 	if (!actor->IsInvisible())

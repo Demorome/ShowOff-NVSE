@@ -18,37 +18,64 @@ static EquipDataSet GetEquippedItems(TESObjectREFR* actorRef, uint32_t const fil
 typedef TESBipedModelForm::EPartBit EquippedItemIndex;
 typedef TESBipedModelForm::ESlot EquippedItemSlot;
 
+
+bool __fastcall FilterItem(ItemChange* apItem, uint32_t auiFlags) {
+	TESForm* pForm = apItem->type;
+
+	using namespace FindEquipped;
+	const bool bSkipUnplayable = (auiFlags & iFilter_NoUnplayable) || !auiFlags;
+	const bool bNoQuestItems = auiFlags & iFilter_NoQuestItems;
+	const bool bNoSlotlessItems = auiFlags & iFilter_NoSlotlessItems;
+
+	if (bSkipUnplayable && !IsEquipableItemPlayable(pForm))
+		return false;
+
+	if (bNoQuestItems && pForm->IsQuestItem())
+		return false;
+
+	const uint32_t uiEquipMask = GetFormEquipSlotMask(pForm);
+	if (bNoSlotlessItems && !uiEquipMask)
+		return false;
+
+	if (uiEquipMask && auiFlags && !MatchAnyEquipSlots(uiEquipMask, auiFlags))
+		return false;
+
+	return true;
+}
+
+struct IterData {
+	TESObjectREFR*	pRef;
+	uint32_t		uiFlags;
+	float			fThreshold;
+	uint32_t		uiCount = 0;
+};
+
+
+bool __cdecl CountBrokenEquippedItems(ItemChange* apItem, IterData* apData) {
+	if (!apItem || !apItem->type)
+		return false;
+
+	if (!apItem->GetWorn())
+		return false;
+
+	if (FilterItem(apItem, apData->uiFlags)) {
+		const float fHealth = apItem->GetItemHealth(true);
+		if (fHealth <= apData->fThreshold)
+			++apData->uiCount;
+	}
+
+	return false;
+}
+
 uint32_t __fastcall GetNumBrokenEquippedItems_Call(TESObjectREFR* const thisObj, float threshold, uint32_t const flags)
 {
-	if (!IS_ACTOR(thisObj)) return 0;
-	threshold /= 100.0F;  //expecting a number like 35, reduce to 0.35
-	uint32_t numBrokenItems = 0;  //return value.
-	auto eqItems = GetEquippedItems(thisObj, flags);
-	for (auto iter : eqItems)
-	{
-		if (g_ShowFuncDebug)
-			Console_Print("GetNumBrokenEquippedItems - iter form: [%08X] (%s)", iter.pForm, iter.pForm->GetName());
+	if (!IS_ACTOR(thisObj)) 
+		return 0;
 
-		auto const pHealth = DYNAMIC_CAST(iter.pForm, TESForm, TESHealthForm);  // base health
-		if (!pHealth) continue;
-		float baseHealth = pHealth->health;
-
-		//todo: modify baseHealth if the item is a weapon by checking if it has the weapon mod equipped (check xData)
-		// Check if Jazz's code at https://discord.com/channels/711228477382328331/816602410012639262/869359398978469911 gets released (could be used here).
-
-		ExtraHealth* pXHealth = iter.pExtraData ? (ExtraHealth*)iter.pExtraData->GetByType(kExtraData_Health) : NULL; // modified health data
-		if (pXHealth)  // If there's no pXHealth, it's at 100% health (no modified health extra data).
-		{
-			float const currentHealth = pXHealth->health;
-			if ((currentHealth / baseHealth) <= threshold) numBrokenItems++;
-			if (g_ShowFuncDebug)
-				Console_Print("GetNumBrokenEquippedItems - health %% check being performed on %s. %%: %f vs %f threshold", iter.pForm->GetName(), (pXHealth->health / (float)pHealth->health), threshold);
-		}
-		else if (threshold >= 1.0F) numBrokenItems++;
-	}
-	if (IsConsoleMode())
-		Console_Print("GetNumBrokenEquippedItems >> %u", numBrokenItems);
-	return numBrokenItems;
+	IterData kData{ thisObj, flags, threshold };
+	void* pInventoryChanges = CdeclCall<void*>(0x4BF220, thisObj);
+	ThisCall<int32_t>(0x4D4530, pInventoryChanges, CountBrokenEquippedItems, &kData, 0);
+	return kData.uiCount;
 }
 
 DEFINE_CMD_ALT_COND_PLUGIN(GetNumBrokenEquippedItems, GetNumBrokenEq, "", true, kParams_OneOptionalFloat_OneOptionalInt);
@@ -101,9 +128,7 @@ bool Cmd_UnequipItems_Execute(COMMAND_ARGS)
 {
 	uint32_t flags = 0, noEquip = 0, hideMessage = 0, triggerOnUnequip = 1;
 
-	if (!ExtractArgs(EXTRACT_ARGS, &flags, &noEquip, &hideMessage, &triggerOnUnequip)
-		|| NOT_ACTOR(thisObj))
-	{
+	if (!ExtractArgs(EXTRACT_ARGS, &flags, &noEquip, &hideMessage, &triggerOnUnequip) || NOT_ACTOR(thisObj)) {
 		return true;
 	}
 

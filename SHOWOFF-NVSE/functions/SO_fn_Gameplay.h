@@ -82,15 +82,12 @@ bool Cmd_GetPlayerCanPickpocketEquippedItems_Execute(COMMAND_ARGS)
 
 DEFINE_CMD_COND_PLUGIN(GetPCHasSleepWaitOverride, "Returns whether or not the player has a Sleep/Wait prevention override",
 	false, nullptr);
-bool Cmd_GetPCHasSleepWaitOverride_Eval(COMMAND_ARGS_EVAL)
-{
+bool Cmd_GetPCHasSleepWaitOverride_Eval(COMMAND_ARGS_EVAL) {
 	*result = !PlayerCharacter::GetSingleton()->canSleepWait;
 	return true;
 }
-bool Cmd_GetPCHasSleepWaitOverride_Execute(COMMAND_ARGS)
-{
-	Cmd_GetPCHasSleepWaitOverride_Eval(thisObj, nullptr, nullptr, result);
-	return true;
+bool Cmd_GetPCHasSleepWaitOverride_Execute(COMMAND_ARGS) {
+	return Cmd_GetPCHasSleepWaitOverride_Eval(thisObj, nullptr, nullptr, result);
 }
 
 DEFINE_COMMAND_PLUGIN(SetPCHasSleepWaitOverride, "Sets whether or not the player has a Sleep/Wait prevention override",
@@ -105,46 +102,41 @@ bool Cmd_SetPCHasSleepWaitOverride_Execute(COMMAND_ARGS)
 	return true;
 }
 
-bool Cmd_IsWeaponMelee_Eval(COMMAND_ARGS_EVAL)
-{
-	//Console_Print("thisObj: [%0.8X]", thisObj->baseForm->GetId());
+bool Cmd_IsWeaponMelee_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
-	TESForm* form;
+	TESForm* pForm = nullptr;
 	if (arg1)
-		form = (TESForm*)arg1;
+		pForm = static_cast<TESForm*>(arg1);
 	else if (thisObj)
-		form = thisObj->baseForm;
-	else return true;
+		pForm = thisObj->baseForm;
 
-	auto const weapon = DYNAMIC_CAST(form, TESForm, TESObjectWEAP);
-	if (!weapon) return true;
-;
-	*result = weapon->IsMelee();
+	if (!pForm || !IS_TYPE(pForm, TESObjectWEAP))
+		return true;
+
+	*result = static_cast<TESObjectWEAP*>(pForm)->IsMelee();
 	return true;
 }
-bool Cmd_IsWeaponMelee_Execute(COMMAND_ARGS)
-{
-	*result = 0;
-	TESObjectWEAP* weapon = NULL;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &weapon)) return true;
 
-	return Cmd_IsWeaponMelee_Eval(thisObj, weapon, 0, result);
+bool Cmd_IsWeaponMelee_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESObjectWEAP* pWeapon = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon)) 
+		return true;
+
+	return Cmd_IsWeaponMelee_Eval(thisObj, pWeapon, nullptr, result);
 }
 
 bool Cmd_IsEquippedWeaponMelee_Eval(COMMAND_ARGS_EVAL)
 {
 	// Not recommended to use this function for certain perk effects, like Calculate Weap. Damage;
 	// since it will affect the DAM that appears in the UI for other weapons, as long as the currently equipped weapon is a melee weap.
-	*result = false;
-	if (thisObj)
-	{
-		if (!thisObj->IsActor()) return true;
-		TESObjectWEAP* weapon = ((Actor*)thisObj)->GetEquippedWeapon();
-		if (weapon)
-			*result = weapon->IsMelee();
-		else
-		{
-			*result = true;
+	*result = 0;
+	if (thisObj && thisObj->IsActor()) {
+		const TESObjectWEAP* pWeapon = static_cast<Actor*>(thisObj)->GetEquippedWeapon();
+		if (pWeapon)
+			*result = pWeapon->IsMelee();
+		else {
+			*result = 1;
 			if (g_ShowFuncDebug)
 				Console_Print("IsEquippedWeaponMelee >> 1 >> No equipped weapon found, assuming that the default unarmed is equipped.");
 		}
@@ -156,74 +148,49 @@ bool Cmd_IsEquippedWeaponMelee_Execute(COMMAND_ARGS)
 	return Cmd_IsEquippedWeaponMelee_Eval(thisObj, nullptr, nullptr, result);
 }
 
-bool Cmd_IsWeaponRanged_Eval(COMMAND_ARGS_EVAL)
-{
-	//Console_Print("thisObj: [%0.8X]", thisObj->baseForm->GetId());
+bool Cmd_IsWeaponRanged_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
-	TESForm* form;
+	TESForm* pForm = nullptr;
 	if (arg1)
-	{
-		form = (TESForm*)arg1;
-	}
+		pForm = static_cast<TESForm*>(arg1);
 	else if (thisObj)
-	{
-		form = thisObj->baseForm;
-	}
-	else return true;
+		pForm = thisObj->baseForm;
 
-	auto const weapon = DYNAMIC_CAST(form, TESForm, TESObjectWEAP);
-	if (!weapon) return true;
+	if (!pForm || !IS_TYPE(pForm, TESObjectWEAP))
+		return true;
 
-	const UINT8 weapType = weapon->eWeaponType;
-	*result = weapType >= 3 && weapType <= 13;
-
+	*result = static_cast<TESObjectWEAP*>(pForm)->IsRangedWeapon();
 	return true;
 }
-bool Cmd_IsWeaponRanged_Execute(COMMAND_ARGS)
-{
+bool Cmd_IsWeaponRanged_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESObjectWEAP* weapon = NULL;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &weapon)) return true;
+	TESObjectWEAP* pWeapon = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pWeapon)) 
+		return true;
 
-	return Cmd_IsWeaponRanged_Eval(thisObj, weapon, 0, result);
+	return Cmd_IsWeaponRanged_Eval(thisObj, pWeapon, nullptr, result);
 }
 
-bool Cmd_IsEquippedWeaponRanged_Eval(COMMAND_ARGS_EVAL)
-{
+bool Cmd_IsEquippedWeaponRanged_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
-	if (thisObj)
-	{
-		if (!thisObj->IsActor()) return true;
-		if (const TESObjectWEAP* weapon = ((Actor*)thisObj)->GetEquippedWeapon())
-		{
-			const UINT8 weapType = weapon->eWeaponType;
-			*result = weapType >= 3 && weapType <= 13;
-		}
+	if (thisObj && thisObj->IsActor()) {
+		const TESObjectWEAP* pWeapon = static_cast<Actor*>(thisObj)->GetEquippedWeapon();
+		if (pWeapon)
+			*result = pWeapon->IsRangedWeapon();
 	}
 	return true;
 }
-bool Cmd_IsEquippedWeaponRanged_Execute(COMMAND_ARGS)
-{
+
+bool Cmd_IsEquippedWeaponRanged_Execute(COMMAND_ARGS) {
 	return Cmd_IsEquippedWeaponRanged_Eval(thisObj, nullptr, nullptr, result);
 }
 
-
-bool Cmd_GetChallengeProgress_Execute(COMMAND_ARGS)
-{
-	TESChallenge* challenge;
-	if (ExtractArgs(EXTRACT_ARGS, &challenge) && IS_TYPE(challenge, TESChallenge))
-		*result = challenge->progress;
-	else *result = 0;
-	return true;
-}
-bool Cmd_GetChallengeProgress_Eval(COMMAND_ARGS_EVAL)
-{
+bool Cmd_GetChallengeProgress_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
-	if (arg1)
-	{
-		const auto challenge = (TESChallenge*)arg1;
-		if (IS_TYPE(challenge, TESChallenge))
-			*result = challenge->progress;
+	if (arg1) {
+		const TESChallenge* pChallenge = static_cast<TESChallenge*>(arg1);
+		if (IS_TYPE(pChallenge, TESChallenge))
+			*result = pChallenge->progress;
 	}
 #if _DEBUG
 	Console_Print("GetChallengeProgress >> %f", *result);
@@ -231,6 +198,14 @@ bool Cmd_GetChallengeProgress_Eval(COMMAND_ARGS_EVAL)
 	return true;
 }
 
+bool Cmd_GetChallengeProgress_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESChallenge* pChallenge = nullptr;
+	if (!ExtractArgs(EXTRACT_ARGS, &pChallenge))
+		return true;
+
+	return Cmd_GetChallengeProgress_Eval(nullptr, pChallenge, nullptr, result);
+}
 
 bool Cmd_GetPCHasScriptedFastTravelOverride_Eval(COMMAND_ARGS_EVAL)
 {
@@ -258,56 +233,68 @@ bool Cmd_GetPCCanFastTravel_Execute(COMMAND_ARGS)
 	return Cmd_GetPCCanFastTravel_Eval(thisObj, 0, 0, result);
 }
 
-bool Cmd_GetWeaponHasFlag_Eval(COMMAND_ARGS_EVAL)
-{
+bool Cmd_GetWeaponHasFlag_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
-	uint32_t flagToCheck = (uint32_t)arg1;
-	if (flagToCheck > 21) return true;
-	TESForm* form;
-	if (arg2) form = (TESForm*)arg2;
-	else if (thisObj) form = thisObj->baseForm;
-	else return true;
-	auto const weapon = DYNAMIC_CAST(form, TESForm, TESObjectWEAP);
-	if (!weapon) return true;
-	if (flagToCheck < 8)  //check Flags1 (0-7)
+	uint32_t uiBit = reinterpret_cast<uint32_t>(arg1);
+	if (uiBit > 31)
+		return true;
+
+	TESForm* pForm = nullptr;
+	if (arg2)
+		pForm = static_cast<TESForm*>(arg2);
+	else if (thisObj)
+		pForm = thisObj->baseForm;
+
+	if (!pForm || !IS_TYPE(pForm, TESObjectWEAP))
+		return true;
+
+	const TESObjectWEAP* pWeapon = static_cast<TESObjectWEAP*>(pForm);
+
+	if (uiBit < 8)  //check Flags1 (0-7)
 	{
-		*result = weapon->weaponFlags1.Extract(flagToCheck);
+		*result = pWeapon->weaponFlags1.Extract(uiBit);
 	}
 	else  //check Flags2 (0-13)
 	{
-		flagToCheck -= 8;  //set the base to 0. At flagToCheck == 8, this equals 0.
-		*result = weapon->weaponFlags2.Extract(flagToCheck);
+		uiBit -= 8;  //set the base to 0. At flagToCheck == 8, this equals 0.
+		*result = pWeapon->weaponFlags2.Extract(uiBit);
 	}
 	return true;
 }
 bool Cmd_GetWeaponHasFlag_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	uint32_t flagToCheck;
-	TESObjectWEAP* weapon = NULL;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &flagToCheck, &weapon)) return true;
-	return Cmd_GetWeaponHasFlag_Eval(thisObj, (void*)flagToCheck, weapon, result);
+	uint32_t uiBit = 0;
+	TESObjectWEAP* pWeapon = NULL;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &uiBit, &pWeapon)) 
+		return true;
+
+	return Cmd_GetWeaponHasFlag_Eval(thisObj, (void*)uiBit, pWeapon, result);
 }
 
 bool Cmd_SetWeaponFlag_Execute(COMMAND_ARGS)
 {
-	*result = false; //bSuccess
-	uint32_t flag, bOn;
-	TESObjectWEAP* weapon = nullptr;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &flag, &bOn, &weapon) || flag > 21)
+	*result = 0; //bSuccess
+	uint32_t uiBit, bOn;
+	TESObjectWEAP* pWeapon = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &uiBit, &bOn, &pWeapon))
 		return true;
-	if (weapon = DYNAMIC_CAST(TryExtractBaseForm(weapon, thisObj), TESForm, TESObjectWEAP))
-	{
-		if (flag < 8)  //change Flags1 (0-7)
+
+	TESForm* pForm = TryExtractBaseForm(pWeapon, thisObj);
+	if (pForm && IS_TYPE(pForm, TESObjectWEAP))
+		pWeapon = static_cast<TESObjectWEAP*>(pForm);
+
+	if (pWeapon) {
+		if (uiBit < 8)  //change Flags1 (0-7)
 		{
-			weapon->weaponFlags1.WriteBit(flag, bOn);
+			pWeapon->weaponFlags1.WriteBit(uiBit, bOn);
 		}
 		else  //change Flags2 (0-13)
 		{
-			flag -= 8;  //set the base to 0. At flagToCheck == 8, this equals 0.
-			weapon->weaponFlags2.WriteBit(flag, bOn);
+			uiBit -= 8;  //set the base to 0. At flagToCheck == 8, this equals 0.
+			pWeapon->weaponFlags2.WriteBit(uiBit, bOn);
 		}
-		*result = true;
+		*result = 1;
 	}
 	return true;
 }
@@ -315,40 +302,37 @@ bool Cmd_SetWeaponFlag_Execute(COMMAND_ARGS)
 bool Cmd_GetActorHasBaseFlag_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
-	uint32_t flagToCheck = (uint32_t)arg1;
-	if (flagToCheck > 31) return true;
-	TESForm* form;
-	if (arg2) form = (TESForm*)arg2;
-	else if (thisObj) form = thisObj->baseForm;
-	else return true;
-	auto const actor = DYNAMIC_CAST(form, TESForm, TESActorBase);
-	if (!actor) return true;
-	if (flagToCheck < 16)  //check FlagsLow (0-15)
-	{
-		const uint32_t lowFlags = actor->baseData.flags & 0xFFFF;  //copied from NVSE's GetActorBaseFlagsLow
-		*result = (lowFlags >> flagToCheck) & 1;
-	}
-	else  //check FlagsHigh (0-15)
-	{
-		flagToCheck -= 16;  //set the base to 0. At flagToCheck == 16, this equals 0.
-		const uint32_t highFlags = (actor->baseData.flags >> 16) & 0xFFFF;  //copied from NVSE's GetActorBaseFlagsHigh
-		*result = (highFlags >> flagToCheck) & 1;
-	}
+	uint32_t uiBit = reinterpret_cast<uint32_t>(arg1);
+	if (uiBit > 31) 
+		return true;
+
+	TESForm* pForm;
+	if (arg2) 
+		pForm = static_cast<TESForm*>(arg2);
+	else if (thisObj) 
+		pForm = thisObj->baseForm;
+
+	if (!pForm || !pForm->IsActorBase())
+		return true;
+
+	const TESActorBase* pActorBase = static_cast<TESActorBase*>(pForm);
+	*result = _bittest(reinterpret_cast<const long*>(&pActorBase->baseData.flags), uiBit);
 	return true;
 }
-bool Cmd_GetActorHasBaseFlag_Execute(COMMAND_ARGS)
-{
+bool Cmd_GetActorHasBaseFlag_Execute(COMMAND_ARGS) {
 	*result = 0;
-	uint32_t flagToCheck;
-	TESActorBase* actor = NULL;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &flagToCheck, &actor)) return true;
-	return Cmd_GetActorHasBaseFlag_Eval(thisObj, (void*)flagToCheck, actor, result);
+	uint32_t uiBit = 0;
+	TESActorBase* pActorBase = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &uiBit, &pActorBase)) 
+		return true;
+
+	return Cmd_GetActorHasBaseFlag_Eval(thisObj, (void*)uiBit, pActorBase, result);
 }
 
 bool Cmd_ForceWeaponJamAnim_Execute(COMMAND_ARGS)
 {
 	*result = false;
-	if (IS_ACTOR(thisObj))
+	if (thisObj->IsActor())
 	{
 		const auto actor = (Actor*)thisObj;
 		if (auto const weapn = actor->GetEquippedWeapon())
@@ -362,7 +346,7 @@ bool Cmd_ForceWeaponJamAnim_Execute(COMMAND_ARGS)
 				{
 					ThisCall<void*>(0x8B28C0, actor, animGroupID, animData);  // Actor::8B28C0
 					auto const animSeqElem = animData->animSequence[4];  // 4 = kSequence_Weapon
-					actor->SetAnimActionAndSequence(HighProcess::kAnimAction_Reload, animSeqElem);
+					actor->SetAnimAction(HighProcess::kAnimAction_Reload, animSeqElem);
 					actor->Unk_12C(animKey, true);
 					*result = true;
 				}
@@ -902,9 +886,9 @@ bool Cmd_SetOwnershipTemp_Execute(COMMAND_ARGS)
 	if (!newOwner->IsActorAlt() && !IS_ID(newOwner, TESFaction))
 		return true;
 	ExtraDataList* xData = nullptr;
-	if (auto const cell = DYNAMIC_CAST(baseForm, TESForm, TESObjectCELL))
+	if (IS_TYPE(baseForm, TESObjectCELL))
 	{
-		xData = &cell->extraDataList;
+		xData = &static_cast<TESObjectCELL*>(baseForm)->extraDataList;
 	}
 	else if (thisObj)
 	{
@@ -989,33 +973,30 @@ bool Cmd_GetCalculatedAPCost_Execute(COMMAND_ARGS)
 }
 
 
-DEFINE_COMMAND_PLUGIN(IsAiming, "", true, nullptr);
-bool Cmd_IsAiming_Execute(COMMAND_ARGS)
-{
+DEFINE_CMD_COND_PLUGIN(IsAiming, "", true, nullptr);
+bool Cmd_IsAiming_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
-	if (thisObj && IS_ACTOR(thisObj))
-	{
-		auto* actor = static_cast<Actor*>(thisObj);
-		if (actor->baseProcess)
-			*result = actor->baseProcess->IsAiming();
-	}
+	if (thisObj && thisObj->IsActor())
+		*result = static_cast<Actor*>(thisObj)->GetIronSights();
 	return true;
 }
 
-DEFINE_COMMAND_PLUGIN(IsBlockingOrAiming, "", true, nullptr);
-bool Cmd_IsBlockingOrAiming_Execute(COMMAND_ARGS)
-{
+bool Cmd_IsAiming_Execute(COMMAND_ARGS) {
+	return Cmd_IsAiming_Eval(thisObj, nullptr, nullptr, result);
+}
+
+DEFINE_CMD_COND_PLUGIN(IsBlockingOrAiming, "", true, nullptr);
+bool Cmd_IsBlockingOrAiming_Eval(COMMAND_ARGS_EVAL) {
 	*result = 0;
-	if (thisObj && IS_ACTOR(thisObj))
-	{
-		auto* actor = static_cast<Actor*>(thisObj);
-		if (actor->baseProcess)
-		{
-			*result = actor->baseProcess->IsAiming()
-				|| actor->baseProcess->GetCurrentAnimAction() == 7; // block
-		}
+	if (thisObj && thisObj->IsActor()) {
+		Actor* pActor = static_cast<Actor*>(thisObj);
+		if (pActor->baseProcess)
+			*result = pActor->baseProcess->IsAiming() || pActor->baseProcess->GetCurrentAnimAction() == 7; // block
 	}
 	return true;
+}
+bool Cmd_IsBlockingOrAiming_Execute(COMMAND_ARGS) {
+	return Cmd_IsBlockingOrAiming_Eval(thisObj, nullptr, nullptr, result);
 }
 
 DEFINE_COMMAND_PLUGIN(IsJumping_BROKEN, "", true, nullptr);
@@ -1080,7 +1061,7 @@ bool Cmd_GetVATSTargetable_Eval(COMMAND_ARGS_EVAL)
 			const bool destructibleAndNotTargetable = destrForm && destrForm->data
 				&& ThisCall<bool>(0x576070, thisObj); // TESObjectREFR::IsDestructibleAndVATSTargettable
 
-			if (actor->GetDead() || !actor->Get3D() || !actor->baseProcess || (actor->baseProcess->processLevel != 0) 
+			if (actor->GetDead() || !actor->Get3DSimple() || !actor->baseProcess || (actor->baseProcess->processLevel != 0) 
 				|| actor->GetIsChildSize(false) || destructibleAndNotTargetable)
 			{
 				return true;

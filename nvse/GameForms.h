@@ -3375,6 +3375,8 @@ public:
 	float GetItemModValue2(uint8_t which)		{ which -= 1; assert(which < 3); return value2Mod[which]; }
 	bool IsMelee() const { return eWeaponType <= 2; };
 	bool IsDontHidePlayerWhileAiming() const { return weaponFlags2.IsSet(eFlag_DontHidePlayerWhileAiming); }
+
+	bool IsRangedWeapon() const { return ThisCall<bool>(0x4C0C30, this); }
 };
 static_assert(sizeof(TESObjectWEAP) == 0x388);
 

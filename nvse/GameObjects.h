@@ -164,7 +164,7 @@ public:
 
 	void Update3D();
 	NiAVObject* __fastcall GetNiBlock2(const char* blockName) const;
-	TESContainer *GetContainer();
+	TESContainer *GetContainer() const;
 	bool IsMapMarker();
 
 	TESForm *GetBaseForm();
@@ -193,7 +193,7 @@ public:
 	bool RunScriptSource(const char *sourceStr);
 
 	// Does the same thing as GetNiNode
-	NiNode* Get3D() const;
+	NiNode* Get3DSimple() const;
 
 	TESObjectREFR* PlaceAtMe(TESForm* toPlace, int count = 1, int useNodePos = 0, int direction = 0);
 
@@ -739,7 +739,7 @@ public:
 	bool IsItemEquipped(TESForm *item);
 	bool GetEquippedItemData(uint32_t slotIndex, ItemEntryData &itemData);
 	uint8_t EquippedWeaponHasMod(uint8_t modID);
-	bool IsSneaking();
+	bool IsSneaking() const;
 	void StopCombat();
 
 	// if "this" is the player, won't work properly!
@@ -759,9 +759,9 @@ public:
 	BackUpPackage *AddBackUpPackage(TESObjectREFR *targetRef, TESObjectCELL *targetCell, uint32_t flags);
 	void TurnToFaceObject(TESObjectREFR *target);
 	void TurnAngle(float angle);
-	void SetAnimActionAndSequence(int32_t animAction, BSAnimGroupSequence *animGroupSeq);
+	void SetAnimAction(int32_t animAction, BSAnimGroupSequence *animGroupSeq);
 	void PlayIdle(TESIdleForm *idleAnim);
-	uint32_t GetLevel();
+	uint16_t GetLevel();
 	float GetKillXP();
 	void DismemberLimb(uint32_t bodyPartID, bool explode);
 	void EquipItemAlt(ExtraContainerChanges::EntryData *itemEntry, bool noUnequip, bool noMessage);
@@ -773,9 +773,25 @@ public:
 	float GetHealthEffectsSum();
 	void Kill(Actor* killer);
 	bool GetShouldAttack(Actor* target);
-	void SetWantsWeaponOut(bool wantsWeaponOut);
-	bool IsInReloadAnim();
-	bool IsDoingAttackAnimation() const;
+	void SetWantWeaponDrawn(bool wantsWeaponOut);
+	bool IsReloading() const;
+	bool IsAttacking() const;
+
+	bool GetIronSights() const {
+		return ThisCall<bool>(0x8BBC10, this);
+	}
+
+	bool GetBlocking() const {
+		return ThisCall<bool>(0x894D60, this);
+	}
+
+	void Recoil() {
+		ThisCall(0x894E90, this);
+	}
+
+	float GetMaxCarryWeight() {
+		return ThisCall<float>(0x8A0C20, this);
+	}
 };
 
 // 1C0
@@ -1073,13 +1089,12 @@ public:
 	bool IsPlayerSwimming() { return (GetMovementFlags()  >> 11) & 1; }
 
 	static PlayerCharacter*	GetSingleton();
-	bool SetSkeletonPath(const char* newPath);
 	static void UpdateHead(void);
 
 	bool ToggleFirstPerson(bool toggleON);
 	char GetDetectionState();
 
 	// Credits to lStewieAl
-	void UpdateCamera(bool isCalledFromFunc21, bool _zero_skipUpdateLOD);
+	void UpdateCamera(bool abForce, bool abSkipUpdateLOD);
 };
 static_assert(sizeof(PlayerCharacter) == 0xE50);
