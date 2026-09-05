@@ -4138,6 +4138,10 @@ public:
 	NiNode *Get3DNode(uint32_t index);
 	void ToggleNodes(uint32_t nodeBits, uint8_t doHide);
 	void GenerateRenderedTexture(NiCamera *camera, NiRenderedTexture **outTexture);
+
+	void SetDetachTime(uint32_t auiTime, bool abForce) {
+		ThisCall(0x546B10, this, auiTime, abForce);
+	}
 };
 static_assert(sizeof(TESObjectCELL) == 0xE0);
 

@@ -861,15 +861,14 @@ bool Cmd_RemoveFormFromLeveledList_Execute(COMMAND_ARGS)
 
 bool Cmd_ResetInteriorAlt_Execute(COMMAND_ARGS)
 {
-	*result = false;	//success
-	TESForm* form;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form))
+	*result = 0;
+	TESForm* pForm;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pForm) || !IS_ID(pForm, TESObjectCELL))
 		return true;
-	if (auto const cell = DYNAMIC_CAST(form, TESForm, TESObjectCELL)) {
-		ThisCall<bool>(0x546B10, cell, -2, false);	//TESObjectCELL::updateDetachTime
-		//(hooks are in place to handle the -2 detachTime correctly)
-		*result = true;
-	}
+
+	TESObjectCELL* pCell = static_cast<TESObjectCELL*>(pForm);
+	pCell->SetDetachTime(-2, false);
+	*result = 1;
 	return true;
 }
 
