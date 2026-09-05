@@ -134,60 +134,9 @@ static const uint32_t s_ExtraHotkeyVtbl = 0x0101592C;
 static const uint32_t s_ExtraSemaphore	= 0x011C3920;
 static const uint32_t s_SemaphoreWait		= 0x0040FBF0;
 static const uint32_t s_SemaphoreLeave	= 0x0040FBA0;
-
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-static const uint32_t s_ExtraContainerChangesVtbl					= 0X1015BA8;
-static const uint32_t s_ExtraWornVtbl								= 0X1015BCC;
-//static const uint32_t s_ExtraWornLeftVtbl							= 0x01015BD8;	//	
-static const uint32_t s_ExtraCannotWearVtbl						= 0X1015BE4;
-
-static const uint32_t s_ExtraOwnershipVtbl						= 0X10158A4;
-static const uint32_t s_ExtraRankVtbl								= 0X10158BC;
-static const uint32_t s_ExtraActionVtbl							= 0X1015B9C;
-static const uint32_t s_ExtraFactionChangesVtbl					= 0X1015F20;
-static const uint32_t s_ExtraScriptVtbl							= 0X1015904;
-
-//static const uint32_t s_ExtraScript_init							= 0x0042C5B0;	//	
-
-static const uint32_t s_ExtraHealthVtbl = 0x010158D4;
-static const uint32_t s_ExtraLockVtbl = 0x0101588C;
-static const uint32_t s_ExtraCountVtbl = 0x010158C8;
-static const uint32_t s_ExtraTeleportVtbl = 0x01015898;
-static const uint32_t s_ExtraWeaponModFlagsVtbl = 0x01015994;
-
-static const uint32_t s_ExtraHotkeyVtbl = 0x0101591C;
-
-static const uint32_t s_ExtraSemaphore	= 0x011C3920;
-static const uint32_t s_SemaphoreWait		= 0x0040FC20;
-static const uint32_t s_SemaphoreLeave	= 0x0040FBE0;
-
 #else
 #error
 #endif
-
-static void** g_ExtraSemaphore = (void **)s_ExtraSemaphore;
-
-void* GetExtraSemaphore()
-{
-	return *g_ExtraSemaphore;
-};
-
-void CallSemaphore(void * Semaphore, uint32_t SemaphoreFunc)
-{
-	_asm pushad
-	_asm mov ecx, Semaphore
-	_asm call SemaphoreFunc
-	_asm popad
-};
-
-void CallSemaphore4(void * Semaphore, uint32_t SemaphoreFunc)
-{
-	_asm pushad
-	_asm push ecx	;	does not seem to be used at all
-	_asm mov ecx, Semaphore
-	_asm call SemaphoreFunc
-	_asm popad
-};
 
 ExtraContainerChanges::ExtendDataList *ExtraContainerChangesExtendDataListCreate(ExtraDataList *pExtraDataList)
 {
@@ -230,16 +179,6 @@ void ExtraContainerChanges::EntryData::Cleanup()
 		xdlIter = prev ? prev->RemoveNext() : xdlIter->RemoveMe();
 	}
 	while (xdlIter);
-}
-
-ExtraContainerChanges *ExtraContainerChanges::Create()
-{
-	uint32_t *dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraContainerChanges));
-	dataPtr[0] = kVtbl_ExtraContainerChanges;
-	dataPtr[1] = kExtraData_ContainerChanges;
-	dataPtr[2] = 0;
-	dataPtr[3] = 0;
-	return (ExtraContainerChanges*)dataPtr;
 }
 
 ExtraContainerChanges::Data *ExtraContainerChanges::Data::Create(TESObjectREFR *owner)
@@ -322,79 +261,6 @@ BSExtraData *BSExtraData::Create(uint8_t xType, uint32_t size, uint32_t vtbl)
 	return xData;
 }
 
-ExtraHealth *ExtraHealth::Create(float _health)
-{
-	uint32_t *dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraHealth));
-	dataPtr[0] = kVtbl_ExtraHealth;
-	dataPtr[1] = kExtraData_Health;
-	dataPtr[2] = 0;
-	ExtraHealth *xHealth = (ExtraHealth*)dataPtr;
-	xHealth->health = _health;
-	return xHealth;
-}
-
-ExtraWorn *ExtraWorn::Create()
-{
-	uint32_t *dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraWorn));
-	dataPtr[0] = kVtbl_ExtraWorn;
-	dataPtr[1] = kExtraData_Worn;
-	dataPtr[2] = 0;
-	return (ExtraWorn*)dataPtr;
-}
-
-ExtraCannotWear *ExtraCannotWear::Create()
-{
-	uint32_t *dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraCannotWear));
-	dataPtr[0] = kVtbl_ExtraCannotWear;
-	dataPtr[1] = kExtraData_CannotWear;
-	dataPtr[2] = 0;
-	return (ExtraCannotWear*)dataPtr;
-}
-
-ExtraLock *ExtraLock::Create()
-{
-	uint32_t *dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraLock));
-	dataPtr[0] = kVtbl_ExtraLock;
-	dataPtr[1] = kExtraData_Lock;
-	dataPtr[2] = 0;
-	uint32_t *lockData = (uint32_t*)GameHeapAlloc(sizeof(Data));
-	MemZero(lockData, sizeof(Data));
-	dataPtr[3] = (uint32_t)lockData;
-	return (ExtraLock*)dataPtr;
-}
-
-ExtraCount *ExtraCount::Create(uint32_t count)
-{
-	uint32_t *dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraCount));
-	dataPtr[0] = kVtbl_ExtraCount;
-	dataPtr[1] = kExtraData_Count;
-	dataPtr[2] = 0;
-	dataPtr[3] = count;
-	return (ExtraCount*)dataPtr;
-}
-
-ExtraTeleport *ExtraTeleport::Create()
-{
-	uint32_t *dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraTeleport));
-	dataPtr[0] = kVtbl_ExtraTeleport;
-	dataPtr[1] = kExtraData_Teleport;
-	dataPtr[2] = 0;
-	uint32_t *teleData = (uint32_t*)GameHeapAlloc(sizeof(Data));
-	MemZero(teleData, sizeof(Data));
-	dataPtr[3] = (uint32_t)teleData;
-	return (ExtraTeleport*)dataPtr;
-}
-
-ExtraWeaponModFlags *ExtraWeaponModFlags::Create(uint8_t _flags)
-{
-	uint32_t *dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraWeaponModFlags));
-	dataPtr[0] = kVtbl_ExtraWeaponModFlags;
-	dataPtr[1] = kExtraData_WeaponModFlags;
-	dataPtr[2] = 0;
-	dataPtr[3] = _flags;
-	return (ExtraWeaponModFlags*)dataPtr;
-}
-
 uint32_t GetCountForExtraDataList(ExtraDataList* list)
 {
 	if (!list)
@@ -404,47 +270,11 @@ uint32_t GetCountForExtraDataList(ExtraDataList* list)
 	return xCount ? xCount->count : 1;
 }
 
-ExtraOwnership *ExtraOwnership::Create(TESForm *_owner)
-{
-	uint32_t *dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraOwnership));
-	dataPtr[0] = kVtbl_ExtraOwnership;
-	dataPtr[1] = kExtraData_Ownership;
-	dataPtr[2] = 0;
-	dataPtr[3] = (uint32_t)_owner;
-	return (ExtraOwnership*)dataPtr;
-}
-
 ExtraSecuritronFace* ExtraSecuritronFace::Create()
 {
-	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraSecuritronFace));
-	dataPtr[0] = kVtbl_ExtraSecuritronFace;
-	dataPtr[1] = kExtraData_SecuritronFace;
-	dataPtr[2] = 0;	//unknown what this is for... padding?
-	auto xFace = (ExtraSecuritronFace*)dataPtr;
-	xFace->expression.Init(0);
-	xFace->face.Init(0);
-	return xFace;
-}
-
-ExtraRank *ExtraRank::Create(uint32_t _rank)
-{
-	uint32_t *dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraRank));
-	dataPtr[0] = kVtbl_ExtraRank;
-	dataPtr[1] = kExtraData_Rank;
-	dataPtr[2] = 0;
-	dataPtr[3] = _rank;
-	return (ExtraRank*)dataPtr;
-}
-
-ExtraAction *ExtraAction::Create(TESObjectREFR *_actionRef)
-{
-	uint32_t *dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraAction));
-	dataPtr[0] = kVtbl_ExtraAction;
-	dataPtr[1] = kExtraData_Action;
-	dataPtr[2] = 0;
-	dataPtr[3] = 0;
-	dataPtr[4] = (uint32_t)_actionRef;
-	return (ExtraAction*)dataPtr;
+	ExtraSecuritronFace* pData = (ExtraSecuritronFace*)GameHeapAlloc(sizeof(ExtraSecuritronFace));
+	ThisCall(0x42CCC0, pData);
+	return pData;
 }
 
 const char *kExtraDataNames[] =
@@ -699,61 +529,6 @@ ExtraScript *ExtraScript::Create(TESForm *baseForm, bool create, TESObjectREFR *
 		}
 	}
 	return xScript;
-}
-
-ExtraFactionChanges *ExtraFactionChanges::Create()
-{
-	uint32_t *dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraFactionChanges));
-	dataPtr[0] = kVtbl_ExtraFactionChanges;
-	dataPtr[1] = kExtraData_FactionChanges;
-	dataPtr[2] = 0;
-	uint32_t *listData = (uint32_t*)GameHeapAlloc(sizeof(FactionListEntry));
-	listData[0] = 0;
-	listData[1] = 0;
-	dataPtr[3] = (uint32_t)listData;
-	return (ExtraFactionChanges*)dataPtr;
-}
-
-ExtraFactionChanges::FactionListEntry* GetExtraFactionList(BaseExtraList& xDataList)
-{
-	ExtraFactionChanges* xFactionChanges = GetExtraType(xDataList, FactionChanges);
-	if (xFactionChanges)
-		return xFactionChanges->data;
-	return NULL;
-}
-
-void SetExtraFactionRank(BaseExtraList& xDataList, TESFaction * faction, char rank)
-{
-	FactionListData *pData = NULL;
-	ExtraFactionChanges* xFactionChanges = GetExtraType(xDataList, FactionChanges);
-	if (xFactionChanges && xFactionChanges->data) {
-		ExtraFactionChangesMatcher matcher(faction, xFactionChanges);
-		pData = xFactionChanges->data->Find(matcher);
-		if (pData)
-			pData->rank = rank;
-	}
-	if (!pData) {
-		if (!xFactionChanges) {
-			xFactionChanges = ExtraFactionChanges::Create();
-			xDataList.Add(xFactionChanges);
-		}
-		pData = (FactionListData*)GameHeapAlloc(sizeof(FactionListData));
-		if (pData) {
-			pData->faction = faction;
-			pData->rank = rank;
-			xFactionChanges->data->Append(pData);
-		}
-	}
-}
-
-ExtraHotkey *ExtraHotkey::Create(uint8_t _index)
-{
-	uint32_t *dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraHotkey));
-	dataPtr[0] = kVtbl_ExtraHotkey;
-	dataPtr[1] = kExtraData_Hotkey;
-	dataPtr[2] = 0;
-	dataPtr[3] = _index;
-	return (ExtraHotkey*)dataPtr;
 }
 
 // Copied from JIP
