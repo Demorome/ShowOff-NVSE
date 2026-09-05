@@ -48,6 +48,7 @@ struct BaseExtraList
 };
 
 class BGSEncounterZone;
+class TESObjectREFR;
 
 struct ExtraDataList : public BaseExtraList
 {
@@ -56,6 +57,18 @@ struct ExtraDataList : public BaseExtraList
 
 	BGSEncounterZone* GetEncounterZone() const {
 		return ThisCall<BGSEncounterZone*>(0x421C30, this);
+	}
+
+	void SetEnableStateParent(TESObjectREFR* apParent) {
+		ThisCall(0x41DA40, this, apParent);
+	}
+
+	void AddEnableStateChild(TESObjectREFR* apChild) {
+		ThisCall(0x41DCD0, this, apChild);
+	}
+
+	void RemoveEnableStateChild(TESObjectREFR* apChild) {
+		ThisCall(0x41DDA0, this, apChild);
 	}
 };
 

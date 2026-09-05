@@ -875,54 +875,16 @@ bool Cmd_ResetInteriorAlt_Execute(COMMAND_ARGS)
 DEFINE_COMMAND_ALT_PLUGIN(SetEnableParent, SetParentRef, "", true, kParams_OneOptionalForm);
 bool Cmd_SetEnableParent_Execute(COMMAND_ARGS)
 {
-	TESObjectREFR* newParent = nullptr;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &newParent) || !thisObj)
+	TESObjectREFR* pNewParent = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pNewParent))
 		return true;
 
-	auto xParentRef = GetExtraTypeJIP(&thisObj->extraDataList, EnableStateParent);
+	if (pNewParent && !pNewParent->IsReference())
+		return true;
 
-	if (xParentRef)
-	{
-		if (auto const parent = xParentRef->parent;
-			parent != newParent)
-		{
-			// remove EnableChildren extraData
-			if (auto const xChildrenRef = GetExtraTypeJIP(&parent->extraDataList, EnableStateChildren))
-			{
-				xChildrenRef->children.Remove(thisObj);
-				if (xChildrenRef->children.Empty())
-					parent->extraDataList.Remove(xChildrenRef, true);
-			}
-		}
-	}
-
-	if (!newParent)
-	{
-		if (!xParentRef)
-			return true;
-
-		// remove EnableParent extraData
-		thisObj->extraDataList.Remove(xParentRef, true);
-	}
-	else
-	{
-		// add EnableChildren xData to newParent
-		auto xChildrenRef = GetExtraTypeJIP(&newParent->extraDataList, EnableStateChildren);
-		if (!xChildrenRef)
-		{
-			xChildrenRef = ExtraEnableStateChildren::Create();
-			newParent->extraDataList.Add(xChildrenRef);
-		}
-		xChildrenRef->children.Append(thisObj);
-
-		// add EnableParent xData to thisObj
-		if (!xParentRef)
-		{
-			xParentRef = ExtraEnableStateParent::Create();
-			thisObj->extraDataList.Add(xParentRef);
-		}
-		xParentRef->parent = newParent;
-	}
+	thisObj->SetEnableStateParent(pNewParent);
+	if (pNewParent)
+		pNewParent->extraDataList.AddEnableStateChild(thisObj);
 
 	return true;
 }

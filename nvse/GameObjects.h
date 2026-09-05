@@ -197,6 +197,10 @@ public:
 
 	TESObjectREFR* PlaceAtMe(TESForm* toPlace, int count = 1, int useNodePos = 0, int direction = 0);
 
+	void SetEnableStateParent(TESObjectREFR* apParent) {
+		ThisCall(0x56AA10, this, apParent);
+	}
+
 	static TESObjectREFR* __stdcall Create(bool bTemp = false);
 
 	MEMBER_FN_PREFIX(TESObjectREFR);
