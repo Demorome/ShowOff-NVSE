@@ -170,7 +170,6 @@ public:
 	TESForm *GetBaseForm();
 	bool GetDisabled();
 	ExtraContainerChanges *GetOrCreateContainerChanges();
-	ExtraContainerChanges::EntryDataList *GetContainerChangesList();
 	InventoryChanges *GetInventoryChanges();
 	int32_t GetItemCount(TESForm *form);
 	void AddItemAlt(TESForm *item, uint32_t count, float condition, bool doEquip);

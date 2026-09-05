@@ -69,68 +69,18 @@ float GetDistance3D(TESObjectREFR* ref1, TESObjectREFR* ref2)
 	return GetAxisDistance(ref1, ref2, 7);
 }
 
-__declspec(naked) bool __fastcall Actor::IsInCombatWith(Actor* target) const
+bool Actor::IsInCombatWith(Actor* target) const
 {
-	__asm
-	{
-		mov		eax, [ecx + 0x12C]
-		test	eax, eax
-		jz		done
-		mov		ecx, [eax + 4]
-		mov		eax, [eax + 8]
-		test	eax, eax
-		jz		done
-		ALIGN 16
-		iterHead:
-		cmp[ecx], edx
-			jz		rtnTrue
-			add		ecx, 4
-			dec		eax
-			jnz		iterHead
-			retn
-			rtnTrue :
-		mov		al, 1
-			done :
-			retn
-	}
+	return ThisCall<bool>(0x8BC700, this, target);
 }
 
-__declspec(naked) TESForm* __stdcall LookupFormByRefID(uint32_t refID)
-{
-	__asm
-	{
-		mov		ecx, ds: [0x11C54C0]
-		mov		eax, [esp + 4]
-		xor edx, edx
-		div		dword ptr[ecx + 4]
-		mov		eax, [ecx + 8]
-		mov		eax, [eax + edx * 4]
-		test	eax, eax
-		jz		done
-		mov		edx, [esp + 4]
-		ALIGN 16
-		iterHead:
-		cmp[eax + 4], edx
-			jz		found
-			mov		eax, [eax]
-			test	eax, eax
-			jnz		iterHead
-			retn	4
-			found:
-		mov		eax, [eax + 8]
-			done :
-			retn	4
-	}
+TESForm* LookupFormByRefID(uint32_t refID) {
+	return TESForm::GetFormByNumericID(refID);
 }
 
 TESObjectWEAP* Actor::GetEquippedWeapon() const
 {
-	if (baseProcess)
-	{
-		ContChangesEntry* weaponInfo = baseProcess->GetWeaponInfo();
-		if (weaponInfo) return (TESObjectWEAP*)weaponInfo->type;
-	}
-	return NULL;
+	return ThisCall<TESObjectWEAP*>(0x8A1710, this);
 }
 
 //Ensure thread safety when modifying these globals!
@@ -145,35 +95,9 @@ uint32_t __fastcall GetSubjectID(TESForm* form, TESObjectREFR* thisObj)
 
 std::atomic<uint8_t> s_dataChangedFlags = kChangedFlag_None; // For AuxVar serialization.
 
-
-__declspec(naked) ExtraContainerChanges::EntryDataList* TESObjectREFR::GetContainerChangesList()
-{
-	__asm
-	{
-		push	kExtraData_ContainerChanges
-		add		ecx, 0x44
-		call	BaseExtraList::GetByType
-		test	eax, eax
-		jz		done
-		mov		eax, [eax + 0xC]
-		test	eax, eax
-		jz		done
-		mov		eax, [eax]
-		done:
-		retn
-	}
-}
-
-const bool kInventoryType[121] =
-{
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-	1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0
-};
-
 bool TESForm::IsItem() const
 {
-	return kInventoryType[this->typeID];
+	return TESContainer::ContainerCanHoldType(typeID);
 }
 
 __declspec(naked) bool __fastcall GetResolvedModIndex(uint8_t* pModIdx)

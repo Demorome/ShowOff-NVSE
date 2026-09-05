@@ -636,6 +636,10 @@ public:
 
 	Script* GetScript() const;
 
+	static TESForm* GetFormByNumericID(uint32_t auiFormID) {
+		return CdeclCall<TESForm*>(0x4839C0, auiFormID);
+	}
+
 	MEMBER_FN_PREFIX(TESForm);
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 	DEFINE_MEMBER_FN(MarkAsTemporary, void, 0x00484490);	// probably a member of TESForm
@@ -1373,6 +1377,10 @@ public:
 	typedef tList<FormCount> FormCountList;
 
 	FormCountList	formCountList;	// 04
+
+	static bool ContainerCanHoldType(uint32_t aeTypeID) {
+		return CdeclCall<bool>(0x481F30, aeTypeID);
+	}
 };
 
 // 00C
