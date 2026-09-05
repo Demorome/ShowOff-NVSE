@@ -47,14 +47,14 @@
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(SolutionDir)art-of-cpp\PEGTL;$(SolutionDir)art-of-cpp\taocpp-json\include;$(SolutionDir)art-of-cpp\config;$(SolutionDir)Armadillo Library;$(SolutionDir)Events;$(SolutionDir)internal;$(SolutionDir)functions;$(SolutionDir)JSON_Library;$(SolutionDir)SimpleINILibrary;$(IncludePath)</IncludePath>
-    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
+    <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir>$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(SolutionDir)art-of-cpp\PEGTL;$(SolutionDir)art-of-cpp\taocpp-json\include;$(SolutionDir)art-of-cpp\config;$(SolutionDir)Armadillo Library;$(SolutionDir)Events;$(SolutionDir)internal;$(SolutionDir)functions;$(SolutionDir)JSON_Library;$(SolutionDir)SimpleINILibrary;$(IncludePath)</IncludePath>
-    <PostBuildEventUseInBuild>false</PostBuildEventUseInBuild>
+    <PostBuildEventUseInBuild>true</PostBuildEventUseInBuild>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -83,10 +83,12 @@
       <GenerateMapFile>true</GenerateMapFile>
     </Link>
     <PostBuildEvent>
-      <Message>Installing DLL...</Message>
-      <Command>if exist "$(FalloutNVPath)\Data\NVSE\Plugins" (
-copy "$(TargetPath)" "$(FalloutNVPath)\Data\NVSE\Plugins\$(TargetFileName)"
-copy "$(SolutionDir)Release\$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\ShowOffNVSE.pdb"
+      <Message>
+      </Message>
+      <Command>if exist "$(MO2)\ShowOff xNVSE Plugin\nvse\plugins" (
+copy "$(TargetPath)" "$(MO2)\ShowOff xNVSE Plugin\nvse\plugins\$(TargetFileName)"
+copy "$(TargetDir)$(TargetName).pdb" "$(MO2)\ShowOff xNVSE Plugin\nvse\plugins\$(TargetName).pdb"
+copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
 )</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -118,10 +120,12 @@ copy "$(SolutionDir)Release\$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugi
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Message>Installing DLL and PDB...</Message>
-      <Command>if exist "$(FalloutNVPath)\Data\NVSE\Plugins" (
-copy "$(TargetPath)" "$(FalloutNVPath)\Data\NVSE\Plugins\$(TargetFileName)"
-copy "$(SolutionDir)Release\$(TargetName).pdb" "$(FalloutNVPath)\Data\NVSE\Plugins\ShowOffNVSE.pdb"
+      <Message>
+      </Message>
+      <Command>if exist "$(MO2)\ShowOff xNVSE Plugin\nvse\plugins" (
+copy "$(TargetPath)" "$(MO2)\ShowOff xNVSE Plugin\nvse\plugins\$(TargetFileName)"
+copy "$(TargetDir)$(TargetName).pdb" "$(MO2)\ShowOff xNVSE Plugin\nvse\plugins\$(TargetName).pdb"
+copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
 )</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
