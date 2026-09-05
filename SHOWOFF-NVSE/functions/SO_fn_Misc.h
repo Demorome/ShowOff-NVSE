@@ -330,7 +330,7 @@ bool Cmd_IsNight_Eval(COMMAND_ARGS_EVAL)
 	Sky* sky = Sky::GetSingleton();
 	float const gameHour = ThisCall<double>(0x966A20, sky);
 	float sunrise, sunset;
-	if (climate && IS_TYPE(climate, TESClimate))
+	if (climate && IS_ID(climate, TESClimate))
 	{
 		sunrise = ThisCall<uint8_t>(0x595F10, climate, 1) / 6.0F;  //sunrise begin sprinkled with adjustments.
 		sunset = ThisCall<uint8_t>(0x595F10, climate, 2) / 6.0F;  //Second arg determines which type of time to check.
@@ -356,7 +356,7 @@ bool Cmd_IsNight_Execute(COMMAND_ARGS)
 bool Cmd_IsLimbCrippled_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
-	if (!IS_ACTOR(thisObj)) return true;
+	if (!thisObj->IsActor()) return true;
 	Actor* const actor = (Actor*)thisObj;
 	uint32_t limbID = (uint32_t)arg1;
 	uint32_t const threshold = (uint32_t)arg2;
@@ -392,7 +392,7 @@ bool Cmd_IsLimbCrippled_Execute(COMMAND_ARGS)
 bool Cmd_GetNumCrippledLimbs_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
-	if (!IS_ACTOR(thisObj)) return true;
+	if (!thisObj->IsActor()) return true;
 	Actor* const actor = (Actor*)thisObj;
 	uint32_t const threshold = (uint32_t)arg1;
 	uint32_t numCrippledLimbs = 0;
@@ -418,7 +418,7 @@ bool Cmd_GetNumCrippledLimbs_Execute(COMMAND_ARGS)
 bool Cmd_GetCrippledLimbsAsBitMask_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
-	if (!IS_ACTOR(thisObj)) return true;
+	if (!thisObj->IsActor()) return true;
 	Actor* const actor = (Actor*)thisObj;
 	uint32_t const threshold = (uint32_t)arg1;
 
@@ -469,7 +469,7 @@ bool Cmd_ClearShowoffSavedData_Execute(COMMAND_ARGS)
 bool Cmd_GetCalculatedMaxCarryWeight_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
-	if (!IS_ACTOR(thisObj)) return true;
+	if (!thisObj->IsActor()) return true;
 	*result = ThisCall<double>(0x8A0C20, (Actor*)thisObj);
 	return true;
 }
@@ -939,7 +939,7 @@ bool Cmd_SetAmmoName_Execute(COMMAND_ARGS)
 		if (!thisObj) return true;
 		form = thisObj->baseForm;
 	}
-	if (!IS_TYPE(form, TESAmmo))
+	if (!IS_ID(form, TESAmmo))
 		return true;
 
 	*result = 1;
@@ -974,7 +974,7 @@ bool Cmd_GetAmmoName_Execute(COMMAND_ARGS)
 			if (!thisObj) return true;
 			form = thisObj->baseForm;
 		}
-		if (!IS_TYPE(form, TESAmmo))
+		if (!IS_ID(form, TESAmmo))
 			return true;
 
 		String* nameString = nullptr;
@@ -1033,7 +1033,7 @@ bool Cmd_SpawnTracingProjectile_Execute(COMMAND_ARGS)
 	uint32_t bCopyData = false;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &baseProjToSpawn, &ignoreGravity, &bCopyData))
 		return true;
-	if (!thisObj || !IS_PROJECTILE(thisObj) || !IS_TYPE(baseProjToSpawn, BGSProjectile))
+	if (!thisObj || !thisObj->IsProjectile() || !IS_ID(baseProjToSpawn, BGSProjectile))
 		return true;
 
 	auto* projectileToTrail = static_cast<Projectile*>(thisObj);
@@ -1150,7 +1150,7 @@ bool Cmd_CaravanDeckGetCards_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	TESForm* deckForm;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &deckForm) || !IS_TYPE(deckForm, TESCaravanDeck))
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &deckForm) || !IS_ID(deckForm, TESCaravanDeck))
 		return true;
 	const auto* deck = static_cast<TESCaravanDeck*>(deckForm);
 	if (deck->cards->Empty())
@@ -1173,7 +1173,7 @@ bool Cmd_CaravanDeckRemoveCard_Execute(COMMAND_ARGS)
 	TESForm* deckForm;
 	TESForm* cardForm;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &deckForm, &cardForm)
-		|| !IS_TYPE(deckForm, TESCaravanDeck) || !IS_TYPE(cardForm, TESCaravanCard))
+		|| !IS_ID(deckForm, TESCaravanDeck) || !IS_ID(cardForm, TESCaravanCard))
 	{
 		return true;
 	}
@@ -1194,7 +1194,7 @@ bool Cmd_CaravanDeckAddCard_Execute(COMMAND_ARGS)
 	TESForm* cardForm;
 	int32_t n = eListEnd;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &deckForm, &cardForm, &n)
-		|| !IS_TYPE(deckForm, TESCaravanDeck) || !IS_TYPE(cardForm, TESCaravanCard))
+		|| !IS_ID(deckForm, TESCaravanDeck) || !IS_ID(cardForm, TESCaravanCard))
 	{
 		return true;
 	}
@@ -1210,7 +1210,7 @@ bool Cmd_CaravanDeckGetCount_Execute(COMMAND_ARGS)
 {
 	*result = -1;
 	TESForm* deckForm;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &deckForm) || !IS_TYPE(deckForm, TESCaravanDeck) )
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &deckForm) || !IS_ID(deckForm, TESCaravanDeck) )
 		return true;
 	auto* deck = static_cast<TESCaravanDeck*>(deckForm);
 	*result = deck->count;
@@ -1224,7 +1224,7 @@ bool Cmd_CaravanDeckGetCardIndex_Execute(COMMAND_ARGS)
 	TESForm* deckForm;
 	TESForm* cardForm;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &deckForm, &cardForm)
-		|| !IS_TYPE(deckForm, TESCaravanDeck) || !IS_TYPE(cardForm, TESCaravanCard))
+		|| !IS_ID(deckForm, TESCaravanDeck) || !IS_ID(cardForm, TESCaravanCard))
 	{
 		return true;
 	}
