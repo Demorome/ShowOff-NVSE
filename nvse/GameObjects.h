@@ -93,10 +93,10 @@ public:
 	virtual uint32_t		Unk_83(void);
 	virtual void		Unk_84(uint32_t arg0);
 	virtual uint32_t		Unk_85(void);
-	virtual bool		IsCharacter();			// return false for Actor and Creature, true for character and PlayerCharacter
-	virtual bool		IsCreature();
-	virtual bool		IsExplosion();
-	virtual bool		IsProjectile();
+	virtual bool		IsCharacter() const;			// return false for Actor and Creature, true for character and PlayerCharacter
+	virtual bool		IsCreature() const;
+	virtual bool		IsExplosion() const;
+	virtual bool		IsProjectile() const;
 	virtual void		Unk_8A(void);			// SetParentCell (Interior only ?)
 	virtual bool		HasHealth(bool arg0);	// HasHealth (baseForm health > 0 or Flags bit23 set)
 	virtual bool		GetHasKnockedState(void);

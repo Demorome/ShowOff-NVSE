@@ -84,7 +84,7 @@ public:
 			TESForm* currentFilter = GenFilters[i].form;
 			if (!currentFilter) continue;
 			if (!(IsAcceptedParameter(currentFilter))) continue;
-			if (currentFilter->GetIsReference())
+			if (currentFilter->IsReference())
 			{
 				InsertToFilter(i, ((TESObjectREFR*)currentFilter)->baseForm->GetFormID());
 				continue;
@@ -95,7 +95,7 @@ public:
 				ListNode<TESForm>* iterator = ((BGSListForm*)currentFilter)->list.Head();
 				do {
 					TESForm* it = iterator->data;
-					if (it->GetIsReference()) continue;
+					if (it->IsReference()) continue;
 					if (IsAcceptedParameter(it))
 						InsertToFilter(i, it->GetFormID());
 				} while (iterator = iterator->next);
@@ -108,7 +108,7 @@ public:
 	__forceinline bool IsBaseInFilter(uint32_t filterNum, TESForm* form)
 	{
 		if (!form) return false;
-		if (form->GetIsReference())
+		if (form->IsReference())
 			return IsInFilter(filterNum, ((TESObjectREFR*)form)->baseForm->GetFormID());
 		return IsInFilter(filterNum, form->GetFormID());
 	}

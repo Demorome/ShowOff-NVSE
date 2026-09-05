@@ -20,7 +20,7 @@ BGSDefaultObjectManager ** g_defaultObjectManager = (BGSDefaultObjectManager**)0
 
 TESForm *TESForm::TryGetREFRParent()
 {
-	if (GetIsReference())
+	if (IsReference())
 	{
 		TESObjectREFR *refr = (TESObjectREFR*)this;
 		if (refr->baseForm) return refr->baseForm;
@@ -80,7 +80,7 @@ TESFullName *TESForm::GetFullName() const
 	const TESForm *baseForm = this;
 	TESFullName *fullName = NULL;
 
-	if (GetIsReference())
+	if (IsReference())
 		baseForm = ((TESObjectREFR*)this)->baseForm;
 	else if IS_TYPE(this, TESObjectCELL)
 	{

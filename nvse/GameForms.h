@@ -509,14 +509,14 @@ public:
 	virtual void		Unk_36(bool set);	// 00020000
 	virtual void		Unk_37(void);		// write esp format
 	virtual void		readOBNDSubRecord(ModInfo * modInfo);	// read esp format
-	virtual bool		Unk_39(void);
-	virtual bool		Unk_3A(void);
-	virtual bool		Unk_3B(void);
-	virtual bool		GetIsReference() const;
-	virtual bool		IsArmorAddon();
-	virtual bool		Unk_3E(void);
-	virtual bool		Unk_3F(void);	// returnTrue for refr whose baseForm is a TESActorBase
-	virtual bool		IsActor(void);	//seems to only work for references.
+	virtual bool		IsBoundObject() const;
+	virtual bool		IsObject() const;
+	virtual bool		IsMagicItem() const;
+	virtual bool		IsReference() const;
+	virtual bool		IsArmorAddon() const;
+	virtual bool		IsActorBase() const;
+	virtual bool		IsMobileObject() const;
+	virtual bool		IsActor() const;
 	virtual uint32_t		Unk_41(void);
 	virtual void		CopyFrom(const TESForm * form);
 	virtual bool		Compare(TESForm * form);
@@ -605,7 +605,6 @@ public:
 	// return a new base form which is the clone of this form
 	TESForm *CloneForm(bool bPersist = true) const;
 	bool IsInventoryObject() const;
-	bool IsReference() const;
 
 	bool HasScript();
 	bool GetScriptAndEventList(Script*& script, ScriptEventList*& eventList);
