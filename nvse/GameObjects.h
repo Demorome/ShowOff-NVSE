@@ -717,8 +717,8 @@ public:
 	// OBSE: unk1 looks like quantity, usu. 1; ignored for ammo (equips entire stack). In NVSE, pretty much always forced internally to 1
 	// OBSE: itemExtraList is NULL as the container changes entry is not resolved before the call
 	// NVSE: Default values are those used by the vanilla script functions.
-	void EquipItem(TESForm *objType, uint32_t equipCount = 1, ExtraDataList *itemExtraList = NULL, uint32_t unk3 = 1, bool lockEquip = false, uint32_t unk5 = 1);	// unk3 apply enchantment on player differently
-	void UnequipItem(TESForm *objType, uint32_t unequipCount = 1, ExtraDataList *itemExtraList = NULL, uint32_t unk3 = 1, bool lockUnequip_unused = false, uint32_t unk5 = 1);
+	void EquipItem(TESForm *objType, uint32_t equipCount = 1, ExtraDataList *itemExtraList = NULL, bool unk3 = 1, bool lockEquip = false, bool unk5 = 1);	// unk3 apply enchantment on player differently
+	void UnequipItem(TESForm *objType, uint32_t unequipCount = 1, ExtraDataList *itemExtraList = NULL, bool unk3 = 1, bool lockUnequip_unused = false, bool unk5 = 1);
 
 	//EquippedItemsList GetEquippedItems();
 	//ExtraContainerDataArray GetEquippedEntryDataList();
