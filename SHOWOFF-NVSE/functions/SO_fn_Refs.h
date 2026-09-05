@@ -29,7 +29,7 @@ bool Cmd_GetCompassTargets_Execute(COMMAND_ARGS)
 
 	NVSEArrayVar* resArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 	g_arrInterface->AssignCommandResult(resArr, result);
-	for (auto const iter : GetCompassTargets::g_TargetsInCompass)
+	for (auto const& iter : GetCompassTargets::g_TargetsInCompass)
 	{
 		if (includeWhat == IncludeAll
 			|| (includeWhat == IncludeNonHostiles && !iter.isHostile)
