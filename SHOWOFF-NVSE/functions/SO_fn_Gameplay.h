@@ -886,7 +886,7 @@ bool Cmd_SetOwnershipTemp_Execute(COMMAND_ARGS)
 	if (!newOwner->IsActorAlt() && !IS_ID(newOwner, TESFaction))
 		return true;
 	ExtraDataList* xData = nullptr;
-	if (IS_TYPE(baseForm, TESObjectCELL))
+	if (baseForm && IS_TYPE(baseForm, TESObjectCELL))
 	{
 		xData = &static_cast<TESObjectCELL*>(baseForm)->extraDataList;
 	}
