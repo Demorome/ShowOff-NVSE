@@ -2100,20 +2100,28 @@ uint32_t __fastcall StringToRef(char* refStr)
 	if (char* colon = FindChr(refStr, ':');
 		colon)
 	{
+		const TESFile* pFile = nullptr;
 		uint8_t modIdx;
 		if (colon != refStr)
 		{
 			*colon = 0;
-			modIdx = TESDataHandler::GetSingleton()->GetModIndex(refStr);
+			pFile = TESDataHandler::GetSingleton()->GetListFile(refStr);
 			*colon = ':';
-			if (modIdx == 0xFF) 
+			if (!pFile)
 				return 0;
+
+			modIdx = pFile->modIndex;
 		}
 		else
 		{
 			modIdx = 0xFF;
 		}
-		*findStr = (modIdx << 24) | HexToUInt(colon + 1);
+
+		if (TESDataHandler::HasSmallPluginSupport() && modIdx == 0xFE) {
+			*findStr = (modIdx << 24) | (pFile->smallIndex << 12) | HexToUInt(colon + 1 + 3);
+		}
+		else
+			*findStr = (modIdx << 24) | HexToUInt(colon + 1);
 		return *findStr;
 	}
 	return ResolveRefID(HexToUInt(refStr), findStr) ? *findStr : 0;
@@ -2131,12 +2139,27 @@ const std::string& RefToString(TESForm* form)
 	if (auto search = s_refStrings.find(form->GetFormID()); search != s_refStrings.end())
 		return search->second;
 
-	const char* modName = TESDataHandler::GetSingleton()->GetNthModName(form->modIndex);
+	if (form->modIndex == 0xFF)
+		return invalidRef;
+
+	TESDataHandler* pDataHandler = TESDataHandler::GetSingleton();
+	uint32_t uiModIndex = form->modIndex;
+	if (form->modIndex == 0xFE && pDataHandler->SupportsSmallPugins())
+		uiModIndex = form->GetFormID();
+		
+	const TESFile* pMod = TESDataHandler::GetSingleton()->GetFile(uiModIndex);
+	if (!pMod)
+		return invalidRef;
+
+	const char* modName = pMod->name;
 	if (!modName || !modName[0])
 		return invalidRef;
 
 	char cHexString[10];
-	snprintf(cHexString, sizeof(cHexString), ":%08X", form->GetFormID() & 0xFFFFFF);
+	if (form->modIndex == 0xFE && pDataHandler->SupportsSmallPugins())
+		snprintf(cHexString, sizeof(cHexString), ":%08X", form->GetFormID() & 0xFFF);
+	else
+		snprintf(cHexString, sizeof(cHexString), ":%08X", form->GetFormID() & 0xFFFFFF);
 
 	std::string result;
 	result.reserve(result.size() + strlen(modName) + 9);

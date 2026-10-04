@@ -5,16 +5,16 @@
 
 // All ripped from JIP LN's serialization.h
 
-void ProcessDataChangedFlags(DataChangedFlags changedFlags)
+void ClearScriptAuxData()
 {
-	if (changedFlags & kChangedFlag_AuxStringMaps) s_auxStringMapArraysPerm.Clear();
-	if (changedFlags & kChangedFlag_AuxTimerMaps) AuxTimer::s_auxTimerMapArraysPerm.Clear();
+	s_auxStringMapArraysPerm.Clear();
+	AuxTimer::s_auxTimerMapArraysPerm.Clear();
 }
-
-char s_lastLoadedPath[MAX_PATH];
 
 uint8_t* s_loadGameBuffer = nullptr;
 uint32_t s_loadGameBufferSize = 0x10000;
+
+constexpr uint32_t AuxStringMapVersion = 11;
 
 __declspec(noinline) uint8_t* __fastcall GetLoadGameBuffer(uint32_t length)
 {
@@ -33,38 +33,56 @@ __declspec(noinline) uint8_t* __fastcall GetLoadGameBuffer(uint32_t length)
 
 void LoadGameCallback(void*)
 {
-	// loaded path is checked in message handler.
-	uint8_t const changedFlags = s_dataChangedFlags;
-	ProcessDataChangedFlags(static_cast<DataChangedFlags>(changedFlags));
+	ClearScriptAuxData();
 	// s_dataChangedFlags is reset @ PostLoadGame msg handler.
 
-	uint32_t type, version, length, nRefs, buffer4;
-	uint8_t buffer1, modIdx, loopBuffer;
+	const bool bGameSupportsESL = TESDataHandler::HasSmallPluginSupport();
+
+	uint32_t type, uiVersion, length, nRefs;
+	uint8_t buffer1, loopBuffer;
 	uint16_t nRecs, nVals, nVars;
 	char varName[0x50];
 	char keyName[0x50];
 
-	while (GetNextRecordInfo(&type, &version, &length))
+	while (GetNextRecordInfo(&type, &uiVersion, &length))
 	{
 		switch (type)
 		{
 		case 'SMSO':
 		{
-			if (!(changedFlags & kChangedFlag_AuxStringMaps)) continue;
+			if (uiVersion > AuxStringMapVersion)
+				break;
+
+			const bool bSaveSupportsESL = uiVersion > 10;
+
 			nRecs = ReadRecord16();  //the saved size of s_auxStringMapArraysPerm
 			while (nRecs)
 			{
 				nRecs--;
-				buffer1 = ReadRecord8();  //modID
+				const uint8_t ucModIndex = ReadRecord8();
+				const bool bESL = bGameSupportsESL && ucModIndex == 0xFE;
 
-				//checks if mod is still loaded(?)
-				if (!ResolveRefID(buffer1 << 24, &buffer4))
-				{
+				uint32_t uiTempFormID = 0;
+				uiTempFormID |= ucModIndex << 24;
+				
+				if (bSaveSupportsESL) {
+					const uint16_t usSmallIndex = ReadRecord16();
+					if (bESL)
+						uiTempFormID |= usSmallIndex << 12;
+				}
+				else if (bESL) {
+					// File won't be found, so skip early
+					uiTempFormID = 0xFF << 24;
+				}
+
+				const TESFile* pFile = nullptr;
+				if (ResolveRefID(uiTempFormID, &uiTempFormID))
+					pFile = TESDataHandler::GetSingleton()->GetFileByFormID(uiTempFormID);
+				
+				if (!pFile)
 					continue;
-				}   
 				
 				AuxStringMapVarsMap* rVarsMap = NULL;
-				modIdx = buffer4 >> 24;
 				nVars = ReadRecord16();  //amount of auxStringMaps owned by the mod.
 				while (nVars)
 				{
@@ -87,7 +105,7 @@ void LoadGameCallback(void*)
 								if (!rVarsMap) 
 								{
 									rVarsMap = s_auxStringMapArraysPerm.Emplace(
-										modIdx, 
+										pFile,
 										nVars
 									);
 								}
@@ -113,19 +131,40 @@ void LoadGameCallback(void*)
 		}
 		case 'TAOS':
 		{
-			if (!(changedFlags & kChangedFlag_AuxTimerMaps) 
-				|| (version < AuxTimer::AuxTimerVersion))
-			{
+			if (uiVersion > AuxTimer::AuxTimerVersion)
 				break;
-			}
+
+			const bool bSaveSupportsESL = uiVersion > 1;
+
 			uint8_t* bufPos = GetLoadGameBuffer(length);
 			nRecs = *(uint16_t*)bufPos;
 			bufPos += sizeof(uint16_t);
 			while (nRecs)
 			{
-				modIdx = *bufPos++;
+				const uint8_t ucModIndex = *bufPos++;
+				const bool bESL = bGameSupportsESL && ucModIndex == 0xFE;
+
+				uint32_t uiTempFormID = 0;
+				uiTempFormID |= ucModIndex << 24;
+				
+				if (bSaveSupportsESL) {
+					const uint16_t usSmallIndex = *reinterpret_cast<uint16_t*>(bufPos);
+					bufPos += sizeof(uint16_t);
+					if (bESL)
+						uiTempFormID |= usSmallIndex << 12;
+				}
+				else if (bESL) {
+					// File won't be found, so skip early
+					uiTempFormID = 0xFF << 24;
+				}
+
 				nRecs--;
-				if (modIdx > 5 && GetResolvedModIndex(&modIdx))
+
+				const TESFile* pFile = nullptr;
+				if (ResolveRefID(uiTempFormID, &uiTempFormID))
+					pFile = TESDataHandler::GetSingleton()->GetFileByFormID(uiTempFormID);
+
+				if (pFile)
 				{
 					AuxTimer::AuxTimerOwnersMap* ownersMap = nullptr;
 					nRefs = *(uint16_t*)bufPos;
@@ -136,13 +175,12 @@ void LoadGameCallback(void*)
 						bufPos += sizeof(uint32_t);
 						nVars = *(uint16_t*)bufPos;
 						bufPos += sizeof(uint16_t);
-						if ((refID = GetResolvedRefID(refID)) 
-							&& (LookupFormByRefID(refID) || HasChangeData(refID)))
+						if (ResolveRefID(refID, &refID) && (TESForm::GetFormByNumericID(refID) || HasChangeData(refID)))
 						{
 							if (!ownersMap)
 							{
 								ownersMap = AuxTimer::s_auxTimerMapArraysPerm.Emplace(
-									modIdx, 
+									pFile,
 									AlignBucketCount(nRefs)
 								);
 							}
@@ -228,10 +266,15 @@ void SaveGameCallback(void*)
 
 	if (buffer2 = s_auxStringMapArraysPerm.Size())
 	{
-		WriteRecord('SMSO', 10, &buffer2, 2);
+		WriteRecord('SMSO', AuxStringMapVersion, &buffer2, 2);
 		for (auto rmModIt = s_auxStringMapArraysPerm.Begin(); rmModIt; ++rmModIt)
 		{
-			WriteRecord8(rmModIt.Key());
+			const TESFile* pMod = rmModIt.Key();
+			if (!pMod)
+				continue;
+
+			WriteRecord8(pMod->modIndex);
+			WriteRecord16(pMod->smallIndex);
 			WriteRecord16(rmModIt().Size());
 			for (auto rmVarIt = rmModIt().Begin(); rmVarIt; ++rmVarIt)
 			{
@@ -256,7 +299,12 @@ void SaveGameCallback(void*)
 		WriteRecord('TAOS', AuxTimer::AuxTimerVersion, &buffer2, 2);
 		for (auto avModIt = AuxTimer::s_auxTimerMapArraysPerm.Begin(); avModIt; ++avModIt)
 		{
-			WriteRecord8(avModIt.Key());
+			const TESFile* pMod = avModIt.Key();
+			if (!pMod)
+				continue;
+
+			WriteRecord8(pMod->modIndex);
+			WriteRecord16(pMod->smallIndex);
 			WriteRecord16(avModIt().Size());
 			for (auto avOwnerIt = avModIt().Begin(); avOwnerIt; ++avOwnerIt)
 			{
