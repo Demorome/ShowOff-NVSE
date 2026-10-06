@@ -750,7 +750,8 @@ bool Cmd_GetSpellUsageNumEx_Execute(COMMAND_ARGS)
 	return Cmd_GetSpellUsageNumEx_Eval(thisObj, magicItem, nullptr, result);
 }
 
-#if _DEBUG
+//#if _DEBUG
+#if  0
 
 // Will be able to get the inventory reference's original extendDataList.
 TESObjectREFR* __fastcall CreateRefForStackWithoutCopy(TESObjectREFR* container, ContChangesEntry* entry)

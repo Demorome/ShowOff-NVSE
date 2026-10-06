@@ -733,15 +733,16 @@ extern "C"
 
 
 
-#if EnableSafeExtractArgsTests
+//#if EnableSafeExtractArgsTests
+#if 0
 		REG_CMD(TestSafeExtract_OneArray)
 		REG_CMD(TestSafeExtract_OneNumber_OneOptionalString)
 		REG_CMD(TestSafeExtract_OneNumber_OneOptionalString_Alt)
 		REG_CMD(TestSafeExtract_OneOptionalStringOrNumber)
 #endif
 		
-#if _DEBUG  //for functions being tested (or just abandoned).
-
+//#if _DEBUG  //for functions being tested (or just abandoned).
+#if 0
 		REG_CMD(SetShouldShowSleepWaitOverrideMessage);
 
 		REG_CMD_ARR(CaravanDeckGetCards)

@@ -1111,8 +1111,8 @@ bool Cmd_GetVATSTargetable_Execute(COMMAND_ARGS)
 	return Cmd_GetVATSTargetable_Eval(thisObj, nullptr, nullptr, result);
 }
 
-#ifdef _DEBUG
-
+//#ifdef _DEBUG
+#if 0
 
 
 
