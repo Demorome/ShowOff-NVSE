@@ -1092,7 +1092,7 @@ DEFINE_COMMAND_PLUGIN(ToANSIChar, "", false, kParams_OneInt_OneOptionalInt);
 bool Cmd_ToANSIChar_Execute(COMMAND_ARGS)
 {
 	uint32_t scancode = 0;
-	bool ignoreShift = false;
+	BOOL ignoreShift = false;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &scancode, &ignoreShift))
 	{
 		g_strInterface->Assign(PASS_COMMAND_ARGS, "");
