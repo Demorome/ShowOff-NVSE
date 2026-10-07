@@ -2101,7 +2101,7 @@ uint32_t __fastcall StringToRef(char* refStr)
 		colon)
 	{
 		const TESFile* pFile = nullptr;
-		uint8_t modIdx;
+		uint8_t modIdx = 0xFF;
 		if (colon != refStr)
 		{
 			*colon = 0;
@@ -2112,16 +2112,17 @@ uint32_t __fastcall StringToRef(char* refStr)
 
 			modIdx = pFile->modIndex;
 		}
-		else
-		{
-			modIdx = 0xFF;
-		}
 
-		if (TESDataHandler::HasSmallPluginSupport() && modIdx == 0xFE) {
-			*findStr = (modIdx << 24) | (pFile->smallIndex << 12) | HexToUInt(colon + 1 + 3);
+		*findStr = (modIdx << 24);
+		const uint32_t uiConvertedID = HexToUInt(colon + 1);
+		if (TESDataHandler::HasNewFileTypeSupport() && (modIdx == 0xFE || modIdx == 0xFD)) {
+			if (modIdx == 0xFE)
+				*findStr = (pFile->smallIndex << 12) | (uiConvertedID & 0xFFF);
+			else if (modIdx == 0xFD)
+				*findStr = (pFile->mediumIndex << 16) | (uiConvertedID & 0xFFFF);
 		}
 		else
-			*findStr = (modIdx << 24) | HexToUInt(colon + 1);
+			*findStr = uiConvertedID & 0xFFFFFF;
 		return *findStr;
 	}
 	return ResolveRefID(HexToUInt(refStr), findStr) ? *findStr : 0;
@@ -2143,8 +2144,9 @@ const std::string& RefToString(TESForm* form)
 		return invalidRef;
 
 	TESDataHandler* pDataHandler = TESDataHandler::GetSingleton();
+	const bool bSpecialIDs = pDataHandler->SupportsNewFileTypes();
 	uint32_t uiModIndex = form->modIndex;
-	if (form->modIndex == 0xFE && pDataHandler->SupportsSmallPugins())
+	if (bSpecialIDs && form->modIndex >= 0xFD)
 		uiModIndex = form->GetFormID();
 		
 	const TESFile* pMod = TESDataHandler::GetSingleton()->GetFile(uiModIndex);
@@ -2156,8 +2158,12 @@ const std::string& RefToString(TESForm* form)
 		return invalidRef;
 
 	char cHexString[10];
-	if (form->modIndex == 0xFE && pDataHandler->SupportsSmallPugins())
-		snprintf(cHexString, sizeof(cHexString), ":%08X", form->GetFormID() & 0xFFF);
+	if (bSpecialIDs && form->modIndex >= 0xFD) {
+		if (form->modIndex == 0xFE)
+			snprintf(cHexString, sizeof(cHexString), ":%08X", form->GetFormID() & 0xFFF);
+		else
+			snprintf(cHexString, sizeof(cHexString), ":%08X", form->GetFormID() & 0xFFFF);
+	}
 	else
 		snprintf(cHexString, sizeof(cHexString), ":%08X", form->GetFormID() & 0xFFFFFF);
 

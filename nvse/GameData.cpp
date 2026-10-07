@@ -15,7 +15,7 @@ const TESFile * TESDataHandler::GetListFile(const char * modName) const {
 
 const TESFile* TESDataHandler::GetFileByFormID(uint32_t auiFormID) const {
 	uint32_t uiFileIndex = (auiFormID >> 24) & 0xFF;
-	if (SupportsSmallPugins() && uiFileIndex == 0xFE)
+	if (SupportsNewFileTypes() && uiFileIndex >= 0xFD)
 		uiFileIndex = auiFormID;
 
 	return GetFile(uiFileIndex);
@@ -29,4 +29,8 @@ uint8_t TESDataHandler::GetModIndex(const char *modName) const {
 uint8_t TESDataHandler::GetActiveModCount() const
 {
 	return modInfoList.Count();
+}
+
+bool TESDataHandler::IsFormIDInUse(uint32_t auiFormID) const {
+	return ThisCall<bool>(0x469760, this, auiFormID);
 }

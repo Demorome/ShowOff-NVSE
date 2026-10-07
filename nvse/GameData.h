@@ -171,7 +171,10 @@ struct TESFile		// referred to by game as TESFile
 	uint32_t								unk404;				// 404
 	uint32_t								unk408;				// 408
 	uint8_t								modIndex;			// 40C init to 0xFF
-	uint16_t							smallIndex;
+	union {
+		uint8_t							mediumIndex;
+		uint16_t						smallIndex;
+	};
 	String								author;				// 410
 	String								description;		// 418
 	void								* dataBuf;			// 420 
@@ -203,8 +206,7 @@ struct ModList
 };
 static_assert(sizeof(ModList) == 0x400);
 
-inline constexpr uint32_t HAS_SMALL_PLUGINS_FLAG = 0x40;
-inline constexpr uint32_t HAS_OVERLAY_PLUGINS_FLAG = 0x80;
+inline constexpr uint32_t HAS_NEW_PLUGIN_TYPES = 0x80;
 
 // 5B8
 class TESDataHandler
@@ -303,12 +305,8 @@ public:
 
 	static TESDataHandler* GetSingleton();
 
-	bool SupportsSmallPugins() const { return flags & HAS_SMALL_PLUGINS_FLAG; }
-	bool SupportsOverlayPugins() const { return flags & HAS_OVERLAY_PLUGINS_FLAG; }
-	bool SupportsAllPlugins() const { return (flags & (HAS_SMALL_PLUGINS_FLAG | HAS_OVERLAY_PLUGINS_FLAG)) == (HAS_SMALL_PLUGINS_FLAG | HAS_OVERLAY_PLUGINS_FLAG); }
-	static bool HasSmallPluginSupport() { return GetSingleton()->SupportsSmallPugins(); }
-	static bool HasOverlayPluginSupport() { return GetSingleton()->SupportsOverlayPugins(); }
-	static bool HasExtendedPlugins() { return GetSingleton()->flags & (HAS_SMALL_PLUGINS_FLAG | HAS_OVERLAY_PLUGINS_FLAG); }
+	bool SupportsNewFileTypes() const { return flags & HAS_NEW_PLUGIN_TYPES; }
+	static bool HasNewFileTypeSupport() { return GetSingleton()->SupportsNewFileTypes(); }
 
 	const TESFile* GetFile(uint32_t auiIndex) const;
 	const TESFile* GetListFile(const char* modName) const;
@@ -316,6 +314,8 @@ public:
 
 	uint8_t GetModIndex(const char* modName) const;
 	uint8_t GetActiveModCount() const;
+
+	bool IsFormIDInUse(uint32_t auiFormID) const;
 
 	MEMBER_FN_PREFIX(TESDataHandler);
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
