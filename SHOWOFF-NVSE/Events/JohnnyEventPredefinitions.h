@@ -84,9 +84,9 @@ public:
 			TESForm* currentFilter = GenFilters[i].form;
 			if (!currentFilter) continue;
 			if (!(IsAcceptedParameter(currentFilter))) continue;
-			if (currentFilter->GetIsReference())
+			if (currentFilter->IsReference())
 			{
-				InsertToFilter(i, ((TESObjectREFR*)currentFilter)->baseForm->refID);
+				InsertToFilter(i, ((TESObjectREFR*)currentFilter)->baseForm->GetFormID());
 				continue;
 			}
 			if (IS_TYPE(currentFilter, BGSListForm))
@@ -95,28 +95,29 @@ public:
 				ListNode<TESForm>* iterator = ((BGSListForm*)currentFilter)->list.Head();
 				do {
 					TESForm* it = iterator->data;
-					if (it->GetIsReference()) continue;
+					if (it->IsReference()) continue;
 					if (IsAcceptedParameter(it))
-						InsertToFilter(i, it->refID);
+						InsertToFilter(i, it->GetFormID());
 				} while (iterator = iterator->next);
 
 			}
-			else InsertToFilter(i, currentFilter->refID);
+			else InsertToFilter(i, currentFilter->GetFormID());
 		}
 	}
 
 	__forceinline bool IsBaseInFilter(uint32_t filterNum, TESForm* form)
 	{
 		if (!form) return false;
-		if (form->GetIsReference()) return IsInFilter(filterNum, ((TESObjectREFR*)form)->baseForm->refID);
-		return IsInFilter(filterNum, form->refID);
+		if (form->IsReference())
+			return IsInFilter(filterNum, ((TESObjectREFR*)form)->baseForm->GetFormID());
+		return IsInFilter(filterNum, form->GetFormID());
 	}
 
 	void insertFormList(BGSListForm* List, uint32_t filter)
 	{
 		ListNode<TESForm>* iterator = ((BGSListForm*)List)->list.Head();
 		do {
-			InsertToFilter(filter, iterator->data->refID);
+			InsertToFilter(filter, iterator->data->GetFormID());
 		} while (iterator = iterator->next);
 	}
 };

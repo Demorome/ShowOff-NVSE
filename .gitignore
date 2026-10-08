@@ -354,3 +354,6 @@ common/Debug VC9/common_vc9.lib
 *.lib
 /common/Release VC9
 /common/Release VC9
+/SHOWOFF-NVSE/ReleaseDebug
+/common/Debug VC9
+/common/Debug VC9

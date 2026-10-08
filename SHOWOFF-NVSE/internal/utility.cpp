@@ -1853,31 +1853,6 @@ __declspec(naked) TESObjectCELL* TESObjectREFR::GetParentCell()
 	}
 }
 
-
-TESBipedModelForm* CastFormToBipedModel(TESForm* form)
-{
-	if (!form) return nullptr;
-	switch (form->typeID)
-	{
-		case kFormType_TESObjectARMO:
-		{
-			auto armo = (TESObjectARMO*)form;
-			return &armo->bipedModel;
-		}
-		case kFormType_TESObjectARMA:
-		{
-			auto arma = (TESObjectARMA*)form;
-			return &arma->bipedModel;
-		}
-		case kFormType_TESObjectCLOT:
-		{
-			auto clot = (TESObjectCLOT*)form;
-			return &clot->bipedModel;
-		}
-	}
-	return nullptr;
-}
-
 TESRace* CastFormToRace(TESForm* form)
 {
 	if (!form) return nullptr;
@@ -1896,7 +1871,7 @@ TESRace* CastFormToRace(TESForm* form)
 // Copied after NVSE's IsPlayable
 bool IsFormPlayable(TESForm* form)
 {
-	TESBipedModelForm* biped = CastFormToBipedModel(form);
+	TESBipedModelForm* biped = TESBipedModelForm::GetFormAsBipedModel(form);
 	if (biped)
 		return biped->IsPlayable();
 
@@ -1914,7 +1889,7 @@ bool IsFormPlayable(TESForm* form)
 
 bool IsItemPlayable(TESForm* form)
 {
-	if (auto biped = CastFormToBipedModel(form))
+	if (auto biped = TESBipedModelForm::GetFormAsBipedModel(form))
 		return biped->IsPlayable();
 
 	if (IS_TYPE(form, TESObjectWEAP))
@@ -1931,7 +1906,7 @@ short GetEquipType(TESForm* form)  // Ammo is not equip-able in the same sense a
 	if (IS_TYPE(form, TESObjectWEAP)) {
 		return kEquipType_Weapon;
 	}
-	if (CastFormToBipedModel(form)) {
+	if (TESBipedModelForm::GetFormAsBipedModel(form)) {
 		return kEquipType_Armor;
 	}
 	return false;
@@ -1939,7 +1914,7 @@ short GetEquipType(TESForm* form)  // Ammo is not equip-able in the same sense a
 
 bool IsEquipableItemPlayable(TESForm* form)  // Ammo is not equip-able in the same sense.
 {
-	TESBipedModelForm* biped = CastFormToBipedModel(form);
+	TESBipedModelForm* biped = TESBipedModelForm::GetFormAsBipedModel(form);
 	if (biped)
 		return biped->IsPlayable();
 	if (IS_TYPE(form, TESObjectWEAP))
@@ -1956,7 +1931,7 @@ uint32_t GetFormEquipSlotMask(TESForm* form)
 	}
 	else
 	{
-		TESBipedModelForm* pBip = CastFormToBipedModel(form);
+		TESBipedModelForm* pBip = TESBipedModelForm::GetFormAsBipedModel(form);
 		if (pBip)
 			equipSlotMask = pBip->partMask;
 	}
@@ -2051,7 +2026,7 @@ void AssignScriptValueResult(const NVSEArrayElement* val, PluginExpressionEvalua
 		eval.SetExpectedReturnType(kRetnType_String);
 		break;
 	case NVSEArrayVarInterface::kType_Form:
-		REFR_RES = val->form->refID;
+		REFR_RES = val->form->GetFormID();
 		eval.SetExpectedReturnType(kRetnType_Form);
 		break;
 	case NVSEArrayVarInterface::kType_Invalid:
@@ -2153,7 +2128,7 @@ const std::string& RefToString(TESForm* form)
 	if (!form)
 		return invalidRef;
 
-	if (auto search = s_refStrings.find(form->refID); search != s_refStrings.end())
+	if (auto search = s_refStrings.find(form->GetFormID()); search != s_refStrings.end())
 		return search->second;
 
 	const char* modName = TESDataHandler::GetSingleton()->GetNthModName(form->modIndex);
@@ -2161,7 +2136,7 @@ const std::string& RefToString(TESForm* form)
 		return invalidRef;
 
 	char cHexString[10];
-	snprintf(cHexString, sizeof(cHexString), ":%08X", form->refID & 0xFFFFFF);
+	snprintf(cHexString, sizeof(cHexString), ":%08X", form->GetFormID() & 0xFFFFFF);
 
 	std::string result;
 	result.reserve(result.size() + strlen(modName) + 9);
@@ -2169,7 +2144,7 @@ const std::string& RefToString(TESForm* form)
 	result += cHexString;
 
 	// Cache the string
-	auto emplaced = s_refStrings.emplace(form->refID, result);
+	auto emplaced = s_refStrings.emplace(form->GetFormID(), result);
 	return emplaced.first->second;
 }
 

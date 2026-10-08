@@ -312,8 +312,6 @@ public:
 	uint8_t			byte0C;		// 00C	some kind of status or flags
 	uint8_t			fill0D[3];	// 00D
 	TESObjectREFR	*actionRef;	// 010
-
-	static ExtraAction* __stdcall Create(TESObjectREFR *_actionRef = NULL);
 };
 
 // 014
@@ -366,6 +364,14 @@ public:
 
 		[[nodiscard]] bool HasWeaponMod(uint8_t effectCode) const {
 			return ThisCall<bool>(0x4BDA70, this, effectCode);
+		}
+
+		[[nodiscard]] bool GetWorn(bool abLeftOnly = false) const {
+			return ThisCall<bool>(0x4BDDD0, this, abLeftOnly);
+		}
+
+		[[nodiscard]] float GetItemHealth(bool abPercent) const {
+			return ThisCall<float>(0x4BCDB0, this, abPercent);
 		}
 	};
 
@@ -434,6 +440,8 @@ typedef ExtraContainerChanges::FoundEquipData EquipData;
 // real class names
 typedef	ExtraContainerChanges::Data InventoryChanges;
 typedef	ExtraContainerChanges::EntryData EntryData;
+
+using ItemChange = EntryData;
 
 // https://stackoverflow.com/questions/50888127/how-can-i-use-an-unordered-set-with-a-custom-struct
 class EquipDataHashFunction {
@@ -578,7 +586,7 @@ public:
 
 	bool Accept(ExtraContainerChanges::EntryData* match) const
 	{
-		return (match && match->type && m_toMatch == match->type->refID);
+		return (match && match->type && m_toMatch == match->type->GetFormID());
 	}
 };
 
@@ -591,7 +599,7 @@ public:
 
 	bool Accept(ExtraContainerChanges::EntryData* match) const
 	{
-		return (match && match->type && match->type->TryGetREFRParent() && m_toMatch == match->type->TryGetREFRParent()->refID);
+		return (match && match->type && match->type->TryGetREFRParent() && m_toMatch == match->type->TryGetREFRParent()->GetFormID());
 	}
 };
 
@@ -605,8 +613,6 @@ public:
 	ExtraHealth();
 	virtual ~ExtraHealth();
 	float health;
-
-	static ExtraHealth* __stdcall Create(float _health = 0);
 };
 
 // 00C
@@ -615,8 +621,6 @@ class ExtraWorn : public BSExtraData	// Item is equipped
 public:
 	ExtraWorn();
 	virtual ~ExtraWorn();
-
-	static ExtraWorn* Create();
 };
 
 // 00C
@@ -625,8 +629,6 @@ class ExtraWornLeft : public BSExtraData	// haven't seen used yet
 public:
 	ExtraWornLeft();
 	virtual ~ExtraWornLeft();
-
-	//static ExtraWornLeft* Create();
 };
 
 // 00C
@@ -635,8 +637,6 @@ class ExtraCannotWear : public BSExtraData	//	Seen used as ForceEquip ! Unused a
 public:
 	ExtraCannotWear();
 	virtual ~ExtraCannotWear();
-
-	static ExtraCannotWear* Create();
 };
 
 // 010
@@ -647,8 +647,6 @@ public:
 	virtual ~ExtraHotkey();
 
 	uint8_t	index;		// 00C (is 0-7)
-
-	static ExtraHotkey* __stdcall Create(uint8_t _index = 0);
 };
 
 // 010
@@ -659,9 +657,6 @@ public:
 	virtual ~ExtraCount();
 
 	int16_t	count;	// 00C
-	uint8_t	pad[2];	// 00E
-
-	static ExtraCount* __stdcall Create(uint32_t count = 0);
 };
 
 // 010
@@ -682,8 +677,6 @@ public:
 	};
 
 	Data*	data;		// 00C
-
-	static ExtraLock* Create();
 };
 
 // 010
@@ -694,8 +687,6 @@ public:
 	~ExtraUses();
 
 	uint32_t unk0;
-
-	static ExtraUses* Create();
 };
 
 // 010
@@ -719,8 +710,6 @@ public:
 	};
 
 	Data *	data;
-
-	static ExtraTeleport* Create();
 };
 
 // 010
@@ -752,8 +741,6 @@ public:
 	virtual ~ExtraOwnership();
 
 	TESForm	* owner;	// maybe this should be a union {TESFaction*; TESNPC*} but it would be more unwieldy to access and modify
-
-	static ExtraOwnership* __stdcall Create(TESForm *_owner);
 };
 
 class ExtraSecuritronFace : public BSExtraData
@@ -763,7 +750,19 @@ public:
 	virtual ~ExtraSecuritronFace();
 	String face, expression;
 
-	static ExtraSecuritronFace* __stdcall Create();
+	static ExtraSecuritronFace* Create();
+
+	void SetPersonality(const char* apPersonality) {
+		ThisCall(0x438260, this, apPersonality);
+	}
+
+	void SetMood(const char* apMood) {
+		ThisCall(0x438280, this, apMood);
+	}
+
+	void ApplyFace(NiAVObject* apScene) {
+		ThisCall(0x437F90, this, apScene);
+	}
 };
 
 // 010
@@ -774,8 +773,6 @@ public:
 	virtual ~ExtraRank();
 
 	int32_t	rank; // 00C
-
-	static ExtraRank* __stdcall Create(uint32_t _rank);
 };
 
 // 010
@@ -796,8 +793,6 @@ public:
 	~ExtraWeaponModFlags();
 
 	uint8_t	flags; // 00C
-
-	static ExtraWeaponModFlags* __stdcall Create(uint8_t _flags = 0);
 };
 
 class ExtraFactionChanges : public BSExtraData
@@ -810,8 +805,6 @@ public:
 	FactionListEntry	*data;
 
 	void DebugDump();
-
-	static ExtraFactionChanges* Create();
 };
 
 static_assert(sizeof(ExtraFactionChanges) == 0x10);
@@ -826,9 +819,6 @@ public:
 		return (data->faction == pFaction) ? true : false;
 	}
 };
-
-ExtraFactionChanges::FactionListEntry* GetExtraFactionList(BaseExtraList& xDataList);
-void SetExtraFactionRank(BaseExtraList& xDataList, TESFaction * faction, char rank);
 
 class ExtraLeveledCreature : public BSExtraData
 {

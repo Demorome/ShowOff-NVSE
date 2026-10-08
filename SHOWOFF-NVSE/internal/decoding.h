@@ -635,6 +635,10 @@ public:
 	static Projectile* __cdecl Spawn(BGSProjectile* projectile, Actor* source, CombatController* combatCtrl, TESObjectWEAP* sourceWeap,
 		NiPoint3 pos, float rotZ, float rotX, float angularMomentumZ, float angularMomentumX, TESObjectCELL* cell,
 		bool ignoreGravity = false);
+
+	void Kill() {
+		ThisCall(0x9BC8F0, this);
+	}
 };
 static_assert(sizeof(Projectile) == 0x150);
 
@@ -720,7 +724,7 @@ public:
 	tList<void>		list0A4;		// 0A4
 	uint32_t			unk0AC[6];		// 0AC
 	NiRefObject		*object0C4;		// 0C4
-	Actor*			source;			// 0C8
+	TESObjectREFR*		source;			// 0C8
 	uint32_t			unk0CC;			// 0CC
 	NiRefObject		*object0D0;		// 0D0
 	uint32_t			unk0D4[11];		// 0D4

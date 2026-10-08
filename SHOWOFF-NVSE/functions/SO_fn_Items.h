@@ -18,37 +18,64 @@ static EquipDataSet GetEquippedItems(TESObjectREFR* actorRef, uint32_t const fil
 typedef TESBipedModelForm::EPartBit EquippedItemIndex;
 typedef TESBipedModelForm::ESlot EquippedItemSlot;
 
+
+bool __fastcall FilterItem(ItemChange* apItem, uint32_t auiFlags) {
+	TESForm* pForm = apItem->type;
+
+	using namespace FindEquipped;
+	const bool bSkipUnplayable = (auiFlags & iFilter_NoUnplayable) || !auiFlags;
+	const bool bNoQuestItems = auiFlags & iFilter_NoQuestItems;
+	const bool bNoSlotlessItems = auiFlags & iFilter_NoSlotlessItems;
+
+	if (bSkipUnplayable && !IsEquipableItemPlayable(pForm))
+		return false;
+
+	if (bNoQuestItems && pForm->IsQuestItem())
+		return false;
+
+	const uint32_t uiEquipMask = GetFormEquipSlotMask(pForm);
+	if (bNoSlotlessItems && !uiEquipMask)
+		return false;
+
+	if (uiEquipMask && auiFlags && !MatchAnyEquipSlots(uiEquipMask, auiFlags))
+		return false;
+
+	return true;
+}
+
+struct IterData {
+	TESObjectREFR*	pRef;
+	uint32_t		uiFlags;
+	float			fThreshold;
+	uint32_t		uiCount = 0;
+};
+
+
+bool __cdecl CountBrokenEquippedItems(ItemChange* apItem, IterData* apData) {
+	if (!apItem || !apItem->type)
+		return false;
+
+	if (!apItem->GetWorn())
+		return false;
+
+	if (FilterItem(apItem, apData->uiFlags)) {
+		const float fHealth = apItem->GetItemHealth(true);
+		if (fHealth <= apData->fThreshold)
+			++apData->uiCount;
+	}
+
+	return false;
+}
+
 uint32_t __fastcall GetNumBrokenEquippedItems_Call(TESObjectREFR* const thisObj, float threshold, uint32_t const flags)
 {
-	if (!IS_ACTOR(thisObj)) return 0;
-	threshold /= 100.0F;  //expecting a number like 35, reduce to 0.35
-	uint32_t numBrokenItems = 0;  //return value.
-	auto eqItems = GetEquippedItems(thisObj, flags);
-	for (auto iter : eqItems)
-	{
-		if (g_ShowFuncDebug)
-			Console_Print("GetNumBrokenEquippedItems - iter form: [%08X] (%s)", iter.pForm, iter.pForm->GetName());
+	if (!IS_ACTOR(thisObj)) 
+		return 0;
 
-		auto const pHealth = DYNAMIC_CAST(iter.pForm, TESForm, TESHealthForm);  // base health
-		if (!pHealth) continue;
-		float baseHealth = pHealth->health;
-
-		//todo: modify baseHealth if the item is a weapon by checking if it has the weapon mod equipped (check xData)
-		// Check if Jazz's code at https://discord.com/channels/711228477382328331/816602410012639262/869359398978469911 gets released (could be used here).
-
-		ExtraHealth* pXHealth = iter.pExtraData ? (ExtraHealth*)iter.pExtraData->GetByType(kExtraData_Health) : NULL; // modified health data
-		if (pXHealth)  // If there's no pXHealth, it's at 100% health (no modified health extra data).
-		{
-			float const currentHealth = pXHealth->health;
-			if ((currentHealth / baseHealth) <= threshold) numBrokenItems++;
-			if (g_ShowFuncDebug)
-				Console_Print("GetNumBrokenEquippedItems - health %% check being performed on %s. %%: %f vs %f threshold", iter.pForm->GetName(), (pXHealth->health / (float)pHealth->health), threshold);
-		}
-		else if (threshold >= 1.0F) numBrokenItems++;
-	}
-	if (IsConsoleMode())
-		Console_Print("GetNumBrokenEquippedItems >> %u", numBrokenItems);
-	return numBrokenItems;
+	IterData kData{ thisObj, flags, threshold };
+	void* pInventoryChanges = CdeclCall<void*>(0x4BF220, thisObj);
+	ThisCall<int32_t>(0x4D4530, pInventoryChanges, CountBrokenEquippedItems, &kData, 0);
+	return kData.uiCount;
 }
 
 DEFINE_CMD_ALT_COND_PLUGIN(GetNumBrokenEquippedItems, GetNumBrokenEq, "", true, kParams_OneOptionalFloat_OneOptionalInt);
@@ -101,9 +128,7 @@ bool Cmd_UnequipItems_Execute(COMMAND_ARGS)
 {
 	uint32_t flags = 0, noEquip = 0, hideMessage = 0, triggerOnUnequip = 1;
 
-	if (!ExtractArgs(EXTRACT_ARGS, &flags, &noEquip, &hideMessage, &triggerOnUnequip)
-		|| NOT_ACTOR(thisObj))
-	{
+	if (!ExtractArgs(EXTRACT_ARGS, &flags, &noEquip, &hideMessage, &triggerOnUnequip) || NOT_ACTOR(thisObj)) {
 		return true;
 	}
 
@@ -431,7 +456,7 @@ bool Cmd_GetIngestibleConsumeSound_Execute(COMMAND_ARGS)
 		if (auto const ingestible = DYNAMIC_CAST(form, TESForm, AlchemyItem))
 		{
 			if (ingestible->consumeSound)
-				REFR_RES = ingestible->consumeSound->refID;
+				REFR_RES = ingestible->consumeSound->GetFormID();
 		}
 	}
 	return true;
@@ -502,14 +527,14 @@ bool Cmd_GetEquippedItemRefForItem_Execute(COMMAND_ARGS)
 			{
 				if (auto const itemRef = GetEquippedItemRefForItem_Call((Actor*)thisObj, iter.Get()))
 				{
-					REFR_RES = itemRef->refID;
+					REFR_RES = itemRef->GetFormID();
 					break;
 				}
 			}
 		}
 		else {
 			if (auto const itemRef = GetEquippedItemRefForItem_Call((Actor*)thisObj, itemForm_OrList))
-				REFR_RES = itemRef->refID;
+				REFR_RES = itemRef->GetFormID();
 		}
 	}
 	return true;
@@ -554,7 +579,7 @@ bool Cmd_GetCalculatedItemValue_Eval(COMMAND_ARGS_EVAL)
 	if (baseItem = TryExtractBaseForm(baseItem, thisObj);
 		baseItem && baseItem->IsItem())
 	{
-		auto const invRef = InventoryRefGetForID(thisObj->refID);
+		auto const invRef = InventoryRefGetForID(thisObj->GetFormID());
 
 		auto itemVal = -1.0;
 		if (auto const bAccountForBarterChanges = (uint32_t)arg1;
@@ -608,7 +633,7 @@ bool Cmd_GetEquippedWeapon_Execute(COMMAND_ARGS)
 	auto weap = ((Actor*)thisObj)->GetEquippedWeapon();
 	if (!weap)
 		weap = TESDataHandler::GetDefaultWeapon();
-	REFR_RES = weap->refID;
+	REFR_RES = weap->GetFormID();
 	return true;
 }
 
@@ -626,7 +651,7 @@ bool Cmd_GetEquippedWeaponRef_Execute(COMMAND_ARGS)
 	if (weapInfo && weapInfo->extendData)
 	{
 		if (auto const invRef = InventoryRefCreateEntry(thisObj, weapInfo->type, weapInfo->countDelta, weapInfo->extendData->GetFirstItem()))
-			REFR_RES = invRef->refID;
+			REFR_RES = invRef->GetFormID();
 	}
 	return true;
 }
@@ -645,11 +670,11 @@ bool Cmd_SetItemHotkeyIconPath_Execute(COMMAND_ARGS)
 		if (!newIconPath || !newIconPath[0]) // empty string
 		{
 			// Remove hotkey icon override if it exists.
-			g_hotkeyIconOverrides.erase(item->refID);
+			g_hotkeyIconOverrides.erase(item->GetFormID());
 		}
 		else
 		{
-			g_hotkeyIconOverrides[item->refID] = std::string(newIconPath);
+			g_hotkeyIconOverrides[item->GetFormID()] = std::string(newIconPath);
 		}
 	}
 	return true;
@@ -664,7 +689,7 @@ bool Cmd_GetItemHotkeyIconPath_Execute(COMMAND_ARGS)
 	uint32_t bOnlyReturnOverride = 0;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &item, &bOnlyReturnOverride) && item && item->IsItem())
 	{
-		if (auto iter = g_hotkeyIconOverrides.find(item->refID);
+		if (auto iter = g_hotkeyIconOverrides.find(item->GetFormID());
 			iter != g_hotkeyIconOverrides.end())
 		{
 			path = iter->second.c_str();
@@ -725,7 +750,8 @@ bool Cmd_GetSpellUsageNumEx_Execute(COMMAND_ARGS)
 	return Cmd_GetSpellUsageNumEx_Eval(thisObj, magicItem, nullptr, result);
 }
 
-#if _DEBUG
+//#if _DEBUG
+#if  0
 
 // Will be able to get the inventory reference's original extendDataList.
 TESObjectREFR* __fastcall CreateRefForStackWithoutCopy(TESObjectREFR* container, ContChangesEntry* entry)
@@ -750,7 +776,7 @@ bool Cmd_SetSingleItemRefCurrentHealth_Execute(COMMAND_ARGS)
 	uint32_t setPercent = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &health, &setPercent))
 		return true;
-	InventoryRef* invRef = InventoryRefGetForID(thisObj->refID);
+	InventoryRef* invRef = InventoryRefGetForID(thisObj->GetFormID());
 	if (!invRef)
 		return true;
 
@@ -776,7 +802,7 @@ bool Cmd_SetSingleItemRefCurrentHealth_Execute(COMMAND_ARGS)
 		else if (xData = invRef->CreateExtraData()) {
 			xData->Add(ExtraHealth::Create(health));
 		}
-		REFR_RES = invRef->tempRef->refID;
+		REFR_RES = invRef->tempRef->GetFormID();
 	}
 	else // create a new single stack, separating it from its old stack xDataList.
 	{
@@ -796,7 +822,7 @@ bool Cmd_SetSingleItemRefCurrentHealth_Execute(COMMAND_ARGS)
 		newDataList->Add(ExtraHealth::Create(health));
 		auto* entry = invRef->CopyWithNewExtraData(newDataList);
 		auto* newRefr = CreateRefForStackWithoutCopy(invRef->containerRef, entry);
-		REFR_RES = newRefr ? newRefr->refID : 0;
+		REFR_RES = newRefr ? newRefr->GetFormID() : 0;
 	}
 
 	//### todo: copy the cleanup loop at 0x7B8160 to put the changed invRef inside a new stack,
@@ -944,7 +970,7 @@ bool Cmd_GetSelectedItemRefSO_Execute(COMMAND_ARGS)
 		return true;
 	}
 	if (itemRef)
-		REFR_RES = itemRef->refID;
+		REFR_RES = itemRef->GetFormID();
 	return true;
 }
 
@@ -968,7 +994,7 @@ bool Cmd_GetCalculatedItemWeight_Eval(COMMAND_ARGS_EVAL)
 	//todo: Check 0x57728A, call GetInventoryWeight with a pseudo ExtraContainerChanges::Data (?).
 	if (thisObj)
 	{
-		if (auto const invRef = InventoryRefGetForID(thisObj->refID))
+		if (auto const invRef = InventoryRefGetForID(thisObj->GetFormID()))
 		{
 			if (auto contChangesData = ExtraContainerChanges::Data::Create(invRef->containerRef))
 			{

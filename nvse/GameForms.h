@@ -509,14 +509,14 @@ public:
 	virtual void		Unk_36(bool set);	// 00020000
 	virtual void		Unk_37(void);		// write esp format
 	virtual void		readOBNDSubRecord(ModInfo * modInfo);	// read esp format
-	virtual bool		Unk_39(void);
-	virtual bool		Unk_3A(void);
-	virtual bool		Unk_3B(void);
-	virtual bool		GetIsReference() const;
-	virtual bool		IsArmorAddon();
-	virtual bool		Unk_3E(void);
-	virtual bool		Unk_3F(void);	// returnTrue for refr whose baseForm is a TESActorBase
-	virtual bool		IsActor(void);	//seems to only work for references.
+	virtual bool		IsBoundObject() const;
+	virtual bool		IsObject() const;
+	virtual bool		IsMagicItem() const;
+	virtual bool		IsReference() const;
+	virtual bool		IsArmorAddon() const;
+	virtual bool		IsActorBase() const;
+	virtual bool		IsMobileObject() const;
+	virtual bool		IsActor() const;
 	virtual uint32_t		Unk_41(void);
 	virtual void		CopyFrom(const TESForm * form);
 	virtual bool		Compare(TESForm * form);
@@ -596,12 +596,15 @@ public:
 	const char *GetTheName() const;
 	bool IsCloned() const;
 
+	uint32_t GetFormID() const {
+		return refID;
+	}
+
 	// adds a new form to the game (from CloneForm or LoadForm)
 	void DoAddForm(TESForm* newForm, bool bPersist = true, bool record = true) const;
 	// return a new base form which is the clone of this form
 	TESForm *CloneForm(bool bPersist = true) const;
 	bool IsInventoryObject() const;
-	bool IsReference() const;
 
 	bool HasScript();
 	bool GetScriptAndEventList(Script*& script, ScriptEventList*& eventList);
@@ -631,6 +634,10 @@ public:
 	BGSDestructibleObjectForm* GetDestructibleObjectForm();
 
 	Script* GetScript() const;
+
+	static TESForm* GetFormByNumericID(uint32_t auiFormID) {
+		return CdeclCall<TESForm*>(0x4839C0, auiFormID);
+	}
 
 	MEMBER_FN_PREFIX(TESForm);
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
@@ -1321,6 +1328,10 @@ public:
 
 	uint32_t GetBipedMask() const;
 	void SetBipedMask(uint32_t mask);
+
+	static TESBipedModelForm* GetFormAsBipedModel(const TESForm* apForm) {
+		return CdeclCall<TESBipedModelForm*>(0x480DB0, apForm);
+	}
 };
 
 static_assert(sizeof(TESBipedModelForm) == 0x0DC);
@@ -1365,6 +1376,10 @@ public:
 	typedef tList<FormCount> FormCountList;
 
 	FormCountList	formCountList;	// 04
+
+	static bool ContainerCanHoldType(uint32_t aeTypeID) {
+		return CdeclCall<bool>(0x481F30, aeTypeID);
+	}
 };
 
 // 00C
@@ -3360,6 +3375,8 @@ public:
 	float GetItemModValue2(uint8_t which)		{ which -= 1; assert(which < 3); return value2Mod[which]; }
 	bool IsMelee() const { return eWeaponType <= 2; };
 	bool IsDontHidePlayerWhileAiming() const { return weaponFlags2.IsSet(eFlag_DontHidePlayerWhileAiming); }
+
+	bool IsRangedWeapon() const { return ThisCall<bool>(0x4C0C30, this); }
 };
 static_assert(sizeof(TESObjectWEAP) == 0x388);
 
@@ -4123,6 +4140,10 @@ public:
 	NiNode *Get3DNode(uint32_t index);
 	void ToggleNodes(uint32_t nodeBits, uint8_t doHide);
 	void GenerateRenderedTexture(NiCamera *camera, NiRenderedTexture **outTexture);
+
+	void SetDetachTime(uint32_t auiTime, bool abForce) {
+		ThisCall(0x546B10, this, auiTime, abForce);
+	}
 };
 static_assert(sizeof(TESObjectCELL) == 0xE0);
 
@@ -6040,6 +6061,10 @@ public:
 	ZoneFlags	zoneFlags;					// 01E
 	uint8_t		pad01C;						// 01F
 	uint32_t		unk020[4];					// 020
+
+	bool GetNeverReset() const {
+		return zoneFlags & kEncounterZone_NoRespawns;
+	}
 };
 
 // 40

@@ -39,10 +39,9 @@ bool __fastcall ContainerMenuCheckIsTargetChild(ContChangesEntry* entry, void* e
 	return ref->GetIsChildSize(true);
 }
 
-__declspec(naked) void Actor::UnequipItem(TESForm* objType, uint32_t unk1, ExtraDataList* itemExtraList, uint32_t unk3, bool lockUnequip_unused, uint32_t unk5)
+void Actor::UnequipItem(TESForm* objType, uint32_t unk1, ExtraDataList* itemExtraList, bool unk3, bool lockUnequip_unused, bool unk5)
 {
-	static const uint32_t procAddr = kAddr_UnequipItem;
-	__asm	jmp		procAddr
+	ThisCall(0x88C790, this, objType, unk1, itemExtraList, unk3, lockUnequip_unused, unk5);
 }
 
 __declspec(naked) float ExtraContainerChanges::EntryData::GetItemHealthPerc(bool arg1)
@@ -64,16 +63,14 @@ int Actor::GetDetectionValue(Actor* detected)
 }
 
 
-__declspec(naked) void Tile::SetFloat(uint32_t id, float fltVal, bool bPropagate)
+void Tile::SetFloat(uint32_t id, float fltVal, bool bPropagate)
 {
-	static const uint32_t procAddr = kAddr_TileSetFloat;
-	__asm	jmp		procAddr
+	ThisCall(0xA012D0, this, id, fltVal, bPropagate);
 }
 
-__declspec(naked) void Tile::SetString(uint32_t id, const char* strVal, bool bPropagate)
+void Tile::SetString(uint32_t id, const char* strVal, bool bPropagate)
 {
-	static const uint32_t procAddr = kAddr_TileSetString;
-	__asm	jmp		procAddr
+	ThisCall(0xA01350, this, id, strVal, bPropagate);
 }
 
 

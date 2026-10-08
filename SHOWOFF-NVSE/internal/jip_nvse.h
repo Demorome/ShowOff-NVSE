@@ -97,7 +97,7 @@ float __fastcall GetAxisDistance(TESObjectREFR* ref1, TESObjectREFR* ref2, uint8
 //If ref1 and ref2 are the same, distance = 0.
 float GetDistance3D(TESObjectREFR* ref1, TESObjectREFR* ref2);
 
-TESForm* __stdcall LookupFormByRefID(uint32_t refID);
+TESForm* LookupFormByRefID(uint32_t refID);
 
 class AuxVariableValue
 {
@@ -170,7 +170,7 @@ public:
 		ScopedLock lock(g_Lock);
 		Clear();
 		type = 2;
-		refID = value ? value->refID : 0;
+		refID = value ? value->GetFormID() : 0;
 	}
 
 	void SetStr(const char* value)
@@ -330,7 +330,7 @@ void BGSLevL::Dump()
 		form = data->form;
 		lvlList = form->GetLvlList();
 		Console_Print("%s%s [%08X] Level: %d Count: %d Health: %.2f", kDumpLvlListIndentStr + s_dumpLvlListIndent,
-			lvlList ? "(LeveledList)" : form->GetTheName(), form->refID, data->level, data->count, data->extra ? data->extra->health : 0);
+			lvlList ? "(LeveledList)" : form->GetTheName(), form->GetFormID(), data->level, data->count, data->extra ? data->extra->health : 0);
 		if (lvlList)
 		{
 			s_dumpLvlListIndent -= 5;

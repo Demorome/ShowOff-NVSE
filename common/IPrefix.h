@@ -9,8 +9,12 @@
 // 4312 - pointer extension
 #pragma warning(disable: 4018 4244 4267 4305 4288 4312 4311)
 
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
 #include <cstdlib>
 #include <stdint.h>
 #include <stdio.h>

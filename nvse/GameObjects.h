@@ -93,10 +93,10 @@ public:
 	virtual uint32_t		Unk_83(void);
 	virtual void		Unk_84(uint32_t arg0);
 	virtual uint32_t		Unk_85(void);
-	virtual bool		IsCharacter();			// return false for Actor and Creature, true for character and PlayerCharacter
-	virtual bool		IsCreature();
-	virtual bool		IsExplosion();
-	virtual bool		IsProjectile();
+	virtual bool		IsCharacter() const;			// return false for Actor and Creature, true for character and PlayerCharacter
+	virtual bool		IsCreature() const;
+	virtual bool		IsExplosion() const;
+	virtual bool		IsProjectile() const;
 	virtual void		Unk_8A(void);			// SetParentCell (Interior only ?)
 	virtual bool		HasHealth(bool arg0);	// HasHealth (baseForm health > 0 or Flags bit23 set)
 	virtual bool		GetHasKnockedState(void);
@@ -164,13 +164,12 @@ public:
 
 	void Update3D();
 	NiAVObject* __fastcall GetNiBlock2(const char* blockName) const;
-	TESContainer *GetContainer();
+	TESContainer *GetContainer() const;
 	bool IsMapMarker();
 
 	TESForm *GetBaseForm();
 	bool GetDisabled();
 	ExtraContainerChanges *GetOrCreateContainerChanges();
-	ExtraContainerChanges::EntryDataList *GetContainerChangesList();
 	InventoryChanges *GetInventoryChanges();
 	int32_t GetItemCount(TESForm *form);
 	void AddItemAlt(TESForm *item, uint32_t count, float condition, bool doEquip);
@@ -181,7 +180,6 @@ public:
 	void SetPos(NiVector3 &posVector);
 	void SetAngle(NiVector3 &rotVector);
 	bool MoveToCell(TESForm *worldOrCell, NiVector3 &posVector);
-	void MarkForDelete();
 	TESObjectREFR *GetMerchantContainer();
 	ContChangesEntry* GetContainerChangesEntry(TESForm* itemForm) const;
 	float GetWaterImmersionPerc();
@@ -195,9 +193,13 @@ public:
 	bool RunScriptSource(const char *sourceStr);
 
 	// Does the same thing as GetNiNode
-	NiNode* Get3D() const;
+	NiNode* Get3DSimple() const;
 
 	TESObjectREFR* PlaceAtMe(TESForm* toPlace, int count = 1, int useNodePos = 0, int direction = 0);
+
+	void SetEnableStateParent(TESObjectREFR* apParent) {
+		ThisCall(0x56AA10, this, apParent);
+	}
 
 	static TESObjectREFR* __stdcall Create(bool bTemp = false);
 
@@ -718,8 +720,8 @@ public:
 	// OBSE: unk1 looks like quantity, usu. 1; ignored for ammo (equips entire stack). In NVSE, pretty much always forced internally to 1
 	// OBSE: itemExtraList is NULL as the container changes entry is not resolved before the call
 	// NVSE: Default values are those used by the vanilla script functions.
-	void EquipItem(TESForm *objType, uint32_t equipCount = 1, ExtraDataList *itemExtraList = NULL, uint32_t unk3 = 1, bool lockEquip = false, uint32_t unk5 = 1);	// unk3 apply enchantment on player differently
-	void UnequipItem(TESForm *objType, uint32_t unequipCount = 1, ExtraDataList *itemExtraList = NULL, uint32_t unk3 = 1, bool lockUnequip_unused = false, uint32_t unk5 = 1);
+	void EquipItem(TESForm *objType, uint32_t equipCount = 1, ExtraDataList *itemExtraList = NULL, bool unk3 = 1, bool lockEquip = false, bool unk5 = 1);	// unk3 apply enchantment on player differently
+	void UnequipItem(TESForm *objType, uint32_t unequipCount = 1, ExtraDataList *itemExtraList = NULL, bool unk3 = 1, bool lockUnequip_unused = false, bool unk5 = 1);
 
 	//EquippedItemsList GetEquippedItems();
 	//ExtraContainerDataArray GetEquippedEntryDataList();
@@ -737,7 +739,7 @@ public:
 	bool IsItemEquipped(TESForm *item);
 	bool GetEquippedItemData(uint32_t slotIndex, ItemEntryData &itemData);
 	uint8_t EquippedWeaponHasMod(uint8_t modID);
-	bool IsSneaking();
+	bool IsSneaking() const;
 	void StopCombat();
 
 	// if "this" is the player, won't work properly!
@@ -757,9 +759,9 @@ public:
 	BackUpPackage *AddBackUpPackage(TESObjectREFR *targetRef, TESObjectCELL *targetCell, uint32_t flags);
 	void TurnToFaceObject(TESObjectREFR *target);
 	void TurnAngle(float angle);
-	void SetAnimActionAndSequence(int32_t animAction, BSAnimGroupSequence *animGroupSeq);
+	void SetAnimAction(int32_t animAction, BSAnimGroupSequence *animGroupSeq);
 	void PlayIdle(TESIdleForm *idleAnim);
-	uint32_t GetLevel();
+	uint16_t GetLevel();
 	float GetKillXP();
 	void DismemberLimb(uint32_t bodyPartID, bool explode);
 	void EquipItemAlt(ExtraContainerChanges::EntryData *itemEntry, bool noUnequip, bool noMessage);
@@ -771,9 +773,25 @@ public:
 	float GetHealthEffectsSum();
 	void Kill(Actor* killer);
 	bool GetShouldAttack(Actor* target);
-	void SetWantsWeaponOut(bool wantsWeaponOut);
-	bool IsInReloadAnim();
-	bool IsDoingAttackAnimation() const;
+	void SetWantWeaponDrawn(bool wantsWeaponOut);
+	bool IsReloading() const;
+	bool IsAttacking() const;
+
+	bool GetIronSights() const {
+		return ThisCall<bool>(0x8BBC10, this);
+	}
+
+	bool GetBlocking() const {
+		return ThisCall<bool>(0x894D60, this);
+	}
+
+	void Recoil() {
+		ThisCall(0x894E90, this);
+	}
+
+	float GetMaxCarryWeight() {
+		return ThisCall<float>(0x8A0C20, this);
+	}
 };
 
 // 1C0
@@ -810,7 +828,6 @@ public:
 class bhkRigidBody;
 struct ParentSpaceNode;
 struct TeleportLink;
-struct ItemChange;
 class NiObject;
 struct MusicMarker;
 
@@ -1072,13 +1089,12 @@ public:
 	bool IsPlayerSwimming() { return (GetMovementFlags()  >> 11) & 1; }
 
 	static PlayerCharacter*	GetSingleton();
-	bool SetSkeletonPath(const char* newPath);
 	static void UpdateHead(void);
 
 	bool ToggleFirstPerson(bool toggleON);
 	char GetDetectionState();
 
 	// Credits to lStewieAl
-	void UpdateCamera(bool isCalledFromFunc21, bool _zero_skipUpdateLOD);
+	void UpdateCamera(bool abForce, bool abSkipUpdateLOD);
 };
 static_assert(sizeof(PlayerCharacter) == 0xE50);

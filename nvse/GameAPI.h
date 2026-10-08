@@ -67,7 +67,7 @@ extern const _ShowMessageBox_Callback ShowMessageBox_Callback;
 typedef bool (* _ShowMessageBox)(const char * message, uint32_t unk1, uint32_t unk2, _ShowMessageBox_Callback callback, uint32_t unk4, uint32_t unk5, float unk6, float unk7, ...);
 extern const _ShowMessageBox ShowMessageBox;
 
-// set to scriptObj->refID after calling ShowMessageBox()
+// set to scriptObj->GetFormID() after calling ShowMessageBox()
 // GetButtonPressed checks this before returning a value, if it doesn't match it returns -1
 typedef uint32_t * _ShowMessageBox_pScriptRefID;
 extern const _ShowMessageBox_pScriptRefID ShowMessageBox_pScriptRefID;

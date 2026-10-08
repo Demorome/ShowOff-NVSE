@@ -330,7 +330,7 @@ bool Cmd_IsNight_Eval(COMMAND_ARGS_EVAL)
 	Sky* sky = Sky::GetSingleton();
 	float const gameHour = ThisCall<double>(0x966A20, sky);
 	float sunrise, sunset;
-	if (climate && IS_TYPE(climate, TESClimate))
+	if (climate && IS_ID(climate, TESClimate))
 	{
 		sunrise = ThisCall<uint8_t>(0x595F10, climate, 1) / 6.0F;  //sunrise begin sprinkled with adjustments.
 		sunset = ThisCall<uint8_t>(0x595F10, climate, 2) / 6.0F;  //Second arg determines which type of time to check.
@@ -356,7 +356,7 @@ bool Cmd_IsNight_Execute(COMMAND_ARGS)
 bool Cmd_IsLimbCrippled_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
-	if (!IS_ACTOR(thisObj)) return true;
+	if (!thisObj->IsActor()) return true;
 	Actor* const actor = (Actor*)thisObj;
 	uint32_t limbID = (uint32_t)arg1;
 	uint32_t const threshold = (uint32_t)arg2;
@@ -392,7 +392,7 @@ bool Cmd_IsLimbCrippled_Execute(COMMAND_ARGS)
 bool Cmd_GetNumCrippledLimbs_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
-	if (!IS_ACTOR(thisObj)) return true;
+	if (!thisObj->IsActor()) return true;
 	Actor* const actor = (Actor*)thisObj;
 	uint32_t const threshold = (uint32_t)arg1;
 	uint32_t numCrippledLimbs = 0;
@@ -418,7 +418,7 @@ bool Cmd_GetNumCrippledLimbs_Execute(COMMAND_ARGS)
 bool Cmd_GetCrippledLimbsAsBitMask_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
-	if (!IS_ACTOR(thisObj)) return true;
+	if (!thisObj->IsActor()) return true;
 	Actor* const actor = (Actor*)thisObj;
 	uint32_t const threshold = (uint32_t)arg1;
 
@@ -469,7 +469,7 @@ bool Cmd_ClearShowoffSavedData_Execute(COMMAND_ARGS)
 bool Cmd_GetCalculatedMaxCarryWeight_Eval(COMMAND_ARGS_EVAL)
 {
 	*result = 0;
-	if (!IS_ACTOR(thisObj)) return true;
+	if (!thisObj->IsActor()) return true;
 	*result = ThisCall<double>(0x8A0C20, (Actor*)thisObj);
 	return true;
 }
@@ -522,7 +522,7 @@ bool Cmd_SetSeedUsingForm_Execute(COMMAND_ARGS)
 {
 	TESForm* seedForm = nullptr;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &seedForm)) return true;
-	uint32_t const seed = seedForm ? seedForm->refID : 0;
+	uint32_t const seed = seedForm ? seedForm->GetFormID() : 0;
 	SetSeedForMod(seed, scriptObj);
 	return true;
 }
@@ -754,15 +754,12 @@ bool Cmd_FormListRemoveForm_Execute(COMMAND_ARGS)
 	return true;
 }
 
-bool Cmd_GetZoneRespawns_Execute(COMMAND_ARGS)
-{
+bool Cmd_GetZoneRespawns_Execute(COMMAND_ARGS) {
 	*result = -1;	//bRespawns. -1 if could not extract the form.
-	TESForm* form;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form))
-		return true;
-	if (auto const zone = DYNAMIC_CAST(form, TESForm, BGSEncounterZone))
-	{
-		*result = (zone->zoneFlags & BGSEncounterZone::kEncounterZone_NoRespawns) == 0;
+	TESForm* pForm;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm) && IS_ID(pForm, BGSEncounterZone)) {
+		BGSEncounterZone* pZone = static_cast<BGSEncounterZone*>(pForm);
+		*result = !pZone->GetNeverReset();
 	}
 	return true;
 }
@@ -775,17 +772,17 @@ bool Cmd_ClearCinematicTextQueue_Execute(COMMAND_ARGS)
 }
 
 //Credits to LN's GetZone function for most of the code here.
-bool Cmd_GetCellEncounterZone_Execute(COMMAND_ARGS)
-{
-	*result = 0;	//zone form
-	TESForm* form;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form))
+bool Cmd_GetCellEncounterZone_Execute(COMMAND_ARGS) {
+	*result = 0;
+	TESForm* pForm;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pForm) || !IS_ID(pForm, TESObjectCELL))
 		return true;
-	if (auto const cell = DYNAMIC_CAST(form, TESForm, TESObjectCELL)) {
-		ExtraEncounterZone* xEncZone = GetExtraTypeJIP(&cell->extraDataList, EncounterZone);
-		if (xEncZone && xEncZone->zone)
-			REFR_RES = xEncZone->zone->refID;
-	}
+
+	const TESObjectCELL* pCell = static_cast<TESObjectCELL*>(pForm);
+	const BGSEncounterZone* pZone = pCell->extraDataList.GetEncounterZone();
+	if (pZone)
+		REFR_RES = pZone->GetFormID();
+
 	return true;
 }
 
@@ -864,69 +861,30 @@ bool Cmd_RemoveFormFromLeveledList_Execute(COMMAND_ARGS)
 
 bool Cmd_ResetInteriorAlt_Execute(COMMAND_ARGS)
 {
-	*result = false;	//success
-	TESForm* form;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form))
+	*result = 0;
+	TESForm* pForm;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pForm) || !IS_ID(pForm, TESObjectCELL))
 		return true;
-	if (auto const cell = DYNAMIC_CAST(form, TESForm, TESObjectCELL)) {
-		ThisCall<bool>(0x546B10, cell, -2, false);	//TESObjectCELL::updateDetachTime
-		//(hooks are in place to handle the -2 detachTime correctly)
-		*result = true;
-	}
+
+	TESObjectCELL* pCell = static_cast<TESObjectCELL*>(pForm);
+	pCell->SetDetachTime(-2, false);
+	*result = 1;
 	return true;
 }
 
 DEFINE_COMMAND_ALT_PLUGIN(SetEnableParent, SetParentRef, "", true, kParams_OneOptionalForm);
 bool Cmd_SetEnableParent_Execute(COMMAND_ARGS)
 {
-	TESObjectREFR* newParent = nullptr;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &newParent) || !thisObj)
+	TESObjectREFR* pNewParent = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pNewParent))
 		return true;
 
-	auto xParentRef = GetExtraTypeJIP(&thisObj->extraDataList, EnableStateParent);
+	if (pNewParent && !pNewParent->IsReference())
+		return true;
 
-	if (xParentRef)
-	{
-		if (auto const parent = xParentRef->parent;
-			parent != newParent)
-		{
-			// remove EnableChildren extraData
-			if (auto const xChildrenRef = GetExtraTypeJIP(&parent->extraDataList, EnableStateChildren))
-			{
-				xChildrenRef->children.Remove(thisObj);
-				if (xChildrenRef->children.Empty())
-					parent->extraDataList.Remove(xChildrenRef, true);
-			}
-		}
-	}
-
-	if (!newParent)
-	{
-		if (!xParentRef)
-			return true;
-
-		// remove EnableParent extraData
-		thisObj->extraDataList.Remove(xParentRef, true);
-	}
-	else
-	{
-		// add EnableChildren xData to newParent
-		auto xChildrenRef = GetExtraTypeJIP(&newParent->extraDataList, EnableStateChildren);
-		if (!xChildrenRef)
-		{
-			xChildrenRef = ExtraEnableStateChildren::Create();
-			newParent->extraDataList.Add(xChildrenRef);
-		}
-		xChildrenRef->children.Append(thisObj);
-
-		// add EnableParent xData to thisObj
-		if (!xParentRef)
-		{
-			xParentRef = ExtraEnableStateParent::Create();
-			thisObj->extraDataList.Add(xParentRef);
-		}
-		xParentRef->parent = newParent;
-	}
+	thisObj->SetEnableStateParent(pNewParent);
+	if (pNewParent)
+		pNewParent->extraDataList.AddEnableStateChild(thisObj);
 
 	return true;
 }
@@ -981,7 +939,7 @@ bool Cmd_SetAmmoName_Execute(COMMAND_ARGS)
 		if (!thisObj) return true;
 		form = thisObj->baseForm;
 	}
-	if (!IS_TYPE(form, TESAmmo))
+	if (!IS_ID(form, TESAmmo))
 		return true;
 
 	*result = 1;
@@ -1016,7 +974,7 @@ bool Cmd_GetAmmoName_Execute(COMMAND_ARGS)
 			if (!thisObj) return true;
 			form = thisObj->baseForm;
 		}
-		if (!IS_TYPE(form, TESAmmo))
+		if (!IS_ID(form, TESAmmo))
 			return true;
 
 		String* nameString = nullptr;
@@ -1075,7 +1033,7 @@ bool Cmd_SpawnTracingProjectile_Execute(COMMAND_ARGS)
 	uint32_t bCopyData = false;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &baseProjToSpawn, &ignoreGravity, &bCopyData))
 		return true;
-	if (!thisObj || !IS_PROJECTILE(thisObj) || !IS_TYPE(baseProjToSpawn, BGSProjectile))
+	if (!thisObj || !thisObj->IsProjectile() || !IS_ID(baseProjToSpawn, BGSProjectile))
 		return true;
 
 	auto* projectileToTrail = static_cast<Projectile*>(thisObj);
@@ -1095,7 +1053,7 @@ bool Cmd_SpawnTracingProjectile_Execute(COMMAND_ARGS)
 		weap, *projectileToTrail->GetPos(), projectileToTrail->rotZ, projectileToTrail->rotX,
 		0, 0, projectileToTrail->parentCell, ignoreGravity);
 
-	REFR_RES = newProj->refID;
+	REFR_RES = newProj->GetFormID();
 	return true;
 }
 
@@ -1134,7 +1092,7 @@ DEFINE_COMMAND_PLUGIN(ToANSIChar, "", false, kParams_OneInt_OneOptionalInt);
 bool Cmd_ToANSIChar_Execute(COMMAND_ARGS)
 {
 	uint32_t scancode = 0;
-	bool ignoreShift = false;
+	BOOL ignoreShift = false;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &scancode, &ignoreShift))
 	{
 		g_strInterface->Assign(PASS_COMMAND_ARGS, "");
@@ -1192,7 +1150,7 @@ bool Cmd_CaravanDeckGetCards_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	TESForm* deckForm;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &deckForm) || !IS_TYPE(deckForm, TESCaravanDeck))
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &deckForm) || !IS_ID(deckForm, TESCaravanDeck))
 		return true;
 	const auto* deck = static_cast<TESCaravanDeck*>(deckForm);
 	if (deck->cards->Empty())
@@ -1215,7 +1173,7 @@ bool Cmd_CaravanDeckRemoveCard_Execute(COMMAND_ARGS)
 	TESForm* deckForm;
 	TESForm* cardForm;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &deckForm, &cardForm)
-		|| !IS_TYPE(deckForm, TESCaravanDeck) || !IS_TYPE(cardForm, TESCaravanCard))
+		|| !IS_ID(deckForm, TESCaravanDeck) || !IS_ID(cardForm, TESCaravanCard))
 	{
 		return true;
 	}
@@ -1236,7 +1194,7 @@ bool Cmd_CaravanDeckAddCard_Execute(COMMAND_ARGS)
 	TESForm* cardForm;
 	int32_t n = eListEnd;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &deckForm, &cardForm, &n)
-		|| !IS_TYPE(deckForm, TESCaravanDeck) || !IS_TYPE(cardForm, TESCaravanCard))
+		|| !IS_ID(deckForm, TESCaravanDeck) || !IS_ID(cardForm, TESCaravanCard))
 	{
 		return true;
 	}
@@ -1252,7 +1210,7 @@ bool Cmd_CaravanDeckGetCount_Execute(COMMAND_ARGS)
 {
 	*result = -1;
 	TESForm* deckForm;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &deckForm) || !IS_TYPE(deckForm, TESCaravanDeck) )
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &deckForm) || !IS_ID(deckForm, TESCaravanDeck) )
 		return true;
 	auto* deck = static_cast<TESCaravanDeck*>(deckForm);
 	*result = deck->count;
@@ -1266,7 +1224,7 @@ bool Cmd_CaravanDeckGetCardIndex_Execute(COMMAND_ARGS)
 	TESForm* deckForm;
 	TESForm* cardForm;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &deckForm, &cardForm)
-		|| !IS_TYPE(deckForm, TESCaravanDeck) || !IS_TYPE(cardForm, TESCaravanCard))
+		|| !IS_ID(deckForm, TESCaravanDeck) || !IS_ID(cardForm, TESCaravanCard))
 	{
 		return true;
 	}

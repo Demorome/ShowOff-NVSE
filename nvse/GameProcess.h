@@ -392,7 +392,7 @@ public:
 	virtual void	SetIsAiming(bool isAiming);
 	virtual bool	IsAiming();
 	virtual void	Unk_102();
-	virtual int32_t	GetKnockedState();
+	virtual int32_t	GetKnockState();
 	virtual void	SetKnockedState(char state);
 	virtual void	Unk_105();
 	virtual void	PushActorAway(Actor* pushed, float posX, float posY, float posZ, float force);
@@ -522,7 +522,7 @@ public:
 	virtual void	Unk_182();
 	virtual void	Unk_183();
 	virtual void	Unk_184();
-	virtual void	SetQueuedIdleFlags(uint32_t flags);
+	virtual void	AddPostAnimationAction(uint32_t flags);
 	virtual uint32_t	GetQueuedIdleFlags();
 	virtual void	Unk_187();
 	virtual void	Unk_188();
@@ -588,7 +588,7 @@ public:
 	virtual void	Unk_1C4();
 	virtual void	Unk_1C5();
 	virtual TESIdleForm* GetIdleForm();
-	virtual void	SetIdleForm(TESIdleForm* idleForm);
+	virtual void	SetCurrentProcessIdle(TESIdleForm* idleForm);
 	virtual void	Unk_1C8();
 	virtual void	Unk_1C9();
 	virtual void	Unk_1CA();
@@ -816,7 +816,7 @@ struct AnimData
 	NiNode* node130;
 	tList<void> list134;
 
-	void CreateForcedIdle(TESIdleForm* idleForm, Actor* actor, uint32_t sequenceID, int a5);
+	void SpecialIdleAuto(TESIdleForm* idleForm, Actor* actor, uint32_t sequenceID, int a5);
 };
 static_assert(sizeof(AnimData) == 0x13C);
 
@@ -956,10 +956,10 @@ public:
 		kAnimAction_Equip_Weapon,
 		kAnimAction_Unequip_Weapon,
 		kAnimAction_Attack,
+		kAnimAction_Attack_Wait_For_Eject,
 		kAnimAction_Attack_Follow_Through,
-		kAnimAction_Attack_Latency,
+		kAnimAction_Attack_Throw,
 		kAnimAction_Attack_Throw_Attach,
-		kAnimAction_Attack_Throw_Release,
 		kAnimAction_Block,
 		kAnimAction_Stagger,
 		kAnimAction_Reload,

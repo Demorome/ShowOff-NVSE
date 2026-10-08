@@ -416,7 +416,7 @@ namespace SetItemHotkeyIconPath
 	{
 		if (entry->type)
 		{
-			if (auto iter = g_hotkeyIconOverrides.find(entry->type->refID);
+			if (auto iter = g_hotkeyIconOverrides.find(entry->type->GetFormID());
 				iter != g_hotkeyIconOverrides.end())
 			{
 				return iter->second.c_str();
