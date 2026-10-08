@@ -16,19 +16,19 @@ struct ChunkAndFormType {
 };
 
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
-static const uint32_t _ModInfo_GetNextChunk = 0x004726B0; // args: none retn: uint32_t subrecordType (third call in TESObjectARMO_LoadForm)
-static const uint32_t _ModInfo_GetChunkData = 0x00472890;	// args: void* buf, uint32_t bufSize retn: bool readSucceeded (fifth call in TESObjectARMO_LoadForm)
-static const uint32_t _ModInfo_Read32		  =	0x004727F0;	// args: void* buf retn: void (find 'LPER', then next call, still in TESObjectARMO_LoadForm)
-static const uint32_t _ModInfo_HasMoreSubrecords = 0x004726F0;	// Last call before "looping" to GetNextChunk in TESObjectARMO_LoadForm.
-static const uint32_t _ModInfo_InitializeForm = 0x00472F60;	// args: TESForm* retn: void (second call in TESObjectARMO_LoadForm)
+static const uint32_t _TESFile_GetNextChunk = 0x004726B0; // args: none retn: uint32_t subrecordType (third call in TESObjectARMO_LoadForm)
+static const uint32_t _TESFile_GetChunkData = 0x00472890;	// args: void* buf, uint32_t bufSize retn: bool readSucceeded (fifth call in TESObjectARMO_LoadForm)
+static const uint32_t _TESFile_Read32		  =	0x004727F0;	// args: void* buf retn: void (find 'LPER', then next call, still in TESObjectARMO_LoadForm)
+static const uint32_t _TESFile_HasMoreSubrecords = 0x004726F0;	// Last call before "looping" to GetNextChunk in TESObjectARMO_LoadForm.
+static const uint32_t _TESFile_InitializeForm = 0x00472F60;	// args: TESForm* retn: void (second call in TESObjectARMO_LoadForm)
 
-// addresses of static ModInfo members holding type info about currently loading form
-static uint32_t* s_ModInfo_CurrentChunkTypeCode = (uint32_t*)0x011C54F4;
-static uint32_t* s_ModInfo_CurrentFormTypeEnum = (uint32_t*)0x011C54F0;
-// in last call (SetStaticFieldsAndGetFormTypeEnum) of first call (ModInfo__GetFormInfoTypeID) from _ModInfo_InitializeForm
-		//		s_ModInfo_CurrentChunkTypeCode is first cmp
-		//		s_ModInfo_CurrentChunkTypeEnum is next mov
-static const ChunkAndFormType* s_ModInfo_ChunkAndFormTypes = (const ChunkAndFormType*)0x01187008;	// Array used in the loop in SetStaticFieldsAndGetFormTypeEnum, starts under dd offset aNone
+// addresses of static TESFile members holding type info about currently loading form
+static uint32_t* s_TESFile_CurrentChunkTypeCode = (uint32_t*)0x011C54F4;
+static uint32_t* s_TESFile_CurrentFormTypeEnum = (uint32_t*)0x011C54F0;
+// in last call (SetStaticFieldsAndGetFormTypeEnum) of first call (TESFile__GetFormInfoTypeID) from _TESFile_InitializeForm
+		//		s_TESFile_CurrentChunkTypeCode is first cmp
+		//		s_TESFile_CurrentChunkTypeEnum is next mov
+static const ChunkAndFormType* s_TESFile_ChunkAndFormTypes = (const ChunkAndFormType*)0x01187008;	// Array used in the loop in SetStaticFieldsAndGetFormTypeEnum, starts under dd offset aNone
 
 static uint8_t** g_CreatedObjectData = (uint8_t**)0x011C54CC;	// pointer to FormInfo + form data, filled out by TESForm::SaveForm()
 static uint32_t* g_CreatedObjectSize = (uint32_t*)0x011C54D0;
@@ -36,19 +36,19 @@ static uint32_t* g_CreatedObjectSize = (uint32_t*)0x011C54D0;
 		//		g_CreatedObjectSize is set to 18h
 		//		g_CreatedObjectData is set to the eax result of the next call
 #elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-static const uint32_t _ModInfo_GetNextChunk = 0x004735D0; // args: none retn: uint32_t subrecordType (third call in TESObjectARMO_LoadForm)
-static const uint32_t _ModInfo_GetChunkData = 0x00473790;	// args: void* buf, uint32_t bufSize retn: bool readSucceeded (fifth call in TESObjectARMO_LoadForm)
-static const uint32_t _ModInfo_Read32		  =	0x004736F0;	// args: void* buf retn: void (find 'LPER', then next call, still in TESObjectARMO_LoadForm)
-static const uint32_t _ModInfo_HasMoreSubrecords = 0x00473610;	// Last call before "looping" to GetNextChunk in TESObjectARMO_LoadForm.
-static const uint32_t _ModInfo_InitializeForm = 0x00486100;	// args: TESForm* retn: void (second call in TESObjectARMO_LoadForm)
+static const uint32_t _TESFile_GetNextChunk = 0x004735D0; // args: none retn: uint32_t subrecordType (third call in TESObjectARMO_LoadForm)
+static const uint32_t _TESFile_GetChunkData = 0x00473790;	// args: void* buf, uint32_t bufSize retn: bool readSucceeded (fifth call in TESObjectARMO_LoadForm)
+static const uint32_t _TESFile_Read32		  =	0x004736F0;	// args: void* buf retn: void (find 'LPER', then next call, still in TESObjectARMO_LoadForm)
+static const uint32_t _TESFile_HasMoreSubrecords = 0x00473610;	// Last call before "looping" to GetNextChunk in TESObjectARMO_LoadForm.
+static const uint32_t _TESFile_InitializeForm = 0x00486100;	// args: TESForm* retn: void (second call in TESObjectARMO_LoadForm)
 
-// addresses of static ModInfo members holding type info about currently loading form
-static uint32_t* s_ModInfo_CurrentChunkTypeCode = (uint32_t*)0x011C54F4;
-static uint32_t* s_ModInfo_CurrentFormTypeEnum = (uint32_t*)0x011C54F0;
-// in last call (SetStaticFieldsAndGetFormTypeEnum) of first call (ModInfo__GetFormInfoTypeID) from _ModInfo_InitializeForm
-		//		s_ModInfo_CurrentChunkTypeCode is first cmp
-		//		s_ModInfo_CurrentChunkTypeEnum is next mov
-static const ChunkAndFormType* s_ModInfo_ChunkAndFormTypes = (const ChunkAndFormType*)0x01187008;	// Array used in the loop in SetStaticFieldsAndGetFormTypeEnum, starts under dd offset aNone
+// addresses of static TESFile members holding type info about currently loading form
+static uint32_t* s_TESFile_CurrentChunkTypeCode = (uint32_t*)0x011C54F4;
+static uint32_t* s_TESFile_CurrentFormTypeEnum = (uint32_t*)0x011C54F0;
+// in last call (SetStaticFieldsAndGetFormTypeEnum) of first call (TESFile__GetFormInfoTypeID) from _TESFile_InitializeForm
+		//		s_TESFile_CurrentChunkTypeCode is first cmp
+		//		s_TESFile_CurrentChunkTypeEnum is next mov
+static const ChunkAndFormType* s_TESFile_ChunkAndFormTypes = (const ChunkAndFormType*)0x01187008;	// Array used in the loop in SetStaticFieldsAndGetFormTypeEnum, starts under dd offset aNone
 
 static uint8_t** g_CreatedObjectData = (uint8_t**)0x011C54CC;	// pointer to FormInfo + form data, filled out by TESForm::SaveForm()
 static uint32_t* g_CreatedObjectSize = (uint32_t*)0x011C54D0;
@@ -86,10 +86,10 @@ struct ChunkHeader
 	uint16_t	size : 2;
 };
 
-struct ModInfo		// referred to by game as TESFile
+struct TESFile		// referred to by game as TESFile
 {
-	ModInfo();
-	~ModInfo();
+	TESFile();
+	~TESFile();
 
 	// 18 info about currently loading form
 	struct FormInfo  // Record Header in FNVEdit
@@ -128,7 +128,7 @@ struct ModInfo		// referred to by game as TESFile
 		uint32_t	high;
 	};
 
-	tList<uint32_t>						unkList;			// 000 treated as ModInfo during InitializeForm, looks to be a linked list of modInfo
+	tList<uint32_t>						unkList;			// 000 treated as TESFile during InitializeForm, looks to be a linked list of modInfo
 	uint32_t /*NiTPointerMap<TESFile*>*/	* pointerMap;		// 008
 	uint32_t								unk00C;				// 00C
 	BSFile*								unkFile;			// 010
@@ -167,11 +167,14 @@ struct ModInfo		// referred to by game as TESFile
 	uint32_t								unk3F8;				// 3F8
 	uint32_t								numRefMods;			// 3FC related to modindex; see 4472D0
 																// formIDs in mod are as saved in GECK, must fix up at runtime
-	ModInfo								** refModInfo;		// 400 used to look up modInfo based on fixed mod index, double-check
+	TESFile								** refTESFile;		// 400 used to look up modInfo based on fixed mod index, double-check
 	uint32_t								unk404;				// 404
 	uint32_t								unk408;				// 408
 	uint8_t								modIndex;			// 40C init to 0xFF
-	uint8_t								pad40D[3];
+	union {
+		uint8_t							mediumIndex;
+		uint16_t						smallIndex;
+	};
 	String								author;				// 410
 	String								description;		// 418
 	void								* dataBuf;			// 420 
@@ -185,26 +188,25 @@ struct ModInfo		// referred to by game as TESFile
 
 #if !EDITOR
 	/*** used by TESForm::LoadForm() among others ***/
-	MEMBER_FN_PREFIX(ModInfo);
-	DEFINE_MEMBER_FN(GetNextChunk, uint32_t, _ModInfo_GetNextChunk);	// returns chunk type
-	DEFINE_MEMBER_FN(GetChunkData, bool, _ModInfo_GetChunkData, uint8_t* buf, uint32_t bufSize); // max size, not num to read
-	DEFINE_MEMBER_FN(Read32, void, _ModInfo_Read32, void* out);
-	DEFINE_MEMBER_FN(HasMoreSubrecords, bool, _ModInfo_HasMoreSubrecords);
+	MEMBER_FN_PREFIX(TESFile);
+	DEFINE_MEMBER_FN(GetNextChunk, uint32_t, _TESFile_GetNextChunk);	// returns chunk type
+	DEFINE_MEMBER_FN(GetChunkData, bool, _TESFile_GetChunkData, uint8_t* buf, uint32_t bufSize); // max size, not num to read
+	DEFINE_MEMBER_FN(Read32, void, _TESFile_Read32, void* out);
+	DEFINE_MEMBER_FN(HasMoreSubrecords, bool, _TESFile_HasMoreSubrecords);
 #endif
 };
 
 static_assert(sizeof(WIN32_FIND_DATA) == 0x140);
-static_assert(sizeof(ModInfo) == 0x42C);
-
-
+static_assert(sizeof(TESFile) == 0x42C);
 
 struct ModList
 {
-	tList<ModInfo>		modInfoList;		// 00
-	uint32_t				loadedModCount;		// 08
-	ModInfo*			loadedMods[0xFF];	// 0C
+	uint32_t			loadedModCount;
+	TESFile*			loadedMods[0xFF];
 };
-static_assert(sizeof(ModList) == 0x408);
+static_assert(sizeof(ModList) == 0x400);
+
+inline constexpr uint32_t HAS_NEW_PLUGIN_TYPES = 0x80;
 
 // 5B8
 class TESDataHandler
@@ -213,7 +215,7 @@ public:
 	TESDataHandler();
 	~TESDataHandler();
 
-	uint32_t							unk00;					// 000
+	uint32_t						flags;					// 000
 	BoundObjectListHead				*boundObjectList;		// 004
 	tList<TESPackage>				packageList;			// 008
 	tList<TESWorldSpace>			worldSpaceList;			// 010
@@ -277,33 +279,43 @@ public:
 	NiTArray<TESObjectCELL*>		cellArray;				// 1DC
 	NiTArray<BGSAddonNode*>			addonArray;				// 1EC
 
-	uint32_t							unk1FC[3];				// 1FC	208 looks like next created refID
-	uint32_t							nextCreatedRefID;		// 208	Init'd to FF000800
-	uint32_t							unk20C;					// 20C	last unselected mod in modList. GECK: active ESM
+	uint32_t						unk1FC[3];				// 1FC	208 looks like next created refID
+	uint32_t						nextCreatedRefID;		// 208	Init'd to FF000800 (in GECK init'd to nn000800)
+	TESFile*						activeFile;					// 20C	last unselected mod in modList. GECK: active ESM
+	tList<TESFile>					modInfoList;
 	ModList							modList;				// 210
-	uint8_t							unk618;					// 618
+	uint8_t							unk618;					// 618	5A4
 	uint8_t							unk619;					// 619
 	uint8_t							unk61A;					// 61A	referenced during LoadForm (ie TESSpellList). bit 1 might mean refID to pointer conversion not done. For GECK means save in progress
 	uint8_t							unk61B;					// 61B
-	uint32_t							unk61C;					// 61C
-	uint8_t							unk620;					// 620
+	uint8_t							unk61C;					// 61C	5A8
+	uint8_t							unk61D;					// 61D
+	uint8_t							unk61E;					// 61E
+	uint8_t							unk61F;					// 61F
+	uint8_t							unk620;					// 620	5AC
 	uint8_t							loading;				// 621	Init'd to 0 after loadForms
-	uint8_t							unk622;					// 622	referenced during loading of modules
+	uint8_t							unk622;					// 622	referenced during loading of modules. Compared with type = GameSetting but seems to always end up equal to 1.
 	uint8_t							unk623;					// 623
-	TESRegionManager				*regionManager;			// 624
-	ExtraContainerChanges::Data		*vendorContainer;		// 628
-	uint32_t							unk62C;					// 62C	
-	uint32_t							unk630;					// 630
-	uint32_t							unk634;					// 634
-	uint32_t							unk638;					// 638
+	TESRegionManager				* regionManager;		// 624	5B0
+	uint32_t						unk628;					// 628	5B4
+	uint32_t						unk62C;					// 62C	
+	uint32_t						unk630;					// 630
+	uint32_t						unk634;					// 634
+	uint32_t						unk638;					// 638
 
 	static TESDataHandler* GetSingleton();
 
-	const ModInfo* GetFile(uint32_t auiIndex) const;
-	const ModInfo* GetListFile(const char* modName);
-	uint8_t GetModIndex(const char* modName);
+	bool SupportsNewFileTypes() const { return flags & HAS_NEW_PLUGIN_TYPES; }
+	static bool HasNewFileTypeSupport() { return GetSingleton()->SupportsNewFileTypes(); }
+
+	const TESFile* GetFile(uint32_t auiIndex) const;
+	const TESFile* GetListFile(const char* modName) const;
+	const TESFile* GetFileByFormID(uint32_t auiFormID) const;
+
+	uint8_t GetModIndex(const char* modName) const;
 	uint8_t GetActiveModCount() const;
-	const char* GetNthModName(uint32_t modIndex);
+
+	bool IsFormIDInUse(uint32_t auiFormID) const;
 
 	MEMBER_FN_PREFIX(TESDataHandler);
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525

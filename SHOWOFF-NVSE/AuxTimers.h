@@ -6,7 +6,7 @@ namespace AuxTimer
 {
 	// Code structure copied from JIP's jip_core.h
 
-	constexpr uint8_t AuxTimerVersion = 1;
+	constexpr uint8_t AuxTimerVersion = 2;
 
 	struct AuxTimerValue
 	{
@@ -77,16 +77,16 @@ namespace AuxTimer
 
 	using AuxTimerVarsMap = UnorderedMap<NameString, AuxTimerValue>;
 	using AuxTimerOwnersMap = UnorderedMap<RefID, AuxTimerVarsMap>;
-	using AuxTimerModsMap = UnorderedMap<ModID, AuxTimerOwnersMap>;
+	using AuxTimerModsMap = UnorderedMap<const TESFile*, AuxTimerOwnersMap>;
 	// Ensure thread safety when modifying these globals!
 	extern AuxTimerModsMap s_auxTimerMapArraysPerm, s_auxTimerMapArraysTemp;
 
 	struct AuxTimerMapInfo
 	{
 		uint32_t		ownerID;
-		uint32_t		modIndex;
-		char		*varName;
-		bool		isPerm;
+		const TESFile*	pOwnerFile;
+		char*			varName;
+		bool			isPerm;
 
 		AuxTimerMapInfo(TESForm* form, TESObjectREFR* thisObj, const Script* scriptObj, char* pVarName)
 		{
@@ -101,7 +101,7 @@ namespace AuxTimer
 				varName = pVarName;
 				isPerm = (varName[0] != '*');
 				// If an AuxTimer func is called from console, will have 0xFF aka Public mod index.
-				modIndex = (varName[!isPerm] == '_') ? 0xFF : scriptObj->GetOverridingModIdx();
+				pOwnerFile = (varName[!isPerm] == '_') ? nullptr : scriptObj->GetFile(-1);
 			}
 		}
 
@@ -111,7 +111,7 @@ namespace AuxTimer
 			if (ownerID)
 			{
 				isPerm = !(type & 1);
-				modIndex = (type > 1) ? 0xFF : scriptObj->GetOverridingModIdx();
+				pOwnerFile = (type > 1) ? nullptr : scriptObj->GetFile(-1);
 			}
 		}
 
@@ -120,7 +120,7 @@ namespace AuxTimer
 		}
 
 		[[nodiscard]] bool IsPublic() const {
-			return modIndex == 0xFF;
+			return pOwnerFile == nullptr;
 		}
 	};
 
@@ -135,20 +135,20 @@ namespace AuxTimer
 
 	struct AuxTimerPendingRemoval
 	{
-		uint32_t		modIndex;
+		const TESFile*	pOwnerFile;
 		uint32_t		ownerID;
-		std::string	varName;
+		std::string		varName;
 	};
 
 	//deferred insertion for timers created during DoCountdown iteration
 	//inserting into UnorderedMap mid-iteration can rehash and invalidate iterators
 	struct AuxTimerPendingInsertion
 	{
-		uint32_t		modIndex;
+		const TESFile*	pOwnerFile;
 		uint32_t		ownerID;
-		std::string	varName;
-		bool		isPerm;
-		double		timeToCountdown;
+		std::string		varName;
+		bool			isPerm;
+		double			timeToCountdown;
 		uint32_t		flags;
 	};
 

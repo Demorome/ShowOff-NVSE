@@ -373,7 +373,7 @@ enum ObjectVtbl
 #define IS_ID(form, type) (form->typeID == kFormType_##type)
 #define NOT_ID(form, type) (form->typeID != kFormType_##type)
 
-struct ModInfo;		// in GameData.h 
+struct TESFile;		// in GameData.h 
 class TESFullName;
 class EnchantmentItem;
 class TESSound;
@@ -458,13 +458,13 @@ public:
 	virtual void		Unk_05(void);						// Might be set default value (called from constructor)
 	virtual uint32_t		Unk_06(void);
 	virtual bool		Unk_07(void);
-	virtual bool		LoadForm(ModInfo * modInfo);		// func_010 in GECK
+	virtual bool		LoadForm(TESFile * modInfo);		// func_010 in GECK
 	virtual bool		Unk_09(void * arg);					// points to LoadForm on TESForm
-	virtual bool		AppendForm(ModInfo* modInfo);		// (ie SaveForm + append to modInfo)
+	virtual bool		AppendForm(TESFile* modInfo);		// (ie SaveForm + append to modInfo)
 	virtual void		SaveForm(void);						// saves in same format as in .esp	//	func_013 in GECK
 															// data buffer and buffer size stored in globals when done, doesn't return anything
-	virtual bool		LoadForm2(ModInfo * modInfo);		// just calls LoadForm
-	virtual void		WriteFormInfo(ModInfo* modInfo);	// does some saving stuff, then calls Fn0A
+	virtual bool		LoadForm2(TESFile * modInfo);		// just calls LoadForm
+	virtual void		WriteFormInfo(TESFile* modInfo);	// does some saving stuff, then calls Fn0A
 	virtual bool		Unk_0E(void * arg);					// prapares a GRUP formInfo
 	virtual bool		Sort(TESForm * form);				// returns if the argument is "greater or equal" to this form
 	virtual TESForm *	CreateForm(void * arg0, void * mapToAddTo);	// makes a new form, 
@@ -508,7 +508,7 @@ public:
 	virtual void		Unk_35(bool set);	// 00010000 then calls Fn12 MarkAsModified
 	virtual void		Unk_36(bool set);	// 00020000
 	virtual void		Unk_37(void);		// write esp format
-	virtual void		readOBNDSubRecord(ModInfo * modInfo);	// read esp format
+	virtual void		readOBNDSubRecord(TESFile * modInfo);	// read esp format
 	virtual bool		IsBoundObject() const;
 	virtual bool		IsObject() const;
 	virtual bool		IsMagicItem() const;
@@ -587,7 +587,7 @@ public:
 #ifdef EDITOR
 	EditorData	editorData;			// +10
 #endif
-	tList<ModInfo> mods;			// 010 ModReferenceList in Oblivion	
+	tList<TESFile> mods;			// 010 ModReferenceList in Oblivion	
 	// 018 / 028
 
 	TESForm *TryGetREFRParent();
@@ -599,6 +599,8 @@ public:
 	uint32_t GetFormID() const {
 		return refID;
 	}
+
+	TESFile* GetFile(int32_t aiIndex) const;
 
 	// adds a new form to the game (from CloneForm or LoadForm)
 	void DoAddForm(TESForm* newForm, bool bPersist = true, bool record = true) const;
@@ -4267,7 +4269,7 @@ public:
 	};
 
 	typedef NiTPointerMap<BSSimpleList<TESObjectREFR> > RefListPointerMap;
-	typedef NiTMapBase<ModInfo*, TESWorldSpace::Offset_Data*> OffsetDataMap;
+	typedef NiTMapBase<TESFile*, TESWorldSpace::Offset_Data*> OffsetDataMap;
 
 	enum
 	{
@@ -4492,7 +4494,7 @@ public:
 	virtual void	Destroy(bool free);
 	virtual void	CopyFrom(TESPackageData * packageData);
 	virtual void	Unk_02(void);
-	virtual void	Save(ModInfo* modInfo);
+	virtual void	Save(TESFile* modInfo);
 	virtual void	Unk_04(void);
 	virtual void	Unk_05(void);
 	virtual void	Unk_06(void);

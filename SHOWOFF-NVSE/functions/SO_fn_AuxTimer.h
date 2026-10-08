@@ -43,12 +43,11 @@ bool Cmd_AuxTimerStart_Execute(COMMAND_ARGS)
 				if (g_isIteratingTimers)
 				{
 					g_auxTimersPendingInsertion.emplace_back(AuxTimerPendingInsertion{
-						varInfo.modIndex, varInfo.ownerID, varName,
+						varInfo.pOwnerFile, varInfo.ownerID, varName,
 						varInfo.isPerm, timeToCountdown, flags
 					});
 					if (varInfo.isPerm)
 					{
-						s_dataChangedFlags |= kChangedFlag_AuxTimerMaps;
 						if (thisObj)
 							thisObj->MarkAsModified(0);
 					}
@@ -77,14 +76,14 @@ bool Cmd_AuxTimerStart_Execute(COMMAND_ARGS)
 				if (filter->IsInFilter(0, varInfo.ownerID) && filter->IsInFilter(1, varName)) 
 				{
 					if (varInfo.IsPublic() 
-						|| callback.ScriptForEvent->GetOverridingModIdx() == varInfo.modIndex) 
+						|| callback.ScriptForEvent->GetFile(-1) == varInfo.pOwnerFile) 
 						{
 						FunctionCallScriptAlt(
 							callback.ScriptForEvent, 
 							nullptr, 
 							OnAuxTimerStart->numMaxArgs, 
 							varName, 
-							LookupFormByRefID(varInfo.ownerID)
+							TESForm::GetFormByNumericID(varInfo.ownerID)
 						);
 					}
 				}
@@ -92,7 +91,6 @@ bool Cmd_AuxTimerStart_Execute(COMMAND_ARGS)
 			
 			if (varInfo.isPerm)
 			{
-				s_dataChangedFlags |= kChangedFlag_AuxTimerMaps;
 				if (thisObj)
 					thisObj->MarkAsModified(0);
 			}
@@ -137,14 +135,14 @@ bool Cmd_AuxTimerStop_Execute(COMMAND_ARGS)
 					if (filter->IsInFilter(0, varInfo.ownerID) && filter->IsInFilter(1, varName)) 
 					{
 						if (varInfo.IsPublic() 
-							|| callback.ScriptForEvent->GetOverridingModIdx() == varInfo.modIndex) 
+							|| callback.ScriptForEvent->GetFile(-1) == varInfo.pOwnerFile)
 						{
 							FunctionCallScriptAlt(
 								callback.ScriptForEvent, 
 								nullptr, 
 								OnAuxTimerStop->numMaxArgs, 
 								varName, 
-								LookupFormByRefID(varInfo.ownerID)
+								TESForm::GetFormByNumericID(varInfo.ownerID)
 							);
 						}
 					}
@@ -157,7 +155,7 @@ bool Cmd_AuxTimerStop_Execute(COMMAND_ARGS)
 
 			timersToRemove.emplace_back(AuxTimerPendingRemoval
 				{ 
-					varInfo.modIndex, 
+					varInfo.pOwnerFile, 
 					varInfo.ownerID, 
 					varName 
 				}
@@ -166,7 +164,6 @@ bool Cmd_AuxTimerStop_Execute(COMMAND_ARGS)
 
 			if (varInfo.isPerm)
 			{
-				s_dataChangedFlags |= kChangedFlag_AuxTimerMaps;
 				if (thisObj)
 					thisObj->MarkAsModified(0);
 			}
@@ -208,7 +205,6 @@ bool Cmd_AuxTimerPaused_Execute(COMMAND_ARGS)
 
 				if (varInfo.isPerm)
 				{
-					s_dataChangedFlags |= kChangedFlag_AuxTimerMaps;
 					if (thisObj)
 						thisObj->MarkAsModified(0);
 				}

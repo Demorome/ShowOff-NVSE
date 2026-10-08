@@ -743,13 +743,12 @@ namespace IniToNVSE
 
 	bool GetModINIPath(std::string &outModPath, Script* const scriptObj)
 	{
-		uint8_t const modIdx = scriptObj->GetOverridingModIdx();
-		if (modIdx == 0xFF)
-		{
+		const TESFile* pLastFile = scriptObj->GetFile(-1);
+		if (!pLastFile)
 			return false;
-		}
+
 		//replace .esm/p ending with .ini
-		outModPath = TESDataHandler::GetSingleton()->GetNthModName(modIdx);
+		outModPath = pLastFile->name;
 		outModPath.replace(outModPath.size() - 3, 3, "ini");
 		return true;
 	}
