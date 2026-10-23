@@ -85,7 +85,7 @@ ExtraDataList* ExtraContainerChanges::EntryData::GetEquippedExtra()
 			xData = xdlIter->data;
 			if (xData && xData->HasType(kExtraData_Worn))
 				return xData;
-		} while (xdlIter = xdlIter->next);
+		} while ((xdlIter = xdlIter->next));
 	}
 	return NULL;
 }

@@ -370,7 +370,7 @@ static bool v_ExtractArgsEx(int16_t numArgs, ParamInfo * paramInfo, uint8_t* &sc
 	}
 #endif
 
-	for(uint32_t i = 0; i < numArgs; i++)
+	for(int32_t i = 0; i < numArgs; i++)
 	{
 		ParamInfo	* info = &paramInfo[i];
 
@@ -816,7 +816,7 @@ void ScriptEventList::Dump(void)
 {
 	uint32_t nEvents = m_eventList->Count();
 
-	for(int32_t n = 0; n < nEvents; ++n)
+	for(uint32_t n = 0; n < nEvents; ++n)
 	{
 		Event* pEvent = m_eventList->GetNthItem(n);
 		if(pEvent)
@@ -841,7 +841,7 @@ uint32_t ScriptEventList::ResetAllVariables()
 			numVars++;
 		}
 	}
-	while (varIter = varIter->next);
+	while ((varIter = varIter->next));
 	return numVars;
 }
 
@@ -857,7 +857,7 @@ ScriptVar *ScriptEventList::GetVariable(uint32_t id)
 			if (scriptVar && (scriptVar->id == id))
 				return scriptVar;
 		}
-		while (varIter = varIter->next);
+		while ((varIter = varIter->next));
 	}
 	return NULL;
 }
@@ -1644,7 +1644,7 @@ void ShowCompilerError(ScriptLineBuffer* lineBuf, const char * fmt, ...)
 {
 
 	char errorHeader[0x400];
-	uint32_t offset = sprintf_s(errorHeader, 0x400, "Error on line %d\n\n", lineBuf->lineNumber);
+	sprintf_s(errorHeader, 0x400, "Error on line %d\n\n", lineBuf->lineNumber);
 
 	va_list	args;
 	va_start(args, fmt);

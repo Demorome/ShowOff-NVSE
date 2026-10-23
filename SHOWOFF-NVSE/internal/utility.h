@@ -275,10 +275,10 @@ public:
 	~FileStreamJIP() { if (theFile) fclose(theFile); }
 
 	bool Open(const char* filePath);
-	bool OpenAt(const char* filePath, uint32_t inOffset);
+	bool OpenAt(const char* filePath, int32_t inOffset);
 	bool OpenWrite(char* filePath, bool append);
 	bool Create(const char* filePath);
-	void SetOffset(uint32_t inOffset);
+	void SetOffset(int32_t inOffset);
 
 	void Close()
 	{

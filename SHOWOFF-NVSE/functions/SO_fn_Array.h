@@ -23,14 +23,14 @@ void ListAddArray_Call(BGSListForm* pListForm, NVSEArrayVar* inArr, int32_t inde
 		return true;
 	}; index == eListEnd)
 	{
-		for (int i = 0; i < size; i++) {
+		for (uint32_t i = 0; i < size; i++) {
 			if (!Add_Array_Element_To_FormList(i)) 
 				break;
 		}
 	}
 	else
 	{
-		for (int i = size - 1; i >= 0; i--) {
+		for (int32_t i = size - 1; i >= 0; i--) {
 			if (!Add_Array_Element_To_FormList(i)) 
 				break;
 		}

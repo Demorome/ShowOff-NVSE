@@ -1,13 +1,12 @@
 #pragma once
 
-// 4018 - signed/unsigned mismatch
-// 4244 - loss of data by assignment
-// 4267 - possible loss of data (truncation)
-// 4305 - truncation by assignment
-// 4288 - disable warning for crap microsoft extension screwing up the scope of variables defined in for loops
-// 4311 - pointer truncation
-// 4312 - pointer extension
-#pragma warning(disable: 4018 4244 4267 4305 4288 4312 4311)
+// 4100 - unreferenced formal parameter
+// 4201 - nonstandard extension used : nameless struct/union
+// 4244 - 'argument' : conversion from 'type1' to 'type2', possible loss of data
+// 4324 - 'type': structure was padded due to alignment specifier
+// 4505 - 'function' : unreferenced local function has been removed
+// 4530 - C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
+#pragma warning(disable: 4100 4201 4244 4324 4505 4530 28159)
 
 #ifndef NOMINMAX
 #define NOMINMAX

@@ -105,7 +105,7 @@ std::optional<array_2d<T>> TryGetArrayNumbers(NVSEArrayVar* arr, size_t const ma
 			return {};
 		num_rows = arrData.size;
 		matData.numbers.resize(num_rows);
-		for (int i = 0; i < num_rows; i++)
+		for (size_t i = 0; i < num_rows; i++)
 		{
 			ArrayData const innerArrData(arrData.vals[i].Array(), true);
 			if (innerArrData.size <= 0 || (maxCols && innerArrData.size > maxCols))
@@ -117,7 +117,7 @@ std::optional<array_2d<T>> TryGetArrayNumbers(NVSEArrayVar* arr, size_t const ma
 				return {};
 
 			//Get row data from internal array.
-			for (int k = 0; k < num_cols; k++)
+			for (size_t k = 0; k < num_cols; k++)
 			{
 				matData.numbers[k].emplace_back(innerArrData.vals[k].num);
 			}
@@ -130,7 +130,7 @@ std::optional<array_2d<T>> TryGetArrayNumbers(NVSEArrayVar* arr, size_t const ma
 			return {};
 		num_cols = arrData.size;
 		matData.numbers.resize(num_rows);
-		for (int i = 0; i < num_cols; i++)
+		for (size_t i = 0; i < num_cols; i++)
 		{
 			matData.numbers[0].emplace_back(arrData.vals[i].num);
 		}
@@ -175,7 +175,7 @@ bool ArrayIsMatrix(NVSEArrayVar* arr)
 		is2D == true)
 	{
 		size_t numElemsInRows = 0;
-		for (int iRow = 0; iRow < arrData.size; iRow++)
+		for (size_t iRow = 0; iRow < arrData.size; iRow++)
 		{
 			ArrayData const rowData(arrData.vals[iRow].Array(), true);
 			if (rowData.size <= 0)
@@ -189,7 +189,7 @@ bool ArrayIsMatrix(NVSEArrayVar* arr)
 			else
 				numElemsInRows = rowData.size;
 
-			for (int iCol = 0; iCol < rowData.size; iCol++)
+			for (size_t iCol = 0; iCol < rowData.size; iCol++)
 			{
 				if (rowData.vals[iCol].GetType() != NVSEArrayVarInterface::kType_Numeric)
 					return false;
@@ -198,7 +198,7 @@ bool ArrayIsMatrix(NVSEArrayVar* arr)
 	}
 	else //1D
 	{
-		for (int iCol = 0; iCol < arrData.size; iCol++)
+		for (size_t iCol = 0; iCol < arrData.size; iCol++)
 		{
 			if (arrData.vals[iCol].GetType() != NVSEArrayVarInterface::kType_Numeric)
 				return false;
@@ -218,8 +218,8 @@ std::optional<arma::Mat<double>> GetMatrixFromArray(NVSEArrayVar* arr)
 	if (bool const is2D = arrData.vals[0].GetType() == NVSEArrayVarInterface::kType_Array;
 		is2D == true)
 	{
-		int n_cols = -1;
-		for (int iRow = 0; iRow < arrData.size; iRow++)	//assume each elem is an array.
+		size_t n_cols = UINT32_MAX;
+		for (size_t iRow = 0; iRow < arrData.size; iRow++)	//assume each elem is an array.
 		{
 			ArrayData const innerArrData(arrData.vals[iRow].Array(), true);
 			if (innerArrData.size <= 0)
@@ -232,7 +232,7 @@ std::optional<arma::Mat<double>> GetMatrixFromArray(NVSEArrayVar* arr)
 
 			//Populate current row with column data contained in internal (row) array.
 			arma::Row<double> NthRow(innerArrData.size);
-			for (int k = 0; k < innerArrData.size; k++)	//assume each elem is a number.
+			for (size_t k = 0; k < innerArrData.size; k++)	//assume each elem is a number.
 			{
 				NthRow(k) = innerArrData.vals[k].Number();
 			}
@@ -242,7 +242,7 @@ std::optional<arma::Mat<double>> GetMatrixFromArray(NVSEArrayVar* arr)
 	else //1D array, which is only a single row (each element is a column).
 	{
 		arma::Row<double> row(arrData.size);
-		for (int i = 0; i < arrData.size; i++)
+		for (size_t i = 0; i < arrData.size; i++)
 		{
 			row(i) = arrData.vals[i].Number();
 		}

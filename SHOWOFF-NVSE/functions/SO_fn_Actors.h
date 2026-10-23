@@ -696,11 +696,11 @@ bool Cmd_HighlightAdditionalReferenceAlt_Execute(COMMAND_ARGS)
 			// If ref was already flashing, make it stop.
 			if (manager->vatsHighlightData.flashingRefIndex != -1)
 			{
-				for (int i = 0; i < manager->vatsHighlightData.numHighlightedRefs; ++i)
+				for (uint32_t i = 0; i < manager->vatsHighlightData.numHighlightedRefs; ++i)
 				{
 					if (manager->vatsHighlightData.highlightedRefs[i].ref == thisObj)
 					{
-						manager->vatsHighlightData.flashingRefIndex = -1;
+						manager->vatsHighlightData.flashingRefIndex = UINT32_MAX;
 						break;
 					}
 				}

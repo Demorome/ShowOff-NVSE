@@ -9,9 +9,9 @@ struct _VarIDs : Set<uint32_t>
 {
 	uint32_t PopFirst()
 	{
-		uint32_t* keys = Keys(), first = *keys;
+		uint32_t* pKeys = Keys(), first = *pKeys;
 		if (--numKeys)
-			memmove(keys, keys + 1, numKeys * 4);
+			memmove(pKeys, pKeys + 1, numKeys * 4);
 		return first;
 	}
 

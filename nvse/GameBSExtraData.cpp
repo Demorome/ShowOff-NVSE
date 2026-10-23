@@ -71,7 +71,7 @@ char BaseExtraList::GetExtraFactionRank(TESFaction *faction)
 			if (pData && (pData->faction == faction))
 				return pData->rank;
 		}
-		while (traverse = traverse->next);
+		while ((traverse = traverse->next));
 	}
 	return -1;
 }

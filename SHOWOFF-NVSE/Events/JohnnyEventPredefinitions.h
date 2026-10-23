@@ -169,7 +169,7 @@ public:
 			{
 				if (!maxFilters) return;
 				if (!it->eventFilter->GetNumFilters()) continue;
-				int i = 0; // filter iterator
+				uint32_t i = 0; // filter iterator
 				for (; i < maxFilters; i++)
 				{
 					if (!(it->eventFilter->IsFilterEqual(filtersArr[i], i))) break;
@@ -186,7 +186,7 @@ public:
 			{
 				if (!maxFilters) return;
 				if (!it->eventFilter->GetNumFilters()) continue;
-				int i = 0; // filter iterator
+				uint32_t i = 0; // filter iterator
 				for (; i < maxFilters; i++)
 				{
 					if (!(it->eventFilter->IsFilterEqual(filtersArr[i], i))) break;
@@ -218,7 +218,7 @@ public:
 				if (auto eventFilters = it->eventFilter)
 				{
 					uint32_t maxFilters = eventFilters->GetNumFilters();
-					for (int i = 0; i < maxFilters; i++)
+					for (uint32_t i = 0; i < maxFilters; i++)
 					{
 						if (!(it->eventFilter->IsFilterEqual(filters[i], i))) goto NotFound;
 

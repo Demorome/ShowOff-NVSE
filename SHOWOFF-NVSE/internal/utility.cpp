@@ -1309,13 +1309,13 @@ __declspec(noinline) char* __fastcall GetNextToken(char *str, const char *delims
 	bool table[0x100];
 	MemZero(table, 0x100);
 	uint8_t curr;
-	while (curr = *delims)
+	while ((curr = *delims))
 	{
 		table[curr] = true;
 		delims++;
 	}
 	bool found = false;
-	while (curr = *str)
+	while ((curr = *str))
 	{
 		if (table[curr])
 		{
@@ -1400,7 +1400,7 @@ int __fastcall StrToInt(const char *str)
 	bool neg = *str == '-';
 	if (neg) str++;
 	char chr;
-	while (chr = *str++)
+	while ((chr = *str++))
 	{
 		if ((chr < '0') || (chr > '9')) break;
 		result *= 10;
@@ -1417,7 +1417,7 @@ double __fastcall StrToDbl(const char *str)
 	bool neg = *str == '-', point = false;
 	if (neg) str++;
 	char chr;
-	while (chr = *str++)
+	while ((chr = *str++))
 	{
 		if ((chr >= '0') && (chr <= '9'))
 		{
@@ -1532,7 +1532,7 @@ bool FileStreamJIP::Open(const char* filePath)
 	return theFile ? true : false;
 }
 
-bool FileStreamJIP::OpenAt(const char* filePath, uint32_t inOffset)
+bool FileStreamJIP::OpenAt(const char* filePath, int32_t inOffset)
 {
 	if (theFile) fclose(theFile);
 	theFile = _fsopen(filePath, "rb", 0x20);
@@ -1581,7 +1581,7 @@ uint32_t FileStreamJIP::GetLength()
 	return result;
 }
 
-void FileStreamJIP::SetOffset(uint32_t inOffset)
+void FileStreamJIP::SetOffset(int32_t inOffset)
 {
 	fseek(theFile, 0, SEEK_END);
 	if (ftell(theFile) > inOffset)
@@ -1619,7 +1619,7 @@ void FileStreamJIP::WriteBuf(const void* inData, uint32_t inLength)
 void FileStreamJIP::MakeAllDirs(char* fullPath)
 {
 	char* traverse = fullPath, curr;
-	while (curr = *traverse)
+	while ((curr = *traverse))
 	{
 		if ((curr == '\\') || (curr == '/'))
 		{
@@ -1825,7 +1825,7 @@ bool AlchemyItem::IsPoison()
 		if (!(effItem = iter->data)) continue;
 		effSetting = effItem->setting;
 		if (effSetting && !(effSetting->effectFlags & 4)) return false;
-	} while (iter = iter->next);
+	} while ((iter = iter->next));
 	return effSetting != NULL;
 }
 
@@ -2040,8 +2040,8 @@ void AssignScriptValueResult(const NVSEArrayElement* val, PluginExpressionEvalua
 
 __declspec(noinline) uint8_t* AuxBuffer::Get(uint32_t bufIdx, uint32_t reqSize)
 {
-	thread_local AuxBuffer s_auxBuffers[3];
-	AuxBuffer* auxBuf = &s_auxBuffers[bufIdx];
+	thread_local AuxBuffer tl_auxBuffers[3];
+	AuxBuffer* auxBuf = &tl_auxBuffers[bufIdx];
 	if (auxBuf->size < reqSize)
 	{
 		auxBuf->size = reqSize;

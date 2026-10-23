@@ -252,7 +252,7 @@ VariableInfo *Script::GetVariableByName(const char *varName)
 		if (varInfo && StrEqualCI(varName, varInfo->name.m_data))
 			return varInfo;
 	}
-	while (varIter = varIter->next);
+	while ((varIter = varIter->next));
 	return NULL;
 }
 
@@ -268,7 +268,7 @@ Script::RefVariable	*Script::GetVariable(uint32_t reqIdx)
 				return varIter->data;
 			idx++;
 		}
-		while (varIter = varIter->next);
+		while ((varIter = varIter->next));
 	}
 	return NULL;
 }
@@ -283,7 +283,7 @@ VariableInfo *Script::GetVariableInfo(uint32_t idx)
 		if (varInfo && (varInfo->idx == idx))
 			return varInfo;
 	}
-	while (varIter = varIter->next);
+	while ((varIter = varIter->next));
 	return NULL;
 }
 
@@ -314,7 +314,7 @@ uint32_t Script::RefVarList::GetIndex(RefVariable *refVar)
 		if (varIter->data == refVar)
 			return idx;
 	}
-	while (varIter = varIter->next);
+	while ((varIter = varIter->next));
 	return 0;
 }
 

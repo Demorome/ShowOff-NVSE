@@ -5,16 +5,16 @@
 #include "GameData.h"
 
 #if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
-static const ActorValueInfo** ActorValueInfoPointerArray = (const ActorValueInfo**)0x0011D61C8;		// See GetActorValueInfo
-static const _GetActorValueInfo GetActorValueInfo = (_GetActorValueInfo)0x00066E920;	// See GetActorValueName
+const ActorValueInfo** ActorValueInfoPointerArray = (const ActorValueInfo**)0x0011D61C8;		// See GetActorValueInfo
+const _GetActorValueInfo GetActorValueInfo = (_GetActorValueInfo)0x00066E920;	// See GetActorValueName
 BGSDefaultObjectManager ** g_defaultObjectManager = (BGSDefaultObjectManager**)0x011CA80C;
 #elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-static const ActorValueInfo** ActorValueInfoPointerArray = (const ActorValueInfo**)0x0011D61C8;		// See GetActorValueInfo (same as gore)
-static const _GetActorValueInfo GetActorValueInfo = (_GetActorValueInfo)0x0066E480;	// See GetActorValueName
+const ActorValueInfo** ActorValueInfoPointerArray = (const ActorValueInfo**)0x0011D61C8;		// See GetActorValueInfo (same as gore)
+const _GetActorValueInfo GetActorValueInfo = (_GetActorValueInfo)0x0066E480;	// See GetActorValueName
 BGSDefaultObjectManager ** g_defaultObjectManager = (BGSDefaultObjectManager**)0x011CA80C;
 #else
-static const ActorValueInfo** ActorValueInfoPointerArray = (const ActorValueInfo**)0;
-static const _GetActorValueInfo GetActorValueInfo = (_GetActorValueInfo)0;
+const ActorValueInfo** ActorValueInfoPointerArray = (const ActorValueInfo**)0;
+const _GetActorValueInfo GetActorValueInfo = (_GetActorValueInfo)0;
 BGSDefaultObjectManager ** g_defaultObjectManager = (BGSDefaultObjectManager**)0x0;
 #endif
 
@@ -174,7 +174,7 @@ uint32_t TESBipedModelForm::MaskForSlot(uint32_t slot)
 		case ePart_BodyAddon1:	return eSlot_BodyAddon1;
 		case ePart_BodyAddon2:	return eSlot_BodyAddon2;
 		case ePart_BodyAddon3:	return eSlot_BodyAddon3;
-		default:				return -1;
+		default:				return UINT32_MAX;
 	}
 }
 
@@ -202,7 +202,7 @@ uint32_t TESBipedModelForm::SlotForMask(uint32_t slot)
 	case eSlot_BodyAddon1:	return ePart_BodyAddon1;
 	case eSlot_BodyAddon2:	return ePart_BodyAddon2;
 	case eSlot_BodyAddon3:	return ePart_BodyAddon3;
-	default:				return -1;
+	default:				return UINT32_MAX;
 	}
 }
 
@@ -278,7 +278,7 @@ char TESActorBaseData::GetFactionRank(TESFaction *faction)
 		if (data && (data->faction == faction))
 			return data->rank;
 	}
-	while (facIter = facIter->next);
+	while ((facIter = facIter->next));
 	return -1;
 }
 
@@ -970,12 +970,12 @@ uint32_t TESIdleForm::GetSequenceID() const
 	return data.groupFlags & 0x3F; // copying code at 0x5FF160
 }
 
-void TESNPC::SetSex(uint32_t flags)
+void TESNPC::SetSex(uint32_t auiFlags)
 {
 	TESActorBaseData* baseDataPtr = &this->baseData;
 
 	uint32_t currentSexBit = baseDataPtr->flags & TESActorBaseData::kFlags_Female;
-	uint32_t newSexBit = flags & TESActorBaseData::kFlags_Female;
+	uint32_t newSexBit = auiFlags & TESActorBaseData::kFlags_Female;
 
 	if (currentSexBit == newSexBit) 
 		return;

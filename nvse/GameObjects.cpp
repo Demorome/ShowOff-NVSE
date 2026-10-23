@@ -105,9 +105,9 @@ bool Actor::IsInvisible()
 	return (avOwner.GetActorValueInt(kAVCode_Invisibility) > 0) || (avOwner.GetActorValueInt(kAVCode_Chameleon) > 0);
 }
 
-void Actor::Kill(Actor* killer)
+void Actor::Kill(Actor* apKiller)
 {
-	ThisCall<void>(0x89D900, this, killer, 0.0f);
+	ThisCall<void>(0x89D900, this, apKiller, 0.0f);
 }
 
 bool Actor::GetShouldAttack(Actor* target)

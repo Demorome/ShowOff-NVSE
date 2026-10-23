@@ -541,8 +541,12 @@ public:
 	{
 		if constexpr (std::is_same_v<T_Key, char*> || std::is_same_v<T_Key, const char*>)
 			return StrCompare(*(const char**)&inKey, *(const char**)&key);
-		if (inKey < key) return -1;
-		return (key < inKey) ? 1 : 0;
+		else {
+			if (inKey < key)
+				return -1;
+
+			return (key < inKey) ? 1 : 0;
+		}
 	}
 	__forceinline void Clear()
 	{
@@ -1415,7 +1419,7 @@ public:
 		void FindNonEmpty()
 		{
 			for (Bucket* pEnd = table->End(); bucket != pEnd; bucket++)
-				if (entry = bucket->entries) return;
+				if ((entry = bucket->entries)) return;
 		}
 
 	public:
@@ -1487,7 +1491,7 @@ public:
 			{
 				if (curr == entry) break;
 				prev = curr;
-			} while (curr = curr->next);
+			} while ((curr = curr->next));
 			table->numEntries--;
 			bucket->Remove(entry, prev);
 			entry = prev;

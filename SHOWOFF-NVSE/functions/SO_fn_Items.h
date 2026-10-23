@@ -346,8 +346,11 @@ float __fastcall GetCalculatedEquippedWeight_Call(TESObjectREFR* const thisObj, 
 		if (isWeapon) {
 			ContChangesEntry* weapInfo = nullptr;
 			// Gather more information about the weapon reference (weapon mods).
-			if (!(weapInfo = ((Actor*)thisObj)->baseProcess->GetWeaponInfo())) continue;
-			if (item = weapInfo->type) {
+			if (!(weapInfo = ((Actor*)thisObj)->baseProcess->GetWeaponInfo())) 
+				continue;
+			
+			item = weapInfo->type;
+			if (item) {
 				bool const hasDecreaseWeightMod = ThisCall<bool>(0x4BDA70, weapInfo, TESObjectWEAP::kWeaponModEffect_DecreaseWeight);
 				itemWeight = ThisCall<double>(0x4BE380, (TESObjectWEAP*)item, hasDecreaseWeightMod);  //GetWeaponModdedWeight
 				if (itemWeight >= 10.0) {
@@ -451,7 +454,8 @@ bool Cmd_GetIngestibleConsumeSound_Execute(COMMAND_ARGS)
 		return true;
 	}
 
-	if (form = TryExtractBaseForm(form, thisObj))
+	form = TryExtractBaseForm(form, thisObj);
+	if (form)
 	{
 		if (auto const ingestible = DYNAMIC_CAST(form, TESForm, AlchemyItem))
 		{
@@ -475,7 +479,8 @@ bool Cmd_SetIngestibleConsumeSound_Execute(COMMAND_ARGS)
 		return true;
 	}
 
-	if (form = TryExtractBaseForm(form, thisObj))
+	form = TryExtractBaseForm(form, thisObj);
+	if (form)
 	{
 		if (auto const ingestible = DYNAMIC_CAST(form, TESForm, AlchemyItem))
 		{
@@ -750,7 +755,8 @@ bool Cmd_GetSpellUsageNumEx_Execute(COMMAND_ARGS)
 	return Cmd_GetSpellUsageNumEx_Eval(thisObj, magicItem, nullptr, result);
 }
 
-#if _DEBUG
+//#if _DEBUG
+#if  0
 
 // Will be able to get the inventory reference's original extendDataList.
 TESObjectREFR* __fastcall CreateRefForStackWithoutCopy(TESObjectREFR* container, ContChangesEntry* entry)

@@ -175,8 +175,8 @@ bool Cmd_SetFlyCamera_Execute(COMMAND_ARGS)
 
 
 
-	Modes mode;
 	/*
+	Modes mode;
 	double pos[3] = { PlayerCharacter::GetSingleton()->posX, PlayerCharacter::GetSingleton()->posY,
 		PlayerCharacter::GetSingleton()->posZ + (PlayerCharacter::GetSingleton()->GetScaledHeight() * PlayerCharacter::GetSingleton()->eyeHeight) };
 	double rot[2] = { PlayerCharacter::GetSingleton()->rotZ, PlayerCharacter::GetSingleton()->rotX };

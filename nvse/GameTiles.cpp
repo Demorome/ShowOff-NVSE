@@ -60,11 +60,11 @@ char *Tile::GetComponentFullName(char *resStr)
 	char *fullName = parent->GetComponentFullName(resStr);
 	*fullName++ = '/';
 	fullName = StrCopy(fullName, name.m_data);
-	DListNode<Tile> *node = parent->children.Tail();
-	while (node->data != this)
-		node = node->prev;
+	DListNode<Tile>* pIter = parent->children.Tail();
+	while (pIter->data != this)
+		pIter = pIter->prev;
 	int index = 0;
-	while ((node = node->prev) && StrEqualCS(name.m_data, node->data->name.m_data))
+	while ((pIter = pIter->prev) && StrEqualCS(name.m_data, pIter->data->name.m_data))
 		index++;
 	if (index)
 	{
@@ -82,7 +82,7 @@ Menu *Tile::GetParentMenu()
 		if IS_TYPE(tile, TileMenu)
 			return ((TileMenu*)tile)->menu;
 	}
-	while (tile = tile->parent);
+	while ((tile = tile->parent));
 	return NULL;
 }
 
@@ -134,12 +134,12 @@ __declspec(naked) void Tile::FakeClick()
 
 void Tile::DestroyAllChildren()
 {
-	DListNode<Tile> *node = children.Tail();
+	DListNode<Tile> * pIter = children.Tail();
 	Tile *child;
-	while (node)
+	while (pIter)
 	{
-		child = node->data;
-		node = node->prev;
+		child = pIter->data;
+		pIter = pIter->prev;
 		if (child) child->Destroy(true);
 	}
 }
@@ -155,11 +155,11 @@ Tile *Tile::GetChild(const char *childName)
 		childIndex = StrToInt(colon + 1);
 	}
 	Tile *result = NULL;
-	for (DListNode<Tile> *node = children.Head(); node; node = node->next)
+	for (DListNode<Tile> * pIter = children.Head(); pIter; pIter = pIter->next)
 	{
-		if (node->data && ((*childName == '*') || StrEqualCI(node->data->name.m_data, childName)) && !childIndex--)
+		if (pIter->data && ((*childName == '*') || StrEqualCI(pIter->data->name.m_data, childName)) && !childIndex--)
 		{
-			result = node->data;
+			result = pIter->data;
 			break;
 		}
 	}
@@ -171,7 +171,7 @@ Tile *Tile::GetComponent(const char *componentPath, const char *&trait)
 {
 	Tile *parentTile = this;
 	char *slashPos;
-	while (slashPos = SlashPos(componentPath))
+	while ((slashPos = SlashPos(componentPath)))
 	{
 		*slashPos = 0;
 		parentTile = parentTile->GetChild(componentPath);
