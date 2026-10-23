@@ -33,7 +33,7 @@ uint32_t __fastcall LoadFormID(bool abSpecialIDs, bool abSaveSupportsSpecialForm
 	}
 	else if (bESL || bMedium) {
 		// File won't be found, so skip early
-		uiTempFormID = 0xFF << 24;
+		uiTempFormID = 0xFFu << 24;
 	}
 	return uiTempFormID;
 }
@@ -236,12 +236,12 @@ void SaveGameCallback(void*)
 				SaveFormID(pMod, bSpecialIDs);
 				WriteRecord16(rmModIt().Size());
 				for (auto rmVarIt = rmModIt().Begin(); rmVarIt; ++rmVarIt) {
-					const uint8_t ucKeyLength = strlen(rmVarIt.Key());
+					const uint8_t ucKeyLength = static_cast<uint8_t>(strlen(rmVarIt.Key()));
 					WriteRecord8(ucKeyLength);
 					WriteRecordData(rmVarIt.Key(), ucKeyLength);
 					WriteRecord16(rmVarIt().Size());
 					for (auto rmRefIt = rmVarIt().Begin(); rmRefIt; ++rmRefIt) {
-						const uint8_t ucStringLength = strlen(rmRefIt.Key());
+						const uint8_t ucStringLength = static_cast<uint8_t>(strlen(rmRefIt.Key()));
 						WriteRecord8(ucStringLength);
 						WriteRecordData(rmRefIt.Key(), ucStringLength);
 						rmRefIt().WriteValData();
@@ -267,7 +267,7 @@ void SaveGameCallback(void*)
 					WriteRecord32(avOwnerIt.Key());
 					WriteRecord16(avOwnerIt().Size());
 					for (auto avVarIt = avOwnerIt().Begin(); avVarIt; ++avVarIt) {
-						const uint8_t ucKeyLength = strlen(avVarIt.Key());
+						const uint8_t ucKeyLength = static_cast<uint8_t>(strlen(avVarIt.Key()));
 						WriteRecord8(ucKeyLength);
 						WriteRecordData(avVarIt.Key(), ucKeyLength);
 						avVarIt().WriteValData();
