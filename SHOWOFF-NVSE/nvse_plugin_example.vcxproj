@@ -90,6 +90,7 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard_C>stdclatest</LanguageStandard_C>
+      <IntelJCCErratum>true</IntelJCCErratum>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>
@@ -129,6 +130,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <AdditionalOptions>/Gw %(AdditionalOptions)</AdditionalOptions>
       <WholeProgramOptimization>true</WholeProgramOptimization>
+      <IntelJCCErratum>true</IntelJCCErratum>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>
@@ -168,6 +170,7 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
       <Optimization>Disabled</Optimization>
       <StringPooling>true</StringPooling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <IntelJCCErratum>true</IntelJCCErratum>
     </ClCompile>
     <Link>
       <ModuleDefinitionFile>
