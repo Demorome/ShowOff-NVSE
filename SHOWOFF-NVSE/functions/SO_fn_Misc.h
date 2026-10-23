@@ -95,7 +95,7 @@ bool Cmd_ListAddList_Execute(COMMAND_ARGS)
 	*result = 1;
 	BGSListForm* pListForm = nullptr;
 	BGSListForm* pToAppendList = nullptr;
-	uint32_t addAtIndex = eListEnd;
+	int32_t addAtIndex = eListEnd;
 
 	ExtractArgsEx(EXTRACT_ARGS_EX, &pListForm, &pToAppendList, &addAtIndex);
 	if (!pListForm || !pToAppendList) return true;
@@ -383,7 +383,7 @@ bool Cmd_IsLimbCrippled_Eval(COMMAND_ARGS_EVAL)
 bool Cmd_IsLimbCrippled_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	uint32_t limbID = -1;
+	uint32_t limbID = UINT32_MAX;
 	uint32_t threshold = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &limbID, &threshold)) return true;
 	return Cmd_IsLimbCrippled_Eval(thisObj, (void*)limbID, (void*)threshold, result);
@@ -823,6 +823,8 @@ bool Cmd_ShowPauseMenu_Execute(COMMAND_ARGS)
 		case kHelp:
 			callback_addr = StartMenu::kHelpAddr;
 			break;
+		default:
+			__assume(false);
 		}
 		CdeclCall(callback_addr);
 
@@ -837,7 +839,7 @@ bool Cmd_ShowPauseMenu_Execute(COMMAND_ARGS)
 					break;
 				}
 			}
-		} while (iter = iter->next);
+		} while ((iter = iter->next));
 	}
 	return true;
 }
@@ -849,7 +851,8 @@ bool Cmd_RemoveFormFromLeveledList_Execute(COMMAND_ARGS)
 	TESLeveledList* lvlList;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &list, &form) && (lvlList = list->GetLvlList()))
 	{
-		if (*result = (int)lvlList->RemoveItem(form))
+		*result = lvlList->RemoveItem(form);
+		if (*result)
 		{
 			//todo: modify lvList->extraDatas (?)
 			list->MarkAsModified(0x80000000);
@@ -867,7 +870,7 @@ bool Cmd_ResetInteriorAlt_Execute(COMMAND_ARGS)
 		return true;
 
 	TESObjectCELL* pCell = static_cast<TESObjectCELL*>(pForm);
-	pCell->SetDetachTime(-2, false);
+	pCell->SetDetachTime(static_cast<uint32_t>(-2), false);
 	*result = 1;
 	return true;
 }
@@ -979,8 +982,8 @@ bool Cmd_GetAmmoName_Execute(COMMAND_ARGS)
 
 		String* nameString = nullptr;
 		if (nameTypeToChange == kAmmoName_Full) {
-			if (TESFullName* name = form->GetFullName()) {
-				nameString = &name->name;
+			if (TESFullName* pFullName = form->GetFullName()) {
+				nameString = &pFullName->name;
 			}
 		}
 		else if (nameTypeToChange == kAmmoName_Short) {

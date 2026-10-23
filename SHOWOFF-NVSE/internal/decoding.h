@@ -762,7 +762,7 @@ public:
 			if (item && (item->tile == selected))
 				return item->object;
 		}
-		while (iter = iter->next);
+		while ((iter = iter->next));
 		return nullptr;
 	}
 
@@ -778,7 +778,7 @@ public:
 			{
 				return i->tile;
 			}
-		} while (iter = iter->next);
+		} while ((iter = iter->next));
 		return nullptr;
 	}
 
@@ -1864,8 +1864,8 @@ public:
 	double CalculateItemPrice(ContChangesEntry* itemEntry) const
 	{
 		double value = -1.0;
-		if (auto const tile = GetTileForItem(itemEntry))
-			value = CdeclCall<double>(0x72ED00, tile, itemEntry);
+		if (auto const pItemTile = GetTileForItem(itemEntry))
+			value = CdeclCall<double>(0x72ED00, pItemTile, itemEntry);
 		
 		return value;
 	}

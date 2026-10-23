@@ -336,7 +336,7 @@ bool Cmd_AuxStringMapArraySetFromArray_Execute(COMMAND_ARGS)
 	GetArrayElements(inArr, elements.get(), keys.get());
 	if (keys[0].GetType() == NVSEArrayVarInterface::kType_String)  //only works by passing StringMap arrays
 	{
-		for (int i = 0; i < size; i++)
+		for (uint32_t i = 0; i < size; i++)
 		{
 			char* keyName = CopyCString(keys[i].String());
 			AuxVariableValue* value = AuxStringMapAddValue(scriptObj, varName, keyName);

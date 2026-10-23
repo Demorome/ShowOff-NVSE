@@ -5454,7 +5454,7 @@ public:
 	int32_t RemoveForm(TESForm* pForm);
 	int32_t ReplaceForm(TESForm* pForm, TESForm* pReplaceWith);
 
-	bool IsAddedObject(int32_t idx)
+	bool IsAddedObject(uint32_t idx)
 	{
 		return (idx >= 0) && (idx < numAddedObjects);
 	}
@@ -5465,7 +5465,7 @@ public:
 		numAddedObjects = 0;
 	}
 
-	void Dump(const std::function<void(const std::string&)>& output = [&](const std::string& input) { Console_Print("%s", input.c_str()); });
+	void Dump(const std::function<void(const std::string&)>& output = [](const std::string& input) { Console_Print("%s", input.c_str()); });
 	void DumpToFile(const char* filePath, bool append);
 };
 

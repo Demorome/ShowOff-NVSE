@@ -32,7 +32,7 @@ TESObjectREFR* Projectile::GetImpactRef() const
 			{
 				return impactData->refr;
 			}
-		} while (traverse = traverse->next);
+		} while ((traverse = traverse->next));
 	}
 	return nullptr;
 }

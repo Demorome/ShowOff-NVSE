@@ -169,8 +169,8 @@ namespace JsonToNVSE
 			Vector<ArrayElementL> arrData(arr.size());
 			for (auto const& value : arr)
 			{
-				if (auto const type = value.type();
-					valType::ARRAY == type || valType::OBJECT == type)
+				if (auto const eValType = value.type();
+					valType::ARRAY == eValType || valType::OBJECT == eValType)
 				{
 					arrData.Append(ArrayElementL{ SubElementsToNVSEArray(value, scriptObj) }); //recursion
 				}
@@ -187,8 +187,8 @@ namespace JsonToNVSE
 			resArr = g_arrInterface->CreateStringMap(nullptr, nullptr, 0, scriptObj);
 			for (auto const& [key, value] : obj)
 			{
-				if (auto const type = value.type();
-					valType::ARRAY == type || valType::OBJECT == type)
+				if (auto const eValType = value.type();
+					valType::ARRAY == eValType || valType::OBJECT == eValType)
 				{
 					g_arrInterface->SetElement(resArr, ArrayElementL(key.c_str()), ArrayElementL(SubElementsToNVSEArray(value, scriptObj)));
 				}
@@ -427,7 +427,7 @@ namespace JsonToNVSE
 				{
 					ArrayData const data = { elem.arr, true };
 					value.reserve_array(data.size);
-					for (auto i = 0; i < data.size; i++)
+					for (uint32_t i = 0; i < data.size; i++)
 					{
 						if (auto const type = data.vals[i].GetType();
 							type == NVSEArrayVarInterface::kType_Array)
@@ -446,7 +446,7 @@ namespace JsonToNVSE
 				{
 					value = tao::json::empty_object;
 					ArrayData const data = { elem.arr, false };
-					for (auto i = 0; i < data.size; i++)
+					for (uint32_t i = 0; i < data.size; i++)
 					{
 						if (auto const type = data.vals[i].GetType();
 							type == NVSEArrayVarInterface::kType_Array)

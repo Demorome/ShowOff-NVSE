@@ -306,7 +306,7 @@ bool Cmd_GetActorHasBaseFlag_Eval(COMMAND_ARGS_EVAL)
 	if (uiBit > 31) 
 		return true;
 
-	TESForm* pForm;
+	TESForm* pForm = nullptr;
 	if (arg2) 
 		pForm = static_cast<TESForm*>(arg2);
 	else if (thisObj) 
@@ -483,7 +483,7 @@ bool Cmd_GetLevelUpMenuCurrentPage_Execute(COMMAND_ARGS)
 bool Cmd_SetLevelUpMenuCurrentPage_Execute(COMMAND_ARGS)
 {
 	*result = false;
-	int32_t page;
+	uint32_t page;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &page) || page > 2)  // Allow going to page = 2 in order to close the menu.
 		return true;
 

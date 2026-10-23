@@ -138,23 +138,6 @@ static const uint32_t s_SemaphoreLeave	= 0x0040FBA0;
 #error
 #endif
 
-ExtraContainerChanges::ExtendDataList *ExtraContainerChangesExtendDataListCreate(ExtraDataList *pExtraDataList)
-{
-	ExtraContainerChanges::ExtendDataList *xData = (ExtraContainerChanges::ExtendDataList*)GameHeapAlloc(sizeof(ExtraContainerChanges::ExtendDataList));
-	xData->Init();
-	if (pExtraDataList) xData->Append(pExtraDataList);
-	return xData;
-}
-
-static void ExtraContainerChangesExtendDataListFree(ExtraContainerChanges::ExtendDataList *xData, bool bFreeList)
-{
-	if (xData)
-	{
-		if (bFreeList) xData->Clear();
-		GameHeapFree(xData);
-	}
-}
-
 void ExtraContainerChanges::EntryData::Cleanup()
 {
 	if (!extendData) return;
@@ -207,7 +190,7 @@ void ExtraContainerChanges::Cleanup()
 			if (entryIter->data)
 				entryIter->data->Cleanup();
 		}
-		while (entryIter = entryIter->next);
+		while ((entryIter = entryIter->next));
 	}
 }
 

@@ -603,9 +603,6 @@ public:
 	}
 };
 
-extern ExtraContainerChanges::ExtendDataList* ExtraContainerChangesExtendDataListCreate(ExtraDataList* pExtraDataList = NULL);
-extern void ExtraContainerChangesExtendDataListFree(ExtraContainerChanges::ExtendDataList* xData, bool bFreeList = false);
-
 // 010
 class ExtraHealth : public BSExtraData
 {

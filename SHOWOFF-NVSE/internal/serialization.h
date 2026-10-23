@@ -226,7 +226,7 @@ void SaveGameCallback(void*)
 
 	// s_dataChangedFlags gets set to 0 in NVSE OnLoad message handler.
 
-	if (buffer2 = s_auxStringMapArraysPerm.Size())
+	if ((buffer2 = s_auxStringMapArraysPerm.Size()))
 	{
 		WriteRecord('SMSO', 10, &buffer2, 2);
 		for (auto rmModIt = s_auxStringMapArraysPerm.Begin(); rmModIt; ++rmModIt)
@@ -250,7 +250,7 @@ void SaveGameCallback(void*)
 		}
 	}
 
-	if (buffer2 = AuxTimer::s_auxTimerMapArraysPerm.Size())
+	if ((buffer2 = AuxTimer::s_auxTimerMapArraysPerm.Size()))
 	{
 		// "ShowOff (SO) AuxTimer (AT)"
 		WriteRecord('TAOS', AuxTimer::AuxTimerVersion, &buffer2, 2);

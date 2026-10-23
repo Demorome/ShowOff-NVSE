@@ -42,7 +42,7 @@ bool __stdcall WriteRelJump(uint32_t jumpSrc, uint32_t jumpTgt, std::optional<st
 	if (originalBytes.has_value())
 	{
 		auto& oldBytes = originalBytes.value();
-		for (int i = 0; i < oldBytes.size(); ++i)
+		for (size_t i = 0; i < oldBytes.size(); ++i)
 		{
 			if (*reinterpret_cast<uint8_t*>(jumpSrc + i) != oldBytes[i])
 			{
@@ -94,7 +94,7 @@ bool __stdcall ReplaceCall(uint32_t jumpSrc, uint32_t jumpTgt, std::optional<std
 	if (originalBytes.has_value())
 	{
 		auto& oldBytes = originalBytes.value();
-		for (int i = 0; i < oldBytes.size(); ++i)
+		for (size_t i = 0; i < oldBytes.size(); ++i)
 		{
 			// +1 due to already having checked the first byte for call instruction (0xE8)
 			if (*reinterpret_cast<uint8_t*>(jumpSrc + i + 1) != oldBytes[i])

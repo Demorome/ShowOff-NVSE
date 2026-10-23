@@ -151,7 +151,7 @@ private:
 				if (!index) return node;
 				index--;
 			}
-			while (node = node->next);
+			while ((node = node->next));
 		}
 		return NULL;
 	}
@@ -210,7 +210,7 @@ public:
 		if (!m_listHead.data) return 0;
 		Node *node = Head();
 		uint32_t count = 1;
-		while (node = node->next) count++;
+		while ((node = node->next)) count++;
 		return count;
 	};
 
