@@ -43,6 +43,10 @@ void __fastcall SaveFormID(const TESFile* apFile, bool abSpecialIDs) {
 	WriteRecord16(abSpecialIDs ? apFile->smallIndex : 0);
 }
 
+bool __fastcall IsFormIDUsed(const uint32_t auiFormID) {
+	return TESDataHandler::GetSingleton()->IsFormIDInUse(auiFormID) || TESFile::GetFileForTempID(auiFormID);
+}
+
 void LoadGameCallback(void*)
 {
 	ClearScriptAuxData();
@@ -154,7 +158,7 @@ void LoadGameCallback(void*)
 						uint32_t refID = ReadRecord32();
 
 						nVars = ReadRecord16();
-						if (ResolveRefID(refID, &refID) && TESDataHandler::GetSingleton()->IsFormIDInUse(refID))
+						if (ResolveRefID(refID, &refID) && IsFormIDUsed(refID))
 						{
 							if (!ownersMap)
 								ownersMap = AuxTimer::s_auxTimerMapArraysPerm.Emplace(pFile, AlignBucketCount(nRefs));

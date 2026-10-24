@@ -34,3 +34,8 @@ uint8_t TESDataHandler::GetActiveModCount() const
 bool TESDataHandler::IsFormIDInUse(uint32_t auiFormID) const {
 	return ThisCall<bool>(0x469760, this, auiFormID);
 }
+
+// GAME - 0x474060
+TESFile* TESFile::GetFileForTempID(uint32_t auiFormID) {
+	return CdeclCall<TESFile*>(0x474060, auiFormID);
+}

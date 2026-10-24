@@ -186,6 +186,9 @@ struct TESFile		// referred to by game as TESFile
 	
 	bool IsLoaded() const { return true; }
 
+
+	static TESFile* GetFileForTempID(uint32_t auiFormID);
+
 #if !EDITOR
 	/*** used by TESForm::LoadForm() among others ***/
 	MEMBER_FN_PREFIX(TESFile);
