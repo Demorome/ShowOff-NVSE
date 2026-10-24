@@ -44,7 +44,7 @@ bool Cmd_AuxTimerStart_Execute(COMMAND_ARGS)
 				{
 					g_auxTimersPendingInsertion.emplace_back(AuxTimerPendingInsertion{
 						varInfo.modIndex, varInfo.ownerID, varName,
-						varInfo.isPerm, timeToCountdown, flags
+						timeToCountdown, flags, varInfo.isPerm
 					});
 					if (varInfo.isPerm)
 					{

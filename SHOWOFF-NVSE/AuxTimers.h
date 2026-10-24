@@ -147,9 +147,9 @@ namespace AuxTimer
 		uint32_t		modIndex;
 		uint32_t		ownerID;
 		std::string	varName;
-		bool		isPerm;
 		double		timeToCountdown;
 		uint32_t		flags;
+		bool		isPerm;
 	};
 
 	extern bool g_isIteratingTimers;
