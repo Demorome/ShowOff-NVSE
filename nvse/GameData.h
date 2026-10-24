@@ -41,10 +41,10 @@ struct ChunkHeader
 	uint16_t	size : 2;
 };
 
-struct ModInfo		// referred to by game as TESFile
+struct TESFile		// referred to by game as TESFile
 {
-	ModInfo();
-	~ModInfo();
+	TESFile();
+	~TESFile();
 
 	// 18 info about currently loading form
 	struct FormInfo  // Record Header in FNVEdit
@@ -83,7 +83,7 @@ struct ModInfo		// referred to by game as TESFile
 		uint32_t	high;
 	};
 
-	tList<uint32_t>						unkList;			// 000 treated as ModInfo during InitializeForm, looks to be a linked list of modInfo
+	tList<uint32_t>						unkList;			// 000 treated as TESFile during InitializeForm, looks to be a linked list of modInfo
 	uint32_t /*NiTPointerMap<TESFile*>*/	* pointerMap;		// 008
 	uint32_t								unk00C;				// 00C
 	BSFile*								unkFile;			// 010
@@ -122,11 +122,14 @@ struct ModInfo		// referred to by game as TESFile
 	uint32_t								unk3F8;				// 3F8
 	uint32_t								numRefMods;			// 3FC related to modindex; see 4472D0
 																// formIDs in mod are as saved in GECK, must fix up at runtime
-	ModInfo								** refModInfo;		// 400 used to look up modInfo based on fixed mod index, double-check
+	TESFile								** refTESFile;		// 400 used to look up modInfo based on fixed mod index, double-check
 	uint32_t								unk404;				// 404
 	uint32_t								unk408;				// 408
 	uint8_t								modIndex;			// 40C init to 0xFF
-	uint8_t								pad40D[3];
+	union {
+		uint8_t							mediumIndex;
+		uint16_t						smallIndex;
+	};
 	String								author;				// 410
 	String								description;		// 418
 	void								* dataBuf;			// 420 
@@ -137,20 +140,21 @@ struct ModInfo		// referred to by game as TESFile
 	// In Editor: 430 = ONAM array and 434 ONAM array count. Allocated at 0438
 	
 	bool IsLoaded() const { return true; }
+
+	static TESFile* GetFileForTempID(uint32_t auiFormID);
 };
 
 static_assert(sizeof(WIN32_FIND_DATA) == 0x140);
-static_assert(sizeof(ModInfo) == 0x42C);
-
-
+static_assert(sizeof(TESFile) == 0x42C);
 
 struct ModList
 {
-	tList<ModInfo>		modInfoList;		// 00
-	uint32_t				loadedModCount;		// 08
-	ModInfo*			loadedMods[0xFF];	// 0C
+	uint32_t			loadedModCount;
+	TESFile*			loadedMods[0xFF];
 };
-static_assert(sizeof(ModList) == 0x408);
+static_assert(sizeof(ModList) == 0x400);
+
+inline constexpr uint32_t HAS_NEW_PLUGIN_TYPES = 0x80;
 
 // 5B8
 class TESDataHandler
@@ -159,7 +163,7 @@ public:
 	TESDataHandler();
 	~TESDataHandler();
 
-	uint32_t							unk00;					// 000
+	uint32_t						flags;					// 000
 	BoundObjectListHead				*boundObjectList;		// 004
 	tList<TESPackage>				packageList;			// 008
 	tList<TESWorldSpace>			worldSpaceList;			// 010
@@ -223,33 +227,43 @@ public:
 	NiTArray<TESObjectCELL*>		cellArray;				// 1DC
 	NiTArray<BGSAddonNode*>			addonArray;				// 1EC
 
-	uint32_t							unk1FC[3];				// 1FC	208 looks like next created refID
-	uint32_t							nextCreatedRefID;		// 208	Init'd to FF000800
-	uint32_t							unk20C;					// 20C	last unselected mod in modList. GECK: active ESM
+	uint32_t						unk1FC[3];				// 1FC	208 looks like next created refID
+	uint32_t						nextCreatedRefID;		// 208	Init'd to FF000800 (in GECK init'd to nn000800)
+	TESFile*						activeFile;					// 20C	last unselected mod in modList. GECK: active ESM
+	tList<TESFile>					modInfoList;
 	ModList							modList;				// 210
-	uint8_t							unk618;					// 618
+	uint8_t							unk618;					// 618	5A4
 	uint8_t							unk619;					// 619
 	uint8_t							unk61A;					// 61A	referenced during LoadForm (ie TESSpellList). bit 1 might mean refID to pointer conversion not done. For GECK means save in progress
 	uint8_t							unk61B;					// 61B
-	uint32_t							unk61C;					// 61C
-	uint8_t							unk620;					// 620
+	uint8_t							unk61C;					// 61C	5A8
+	uint8_t							unk61D;					// 61D
+	uint8_t							unk61E;					// 61E
+	uint8_t							unk61F;					// 61F
+	uint8_t							unk620;					// 620	5AC
 	uint8_t							loading;				// 621	Init'd to 0 after loadForms
-	uint8_t							unk622;					// 622	referenced during loading of modules
+	uint8_t							unk622;					// 622	referenced during loading of modules. Compared with type = GameSetting but seems to always end up equal to 1.
 	uint8_t							unk623;					// 623
-	TESRegionManager				*regionManager;			// 624
-	ExtraContainerChanges::Data		*vendorContainer;		// 628
-	uint32_t							unk62C;					// 62C	
-	uint32_t							unk630;					// 630
-	uint32_t							unk634;					// 634
-	uint32_t							unk638;					// 638
+	TESRegionManager				* regionManager;		// 624	5B0
+	uint32_t						unk628;					// 628	5B4
+	uint32_t						unk62C;					// 62C	
+	uint32_t						unk630;					// 630
+	uint32_t						unk634;					// 634
+	uint32_t						unk638;					// 638
 
 	static TESDataHandler* GetSingleton();
 
-	const ModInfo* GetFile(uint32_t auiIndex) const;
-	const ModInfo* GetListFile(const char* modName);
-	uint8_t GetModIndex(const char* modName);
+	bool SupportsNewFileTypes() const { return flags & HAS_NEW_PLUGIN_TYPES; }
+	static bool HasNewFileTypeSupport() { return GetSingleton()->SupportsNewFileTypes(); }
+
+	const TESFile* GetFile(uint32_t auiIndex) const;
+	const TESFile* GetListFile(const char* modName) const;
+	const TESFile* GetFileByFormID(uint32_t auiFormID) const;
+
+	uint8_t GetModIndex(const char* modName) const;
 	uint8_t GetActiveModCount() const;
-	const char* GetNthModName(uint32_t modIndex);
+
+	bool IsFormIDInUse(uint32_t auiFormID) const;
 
 	TESQuest* GetQuestByName(const char* questName);
 

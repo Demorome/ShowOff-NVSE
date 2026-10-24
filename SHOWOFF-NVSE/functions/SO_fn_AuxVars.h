@@ -256,8 +256,6 @@ AuxVariableValue* __fastcall AuxStringMapAddValue(Script* scriptObj, char* varNa
 	if (varName[0] && keyName[0])
 	{
 		AuxStringMapInfo varInfo(scriptObj, varName);
-		if (varInfo.isPerm)
-			s_dataChangedFlags |= kChangedFlag_AuxStringMaps;
 		ScopedLock lock(g_Lock);  //since ModsMap() returns the global.
 		return &varInfo.ModsMap()[varInfo.modIndex][varName][keyName];
 	}
@@ -344,8 +342,6 @@ bool Cmd_AuxStringMapArraySetFromArray_Execute(COMMAND_ARGS)
 			value->SetElem(elements[i]);
 		}
 	}
-	if (varInfo.isPerm)
-		s_dataChangedFlags |= kChangedFlag_AuxStringMaps;
 	return true;
 }
 
@@ -394,8 +390,6 @@ bool Cmd_AuxStringMapArrayEraseKey_Execute(COMMAND_ARGS)
 		if (findMod().Empty()) findMod.Remove();
 	}
 	else *result = (int)findVar().Size();
-	if (varInfo.isPerm)
-		s_dataChangedFlags |= kChangedFlag_AuxStringMaps;
 	return true;
 }
 
@@ -427,8 +421,6 @@ bool Cmd_AuxStringMapArrayValidateValues_Execute(COMMAND_ARGS)
 		if (findMod().Empty()) findMod.Remove();
 	}
 	else *result = (int)findVar().Size();
-	if (cleaned && varInfo.isPerm)
-		s_dataChangedFlags |= kChangedFlag_AuxStringMaps;
 	return true;
 }
 
@@ -445,8 +437,6 @@ bool Cmd_AuxStringMapArrayDestroy_Execute(COMMAND_ARGS)
 	ScopedLock lock(g_Lock);
 	findVar.Remove();
 	if (findMod().Empty()) findMod.Remove();
-	if (varInfo.isPerm)
-		s_dataChangedFlags |= kChangedFlag_AuxStringMaps;
 	return true;
 }
 
