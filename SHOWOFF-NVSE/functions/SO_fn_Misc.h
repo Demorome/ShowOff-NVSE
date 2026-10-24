@@ -931,7 +931,7 @@ DEFINE_COMMAND_PLUGIN(SetAmmoName, "", false, kParams_OneString_OneOptionalInt_O
 bool Cmd_SetAmmoName_Execute(COMMAND_ARGS)
 {
 	*result = 0; // success
-	char string[256];
+	char string[256] = {};
 	uint32_t nameTypeToChange = 0;
 	TESForm* form = nullptr;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &string, &nameTypeToChange, &form))
@@ -1135,7 +1135,7 @@ bool Cmd_ToANSIChar_Execute(COMMAND_ARGS)
 
 	if (len <= 0) return true;
 
-	char ansiChar[16];
+	char ansiChar[16] = {};
 	int bytes = WideCharToMultiByte(CP_ACP, 0, unicodeChar, len, ansiChar, sizeof(ansiChar), NULL, NULL);
 	if (bytes <= 0) return true;
 	ansiChar[bytes] = '\0';
@@ -1361,7 +1361,7 @@ DEFINE_COMMAND_PLUGIN(SetCellFullNameAlt, "Like SetCellFullName but accepts a st
 bool Cmd_SetCellFullNameAlt_Execute(COMMAND_ARGS)
 {
 	TESObjectCELL* cell;
-	char newName[256];
+	char newName[256] = {};
 
 	ExtractArgsEx(EXTRACT_ARGS_EX, &cell, &newName);
 	if (!cell) return true;

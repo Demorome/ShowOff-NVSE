@@ -83,7 +83,7 @@ bool Cmd_TopicInfoSetNthResponseString_Execute(COMMAND_ARGS)
 	*result = 0;
 	TESTopicInfo* tInfo;
 	uint32_t responseIdx;
-	char newResponseStr[0x10000];
+	char newResponseStr[0x10000] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &tInfo, &responseIdx, &newResponseStr) && IS_ID(tInfo, TESTopicInfo)
 		&& newResponseStr[0])
 	{

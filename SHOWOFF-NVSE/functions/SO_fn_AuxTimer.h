@@ -19,7 +19,7 @@ DEFINE_COMMAND_PLUGIN(
 bool Cmd_AuxTimerStart_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	char varName[0x50];
+	char varName[256] = {};
 	double timeToCountdown = -1.0; // if -1.0, will restart the timer while keeping the old flags if not specifying them, assuming it was set up before. 
 	uint32_t flags = AuxTimerValue::kFlag_Defaults;
 	TESForm* form = nullptr;
@@ -112,7 +112,7 @@ DEFINE_COMMAND_ALT_PLUGIN(
 bool Cmd_AuxTimerStop_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	char varName[0x50];
+	char varName[256] = {};
 	uint32_t fireEvent = false;
 	TESForm* form = nullptr;
 
@@ -181,7 +181,7 @@ DEFINE_COMMAND_PLUGIN(AuxTimerPaused, "Gets/Sets if an auxvar timer is paused.",
 bool Cmd_AuxTimerPaused_Execute(COMMAND_ARGS)
 {
 	*result = -1;
-	char varName[0x50];
+	char varName[256] = {};
 	int setPaused = -1; // -1 = just check, 0 and above will modify.
 	TESForm* form = nullptr;
 
@@ -227,7 +227,7 @@ DEFINE_COMMAND_PLUGIN(
 bool Cmd_AuxTimerTimeElapsed_Execute(COMMAND_ARGS)
 {
 	*result = -1;
-	char varName[0x50];
+	char varName[256] = {};
 	int unused = -1; // todo: -1 = just check, 0 and above will modify.
 	TESForm* form = nullptr;
 
@@ -253,7 +253,7 @@ DEFINE_COMMAND_PLUGIN(AuxTimerTimeToCountdown, "Gets the original countdown time
 bool Cmd_AuxTimerTimeToCountdown_Execute(COMMAND_ARGS)
 {
 	*result = -1;
-	char varName[0x50];
+	char varName[256] = {};
 	TESForm* form = nullptr;
 
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &form))
@@ -278,7 +278,7 @@ DEFINE_COMMAND_PLUGIN(AuxTimerTimeLeft, "Gets the time left for the countdown, -
 bool Cmd_AuxTimerTimeLeft_Execute(COMMAND_ARGS)
 {
 	*result = -1;
-	char varName[0x50];
+	char varName[256] = {};
 	TESForm* form = nullptr;
 
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &form))

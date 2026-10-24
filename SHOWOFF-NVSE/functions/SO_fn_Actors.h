@@ -500,8 +500,8 @@ bool Cmd_SetSecuritronExpressionTemp_Execute(COMMAND_ARGS)
 {
 	*result = 0;
 	Actor* pActor = nullptr;
-	char cPersonality[512];
-	char cMood[512];
+	char cPersonality[512] = {};
+	char cMood[512] = {};
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pActor, cPersonality, cMood) || !pActor->IsActor())
 		return true;
 

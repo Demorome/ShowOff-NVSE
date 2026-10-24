@@ -10,7 +10,7 @@ bool Cmd_ApplyEasing_Execute(COMMAND_ARGS)
 {
 	*result = -1;
 	double input;	//should be between 0-1
-	char funcName[0x25];	//choose easing function, ex: "sine", "Quad". Non-case sensitive.
+	char funcName[64] = {};	//choose easing function, ex: "sine", "Quad". Non-case sensitive.
 	EasingMode mode;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &input, &funcName, &mode) || mode > kModeMax)
 		return true;
@@ -308,7 +308,7 @@ bool Cmd_Matrix_ApplyOperationWithMatrix_OLD_Execute(COMMAND_ARGS)
 {
 	*result = 0;	// resulting matrix
 	uint32_t arrA_ID, arrB_ID;
-	char op[3];
+	char op[4] = {};
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrA_ID, op, &arrB_ID))
 		return true;
 	auto matrixA = GetMatrixFromArray(g_arrInterface->LookupArrayByID(arrA_ID));
@@ -370,7 +370,7 @@ bool Cmd_Matrix_ApplyOperationWithScalar_OLD_Execute(COMMAND_ARGS)
 {
 	*result = 0;	// resulting matrix
 	uint32_t arrID;
-	char op[3];
+	char op[4] = {};
 	double scalar;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &arrID, op, &scalar))
 		return true;
