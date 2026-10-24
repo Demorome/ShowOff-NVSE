@@ -15,51 +15,6 @@ struct ChunkAndFormType {
 	const char	* formName;	// ie 'NPC_'
 };
 
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
-static const uint32_t _ModInfo_GetNextChunk = 0x004726B0; // args: none retn: uint32_t subrecordType (third call in TESObjectARMO_LoadForm)
-static const uint32_t _ModInfo_GetChunkData = 0x00472890;	// args: void* buf, uint32_t bufSize retn: bool readSucceeded (fifth call in TESObjectARMO_LoadForm)
-static const uint32_t _ModInfo_Read32		  =	0x004727F0;	// args: void* buf retn: void (find 'LPER', then next call, still in TESObjectARMO_LoadForm)
-static const uint32_t _ModInfo_HasMoreSubrecords = 0x004726F0;	// Last call before "looping" to GetNextChunk in TESObjectARMO_LoadForm.
-static const uint32_t _ModInfo_InitializeForm = 0x00472F60;	// args: TESForm* retn: void (second call in TESObjectARMO_LoadForm)
-
-// addresses of static ModInfo members holding type info about currently loading form
-static uint32_t* s_ModInfo_CurrentChunkTypeCode = (uint32_t*)0x011C54F4;
-static uint32_t* s_ModInfo_CurrentFormTypeEnum = (uint32_t*)0x011C54F0;
-// in last call (SetStaticFieldsAndGetFormTypeEnum) of first call (ModInfo__GetFormInfoTypeID) from _ModInfo_InitializeForm
-		//		s_ModInfo_CurrentChunkTypeCode is first cmp
-		//		s_ModInfo_CurrentChunkTypeEnum is next mov
-static const ChunkAndFormType* s_ModInfo_ChunkAndFormTypes = (const ChunkAndFormType*)0x01187008;	// Array used in the loop in SetStaticFieldsAndGetFormTypeEnum, starts under dd offset aNone
-
-static uint8_t** g_CreatedObjectData = (uint8_t**)0x011C54CC;	// pointer to FormInfo + form data, filled out by TESForm::SaveForm()
-static uint32_t* g_CreatedObjectSize = (uint32_t*)0x011C54D0;
-		// in first call (Form_startSaveForm) in TESObjectARMO__SaveForm:
-		//		g_CreatedObjectSize is set to 18h
-		//		g_CreatedObjectData is set to the eax result of the next call
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-static const uint32_t _ModInfo_GetNextChunk = 0x004735D0; // args: none retn: uint32_t subrecordType (third call in TESObjectARMO_LoadForm)
-static const uint32_t _ModInfo_GetChunkData = 0x00473790;	// args: void* buf, uint32_t bufSize retn: bool readSucceeded (fifth call in TESObjectARMO_LoadForm)
-static const uint32_t _ModInfo_Read32		  =	0x004736F0;	// args: void* buf retn: void (find 'LPER', then next call, still in TESObjectARMO_LoadForm)
-static const uint32_t _ModInfo_HasMoreSubrecords = 0x00473610;	// Last call before "looping" to GetNextChunk in TESObjectARMO_LoadForm.
-static const uint32_t _ModInfo_InitializeForm = 0x00486100;	// args: TESForm* retn: void (second call in TESObjectARMO_LoadForm)
-
-// addresses of static ModInfo members holding type info about currently loading form
-static uint32_t* s_ModInfo_CurrentChunkTypeCode = (uint32_t*)0x011C54F4;
-static uint32_t* s_ModInfo_CurrentFormTypeEnum = (uint32_t*)0x011C54F0;
-// in last call (SetStaticFieldsAndGetFormTypeEnum) of first call (ModInfo__GetFormInfoTypeID) from _ModInfo_InitializeForm
-		//		s_ModInfo_CurrentChunkTypeCode is first cmp
-		//		s_ModInfo_CurrentChunkTypeEnum is next mov
-static const ChunkAndFormType* s_ModInfo_ChunkAndFormTypes = (const ChunkAndFormType*)0x01187008;	// Array used in the loop in SetStaticFieldsAndGetFormTypeEnum, starts under dd offset aNone
-
-static uint8_t** g_CreatedObjectData = (uint8_t**)0x011C54CC;	// pointer to FormInfo + form data, filled out by TESForm::SaveForm()
-static uint32_t* g_CreatedObjectSize = (uint32_t*)0x011C54D0;
-		// in first call in TESObjectARMO__SaveForm:
-		//		g_CreatedObjectSize is set to 18h
-		//		g_CreatedObjectData is set to the eax result of the next call
-#elif EDITOR
-#else
-#error
-#endif
-
 // 10
 class BoundObjectListHead
 {
@@ -182,15 +137,6 @@ struct ModInfo		// referred to by game as TESFile
 	// In Editor: 430 = ONAM array and 434 ONAM array count. Allocated at 0438
 	
 	bool IsLoaded() const { return true; }
-
-#if !EDITOR
-	/*** used by TESForm::LoadForm() among others ***/
-	MEMBER_FN_PREFIX(ModInfo);
-	DEFINE_MEMBER_FN(GetNextChunk, uint32_t, _ModInfo_GetNextChunk);	// returns chunk type
-	DEFINE_MEMBER_FN(GetChunkData, bool, _ModInfo_GetChunkData, uint8_t* buf, uint32_t bufSize); // max size, not num to read
-	DEFINE_MEMBER_FN(Read32, void, _ModInfo_Read32, void* out);
-	DEFINE_MEMBER_FN(HasMoreSubrecords, bool, _ModInfo_HasMoreSubrecords);
-#endif
 };
 
 static_assert(sizeof(WIN32_FIND_DATA) == 0x140);

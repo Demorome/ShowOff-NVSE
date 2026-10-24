@@ -3,20 +3,7 @@
 //#include "Utilities.h"
 #include "utility.h"
 
-
-#if RUNTIME
-
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 const uint32_t kNiTMapLookupAddr = 0x853130;
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-const uint32_t kNiTMapLookupAddr = 0x844740;
-#else
-#error
-#endif
-
-#else
-const uint32_t _NiTMap_Lookup = 0;
-#endif
 
 struct NiVector4;
 struct NiQuaternion;
@@ -539,31 +526,16 @@ struct NiTArray
 
 	Iterator Begin() { return Iterator(*this); }
 };
-#if RUNTIME
 
 template <typename T> void NiTArray<T>::AddAtIndex(uint32_t index, T* item)
 {
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 	ThisCall(0x00869640, this, index, item);
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-	ThisCall(0x00869110, this, index, item);
-#else
-#error unsupported Oblivion version
-#endif
 }
 
 template <typename T> void NiTArray<T>::SetCapacity(uint16_t newCapacity)
 {
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 	ThisCall(0x008696E0, this, newCapacity);
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-	ThisCall(0x00869190, this, newCapacity);
-#else
-#error unsupported Runtime version
-#endif
 }
-
-#endif
 
 // 18
 // an NiTArray that can go above 0xFFFF, probably with all the same weirdness

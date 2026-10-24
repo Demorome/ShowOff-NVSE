@@ -12,10 +12,6 @@ struct BaseExtraList;
 #define playerID	0x7
 #define playerRefID 0x14
 
-#if RUNTIME_VERSION
-	static const uint32_t s_Console__Print = 0x0071D0A0;
-#endif
-
 void Console_Print(const char * fmt, ...);
 
 typedef bool (* _ExtractArgs)(ParamInfo * paramInfo, void * scriptData, uint32_t * arg2, TESObjectREFR * arg3, TESObjectREFR * arg4, Script * script, ScriptEventList * eventList, ...);
@@ -278,10 +274,8 @@ enum EActorVals {
 class ConsoleManager
 {
 public:
-#if RUNTIME
 	MEMBER_FN_PREFIX(ConsoleManager);
-	DEFINE_MEMBER_FN(Print, void, s_Console__Print, const char * fmt, va_list args);
-#endif
+	DEFINE_MEMBER_FN(Print, void, 0x0071D0A0, const char * fmt, va_list args);
 
 	ConsoleManager();
 	~ConsoleManager();

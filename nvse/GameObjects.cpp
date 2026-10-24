@@ -85,7 +85,7 @@ TESObjectREFR* TESObjectREFR::PlaceAtMe(TESForm* toPlace, int count, int useNode
 TESObjectREFR *TESObjectREFR::Create(bool bTemp)
 {
 	TESObjectREFR *refr = (TESObjectREFR*)GameHeapAlloc(sizeof(TESObjectREFR));
-	ThisCall(s_TESObject_REFR_init, refr);
+	ThisCall(0x55A2F0, refr);
 	if (bTemp) ThisCall(0x484490, refr);
 	return refr;
 }

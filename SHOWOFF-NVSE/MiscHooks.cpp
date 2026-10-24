@@ -94,7 +94,7 @@ namespace PickpocketInCombat
 				ThisCall(0x8C00E0, PlayerCharacter::GetSingleton(), actor, 0, 0);
 				char buf[260];
 				ScopedLock lock(g_Lock);
-				sprintf(buf, "%s", g_fForcePickpocketFailureMessage);
+				snprintf(buf, sizeof(buf), "%s", g_fForcePickpocketFailureMessage);
 				QueueUIMessage(buf, eEmotion::sad, NULL, NULL, 2.0, 0);
 
 				//menu->hasFailedPickpocket= true; //not sure what the point of this is.
@@ -152,7 +152,7 @@ namespace PickpocketInCombat
 		int actionPointCost = CalculateCombatPickpocketAPCost(ContainerMenu::GetSelection(), (Actor*)container->containerRef, itemValue, 1, isItemOwnedByTarget);
 		int currentAP = PlayerCharacter::GetSingleton()->avOwner.GetActorValue(kAVCode_ActionPoints);
 		char buf[260];
-		sprintf(buf, "Action Point Cost: %d / %d", actionPointCost, currentAP);
+		snprintf(buf, sizeof(buf), "Action Point Cost: %d / %d", actionPointCost, currentAP);
 		subtitlesTile->SetString(kTileValue_string, buf, 1);
 	}
 
