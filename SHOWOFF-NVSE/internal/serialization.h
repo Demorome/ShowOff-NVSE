@@ -57,8 +57,8 @@ void LoadGameCallback(void*)
 	uint32_t type, uiVersion, length, nRefs;
 	uint8_t buffer1, loopBuffer;
 	uint16_t nRecs, nVals, nVars;
-	char varName[0x50];
-	char keyName[0x50];
+	char varName[MAX_PATH];
+	char keyName[MAX_PATH];
 
 	while (GetNextRecordInfo(&type, &uiVersion, &length))
 	{

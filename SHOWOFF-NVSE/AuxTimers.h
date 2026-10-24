@@ -146,10 +146,10 @@ namespace AuxTimer
 	{
 		const TESFile*	pOwnerFile;
 		uint32_t		ownerID;
-		std::string		varName;
-		bool			isPerm;
-		double			timeToCountdown;
+		std::string	varName;
+		double		timeToCountdown;
 		uint32_t		flags;
+		bool		isPerm;
 	};
 
 	extern bool g_isIteratingTimers;

@@ -50,7 +50,7 @@ AuxStringMapIDsMap* ASMFind(Script* scriptObj, char* varName)
 bool Cmd_AuxStringMapArrayGetSize_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	char varName[0x50];
+	char varName[256] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName))
 	{
 		AuxStringMapIDsMap* idsMap = ASMFind(scriptObj, varName);
@@ -62,8 +62,8 @@ bool Cmd_AuxStringMapArrayGetSize_Execute(COMMAND_ARGS)
 bool Cmd_AuxStringMapArrayGetValueType_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	char varName[0x50];
-	char keyName[0x50];
+	char varName[256] = {};
+	char keyName[256] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &keyName))
 	{
 		AuxStringMapIDsMap* idsMap = ASMFind(scriptObj, varName);
@@ -80,8 +80,8 @@ bool Cmd_AuxStringMapArrayGetValueType_Execute(COMMAND_ARGS)
 bool Cmd_AuxStringMapArrayGetFloat_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	char varName[0x50];
-	char keyName[0x50];
+	char varName[256] = {};
+	char keyName[256] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &keyName))
 	{
 		AuxStringMapIDsMap* idsMap = ASMFind(scriptObj, varName);
@@ -98,8 +98,8 @@ bool Cmd_AuxStringMapArrayGetFloat_Execute(COMMAND_ARGS)
 bool Cmd_AuxStringMapArrayGetRef_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	char varName[0x50];
-	char keyName[0x50];
+	char varName[256] = {};
+	char keyName[256] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &keyName))
 	{
 		AuxStringMapIDsMap* idsMap = ASMFind(scriptObj, varName);
@@ -116,8 +116,8 @@ bool Cmd_AuxStringMapArrayGetRef_Execute(COMMAND_ARGS)
 bool Cmd_AuxStringMapArrayGetString_Execute(COMMAND_ARGS)
 {
 	const char* resStr = NULL;
-	char varName[0x50];
-	char keyName[0x50];
+	char varName[256] = {};
+	char keyName[256] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &keyName))
 	{
 		AuxStringMapIDsMap* idsMap = ASMFind(scriptObj, varName);
@@ -136,7 +136,7 @@ bool Cmd_AuxStringMapArrayGetString_Execute(COMMAND_ARGS)
 bool Cmd_AuxStringMapArrayGetValue_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	char varName[0x50];
+	char varName[256] = {};
 	TESForm* form = NULL;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &form))
 	{
@@ -178,7 +178,7 @@ NVSEArrayVar* __fastcall AuxStringMapArrayIterator(Script* scriptObj, char* varN
 bool Cmd_AuxStringMapArrayGetFirst_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	char varName[0x50];
+	char varName[256] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName))
 	{
 		NVSEArrayVar* pairArr = AuxStringMapArrayIterator(scriptObj, varName, true);
@@ -190,7 +190,7 @@ bool Cmd_AuxStringMapArrayGetFirst_Execute(COMMAND_ARGS)
 bool Cmd_AuxStringMapArrayGetNext_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	char varName[0x50];
+	char varName[256] = {};
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName))
 	{
 		NVSEArrayVar* pairArr = AuxStringMapArrayIterator(scriptObj, varName, false);
@@ -202,7 +202,7 @@ bool Cmd_AuxStringMapArrayGetNext_Execute(COMMAND_ARGS)
 bool Cmd_AuxStringMapArrayGetKeys_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	char varName[0x50];
+	char varName[256] = {};
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &varName)) return true;
 	AuxStringMapIDsMap* idsMap = ASMFind(scriptObj, varName);
 	if (!idsMap) return true;
@@ -237,7 +237,7 @@ bool Cmd_AuxStringMapArrayGetAll_Execute(COMMAND_ARGS)
 bool Cmd_AuxStringMapArrayGetAsArray_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	char varName[0x50];
+	char varName[256] = {};
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &varName)) return true;
 	AuxStringMapIDsMap* idsMap = ASMFind(scriptObj, varName);
 	if (!idsMap) return true;
@@ -264,8 +264,8 @@ AuxVariableValue* __fastcall AuxStringMapAddValue(Script* scriptObj, char* varNa
 
 bool Cmd_AuxStringMapArraySetFloat_Execute(COMMAND_ARGS)
 {
-	char varName[0x50];
-	char keyName[0x50];
+	char varName[256] = {};
+	char keyName[256] = {};
 	double fltVal;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &keyName, &fltVal))
 	{
@@ -278,9 +278,9 @@ bool Cmd_AuxStringMapArraySetFloat_Execute(COMMAND_ARGS)
 
 bool Cmd_AuxStringMapArraySetRef_Execute(COMMAND_ARGS)
 {
-	char varName[0x50];
-	char keyName[0x50];
-	TESForm* refVal;
+	char varName[256] = {};
+	char keyName[256] = {};
+	TESForm* refVal = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &keyName, &refVal))
 	{
 		AuxVariableValue* value = AuxStringMapAddValue(scriptObj, varName, keyName);
@@ -292,8 +292,8 @@ bool Cmd_AuxStringMapArraySetRef_Execute(COMMAND_ARGS)
 
 bool Cmd_AuxStringMapArraySetString_Execute(COMMAND_ARGS)
 {
-	char varName[0x50];
-	char keyName[0x50];
+	char varName[256] = {};
+	char keyName[256] = {};
 	char* buffer = GetStrArgBuffer();
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &keyName, buffer))
 	{
@@ -307,7 +307,7 @@ bool Cmd_AuxStringMapArraySetString_Execute(COMMAND_ARGS)
 bool Cmd_AuxStringMapArraySetFromArray_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	char varName[0x50];
+	char varName[256] = {};
 	uint32_t arrID = NULL;
 	UINT32 bAppend = 0;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &arrID, &bAppend)) return true;
@@ -348,7 +348,7 @@ bool Cmd_AuxStringMapArraySetFromArray_Execute(COMMAND_ARGS)
 #if DoLaterMaybe
 bool Cmd_AuxStringMapArraySetValue_Execute(COMMAND_ARGS)  //a bit unwieldy having to use the array middleman
 {
-	char varName[0x50];
+	char varName[256] = {};
 	uint32_t arrID;
 	TESForm* form = NULL;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &arrID, &form))
@@ -372,8 +372,8 @@ bool Cmd_AuxStringMapArraySetValue_Execute(COMMAND_ARGS)  //a bit unwieldy havin
 bool Cmd_AuxStringMapArrayEraseKey_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	char varName[0x50];
-	char keyName[0x50];
+	char varName[256] = {};
+	char keyName[256] = {};
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &keyName) || !varName[0]) return true;
 	AuxStringMapInfo varInfo(scriptObj, varName);
 	auto findMod = varInfo.ModsMap().Find(varInfo.modIndex);
@@ -398,7 +398,7 @@ bool Cmd_AuxStringMapArrayEraseKey_Execute(COMMAND_ARGS)
 bool Cmd_AuxStringMapArrayValidateValues_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	char varName[0x50];
+	char varName[256] = {};
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &varName) || !varName[0]) return true;
 	AuxStringMapInfo varInfo(scriptObj, varName);
 	auto findMod = varInfo.ModsMap().Find(varInfo.modIndex);
@@ -427,7 +427,7 @@ bool Cmd_AuxStringMapArrayValidateValues_Execute(COMMAND_ARGS)
 
 bool Cmd_AuxStringMapArrayDestroy_Execute(COMMAND_ARGS)
 {
-	char varName[0x50];
+	char varName[256] = {};
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &varName) || !varName[0]) return true;
 	AuxStringMapInfo varInfo(scriptObj, varName);
 	auto findMod = varInfo.ModsMap().Find(varInfo.modIndex);

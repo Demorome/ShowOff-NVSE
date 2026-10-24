@@ -10,8 +10,8 @@ ThisCall<void>(0x61E2B0, tInfo, &testStr, false);
 bool Cmd_TopicInfoGetResponseStrings_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	TESTopicInfo* tInfo;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &tInfo) && IS_ID(tInfo, TESTopicInfo))
+	TESTopicInfo* tInfo = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &tInfo) && tInfo && IS_ID(tInfo, TESTopicInfo))
 	{
 		auto responseArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
 		auto response = ThisCall<TESTopicInfoResponse**>(0x61E780, tInfo, nullptr);
@@ -52,9 +52,9 @@ void TopicInfoSetResponseStrings_Call(NVSEArrayVar *arr, TESTopicInfo* tInfo, do
 bool Cmd_TopicInfoSetResponseStrings_OLD_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	TESTopicInfo* tInfo;
-	uint32_t arrID;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &tInfo, &arrID) && IS_ID(tInfo, TESTopicInfo))
+	TESTopicInfo* tInfo = nullptr;
+	uint32_t arrID = UINT32_MAX;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &tInfo, &arrID) && tInfo && IS_ID(tInfo, TESTopicInfo))
 	{
 		if (const auto inArr = g_arrInterface->LookupArrayByID(arrID))
 			TopicInfoSetResponseStrings_Call(inArr, tInfo, result);
@@ -81,10 +81,10 @@ DEFINE_COMMAND_PLUGIN(TopicInfoSetNthResponseString, "", false, kParams_OneForm_
 bool Cmd_TopicInfoSetNthResponseString_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	TESTopicInfo* tInfo;
-	uint32_t responseIdx;
-	char newResponseStr[0x10000];
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &tInfo, &responseIdx, &newResponseStr) && IS_ID(tInfo, TESTopicInfo)
+	TESTopicInfo* tInfo = nullptr;
+	uint32_t responseIdx = UINT32_MAX;
+	char newResponseStr[0x10000] = {};
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &tInfo, &responseIdx, &newResponseStr) && tInfo && IS_ID(tInfo, TESTopicInfo)
 		&& newResponseStr[0])
 	{
 		auto const response = ThisCall<TESTopicInfoResponse**>(0x61E780, tInfo, nullptr);

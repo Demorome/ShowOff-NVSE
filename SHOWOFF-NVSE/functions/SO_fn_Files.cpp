@@ -17,8 +17,7 @@
 bool Cmd_CreateFolder_Execute(COMMAND_ARGS)
 {
 	*result = false;
-	char folderPath[MAX_PATH]; // relative to "Fallout New Vegas" folder.
-	folderPath[0] = 0;
+	char folderPath[MAX_PATH] = {}; // relative to "Fallout New Vegas" folder.
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &folderPath) && folderPath[0])
 	{
 		*result = std::filesystem::create_directories(GetFalloutDirectory() + folderPath);

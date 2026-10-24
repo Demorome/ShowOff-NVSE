@@ -42,13 +42,17 @@ DEFINE_COMMAND_ALT_PLUGIN(ListAddArray_OLD, AddArrayToFormList_OLD, "",
 bool Cmd_ListAddArray_OLD_Execute(COMMAND_ARGS)
 {
 	*result = 1;	//bSuccess
-	BGSListForm* pListForm;
-	uint32_t arrID;
+	BGSListForm* pListForm = nullptr;
+	uint32_t arrID = UINT32_MAX;
 	int32_t index = eListEnd;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pListForm, &arrID, &index))
 		return true;
+	
+	if (!pListForm) 
+		return true;
+
 	NVSEArrayVar* inArr = g_arrInterface->LookupArrayByID(arrID);
-	if (!pListForm || !inArr) 
+	if (!inArr) 
 		return true;
 	ListAddArray_Call(pListForm, inArr, index, result);
 	return true;

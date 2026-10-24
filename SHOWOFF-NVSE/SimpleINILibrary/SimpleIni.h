@@ -2115,9 +2115,10 @@ SI_Error
 CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::CopyString(
     const SI_CHAR *& a_pString, const SI_CHAR* a_pPrepend)
 {
-    auto uLen = GetStrLen(a_pString);
+    size_t uLen = GetStrLen(a_pString);
+    size_t uPrependLen = a_pPrepend ? GetStrLen(a_pPrepend) : 0;
     if (a_pPrepend)
-        uLen += GetStrLen(a_pPrepend) - 1;  //don't count NULL character twice
+        uLen += uPrependLen - 1;  //don't count NULL character twice
 	
     auto pCopy = new(std::nothrow) SI_CHAR[uLen];
     if (!pCopy) {
@@ -2129,8 +2130,8 @@ CSimpleIniTempl<SI_CHAR,SI_STRLESS,SI_CONVERTER>::CopyString(
 	}
     else
     {
-        strcpy(pCopy, a_pPrepend);
-        strcat(pCopy, a_pString);
+        strcpy_s(pCopy, uLen, a_pPrepend);
+        strcat_s(pCopy, uLen - uPrependLen - 1, a_pString);
     }
     m_strings.push_back(pCopy);
     a_pString = pCopy;

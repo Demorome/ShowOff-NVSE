@@ -78,7 +78,7 @@
     <ClCompile Include="..\nvse\NiTypes.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
-    <ClCompile Include="SO_fn_Math.cpp">
+    <ClCompile Include="functions\SO_fn_Math.cpp">
       <Filter>functions</Filter>
     </ClCompile>
     <ClCompile Include="GameUI.cpp">

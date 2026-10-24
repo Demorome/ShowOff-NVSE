@@ -508,8 +508,7 @@ bool Cmd_ShowPerkMenu_Execute(COMMAND_ARGS)
 {
 	*result = false;  // result = hasShownPerks
 	int32_t numPerks = -1;
-	char menuTitleBuf[0x1000];  // allows changing the title of the Lvl-Up Menu to something more fitting.
-	menuTitleBuf[0] = 0;
+	char menuTitleBuf[0x1000] = {};  // allows changing the title of the Lvl-Up Menu to something more fitting.
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &numPerks, &menuTitleBuf))
 		return true;
 
@@ -593,8 +592,7 @@ bool Cmd_ShowSkillMenu_Execute(COMMAND_ARGS)
 	*result = false;  // result = hasShownSkillMenu
 	int32_t numSkills = -1;
 	uint32_t showMenuDespiteNoPoints = true;
-	char menuTitleBuf[0x1000];  // allows changing the title of the Lvl-Up Menu to something more fitting.
-	menuTitleBuf[0] = 0;
+	char menuTitleBuf[0x1000] = {};  // allows changing the title of the Lvl-Up Menu to something more fitting.
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &numSkills, &showMenuDespiteNoPoints, &menuTitleBuf))
 		return true;
 

@@ -637,16 +637,6 @@ public:
 		return CdeclCall<TESForm*>(0x4839C0, auiFormID);
 	}
 
-	MEMBER_FN_PREFIX(TESForm);
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
-	DEFINE_MEMBER_FN(MarkAsTemporary, void, 0x00484490);	// probably a member of TESForm
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-	DEFINE_MEMBER_FN(MarkAsTemporary, void, 0x00485480);	// probably a member of TESForm
-#elif EDITOR
-#else
-#error
-#endif
-
 };
 static_assert(sizeof(TESForm) == 0x18);
 

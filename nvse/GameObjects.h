@@ -9,22 +9,6 @@ struct ScriptEventList;
 class ActiveEffect;
 struct AnimData;
 
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
-static const uint32_t s_TESObject_REFR_init = 0x55A2F0;			// TESObject_REFR initialization routine (first reference to s_TESObject_REFR_vtbl)
-static const uint32_t	s_Actor_EquipItem = 0x88C650;				// maybe, also, would be: 007198E0 for FOSE	4th call from the end of TESObjectREFR::RemoveItem (func5F)
-static const uint32_t	s_Actor_UnequipItem = 0x88C790;				// maybe, also, would be: 007133E0 for FOSE next sub after EquipItem
-static const uint32_t s_TESObjectREFR__GetContainer = 0x55D310;	// First call in REFR::RemoveItem
-static const uint32_t s_TESObjectREFR_Set3D = 0x5702E0;			// void : (const char*)
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-static const uint32_t s_TESObject_REFR_init = 0x55A6B0;
-static const uint32_t	s_Actor_EquipItem = 0x88C2B0;
-static const uint32_t	s_Actor_UnequipItem = 0x88C3F0;
-static const uint32_t s_TESObjectREFR__GetContainer = 0x55D6B0;
-static const uint32_t s_TESObjectREFR_Set3D = 0x4E0F80;
-#elif EDITOR
-#else
-#error
-#endif
 const uint32_t kUpdateAppearanceAddr = 0x8D3FA0;
 struct NiPoint3;
 // 68
@@ -204,14 +188,7 @@ public:
 	static TESObjectREFR* __stdcall Create(bool bTemp = false);
 
 	MEMBER_FN_PREFIX(TESObjectREFR);
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 	DEFINE_MEMBER_FN(Activate, bool, 0x00573170, TESObjectREFR*, uint32_t, uint32_t, uint32_t);	// Usage Activate(actionRef, 0, 0, 1); found inside Cmd_Activate_Execute as the last call (190 bytes)
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-	DEFINE_MEMBER_FN(Activate, bool, 0x00573430, TESObjectREFR*, uint32_t, uint32_t, uint32_t);	// Usage Activate(actionRef, 0, 0, 1); found inside Cmd_Activate_Execute
-#elif EDITOR
-#else
-#error
-#endif
 };
 
 static_assert(sizeof(TESObjectREFR) == 0x068);

@@ -5,8 +5,6 @@ static NVSEStringVarInterface* s_StringVarInterface = NULL;
 // arg1 = 1, ignored if canCreateNew is false, passed to 'init' function if a new object is created
 typedef void * (* _GetSingleton)(bool canCreateNew);
 
-#if RUNTIME_VERSION
-
 const _ExtractArgs ExtractArgs = (_ExtractArgs)0x005ACCB0;
 
 const _FormHeap_Allocate FormHeap_Allocate = (_FormHeap_Allocate)0x00401000;
@@ -23,8 +21,6 @@ const _ShowMessageBox_button ShowMessageBox_button = (_ShowMessageBox_button)0x0
 
 const _GetActorValueEditorIDName GetActorValueEditorIDName = (_GetActorValueEditorIDName)0x66EAC0;	// See Cmd_GetActorValue_Eval
 const _GetActorValueLocalizedName GetActorValueShortLocalizedName = (_GetActorValueLocalizedName)0x66EB00;
-
-#endif
 
 #if RUNTIME
 

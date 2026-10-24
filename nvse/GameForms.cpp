@@ -420,15 +420,7 @@ bool BGSPerk::GetActorCanPickPerk(Actor* actor)
 bool TESForm::IsInventoryObject() const
 {
 	typedef bool (*_IsInventoryObjectType)(uint32_t formType);
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 	static _IsInventoryObjectType IsInventoryObjectType = (_IsInventoryObjectType)0x481F30;
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-	static _IsInventoryObjectType IsInventoryObjectType = (_IsInventoryObjectType)0x482F50;
-#elif EDITOR
-	static _IsInventoryObjectType IsInventoryObjectType = (_IsInventoryObjectType)0x4F4100;
-#else
-#error
-#endif
 	return IsInventoryObjectType(typeID);
 }
 
@@ -639,13 +631,6 @@ uint8_t TESPackage::ObjectCodeForString(const char* objString)
 	return kObjectType_Max;
 }
 
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525 || RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-	static const char** s_procNames = (const char**)0x011A3CC0;
-#elif EDITOR
-#else
-#error unsupported Fallout version
-#endif
-
 const char* TESPackage::StringForProcedureCode(eProcedure proc)
 {
 	if (proc < kProcedure_MAX)
@@ -653,26 +638,6 @@ const char* TESPackage::StringForProcedureCode(eProcedure proc)
 
 	return "";
 }
-
-//const char* TESPackage::StringForProcedureCode(eProcedure proc, bool bRemovePrefix)
-//{
-//	static size_t prefixLen = strlen("PROCEDURE_");
-//
-//	const char* name = NULL;
-//	// special-case "AQUIRE" (sic) to fix typo in game executable
-//	if (proc == TESPackage::kProcedure_ACQUIRE) {
-//		name = "PROCEDURE_ACQUIRE";
-//	}
-//	else {
-//		name = (proc <= TESPackage::kProcedure_MAX) ? s_procNames[proc] : NULL;
-//	}
-//
-//	if (name && bRemovePrefix) {
-//		name += prefixLen;
-//	}
-//
-//	return name;
-//}
 
 const char* TESPackage::PackageTime::DayForCode(uint8_t dayCode)
 {

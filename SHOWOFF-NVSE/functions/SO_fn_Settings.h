@@ -8,7 +8,7 @@
 DEFINE_COMMAND_PLUGIN(IsGameSetting, "Checks if a string refers to a valid Gamesetting", false, kParams_OneString);
 bool Cmd_IsGameSetting_Execute(COMMAND_ARGS)
 {
-	char settingName[512];
+	char settingName[512] = {};
 	Setting* setting;
 	GameSettingCollection* gmsts = GameSettingCollection::GetSingleton();
 
@@ -31,7 +31,7 @@ bool Cmd_IsGameSetting_Execute(COMMAND_ARGS)
 DEFINE_COMMAND_PLUGIN(IsINISetting, "Checks if a string refers to a valid FalloutPrefs.ini / Fallout.ini setting.", false, kParams_OneString);
 bool Cmd_IsINISetting_Execute(COMMAND_ARGS)
 {
-	char settingName[512];
+	char settingName[512] = {};
 	Setting* setting;
 
 	if (ExtractArgs(EXTRACT_ARGS, &settingName)) {
@@ -53,7 +53,7 @@ bool Cmd_IsINISetting_Execute(COMMAND_ARGS)
 DEFINE_COMMAND_PLUGIN(ModNumericINISetting, "", false, kParams_OneString_OneFloat);
 bool Cmd_ModNumericINISetting_Execute(COMMAND_ARGS)
 {
-	char settingName[512];
+	char settingName[512] = {};
 	Setting* setting;
 	float modVal = 0;
 	double curVal = 0;
@@ -86,7 +86,7 @@ bool Cmd_ModNumericINISetting_Execute(COMMAND_ARGS)
 DEFINE_COMMAND_PLUGIN(ModNumericINISettingAlt, "", false, kParams_OneString_OneFloat);
 bool Cmd_ModNumericINISettingAlt_Execute(COMMAND_ARGS)
 {
-	char settingName[512];
+	char settingName[512] = {};
 	Setting* setting;
 	float modVal = 0;
 	double curVal = 0;
@@ -119,7 +119,7 @@ bool Cmd_ModNumericINISettingAlt_Execute(COMMAND_ARGS)
 DEFINE_COMMAND_PLUGIN(ModNumericGameSetting, "", false, kParams_OneString_OneFloat);
 bool Cmd_ModNumericGameSetting_Execute(COMMAND_ARGS)
 {
-	char settingName[512];
+	char settingName[512] = {};
 	float modVal = 0;
 	*result = 0;
 

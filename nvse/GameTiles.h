@@ -147,16 +147,8 @@ public:
 	};
 
 	MEMBER_FN_PREFIX(Tile);
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
 	DEFINE_MEMBER_FN(SetStringValue, void, 0x00A01350, uint32_t valueID, const char* str, bool bPropagate);
 	DEFINE_MEMBER_FN(SetFloatValue, void, 0x00A012D0, uint32_t valueID, float num, bool bPropagate);
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-	DEFINE_MEMBER_FN(SetStringValue, void, 0x00A01220, uint32_t valueID, const char* str, bool bPropagate);
-	DEFINE_MEMBER_FN(SetFloatValue, void, 0x00A011A0, uint32_t valueID, float num, bool bPropagate);
-#elif EDITOR
-#else
-#error
-#endif
 
 	virtual Tile		*Destroy(bool doFree);
 	virtual void		Init(Tile *parent, const char *name, Tile *replacedChild);

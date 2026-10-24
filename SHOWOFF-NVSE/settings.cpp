@@ -10,8 +10,10 @@
 void HandleINIOptions()
 {
 	char iniPath[MAX_PATH];
-	GetModuleFileNameA(g_ShowOffHandle, iniPath, MAX_PATH);
-	strcpy((strrchr(iniPath, '\\') + 1), INI_NAME);
+	GetModuleFileNameA(NULL, iniPath, MAX_PATH);
+	char* lastSlash = strrchr(iniPath, '\\') + 1;
+	uint32_t length = MAX_PATH - (lastSlash - iniPath);;
+	strcpy_s(lastSlash, length, INI_NAME);
 
 	CSimpleIniA ini;
 	ini.SetUnicode();
