@@ -220,11 +220,9 @@ copy "$(TargetDir)$(TargetName).pdb" "C:\Symbols\$(TargetName).pdb"
     <ClCompile Include="GameUI.cpp" />
     <ClCompile Include="internal\AuxTimers.cpp" />
     <ClCompile Include="internal\ExtractArgs_TypeSafe.cpp" />
-    <ClCompile Include="internal\SOTypes.cpp" />
     <ClCompile Include="InventoryRef.cpp" />
     <ClCompile Include="MenuHooks.cpp" />
     <ClCompile Include="MiscHooks.cpp" />
-    <ClCompile Include="internal\containers.cpp" />
     <ClCompile Include="internal\decoding.cpp" />
     <ClCompile Include="internal\jip_nvse.cpp" />
     <ClCompile Include="internal\memory_pool.cpp" />

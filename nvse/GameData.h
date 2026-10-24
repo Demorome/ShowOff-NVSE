@@ -317,16 +317,6 @@ public:
 
 	bool IsFormIDInUse(uint32_t auiFormID) const;
 
-	MEMBER_FN_PREFIX(TESDataHandler);
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
-	DEFINE_MEMBER_FN(DoAddForm, uint32_t, 0x004603B0, TESForm * pForm);	// stupid name is because AddForm is redefined in windows header files
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-	DEFINE_MEMBER_FN(DoAddForm, uint32_t, 0x00461160, TESForm * pForm);	// stupid name is because AddForm is redefined in windows header files
-#elif EDITOR
-#else
-#error
-#endif
-
 	TESQuest* GetQuestByName(const char* questName);
 
 	static TESObjectWEAP* GetDefaultWeapon() {

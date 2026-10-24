@@ -57,9 +57,6 @@ extern bool (__cdecl *GetIsGodMode)();
 
 //-Hook Globals
 extern std::atomic<bool> g_canPlayerPickpocketInCombat;
-#if 0
-extern ActorAndItemPairs g_noEquipMap;
-#endif
 extern bool g_bNoSelfRepairingBrokenItems;
 extern bool g_bNoVendorRepairingBrokenItems;
 extern bool g_bResetInteriorResetsActors;

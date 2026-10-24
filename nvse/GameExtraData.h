@@ -299,9 +299,6 @@ enum
 #define GetExtraType(xDataList, Type) (Extra ## Type*)xDataList.GetByType(kExtraData_ ## Type)
 #define GetExtraTypeJIP(xDataList, Type) (Extra ## Type*)GetExtraData(xDataList, kExtraData_ ## Type)
 
-extern const char* GetExtraDataValue(BSExtraData* traverse);
-extern const char *GetExtraDataName(uint8_t extraDataType);
-
 // 014
 class ExtraAction : public BSExtraData
 {
@@ -323,8 +320,6 @@ public:
 
 	Script			* script;		// 00C
 	ScriptEventList	* eventList;	// 010
-
-	static ExtraScript* __stdcall Create(TESForm* baseForm = NULL, bool create = true, TESObjectREFR* container = NULL);
 };
 
 uint32_t GetCountForExtraDataList(ExtraDataList* list);
@@ -356,11 +351,7 @@ public:
 
 		void Cleanup();
 		void RemoveCannotWear();
-		float GetItemHealthPerc(bool arg1 = true);
 		ExtraDataList *GetEquippedExtra();
-		float CalculateWeaponDamage(float condition, TESForm *ammo);
-		float __vectorcall GetWeaponModEffectValue(uint32_t effectType) const;
-		float __vectorcall GetBaseHealth() const;
 
 		[[nodiscard]] bool HasWeaponMod(uint8_t effectCode) const {
 			return ThisCall<bool>(0x4BDA70, this, effectCode);
@@ -398,7 +389,6 @@ public:
 
 	EntryData *GetByType(TESForm *type);
 
-	void DebugDump();
 	void Cleanup();	// clean up unneeded extra data from each EntryData
 
 	static ExtraContainerChanges* Create();
@@ -425,10 +415,6 @@ public:
 			return false;
 		};
 	};
-
-#if 0
-	FoundEquipData FindEquipped(FormMatcher& matcher) const;
-#endif
 
 	EntryDataList* GetEntryDataList() const {
 		return data ? data->objList : NULL;

@@ -234,12 +234,13 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		}
 
 		// Handle events
-		for (const auto& EventInfo : EventsArray)
 		{
-			EventInfo->AddQueuedEvents();
-			EventInfo->DeleteEvents();
+			std::lock_guard lock(EventsArrayMutex);
+			for (const auto& EventInfo : EventsArray) {
+				EventInfo->AddQueuedEvents();
+				EventInfo->DeleteEvents();
+			}
 		}
-		EventHandling::HandleGameLoopEvents();
 
 		// Handle AuxTimers
 		{
@@ -425,13 +426,6 @@ extern "C"
 			nvse->InitExpressionEvaluatorUtils(&g_expEvalUtils);
 
 			g_eventInterface = (NVSEEventManagerInterface*)nvse->QueryInterface(kInterface_EventManager);
-
-#if 0
-			auto johnnyGuitar = GetModuleHandle("johnnyguitar.dll");
-			JGCreateEvent = (CreateScriptEvent)GetProcAddress(johnnyGuitar, "JGCreateEvent");
-			JGFreeEvent = (FreeScriptEvent)GetProcAddress(johnnyGuitar, "JGFreeEvent");
-			//todo: if using these imports, add JG requirement check
-#endif
 			
 			HandleINIOptions();
 			HandleHooks::HandleGameHooks();

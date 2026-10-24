@@ -81,8 +81,6 @@ public:
 	uint32_t	unk00C;		// Semaphore/Status
 	uint32_t	unk010;		// Paired : 10 and 14 for a 64 bit integer
 	uint32_t	unk014;
-
-	static uint32_t*	GetCounterSingleton();
 };
 
 // 18
@@ -402,5 +400,4 @@ public:
 
 	static ModelLoader *GetSingleton();
 	void QueueReference(TESObjectREFR *refr, uint32_t arg2, uint32_t arg3);
-	NiNode *LoadModel(const char *nifPath, uint32_t arg2, uint8_t arg3, uint32_t arg4, uint8_t arg5, uint8_t arg6);
 };

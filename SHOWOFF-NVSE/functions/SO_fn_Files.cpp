@@ -130,7 +130,7 @@ namespace JsonToNVSE
 				!string.empty() && string[0] == '@')
 			{
 				//Assume form contained in string
-				elem = LookupFormByID(StringToRef(const_cast<char*>(string.data()) + 1));	//don't care if the string is modified here, it won't be used.
+				elem = TESForm::GetFormByNumericID(StringToRef(const_cast<char*>(string.data()) + 1));	//don't care if the string is modified here, it won't be used.
 			}
 			else //assume string
 			{

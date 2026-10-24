@@ -411,7 +411,7 @@ bool Cmd_AuxStringMapArrayValidateValues_Execute(COMMAND_ARGS)
 	{
 		auto refVal = idIter().GetRef();
 		if (!refVal) continue;
-		if (LookupFormByID(refVal)) continue;
+		if (TESForm::GetFormByNumericID(refVal)) continue;
 		idIter.Remove();
 		cleaned = true;
 	}

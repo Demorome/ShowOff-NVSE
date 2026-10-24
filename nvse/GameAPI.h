@@ -12,45 +12,22 @@ struct BaseExtraList;
 #define playerID	0x7
 #define playerRefID 0x14
 
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
+#if RUNTIME_VERSION
 	static const uint32_t s_Console__Print = 0x0071D0A0;
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-	static const uint32_t s_Console__Print = 0x0071D070;
-#elif EDITOR
-#else
-#error
 #endif
 
-extern bool extraTraces;
-
 void Console_Print(const char * fmt, ...);
-
-//typedef void * (* _FormHeap_Allocate)(uint32_t size);
-//extern const _FormHeap_Allocate FormHeap_Allocate;
-//
-//typedef void (* _FormHeap_Free)(void * ptr);
-//extern const _FormHeap_Free FormHeap_Free;
-
-#if RUNTIME
 
 typedef bool (* _ExtractArgs)(ParamInfo * paramInfo, void * scriptData, uint32_t * arg2, TESObjectREFR * arg3, TESObjectREFR * arg4, Script * script, ScriptEventList * eventList, ...);
 extern const _ExtractArgs ExtractArgs;
 
-typedef TESForm * (* _CreateFormInstance)(uint8_t type);
-extern const _CreateFormInstance CreateFormInstance;
-
 bool IsConsoleMode();
-bool GetConsoleEcho();
-void SetConsoleEcho(bool doEcho);
 const char * GetFullName(TESForm * baseForm);
-const char* GetDebugActorValueString(uint32_t actorValue); // should work now
-uint32_t GetActorValueForString(const char* strActorVal, bool bForScript = false);
 
 typedef char * (* _GetActorValueEditorIDName)(uint32_t actorValueCode);
 extern const _GetActorValueEditorIDName GetActorValueEditorIDName;
 typedef char* (* _GetActorValueLocalizedName)(uint32_t actorValueCode);
 extern const _GetActorValueLocalizedName GetActorValueShortLocalizedName;
-uint32_t GetActorValueMax(uint32_t actorValueCode);
 
 typedef void (* _ShowMessageBox_Callback)(void);
 extern const _ShowMessageBox_Callback ShowMessageBox_Callback;
@@ -83,30 +60,7 @@ extern const _QueueUIMessage QueueUIMessage;
 
 const uint32_t kMaxMessageLength = 0x4000;
 
-#if NVSE_CORE
-bool ExtractArgsEx(ParamInfo * paramInfo, void * scriptData, uint32_t * scriptDataOffset, Script * scriptObj, ScriptEventList * eventList, ...);
-extern bool ExtractFormatStringArgs(uint32_t fmtStringPos, char* buffer, ParamInfo * paramInfo, void * scriptDataIn, uint32_t * scriptDataOffset, Script * scriptObj, ScriptEventList * eventList, uint32_t maxParams, ...);
-#endif
-
-void ShowCompilerError(ScriptLineBuffer* lineBuf, const char* fmt, ...);
-
-#else
-
-typedef TESForm * (__cdecl * _GetFormByID)(const char* editorID);
-extern const _GetFormByID GetFormByID;
-
-typedef void (__cdecl *_ShowCompilerError)(ScriptBuffer* Buffer, const char* format, ...);
-extern const _ShowCompilerError		ShowCompilerError;
-
-#endif
-
 struct NVSEStringVarInterface;
-	// Problem: plugins may want to use %z specifier in format strings, but don't have access to StringVarMap
-	// Could change params to ExtractFormatStringArgs to include an NVSEStringVarInterface* but
-	//  this would break existing plugins
-	// Instead allow plugins to register their NVSEStringVarInterface for use
-	// I'm sure there is a better way to do this but I haven't found it
-void RegisterStringVarInterface(NVSEStringVarInterface* intfc);
 
 struct ScriptVar
 {
@@ -180,15 +134,8 @@ struct ScriptEventList // also called "ScriptLocals"
 	VarList			*m_vars;		// 0C
 	Struct10		*pScriptEffectData;	// 10
 
-	void Dump(void);
 	ScriptVar *GetVariable(uint32_t id);
-	uint32_t ResetAllVariables();
 };
-
-ScriptEventList* EventListFromForm(TESForm* form);
-
-typedef bool (* _MarkBaseExtraListScriptEvent)(TESForm* target, BaseExtraList* extraList, uint32_t eventMask);
-extern const _MarkBaseExtraListScriptEvent MarkBaseExtraListScriptEvent;
 
 struct ExtractedParam
 {
@@ -230,8 +177,6 @@ struct ExtractedParam
 		} var;
 	} data;
 };
-
-bool ExtractArgsRaw(ParamInfo * paramInfo, void * scriptDataIn, uint32_t * scriptDataOffset, Script * scriptObj, ScriptEventList * eventList, ...);
 
 enum EActorVals {
 	eActorVal_Aggression			= 0,
@@ -389,31 +334,6 @@ public:
 	virtual bool HasMoreArgs() = 0;
 	virtual std::string GetFormatString() = 0;						// return format string
 };
-
-// concrete class used for extracting script args
-class ScriptFormatStringArgs : public FormatStringArgs
-{
-public:
-	virtual bool Arg(argType asType, void* outResult);
-	virtual bool SkipArgs(uint32_t numToSkip);
-	virtual bool HasMoreArgs();
-	virtual std::string GetFormatString();
-
-	ScriptFormatStringArgs(uint32_t _numArgs, uint8_t* _scriptData, Script* _scriptObj, ScriptEventList* _eventList);
-	uint32_t GetNumArgs();
-	uint8_t* GetScriptData();
-
-private:
-	uint32_t			numArgs;
-	uint8_t			* scriptData;
-	Script			* scriptObj;
-	ScriptEventList	* eventList;
-	std::string fmtString;
-};
-bool SCRIPT_ASSERT(bool expr, Script* script, const char * errorMsg, ...);
-
-bool ExtractSetStatementVar(Script* script, ScriptEventList* eventList, void* scriptDataIn, double* outVarData, uint8_t* outModIndex = NULL, bool shortPath = false);
-bool ExtractFormattedString(FormatStringArgs& args, char* buffer);
 
 class ChangesMap;
 class InteriorCellNewReferencesMap;
@@ -675,79 +595,6 @@ class BGSSaveFormBuffer: public BGSLoadGameBuffer
 
 };	// in BGSSaveGameBuffer there is a 010, which look like a counter (ChunkCount ?), then the Header
 
-// 1C8 - only explicitly marked things are verified
-class TESSaveLoadGame
-{
-public:
-	TESSaveLoadGame();
-	~TESSaveLoadGame();
-
-	struct CreatedObject {
-		uint32_t			refID;
-		CreatedObject	* next;
-	};
-
-	ChangesMap					* changesMap;		// 000
-	uint32_t						unk004;				// 004
-	InteriorCellNewReferencesMap	* intRefMap;	// 008
-	ExteriorCellNewReferencesMap	* extRefMap00C;	// 00C
-	ExteriorCellNewReferencesMap	* extRefMap010;	// 010
-	void						* saveLoadBuffer;	// 014
-	uint32_t						unk018;				// 018
-	uint8_t						unk01C;				// 01C
-	uint8_t						pad01D[3];
-	NiTArray<TESObjectREFR*>	* arr020;			// 020
-	uint32_t						unk024;				// 024
-	uint32_t						unk028;				// 028
-	CreatedObject				createdObjectList;	// 02C data is formID - verified
-	NiTPointerMap<void*>		* map034;			// 034
-	uint32_t				unk034[(0x58-0x44) >> 2];	// 044
-	NumericIDBufferMap			* idMap058;			// 058
-	NumericIDBufferMap			* idMap05C;			// 05C
-	NumericIDBufferMap			* idMap060;			// 060
-	NumericIDBufferMap			* idMap064;			// 064
-	uint32_t						unk068;				// 068
-	uint32_t						unk06C;				// 06C
-	uint32_t						unk070;				// 070
-	uint8_t						unk074;				// 074
-	uint8_t						unk075;				//     init to 0x7D
-	uint8_t						pad076[2];
-	NiTArray<uint32_t>			* array078;			// 078 NiTLargePrimitiveArray<?>
-	NiTArray<uint32_t>			* array07C;			// 07C NiTLargePrimitiveArray<?>	
-	uint8_t						unk080;				// 080 version of save?
-	uint8_t						unk081;
-	uint8_t						pad082[2];
-	uint32_t				unk084[(0xAC-0x84) >> 2];	// 084
-	uint8_t						unk0AC;				// 0AC
-	uint8_t						unk0AD;				// 0AD
-	uint8_t						unk0AE;				// 0AE
-	uint8_t						unk0AF;				// 0AF
-	uint32_t				unk0B0[(0x1C8-0x0B0) >> 2];	// 0B0
-
-	static TESSaveLoadGame* Get();
-
-	MEMBER_FN_PREFIX(TESSaveLoadGame);
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
-	DEFINE_MEMBER_FN(AddCreatedForm, uint32_t, 0x00861780, TESForm * pForm);
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-	DEFINE_MEMBER_FN(AddCreatedForm, uint32_t, 0x00861330, TESForm * pForm);
-#elif EDITOR
-#else
-#error
-#endif
-};
-
-#if RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525
-const uint32_t _SaveGameManager_ConstructSavegameFilename = 0x0084FF90;
-const uint32_t _SaveGameManager_ConstructSavegamePath		= 0x0084FF30;
-#elif RUNTIME_VERSION == RUNTIME_VERSION_1_4_0_525ng
-const uint32_t _SaveGameManager_ConstructSavegameFilename = 0x0084F9E0;
-const uint32_t _SaveGameManager_ConstructSavegamePath		= 0x0084F980;
-#elif EDITOR
-#else
-#error
-#endif
-
 template <typename T_Key, typename T_Data>
 class NiTMap : public NiTMapBase<T_Key, T_Data>
 {
@@ -816,54 +663,6 @@ public:
 	uint8_t									pad249[3];				// 249
 
 };
-
-#if RUNTIME
-class SaveGameManager
-{
-public:
-	SaveGameManager();
-	~SaveGameManager();
-
-	static SaveGameManager* GetSingleton();
-	MEMBER_FN_PREFIX(SaveGameManager);
-	DEFINE_MEMBER_FN(ConstructSavegameFilename, void, _SaveGameManager_ConstructSavegameFilename, 
-					 const char* filename, char* outputBuf, bool bTempFile);
-	DEFINE_MEMBER_FN(ConstructSavegamePath, void, _SaveGameManager_ConstructSavegamePath, char* outputBuf);
-
-	struct SaveGameData
-	{
-		const char	* name;		// 00
-		uint32_t		unk04;		// 04
-		uint32_t		saveNumber;	// 08 index?
-		const char	* pcName;	// 0C
-		const char	* pcTitle;	// 10
-		const char	* location;	// 14
-		const char	* time;		// 18
-	};
-
-	tList<SaveGameData>		* saveList;		// 00
-	uint32_t					numSaves;		// 04
-	uint32_t					unk08;			// 08
-	uint8_t					unk0C;			// 0C	flag for either opened or writable or useSeparator (|)
-	uint8_t					unk0D;
-	uint8_t					unk0E;
-	uint8_t					unk0F;
-/*
-	const char				* unk10;		// 10 name of most recently loaded/saved game?
-	uint32_t					unk14;			// 14 init to -1
-	uint8_t					unk18;			// 18
-	uint8_t					pad19[3];
-	uint8_t					unk20;			// 20 init to 1
-	uint8_t					unk21;
-	uint8_t					pad22[2];
-	uint32_t					unk24;			// 24
-	uint32_t					unk28;			// 28
-*/
-};
-
-std::string GetSavegamePath();
-
-#endif
 
 enum Coords
 {

@@ -836,7 +836,7 @@ bool Cmd_ShowPauseMenu_Execute(COMMAND_ARGS)
 			{
 				if ((uint32_t)item->object->followupOption_callback == callback_addr)
 				{
-					item->tile->SetFloat(TraitNameToID("_selected"), 1, true);
+					item->tile->SetFloat(Tile::TraitNameToID("_selected"), 1, true);
 					break;
 				}
 			}

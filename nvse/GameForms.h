@@ -602,10 +602,6 @@ public:
 
 	TESFile* GetFile(int32_t aiIndex) const;
 
-	// adds a new form to the game (from CloneForm or LoadForm)
-	void DoAddForm(TESForm* newForm, bool bPersist = true, bool record = true) const;
-	// return a new base form which is the clone of this form
-	TESForm *CloneForm(bool bPersist = true) const;
 	bool IsInventoryObject() const;
 
 	bool HasScript();
@@ -922,37 +918,6 @@ public:
 	EffectSetting		*setting;			// 14
 	float				cost;				// 18 on autocalc items this seems to be the cost
 	ConditionList		conditions;			// 1C
-
-	//bool HasActorValue() const;
-	//uint32_t GetActorValue() const;
-	//bool IsValidActorValue(uint32_t actorValue) const;
-	//void SetActorValue(uint32_t actorValue);
-
-	//bool IsScriptedEffect() const;
-	//uint32_t ScriptEffectRefId() const;
-	//uint32_t ScriptEffectSchool() const;
-	//uint32_t ScriptEffectVisualEffectCode() const;
-	//bool IsScriptEffectHostile() const;
-
-	//EffectItem* Clone() const;
-	//void CopyFrom(const EffectItem* from);
-	//static EffectItem* Create();
-	//static EffectItem* ProxyEffectItemFor(uint32_t effectCode);
-	//
-	//bool operator<(EffectItem*rhs) const;
-	//// return the magicka cost of this effect item
-	//// adjust for skill level if actorCasting is used
-	//float MagickaCost(TESForm* actorCasting = NULL) const;
-
-	//void SetMagnitude(uint32_t magnitude);
-	//void ModMagnitude(float modBy);
-	//void SetArea(uint32_t area);
-	//void ModArea(float modBy);
-	//void SetDuration(uint32_t duration);
-	//void ModDuration(float modBy);
-	//void SetRange(uint32_t range);
-	//bool IsHostile() const;
-	signed int GetSkillCode();
 };
 
 // 10

@@ -53,43 +53,6 @@ extern uint32_t(*ReadRecord32)();
 extern void (*ReadRecord64)(void* outData);
 extern void (*SkipNBytes)(uint32_t byteNum);
 
-//todo: fix bug where second element in a 2D array is somehow nullptr, and not an inner array.
-struct ArrayData_JIP
-{
-	uint32_t			size;
-	ArrayElementR* vals;
-	ArrayElementR* keys;
-
-	ArrayData_JIP(NVSEArrayVar* srcArr, bool isPacked)
-	{
-		size = GetArraySize(srcArr);
-		if (size)
-		{
-			uint32_t alloc = size * sizeof(ArrayElementR);
-			if (!isPacked) alloc *= 2;
-			vals = (ArrayElementR*)AuxBuffer::Get(2, alloc);
-			keys = isPacked ? nullptr : (vals + size);
-			MemZero(vals, alloc);
-			if (!GetArrayElements(srcArr, vals, keys))
-				size = 0;
-		}
-	}
-
-	~ArrayData_JIP()
-	{
-		if (size)
-		{
-			uint32_t count = keys ? (size * 2) : size;
-			ArrayElementR* elems = vals;
-			do
-			{
-				elems->~ElementR();
-				elems++;
-			} while (--count);
-		}
-	}
-};
-
 TESObjectREFR* __fastcall CreateRefForStack(TESObjectREFR* container, ContChangesEntry* menuEntry);
 
 float __fastcall GetAxisDistance(TESObjectREFR* ref1, TESObjectREFR* ref2, uint8_t axis);

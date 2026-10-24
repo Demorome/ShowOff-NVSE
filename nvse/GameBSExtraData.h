@@ -39,11 +39,8 @@ struct BaseExtraList
 	void RemoveByType(uint8_t type);
 	BSExtraData *Add(BSExtraData *xData);
 	void RemoveAll(bool doFree = true);
-	bool MarkScriptEvent(uint32_t eventMask, TESForm *eventTarget);
 	void Copy(BaseExtraList *sourceList); // safe even if copying a nullptr list
-	void DebugDump() const;
 	bool IsWorn();
-	char GetExtraFactionRank(TESFaction *faction);
 	int32_t GetCount() const;
 };
 
@@ -52,8 +49,7 @@ class TESObjectREFR;
 
 struct ExtraDataList : public BaseExtraList
 {
-	ExtraDataList *CreateCopy();
-	static ExtraDataList* __stdcall Create(BSExtraData *xBSData = NULL);
+	static ExtraDataList* Create();
 
 	BGSEncounterZone* GetEncounterZone() const {
 		return ThisCall<BGSEncounterZone*>(0x421C30, this);
@@ -81,14 +77,5 @@ extern const _GetExtraData GetExtraData;
 typedef BSExtraData* (__thiscall* _AddExtraData)(BaseExtraList*, BSExtraData*);
 extern const _AddExtraData AddExtraData;
 
-typedef void(__thiscall* _RemoveExtraData)(BaseExtraList*, BSExtraData*, bool);
-extern const _RemoveExtraData RemoveExtraData;
-
 typedef void(__thiscall* _RemoveExtraType)(BaseExtraList*, uint8_t);
 extern const _RemoveExtraType RemoveExtraType;
-
-typedef void(__thiscall* _ClearExtraDataList)(BaseExtraList*, bool);
-extern const _ClearExtraDataList ClearExtraDataList;
-
-typedef void(__thiscall* _CopyExtraDataList)(BaseExtraList*, const BaseExtraList*);
-extern const _CopyExtraDataList CopyExtraDataList;

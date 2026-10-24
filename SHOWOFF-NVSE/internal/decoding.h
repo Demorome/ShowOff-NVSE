@@ -803,14 +803,14 @@ public:
 	//taken from Stewie's Tweaks
 	void SetParentEnabled(bool isEnabled)
 	{
-		static uint32_t enabledTrait = TraitNameToID("_enabled");
+		static uint32_t enabledTrait = Tile::TraitNameToID("_enabled");
 		parentTile->SetFloat(enabledTrait, isEnabled);
 	}
 	
 	//taken from Stewie's Tweaks
 	[[nodiscard]] bool IsEnabled() const
 	{
-		static uint32_t enabledTrait = TraitNameToID("_enabled");
+		static uint32_t enabledTrait = Tile::TraitNameToID("_enabled");
 		return parentTile && parentTile->GetValueFloat(enabledTrait);
 	}
 };
@@ -3449,8 +3449,6 @@ public:
 	virtual ~ExtraEnableStateChildren();
 
 	tList<TESObjectREFR>	children;	// 0C
-
-	static ExtraEnableStateChildren* Create();
 };
 
 // 14
@@ -3463,7 +3461,6 @@ public:
 	TESObjectREFR	*parent;	// 0C
 	uint8_t			flags;		// 10
 	uint8_t			pad11[3];	// 11
-	static ExtraEnableStateParent* Create(TESObjectREFR* parent = nullptr);
 };
 
 // 10
@@ -3868,8 +3865,6 @@ struct SystemColorManager
 		virtual bool	IsSoft();
 
 		String		traitName;
-
-		void SetColorRGB(uint32_t r, uint32_t g, uint32_t b);
 	};
 
 	// 10

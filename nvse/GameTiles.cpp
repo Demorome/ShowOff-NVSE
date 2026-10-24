@@ -1,28 +1,11 @@
 #pragma once
 
 #include "nvse/GameTiles.h"
-#include "nvse/Utilities.h"
-#include "nvse/GameAPI.h"
-#include "internal/utility.h"
-
-typedef NiTMapBase<const char*, int> TraitNameMap;
-TraitNameMap *g_traitNameMap = (TraitNameMap*)0x11F32F4;
-const _TraitNameToID TraitNameToID = (_TraitNameToID)0xA01860;
-uint32_t (*TraitNameToIDAdd)(const char*, uint32_t) = (uint32_t (*)(const char*, uint32_t))0xA00940;
-
-enum
-{
-	kAddr_TileGetFloat = 0xA011B0,
-};
+#include "nvse/GameForms.h"
 
 uint32_t Tile::TraitNameToID(const char *traitName)
 {
-	return ::TraitNameToID(traitName);
-}
-
-uint32_t Tile::TraitNameToIDAdd(const char *traitName)
-{
-	return ::TraitNameToIDAdd(traitName, 0xFFFFFFFF);
+	return CdeclCall<uint32_t>(0xA01860, traitName);
 }
 
 Tile::Value *Tile::GetValue(uint32_t typeID)
@@ -37,41 +20,9 @@ Tile::Value *Tile::GetValue(uint32_t typeID)
 	return NULL;
 }
 
-Tile::Value *Tile::GetValueName(const char *valueName)
+float Tile::GetValueFloat(uint32_t id)
 {
-	return GetValue(TraitNameToID(valueName));
-}
-
-__declspec(naked) float Tile::GetValueFloat(uint32_t id)
-{
-	static const uint32_t procAddr = kAddr_TileGetFloat;
-	__asm	jmp		procAddr
-}
-
-DListNode<Tile> *Tile::GetNthChild(uint32_t index)
-{
-	return children.Tail()->Regress(index);
-}
-
-char *Tile::GetComponentFullName(char *resStr)
-{
-	if IS_TYPE(this, TileMenu)
-		return StrCopy(resStr, name.m_data);
-	char *fullName = parent->GetComponentFullName(resStr);
-	*fullName++ = '/';
-	fullName = StrCopy(fullName, name.m_data);
-	DListNode<Tile>* pIter = parent->children.Tail();
-	while (pIter->data != this)
-		pIter = pIter->prev;
-	int index = 0;
-	while ((pIter = pIter->prev) && StrEqualCS(name.m_data, pIter->data->name.m_data))
-		index++;
-	if (index)
-	{
-		*fullName++ = ':';
-		fullName = IntToStr(index, fullName);
-	}
-	return fullName;
+	return ThisCall<float>(0xA011B0, this, id);
 }
 
 Menu *Tile::GetParentMenu()
@@ -83,181 +34,5 @@ Menu *Tile::GetParentMenu()
 			return ((TileMenu*)tile)->menu;
 	}
 	while ((tile = tile->parent));
-	return NULL;
-}
-
-__declspec(naked) void Tile::PokeValue(uint32_t valueID)
-{
-	__asm
-	{
-		push	esi
-		mov		esi, ecx
-		mov		eax, [esp+8]
-		push	1
-		push	0x3F800000
-		push	eax
-		mov		eax, 0xA012D0
-		call	eax
-		mov		eax, [esp+8]
-		push	1
-		push	0
-		push	eax
-		mov		ecx, esi
-		mov		eax, 0xA012D0
-		call	eax
-		pop		esi
-		retn	4
-	}
-}
-
-__declspec(naked) void Tile::FakeClick()
-{
-	__asm
-	{
-		push	esi
-		mov		esi, ecx
-		push	1
-		push	0x3F800000
-		push	kTileValue_clicked
-		mov		eax, 0xA012D0
-		call	eax
-		push	1
-		push	0
-		push	kTileValue_clicked
-		mov		ecx, esi
-		mov		eax, 0xA012D0
-		call	eax
-		pop		esi
-		retn
-	}
-}
-
-void Tile::DestroyAllChildren()
-{
-	DListNode<Tile> * pIter = children.Tail();
-	Tile *child;
-	while (pIter)
-	{
-		child = pIter->data;
-		pIter = pIter->prev;
-		if (child) child->Destroy(true);
-	}
-}
-
-Tile *Tile::GetChild(const char *childName)
-{
-	int childIndex = 0;
-	char *colon = FindChr(childName, ':');
-	if (colon)
-	{
-		if (colon == childName) return NULL;
-		*colon = 0;
-		childIndex = StrToInt(colon + 1);
-	}
-	Tile *result = NULL;
-	for (DListNode<Tile> * pIter = children.Head(); pIter; pIter = pIter->next)
-	{
-		if (pIter->data && ((*childName == '*') || StrEqualCI(pIter->data->name.m_data, childName)) && !childIndex--)
-		{
-			result = pIter->data;
-			break;
-		}
-	}
-	if (colon) *colon = ':';
-	return result;
-}
-
-Tile *Tile::GetComponent(const char *componentPath, const char *&trait)
-{
-	Tile *parentTile = this;
-	char *slashPos;
-	while ((slashPos = SlashPos(componentPath)))
-	{
-		*slashPos = 0;
-		parentTile = parentTile->GetChild(componentPath);
-		if (!parentTile) return NULL;
-		componentPath = slashPos + 1;
-	}
-	if (*componentPath)
-	{
-		Tile *result = parentTile->GetChild(componentPath);
-		if (result) return result;
-		trait = componentPath;
-	}
-	return parentTile;
-}
-
-Tile::Value *Tile::GetComponentValue(const char *componentPath)
-{
-	const char *trait = NULL;
-	Tile *tile = GetComponent(componentPath, trait);
-	return (tile && trait) ? tile->GetValueName(trait) : NULL;
-}
-
-Tile *Tile::GetComponentTile(const char *componentPath)
-{
-	const char *trait = NULL;
-	Tile *tile = GetComponent(componentPath, trait);
-	return (tile && !trait) ? tile : NULL;
-}
-
-void Tile::Dump()
-{
-	_MESSAGE("%08X\t%s", this, name.m_data);
-	g_Log.Indent();
-
-	_MESSAGE("Values:");
-
-	g_Log.Indent();
-	
-	Value *value;
-	const char *traitName;
-	char traitID[9];
-	for (BSSimpleArray<Value*>::Iterator iter(values); !iter.End(); ++iter)
-	{
-		value = *iter;
-		traitName = TraitIDToName(value->id);
-
-		if (!traitName)
-		{
-			UIntToHex(value->id, traitID);
-			traitName = traitID;
-		}
-		if (value->str)
-			_MESSAGE("%d  %s: %s", value->id, traitName, value->str);
-		/*else if (value->action)
-			_MESSAGE("%d  %s: Action %08X", value->id, traitName, value->action);*/
-		else
-			_MESSAGE("%d  %s: %.4f", value->id, traitName, value->num);
-	}
-
-	g_Log.Outdent();
-
-	for (DListNode<Tile> *traverse = children.Tail(); traverse; traverse = traverse->prev)
-		if (traverse->data) traverse->data->Dump();
-
-	g_Log.Outdent();
-}
-
-void Debug_DumpTraits(void)
-{
-	for(uint32_t i = 0; i < g_traitNameMap->numBuckets; i++)
-	{
-		for (TraitNameMap::Entry * bucket = g_traitNameMap->buckets[i]; bucket; bucket = bucket->next)
-		{
-			_MESSAGE("%s %d", bucket->key, bucket->data);
-		}
-	}
-}
-
-// not a one-way mapping, so we just return the first
-// also this is slow and sucks
-const char *TraitIDToName(int id)
-{
-	for (uint32_t i = 0; i < g_traitNameMap->numBuckets; i++)
-		for (TraitNameMap::Entry * bucket = g_traitNameMap->buckets[i]; bucket; bucket = bucket->next)
-			if(bucket->data == id)
-				return bucket->key;
-
 	return NULL;
 }

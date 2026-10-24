@@ -2,9 +2,6 @@
 
 #include "nvse/GameTypes.h"
 
-typedef uint32_t (*_TraitNameToID)(const char *traitName);
-extern const _TraitNameToID TraitNameToID;
-
 const char * TraitIDToName(int id);	// slow
 
 //	Tile			
@@ -262,25 +259,11 @@ public:
 	uint8_t						pad35[2];		// 36
 
 	static uint32_t	TraitNameToID(const char *traitName);
-	static uint32_t	TraitNameToIDAdd(const char *traitName);
 	Value			*GetValue(uint32_t typeID);
-	Value			*GetValueName(const char *valueName);
 	float			GetValueFloat(uint32_t id);
-	DListNode<Tile>	*GetNthChild(uint32_t index);
-	Tile			*GetChild(const char *childName);
-	Tile			*GetComponent(const char *componentTile, const char *&trait);
-	Tile			*GetComponentTile(const char *componentTile);
-	Value			*GetComponentValue(const char *componentPath);
-	Tile			*ReadXML(const char *xmlPath);
-	char			*GetComponentFullName(char *resStr);
 	void			SetFloat(uint32_t id, float fltVal, bool bPropagate = true);
 	void			SetString(uint32_t id, const char *strVal, bool bPropagate = true);
 	Menu			*GetParentMenu();
-	void			DestroyAllChildren();
-	void			PokeValue(uint32_t valueID);
-	void			FakeClick();
-
-	void			Dump();
 };
 
 // 3C
@@ -314,5 +297,3 @@ class TileText : public Tile
 {
 public:
 };
-
-void Debug_DumpTraits(void);

@@ -162,6 +162,11 @@ bool Actor::Detects(Actor* target)
 	return detectionLevel > 0;
 }
 
+TESActorBase* Actor::GetActorBase() {
+	ExtraLeveledCreature* xLvlCre = GetExtraType(extraDataList, LeveledCreature);
+	return (xLvlCre && xLvlCre->form) ? (TESActorBase*)xLvlCre->form : (TESActorBase*)baseForm;
+}
+
 // From JIP
 TESObjectREFR* TESObjectREFR::GetMerchantContainer()
 {
@@ -199,5 +204,23 @@ __declspec(naked) ContChangesEntry* TESObjectREFR::GetContainerChangesEntry(TESF
 		xor eax, eax
 			done :
 		retn	4
+	}
+}
+
+
+__declspec(naked) TESObjectCELL* TESObjectREFR::GetParentCell() {
+	__asm
+	{
+		mov		eax, [ecx + 0x40]
+		test	eax, eax
+		jnz		done
+		push	kExtraData_PersistentCell
+		add		ecx, 0x44
+		call	BaseExtraList::GetByType
+		test	eax, eax
+		jz		done
+		mov		eax, [eax + 0xC]
+		done:
+		retn
 	}
 }

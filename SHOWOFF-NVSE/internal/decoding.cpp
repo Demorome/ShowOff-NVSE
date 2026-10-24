@@ -69,46 +69,6 @@ DebugText::DebugLine* DebugText::GetDebugInput()
 	return result;
 }
 
-ExtraEnableStateChildren* ExtraEnableStateChildren::Create()
-{
-	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraEnableStateChildren));
-	dataPtr[0] = kVtbl_ExtraEnableStateChildren;
-	dataPtr[1] = kExtraData_EnableStateChildren;
-	dataPtr[2] = 0;
-	//tList is inline, not a pointer - init m_listHead directly
-	dataPtr[3] = 0; //children.m_listHead.data
-	dataPtr[4] = 0; //children.m_listHead.next
-	return reinterpret_cast<ExtraEnableStateChildren*>(dataPtr);
-}
-
-ExtraEnableStateParent* ExtraEnableStateParent::Create(TESObjectREFR* parent)
-{
-	uint32_t* dataPtr = (uint32_t*)GameHeapAlloc(sizeof(ExtraEnableStateParent));
-	dataPtr[0] = kVtbl_ExtraEnableStateParent;
-	dataPtr[1] = kExtraData_EnableStateParent;
-	dataPtr[2] = 0;
-	dataPtr[3] = (uint32_t)parent;
-	dataPtr[4] = 0; //flags + pad
-	return reinterpret_cast<ExtraEnableStateParent*>(dataPtr);
-}
-
-__declspec(naked) void SystemColorManager::SystemColor::SetColorRGB(uint32_t r, uint32_t g, uint32_t b)
-{
-	__asm
-	{
-		xor eax, eax
-		mov		ah, [esp + 4]
-		mov		al, [esp + 8]
-		shl		eax, 0x10
-		mov		ah, [esp + 0xC]
-		mov		al, 0xFF
-		push	eax
-		mov		eax, [ecx]
-		call	dword ptr[eax + 8]
-		retn	0xC
-	}
-}
-
 AnimGroupClassify s_animGroupClassify[] =
 {
 	{1, 1, 0, 0}, {1, 1, 0, 0}, {1, 1, 0, 0}, {2, 1, 0, 0}, {2, 2, 0, 0}, {2, 3, 0, 0}, {2, 4, 0, 0}, {2, 1, 1, 0}, {2, 2, 1, 0},
@@ -149,10 +109,6 @@ void __cdecl PlayMenuSound(MenuSoundCode soundCode)
 {
 	return CdeclCall(0x717280, soundCode);
 }
-
-/*
-#include "netimmerse.h"
-#include <utility.h>*/
 
 // Taken from JohnnyGuitar NVSE
 NiNode* NiNode::GetNode(const char* nodeName)

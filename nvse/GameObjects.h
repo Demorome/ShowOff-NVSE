@@ -746,7 +746,6 @@ public:
 	// See JIP's Cmd_IsInCombatWith
 	bool __fastcall IsInCombatWith(Actor* target) const;
 
-	int GetDetectionValue(Actor *detected);
 	TESPackage *GetStablePackage();
 	PackageInfo *GetPackageInfo();
 	TESObjectREFR *GetPackageTarget();
@@ -770,7 +769,6 @@ public:
 	bool IsInvisible();
 	int32_t GetDetectionLevelAlt(Actor* target, bool calculateSneakLevel);
 	bool Detects(Actor* target);
-	float GetHealthEffectsSum();
 	void Kill(Actor* killer);
 	bool GetShouldAttack(Actor* target);
 	void SetWantWeaponDrawn(bool wantsWeaponOut);
