@@ -514,7 +514,7 @@ DEFINE_COMMAND_PLUGIN(GetEquippedItemRefForItem, "Returns the equipped inv ref f
 bool Cmd_GetEquippedItemRefForItem_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	TESForm* itemForm_OrList;
+	TESForm* itemForm_OrList = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &itemForm_OrList) && itemForm_OrList
 		&& IS_ACTOR(thisObj) && !IS_REFERENCE(itemForm_OrList))
 	{

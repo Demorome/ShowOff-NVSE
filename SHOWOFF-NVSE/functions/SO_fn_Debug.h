@@ -6,7 +6,7 @@ bool Cmd_DumpFormList_Execute(COMMAND_ARGS)
 	BGSListForm* FList = nullptr;
 	char fileName[MAX_PATH] = "default";
 	uint32_t bAppend = 1;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &FList, &fileName, &bAppend)
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &FList, &fileName, &bAppend) || !FList
 		|| !IS_TYPE(FList, BGSListForm)) return true;
 
 	if (strcmp(fileName, "default") == 0)  //if they are the same, i.e. filepathStr was not passed.
@@ -65,7 +65,7 @@ DEFINE_COMMAND_ALT_PLUGIN(IsBaseForm, IsBasedForm, "", false, kParams_OneForm);
 bool Cmd_IsBaseForm_Execute(COMMAND_ARGS)
 {
 	*result = false;
-	TESForm* form;
+	TESForm* form = nullptr;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form)) return true;
 	if (form && !IS_REFERENCE(form))
 	{

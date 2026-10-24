@@ -744,9 +744,9 @@ bool Cmd_GetPipboyRadioVoiceEntryData_Execute(COMMAND_ARGS)
 bool Cmd_FormListRemoveForm_Execute(COMMAND_ARGS)
 {
 	*result = eListInvalid;	//index of removed form.
-	BGSListForm* pListForm;
-	TESForm* pForm;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pListForm, &pForm))
+	BGSListForm* pListForm = nullptr;
+	TESForm* pForm = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pListForm, &pForm) || !pListForm || !pForm)
 		return true;
 	int32_t const index = pListForm->RemoveForm(pForm);
 	pListForm->MarkAsModified(0x80000000);
@@ -756,8 +756,8 @@ bool Cmd_FormListRemoveForm_Execute(COMMAND_ARGS)
 
 bool Cmd_GetZoneRespawns_Execute(COMMAND_ARGS) {
 	*result = -1;	//bRespawns. -1 if could not extract the form.
-	TESForm* pForm;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm) && IS_ID(pForm, BGSEncounterZone)) {
+	TESForm* pForm = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &pForm) && pForm && IS_ID(pForm, BGSEncounterZone)) {
 		BGSEncounterZone* pZone = static_cast<BGSEncounterZone*>(pForm);
 		*result = !pZone->GetNeverReset();
 	}
@@ -774,8 +774,8 @@ bool Cmd_ClearCinematicTextQueue_Execute(COMMAND_ARGS)
 //Credits to LN's GetZone function for most of the code here.
 bool Cmd_GetCellEncounterZone_Execute(COMMAND_ARGS) {
 	*result = 0;
-	TESForm* pForm;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pForm) || !IS_ID(pForm, TESObjectCELL))
+	TESForm* pForm = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pForm) || !pForm || !IS_ID(pForm, TESObjectCELL))
 		return true;
 
 	const TESObjectCELL* pCell = static_cast<TESObjectCELL*>(pForm);
@@ -847,9 +847,9 @@ bool Cmd_ShowPauseMenu_Execute(COMMAND_ARGS)
 //Credits to JIP's LeveledListRemoveForm for most of the code.
 bool Cmd_RemoveFormFromLeveledList_Execute(COMMAND_ARGS)
 {
-	TESForm* list, * form;
-	TESLeveledList* lvlList;
-	if (ExtractArgsEx(EXTRACT_ARGS_EX, &list, &form) && (lvlList = list->GetLvlList()))
+	TESForm* list = nullptr, * form = nullptr;
+	TESLeveledList* lvlList = nullptr;
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &list, &form) && list && form && (lvlList = list->GetLvlList()))
 	{
 		*result = lvlList->RemoveItem(form);
 		if (*result)
@@ -865,8 +865,8 @@ bool Cmd_RemoveFormFromLeveledList_Execute(COMMAND_ARGS)
 bool Cmd_ResetInteriorAlt_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	TESForm* pForm;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pForm) || !IS_ID(pForm, TESObjectCELL))
+	TESForm* pForm = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &pForm) || !pForm || !IS_ID(pForm, TESObjectCELL))
 		return true;
 
 	TESObjectCELL* pCell = static_cast<TESObjectCELL*>(pForm);
@@ -895,7 +895,7 @@ bool Cmd_SetEnableParent_Execute(COMMAND_ARGS)
 bool Cmd_GetActorValueName_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	uint32_t av;
+	uint32_t av = UINT32_MAX;
 	enum Mode {
 		kMode_GetEditorName = 0,
 		kMode_GetFullLocalizedName,
@@ -937,7 +937,7 @@ bool Cmd_SetAmmoName_Execute(COMMAND_ARGS)
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &string, &nameTypeToChange, &form))
 		return true;
 
-	form = form->TryGetREFRParent();
+	form = form ? form->TryGetREFRParent() : nullptr;
 	if (!form) {
 		if (!thisObj) return true;
 		form = thisObj->baseForm;
@@ -972,11 +972,15 @@ bool Cmd_GetAmmoName_Execute(COMMAND_ARGS)
 	TESForm* form = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &nameTypeToChange, &form))
 	{
-		form = form->TryGetREFRParent();
+		form = form ? form->TryGetREFRParent() : nullptr;
 		if (!form) {
 			if (!thisObj) return true;
 			form = thisObj->baseForm;
 		}
+
+		if (!form)
+			return true;
+
 		if (!IS_ID(form, TESAmmo))
 			return true;
 
@@ -1031,12 +1035,12 @@ DEFINE_COMMAND_PLUGIN(SpawnTracingProjectile, "Spawns a projectile following the
 bool Cmd_SpawnTracingProjectile_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	TESForm* baseProjToSpawn;
+	TESForm* baseProjToSpawn = nullptr;
 	uint32_t ignoreGravity = 1;
 	uint32_t bCopyData = false;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &baseProjToSpawn, &ignoreGravity, &bCopyData))
 		return true;
-	if (!thisObj || !thisObj->IsProjectile() || !IS_ID(baseProjToSpawn, BGSProjectile))
+	if (!thisObj || !thisObj->IsProjectile() || !baseProjToSpawn || !IS_ID(baseProjToSpawn, BGSProjectile))
 		return true;
 
 	auto* projectileToTrail = static_cast<Projectile*>(thisObj);
@@ -1077,7 +1081,7 @@ DEFINE_COMMAND_PLUGIN(IsFormLoading, "", false, kParams_OneForm);
 bool Cmd_IsFormLoading_Execute(COMMAND_ARGS)
 {
 	*result = false;
-	TESForm* form;
+	TESForm* form = nullptr;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form) || !form)
 		return true;
 	*result = form->IsStillLoading();
@@ -1152,8 +1156,8 @@ DEFINE_COMMAND_PLUGIN(CaravanDeckGetCards, "", false, kParams_OneForm);
 bool Cmd_CaravanDeckGetCards_Execute(COMMAND_ARGS)
 {
 	*result = 0;
-	TESForm* deckForm;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &deckForm) || !IS_ID(deckForm, TESCaravanDeck))
+	TESForm* deckForm = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &deckForm) || !deckForm || !IS_ID(deckForm, TESCaravanDeck))
 		return true;
 	const auto* deck = static_cast<TESCaravanDeck*>(deckForm);
 	if (deck->cards->Empty())
@@ -1173,10 +1177,10 @@ DEFINE_COMMAND_PLUGIN(CaravanDeckRemoveCard, "", false, kParams_TwoForms);
 bool Cmd_CaravanDeckRemoveCard_Execute(COMMAND_ARGS)
 {
 	*result = 0; //numRemoved
-	TESForm* deckForm;
-	TESForm* cardForm;
+	TESForm* deckForm = nullptr;
+	TESForm* cardForm = nullptr;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &deckForm, &cardForm)
-		|| !IS_ID(deckForm, TESCaravanDeck) || !IS_ID(cardForm, TESCaravanCard))
+		|| !deckForm || !IS_ID(deckForm, TESCaravanDeck) || !cardForm || !IS_ID(cardForm, TESCaravanCard))
 	{
 		return true;
 	}
@@ -1193,11 +1197,11 @@ DEFINE_COMMAND_PLUGIN(CaravanDeckAddCard, "", false, kParams_TwoForms_OneOptiona
 bool Cmd_CaravanDeckAddCard_Execute(COMMAND_ARGS)
 {
 	*result = eListInvalid;
-	TESForm* deckForm;
-	TESForm* cardForm;
+	TESForm* deckForm = nullptr;
+	TESForm* cardForm = nullptr;
 	int32_t n = eListEnd;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &deckForm, &cardForm, &n)
-		|| !IS_ID(deckForm, TESCaravanDeck) || !IS_ID(cardForm, TESCaravanCard))
+		|| !deckForm || !IS_ID(deckForm, TESCaravanDeck) || !cardForm || !IS_ID(cardForm, TESCaravanCard))
 	{
 		return true;
 	}
@@ -1212,8 +1216,8 @@ DEFINE_COMMAND_PLUGIN(CaravanDeckGetCount, "", false, kParams_OneForm);
 bool Cmd_CaravanDeckGetCount_Execute(COMMAND_ARGS)
 {
 	*result = -1;
-	TESForm* deckForm;
-	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &deckForm) || !IS_ID(deckForm, TESCaravanDeck) )
+	TESForm* deckForm = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &deckForm) || !deckForm || !IS_ID(deckForm, TESCaravanDeck) )
 		return true;
 	auto* deck = static_cast<TESCaravanDeck*>(deckForm);
 	*result = deck->count;
@@ -1224,10 +1228,10 @@ DEFINE_COMMAND_PLUGIN(CaravanDeckGetCardIndex, "", false, kParams_TwoForms);
 bool Cmd_CaravanDeckGetCardIndex_Execute(COMMAND_ARGS)
 {
 	*result = eListInvalid;
-	TESForm* deckForm;
-	TESForm* cardForm;
+	TESForm* deckForm = nullptr;
+	TESForm* cardForm = nullptr;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &deckForm, &cardForm)
-		|| !IS_ID(deckForm, TESCaravanDeck) || !IS_ID(cardForm, TESCaravanCard))
+		|| !deckForm || !IS_ID(deckForm, TESCaravanDeck) || !cardForm || !IS_ID(cardForm, TESCaravanCard))
 	{
 		return true;
 	}
@@ -1317,8 +1321,11 @@ double GetAngleBetweenPoints(NiPoint3* actorPos, NiPoint3* playerPos, float offs
 DEFINE_COMMAND_PLUGIN(GetHeadingAngleTEST, "", false, kParams_OneForm);
 bool Cmd_GetHeadingAngleTEST_Execute(COMMAND_ARGS)
 {
-	TESObjectREFR* ref;
+	TESObjectREFR* ref = nullptr;
 	ExtractArgsEx(EXTRACT_ARGS_EX, &ref);
+	if (!ref) 
+		return true;
+
 	auto playerRotation = ((Actor*)thisObj)->AdjustRot(0);
 	*result = GetAngleBetweenPoints(ref->GetPos(), thisObj->GetPos(), playerRotation);
 	return true;
@@ -1360,7 +1367,7 @@ bool Cmd_GetPipBoyRadioSoundTimeRemaining_Execute(COMMAND_ARGS)
 DEFINE_COMMAND_PLUGIN(SetCellFullNameAlt, "Like SetCellFullName but accepts a string.", false, kParams_JIP_OneCell_OneString);
 bool Cmd_SetCellFullNameAlt_Execute(COMMAND_ARGS)
 {
-	TESObjectCELL* cell;
+	TESObjectCELL* cell = nullptr;
 	char newName[256] = {};
 
 	ExtractArgsEx(EXTRACT_ARGS_EX, &cell, &newName);

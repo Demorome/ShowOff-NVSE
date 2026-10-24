@@ -17,7 +17,7 @@ DEFINE_COMMAND_PLUGIN(SetFactionCombatReactionTemp, "Sets the combat reaction be
 bool Cmd_SetFactionCombatReactionTemp_Execute(COMMAND_ARGS)
 {
 	*result = 0; //bSuccess
-	TESFaction* faction1, * faction2;
+	TESFaction* faction1 = nullptr, * faction2 = nullptr;
 	uint32_t setAllyOrEnemy;	// emulate SetAlly or SetEnemy
 
 	// If setAlly, and if true, then faction1 will react as a Friend to F2, otherwise Ally.
@@ -48,7 +48,7 @@ DEFINE_COMMAND_ALT_PLUGIN(SetAllyTemp, SetAllyShowOff, "Sets the combat reaction
 bool Cmd_SetAllyTemp_Execute(COMMAND_ARGS)
 {
 	*result = 0; //bSuccess
-	TESFaction* faction1, *faction2;
+	TESFaction* faction1 = nullptr, *faction2 = nullptr;
 	
 	// If true, then faction1 will react as a Friend to faction2, otherwise Ally (default).
 	uint32_t F1toF2Flag = 0;
@@ -69,7 +69,7 @@ DEFINE_COMMAND_ALT_PLUGIN(SetEnemyTemp, SetEnemyShowOff, "Sets the combat reacti
 bool Cmd_SetEnemyTemp_Execute(COMMAND_ARGS)
 {
 	*result = 0; //bSuccess
-	TESFaction* faction1, * faction2;
+	TESFaction* faction1 = nullptr, * faction2 = nullptr;
 
 	// If true, then faction1 will react as a Neutral to faction2, otherwise Enemy (default).
 	uint32_t F1toF2Flag = 0;

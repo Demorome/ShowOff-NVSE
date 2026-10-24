@@ -282,7 +282,7 @@ bool Cmd_AuxStringMapArraySetRef_Execute(COMMAND_ARGS)
 {
 	char varName[256] = {};
 	char keyName[256] = {};
-	TESForm* refVal;
+	TESForm* refVal = nullptr;
 	if (ExtractArgsEx(EXTRACT_ARGS_EX, &varName, &keyName, &refVal))
 	{
 		AuxVariableValue* value = AuxStringMapAddValue(scriptObj, varName, keyName);

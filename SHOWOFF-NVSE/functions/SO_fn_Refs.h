@@ -82,7 +82,7 @@ static ParamInfo Cmd_PlaceAtReticleAlt_Params[] = {
 DEFINE_COMMAND_PLUGIN(PlaceAtReticleAlt, , true, Cmd_PlaceAtReticleAlt_Params);
 bool Cmd_PlaceAtReticleAlt_Execute(COMMAND_ARGS)
 {
-	TESForm* formToPlace;
+	TESForm* formToPlace = nullptr;
 	uint32_t count = 1;
 	float minDistance = 0.0f, maxDistance = 0.0f;
 	PlaceAtReticleAlt::g_healthPercent = 1.0f;

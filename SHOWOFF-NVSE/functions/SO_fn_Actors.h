@@ -411,7 +411,7 @@ bool Cmd_GetActorValueDamage_Eval(COMMAND_ARGS_EVAL)
 bool Cmd_GetActorValueDamage_Execute(COMMAND_ARGS)
 {
 	*result = -1;
-	uint32_t avCode;
+	uint32_t avCode = UINT32_MAX;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &avCode))
 		return true;
 	return Cmd_GetActorValueDamage_Eval(thisObj, (void*)avCode, 0, result);
