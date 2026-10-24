@@ -5,17 +5,7 @@
 
 #include "PluginAPI.h"
 
-
-// Inclusions below fuck up the compiler :thonk: :kms:
-//#include "GameAPI.h"
-//#include "GameData.h"
-//#include "PluginAPI.h"
-//#include "GameForms.h"
-//#include "ShowOffNVSE.h"
-
-
 class TESForm;
-
 
 // From JIP
 extern const double
@@ -77,20 +67,6 @@ extern const uint64_t kSSERemoveSignMaskPD[], kSSEChangeSignMaskPD[];
 
 // From JIP
 extern const char kLwrCaseConverter[];
-
-// LightCS definitions taken from JG
-class LightCS
-{
-	uint32_t	owningThread;
-	uint32_t	enterCount;
-
-public:
-	LightCS() : owningThread(0), enterCount(0) {}
-
-	void Enter();
-	void EnterSleep();
-	void Leave();
-};
 
 // From JIP
 typedef void* (__cdecl* memcpy_t)(void*, const void*, size_t);
@@ -300,15 +276,9 @@ bool FileToBuffer(const char *filePath, char *buffer);
 
 //===End JIP File stuff
 
-void __fastcall GetTimeStamp(char *buffer);
 
 // ConsolePrint() limited to 512 chars; use this to print longer strings to console
 void Console_Print_Long(const std::string& str);
-
-uint32_t __fastcall ByteSwap(uint32_t dword);
-
-void DumpMemImg(void *data, uint32_t size, uint8_t extra = 0);
-
 
 //===Begin JIP AuxBuffer stuff
 
@@ -334,7 +304,6 @@ uint8_t* __fastcall GetAuxBuffer(AuxBuffer& buffer, uint32_t reqSize);
 
 // From kNVSE
 void Log(const std::string& msg);
-int HexStringToInt(const std::string& str);
 std::string GetCurPath();
 
 #if 0
@@ -347,11 +316,6 @@ void DebugPrint(const std::string& str)
 	Log(str);
 }
 #endif
-
-double TryConvertStrToDouble(std::string const& str);
-TESForm* StringToForm_Subroutine(const std::string& modName, const std::string& formIdStr);
-TESForm* __fastcall StringToForm(const std::string& str);  //calls upon _Subroutine
-ArrayElementR __fastcall ConvertStrToElem(const std::string &dataStr);
 
 //	Assign rhs to lhs, bypassing operator=
 template <typename T> __forceinline void RawAssign(const T& lhs, const T& rhs)
@@ -394,13 +358,9 @@ float GetFltGameSetting(uint32_t addr);
 int32_t GetIntGameSetting(uint32_t addr);
 char* GetStrGameSetting(uint32_t addr);
 
-bool IsDllRunning(const char* dll);
-
 TESForm* TryExtractBaseForm(TESForm* form, TESObjectREFR* thisObj);
 TESObjectREFR* TryGetREFR(TESForm* optionalForm, TESObjectREFR* thisObj);
 TESForm* TryGetBaseFormOrREFR(TESForm* form, TESObjectREFR* thisObj);
-
-void AssignScriptValueResult(const NVSEArrayElement* val, PluginExpressionEvaluator& eval, COMMAND_ARGS);
 
 // helper type for std::visit
 // taken from https://en.cppreference.com/w/cpp/utility/variant/visit

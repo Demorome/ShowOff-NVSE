@@ -1,14 +1,11 @@
 #include "utility.h"
-
-#include <algorithm>
-#include <ctime>
-#include <stdexcept>
-
+#include "GameAPI.h"
+#include "GameObjects.h"
 #include "GameData.h"
-#include "GameProcess.h"
-#include "GameRTTI.h"
+
 #include "jip_nvse.h"
 
+#include <ranges>
 
 // From JIP
 memcpy_t MemCopy = memcpy, MemMove = memmove;
@@ -83,48 +80,6 @@ kLwrCaseConverter[] =
 	'\xE0', '\xE1', '\xE2', '\xE3', '\xE4', '\xE5', '\xE6', '\xE7', '\xE8', '\xE9', '\xEA', '\xEB', '\xEC', '\xED', '\xEE', '\xEF',
 	'\xF0', '\xF1', '\xF2', '\xF3', '\xF4', '\xF5', '\xF6', '\xF7', '\xF8', '\xF9', '\xFA', '\xFB', '\xFC', '\xFD', '\xFE', '\xFF'
 };
-
-// From JG
-void LightCS::Enter()
-{
-	uint32_t threadID = GetCurrentThreadId();
-	if (owningThread == threadID)
-	{
-		enterCount++;
-		return;
-	}
-	while (InterlockedCompareExchange(&owningThread, threadID, 0));
-	enterCount = 1;
-}
-
-#define FAST_SLEEP_COUNT 10000UL
-
-void LightCS::EnterSleep()
-{
-	uint32_t threadID = GetCurrentThreadId();
-	if (owningThread == threadID)
-	{
-		enterCount++;
-		return;
-	}
-	uint32_t fastIdx = FAST_SLEEP_COUNT;
-	while (InterlockedCompareExchange(&owningThread, threadID, 0))
-	{
-		if (fastIdx)
-		{
-			fastIdx--;
-			Sleep(0);
-		}
-		else Sleep(1);
-	}
-	enterCount = 1;
-}
-
-void LightCS::Leave()
-{
-	if (!--enterCount)
-		owningThread = 0;
-}
 
 // From JG
 bool fCompare(float lval, float rval)
@@ -1633,44 +1588,6 @@ void FileStreamJIP::MakeAllDirs(char* fullPath)
 
 //===End JIP File stuff
 
-void __fastcall GetTimeStamp(char *buffer)
-{
-	time_t rawTime = time(NULL);
-	tm timeInfo;
-	localtime_s(&timeInfo, &rawTime);
-	sprintf_s(buffer, 0x10, "%02d:%02d:%02d", timeInfo.tm_hour, timeInfo.tm_min, timeInfo.tm_sec);
-}
-
-__declspec(naked) uint32_t __fastcall ByteSwap(uint32_t dword)
-{
-	__asm
-	{
-		mov		eax, ecx
-		bswap	eax
-		retn
-	}
-}
-
-void DumpMemImg(void *data, uint32_t size, uint8_t extra)
-{
-	uint32_t *ptr = (uint32_t*)data;
-	//Console_Print("Output");
-	_MESSAGE("\nDumping  %08X\n", ptr);
-	for (uint32_t iter = 0; iter < size; iter += 4, ptr++)
-	{
-		if (!extra) _MESSAGE("%03X\t\t%08X\t", iter, *ptr);
-		else if (extra == 1) _MESSAGE("%03X\t\t%08X\t[%08X]\t", iter, *ptr, ByteSwap(*ptr));
-		else if (extra == 2) _MESSAGE("%03X\t\t%08X\t%f", iter, *ptr, *(float*)ptr);
-		/*else
-		{
-			uint32_t addr = *ptr;
-			if (!(addr & 3) && (addr > 0x08000000) && (addr < 0x34000000))
-				_MESSAGE("%03X\t\t%08X\t%08X\t", iter, *ptr, *(uint32_t*)addr);
-			else _MESSAGE("%03X\t\t%08X\t", iter, *ptr);
-		}*/
-	}
-}
-
 //From NVSE
 void Console_Print_Long(const std::string& str)
 {
@@ -1727,92 +1644,9 @@ std::string GetCurPath()
 }
 
 // From kNVSE
-int HexStringToInt(const std::string& str)
-{
-	char* p;
-	const auto id = strtoul(str.c_str(), &p, 16);
-	if (*p == 0)
-		return id;
-	return -1;
-}
-
-// From kNVSE
 void Log(const std::string& msg) 
 {
 	_MESSAGE(msg.c_str());
-}
-
-// Copied from kNVSE (https://github.com/korri123/kNVSE/blob/master/nvse_plugin_example/commands_animation.cpp).
-TESForm* StringToForm_Subroutine(const std::string& modName, const std::string& formIdStr)
-{
-	const auto* mod = TESDataHandler::GetSingleton()->GetListFile(modName.c_str());
-#if _DEBUG
-	if (!mod)
-	{
-		Log("TryConvertStrToForm - Mod name " + modName + " was not found");
-	}
-#endif
-	auto formId = HexStringToInt(formIdStr);
-#if _DEBUG
-	if (formId == -1)
-	{
-		Log("TryConvertStrToForm - FormID formatted, got " + formIdStr);
-	}
-#endif
-	formId = (mod->modIndex << 24) + (formId & 0x00FFFFFF);
-	auto* form = LookupFormByID(formId);
-#if _DEBUG
-	if (!form)
-	{
-		Log(FormatString("TryConvertStrToForm - Form %X was not found", formId));
-	}
-#endif
-	return form;
-}
-
-double TryConvertStrToDouble(std::string const& str)
-{
-	double val = NAN;
-	try
-	{
-		val = stod(str);
-	}
-	catch (const std::invalid_argument& ia)
-	{
-		_MESSAGE("Conversion of Str to Double failed (IA): %s", ia.what());
-	}
-	catch (const std::out_of_range& oor)
-	{
-		_MESSAGE("Conversion of Str to Double failed (OOR): %s", oor.what());
-	}
-	return val;
-}
-
-// Copies after JIP's StringToRef().
-TESForm* __fastcall StringToForm(const std::string& str)  //calls upon _Subroutine
-{
-	// Expected input example: "@FalloutNV.esm:135F19"
-	const std::size_t posOfSeparator = str.find(':');
-	const std::string modStr = str.substr(0, posOfSeparator);  // From "@FalloutNV.esm:135F19", grab "FalloutNV.esm"
-	const std::string formIdStr = str.substr(posOfSeparator + 1);  // From "@FalloutNV.esm:135F19", grab "135F19"
-	return StringToForm_Subroutine(modStr, formIdStr);
-}
-
-
-// Copies from JIP's CreateForType()
-ArrayElementR __fastcall ConvertStrToElem(const std::string &dataStr)
-{
-	ArrayElementR result;
-	switch (dataStr[0])
-	{
-	case '@':  // Form
-		result = StringToForm(dataStr);  // can pass null forms
-		break;
-
-	default:  // String - number case is ignored, since it is handled beforehand.
-		result = dataStr.c_str();
-	}
-	return result;
 }
 
 bool AlchemyItem::IsPoison()
@@ -1827,30 +1661,6 @@ bool AlchemyItem::IsPoison()
 		if (effSetting && !(effSetting->effectFlags & 4)) return false;
 	} while ((iter = iter->next));
 	return effSetting != NULL;
-}
-
-TESActorBase* Actor::GetActorBase()
-{
-	ExtraLeveledCreature* xLvlCre = GetExtraType(extraDataList, LeveledCreature);
-	return (xLvlCre && xLvlCre->form) ? (TESActorBase*)xLvlCre->form : (TESActorBase*)baseForm;
-}
-
-__declspec(naked) TESObjectCELL* TESObjectREFR::GetParentCell()
-{
-	__asm
-	{
-		mov		eax, [ecx + 0x40]
-		test	eax, eax
-		jnz		done
-		push	kExtraData_PersistentCell
-		add		ecx, 0x44
-		call	BaseExtraList::GetByType
-		test	eax, eax
-		jz		done
-		mov		eax, [eax + 0xC]
-		done:
-		retn
-	}
 }
 
 TESRace* CastFormToRace(TESForm* form)
@@ -1965,12 +1775,6 @@ char* GetStrGameSetting(uint32_t addr)
 	return *(char**)(addr + 4);
 }
 
-
-bool IsDllRunning(const char* dll)
-{
-	return GetModuleHandleA(dll);
-}
-
 TESForm* TryExtractBaseForm(TESForm* form, TESObjectREFR* thisObj)
 {
 	if (form) {
@@ -1986,7 +1790,7 @@ TESForm* TryExtractBaseForm(TESForm* form, TESObjectREFR* thisObj)
 TESObjectREFR* TryGetREFR(TESForm* optionalForm, TESObjectREFR* thisObj)
 {
 	TESObjectREFR* result = nullptr;
-	if (optionalForm && IS_REFERENCE(optionalForm))
+	if (optionalForm && optionalForm->IsReference())
 	{
 		result = (TESObjectREFR*)optionalForm;
 	}
@@ -2006,36 +1810,6 @@ TESForm* TryGetBaseFormOrREFR(TESForm* form, TESObjectREFR* thisObj)
 	if (!form)
 		return thisObj;
 	return form;
-}
-
-//assume val is non-null
-void AssignScriptValueResult(const NVSEArrayElement* val, PluginExpressionEvaluator& eval, COMMAND_ARGS)
-{
-	switch (val->GetType())
-	{
-	case NVSEArrayVarInterface::kType_Numeric:
-		*result = val->num;
-		eval.SetExpectedReturnType(kRetnType_Default);
-		break;
-	case NVSEArrayVarInterface::kType_Array:
-		g_arrInterface->AssignCommandResult(val->arr, result);
-		eval.SetExpectedReturnType(kRetnType_Array);
-		break;
-	case NVSEArrayVarInterface::kType_String:
-		g_strInterface->Assign(PASS_COMMAND_ARGS, val->str);
-		eval.SetExpectedReturnType(kRetnType_String);
-		break;
-	case NVSEArrayVarInterface::kType_Form:
-		REFR_RES = val->form->GetFormID();
-		eval.SetExpectedReturnType(kRetnType_Form);
-		break;
-	case NVSEArrayVarInterface::kType_Invalid:
-		*result = 0;	//todo: consider a better error constant, like -999
-		eval.SetExpectedReturnType(kRetnType_Default);
-		break;
-	default:
-		throw std::logic_error("SHOWOFF - AssignScriptValueResult >> insufficient switch cases.");
-	}
 }
 
 __declspec(noinline) uint8_t* AuxBuffer::Get(uint32_t bufIdx, uint32_t reqSize)
@@ -2150,7 +1924,7 @@ const std::string& RefToString(TESForm* form)
 
 bool IsGamePaused()
 {
-	bool isMainOrPauseMenuOpen = *(Menu**)0x11DAAC0; // g_startMenu, credits to lStewieAl
+	bool isMainOrPauseMenuOpen = *(DWORD**)0x11DAAC0; // g_startMenu, credits to lStewieAl
 	auto* console = ConsoleManager::GetSingleton();
 
 	return isMainOrPauseMenuOpen || console->IsConsoleOpen();

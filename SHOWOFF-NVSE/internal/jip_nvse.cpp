@@ -74,10 +74,6 @@ bool Actor::IsInCombatWith(Actor* target) const
 	return ThisCall<bool>(0x8BC700, this, target);
 }
 
-TESForm* LookupFormByRefID(uint32_t refID) {
-	return TESForm::GetFormByNumericID(refID);
-}
-
 TESObjectWEAP* Actor::GetEquippedWeapon() const
 {
 	return ThisCall<TESObjectWEAP*>(0x8A1710, this);

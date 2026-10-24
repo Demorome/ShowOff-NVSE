@@ -78,7 +78,7 @@ void Script::RefVariable::Resolve(ScriptEventList *eventList)
 	if (varIdx && eventList)
 	{
 		ScriptVar *var = eventList->GetVariable(varIdx);
-		if (var) form = LookupFormByID(*(uint32_t*)&var->data);
+		if (var) form = TESForm::GetFormByNumericID(*(uint32_t*)&var->data);
 	}
 }
 

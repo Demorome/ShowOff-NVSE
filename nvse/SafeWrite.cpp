@@ -1,8 +1,5 @@
 #include "SafeWrite.h"
-
-#include "GameAPI.h" // for MessageBox
-
-#include "ShowOffNVSE.h" // to delay error prints until console manager is fully loaded
+#include "GameObjects.h"
 
 void __stdcall SafeWrite8(uint32_t addr, uint32_t data)
 {
@@ -209,7 +206,7 @@ uint8_t* GetParentBasePtr(void* addressOfReturnAddress, bool lambda)
 }
 
 bool g_showedRuntimeHookConflictError = false;
-
+extern std::vector<std::string> g_deferredPrints;
 void ShowHookConflictErrorMsg()
 {
 	if (!g_showedRuntimeHookConflictError)

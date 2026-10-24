@@ -1,127 +1,12 @@
 ﻿#pragma once
 #include "EventFilteringInterface.h"
-#include <unordered_set>
 #include <memory>
-#include <mutex>
 #include <shared_mutex>
 
 #include "GameObjects.h"
 
 class EventInformation;
 void* __fastcall GenericCreateFilter(void** maxFilters, uint32_t numFilters);
-
-#if 0 // todo: make it compatible with my changes to how void** filters are passed/handled
-class JohnnyEventFiltersForm : EventHandlerInterface
-{
-	typedef  std::unordered_set<unsigned int> RefUnorderedSet;
-
-private:
-	RefUnorderedSet* Filters = 0;
-
-	RefUnorderedSet* GetFilter(uint32_t filter)
-	{
-		if (filter >= numFilters) return NULL;
-		return &(Filters[filter]);
-	}
-public:
-	JohnnyEventFiltersForm(void** filters, uint32_t nuFilters)
-	{
-		numFilters = nuFilters;
-		Filters = new RefUnorderedSet[numFilters];
-		GenFilters = new GenericFilters[numFilters];
-		for (int i = 0; i < nuFilters; i++) GenFilters[i].ptr = filters[i];
-
-	}
-	virtual ~JohnnyEventFiltersForm()
-	{
-		delete[] Filters;
-		delete[] GenFilters;
-	}
-
-	virtual bool IsInFilter(uint32_t filterNum, GenericFilters toSearch)
-	{
-		RefUnorderedSet* FilterSet;
-		if (!(FilterSet = GetFilter(filterNum))) return false;
-		//RefUnorderedSet::const_iterator got = FilterSet->find(toSearch);
-		return  FilterSet->empty() || (FilterSet->find(toSearch.refID) != FilterSet->end());
-	}
-
-
-	virtual void InsertToFilter(uint32_t filterNum, GenericFilters toInsert)
-	{
-		RefUnorderedSet* FilterSet;
-		if (!(FilterSet = GetFilter(filterNum))) return;
-		FilterSet->insert(toInsert.refID);
-	}
-	virtual void DeleteFromFilter(uint32_t filterNum, GenericFilters toDelete)
-	{
-		RefUnorderedSet* FilterSet;
-		if (!(FilterSet = GetFilter(filterNum))) return;
-		FilterSet->erase(toDelete.refID);
-
-	}
-	virtual bool IsFilterEmpty(uint32_t filterNum)
-	{
-		RefUnorderedSet* FilterSet = GetFilter(filterNum);
-		if (!FilterSet) return true;
-		return FilterSet->empty();
-	}
-	virtual bool IsFilterEqual(GenericFilters Filter, uint32_t nuFilter)
-	{
-		return (Filter.ptr == GenFilters[nuFilter].ptr);
-	}
-	virtual bool IsAcceptedParameter(GenericFilters parameter)
-	{
-
-		return parameter.form->typeID != kFormType_TESObjectSTAT;
-
-	}
-
-	virtual void SetUpFiltering()
-	{
-		for (int i = 0; i < numFilters; i++)
-		{
-			TESForm* currentFilter = GenFilters[i].form;
-			if (!currentFilter) continue;
-			if (!(IsAcceptedParameter(currentFilter))) continue;
-			if (currentFilter->IsReference())
-			{
-				InsertToFilter(i, ((TESObjectREFR*)currentFilter)->baseForm->GetFormID());
-				continue;
-			}
-			if (IS_TYPE(currentFilter, BGSListForm))
-			{
-				//Console_Print("filter looping");
-				ListNode<TESForm>* iterator = ((BGSListForm*)currentFilter)->list.Head();
-				do {
-					TESForm* it = iterator->data;
-					if (it->IsReference()) continue;
-					if (IsAcceptedParameter(it))
-						InsertToFilter(i, it->GetFormID());
-				} while (iterator = iterator->next);
-
-			}
-			else InsertToFilter(i, currentFilter->GetFormID());
-		}
-	}
-
-	__forceinline bool IsBaseInFilter(uint32_t filterNum, TESForm* form)
-	{
-		if (!form) return false;
-		if (form->IsReference())
-			return IsInFilter(filterNum, ((TESObjectREFR*)form)->baseForm->GetFormID());
-		return IsInFilter(filterNum, form->GetFormID());
-	}
-
-	void insertFormList(BGSListForm* List, uint32_t filter)
-	{
-		ListNode<TESForm>* iterator = ((BGSListForm*)List)->list.Head();
-		do {
-			InsertToFilter(filter, iterator->data->GetFormID());
-		} while (iterator = iterator->next);
-	}
-};
-#endif
 
 class EventInformation
 {
@@ -256,13 +141,10 @@ public:
 
 		}
 	}
-	int a = sizeof(std::unordered_set<char>);
 };
 typedef EventInformation* EventInfo;
-extern std::mutex EventsArrayMutex;
+extern std::shared_mutex EventsArrayMutex;
 extern std::vector<EventInfo> EventsArray;
 
-void* __fastcall GenericCreateFilter(void** Filters, uint32_t numFilters);
-EventInfo FindHandlerInfoByChar(const char* nameToFind);
 EventInfo __cdecl JGCreateEvent(const char* EventName, uint8_t maxArgs, uint8_t maxFilters, void* (__fastcall* CreatorFunction)(void**, uint32_t));
 void __cdecl JGFreeEvent(EventInfo& toRemove);

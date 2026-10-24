@@ -1,7 +1,9 @@
 #include "GameFixes.h"
 
 #include "SafeWrite.h"
-#include "ShowOffNVSE.h"
+#include "Utilities.h"
+
+extern bool g_bResetInteriorResetsActors;
 
 namespace GameFixes
 {

@@ -53,9 +53,6 @@
     <ClCompile Include="internal\memory_pool.cpp">
       <Filter>internal</Filter>
     </ClCompile>
-    <ClCompile Include="internal\containers.cpp">
-      <Filter>internal</Filter>
-    </ClCompile>
     <ClCompile Include="functions\SO_fn_Files.cpp">
       <Filter>functions</Filter>
     </ClCompile>
@@ -88,9 +85,6 @@
       <Filter>nvse</Filter>
     </ClCompile>
     <ClCompile Include="internal\ExtractArgs_TypeSafe.cpp">
-      <Filter>internal</Filter>
-    </ClCompile>
-    <ClCompile Include="internal\SOTypes.cpp">
       <Filter>internal</Filter>
     </ClCompile>
     <ClCompile Include="internal\AuxTimers.cpp">

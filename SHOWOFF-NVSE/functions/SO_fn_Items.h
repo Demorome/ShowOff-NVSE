@@ -3,13 +3,6 @@
 #include "utility.h"
 #include "MiscHooks.h"
 
-#if 0
-static EquipData FindEquipped(TESObjectREFR* thisObj, FormMatcher& matcher) {
-	ExtraContainerChanges* pContainerChanges = static_cast<ExtraContainerChanges*>(thisObj->extraDataList.GetByType(kExtraData_ContainerChanges));
-	return (pContainerChanges) ? pContainerChanges->FindEquipped(matcher) : EquipData();
-}
-#endif
-
 static EquipDataSet GetEquippedItems(TESObjectREFR* actorRef, uint32_t const filterFlags = 0) {
 	auto const pContainerChanges = dynamic_cast<ExtraContainerChanges*>(actorRef->extraDataList.GetByType(kExtraData_ContainerChanges));
 	return pContainerChanges ? FindEquippedItems(pContainerChanges, filterFlags) : EquipDataSet();

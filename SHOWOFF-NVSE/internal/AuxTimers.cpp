@@ -69,7 +69,7 @@ namespace AuxTimer
 						!auxVarNameMapIter.End(); ++auxVarNameMapIter)
 					{
 						const auto ownerFormID = refOwnersMapIter.Key();
-						if (const auto* ownerForm = LookupFormByRefID(ownerFormID))
+						if (const auto* ownerForm = TESForm::GetFormByNumericID(ownerFormID))
 						{
 							auto& timer = auxVarNameMapIter.Get();
 

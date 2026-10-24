@@ -983,12 +983,6 @@ namespace OnPreProjectileCreate
 		g_eventInterface->DispatchEventAlt(eventName, resultCallback, &proj,
 			actor, proj, weap);
 
-#if _DEBUG
-		//NiPoint3 test(posX, posY, posZ);
-		//Projectile::Spawn((BGSProjectile*)LookupFormByName("superhotbulletX"), nullptr, nullptr, nullptr, test, rotZ, rotX, 0, 0, cell);
-		// CdeclCall<Projectile*>(g_detour.GetOverwrittenAddr(), (BGSProjectile*)LookupFormByName("superhotbulletX"), actor, nullptr, weap, posX, posY, posZ, rotZ, rotX, nullptr, nullptr, false, false, angularMomentumZ, angularMomentumX, cell);
-#endif
-
 		auto* projectile = CdeclCall<Projectile*>(g_detour.GetOverwrittenAddr(), proj, actor, combatCtrl, weap, posX, posY, posZ, rotZ, rotX, a10, liveGrenadeTargetRef, bAlwaysHit, ignoreGravity, angularMomentumZ, angularMomentumX, cell);
 		return projectile;
 	}
@@ -2390,14 +2384,6 @@ void RegisterEvents()
 	constexpr char DebugEventName[] = "ShowOff:DebugEvent";
 	RegisterEvent(DebugEventName,kEventParams_OneInt_OneFloat_OneArray_OneString_OneForm_OneReference_OneBaseform);
 	*/
-}
-
-namespace EventHandling
-{
-	void HandleGameLoopEvents()
-	{
-
-	}
 }
 
 namespace HandleHooks

@@ -84,7 +84,7 @@ bool Cmd_AuxTimerStart_Execute(COMMAND_ARGS)
 							nullptr, 
 							OnAuxTimerStart->numMaxArgs, 
 							varName, 
-							LookupFormByRefID(varInfo.ownerID)
+							TESForm::GetFormByNumericID(varInfo.ownerID)
 						);
 					}
 				}
@@ -144,7 +144,7 @@ bool Cmd_AuxTimerStop_Execute(COMMAND_ARGS)
 								nullptr, 
 								OnAuxTimerStop->numMaxArgs, 
 								varName, 
-								LookupFormByRefID(varInfo.ownerID)
+								TESForm::GetFormByNumericID(varInfo.ownerID)
 							);
 						}
 					}

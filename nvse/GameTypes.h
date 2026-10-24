@@ -40,9 +40,6 @@ extern const _FormHeap_Allocate FormHeap_Allocate;
 typedef void (*_FormHeap_Free)(void *ptr);
 extern const _FormHeap_Free FormHeap_Free;
 
-typedef TESForm* (*_LookupFormByID)(uint32_t id);
-extern const _LookupFormByID LookupFormByID;
-
 template <typename T_Data> struct ListNode
 {
 	T_Data		*data;

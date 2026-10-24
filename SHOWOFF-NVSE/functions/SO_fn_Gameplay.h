@@ -1218,7 +1218,7 @@ bool Cmd_ApplyAddictionEffect_Execute(COMMAND_ARGS)
 
 		// Apply imagespace modifier
 		auto const kBloodISFXd = 0x19482;
-		auto const imod = DYNAMIC_CAST(LookupFormByID(kBloodISFXd), TESForm, TESImageSpaceModifier);
+		auto const imod = DYNAMIC_CAST(TESForm::GetFormByNumericID(kBloodISFXd), TESForm, TESImageSpaceModifier);
 		imod->Trigger(1.0, 0);
 
 		if (bShowMsg)

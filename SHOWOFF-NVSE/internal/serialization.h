@@ -137,7 +137,7 @@ void LoadGameCallback(void*)
 						nVars = *(uint16_t*)bufPos;
 						bufPos += sizeof(uint16_t);
 						if ((refID = GetResolvedRefID(refID)) 
-							&& (LookupFormByRefID(refID) || HasChangeData(refID)))
+							&& (TESForm::GetFormByNumericID(refID) || HasChangeData(refID)))
 						{
 							if (!ownersMap)
 							{
