@@ -40,7 +40,7 @@ uint32_t __fastcall LoadFormID(bool abSpecialIDs, bool abSaveSupportsSpecialForm
 
 void __fastcall SaveFormID(const TESFile* apFile, bool abSpecialIDs) {
 	WriteRecord8(apFile->modIndex);
-	WriteRecord16(abSpecialIDs ? apFile->smallIndex : 0);
+	WriteRecord16(abSpecialIDs ? apFile->secondIndex : 0);
 }
 
 bool __fastcall IsFormIDUsed(const uint32_t auiFormID) {

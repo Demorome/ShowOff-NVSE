@@ -81,6 +81,28 @@ kLwrCaseConverter[] =
 	'\xF0', '\xF1', '\xF2', '\xF3', '\xF4', '\xF5', '\xF6', '\xF7', '\xF8', '\xF9', '\xFA', '\xFB', '\xFC', '\xFD', '\xFE', '\xFF'
 };
 
+static bool __fastcall AdjustFormIDForMod(const TESFile* apFile, uint32_t& arFormID) {
+	const uint32_t uiModIndex = (apFile ? uint32_t(apFile->modIndex) : 0xFF) << 24;
+	uint32_t uiSecondIndex = 0;
+	uint32_t uiMask = 0x00FFFFFF;
+	if (apFile && TESDataHandler::HasNewFileTypeSupport()) {
+		if (apFile->IsOverlay()) [[unlikely]]
+			return false;
+
+		if (apFile->IsSmall()) {
+			uiMask = 0x00000FFF;
+			uiSecondIndex = uint32_t(apFile->secondIndex) << 12;
+		}
+		else if (apFile->IsMedium()) {
+			uiMask = 0x0000FFFF;
+			uiSecondIndex = uint32_t(apFile->secondIndex) << 16;
+		}
+	}
+
+	arFormID = uiModIndex | uiSecondIndex | (arFormID & uiMask);
+	return true;
+}
+
 // From JG
 bool fCompare(float lval, float rval)
 {
@@ -1875,28 +1897,20 @@ uint32_t __fastcall StringToRef(char* refStr)
 		colon)
 	{
 		const TESFile* pFile = nullptr;
-		uint8_t modIdx = 0xFF;
 		if (colon != refStr)
 		{
 			*colon = 0;
 			pFile = TESDataHandler::GetSingleton()->GetListFile(refStr);
 			*colon = ':';
-			if (!pFile)
+			if (!pFile || pFile->IsOverlay())
 				return 0;
-
-			modIdx = pFile->modIndex;
 		}
 
-		*findStr = (modIdx << 24);
-		const uint32_t uiConvertedID = HexToUInt(colon + 1);
-		if (TESDataHandler::HasNewFileTypeSupport() && (modIdx == 0xFE || modIdx == 0xFD)) {
-			if (modIdx == 0xFE)
-				*findStr = (pFile->smallIndex << 12) | (uiConvertedID & 0xFFF);
-			else if (modIdx == 0xFD)
-				*findStr = (pFile->mediumIndex << 16) | (uiConvertedID & 0xFFFF);
-		}
-		else
-			*findStr = uiConvertedID & 0xFFFFFF;
+		uint32_t uiConvertedID = HexToUInt(colon + 1);
+		if (!AdjustFormIDForMod(pFile, uiConvertedID))
+			return 0;
+
+		*findStr = uiConvertedID;
 		return *findStr;
 	}
 	return ResolveRefID(HexToUInt(refStr), findStr) ? *findStr : 0;
@@ -1914,13 +1928,13 @@ const std::string& RefToString(TESForm* form)
 	if (auto search = s_refStrings.find(form->GetFormID()); search != s_refStrings.end())
 		return search->second;
 
-	if (form->modIndex == 0xFF)
+	uint32_t uiModIndex = form->GetModIndex();
+	if (uiModIndex == 0xFF)
 		return invalidRef;
 
 	TESDataHandler* pDataHandler = TESDataHandler::GetSingleton();
 	const bool bSpecialIDs = pDataHandler->SupportsNewFileTypes();
-	uint32_t uiModIndex = form->modIndex;
-	if (bSpecialIDs && form->modIndex >= 0xFD)
+	if (bSpecialIDs && uiModIndex >= 0xFD)
 		uiModIndex = form->GetFormID();
 		
 	const TESFile* pMod = TESDataHandler::GetSingleton()->GetFile(uiModIndex);
@@ -1931,18 +1945,18 @@ const std::string& RefToString(TESForm* form)
 	if (!modName || !modName[0])
 		return invalidRef;
 
-	char cHexString[10];
-	if (bSpecialIDs && form->modIndex >= 0xFD) {
-		if (form->modIndex == 0xFE)
+	char cHexString[10] = {};
+	if (bSpecialIDs && form->GetModIndex() >= 0xFD) {
+		if (form->GetModIndex() == 0xFE)
 			snprintf(cHexString, sizeof(cHexString), ":%08X", form->GetFormID() & 0xFFF);
 		else
 			snprintf(cHexString, sizeof(cHexString), ":%08X", form->GetFormID() & 0xFFFF);
 	}
-	else
+	else {
 		snprintf(cHexString, sizeof(cHexString), ":%08X", form->GetFormID() & 0xFFFFFF);
-
+	}
 	std::string result;
-	result.reserve(result.size() + strlen(modName) + 9);
+	result.reserve(sizeof(cHexString) + strlen(modName));
 	result = modName;
 	result += cHexString;
 

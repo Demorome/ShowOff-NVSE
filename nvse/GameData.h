@@ -114,8 +114,7 @@ struct TESFile		// referred to by game as TESFile
 	uint8_t								pad29B;
 	WIN32_FIND_DATA						fileData;			// 29C
 	FileHeader							header;				// 3DC
-	uint8_t								flags;				// 3E8	Bit 0 is ESM . Runtime: Bit 2 is Valid, Bit 3 is Unselected Editor: 2 is selected, 3 is active, 4 may be invalid, 6 is endian, 14 controls VCI.
-	uint8_t								pad3E9[3];
+	uint32_t								flags;				// 3E8	Bit 0 is ESM . Runtime: Bit 2 is Valid, Bit 3 is Unselected Editor: 2 is selected, 3 is active, 4 may be invalid, 6 is endian, 14 controls VCI.
 	tList<char*>						* refModNames;		// 3EC	paired with 3F0
 	uint32_t								unk3F0;				// 3F0
 	tList<MasterSize*>					* refModData;		// 3F4 most likely full of 0
@@ -128,7 +127,7 @@ struct TESFile		// referred to by game as TESFile
 	uint8_t								modIndex;			// 40C init to 0xFF
 	union {
 		uint8_t							mediumIndex;
-		uint16_t						smallIndex;
+		uint16_t						secondIndex;
 	};
 	String								author;				// 410
 	String								description;		// 418
@@ -140,6 +139,11 @@ struct TESFile		// referred to by game as TESFile
 	// In Editor: 430 = ONAM array and 434 ONAM array count. Allocated at 0438
 	
 	bool IsLoaded() const { return true; }
+
+	bool IsSmall() const { return (flags & 0x100) != 0; }
+	bool IsOverlay() const { return (flags & 0x200) != 0; }
+	bool IsMedium() const { return (flags & 0x400) != 0; }
+	bool IsSpecial() const { return (flags & 0x700) != 0; }
 
 	static TESFile* GetFileForTempID(uint32_t auiFormID);
 };
@@ -163,7 +167,7 @@ public:
 	TESDataHandler();
 	~TESDataHandler();
 
-	uint32_t						flags;					// 000
+	uint8_t							flags;					// 000
 	BoundObjectListHead				*boundObjectList;		// 004
 	tList<TESPackage>				packageList;			// 008
 	tList<TESWorldSpace>			worldSpaceList;			// 010
