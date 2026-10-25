@@ -69,7 +69,6 @@ bool Cmd_IsBaseForm_Execute(COMMAND_ARGS)
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form)) return true;
 	if (form && !IS_REFERENCE(form))
 	{
-		assert(form->IsBoundObject());
 		*result = true;
 	}
 	return true;
