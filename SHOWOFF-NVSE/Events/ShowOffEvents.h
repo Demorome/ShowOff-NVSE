@@ -29,7 +29,7 @@ bool Cmd_SetOnAuxTimerStartHandler_Execute(COMMAND_ARGS)
 	uint32_t setOrRemove;
 	Script* script = nullptr;
 	GenericFilters filters[2];
-	char strBuf[0x80];
+	char strBuf[256] = {};
 	filters[0].form = nullptr;
 	filters[1].str = strBuf;
 	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, filters[1].str, &filters[0].form) || !script || NOT_TYPE(script, Script)))
@@ -62,7 +62,7 @@ bool Cmd_SetOnAuxTimerStopHandler_Execute(COMMAND_ARGS)
 	uint32_t setOrRemove;
 	Script* script = nullptr;
 	GenericFilters filters[2];
-	char strBuf[0x80];
+	char strBuf[256] = {};
 	filters[0].form = nullptr;
 	filters[1].str = strBuf;
 	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, filters[1].str, &filters[0].form) || !script || NOT_TYPE(script, Script)))
@@ -95,7 +95,7 @@ bool Cmd_SetOnAuxTimerUpdateHandler_Execute(COMMAND_ARGS)
 	uint32_t setOrRemove;
 	Script* script = nullptr;
 	GenericFilters filters[2];
-	char strBuf[0x80];
+	char strBuf[256] = {};
 	filters[0].form = nullptr;
 	filters[1].str = strBuf;
 	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, filters[1].str, &filters[0].form) || !script || NOT_TYPE(script, Script)))
