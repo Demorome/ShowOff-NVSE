@@ -53,32 +53,7 @@ std::atomic<bool> g_ShowFuncDebug = true;
 std::atomic<bool> g_ShowFuncDebug = false;
 #endif
 
-/*----------Globals------------------------------------------------------------------------
-* It's better to include them in a .cpp file instead of a header file.
-* Otherwise, compilation will fail if another .cpp file tries to include the global.
-* Use for example "extern NVSEMessagingInterface* g_messagingInterface;" in main.h if you want to use the global elsewhere.
-*
-*===Danger of using Globals===
-* Modifying globals is not thread-safe, which is unfortunate since scripts are multithreaded.
-* Therefore, to modify globals after game first opens, one MUST either:
-* a) lock threads to ensure thread safety,
-* b) first declare the global as std::atomic<type>
-* It will make the other threads sleep, so globals can be safely modified.
-* Other than that, it's completely safe to check the value at any point.
-*
-*--Example of this:
-ICriticalSection g_someLock;
-void Func()
-{
-	ScopedLock lock(g_Lock);
-	// do un-thread safe stuff like modify globals, only a single thread can be here at a time
-
-	//will automatically leave critical section when leaving scope.
-}
-
-std::atomic<char*> doesn't really work.
-*/
-ICriticalSection g_Lock;
+std::mutex g_GlobalMutex;
 
 // NVSE Globals
 bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);

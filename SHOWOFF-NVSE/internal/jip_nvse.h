@@ -120,7 +120,7 @@ public:
 
 	void SetFlt(double value)
 	{
-		ScopedLock lock(g_Lock);   
+		std::scoped_lock lock(g_GlobalMutex);   
 		Clear();
 		type = 1;
 		num = value;
@@ -128,7 +128,7 @@ public:
 
 	void SetRef(TESForm* value)
 	{
-		ScopedLock lock(g_Lock);
+		std::scoped_lock lock(g_GlobalMutex);
 		Clear();
 		type = 2;
 		refID = value ? value->GetFormID() : 0;
@@ -136,7 +136,7 @@ public:
 
 	void SetStr(const char* value)
 	{
-		ScopedLock lock(g_Lock);
+		std::scoped_lock lock(g_GlobalMutex);
 		type = 4;
 		length = StrLen(value);
 		if (length)
@@ -156,7 +156,7 @@ public:
 
 	void SetElem(NVSEArrayElement& elem)
 	{
-		ScopedLock lock(g_Lock);
+		std::scoped_lock lock(g_GlobalMutex);
 		if (elem.GetType() == 2) SetRef(elem.form);
 		else if (elem.GetType() == 3) SetStr(elem.str);
 		else SetFlt(elem.num);

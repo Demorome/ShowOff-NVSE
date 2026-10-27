@@ -4,9 +4,6 @@
     <Filter Include="debug">
       <UniqueIdentifier>{ce6a1e8c-50a6-4722-bce7-6b17a4af542e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="threads">
-      <UniqueIdentifier>{c8a4c03f-54f2-4946-9315-332a9e803295}</UniqueIdentifier>
-    </Filter>
     <Filter Include="datatypes">
       <UniqueIdentifier>{f5f79544-dcf5-4caa-87bd-95b27c2a3b67}</UniqueIdentifier>
     </Filter>
@@ -22,9 +19,6 @@
   <ItemGroup>
     <ClInclude Include="IDebugLog.h">
       <Filter>debug</Filter>
-    </ClInclude>
-    <ClInclude Include="ICriticalSection.h">
-      <Filter>threads</Filter>
     </ClInclude>
     <ClInclude Include="ITypes.h">
       <Filter>datatypes</Filter>

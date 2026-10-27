@@ -1232,7 +1232,7 @@ namespace OnFireWeapon
 namespace OnCalculateEffectEntryMagnitude
 {
 	constexpr char eventName[] = "ShowOff:OnCalculateEffectMagnitude";
-
+	inline std::mutex g_Lock;
 	inline NumberModifications<float> g_MagnitudeModModifiers;
 	inline EffectItem* g_liveEffectItem = nullptr;
 
@@ -1249,6 +1249,8 @@ namespace OnCalculateEffectEntryMagnitude
 		void* multArg = *(void**)&modifier;
 		void* magnitude = *(void**)&activeEff->magnitude;
 		void* duration = *(void**)&activeEff->duration; // not modified by perk effects, like Modify Positive Chem Duration
+
+		std::scoped_lock lock(g_Lock);
 
 		// Store effect Item for one frame, so it can be queried in a function inside the event.
 		g_liveEffectItem = activeEff->effectItem;
@@ -1339,7 +1341,7 @@ bool Cmd_SetLiveEffectMagnitudeModifier_Execute(COMMAND_ARGS)
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &fMod, &modType) || !modType[0])
 		return true;
 
-	ScopedLock lock(g_Lock);
+	std::scoped_lock lock(OnCalculateEffectEntryMagnitude::g_Lock);
 	*result = OnCalculateEffectEntryMagnitude::g_MagnitudeModModifiers.TryAddMod(fMod, modType[0]);
 
 	return true;
@@ -1353,6 +1355,8 @@ bool Cmd_GetLiveEffectBaseTrait_Execute(COMMAND_ARGS)
 	uint32_t traitID;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &traitID))
 		return true;
+
+	std::scoped_lock lock(OnCalculateEffectEntryMagnitude::g_Lock);
 	EffectItem* effItem = OnCalculateEffectEntryMagnitude::g_liveEffectItem;
 	if (!effItem) return true;
 	switch (traitID)

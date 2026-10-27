@@ -2,6 +2,7 @@
 
 #include <random>
 #include <unordered_set>
+#include <shared_mutex>
 
 #include "AuxTimers.h"
 #include "GameExtraData.h"
@@ -391,11 +392,12 @@ public:
 };
 
 UnorderedMap<uint32_t, Random_Engine*> g_ModsAndSeedsMap;
+std::shared_mutex g_ModsAndSeedsMapLock;
 
 void SetSeedForMod(uint32_t seed, Script* scriptObj) {
 	if (!seed) seed = std::default_random_engine::default_seed;
 	uint8_t const modIdx = scriptObj->GetOverridingModIdx();
-	ScopedLock lock(g_Lock);
+	std::scoped_lock lock(g_ModsAndSeedsMapLock);
 	// Change the engine's seed by just deleting the old engine and creating a new one.
 	auto const oldGen = g_ModsAndSeedsMap.Get(modIdx);
 	g_ModsAndSeedsMap.Erase(modIdx);
@@ -430,7 +432,7 @@ bool Cmd_GetRandomizerSeed_Execute(COMMAND_ARGS) {
 
 uint32_t RandSeeded_Call(uint32_t min, uint32_t max, Script* scriptObj) {
 	uint8_t const modIdx = scriptObj->GetOverridingModIdx();
-	ScopedLock lock(g_Lock);
+	std::scoped_lock lock(g_ModsAndSeedsMapLock);
 	Random_Engine* generator = g_ModsAndSeedsMap.Get(modIdx);
 	if (!generator) {
 		// Make a new generator for the calling Mod w/ default seed, and use that.
@@ -460,8 +462,8 @@ bool Cmd_AdvanceSeed_Execute(COMMAND_ARGS) {
 	uint32_t discardAmount;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &discardAmount)) return true;
 	uint8_t const modIdx = scriptObj->GetOverridingModIdx();
+	std::scoped_lock lock(g_ModsAndSeedsMapLock);
 	if (auto currGen = g_ModsAndSeedsMap.Get(modIdx)) {
-		ScopedLock lock(g_Lock);
 		currGen->discard(discardAmount);
 		*result = true;
 	}

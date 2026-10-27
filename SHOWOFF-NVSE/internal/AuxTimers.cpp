@@ -8,7 +8,7 @@ extern EventInformation* OnAuxTimerUpdate;
 
 namespace AuxTimer
 {
-	ICriticalSection g_AuxTimerLock;
+	std::mutex g_AuxTimerLock;
 
 	AuxTimerModsMap s_auxTimerMapArraysPerm, s_auxTimerMapArraysTemp;
 

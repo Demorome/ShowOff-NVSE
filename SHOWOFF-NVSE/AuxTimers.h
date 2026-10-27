@@ -2,6 +2,8 @@
 #include "jip_nvse.h"
 #include "CustomEventFilters.h"
 
+#include <mutex>
+
 namespace AuxTimer
 {
 	// Code structure copied from JIP's jip_core.h
@@ -163,7 +165,7 @@ namespace AuxTimer
 	void RemovePendingTimers();
 	void InsertPendingTimers();
 
-	extern ICriticalSection g_AuxTimerLock;
+	extern std::mutex g_AuxTimerLock;
 }
 
-#define AUX_TIMER_CS ScopedLock lock(AuxTimer::g_AuxTimerLock)
+#define AUX_TIMER_CS std::scoped_lock lock(AuxTimer::g_AuxTimerLock)

@@ -93,7 +93,7 @@ namespace PickpocketInCombat
 			{
 				ThisCall(0x8C00E0, PlayerCharacter::GetSingleton(), actor, 0, 0);
 				char buf[260];
-				ScopedLock lock(g_Lock);
+				std::scoped_lock lock(g_GlobalMutex);
 				snprintf(buf, sizeof(buf), "%s", g_fForcePickpocketFailureMessage);
 				QueueUIMessage(buf, eEmotion::sad, NULL, NULL, 2.0, 0);
 

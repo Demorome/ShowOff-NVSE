@@ -868,7 +868,7 @@ bool Cmd_GetCalculatedItemWeight_Eval(COMMAND_ARGS_EVAL) {
 				contChangesData->objList->Append(invRef->data.entry);
 
 				// feeble attempt to fix potential multithreading issues, since code is being overwritten here.
-				ScopedLock lockCodeOverwrites(g_Lock);
+				std::scoped_lock lockCodeOverwrites(g_GlobalMutex);
 
 				// Skip code which adds up the weight for each item in the owner / container.
 				ReplaceCall(0x4D09CB, (uint32_t)tList_IsEmpty_ReturnFalse_Hook);

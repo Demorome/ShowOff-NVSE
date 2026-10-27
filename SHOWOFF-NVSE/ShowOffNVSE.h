@@ -2,6 +2,7 @@
 
 #include <atomic>
 #include <memory>
+#include <mutex>
 
 #include "ParamInfos.h"
 #include "NVSEParamInfoList.h"
@@ -9,7 +10,6 @@
 
 #include "PluginAPI.h"
 #include "GameUI.h" 
-#include "common/ICriticalSection.h"
 #include "GameData.h"
 #include "GameEffects.h"
 #include "decoding.h"
@@ -18,7 +18,7 @@
 
 using namespace std::literals;
 
-extern ICriticalSection g_Lock;
+extern std::mutex g_GlobalMutex;
 extern std::atomic<bool> g_ShowFuncDebug;
 
 // NVSE Globals

@@ -105,7 +105,7 @@ AuxStringMapIDsMap::Iterator s_auxStringMapIterator; //need to ensure thread saf
 NVSEArrayVar* __fastcall AuxStringMapArrayIterator(Script* scriptObj, char* varName, bool getFirst) {
 	AuxStringMapIDsMap* idsMap = ASMFind(scriptObj, varName);
 	if (!idsMap) return NULL;
-	ScopedLock lock(g_Lock);
+	std::scoped_lock lock(g_GlobalMutex);
 	if (getFirst || (s_auxStringMapIterator.Table() != idsMap)) {
 		s_auxStringMapIterator.Init(*idsMap);
 		if (!s_auxStringMapIterator)
@@ -190,7 +190,7 @@ AuxVariableValue* __fastcall AuxStringMapAddValue(Script* scriptObj, char* varNa
 		AuxStringMapInfo varInfo(scriptObj, varName);
 		if (varInfo.isPerm)
 			s_dataChangedFlags |= kChangedFlag_AuxStringMaps;
-		ScopedLock lock(g_Lock);  //since ModsMap() returns the global.
+		std::scoped_lock lock(g_GlobalMutex);  //since ModsMap() returns the global.
 		return &varInfo.ModsMap()[varInfo.modIndex][varName][keyName];
 	}
 	return nullptr;
@@ -245,7 +245,7 @@ bool Cmd_AuxStringMapArraySetFromArray_Execute(COMMAND_ARGS) {
 		if (findMod) {
 			auto findVar = findMod().Find(varName);
 			if (findVar) {
-				ScopedLock lock(g_Lock);
+				std::scoped_lock lock(g_GlobalMutex);
 				findVar.Remove();
 				if (findMod().Empty()) findMod.Remove();
 			}
@@ -304,7 +304,7 @@ bool Cmd_AuxStringMapArrayEraseKey_Execute(COMMAND_ARGS) {
 	if (!findVar) return true;
 	auto findID = findVar().Find(keyName);
 	if (!findID) return true;
-	ScopedLock lock(g_Lock);
+	std::scoped_lock lock(g_GlobalMutex);
 	findID.Remove();
 	if (findVar().Empty()) {
 		findVar.Remove();
@@ -327,7 +327,7 @@ bool Cmd_AuxStringMapArrayValidateValues_Execute(COMMAND_ARGS) {
 	if (!findMod) return true;
 	auto findVar = findMod().Find(varName);
 	if (!findVar) return true;
-	ScopedLock lock(g_Lock);
+	std::scoped_lock lock(g_GlobalMutex);
 	bool cleaned = false;
 	for (auto idIter = findVar().Begin(); idIter; ++idIter) {
 		auto refVal = idIter().GetRef();
@@ -355,7 +355,7 @@ bool Cmd_AuxStringMapArrayDestroy_Execute(COMMAND_ARGS) {
 	if (!findMod) return true;
 	auto findVar = findMod().Find(varName);
 	if (!findVar) return true;
-	ScopedLock lock(g_Lock);
+	std::scoped_lock lock(g_GlobalMutex);
 	findVar.Remove();
 	if (findMod().Empty()) findMod.Remove();
 	if (varInfo.isPerm)

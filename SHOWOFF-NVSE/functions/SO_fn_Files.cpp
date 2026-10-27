@@ -7,6 +7,8 @@
 #include <filesystem>
 #include <fstream>
 
+#include <shared_mutex>
+
 #define SI_SUPPORT_IOSTREAMS
 #include "SimpleIni.h"
 
@@ -259,7 +261,7 @@ namespace JsonToNVSE
 	}
 
 	UnorderedMap<const char*, JsonValueVariant> g_CachedJSONFiles;
-	ICriticalSection g_JsonMapLock;
+	std::mutex g_JsonMapLock;
 
 	JsonValueVariant ReadJson_Unsafe(const Parser parser, const std::string& JSON_Path)
 	{
@@ -301,7 +303,7 @@ namespace JsonToNVSE
 			auto parsedJson = ReadJson_Unsafe(parser, JSON_FullPath);
 			if (!cache)
 				return parsedJson;
-			ScopedLock lock(g_JsonMapLock);
+			std::scoped_lock lock(g_JsonMapLock);
 			return std::ref(*g_CachedJSONFiles.Emplace(relativePath.data(), std::move(parsedJson)));
 		}
 		catch (tao::pegtl::parse_error& e)
@@ -500,7 +502,7 @@ namespace JsonToNVSE
 			{
 				try
 				{
-					ScopedLock lock(g_JsonMapLock);	//in case the baseJson was retrieved from the map.
+					std::scoped_lock lock(g_JsonMapLock);	//in case the baseJson was retrieved from the map.
 					base.insert(tao::json::pointer(jsonPointer), insert);
 					return true;
 				}
@@ -710,7 +712,7 @@ bool Cmd_WriteToJSONFile_Execute(COMMAND_ARGS)
 		{
 			// File was either created, or was completely replaced; cache that new data.
 			// Also possible that file didn't exist and wasn't created, but we can still cache that data.
-			ScopedLock lock(g_JsonMapLock);
+			std::scoped_lock lock(g_JsonMapLock);
 			g_CachedJSONFiles[relPath.data()] = std::move(GetRef(elemAsJSON));
 			*result = true;	//success if cached data is changed
 		}
@@ -790,7 +792,7 @@ namespace IniToNVSE
 		return true;
 	}
 
-	ICriticalSection g_IniMapLock;
+	std::mutex g_IniMapLock;
 	Map<const char*, CSimpleIniA> g_CachedIniFiles;
 
 
@@ -849,7 +851,7 @@ namespace IniToNVSE
 
 			if (const auto cachedIni = g_CachedIniFiles.GetPtr(relIniPath))
 			{
-				ScopedLock lock(g_IniMapLock);
+				std::scoped_lock lock(g_IniMapLock);
 				*result = SetIniValue(*cachedIni, newValue, section, key, comment);
 			}
 			else
@@ -861,7 +863,7 @@ namespace IniToNVSE
 
 				if (existed || created)
 				{
-					ScopedLock lock(g_IniMapLock);
+					std::scoped_lock lock(g_IniMapLock);
 					g_CachedIniFiles.Emplace(relIniPath, std::move(iniLocal));
 				}
 			}
@@ -895,7 +897,7 @@ namespace IniToNVSE
 
 			if (const auto cachedIni = g_CachedIniFiles.GetPtr(relIniPath))
 			{
-				ScopedLock lock(g_IniMapLock);
+				std::scoped_lock lock(g_IniMapLock);
 				*result = SetIniInteger(*cachedIni, newValue, section, key, comment);
 			}
 			else
@@ -907,7 +909,7 @@ namespace IniToNVSE
 
 				if (existed || created)
 				{
-					ScopedLock lock(g_IniMapLock);
+					std::scoped_lock lock(g_IniMapLock);
 					g_CachedIniFiles.Emplace(relIniPath, std::move(iniLocal));
 				}
 			}
@@ -954,7 +956,7 @@ namespace IniToNVSE
 				{
 					GetOrDefaultIniValue(iniLocal, section, key, result);
 
-					ScopedLock lock(g_IniMapLock);
+					std::scoped_lock lock(g_IniMapLock);
 					g_CachedIniFiles.Emplace(relIniPath, std::move(iniLocal));
 				}
 			}
@@ -985,7 +987,7 @@ namespace IniToNVSE
 			if (auto const fullPathCStr = fullPath.c_str();
 				auto cachedIni = g_CachedIniFiles.GetPtr(relIniPath))
 			{
-				ScopedLock lock(g_IniMapLock);
+				std::scoped_lock lock(g_IniMapLock);
 				GetOrCreateIniValue(*cachedIni, comment, section, key, result);
 			}
 			else
@@ -996,7 +998,7 @@ namespace IniToNVSE
 
 				if (existed || created)
 				{
-					ScopedLock lock(g_IniMapLock);
+					std::scoped_lock lock(g_IniMapLock);
 					g_CachedIniFiles.Emplace(relIniPath, std::move(iniLocal));
 				}
 			}
@@ -1041,7 +1043,7 @@ bool Cmd_HasINISetting_Cached_Execute(COMMAND_ARGS)
 			{
 				*result = HasIniValue(iniLocal);
 
-				ScopedLock lock(IniToNVSE::g_IniMapLock);
+				std::scoped_lock lock(IniToNVSE::g_IniMapLock);
 				IniToNVSE::g_CachedIniFiles.Emplace(relIniPath, std::move(iniLocal));
 			}
 		}
@@ -1184,7 +1186,7 @@ bool Cmd_ReloadIniCache_Execute(COMMAND_ARGS)
 
 		if (auto const ini = IniToNVSE::g_CachedIniFiles.GetPtr(relIniPath))
 		{
-			ScopedLock lock(IniToNVSE::g_IniMapLock);
+			std::scoped_lock lock(IniToNVSE::g_IniMapLock);
 			*result = ini->LoadFile(fullPath.c_str()) >= SI_OK;
 		}
 	}
@@ -1212,7 +1214,7 @@ bool Cmd_ClearFileCacheShowOff_Execute(COMMAND_ARGS)
 			std::string modPath;
 			if (IniToNVSE::TryGetRelIniPath(relPath, scriptObj, modPath))
 			{
-				ScopedLock lock(IniToNVSE::g_IniMapLock);
+				std::scoped_lock lock(IniToNVSE::g_IniMapLock);
 				*result = IniToNVSE::g_CachedIniFiles.Erase(relPath);
 			}
 		}
@@ -1223,7 +1225,7 @@ bool Cmd_ClearFileCacheShowOff_Execute(COMMAND_ARGS)
 
 			auto [JSON_FullPath, normalizedRelPath] = GetFullPath(relPath);
 			std::string cachePath(normalizedRelPath);
-			ScopedLock lock(JsonToNVSE::g_JsonMapLock);
+			std::scoped_lock lock(JsonToNVSE::g_JsonMapLock);
 			*result = JsonToNVSE::g_CachedJSONFiles.Erase(cachePath.c_str());
 		}
 	}
