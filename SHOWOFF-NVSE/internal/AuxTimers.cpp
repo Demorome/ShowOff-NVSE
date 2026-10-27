@@ -8,6 +8,8 @@ extern EventInformation* OnAuxTimerUpdate;
 
 namespace AuxTimer
 {
+	std::mutex g_AuxTimerLock;
+
 	AuxTimerModsMap s_auxTimerMapArraysPerm, s_auxTimerMapArraysTemp;
 
 	std::vector<AuxTimerPendingRemoval> g_auxTimersToRemovePerm, g_auxTimersToRemoveTemp;

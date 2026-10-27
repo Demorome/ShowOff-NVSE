@@ -1,7 +1,8 @@
 ﻿#pragma once
 #include "EventParams.h"
 #include "GameEffects.h"
-
+#include "SafeWrite.h"
+#include "GameRTTI.h"
 // Credits to Karut (from JohnnyGuitar) for making the Event Framework.
 EventInformation* OnCornerMessage; 
 
@@ -29,11 +30,10 @@ bool Cmd_SetOnAuxTimerStartHandler_Execute(COMMAND_ARGS)
 	uint32_t setOrRemove;
 	Script* script = nullptr;
 	GenericFilters filters[2];
-	char strBuf[0x80];
+	char strBuf[256] = {};
 	filters[0].form = nullptr;
 	filters[1].str = strBuf;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, filters[1].str, &filters[0].form) || !script
-		|| NOT_TYPE(script, Script)))
+	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, filters[1].str, &filters[0].form) || !script || NOT_TYPE(script, Script)))
 	{
 		return true;
 	}
@@ -63,11 +63,10 @@ bool Cmd_SetOnAuxTimerStopHandler_Execute(COMMAND_ARGS)
 	uint32_t setOrRemove;
 	Script* script = nullptr;
 	GenericFilters filters[2];
-	char strBuf[0x80];
+	char strBuf[256] = {};
 	filters[0].form = nullptr;
 	filters[1].str = strBuf;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, filters[1].str, &filters[0].form) || !script
-		|| NOT_TYPE(script, Script)))
+	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, filters[1].str, &filters[0].form) || !script || NOT_TYPE(script, Script)))
 	{
 		return true;
 	}
@@ -97,11 +96,10 @@ bool Cmd_SetOnAuxTimerUpdateHandler_Execute(COMMAND_ARGS)
 	uint32_t setOrRemove;
 	Script* script = nullptr;
 	GenericFilters filters[2];
-	char strBuf[0x80];
+	char strBuf[256] = {};
 	filters[0].form = nullptr;
 	filters[1].str = strBuf;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, filters[1].str, &filters[0].form) || !script
-		|| NOT_TYPE(script, Script)))
+	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, filters[1].str, &filters[0].form) || !script || NOT_TYPE(script, Script)))
 	{
 		return true;
 	}
@@ -1234,7 +1232,7 @@ namespace OnFireWeapon
 namespace OnCalculateEffectEntryMagnitude
 {
 	constexpr char eventName[] = "ShowOff:OnCalculateEffectMagnitude";
-
+	inline std::mutex g_Lock;
 	inline NumberModifications<float> g_MagnitudeModModifiers;
 	inline EffectItem* g_liveEffectItem = nullptr;
 
@@ -1251,6 +1249,8 @@ namespace OnCalculateEffectEntryMagnitude
 		void* multArg = *(void**)&modifier;
 		void* magnitude = *(void**)&activeEff->magnitude;
 		void* duration = *(void**)&activeEff->duration; // not modified by perk effects, like Modify Positive Chem Duration
+
+		std::scoped_lock lock(g_Lock);
 
 		// Store effect Item for one frame, so it can be queried in a function inside the event.
 		g_liveEffectItem = activeEff->effectItem;
@@ -1341,7 +1341,7 @@ bool Cmd_SetLiveEffectMagnitudeModifier_Execute(COMMAND_ARGS)
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &fMod, &modType) || !modType[0])
 		return true;
 
-	ScopedLock lock(g_Lock);
+	std::scoped_lock lock(OnCalculateEffectEntryMagnitude::g_Lock);
 	*result = OnCalculateEffectEntryMagnitude::g_MagnitudeModModifiers.TryAddMod(fMod, modType[0]);
 
 	return true;
@@ -1355,6 +1355,8 @@ bool Cmd_GetLiveEffectBaseTrait_Execute(COMMAND_ARGS)
 	uint32_t traitID;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &traitID))
 		return true;
+
+	std::scoped_lock lock(OnCalculateEffectEntryMagnitude::g_Lock);
 	EffectItem* effItem = OnCalculateEffectEntryMagnitude::g_liveEffectItem;
 	if (!effItem) return true;
 	switch (traitID)

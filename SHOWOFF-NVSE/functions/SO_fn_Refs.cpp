@@ -1,0 +1,108 @@
+#include "SO_fn_Refs.h"
+
+#include "MiscHooks.h"
+
+extern NVSEArrayVarInterface* g_arrInterface;
+extern bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
+
+#define NUM_ARGS *((uint8_t*)scriptData + *opcodeOffsetPtr)  //Probably breaks Compiler Override!! - Credits to Stewie.
+#define REFR_RES *(uint32_t*)result  //From JIPLN
+
+bool Cmd_GetPosArray_Execute(COMMAND_ARGS) {
+	ArrayElementL const posElems[] =
+	{ thisObj->posX, thisObj->posY, thisObj->posZ };
+	auto const arr = g_arrInterface->CreateArray(posElems, 3, scriptObj);
+	g_arrInterface->AssignCommandResult(arr, result);
+	return true;
+}
+
+bool Cmd_GetCompassTargets_Execute(COMMAND_ARGS) {
+	*result = 0;
+
+	enum TargetFlag : uint32_t {
+		IncludeAll = 0,
+		IncludeNonHostiles = 1,
+		IncludeHostiles = 2,
+	} includeWhat = IncludeAll;
+
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &includeWhat))
+		return true;
+
+	NVSEArrayVar* resArr = g_arrInterface->CreateArray(nullptr, 0, scriptObj);
+	g_arrInterface->AssignCommandResult(resArr, result);
+	for (auto const& iter : GetCompassTargets::g_TargetsInCompass) {
+		if (includeWhat == IncludeAll
+			|| (includeWhat == IncludeNonHostiles && !iter.isHostile)
+			|| (includeWhat == IncludeHostiles && iter.isHostile)) {
+			g_arrInterface->AppendElement(resArr, ArrayElementL(iter.target));
+		}
+	}
+	return true;
+}
+
+bool Cmd_GetIsActivationPromptShown_Eval(COMMAND_ARGS_EVAL) {
+	*result = HUDMainMenu::GetSingleton()->tile09C->GetValueFloat(kTileValue_visible);
+	return true;
+}
+
+bool Cmd_GetIsActivationPromptShown_Execute(COMMAND_ARGS) {
+	return Cmd_GetIsActivationPromptShown_Eval(nullptr, nullptr, nullptr, result);
+}
+
+bool Cmd_GetProjectileRefIsStuck_Eval(COMMAND_ARGS_EVAL) {
+	*result = 0;
+	if (thisObj && thisObj->IsProjectile())
+		*result = (static_cast<Projectile*>(thisObj)->projFlags & Projectile::kProjFlag_IsStuck) != 0;
+	return true;
+}
+
+bool Cmd_GetProjectileRefIsStuck_Execute(COMMAND_ARGS) {
+	return Cmd_GetProjectileRefIsStuck_Eval(thisObj, nullptr, nullptr, result);
+}
+
+auto Cmd_PlaceAtReticle = (bool(__cdecl*)(COMMAND_ARGS)) 0x5DF040;
+bool Cmd_PlaceAtReticleAlt_Execute(COMMAND_ARGS) {
+	TESForm* formToPlace = nullptr;
+	uint32_t count = 1;
+	float minDistance = 0.0f, maxDistance = 0.0f;
+	PlaceAtReticleAlt::g_healthPercent = 1.0f;
+
+	PlaceAtReticleAlt::g_lastPlacedRef = nullptr;
+	*result = 0;
+
+	if (ExtractArgsEx(EXTRACT_ARGS_EX, &formToPlace, &count, &minDistance, &maxDistance, &PlaceAtReticleAlt::g_healthPercent)) {
+		// Ugly hack to call the vanilla func by convincing it there's only 4 args to extract.
+		{
+			auto const oldNumArgs = NUM_ARGS;
+			NUM_ARGS = std::size(Cmd_PlaceAtReticle_Params);
+			Cmd_PlaceAtReticle(PASS_COMMAND_ARGS);
+			NUM_ARGS = oldNumArgs;
+		}
+
+		if (auto* refRes = PlaceAtReticleAlt::g_lastPlacedRef) {
+			REFR_RES = refRes->GetFormID();
+		}
+	}
+
+	// Reset the global, so it doesn't mess with regular PlaceAtReticle calls.
+	PlaceAtReticleAlt::g_healthPercent = 1.0f;
+
+	return true;
+}
+
+bool Cmd_GetWorldOffsetPosArray_Execute(COMMAND_ARGS) {
+	ArrayElementL posElems[3] = {};
+
+	if (thisObj->parentCell && thisObj->parentCell->worldSpace) {
+		posElems[0] = (thisObj->posX / thisObj->parentCell->worldSpace->worldMapScale) + thisObj->parentCell->worldSpace->worldMapCellX;
+		posElems[1] = (thisObj->posY / thisObj->parentCell->worldSpace->worldMapScale) + thisObj->parentCell->worldSpace->worldMapCellY;
+	}
+	else {
+		posElems[0] = thisObj->posX;
+		posElems[1] = thisObj->posY;
+	}
+	posElems[2] = thisObj->posZ;
+	auto const arr = g_arrInterface->CreateArray(posElems, 3, scriptObj);
+	g_arrInterface->AssignCommandResult(arr, result);
+	return true;
+}

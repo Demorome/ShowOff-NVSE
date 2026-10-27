@@ -16,8 +16,6 @@ enum
 	kAddr_EvaluateCondition = 0x681600,
 };
 
-bool __fastcall ContainerMenuCheckIsTargetChild(ContChangesEntry* entry, void* edx, int a1);
-
 extern void (*ApplyPerkModifiers)(uint32_t entryPointID, TESObjectREFR* perkOwner, void* arg3, ...);
 extern void(__cdecl* IncPCMiscStat)(MiscStatCode code);
 extern void(__cdecl* DecPCMiscStat)(MiscStatCode code);

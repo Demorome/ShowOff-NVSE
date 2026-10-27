@@ -144,7 +144,6 @@
     <ClCompile Include="ITypes.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ICriticalSection.h" />
     <ClInclude Include="IDebugLog.h" />
     <ClInclude Include="IPrefix.h" />
     <ClInclude Include="ITypes.h" />

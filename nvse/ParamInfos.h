@@ -2343,3 +2343,37 @@ static ParamInfo kParams_TwoFactions_OneInt_TwoOptionalInts[] =
 	{	"int",kParamType_Integer,		1	},
 	{	"int",kParamType_Integer,		1	},
 };
+
+static ParamInfo kParams_SetFactionCombatReaction[] =
+{
+	{ "faction1",	kParamType_Faction,	0 },
+	{ "faction2",	kParamType_Faction,	0 },
+
+	{ "setAllyOrEnemy (int)",kParamType_Integer,		0 },
+
+	{ "F1toF2Flag (int)",kParamType_Integer,		1 },
+	{ "F2toF1Flag (int)",kParamType_Integer,		1 },
+};
+
+static ParamInfo kParams_SetAllyOrEnemyTemp[] =
+{
+	{ "faction1",	kParamType_Faction,	0 },
+	{ "faction2",	kParamType_Faction,	0 },
+	{ "F1toF2Flag (int)",kParamType_Integer,		1 },
+	{ "F2toF1Flag (int)",kParamType_Integer,		1 },
+};
+
+static ParamInfo Cmd_PlaceAtReticle_Params[] = {
+	{ "formToPlace",	kParamType_AnyForm, 0 },
+	{ "count",			kParamType_Integer,	1 },
+	{ "minDistance",	kParamType_Float,	1 },
+	{ "maxDistance",	kParamType_Float,	1 },
+};
+
+static ParamInfo Cmd_PlaceAtReticleAlt_Params[] = {
+	{ "formToPlace",	kParamType_AnyForm, 0 },
+	{ "count",			kParamType_Integer,	1 },
+	{ "minDistance",	kParamType_Float,	1 },
+	{ "maxDistance",	kParamType_Float,	1 },
+	{ "healthPercent",	kParamType_Float,	1 },
+};

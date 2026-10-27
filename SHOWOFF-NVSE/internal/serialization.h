@@ -103,7 +103,6 @@ void LoadGameCallback(void*)
 						{
 							if (!idsMap)
 							{
-								ScopedLock lock(g_Lock);
 								if (!rVarsMap) 
 								{
 									rVarsMap = s_auxStringMapArraysPerm.Emplace(
