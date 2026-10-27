@@ -1,0 +1,196 @@
+#include "SO_fn_Debug.h"
+
+#include <GameObjects.h>
+#include <GameAPI.h>
+#include <jip_nvse.h>
+#include <Utilities.h>
+
+bool Cmd_DumpFormList_Execute(COMMAND_ARGS) {
+	BGSListForm* FList = nullptr;
+	char fileName[MAX_PATH] = "default";
+	uint32_t bAppend = 1;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &FList, &fileName, &bAppend) || !FList
+		|| !IS_TYPE(FList, BGSListForm)) return true;
+
+	if (strcmp(fileName, "default") == 0)  //if they are the same, i.e. filepathStr was not passed.
+	{
+		FList->Dump();
+	}
+	else {
+		FList->DumpToFile(fileName, bAppend);
+	}
+	return true;
+}
+
+
+//Would be cool if this could return whatever is calling this condition, or at what address etc..
+bool Cmd_ConditionPrint_Execute(COMMAND_ARGS) {
+	*result = 1;
+	if (IsConsoleMode())
+		Console_Print("TestCondition >> 1. Not meant for use as a script function.");
+	return true;
+}
+
+bool Cmd_ConditionPrint_Eval(COMMAND_ARGS_EVAL) {
+	*result = 1;
+	UINT32 refID = 0;
+	const char* edID = NULL;
+	if (thisObj) {
+		refID = thisObj->GetFormID();
+		edID = thisObj->GetName();  //Only works with JG's bLoadEditorIDs = 1, otherwise returns an empty string.
+	}
+	Console_Print("TestCondition >> 1. thisObj: [%08X] (%s)", refID, edID);
+	return true;
+}
+
+bool Cmd_GetShowOffDebugMode_Execute(COMMAND_ARGS) {
+	*result = g_ShowFuncDebug;
+	return true;
+}
+
+bool Cmd_SetShowOffDebugMode_Execute(COMMAND_ARGS) {
+	uint32_t bOn = false;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &bOn)) return true;
+	g_ShowFuncDebug = bOn;
+	return true;
+}
+
+bool Cmd_IsBaseForm_Execute(COMMAND_ARGS) {
+	*result = false;
+	TESForm* form = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &form)) return true;
+	if (form && !IS_REFERENCE(form)) {
+		*result = true;
+	}
+	return true;
+}
+
+bool Cmd_IsOutsideMainThread_Execute(COMMAND_ARGS) {
+	*result = GetCurrentThreadId() != g_mainThreadID;
+	return true;
+}
+
+bool Cmd_RefillPlayerAmmo_Execute(COMMAND_ARGS) {
+	*result = 0; // bSuccess
+	int32_t count;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &count) || count <= 0)
+		return true;
+
+	const auto weapInfo = PlayerCharacter::GetSingleton()->baseProcess->GetWeaponInfo();
+	if (!weapInfo)
+		return true;
+	const auto weap = static_cast<TESObjectWEAP*>(weapInfo->type);
+
+	// Player reload code happens at 0x9497AA, copying that.
+	const auto regenRate = ThisCall<double>(0x709430, weap, weapInfo->HasWeaponMod(TESObjectWEAP::kWeaponModEffect_RegenerateAmmo_Seconds));
+	if (regenRate > 0) {
+		if (IsConsoleMode())
+			Console_Print("Cannot refill a weapon with an ammo regen per second!");
+		return true;
+	}
+
+	const auto hasExtendedClip = weapInfo->HasWeaponMod(TESObjectWEAP::kWeaponModEffect_IncreaseClipCapacity);
+	if (const auto ammoInfo = PlayerCharacter::GetSingleton()->baseProcess->GetAmmoInfo()) {
+		PlayerCharacter::GetSingleton()->AddItem(ammoInfo->type, nullptr, count);
+		auto const clipMax = ThisCall<int32_t>(0x4FE160, weap, hasExtendedClip);
+		auto const numLeftToAdd = clipMax - ammoInfo->countDelta;
+		ammoInfo->countDelta += std::min(numLeftToAdd, count);
+	}
+	else if (const auto defaultAmmo = ThisCall<TESAmmo*>(0x474920, &weap->ammo)) {
+		PlayerCharacter::GetSingleton()->AddItem(defaultAmmo, nullptr, count);
+		// player was fully out of ammo; reload the weapon.
+		PlayerCharacter::GetSingleton()->Reload2(weap, 2, hasExtendedClip, false); // 0x95D3F0
+	}
+	else {
+		if (IsConsoleMode())
+			Console_Print("Unable to find default ammo for the weapon!");
+		return true;
+	}
+	*result = 1;
+	return true;
+}
+
+// Copied JIP's GetActorsByProcessingLevel code
+bool Cmd_KillAllHostiles_Execute(COMMAND_ARGS) {
+	Actor* killer = nullptr;
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &killer))
+		return true;
+	ProcessLists* procMngr = ProcessLists::GetSingleton();
+	MobileObject** objArray = procMngr->objects.data, ** arrEnd = objArray;
+	objArray += procMngr->beginOffsets[0];
+	arrEnd += procMngr->endOffsets[0];
+	for (; objArray != arrEnd; objArray++) {
+		auto actor = static_cast<Actor*>(*objArray);
+		if (actor && IS_ACTOR(actor)) {
+			if (actor->IsInCombatWith(PlayerCharacter::GetSingleton())
+				|| actor->GetShouldAttack(PlayerCharacter::GetSingleton())) {
+				actor->Kill(killer);
+			}
+		}
+	}
+	return true;
+}
+
+// TODO
+bool Cmd_SetFlyCamera_Execute(COMMAND_ARGS) {
+	enum Modes : int32_t {
+		kMode_Off = 0,
+		// These are the modes from TFC, offset by +1.
+		kMode_SetFlyCamOn_Default,
+		kMode_SetFlyCamOn_FreezeTime_SetUnkByteToTrue,
+		kMode_SetFlyCamOn_FreezeTime_SetUnkByteToTrue_2, /*duplicate functionality*/
+		kMode_SetFlyCamOn_SetUnkByteToTrue,
+
+		// Does not enable flycam
+		kMode_SetUnkByteToFalse,
+
+		kMode_SetFlyCamOn_FreezeTime_SetUnkByteToTrue_3 /*duplicate functionality*/
+	};
+
+
+
+	/*
+	Modes mode;
+	double pos[3] = { PlayerCharacter::GetSingleton()->posX, PlayerCharacter::GetSingleton()->posY,
+		PlayerCharacter::GetSingleton()->posZ + (PlayerCharacter::GetSingleton()->GetScaledHeight() * PlayerCharacter::GetSingleton()->eyeHeight) };
+	double rot[2] = { PlayerCharacter::GetSingleton()->rotZ, PlayerCharacter::GetSingleton()->rotX };
+	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &mode, &pos, &rot))
+		return true;
+	*/
+
+	//PlayerCharacter::GetSingleton()->cam
+
+	return true;
+}
+
+#if _DEBUG
+
+bool Cmd_Debug_UpdateWeather_Execute(COMMAND_ARGS) {
+	*result = false;
+	if (auto const sky = Sky::GetSingleton()) {
+		ThisCall(0x63D1D0, sky);
+		*result = true;
+	}
+	return true;
+}
+
+bool Cmd_Debug_DispatchEvent_Execute(COMMAND_ARGS) {
+	*result = false;
+	if (PluginExpressionEvaluator eval(PASS_COMMAND_ARGS);
+		eval.ExtractArgs()) {
+		int num1;
+		float num2;
+		NVSEArrayVar* arr;
+		const char* str;
+		TESForm* anyForm;
+		TESForm* reference;
+		TESForm* baseForm;
+		EXTRACT_ALL_ARGS_EXP(Debug_DispatchEvent, eval, std::tie(num1, num2, arr, str, anyForm, reference, baseForm),
+			g_NoArgs);
+		void* num2Formatted = *(void**)&num2;
+		g_eventInterface->DispatchEvent("ShowOff:DebugEvent", PlayerCharacter::GetSingleton(), num1, num2Formatted, arr, str, anyForm, reference, baseForm);
+		*result = true;
+	}
+	return true;
+}
+#endif

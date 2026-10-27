@@ -1,7 +1,8 @@
 ﻿#pragma once
 #include "EventParams.h"
 #include "GameEffects.h"
-
+#include "SafeWrite.h"
+#include "GameRTTI.h"
 // Credits to Karut (from JohnnyGuitar) for making the Event Framework.
 EventInformation* OnCornerMessage; 
 

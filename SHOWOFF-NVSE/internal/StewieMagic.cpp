@@ -7,12 +7,6 @@ void(__cdecl* IncPCMiscStat)(MiscStatCode code) = (void(__cdecl*)(MiscStatCode))
 void(__cdecl* DecPCMiscStat)(MiscStatCode code) = (void(__cdecl*)(MiscStatCode))0x60CAD0;
 KarmaTier(__cdecl* GetKarmaTier)(float karma) = (KarmaTier(__cdecl*)(float))0x47E040;
 
-bool __fastcall ContainerMenuCheckIsTargetChild(ContChangesEntry* entry, void* edx, int a1)
-{
-	TESObjectREFR* ref = ContainerMenu::GetSingleton()->containerRef;
-	return ref->GetIsChildSize(true);
-}
-
 void Actor::UnequipItem(TESForm* objType, uint32_t unk1, ExtraDataList* itemExtraList, bool unk3, bool lockUnequip_unused, bool unk5)
 {
 	ThisCall(0x88C790, this, objType, unk1, itemExtraList, unk3, lockUnequip_unused, unk5);

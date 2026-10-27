@@ -105,6 +105,42 @@
     <ClCompile Include="..\nvse\GameProcess.cpp">
       <Filter>nvse</Filter>
     </ClCompile>
+    <ClCompile Include="functions\SO_fn_Actors.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\SO_fn_Array.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\SO_fn_AuxTimer.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\SO_fn_AuxVars.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\SO_fn_Debug.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\SO_fn_Factions.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\SO_fn_Gameplay.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\SO_fn_Items.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\SO_fn_Topics.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\SO_fn_Settings.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\SO_fn_Refs.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
+    <ClCompile Include="functions\SO_fn_Misc.cpp">
+      <Filter>functions</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="functions\SO_fn_Misc.h">

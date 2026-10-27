@@ -33,10 +33,3 @@ DEFINE_COMMAND_ALT_PLUGIN_EXP_SAFE(SaveCachedIniFile, SaveCachedIni, "", false, 
 DEFINE_COMMAND_PLUGIN_EXP_SAFE(ReloadIniCache, "", false, kNVSEParams_OneOptionalString);
 
 DEFINE_COMMAND_ALT_PLUGIN_EXP_SAFE(ClearFileCacheShowOff, CloseFileSO, "", false, kNVSEParams_OneString_OneNumber);
-
-
-#if _DEBUG
-
-
-
-#endif

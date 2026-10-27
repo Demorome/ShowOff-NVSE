@@ -34,6 +34,8 @@
 #include "Events/CustomEventFilters.h"
 #include "Events/ShowOffEvents.h"
 
+#include <MiscHooks.h>
+
 
 // Plugin Stuff
 IDebugLog g_Log; // file will be open after NVSE plugin load
@@ -274,7 +276,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 			const auto isMenuMode = CdeclCall<bool>(0x702360);
 
 			AUX_TIMER_CS;
-			if (!s_auxTimerMapArraysPerm.Empty())
+			if (!AuxTimer::s_auxTimerMapArraysPerm.Empty())
 			{
 				s_dataChangedFlags |= kChangedFlag_AuxTimerMaps; // assume a timer will change
 			}

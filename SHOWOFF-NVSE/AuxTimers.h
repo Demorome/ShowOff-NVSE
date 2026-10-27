@@ -162,4 +162,8 @@ namespace AuxTimer
 	}
 	void RemovePendingTimers();
 	void InsertPendingTimers();
+
+	extern ICriticalSection g_AuxTimerLock;
 }
+
+#define AUX_TIMER_CS ScopedLock lock(AuxTimer::g_AuxTimerLock)

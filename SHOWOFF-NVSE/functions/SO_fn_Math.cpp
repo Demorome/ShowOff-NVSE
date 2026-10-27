@@ -1,10 +1,46 @@
 #include "SO_fn_Math.h"
+
+#include "ShowOffNVSE.h"
+#include <armadillo>
+#include <optional>
+#include "NiTypes.h"
+
 #include <cfloat>
 #include "easing.h"
 
+// Extracted 2D numbers, for use as matrices, quaternions, etc.
+template <typename T>
+struct array_2d {
+	std::vector<std::vector<T>> numbers;
+	array_2d() = default;
 
+	//Returns num_rows (first), then num_cols
+	[[nodiscard]] std::pair<size_t, size_t> GetDimensions() const;
+	[[nodiscard]] bool IsEmpty() const { return numbers.empty(); }
+	NVSEArrayVar* CreateArray(Script* callingScript);
+};
 
+//Based off of https://stackoverflow.com/a/17569578
+template <typename T, size_t rows, size_t cols>
+array_2d<T> process_2d_array(const T(&array)[rows][cols]);
 
+// Ignores min/maxCol/Rows checks if == 0
+// Assumes array is packed
+template <typename T>
+std::optional<array_2d<T>> TryGetArrayNumbers(NVSEArrayVar* arr, size_t const maxCols = 0, size_t const minCols = 0,
+	size_t const maxRows = 0, size_t const minRows = 0);
+
+std::optional<NiMatrix33> Get3x3MatrixFromArray(NVSEArrayVar* arr);
+
+std::optional<NiQuaternion> GetQuatFromArray(NVSEArrayVar* arr);
+
+//TODO: use array_2d instead of having copied code
+std::optional<arma::Mat<double>> GetMatrixFromArray(NVSEArrayVar* arr);
+
+//todo: swap for generic version (CreateArrayFromNumbers)
+NVSEArrayVar* GetMatrixAsArray(arma::Mat<double>& matrix, Script* callingScript);
+
+NVSEArrayVar* QuatToArray(NiQuaternion const& quat, Script* callingScript);
 
 bool Cmd_ApplyEasing_Execute(COMMAND_ARGS)
 {
