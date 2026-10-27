@@ -359,11 +359,11 @@ bool Cmd_GetCrippledLimbsAsBitMask_Execute(COMMAND_ARGS) {
 bool Cmd_ClearShowoffSavedData_Execute(COMMAND_ARGS) {
 	uint32_t auxStringMaps, auxTimerMaps;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &auxStringMaps, &auxTimerMaps)) return true;
-	uint8_t modIdx = scriptObj->GetOverridingModIdx();
-	if (auxStringMaps && s_auxStringMapArraysPerm.Erase((auxStringMaps == 2) ? 0xFF : modIdx))  //todo: fix .Erase not doing anything!
-		s_dataChangedFlags |= kChangedFlag_AuxStringMaps;
-	if (auxTimerMaps && AuxTimer::s_auxTimerMapArraysPerm.Erase((auxTimerMaps == 2) ? 0xFF : modIdx))
-		s_dataChangedFlags |= kChangedFlag_AuxTimerMaps;
+	TESFile* pFile = scriptObj->GetFile(-1);
+	if (auxStringMaps)  //todo: fix .Erase not doing anything!
+		s_auxStringMapArraysPerm.Erase((auxStringMaps == 2) ? nullptr : pFile);
+	if (auxTimerMaps)
+		AuxTimer::s_auxTimerMapArraysPerm.Erase((auxTimerMaps == 2) ? nullptr : pFile);
 	return true;
 }
 
@@ -391,19 +391,19 @@ public:
 	Random_Engine(uint32_t newSeed) : std::default_random_engine(newSeed), seed(newSeed) {}
 };
 
-UnorderedMap<uint32_t, Random_Engine*> g_ModsAndSeedsMap;
+UnorderedMap<const TESFile*, Random_Engine*> g_ModsAndSeedsMap;
 std::shared_mutex g_ModsAndSeedsMapLock;
 
 void SetSeedForMod(uint32_t seed, Script* scriptObj) {
 	if (!seed) seed = std::default_random_engine::default_seed;
-	uint8_t const modIdx = scriptObj->GetOverridingModIdx();
+	const TESFile* pFile = scriptObj->GetFile(-1);
 	std::scoped_lock lock(g_ModsAndSeedsMapLock);
 	// Change the engine's seed by just deleting the old engine and creating a new one.
-	auto const oldGen = g_ModsAndSeedsMap.Get(modIdx);
-	g_ModsAndSeedsMap.Erase(modIdx);
+	auto const oldGen = g_ModsAndSeedsMap.Get(pFile);
+	g_ModsAndSeedsMap.Erase(pFile);
 	delete oldGen;  //safe to do even if the pointer is null
 	auto newGen = new Random_Engine(seed);
-	g_ModsAndSeedsMap.Emplace(modIdx, newGen);
+	g_ModsAndSeedsMap.Emplace(pFile, newGen);
 }
 
 bool Cmd_SetRandomizerSeed_Execute(COMMAND_ARGS) {
@@ -423,21 +423,21 @@ bool Cmd_SetSeedUsingForm_Execute(COMMAND_ARGS) {
 
 bool Cmd_GetRandomizerSeed_Execute(COMMAND_ARGS) {
 	*result = Random_Engine::kInvalid_Seed;
-	uint8_t const modIdx = scriptObj->GetOverridingModIdx();
-	if (auto const currGen = g_ModsAndSeedsMap.Get(modIdx)) {
+	const TESFile* pFile = scriptObj->GetFile(-1);
+	if (auto const currGen = g_ModsAndSeedsMap.Get(pFile)) {
 		*result = currGen->seed;
 	}
 	return true;
 }
 
 uint32_t RandSeeded_Call(uint32_t min, uint32_t max, Script* scriptObj) {
-	uint8_t const modIdx = scriptObj->GetOverridingModIdx();
+	const TESFile* pFile = scriptObj->GetFile(-1);
 	std::scoped_lock lock(g_ModsAndSeedsMapLock);
-	Random_Engine* generator = g_ModsAndSeedsMap.Get(modIdx);
+	Random_Engine* generator = g_ModsAndSeedsMap.Get(pFile);
 	if (!generator) {
 		// Make a new generator for the calling Mod w/ default seed, and use that.
 		generator = new Random_Engine(std::default_random_engine::default_seed);
-		g_ModsAndSeedsMap.Emplace(modIdx, generator);
+		g_ModsAndSeedsMap.Emplace(pFile, generator);
 	}
 	std::uniform_int_distribution distribution(min, max);
 	return distribution(*generator);
@@ -461,9 +461,9 @@ bool Cmd_AdvanceSeed_Execute(COMMAND_ARGS) {
 	*result = false;
 	uint32_t discardAmount;
 	if (!ExtractArgsEx(EXTRACT_ARGS_EX, &discardAmount)) return true;
-	uint8_t const modIdx = scriptObj->GetOverridingModIdx();
+	const TESFile* pFile = scriptObj->GetFile(-1);
 	std::scoped_lock lock(g_ModsAndSeedsMapLock);
-	if (auto currGen = g_ModsAndSeedsMap.Get(modIdx)) {
+	if (auto currGen = g_ModsAndSeedsMap.Get(pFile)) {
 		currGen->discard(discardAmount);
 		*result = true;
 	}
