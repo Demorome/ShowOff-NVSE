@@ -1286,8 +1286,9 @@ __declspec(noinline) char* __fastcall GetNextToken(char *str, const char *delims
 
 char* __fastcall CopyString(const char *key)
 {
-	char *newKey = (char*)malloc(StrLen(key) + 1);
-	StrCopy(newKey, key);
+	uint32_t size = strlen(key) + 1;
+	char *newKey = (char*)malloc(size);
+	strcpy_s(newKey, size, key);
 	return newKey;
 }
 
