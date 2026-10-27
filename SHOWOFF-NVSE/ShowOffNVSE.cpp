@@ -371,6 +371,8 @@ extern "C"
 			ReadRecord32 = serialization->ReadRecord32;
 			ReadRecord64 = serialization->ReadRecord64;
 			SkipNBytes = serialization->SkipNBytes;
+			ResolveMod = serialization->ResolveMod;
+			GetModType = serialization->GetModType;
 			serialization->SetLoadCallback(nvsePluginHandle, LoadGameCallback);
 			serialization->SetSaveCallback(nvsePluginHandle, SaveGameCallback);
 			

@@ -17,6 +17,8 @@ uint32_t(*ReadRecord32)();
 void (*ReadRecord64)(void* outData);
 void (*SkipNBytes)(uint32_t byteNum);
 InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
+const TESFile* (*ResolveMod)(uint32_t index, NVSESerializationInterface::ModListType modType);
+NVSESerializationInterface::ModListType (*GetModType)(const TESFile* mod);
 
 uint8_t TESForm::GetOverridingModIdx() const
 {

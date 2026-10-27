@@ -45,6 +45,8 @@ extern const CommandInfo* (*GetCmdByName)(const char* name);
 extern bool (*FunctionCallScript)(Script* funcScript, TESObjectREFR* callingObj, TESObjectREFR* container, NVSEArrayElement* result, uint8_t numArgs, ...);
 extern bool (*FunctionCallScriptAlt)(Script* funcScript, TESObjectREFR* callingObj, uint8_t numArgs, ...);
 extern InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
+extern const TESFile* (*ResolveMod)(uint32_t index, NVSESerializationInterface::ModListType modType);
+extern NVSESerializationInterface::ModListType(*GetModType)(const TESFile* mod);
 extern TESObjectREFR* (__stdcall *InventoryRefCreateEntry)(TESObjectREFR* container, TESForm* itemForm, int32_t countDelta, ExtraDataList* xData);
 typedef InventoryRef* (*_InventoryRefCreate)(TESObjectREFR* container, const InventoryRef::Data& data, bool bValidate);
 extern _InventoryRefCreate InventoryRefCreate;

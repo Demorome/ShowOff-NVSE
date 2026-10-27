@@ -16,31 +16,39 @@ uint32_t s_loadGameBufferSize = 0x10000;
 
 constexpr uint32_t AuxStringMapVersion = 11;
 
-uint32_t __fastcall LoadFormID(bool abSpecialIDs, bool abSaveSupportsSpecialFormIDs) {
-	const uint8_t ucModIndex = ReadRecord8();
-	const bool bESL = abSpecialIDs && ucModIndex == 0xFE;
-	const bool bMedium = abSpecialIDs && ucModIndex == 0xFD;
-
-	uint32_t uiTempFormID = ucModIndex << 24;
-
-	if (abSaveSupportsSpecialFormIDs) {
-		const uint16_t usSecondIndex = ReadRecord16();
-		if (bESL)
-			uiTempFormID |= usSecondIndex << 12;
-		else if (bMedium) {
-			uiTempFormID |= usSecondIndex << 16;
-		}
+void __fastcall SaveMod(const TESFile* apFile) {
+	uint8_t ucModType = 0xFF;
+	uint16_t usIndex = 0xFFFF;
+	if (apFile) {
+		ucModType = GetModType(apFile);
+		usIndex = (TESDataHandler::HasNewFileTypeSupport() && apFile->IsSpecial()) ? apFile->secondIndex : apFile->modIndex;
 	}
-	else if (bESL || bMedium) {
-		// File won't be found, so skip early
-		uiTempFormID = 0xFFu << 24;
-	}
-	return uiTempFormID;
+	WriteRecord8(ucModType);
+	WriteRecord16(usIndex);
 }
 
-void __fastcall SaveFormID(const TESFile* apFile, bool abSpecialIDs) {
-	WriteRecord8(apFile->modIndex);
-	WriteRecord16(abSpecialIDs ? apFile->secondIndex : 0);
+bool __fastcall LoadMod(const TESFile*& apFile, bool abSupportsSpecial) {
+	uint8_t ucModType = NVSESerializationInterface::ModListType::kNormal;
+	uint16_t usIndex = 0xFFFF;
+	if (abSupportsSpecial) {
+		ucModType = ReadRecord8();
+		usIndex = ReadRecord16();
+		if (ucModType == NVSESerializationInterface::ModListType::kInvalid) {
+			assert(usIndex == 0xFFFF);
+			apFile = nullptr;
+			return true;
+		}
+	}
+	else {
+		usIndex = ReadRecord8();
+		if (usIndex == 0xFF) {
+			apFile = nullptr;
+			return true;
+		}
+	}
+
+	apFile = ResolveMod(usIndex, static_cast<NVSESerializationInterface::ModListType>(ucModType));
+	return apFile != nullptr;
 }
 
 bool __fastcall IsFormIDUsed(const uint32_t auiFormID) {
@@ -51,8 +59,6 @@ void LoadGameCallback(void*)
 {
 	ClearScriptAuxData();
 	// s_dataChangedFlags is reset @ PostLoadGame msg handler.
-
-	const bool bSpecialIDs = TESDataHandler::HasNewFileTypeSupport();
 
 	uint32_t type, uiVersion, length, nRefs;
 	uint8_t buffer1, loopBuffer;
@@ -75,15 +81,10 @@ void LoadGameCallback(void*)
 			while (nRecs)
 			{
 				nRecs--;
-				uint32_t uiTempFormID = LoadFormID(bSpecialIDs, bSaveSupportsSpecialFormIDs);
-
 				const TESFile* pFile = nullptr;
-				if (ResolveRefID(uiTempFormID, &uiTempFormID))
-					pFile = TESDataHandler::GetSingleton()->GetFileByFormID(uiTempFormID);
-				
-				if (!pFile)
+				if (!LoadMod(pFile, bSaveSupportsSpecialFormIDs))
 					continue;
-				
+
 				AuxStringMapVarsMap* rVarsMap = NULL;
 				nVars = ReadRecord16();  //amount of auxStringMaps owned by the mod.
 				while (nVars)
@@ -140,15 +141,10 @@ void LoadGameCallback(void*)
 			nRecs = ReadRecord16();
 			while (nRecs)
 			{
-				uint32_t uiTempFormID = LoadFormID(bSpecialIDs, bSaveSupportsSpecialFormIDs);
-
 				nRecs--;
 
 				const TESFile* pFile = nullptr;
-				if (ResolveRefID(uiTempFormID, &uiTempFormID))
-					pFile = TESDataHandler::GetSingleton()->GetFileByFormID(uiTempFormID);
-
-				if (pFile)
+				if (LoadMod(pFile, bSaveSupportsSpecialFormIDs))
 				{
 					AuxTimer::AuxTimerOwnersMap* ownersMap = nullptr;
 					nRefs = ReadRecord16();
@@ -225,18 +221,13 @@ void LoadGameCallback(void*)
 
 void SaveGameCallback(void*)
 {
-	const bool bSpecialIDs = TESDataHandler::HasNewFileTypeSupport();
-
 	{
 		const uint16_t usMapSize = s_auxStringMapArraysPerm.Size();
 		if (usMapSize) {
 			WriteRecord('SMSO', AuxStringMapVersion, &usMapSize, sizeof(usMapSize));
 			for (auto rmModIt = s_auxStringMapArraysPerm.Begin(); rmModIt; ++rmModIt) {
 				const TESFile* pMod = rmModIt.Key();
-				if (!pMod)
-					continue;
-
-				SaveFormID(pMod, bSpecialIDs);
+				SaveMod(pMod);
 				WriteRecord16(rmModIt().Size());
 				for (auto rmVarIt = rmModIt().Begin(); rmVarIt; ++rmVarIt) {
 					const uint8_t ucKeyLength = static_cast<uint8_t>(strlen(rmVarIt.Key()));
@@ -261,10 +252,7 @@ void SaveGameCallback(void*)
 			WriteRecord('TAOS', AuxTimer::AuxTimerVersion, &usMapSize, sizeof(usMapSize));
 			for (auto avModIt = AuxTimer::s_auxTimerMapArraysPerm.Begin(); avModIt; ++avModIt) {
 				const TESFile* pMod = avModIt.Key();
-				if (!pMod)
-					continue;
-
-				SaveFormID(pMod, bSpecialIDs);
+				SaveMod(pMod);
 				WriteRecord16(avModIt().Size());
 				for (auto avOwnerIt = avModIt().Begin(); avOwnerIt; ++avOwnerIt) {
 					WriteRecord32(avOwnerIt.Key());
