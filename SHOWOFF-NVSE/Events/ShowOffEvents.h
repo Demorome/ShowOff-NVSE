@@ -9,9 +9,9 @@ DEFINE_COMMAND_ALT_PLUGIN(SetShowOffOnCornerMessageEventHandler, SetOnCornerMess
 bool Cmd_SetShowOffOnCornerMessageEventHandler_Execute(COMMAND_ARGS)
 {
 	uint32_t setOrRemove;
-	Script* script;
+	Script* script = nullptr;
 	uint32_t flags = 0;  //reserved for future use
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags) || NOT_TYPE(script, Script))) return true;
+	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, &flags) || !script || NOT_TYPE(script, Script))) return true;
 	if (OnCornerMessage)
 	{
 		if (setOrRemove)
@@ -27,13 +27,12 @@ DEFINE_COMMAND_ALT_PLUGIN(SetOnAuxTimerStartHandler, SetOnTimerStartHandler, "",
 bool Cmd_SetOnAuxTimerStartHandler_Execute(COMMAND_ARGS)
 {
 	uint32_t setOrRemove;
-	Script* script;
+	Script* script = nullptr;
 	GenericFilters filters[2];
 	char strBuf[0x80];
 	filters[0].form = nullptr;
 	filters[1].str = strBuf;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, filters[1].str, &filters[0].form)
-		|| NOT_TYPE(script, Script)))
+	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, filters[1].str, &filters[0].form) || !script || NOT_TYPE(script, Script)))
 	{
 		return true;
 	}
@@ -61,13 +60,12 @@ DEFINE_COMMAND_ALT_PLUGIN(SetOnAuxTimerStopHandler, SetOnTimerStopHandler, "", f
 bool Cmd_SetOnAuxTimerStopHandler_Execute(COMMAND_ARGS)
 {
 	uint32_t setOrRemove;
-	Script* script;
+	Script* script = nullptr;
 	GenericFilters filters[2];
 	char strBuf[0x80];
 	filters[0].form = nullptr;
 	filters[1].str = strBuf;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, filters[1].str, &filters[0].form)
-		|| NOT_TYPE(script, Script)))
+	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, filters[1].str, &filters[0].form) || !script || NOT_TYPE(script, Script)))
 	{
 		return true;
 	}
@@ -95,13 +93,12 @@ DEFINE_COMMAND_ALT_PLUGIN(SetOnAuxTimerUpdateHandler, SetOnTimerUpdateHandler, "
 bool Cmd_SetOnAuxTimerUpdateHandler_Execute(COMMAND_ARGS)
 {
 	uint32_t setOrRemove;
-	Script* script;
+	Script* script = nullptr;
 	GenericFilters filters[2];
 	char strBuf[0x80];
 	filters[0].form = nullptr;
 	filters[1].str = strBuf;
-	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, filters[1].str, &filters[0].form)
-		|| NOT_TYPE(script, Script)))
+	if (!(ExtractArgsEx(EXTRACT_ARGS_EX, &setOrRemove, &script, filters[1].str, &filters[0].form) || !script || NOT_TYPE(script, Script)))
 	{
 		return true;
 	}
