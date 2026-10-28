@@ -12,10 +12,15 @@ struct ParamInfo;
 class TESObjectREFR;
 class Script;
 class TESForm;
-struct ScriptEventList;
+class ScriptLocals;
+class PluginFormExtraData;
 struct ArrayKey;
 namespace PluginAPI { class ArrayAPI; }
 struct PluginInfo;
+struct ScriptLocal;
+struct ItemEntryData;
+struct InventoryRef;
+struct TESFile;
 
 typedef uint32_t	PluginHandle;	// treat this as an opaque type
 
@@ -611,13 +616,11 @@ struct NVSEScriptInterface
 
 #endif
 
-#if RUNTIME
-
 // Gives access to internal data without reverse engineering NVSE
 struct NVSEDataInterface
 {
 	enum {
-		kVersion = 1
+		kVersion = 4
 	};
 
 	uint32_t		version;
@@ -629,8 +632,8 @@ struct NVSEDataInterface
 
 		kNVSEData_SingletonMax,
 	};
-	void* (*GetSingleton)(uint32_t singletonID);
-	enum {
+	void * (* GetSingleton)(uint32_t singletonID); // Game only
+	enum  {
 		kNVSEData_InventoryReferenceCreate = 1,
 		kNVSEData_InventoryReferenceGetForRefID,
 		kNVSEData_InventoryReferenceGetRefBySelf,
@@ -638,23 +641,53 @@ struct NVSEDataInterface
 		kNVSEData_StringVarMapDeleteBySelf,
 		kNVSEData_LambdaDeleteAllForScript,
 		kNVSEData_InventoryReferenceCreateEntry,
+
+		// If a command that accepts a script (=> lambdas) needs to store the script event list (variable value list) for longer
+		// than the lifetime of the parent script (UDFs clear their lists immediately after execution for example), then you can call
+		// kNVSEData_LambdaSaveVariableList which will save the variable list after deletion so that the lambda can still use the values
+		// until the lambda is discarded. It is required that you clean up with kNVSEData_LambdaUnsaveVariableList when you are no longer
+		// keeping the lambda.
 		kNVSEData_LambdaSaveVariableList,
 		kNVSEData_LambdaUnsaveVariableList,
-
+		
 		kNVSEData_IsScriptLambda,
 		kNVSEData_HasScriptCommand,
 		kNVSEData_DecompileScript,
+
+		// Deprecated in v4
+		kNVSEData_LegacyFormExtraDataGet,
+		kNVSEData_LegacyFormExtraDataGetAll,
+		kNVSEData_LegacyFormExtraDataAdd,
+		kNVSEData_LegacyFormExtraDataRemoveByName,
+		kNVSEData_LegacyFormExtraDataRemoveByPtr,
+
+		// Available in GECK, added in v4
+		kNVSEData_PluginFormExtraDataGet,
+		kNVSEData_PluginFormExtraDataGetAll,
+		kNVSEData_PluginFormExtraDataAdd,
+		kNVSEData_PluginFormExtraDataRemoveByName,
+		kNVSEData_PluginFormExtraDataRemoveByPtr,
+
+		kNVSEData_AdjustFormIDForMod,
+		kNVSEData_AdjustFormIDForModByName,
+		
 		kNVSEData_FuncMax,
 	};
-	void* (*GetFunc)(uint32_t funcID);
-	enum {
+	void * (* GetFunc)(uint32_t funcID);
+	enum  {
 		kNVSEData_NumPreloadMods = 1,
 
 		kNVSEData_DataMax,
 	};
-	void* (*GetData)(uint32_t dataID);
+	void * (* GetData)(uint32_t dataID); // Game only
+	// v2: xNVSE caches script data for additional performance and short circuit evaluation, if you are manipulating script data then you can clear the cache 
+	void (*ClearScriptDataCache)();  // Game only
+	// v3
+
 };
-#endif
+
+typedef bool(__fastcall* _AdjustFormIDForMod)(const TESFile* mod, uint32_t& formID);
+typedef bool(__fastcall* _AdjustFormIDForModByName)(const char* modName, uint32_t& formID);
 
 /**** serialization API docs ***************************************************
  *	
@@ -732,7 +765,7 @@ struct NVSESerializationInterface
 {
 	enum
 	{
-		kVersion = 2,
+		kVersion = 3,
 	};
 
 	typedef void (* EventCallback)(void * reserved);
@@ -763,18 +796,31 @@ struct NVSESerializationInterface
 	// Peeks at the data without interfiring with the current position
 	uint32_t	(* PeekRecordData)(void * buf, uint32_t length);
 
-	//Added in JIP (?)
 	void	(*WriteRecord8)(uint8_t inData);
 	void	(*WriteRecord16)(uint16_t inData);
 	void	(*WriteRecord32)(uint32_t inData);
-	void	(*WriteRecord64)(const void* inData);
+	void	(*WriteRecord64)(const void *inData);
 
 	uint8_t	(*ReadRecord8)();
 	uint16_t	(*ReadRecord16)();
 	uint32_t	(*ReadRecord32)();
-	void	(*ReadRecord64)(void* outData);
+	void	(*ReadRecord64)(void *outData);
 
 	void	(*SkipNBytes)(uint32_t byteNum);
+
+	enum ModListType : uint8_t {
+		kNormal = 0,
+		kSmall = 1,
+		kMedium = 2,
+		kOverlay = 3,
+
+		kCount,
+
+		kInvalid = UINT8_MAX
+	};
+
+	const TESFile* (*ResolveMod)(uint32_t index, ModListType modType);
+	ModListType(*GetModType)(const TESFile* mod);
 };
 
 #ifdef RUNTIME

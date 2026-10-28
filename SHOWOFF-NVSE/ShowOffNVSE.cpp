@@ -149,19 +149,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 	{
 	case NVSEMessagingInterface::kMessage_LoadGame:
 		break;
-	case NVSEMessagingInterface::kMessage_SaveGame:
-		// Copied from jip_nvse.cpp
-		COPY_BYTES(s_lastLoadedPath, msg->fosPath, msg->dataLen + 1);
-		s_dataChangedFlags = 0;
-		break;
 	case NVSEMessagingInterface::kMessage_PreLoadGame:
-		// Copied jip_nvse.cpp
-		if (!StrEqualCS(msg->fosPath, s_lastLoadedPath))
-		{
-			COPY_BYTES(s_lastLoadedPath, msg->fosPath, msg->dataLen + 1);
-			s_dataChangedFlags = kChangedFlag_All;
-		}
-
 		{
 			AUX_TIMER_CS;
 			AuxTimer::RemovePendingTimers();
@@ -169,13 +157,6 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		}
 
 		FlushJGInterfaceEvents();
-		break;
-	case NVSEMessagingInterface::kMessage_PostLoadGame:
-		if (msg->fosLoaded)
-		{
-			// JIP calls DoLoadGameHousekeeping() here
-			s_dataChangedFlags = 0;
-		}
 		break;
 	case NVSEMessagingInterface::kMessage_PostLoad:
 		//_MESSAGE("Received POST LOAD message with file path %s", msg->data);
@@ -191,8 +172,7 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 		break;
 	case NVSEMessagingInterface::kMessage_ExitToMainMenu:
 		// Copied from jip_nvse.cpp
-		ProcessDataChangedFlags(kChangedFlag_All);
-		s_lastLoadedPath[0] = 0;
+		ClearScriptAuxData();
 
 		{
 			AUX_TIMER_CS;
@@ -251,10 +231,6 @@ void MessageHandler(NVSEMessagingInterface::Message* msg)
 			const auto isMenuMode = CdeclCall<bool>(0x702360);
 
 			AUX_TIMER_CS;
-			if (!AuxTimer::s_auxTimerMapArraysPerm.Empty())
-			{
-				s_dataChangedFlags |= kChangedFlag_AuxTimerMaps; // assume a timer will change
-			}
 			AuxTimer::DoCountdown(globalTimeMult, vatsTimeMult, isMenuMode);
 			AuxTimer::RemovePendingTimers();
 		}
@@ -395,6 +371,8 @@ extern "C"
 			ReadRecord32 = serialization->ReadRecord32;
 			ReadRecord64 = serialization->ReadRecord64;
 			SkipNBytes = serialization->SkipNBytes;
+			ResolveMod = serialization->ResolveMod;
+			GetModType = serialization->GetModType;
 			serialization->SetLoadCallback(nvsePluginHandle, LoadGameCallback);
 			serialization->SetSaveCallback(nvsePluginHandle, SaveGameCallback);
 			

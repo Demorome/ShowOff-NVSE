@@ -17,10 +17,12 @@ uint32_t(*ReadRecord32)();
 void (*ReadRecord64)(void* outData);
 void (*SkipNBytes)(uint32_t byteNum);
 InventoryRef* (*InventoryRefGetForID)(uint32_t refID);
+const TESFile* (*ResolveMod)(uint32_t index, NVSESerializationInterface::ModListType modType);
+NVSESerializationInterface::ModListType (*GetModType)(const TESFile* mod);
 
 uint8_t TESForm::GetOverridingModIdx() const
 {
-	ModInfo* info = mods.GetLastItem();
+	TESFile* info = mods.GetLastItem();
 	return info ? info->modIndex : 0xFF;
 }
 
@@ -89,32 +91,9 @@ uint32_t __fastcall GetSubjectID(TESForm* form, TESObjectREFR* thisObj)
 	return 0;
 }
 
-std::atomic<uint8_t> s_dataChangedFlags = kChangedFlag_None; // For AuxVar serialization.
-
 bool TESForm::IsItem() const
 {
 	return TESContainer::ContainerCanHoldType(typeID);
-}
-
-__declspec(naked) bool __fastcall GetResolvedModIndex(uint8_t* pModIdx)
-{
-	__asm
-	{
-		movzx	edx, byte ptr[ecx]
-		cmp		dl, 0xFF
-		jz		retn1
-		mov		eax, dword ptr ds:[0x11DDF38] // BGSSaveLoadGame::pSingleton
-		mov		al, [eax + edx + 0x44]
-		cmp		al, 0xFF
-		jz		retn0
-		mov[ecx], al
-		retn1 :
-		mov		al, 1
-			retn
-			retn0 :
-		xor al, al
-			retn
-	}
 }
 
 __declspec(naked) bool __stdcall HasChangeData(uint32_t refID)
@@ -143,28 +122,5 @@ __declspec(naked) bool __stdcall HasChangeData(uint32_t refID)
 		mov		al, 1
 			done :
 			retn	4
-	}
-}
-
-__declspec(naked) uint32_t __fastcall GetResolvedRefID(uint32_t refID)
-{
-	__asm
-	{
-		push	ecx
-		movzx	edx, byte ptr[esp + 3]
-		cmp		dl, 0xFF
-		jz		retnArg
-		mov		ecx, dword ptr ds : [0x11DDF38] // BGSSaveLoadGame::pSingleton
-		mov		al, [ecx + edx + 0x44]
-		cmp		al, 0xFF
-		jz		retn0
-		mov[esp + 3], al
-		retnArg :
-		pop		eax
-			retn
-			retn0 :
-		xor eax, eax
-			pop		ecx
-			retn
 	}
 }

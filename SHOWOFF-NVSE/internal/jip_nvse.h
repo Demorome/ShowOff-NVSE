@@ -187,26 +187,26 @@ static_assert(sizeof(AuxVariableValue) == 0x10);
 
 typedef UnorderedMap<char*, AuxVariableValue> AuxStringMapIDsMap;
 typedef UnorderedMap<char*, AuxStringMapIDsMap> AuxStringMapVarsMap;
-typedef UnorderedMap<uint32_t, AuxStringMapVarsMap> AuxStringMapModsMap;
+typedef UnorderedMap<const TESFile*, AuxStringMapVarsMap> AuxStringMapModsMap;
 extern AuxStringMapModsMap s_auxStringMapArraysPerm, s_auxStringMapArraysTemp;  //Ensure thread safety when modifying these globals!!
 
 uint32_t __fastcall GetSubjectID(TESForm* form, TESObjectREFR* thisObj);
 
 struct AuxStringMapInfo
 {
-	uint32_t		modIndex;
-	bool		isPerm;
+	const TESFile*	modIndex;
+	bool			isPerm;
 
 	AuxStringMapInfo(Script* scriptObj, char* varName)
 	{
 		isPerm = (varName[0] != '*');
-		modIndex = (varName[!isPerm] == '_') ? 0xFF : scriptObj->GetOverridingModIdx();
+		modIndex = (varName[!isPerm] == '_') ? nullptr : scriptObj->GetFile(-1);
 	}
 
 	AuxStringMapInfo(Script* scriptObj, uint8_t type)
 	{
 		isPerm = !(type & 1);
-		modIndex = (type > 1) ? 0xFF : scriptObj->GetOverridingModIdx();
+		modIndex = (type > 1) ? nullptr : scriptObj->GetFile(-1);
 	}
 
 	AuxStringMapModsMap& ModsMap() { return isPerm ? s_auxStringMapArraysPerm : s_auxStringMapArraysTemp; }
@@ -221,11 +221,7 @@ enum DataChangedFlags : uint8_t
 	kChangedFlag_All = kChangedFlag_AuxStringMaps | kChangedFlag_AuxTimerMaps
 };
 
-extern std::atomic<uint8_t> s_dataChangedFlags; // For AuxVar serialization.
-
-bool __fastcall GetResolvedModIndex(uint8_t* pModIdx);
 bool __stdcall HasChangeData(uint32_t refID);
-uint32_t __fastcall GetResolvedRefID(uint32_t refID);
 
 
 

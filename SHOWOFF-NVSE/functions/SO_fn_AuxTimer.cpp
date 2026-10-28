@@ -30,11 +30,10 @@ bool Cmd_AuxTimerStart_Execute(COMMAND_ARGS) {
 				//can't insert into UnorderedMap mid-iteration, would invalidate iterators
 				if (g_isIteratingTimers) {
 					g_auxTimersPendingInsertion.emplace_back(AuxTimerPendingInsertion{
-						varInfo.modIndex, varInfo.ownerID, varName,
+						varInfo.pOwnerFile, varInfo.ownerID, varName,
 						timeToCountdown, flags, varInfo.isPerm
 					});
 					if (varInfo.isPerm) {
-						s_dataChangedFlags |= kChangedFlag_AuxTimerMaps;
 						if (thisObj)
 							thisObj->MarkAsModified(0);
 					}
@@ -59,7 +58,7 @@ bool Cmd_AuxTimerStart_Execute(COMMAND_ARGS) {
 				auto* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneString*>(callback.eventFilter);
 				if (filter->IsInFilter(0, varInfo.ownerID) && filter->IsInFilter(1, varName)) {
 					if (varInfo.IsPublic()
-						|| callback.ScriptForEvent->GetOverridingModIdx() == varInfo.modIndex) {
+						|| callback.ScriptForEvent->GetFile(-1) == varInfo.pOwnerFile) {
 						FunctionCallScriptAlt(
 							callback.ScriptForEvent,
 							nullptr,
@@ -72,7 +71,6 @@ bool Cmd_AuxTimerStart_Execute(COMMAND_ARGS) {
 			}
 
 			if (varInfo.isPerm) {
-				s_dataChangedFlags |= kChangedFlag_AuxTimerMaps;
 				if (thisObj)
 					thisObj->MarkAsModified(0);
 			}
@@ -105,7 +103,7 @@ bool Cmd_AuxTimerStop_Execute(COMMAND_ARGS) {
 					);
 					if (filter->IsInFilter(0, varInfo.ownerID) && filter->IsInFilter(1, varName)) {
 						if (varInfo.IsPublic()
-							|| callback.ScriptForEvent->GetOverridingModIdx() == varInfo.modIndex) {
+							|| callback.ScriptForEvent->GetFile(-1) == varInfo.pOwnerFile) {
 							FunctionCallScriptAlt(
 								callback.ScriptForEvent,
 								nullptr,
@@ -124,7 +122,7 @@ bool Cmd_AuxTimerStop_Execute(COMMAND_ARGS) {
 
 			timersToRemove.emplace_back(AuxTimerPendingRemoval
 				{
-					varInfo.modIndex,
+					varInfo.pOwnerFile,
 					varInfo.ownerID,
 					varName
 				}
@@ -132,7 +130,6 @@ bool Cmd_AuxTimerStop_Execute(COMMAND_ARGS) {
 			value->m_flags |= AuxTimerValue::kFlag_PendingRemoval;
 
 			if (varInfo.isPerm) {
-				s_dataChangedFlags |= kChangedFlag_AuxTimerMaps;
 				if (thisObj)
 					thisObj->MarkAsModified(0);
 			}
@@ -167,7 +164,6 @@ bool Cmd_AuxTimerPaused_Execute(COMMAND_ARGS) {
 					value->m_flags |= AuxTimerValue::kFlag_IsPaused;
 
 				if (varInfo.isPerm) {
-					s_dataChangedFlags |= kChangedFlag_AuxTimerMaps;
 					if (thisObj)
 						thisObj->MarkAsModified(0);
 				}

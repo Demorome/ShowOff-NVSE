@@ -20,13 +20,13 @@ namespace AuxTimer
 	AuxTimerValue* __fastcall GetTimerValue(const AuxTimerMapInfo& varInfo, bool createIfNotFound)
 	{
 		if (createIfNotFound) {
-			auto &newEntry = varInfo.ModsMap()[varInfo.modIndex][varInfo.ownerID][varInfo.varName];
+			auto &newEntry = varInfo.ModsMap()[varInfo.pOwnerFile][varInfo.ownerID][varInfo.varName];
 			// Remove pending removal flag, just in case we're not creating a new value.
 			newEntry.m_flags &= ~AuxTimerValue::kFlag_PendingRemoval;
 			return &newEntry;
 		}
 
-		AuxTimerOwnersMap* ownersMap = varInfo.ModsMap().GetPtr(varInfo.modIndex);
+		AuxTimerOwnersMap* ownersMap = varInfo.ModsMap().GetPtr(varInfo.pOwnerFile);
 		if (!ownersMap)
 			return nullptr;
 		AuxTimerVarsMap* varsMap = ownersMap->GetPtr(varInfo.ownerID);
@@ -127,7 +127,7 @@ namespace AuxTimer
 											&& filter->IsInFilter(1, auxVarNameMapIter.Key())) 
 										{
 											if (isPublic 
-												|| callback.ScriptForEvent->GetOverridingModIdx() == modMapIter.Key()) 
+												|| callback.ScriptForEvent->GetFile(-1) == modMapIter.Key()) 
 											{
 												FunctionCallScriptAlt(
 													callback.ScriptForEvent, 
@@ -156,7 +156,7 @@ namespace AuxTimer
 											&& filter->IsInFilter(1, auxVarNameMapIter.Key())) 
 										{
 											if (isPublic 
-												|| callback.ScriptForEvent->GetOverridingModIdx() == modMapIter.Key()) 
+												|| callback.ScriptForEvent->GetFile(-1) == modMapIter.Key()) 
 											{
 												FunctionCallScriptAlt(
 													callback.ScriptForEvent, 
@@ -180,7 +180,7 @@ namespace AuxTimer
 											auto* filter = reinterpret_cast<JohnnyEventFiltersOneFormOneString*>(callback.eventFilter);
 											if (filter->IsInFilter(0, ownerFormID) 
 												&& filter->IsInFilter(1, auxVarNameMapIter.Key())) {
-												if (isPublic || callback.ScriptForEvent->GetOverridingModIdx() == modMapIter.Key()) {
+												if (isPublic || callback.ScriptForEvent->GetFile(-1) == modMapIter.Key()) {
 													FunctionCallScriptAlt(
 														callback.ScriptForEvent, 
 														nullptr, 
@@ -268,7 +268,7 @@ namespace AuxTimer
 
 			// After deleting some timers, clear out the maps 
 			// that the timers were contained in, if they're now empty.
-			std::unordered_set<uint32_t> modMapsToUpdate;
+			std::unordered_set<const TESFile*> modMapsToUpdate;
 
 			AuxTimerModsMap& modsMapOfAllTimers = clearTemp 
 				? s_auxTimerMapArraysTemp 
@@ -276,7 +276,7 @@ namespace AuxTimer
 
 			for (auto& timerToRemove : timersToRemove)
 			{
-				auto* modEntry = modsMapOfAllTimers.GetPtr(timerToRemove.modIndex);
+				auto* modEntry = modsMapOfAllTimers.GetPtr(timerToRemove.pOwnerFile);
 				if (!modEntry) [[unlikely]]
 				{
 					_ERROR("AuxTimer: RemovePendingTimers: Null modEntry encountered!");
@@ -313,7 +313,7 @@ namespace AuxTimer
 				{
 					modEntry->Erase(timerToRemove.ownerID);
 					// modAndRefEntry is no longer valid!
-					modMapsToUpdate.insert(timerToRemove.modIndex);
+					modMapsToUpdate.insert(timerToRemove.pOwnerFile);
 				}
 			}
 			timersToRemove.clear();
@@ -340,7 +340,7 @@ namespace AuxTimer
 		for (auto& pending : g_auxTimersPendingInsertion)
 		{
 			auto& modsMap = pending.isPerm ? s_auxTimerMapArraysPerm : s_auxTimerMapArraysTemp;
-			auto& entry = modsMap[pending.modIndex][pending.ownerID][const_cast<char*>(pending.varName.c_str())];
+			auto& entry = modsMap[pending.pOwnerFile][pending.ownerID][const_cast<char*>(pending.varName.c_str())];
 			entry.SetTimeToCountdown(pending.timeToCountdown);
 			entry.m_flags = pending.flags;
 		}

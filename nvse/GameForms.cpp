@@ -100,6 +100,10 @@ const char *TESForm::GetTheName() const
 	return fullName ? fullName->name.CStr() : "";
 }
 
+TESFile* TESForm::GetFile(int32_t aiIndex) const {
+	return ThisCall<TESFile*>(0x484E60, this, aiIndex);
+}
+
 bool TESForm::IsCloned() const
 {
 	return GetModIndex() == 0xFF;
