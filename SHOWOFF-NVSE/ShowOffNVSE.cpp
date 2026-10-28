@@ -53,7 +53,7 @@ std::atomic<bool> g_ShowFuncDebug = true;
 std::atomic<bool> g_ShowFuncDebug = false;
 #endif
 
-std::mutex g_GlobalMutex;
+std::recursive_mutex g_GlobalMutex;
 
 // NVSE Globals
 bool (*ExtractArgsEx)(COMMAND_ARGS_EX, ...);
