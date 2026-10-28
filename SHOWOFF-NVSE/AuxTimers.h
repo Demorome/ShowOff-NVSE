@@ -165,7 +165,7 @@ namespace AuxTimer
 	void RemovePendingTimers();
 	void InsertPendingTimers();
 
-	extern std::mutex g_AuxTimerLock;
+	extern std::recursive_mutex g_AuxTimerLock;
 }
 
 #define AUX_TIMER_CS std::scoped_lock lock(AuxTimer::g_AuxTimerLock)
