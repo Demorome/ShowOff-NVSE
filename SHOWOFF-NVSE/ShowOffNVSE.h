@@ -18,7 +18,7 @@
 
 using namespace std::literals;
 
-extern std::mutex g_GlobalMutex;
+extern std::recursive_mutex g_GlobalMutex;
 extern std::atomic<bool> g_ShowFuncDebug;
 
 // NVSE Globals
